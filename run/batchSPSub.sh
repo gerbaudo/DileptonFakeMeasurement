@@ -6,5 +6,5 @@
 cd $PBS_O_WORKDIR
 
 #run job
-#SusyPlot -f filelist/${inp}.txt -s ${out} ${opt} > batchLog/${out}.susyplot.log
-SusySel -f filelist/${inp}.txt -s ${out} ${opt} > batchLog/${out}.susyplot.log
+SusyPlot -f filelist/${inp}.txt -s ${out} ${opt} > batchLog/${out}.susyplot.log
+#SusySel -f filelist/${inp}.txt -s ${out} ${opt} > batchLog/${out}.susyplot.log
