@@ -1,4 +1,5 @@
 #include "SusyTest0/SusySelection.h"
+#include "SusyTest0/SusyPlotter.h"
 
 #ifdef __CINT__
 
@@ -8,5 +9,6 @@
 #pragma link C++ nestedclass;
 
 #pragma link C++ class SusySelection;
+#pragma link C++ class SusyPlotter;
 
 #endif
