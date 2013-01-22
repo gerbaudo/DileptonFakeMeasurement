@@ -1,7 +1,9 @@
 #!/bin/env python
 
-import collections, re, sys, glob
+import collections, sys, glob
 import ROOT as r
+
+from NavUtils import getAllHistoNames, classifyHistoByName, organizeHistosByType
 
 r.gROOT.SetBatch(1)
 
@@ -36,71 +38,21 @@ def exploreFile(file) :
     file.ls()
 #exploreFile(inputFiles[0])
 
-def getAllHistos(inputDir, verbose=False, onlyTH1=False, onlyTH2=False, onlyTH3=False) :
-    assert onlyTH1 + onlyTH2 + onlyTH2 <= 1, "specify onlyTH* one at the time : %s" % ' '.join(["%s=%s"%(o, eval(o)) for o in ['onlyTH1', 'onlyTH2', 'onlyTH3']])
-    objectNames = []
-    allKeys = [k for k in inputDir.GetListOfKeys()]
-    directoryKeys = [k for k in allKeys if r.TClass(k.GetClassName()).InheritsFrom(r.TDirectory.Class())]
-    directoryNames = [k.GetName() for k in directoryKeys]
-    def isTH1key(key) :
-        kc = r.TClass(key.GetClassName())
-        return kc.InheritsFrom(r.TH1.Class()) \
-               and not kc.InheritsFrom(r.TH2.Class()) \
-               and not kc.InheritsFrom(r.TH3.Class())
-    def isTH2key(key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH2.Class())
-    def isTH3key(key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH3.Class())
-    if onlyTH1 : allKeys = [k for k in allKeys if isTH1key(k)]
-    if onlyTH2 : allKeys = [k for k in allKeys if isTH2key(k)]
-    if onlyTH3 : allKeys = [k for k in allKeys if isTH3key(k)]
-    histoNames = [k.GetName() for k in allKeys if r.TClass(k.GetClassName()).InheritsFrom(r.TH1.Class())]
-    if verbose : print histoNames
-    for directory in directoryNames :
-        histoNames += getAllHistos(inputDir.Get(directory), verbose, onlyTH1, onlyTH2, onlyTH3)
-    return histoNames
 
-histoNames = getAllHistos(inputFiles[0], onlyTH1=True)[:10] # get only 10 histos for now
+histoNames = getAllHistoNames(inputFiles[0], onlyTH1=True)[:10] # get only 10 histos for now
 histos = [inputFiles[0].Get(hn) for hn in histoNames]
 print "collected histos from %s" % inputFiles[0].GetName()
 
-class HistoType(object):
-    "type of histogram, defined by plot region, channel, variable, syst"
-    def __init__(self, pr='', ch='', var='', syst=''):
-        for att in ['pr', 'ch', 'var', 'syst'] : setattr(self, att, eval(att))
-    def sameas(self, rhs):
-        return all([getattr(self,att)==getattr(rhs,att) for att in ['pr', 'ch', 'var', 'syst']])
-    def __eq__(self, other) : return self.sameas(other)
-    def __str__(self) : return ', '.join(["%s : %s"%(a, getattr(self,a)) for a in ['pr', 'ch', 'var', 'syst']])
-    def __hash__(self) : return hash(self.__str__())
-
-def classifyHistoByName(histo, verbose=False) :
-    "Extract PR+'_'+chan+'_'+name+'_'+sys from histoname and attach an HistoType attribute"
-    n = histo.GetName()
-    p = re.compile('(?P<pr>.*?)_'   # plot region (non greedy)
-                   +'(?P<ch>.*?)_'  # channel (non greedy)
-                   +'(?P<var>.*)_'  # var name (greedy, can contain '_')
-                   +'(?P<syst>.*)') # last token, everything that's left
-    match = p.search(n)
-    if not match :
-        if verbose : print "cannot classify %s" % n
-        return
-    kargs = dict([(g, match.group(g)) for g in ['pr', 'ch', 'var', 'syst']])
-    setattr(histo, 'type', HistoType(**kargs))
 
 
 for h in histos : classifyHistoByName(h)
 
 histosByType = collections.defaultdict(list)
 
-def organizeHistosByType(histosByType = collections.defaultdict(list),
-                         histosToOrganize = [], sampleName = '') :
-    for h in histosToOrganize :
-        setattr(h, 'sample', sampleName)
-        histosByType[h.type].append(h)
-    return histosByType
 
 for fname, infile in zip(inputFileNames, inputFiles) :
     samplename = guessSampleFromFilename(fname)
-    histoNames = getAllHistos(inputFiles[0], onlyTH1=True)[:10] # get only 10 histos for now
+    histoNames = getAllHistoNames(inputFiles[0], onlyTH1=True)[:10] # get only 10 histos for now
     histos = [infile.Get(hn) for hn in histoNames]
     for h in histos : classifyHistoByName(h)
     organizeHistosByType(histosByType, histos, samplename)
