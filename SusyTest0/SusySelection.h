@@ -58,7 +58,7 @@ class SusySelection : public SusyNtAna
     // Full event selection. Specify which leptons to use.
     bool selectEvent(bool doMll=true);
     bool selectAnaEvent(const LeptonVector& leptons, const LeptonVector& baseLeptons);
-		     
+
     // Signal regions
     bool passSR1(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     bool passSR2(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
@@ -66,6 +66,10 @@ class SusySelection : public SusyNtAna
     bool passSR4(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     bool passSR4b(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     bool passSR5(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
+    bool passSR6(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
+    bool passSR7(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
+    bool passSR8(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
+    bool passSR9(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
 
     // Some validation regions
     // These are under development!!!
@@ -78,7 +82,7 @@ class SusySelection : public SusyNtAna
     bool passWWCR2(const LeptonVector& leptons, const JetVector& jets, const Met* met);
     bool passWWCR3(const LeptonVector& leptons, const JetVector& jets, const Met* met);
     bool passTOPCR(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    
+
     // Bonus regions to look at same-sign muons
     bool passBR1(const LeptonVector& leptons, const JetVector& jets, const Met* met);
     bool passBR2(const LeptonVector& leptons, const JetVector& jets, const Met* met);
@@ -99,10 +103,11 @@ class SusySelection : public SusyNtAna
     // Signal Region Cuts
     bool passJetVeto(const JetVector& jets);
     bool passZVeto(const LeptonVector& leptons, float Zlow = 81.2, float Zhigh = 101.2);
-    bool passMETRel(const Met *met, const LeptonVector& leptons, 
+    bool passMETRel(const Met *met, const LeptonVector& leptons,
 		    const JetVector& jets, float maxMet = 100);
     bool passbJetVeto(const JetVector& jets);
     bool passge2Jet(const JetVector& jets);
+    bool passeq2Jet(const JetVector& jets);
     bool passdPhi(TLorentzVector v0, TLorentzVector v1, float cut);
     bool passMT2(const LeptonVector& leptons, const Met* met, float cut);
 
@@ -133,7 +138,7 @@ class SusySelection : public SusyNtAna
     // Save file name for easy writing
     void setFileName(string f){ m_fileName = f; };
     string getFileName(){ return m_fileName; };
-    
+
     // Get Btag weight
     float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true,
 		       bool doMediumpp=false);
@@ -155,19 +160,19 @@ class SusySelection : public SusyNtAna
       flag[WT_Evt]   += nt.evt()->w;
       flag[WT_PU]    += nt.evt()->w * nt.evt()->wPileup;
       flag[WT_PU1fb] += nt.evt()->w * nt.evt()->wPileupAB3;
-      flag[WT_LSF]   += (includeLepSF ? 
+      flag[WT_LSF]   += (includeLepSF ?
 			 nt.evt()->w * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF :
 			 nt.evt()->w);
       float btag = includeBtag ? getBTagWeight(nt.evt()) : 1.0;
       flag[WT_Btag]  += nt.evt()->w * btag;
-      
-      float trig = m_baseLeptons.size() == 2 && nt.evt()->isMC ? 
+
+      float trig = m_baseLeptons.size() == 2 && nt.evt()->isMC ?
 	m_trigObj->getTriggerWeight(m_baseLeptons,nt.evt()->isMC,NtSys_NOM) : 1;
       //cout<<"\tTrigger weight: "<<trig<<endl;
       flag[WT_Trig] += trig * nt.evt()->w;
 
       float all = getEventWeightAB3() * btag * trig;
-      all = includeLepSF ? all * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : all;      
+      all = includeLepSF ? all * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : all;
       flag[WT_AllAB3] += all;
 
       float allAE = getEventWeightFixed(nt.evt()->mcChannel,LUMI_A_E) * btag * trig;
@@ -178,7 +183,7 @@ class SusySelection : public SusyNtAna
     // Miscellaneous methods
     void printLep(const Lepton* lep);
     void printJet(const Jet* jet);
- 
+
     ClassDef(SusySelection, 1);
 
   protected:
@@ -213,7 +218,7 @@ class SusySelection : public SusyNtAna
     float                n_pass_exactly2Lep[WT_N];
     float                n_pass_signalLep[WT_N];
     float                n_pass_flavor[ET_N][WT_N];
-    float                n_pass_mll[ET_N][WT_N];    
+    float                n_pass_mll[ET_N][WT_N];
     float                n_pass_os[ET_N][WT_N];
     float                n_pass_ss[ET_N][WT_N];
     float                n_pass_evtTrig[ET_N][WT_N];
@@ -243,13 +248,13 @@ class SusySelection : public SusyNtAna
     float                n_pass_SR5SUMpt[ET_N][WT_N];
     float                n_pass_SR5dPhiMETLL[ET_N][WT_N];
     float                n_pass_SR5dPhiMETL1[ET_N][WT_N];
-    
+
     // SR4 counts
     float                n_pass_SR4jv[ET_N][WT_N];
     float                n_pass_SR4Zv[ET_N][WT_N];
     float                n_pass_SR4MET[ET_N][WT_N];
     float                n_pass_SR4MT2[ET_N][WT_N];
-    
+
 
 
 };

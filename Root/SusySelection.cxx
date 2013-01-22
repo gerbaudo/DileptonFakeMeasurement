@@ -36,30 +36,30 @@ SusySelection::SusySelection() :
     n_pass_signalLep[w]   = 0;
 
     // The rest are channel specific.
-    for(int i=0; i<ET_N; ++i){    
+    for(int i=0; i<ET_N; ++i){
       n_pass_flavor[i][w]   = 0;
       n_pass_evtTrig[i][w]     = 0;
       n_pass_trigMatch[i][w]   = 0;
       n_pass_mll[i][w]         = 0;
       n_pass_ss[i][w]          = 0;
       n_pass_os[i][w]          = 0;
-      
+
       // SR1
       n_pass_SR1jv[i][w]   = 0;
       n_pass_SR1Zv[i][w]   = 0;
       n_pass_SR1MET[i][w]  = 0;
-      
+
       // SR2
       n_pass_SR2jv[i][w]   = 0;
       n_pass_SR2MET[i][w]  = 0;
-      
+
       // SR3
       n_pass_SR3ge2j[i][w] = 0;
       n_pass_SR3Zv[i][w]   = 0;
       n_pass_SR3bjv[i][w]  = 0;
       n_pass_SR3mct[i][w]  = 0;
       n_pass_SR3MET[i][w]  = 0;
-      
+
       // SR5
       n_pass_SR5jv[i][w]        = 0;
       n_pass_SR5MET[i][w]       = 0;
@@ -68,7 +68,7 @@ SusySelection::SusySelection() :
       n_pass_SR5SUMpt[i][w]     = 0;
       n_pass_SR5dPhiMETLL[i][w] = 0;
       n_pass_SR5dPhiMETL1[i][w] = 0;
-      
+
       // SR4
       n_pass_SR4jv[i][w]    = 0;
       n_pass_SR4Zv[i][w]    = 0;
@@ -78,7 +78,7 @@ SusySelection::SusySelection() :
   }// end loop over weight types
 
   //out.open("event.dump");
-  
+
   //setAnaType(Ana_2Lep);
   //out.open("InterestingEventsWPreTaus.txt");
   //out.open("InterestingEventsNoJetReq.txt");
@@ -104,7 +104,7 @@ void SusySelection::Begin(TTree* /*tree*/)
 }
 
 /*--------------------------------------------------------------------------------*/
-// Main process loop function 
+// Main process loop function
 /*--------------------------------------------------------------------------------*/
 Bool_t SusySelection::Process(Long64_t entry)
 {
@@ -156,10 +156,10 @@ Bool_t SusySelection::Process(Long64_t entry)
 
 
   // Count SS and OS
-  if(sameSign(m_signalLeptons))     increment(n_pass_ss[m_ET], true); 
-  
-  if(oppositeSign(m_signalLeptons)) increment(n_pass_os[m_ET], true); 
-  
+  if(sameSign(m_signalLeptons))     increment(n_pass_ss[m_ET], true);
+
+  if(oppositeSign(m_signalLeptons)) increment(n_pass_os[m_ET], true);
+
 
   // Check Signal regions
   passSR1(m_signalLeptons, m_signalJets2Lep, m_met, true);
@@ -172,7 +172,7 @@ Bool_t SusySelection::Process(Long64_t entry)
   passSR3(m_baseLeptons, m_signalJets2Lep, m_met);
   //passSR4(m_baseLeptons, m_signalJets2Lep, m_met);
   //passSR5(m_baseLeptons, m_signalJets2Lep, m_met);
-    
+
   return kTRUE;
 }
 
@@ -202,7 +202,7 @@ bool SusySelection::selectEvent(bool doMll)
   if( !passBadJet(flag) )           return false;
   increment(n_pass_BadJet);
   if( !passBadMuon(flag) )          return false;
-  increment(n_pass_BadMuon); 
+  increment(n_pass_BadMuon);
   if( !passCosmic(flag) )           return false;
   increment(n_pass_Cosmic);
   if( !passHotSpot(flag) )          return false;
@@ -213,7 +213,7 @@ bool SusySelection::selectEvent(bool doMll)
   if( !nt.evt()->passMllForAlpgen ) return false;
   if(doMll && m_baseLeptons.size() == 2){
     //cout<<"Checking mll..."<<endl;
-    if( Mll(m_baseLeptons[0], m_baseLeptons[1]) < 20 ) 
+    if( Mll(m_baseLeptons[0], m_baseLeptons[1]) < 20 )
       return false;
   }
   return true;
@@ -222,7 +222,7 @@ bool SusySelection::selectEvent(bool doMll)
 bool SusySelection::selectAnaEvent(const LeptonVector& leptons, const LeptonVector& baseLeps)
 {
 
-  if(m_dbg) cout << "SusySelection::selectAnaEvent" << endl;  
+  if(m_dbg) cout << "SusySelection::selectAnaEvent" << endl;
 
   if( !selectEvent() )                     return false;
 
@@ -244,8 +244,8 @@ bool SusySelection::selectAnaEvent(const LeptonVector& leptons, const LeptonVect
   if( !passNLepCut(leptons) )              return false;
 
   // only check trigger for MC
-  //if( !nt.evt()->isMC && !passTrigger(baseLeps) ) return false;  
-  if( !passTrigger(baseLeps) ) return false;  
+  //if( !nt.evt()->isMC && !passTrigger(baseLeps) ) return false;
+  if( !passTrigger(baseLeps) ) return false;
 
   if(m_ET == ET_mm){
     float trigW = m_trigObj->getTriggerWeight(m_baseLeptons,nt.evt()->isMC,NtSys_NOM);
@@ -262,7 +262,7 @@ bool SusySelection::selectAnaEvent(const LeptonVector& leptons, const LeptonVect
 }
 
 /*--------------------------------------------------------------------------------*/
-// Signal Region 1 
+// Signal Region 1
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passSR1(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
@@ -270,12 +270,12 @@ bool SusySelection::passSR1(const LeptonVector& leptons, const JetVector& jets, 
   if(m_dbg) cout << "SusySelection::passSR1" << endl;
 
   // Only for OS events
-  if( !oppositeSign(leptons) )           return false;  
+  if( !oppositeSign(leptons) )           return false;
 
   // Jet Veto
   if( !passJetVeto(jets) )               return false;
   if(count) increment(n_pass_SR1jv[m_ET],true,true);
-  
+
   // Reject events with mll in Z window
   if( !passZVeto(leptons))               return false;
   if(count) increment(n_pass_SR1Zv[m_ET],true,true);
@@ -283,7 +283,7 @@ bool SusySelection::passSR1(const LeptonVector& leptons, const JetVector& jets, 
   // Reject if Met_rel < 100
   if( !passMETRel(met,leptons,jets) )    return false;
   if(count) increment(n_pass_SR1MET[m_ET],true,true);
-  
+
 
 
   return true;
@@ -296,7 +296,7 @@ bool SusySelection::passSR2(const LeptonVector& leptons, const JetVector& jets, 
 
   // Only SS
   if( !sameSign(leptons) )               return false;
-  
+
   // CHeck Jet Veto
   if( !passJetVeto(jets) )               return false;
   if(count) increment(n_pass_SR2jv[m_ET],true,true);
@@ -334,7 +334,7 @@ bool SusySelection::passSR3(const LeptonVector& leptons, const JetVector& jets, 
   if( !passbJetVeto(jets) )              return false;
   if(count) increment(n_pass_SR3bjv[m_ET],true,true);
 
-  // Veto top-tag events 
+  // Veto top-tag events
   if( !passTopTag(leptons,jets,met) )    return false;
   if(count) increment(n_pass_SR3mct[m_ET],true,true);
 
@@ -360,7 +360,7 @@ bool SusySelection::passSR5(const LeptonVector& leptons, const JetVector& jets, 
   // MetRel > 40
   if( !passMETRel(met,leptons,jets,40) ) return false;
   if(count) increment(n_pass_SR5MET[m_ET],true);
-  
+
   // Z Veto
   if( !passZVeto(leptons) )              return false;
   if(count) increment(n_pass_SR5Zv[m_ET],true);
@@ -369,12 +369,12 @@ bool SusySelection::passSR5(const LeptonVector& leptons, const JetVector& jets, 
   float pt0 = leptons.at(0)->Pt();
   if( pt0 < 50 )                         return false;
   if(count) increment(n_pass_SR5L0pt[m_ET],true);
-  
+
   // Sum of Pt > 100
   float pt1 = leptons.at(1)->Pt();
   if( pt0 + pt1 < 100 )                  return false;
   if(count) increment(n_pass_SR5SUMpt[m_ET],true);
-  
+
   // dPhi(met, ll) > 2.5
   TLorentzVector metlv = met->lv();
   TLorentzVector ll = (*leptons.at(0) + *leptons.at(1));
@@ -396,7 +396,7 @@ bool SusySelection::passSR4(const LeptonVector& leptons, const JetVector& jets, 
   if(m_dbg) cout << "SusySelection::passSR4" << endl;
 
   // For OS
-  if( !oppositeSign(leptons) )          return false;  
+  if( !oppositeSign(leptons) )          return false;
 
   // Check Jet Veto
   if( !passJetVeto(jets) )              return false;
@@ -417,7 +417,7 @@ bool SusySelection::passSR4(const LeptonVector& leptons, const JetVector& jets, 
   // Check MT2 > 90
   if( !passMT2(leptons, met, 90) )      return false;
   if(count) increment(n_pass_SR4MT2[m_ET],true,true);
-  
+
   return true;
 
 }
@@ -426,11 +426,43 @@ bool SusySelection::passSR4b(const LeptonVector& leptons, const JetVector& jets,
 {
 
   if( !passSR4(leptons, jets, met, count) ) return false;
-  
+
   if( !passMT2(leptons, met, 110) ) return false;
 
   return true;
 
+}
+/*--------------------------------------------------------------------------------*/
+bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
+{
+  if( !oppositeSign(leptons) )          return false;
+  if( !sameFlavor(leptons) )            return false;
+  if( !passeq2Jet(jets) )               return false;
+  return true;
+}
+/*--------------------------------------------------------------------------------*/
+bool SusySelection::passSR7(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
+{
+  if( !oppositeSign(leptons) )          return false;
+  if(  sameFlavor(leptons) )            return false;
+  if( !passeq2Jet(jets) )               return false;
+  return true;
+}
+/*--------------------------------------------------------------------------------*/
+bool SusySelection::passSR8(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
+{
+  if( oppositeSign(leptons) )           return false;
+  if( !sameFlavor(leptons) )            return false;
+  if( !passeq2Jet(jets) )               return false;
+  return true;
+}
+/*--------------------------------------------------------------------------------*/
+bool SusySelection::passSR9(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
+{
+  if( oppositeSign(leptons) )           return false;
+  if( sameFlavor(leptons) )             return false;
+  if( !passeq2Jet(jets) )               return false;
+  return true;
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -441,7 +473,7 @@ bool SusySelection::passVR1(const LeptonVector& leptons, const JetVector& jets, 
 
   // Only SS
   if( !sameSign(leptons) )               return false;
-  
+
   // Check Jet Veto
   if( !passJetVeto(jets) )               return false;
 
@@ -462,12 +494,12 @@ bool SusySelection::passVRTL(const LeptonVector& leptons, const JetVector& jets,
   // Make sure leading is tight, subleading is not tight
   uint nVtx = nt.evt()->nVtx;
   bool isMC = nt.evt()->isMC;
-  if( !(isSignalLepton(leptons[0],nVtx,isMC) && 
+  if( !(isSignalLepton(leptons[0],nVtx,isMC) &&
 	!isSignalLepton(leptons[1],nVtx,isMC)) )   return false;
 
   // Only SS
   if( !sameSign(leptons) )               return false;
-  
+
   // Check Jet Veto
   //if( !passJetVeto(jets) )               return false;
 
@@ -487,7 +519,7 @@ bool SusySelection::passVR2(const LeptonVector& leptons, const JetVector& jets, 
 
   // Only SS
   if( !sameSign(leptons) )               return false;
-  
+
   // Check MET rel > 100
   float metrel = getMetRel(met,leptons,jets);
   if( !(40 < metrel && metrel < 100) )   return false;
@@ -524,7 +556,7 @@ bool SusySelection::passVR4(const LeptonVector& leptons, const JetVector& jets, 
 
   // Only SS
   if( !sameSign(leptons) )               return false;
-  
+
   // Check Jet Veto
   if( !passJetVeto(jets) )               return false;
 
@@ -598,7 +630,7 @@ bool SusySelection::passWWCR3(const LeptonVector& leptons, const JetVector& jets
 
   float Zpt = (*leptons[0]+*leptons[1]).Pt();
   if( !(40 < Zpt && Zpt < 150) ) return false;
-    
+
   return true;
 
 }
@@ -638,13 +670,13 @@ bool SusySelection::passBR1(const LeptonVector& leptons, const JetVector& jets, 
   if(leptons.size() !=2 ) return false;
   if(oppositeSign(leptons)) return false;
 
-  float mll = Mll(leptons[0],leptons[1]); 
+  float mll = Mll(leptons[0],leptons[1]);
   if( !(90 < mll && mll < 120) ) return false;
 
   if( jets.size() != 1 ) return false;
 
   return true;
-  
+
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passBR2(const LeptonVector& leptons, const JetVector& jets, const Met *met)
@@ -657,12 +689,12 @@ bool SusySelection::passBR2(const LeptonVector& leptons, const JetVector& jets, 
 
   //float metRel = getMetRel(met, leptons, jets);
   //if( !(40 < metRel && metRel < 100) ) return false;
-  if( !(30 <met->Et) ) return false; 
+  if( !(30 <met->Et) ) return false;
 
   if( jets.size() != 1 ) return false;
 
   return true;
-  
+
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passBR3(const LeptonVector& leptons, const JetVector& jets, const Met *met)
@@ -676,7 +708,7 @@ bool SusySelection::passBR3(const LeptonVector& leptons, const JetVector& jets, 
   if( jets.size() != 1 ) return false;
 
   return true;
-  
+
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passBR4(const LeptonVector& leptons, const JetVector& jets, const Met *met)
@@ -688,7 +720,7 @@ bool SusySelection::passBR4(const LeptonVector& leptons, const JetVector& jets, 
   if(oppositeSign(leptons)) return false;
 
   if( jets.size() != 1 ) return false;
-  
+
   const TLorentzVector mlv = met->lv();
   const TLorentzVector ll  = *leptons[0] + *leptons[1];
   float mt_met_ll = sqrt(2*ll.Pt()*mlv.Et()*(1-cos(ll.DeltaPhi(mlv))));
@@ -696,7 +728,7 @@ bool SusySelection::passBR4(const LeptonVector& leptons, const JetVector& jets, 
   if( !(140 < mt_met_ll && mt_met_ll < 180) ) return false;
 
   return true;
-  
+
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -739,9 +771,9 @@ bool SusySelection::passTrigger(const LeptonVector& leptons)
   //cout<<"NLeptons: "<<leptons.size()<<endl;
   //for(uint i=0; i<leptons.size(); ++i)
   //cout<<"\tElectron: "<<leptons.at(i)->isEle()<<" "<<leptons.at(i)->trigFlags<<endl;
-  
+
   if(leptons.size() != 2)
-    return false;  
+    return false;
 
   bool passEvtTrig   = m_trigObj->passDilEvtTrig(leptons, nt.evt());
   bool passTrigMatch = m_trigObj->passDilTrigMatch(leptons, nt.evt());
@@ -753,7 +785,7 @@ bool SusySelection::passTrigger(const LeptonVector& leptons)
     //if(m_ET == ET_em) increment(n_pass_flavor[ET_me]);
   }
   if( passEvtTrig && passTrigMatch){
-    increment(n_pass_trigMatch[m_ET],true); 
+    increment(n_pass_trigMatch[m_ET],true);
     return true;
   }
 
@@ -792,7 +824,7 @@ bool SusySelection::passMll(const LeptonVector& leptons, float mll)
   increment(n_pass_mll[m_ET]);
   return true;
 }
- 
+
 /*--------------------------------------------------------------------------------*/
 // Signal region cuts
 /*--------------------------------------------------------------------------------*/
@@ -803,7 +835,7 @@ bool SusySelection::passJetVeto(const JetVector& jets)
   int N_L25 = numberOfCLJets(jets);
   int N_B20 = numberOfCBJets(jets);
   int N_F30 = numberOfFJets(jets);
-  
+
   return (N_L25 + N_B20 + N_F30 == 0);
 
   /*
@@ -814,7 +846,7 @@ bool SusySelection::passJetVeto(const JetVector& jets)
     failjet = true;
     break;
   }
-  
+
   if( failjet ) return false;
   return true;
   */
@@ -822,7 +854,7 @@ bool SusySelection::passJetVeto(const JetVector& jets)
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passbJetVeto(const JetVector& jets)
 {
-  
+
   // Reject if there is a b jet using 2L definition
   int N_B20 = numberOfCBJets(jets);
   return (N_B20 == 0);
@@ -836,7 +868,7 @@ bool SusySelection::passbJetVeto(const JetVector& jets)
     hasbjet = true;
     break;
   }
-  
+
   if( hasbjet ) return false;
   return true;
   */
@@ -849,7 +881,7 @@ bool SusySelection::passge2Jet(const JetVector& jets)
   int N_L25 = numberOfCLJets(jets);
   int N_B20 = numberOfCBJets(jets);
   int N_F30 = numberOfFJets(jets);
-  
+
   return (N_L25 >=2 && N_B20 + N_F30 == 0);
 
   /*
@@ -858,10 +890,20 @@ bool SusySelection::passge2Jet(const JetVector& jets)
   for(uint j=0; j<jets.size(); ++j)
     if( jets.at(j)->Pt() > 30 )
       njet++;
-  
+
   return (njet >= 2);
   */
 }
+/*--------------------------------------------------------------------------------*/
+bool SusySelection::passeq2Jet(const JetVector& jets)
+{
+  // N_L25 >=2 N_B20 = N_F30 = 0
+  int N_L25 = numberOfCLJets(jets);
+  int N_B20 = numberOfCBJets(jets);
+  int N_F30 = numberOfFJets(jets);
+  return (N_L25 == 2 && N_B20 + N_F30 == 0);
+}
+
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passZVeto(const LeptonVector& leptons, float Zlow, float Zhigh)
 {
@@ -872,10 +914,10 @@ bool SusySelection::passZVeto(const LeptonVector& leptons, float Zlow, float Zhi
   return true;
 }
 /*--------------------------------------------------------------------------------*/
-bool SusySelection::passMETRel(const Met *met, const LeptonVector& leptons, 
+bool SusySelection::passMETRel(const Met *met, const LeptonVector& leptons,
 				 const JetVector& jets, float metMax){
-  
-  
+
+
   if( getMetRel(met,leptons,jets) < metMax ) return false;
   return true;
 }
@@ -897,14 +939,14 @@ bool SusySelection::passMT2(const LeptonVector& leptons, const Met* met, float c
   double pTMiss[3] = {0.0, metlv.Px(), metlv.Py()};
   double pA[3]     = {0.0, l0.Px(), l0.Py()};
   double pB[3]     = {0.0, l1.Px(), l1.Py()};
-  
+
   // Create Mt2 object
   mt2_bisect::mt2 mt2_event;
   mt2_event.set_momenta(pA,pB,pTMiss);
   mt2_event.set_mn(0); // LSP mass = 0 is Generic
-  
+
   return (mt2_event.get_mt2() > cut);
-  
+
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -916,7 +958,7 @@ bool SusySelection::isRealLepton(const Lepton* lep)
   // Updated way of handling real and fake leptons using LeptonTruthTools
   return (lep->truthMatchType == RecoTruthMatch::PROMPT);
 
-  // Code taken from Steve.  There seems to be an issue with Sherpa samples, so 
+  // Code taken from Steve.  There seems to be an issue with Sherpa samples, so
   // need to handle those separately. Also just for clarification:
   // * mcOrigin = 9 -- Tau Lepton
   // * mcType   = 1 -- Unknown Electron
@@ -926,7 +968,7 @@ bool SusySelection::isRealLepton(const Lepton* lep)
 
   // Cut is sample dependent due to Sherpa classifications broken
   uint mcId = nt.evt()->mcChannel;
-  
+
   // All tau leptons are classified as non-iso
   // I'm not sure why, yet, but for now I will treat them as real leptons.
   if(lep->mcOrigin == 9) return true;
@@ -941,12 +983,12 @@ bool SusySelection::isRealLepton(const Lepton* lep)
     else             return mcType == 5 || mcType == 6;
   }
   else{
-    
-    // 2-lep classifies everything as real if it 
+
+    // 2-lep classifies everything as real if it
     // is from W, Z, tau, or top..
     //uint origin = lep->mcOrigin;
     //return origin == 9 || origin == 12 || origin == 13 || origin == 10;
-    
+
     if(lep->isEle()) return mcType == 2;
     else             return mcType == 6;
   }
@@ -964,7 +1006,7 @@ bool SusySelection::isConvLepton(const Lepton* lep)
   //return lep->mcOrigin == 5;
   bool isConv       = lep->truthMatchType == RecoTruthMatch::CONV;
   //bool isConv       = lep->mcOrigin == 5;
-  bool isChargeFlip =  lep->isEle() ? ((Electron*) lep)->isChargeFlip : false; 
+  bool isChargeFlip =  lep->isEle() ? ((Electron*) lep)->isChargeFlip : false;
   return isConv && !isChargeFlip;
 
 }
@@ -977,9 +1019,9 @@ bool SusySelection::isHFLepton(const Lepton* lep)
   //uint origin = lep->mcOrigin;
   //return origin == 25 ||origin == 26 || origin == 27 || origin == 28 ||
   //origin == 29 || origin == 32 || origin == 33;
-  
 
-  
+
+
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::isLFLepton(const Lepton* lep)
@@ -1009,14 +1051,14 @@ bool SusySelection::isTrueDilepton(const LeptonVector &leptons)
 
 
   // Maybe not 100% kosher, but I just want to make sure I am not
-  // double counting, so I require dilepton events to be real 
+  // double counting, so I require dilepton events to be real
   if( leptons.size() != 2 ) return false;
 
   bool l0_real = isRealLepton(leptons[0]);
   bool l1_real = isRealLepton(leptons[1]);
   bool l0_cf = leptons[0]->isEle() ? ((Electron*) leptons[0])->isChargeFlip : false;
   bool l1_cf = leptons[1]->isEle() ? ((Electron*) leptons[1])->isChargeFlip : false;
-  
+
   return l0_real && l1_real && !l0_cf && !l1_cf; // ignoring charge flip
   //return (l0_real || l0_cf) && (l1_real || l1_cf);
 
@@ -1025,13 +1067,13 @@ bool SusySelection::isTrueDilepton(const LeptonVector &leptons)
 /*--------------------------------------------------------------------------------*/
 // Get Event weight
 /*--------------------------------------------------------------------------------*/
-float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag, bool includeTrig, 
+float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag, bool includeTrig,
 				  bool doMediumpp)
-{ 
+{
   if( !nt.evt()->isMC ) return 1.;
   uint nl = leptons.size();
   float weight = 1;
-  
+
   // lumi, xs, sumw, pileup
   if(m_do1fb) weight = getEventWeightAB3();
   else if(m_doAD)  weight = getEventWeight(LUMI_A_D);
@@ -1076,7 +1118,7 @@ float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag,
   */
 
   float effW   = nl > 0 ? leptons[0]->effSF : 1.;
-  effW        *=  nl > 1 ? leptons[1]->effSF : 1.; 
+  effW        *=  nl > 1 ? leptons[1]->effSF : 1.;
 
 
   // btag, if included
@@ -1104,7 +1146,7 @@ float SusySelection::getBTagWeight(const Event* evt)
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passCheckMC(int mcRunNumber, float pt)
 {
-  
+
   if( !(159100 <= mcRunNumber && mcRunNumber <= 159104) ) return true;
 
   // Need to bin the samples in order to combine them
@@ -1129,7 +1171,7 @@ bool SusySelection::passCheckMC(int mcRunNumber, float pt)
 float SusySelection::getPhotonXS(int mcRunNumber)
 {
 
-  if( mcRunNumber == 159101) 
+  if( mcRunNumber == 159101)
     return 18652 * 0.57334;
   if( mcRunNumber == 159102)
     return 1640.1 * 0.6398;
@@ -1165,12 +1207,12 @@ void SusySelection::dumpEventCounters()
     cout << "   ------  Start Comparison Here ------ " << endl;
     cout << "pass atleast 2 " << n_pass_atleast2Lep[w] << endl;
     cout << "pass exactly 2 " << n_pass_exactly2Lep[w] << endl;
-    cout << "pass nSigLep:  " << n_pass_signalLep[w]   << endl;    
-    
+    cout << "pass nSigLep:  " << n_pass_signalLep[w]   << endl;
+
     for(int i=0; i<ET_N-1; ++i){
       cout << "************************************" << endl;
       cout << "For dilepton type: " << v_ET[i]       << endl;
-      
+
       cout << "pass flavor:     " << n_pass_flavor[i][w]    << endl;
       cout << "pass evt trig:   " << n_pass_evtTrig[i][w]   << endl;
       cout << "pass trig match: " << n_pass_trigMatch[i][w] << endl;
@@ -1209,7 +1251,7 @@ void SusySelection::dumpEventCounters()
 }
 
 /*--------------------------------------------------------------------------------*/
-// Dump Pre objects 
+// Dump Pre objects
 /*--------------------------------------------------------------------------------*/
 void SusySelection::dumpPreObjects()
 {
@@ -1259,17 +1301,17 @@ void SusySelection::dumpJets()
 /*--------------------------------------------------------------------------------*/
 void SusySelection::checkSys()
 {
- 
+
   bool electronSys = false;
   bool muonSys = false; //false;
   bool jetSys = false;
   bool metSys = true; //true;
   bool effSys = false; //true; //true;
- 
+
   cout<<endl;
   cout<<"*********************************************"<<endl;
   cout<<"Run: "<<nt.evt()->run<<" Event: "<<nt.evt()->event<<endl;
-  
+
   // Electron systematics
   if(electronSys){
     for(uint i=0; i<m_signalLeptons.size(); ++i){
@@ -1343,12 +1385,12 @@ void SusySelection::checkSys()
       else if(i == NtSys_SCALEST_UP){ cout<<"\tMet Scale Soft Term UP:          "; printMet(tmp_met); }
       else if(i == NtSys_SCALEST_DN){ cout<<"\tMet Scale Soft Term Down:        "; printMet(tmp_met); }
       else if(i == NtSys_RESOST)    { cout<<"\tMet Resolution Soft Term:        "; printMet(tmp_met); }
-      
+
     }
     }
     #undef printMet
   }// end if met sys
-  
+
   if(effSys){
     float elEff = 1;
     float elEffUp = 1;
@@ -1360,13 +1402,13 @@ void SusySelection::checkSys()
       const Lepton* lep = m_signalLeptons.at(i);
       if(lep->isEle()){
 	elEff   *= lep->effSF;
-	elEffUp *= (lep->effSF + lep->errEffSF); 
-	elEffDn *= (lep->effSF - lep->errEffSF); 
+	elEffUp *= (lep->effSF + lep->errEffSF);
+	elEffDn *= (lep->effSF - lep->errEffSF);
       }
       else{
 	muEff   *= lep->effSF;
-	muEffUp *= (lep->effSF + lep->errEffSF); 
-	muEffDn *= (lep->effSF - lep->errEffSF); 
+	muEffUp *= (lep->effSF + lep->errEffSF);
+	muEffDn *= (lep->effSF - lep->errEffSF);
 	cout<<"Error: "<<lep->errEffSF<<endl;
       }
     }// end loop over leptons
@@ -1397,8 +1439,8 @@ bool SusySelection::debugEvent()
 /*--------------------------------------------------------------------------------*/
 // Dump interesting events
 /*--------------------------------------------------------------------------------*/
-void SusySelection::dumpInterestingEvents(const LeptonVector& leptons, 
-					  const JetVector& jets, 
+void SusySelection::dumpInterestingEvents(const LeptonVector& leptons,
+					  const JetVector& jets,
 					  const Met* met)
 {
 
@@ -1409,7 +1451,7 @@ void SusySelection::dumpInterestingEvents(const LeptonVector& leptons,
   if(!(100 < mll && mll < 110)) return;
   if(jets.size() != 1) return;
   if( met->Et < 40 ) return;
-  
+
   // Now dump the interesting variables
   const Lepton* l0 = leptons[0];
   const Lepton* l1 = leptons[1];
@@ -1561,5 +1603,5 @@ void SusySelection::printJet(const Jet* jet)
   out<<"\tPt: "<<jet->Pt()<<" Eta: "<<jet->Eta()<<" Phi: "<<jet->Phi()<<endl;
   out<<"\tjvf: "<<jet->jvf<<" sv0: "<<jet->sv0
      <<" combNN: "<<jet->combNN<<" mv1: "<<jet->mv1<<endl;
-  
+
 }
