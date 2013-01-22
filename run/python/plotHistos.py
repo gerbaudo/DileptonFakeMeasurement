@@ -1,9 +1,15 @@
 #!/bin/env python
 
+# Plot all the histograms produced by SusyPlot
+#
+# davide.gerbaudo@gmail.com
+# Jan 2013
+
 import collections, sys, glob
 import ROOT as r
 
 from NavUtils import getAllHistoNames, classifyHistoByName, organizeHistosByType
+from SampleUtils import colors, guessSampleFromFilename
 
 r.gROOT.SetBatch(1)
 
@@ -12,43 +18,8 @@ inputFileNames = glob.glob(inputDir+'/'+'*.root')
 print 'input files:\n'+'\n'.join(inputFileNames)
 inputFiles = [r.TFile.Open(f) for f in inputFileNames]
 
-colors = {
-    'ttbar'     : r.kRed+1,
-    'zjets'     : r.kOrange-2,
-    'wjets'     : r.kBlue-2,
-    'diboson'   : r.kSpring+1,
-    'singletop' : r.kAzure-4,
-    'multijet'  : r.kWhite
-    }
-
-
-def guessSampleFromFilename(filename='', verbose=False) :
-    if 'top_' in filename : return 'ttbar'
-    elif 'Zjet_' in filename : return 'zjets'
-    elif 'ZZ_' in filename \
-         or 'WW_' in filename \
-         or 'WZ_' in filename : return 'diboson'
-    elif 'Wjet_' in filename : return 'wjets'
-    else :
-        if verbose : print "cannot guess samplename for %s" % filename
-    
-
-
-def exploreFile(file) :
-    file.ls()
-#exploreFile(inputFiles[0])
-
-
-histoNames = getAllHistoNames(inputFiles[0], onlyTH1=True)[:10] # get only 10 histos for now
-histos = [inputFiles[0].Get(hn) for hn in histoNames]
-print "collected histos from %s" % inputFiles[0].GetName()
-
-
-
-for h in histos : classifyHistoByName(h)
 
 histosByType = collections.defaultdict(list)
-
 
 for fname, infile in zip(inputFileNames, inputFiles) :
     samplename = guessSampleFromFilename(fname)
