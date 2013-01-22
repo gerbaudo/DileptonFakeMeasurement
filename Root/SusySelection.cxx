@@ -1453,11 +1453,10 @@ void SusySelection::dumpInterestingEvents(const LeptonVector& leptons,
   if( met->Et < 40 ) return;
 
   // Now dump the interesting variables
-  const Lepton* l0 = leptons[0];
-  const Lepton* l1 = leptons[1];
-  const Jet*    j  = jets.size() > 0 ? jets[0] : NULL;
-
-  float metRel = getMetRel(met,leptons,jets);
+  //--DG-- const Lepton* l0 = leptons[0];
+  //--DG-- const Lepton* l1 = leptons[1];
+  //--DG-- const Jet*    j  = jets.size() > 0 ? jets[0] : NULL;
+  //--DG-- float metRel = getMetRel(met,leptons,jets);
 
   /*
   out<<"Run "<<nt.evt()->run
