@@ -37,6 +37,7 @@ def exploreFile(file) :
 #exploreFile(inputFiles[0])
 
 def getAllHistos(inputDir, verbose=False, onlyTH1=False, onlyTH2=False, onlyTH3=False) :
+    assert onlyTH1 + onlyTH2 + onlyTH2 <= 1, "specify onlyTH* one at the time : %s" % ' '.join(["%s=%s"%(o, eval(o)) for o in ['onlyTH1', 'onlyTH2', 'onlyTH3']])
     objectNames = []
     allKeys = [k for k in inputDir.GetListOfKeys()]
     directoryKeys = [k for k in allKeys if r.TClass(k.GetClassName()).InheritsFrom(r.TDirectory.Class())]
@@ -99,7 +100,7 @@ def organizeHistosByType(histosByType = collections.defaultdict(list),
 
 for fname, infile in zip(inputFileNames, inputFiles) :
     samplename = guessSampleFromFilename(fname)
-    histoNames = getAllHistos(inputFiles[0], onlyTH1=True) #[:10] # get only 10 histos for now
+    histoNames = getAllHistos(inputFiles[0], onlyTH1=True)[:10] # get only 10 histos for now
     histos = [infile.Get(hn) for hn in histoNames]
     for h in histos : classifyHistoByName(h)
     organizeHistosByType(histosByType, histos, samplename)
