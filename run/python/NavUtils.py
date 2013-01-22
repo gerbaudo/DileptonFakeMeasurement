@@ -1,4 +1,4 @@
-#!/bin/env/python
+#!/bin/env python
 
 # Utility classes and function to navigate the histograms in a root file
 #
@@ -17,7 +17,6 @@ class HistoType(object):
     def __eq__(self, other) : return self.sameas(other)
     def __str__(self) : return ', '.join(["%s : %s"%(a, getattr(self,a)) for a in ['pr', 'ch', 'var', 'syst']])
     def __hash__(self) : return hash(self.__str__())
-
 
 def getAllHistoNames(inputDir, verbose=False, onlyTH1=False, onlyTH2=False, onlyTH3=False) :
     "Provide a list of all histograms in the file; search recursively (use FindObjectAny to retrieve from subdirs"
