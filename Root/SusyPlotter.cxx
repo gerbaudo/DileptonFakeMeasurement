@@ -331,6 +331,11 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   if( passBR3(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_BR3);
   if( passBR4(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_BR4);
 
+  if( passSR6(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR6);
+  if( passSR7(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR7);
+  if( passSR8(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR8);
+  if( passSR9(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR9);
+
   return kTRUE;
 }
 

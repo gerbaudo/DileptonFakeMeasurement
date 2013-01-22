@@ -52,6 +52,10 @@ enum PlotRegion{
   PR_BR2,
   PR_BR3,
   PR_BR4,
+  PR_SR6,
+  PR_SR7,
+  PR_SR8,
+  PR_SR9,
   PR_N
 };
 
@@ -74,7 +78,11 @@ static string PRNames[] = {
   "br1",
   "br2",
   "br3",
-  "br4"
+  "br4",
+  "sr6",
+  "sr7",
+  "sr8",
+  "sr9"
 };
 
 class SusyPlotter : public SusySelection
