@@ -79,20 +79,11 @@ print
 print tablePreamble
 print header
 print '\\midrule'
-for sel in allSelects :
+for sel in allSelects : # should really use list comprehension
     counts = [countsSampleSel[sam][sel]
               if sam in countsSampleSel and sel in countsSampleSel[sam] else None \
               for sam in allSamples ]
     line = ' & '.join([fwidthField % f for f in [sel]+["%.1f" % c for c in counts]]) + endrow
     print line
 print tableEpilogue
-
-#lines = [' & '.join([fwidthField % f
-#                     for f in [sel]+["%.1f" % c
-#                                     for c in counts]]) + endrow
-#         for counts in [countsSampleSel[sam][sel]
-#                        for sam in allSamples
-#                        for sel in allSelects
-#                        if sam in countsSampleSel \
-#                        and sel in countsSampleSel[sam] ] ]
 
