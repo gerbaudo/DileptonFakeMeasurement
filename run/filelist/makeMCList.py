@@ -2,108 +2,89 @@
 
 import subprocess
 
-# Directory where files are
-#dir = "/gdata/atlas/ucintprod/SusyNt/mc12_n0041/"
-#dir = "/gdata/atlas/ucintprod/SusyNt/mc12_n0105/"
-#dir = "/gdata/atlas/ucintprod/SusyNt/mc12_n0111/"
-#dir = "/gdata/atlas/ucintprod/SusyNt/mc12_n0114/"
-dir = "/gdata/atlas/ucintprod/SusyNt/mc12_n0115/"
+validModes = ['data', 'mc12', 'susy']
+mode = 'mc12'
+assert mode in validModes,"Invalid mode %s (should be one of %s)" % (mode, str(validModes))
 
+# Directory where files are
+basedir = {'data' : '/gdata/atlas/ucintprod/SusyNt/data12_n0115/', # data
+           'mc12' : '/gdata/atlas/ucintprod/SusyNt/mc12_n0115/',   # mc backgrounds
+           'susy' : '/gdata/atlas/ucintprod/SusyNt/susy_n0115/',   # mc signals
+           }
 # Tag for production
 tags = []
 tags.append("n0115")
 #tags.append("n0111")
 
 # What files we want, with appropriate names
-wanted = (
-
-    # Alternative Z+jets AFII samples
-    #"ZeeLightJets_AF2", "ZmumuLightJets_AF2", "ZtautauLightJets_AF2",
-    #"ZeeHeavyJets_AF2", "ZmumuHeavyJets_AF2", "ZtautauHeavyJets_AF2",
-
+wantedDsets = { # mode : [dsets]
+    'data' : []
+    + ["period%(p)s.physics_%(s)s" % {'p':p, 's':s}
+       for p in ['A', 'B', 'C', 'D', 'E'] for s in ['Egamma', 'Muons']]
+    ,
+    'mc12' : []
+    ## # Alternative Z+jets AFII samples
+    ## + ["Z%(ll)s%(f)%sJets_AF2" % {'ll':ll, 'f':f}
+    ##    for ll in ['ee', 'mumu', 'tautau'] for f in ['Heavy', 'Light']]
     # New alternative Z+jets (Yippeee)
-    "Sherpa_CT10_Zee",
-    "Sherpa_CT10_Zmumu",
-    "Sherpa_CT10_Ztautau",
-
+    + ["Sherpa_CT10_Z%s" % ll for ll in ['ee', 'mumu', 'tautau']]
     # Z+jets
-    "ZeeNp0", "ZeeNp1", "ZeeNp2", "ZeeNp3", "ZeeNp4", "ZeeNp5",
-    "ZmumuNp0", "ZmumuNp1", "ZmumuNp2", "ZmumuNp3", "ZmumuNp4", "ZmumuNp5",
-    "ZtautauNp0", "ZtautauNp1", "ZtautauNp2", "ZtautauNp3", "ZtautauNp4", "ZtautauNp5",
-
+    + ["Z%(ll)sNp%(np)d" % {'ll':ll, 'np':np}
+       for ll in ['ee', 'mumu', 'tautau'] for np in [0, 1, 2, 3, 4, 5]]
     # Zbb + jets
-    "ZeebbNp0", "ZeebbNp1", "ZeebbNp2", "ZeebbNp3",
-    "ZmumubbNp0", "ZmumubbNp1", "ZmumubbNp2", "ZmumubbNp3",
-    "ZtautaubbNp0", "ZtautaubbNp1", "ZtautaubbNp2", "ZtautaubbNp3",
-
+    + ["Z%(ll)sbbNp%(np)d" % {'ll':ll, 'np':np}
+       for ll in ['ee', 'mumu', 'tautau'] for np in [0, 1, 2, 3]]
     # Zcc + jets
-    "ZeeccNp0", "ZeeccNp1", "ZeeccNp2", "ZeeccNp3",
-    "ZmumuccNp0", "ZmumuccNp1", "ZmumuccNp2", "ZmumuccNp3",
-    "ZtautauccNp0", "ZtautauccNp1", "ZtautauccNp2", "ZtautauccNp3",
-    
+    + ["Z%(ll)sccNp%(np)d" % {'ll':ll, 'np':np}
+       for ll in ['ee', 'mumu', 'tautau'] for np in [0, 1, 2, 3]]    
     # Low mass Z
-    "ZeeNp0Excl_Mll10to60", "ZeeNp1Excl_Mll10to60", "ZeeNp2Excl_Mll10to60",
-    "ZeeNp3Excl_Mll10to60", "ZeeNp4Excl_Mll10to60",
-    "ZmumuNp0Excl_Mll10to60", "ZmumuNp1Excl_Mll10to60", "ZmumuNp2Excl_Mll10to60",
-    "ZmumuNp3Excl_Mll10to60", "ZmumuNp4Excl_Mll10to60",
-    "ZtautauNp0Excl_Mll10to60", "ZtautauNp1Excl_Mll10to60", "ZtautauNp2Excl_Mll10to60",
-    "ZtautauNp3Excl_Mll10to60", "ZtautauNp4Excl_Mll10to60", 
-
+    + ["Z%(ll)sNp%(np)dExcl_Mll10to60" % {'ll':ll, 'np':np}
+       for ll in ['ee', 'mumu', 'tautau'] for np in [0, 1, 2, 3, 4]]
     # W+Jets (temporary due to bugs)
-    "Sherpa_CT10_Wenu", "Sherpa_CT10_Wmunu", "Sherpa_CT10_Wtaunu",
-
+    + ["Sherpa_CT10_W%s" % lv for lv in ['enu', 'munu', 'taunu']]
     # W+jets
-    "WenuNp0", "WenuNp1", "WenuNp2", "WenuNp3", "WenuNp4", "WenuNp5",
-    "WmunuNp0", "WmunuNp1", "WmunuNp2", "WmunuNp3", "WmunuNp4", "WmunuNp5",
-    "WtaunuNp0", "WtaunuNp1", "WtaunuNp2", "WtaunuNp3", "WtaunuNp4", "WtaunuNp5",
-
+    + ["W%(lv)sNp%(np)d" % {'lv':lv, 'np':np}
+       for lv in ['enu', 'munu', 'taunu'] for np in [0, 1, 2, 3, 4, 5]]
     # Wbb
-    "WbbNp0", "WbbNp1", "WbbNp2", "WbbNp3",
-
+    + ["WbbNp%d" % np for np in [0, 1, 2, 3]]
     # Wcc
-    "WccNp0", "WccNp1", "WccNp2", "WccNp3",
-    "WcNp0", "WcNp1", "WcNp2", "WcNp3",
-
+    + ["WccNp%d" % np for np in [0, 1, 2, 3]]
+    + ["WcNp%d" % np for np in [0, 1, 2, 3]]
     # single top
-    "singletop_tchan_e", "singletop_tchan_mu", "singletop_tchan_tau", "SingleTopWtChanIncl",
-
+    + ["singletop_tchan_%s" % l for l in ['e', 'mu', 'tau']]
+    + ["SingleTopWtChanIncl"]
     # ttbar
-    "McAtNloJimmy_CT10_ttbar_LeptonFilter",
-    "TtbarLeptLept", "TtbarLeptTaulept", "TtbarTauleptTaulept",
-    "TtbarLeptHad", "TtbarLeptTauhad", "TtbarTauleptHad",
-    "TtbarTauleptTauhad", "TtbarHadTauhad", "TtbarTauhadTauhad",
-    #"PowhegPythia_AUET2BCT10_ttbar_LeptonFilter_AF2",
-    "ttbarZ", "ttbarZj",
-    "ttbarW","ttbarWj",
-
+    + ["McAtNloJimmy_CT10_ttbar_LeptonFilter",]
+    + ["Ttbar%s" % ttd for ttd in ["LeptLept", "LeptTaulept", "TauleptTaulept",
+                                   "LeptHad", "LeptTauhad", "TauleptHad",
+                                   "TauleptTauhad", "HadTauhad", "TauhadTauhad",]]
+    # + ["PowhegPythia_AUET2BCT10_ttbar_LeptonFilter_AF2",]
+    + ["ttbar%s" % ttX for ttX in ["Z", "Zj", "W","Wj",]]
     # diboson
-    "lllnu_WZ", "llll_ZZ", "llnunu_ZZ", "llnunu_WW",
-    "WpWmenuenu", "WpWmenumunu", "WpWmenutaunu",
-    "WpWmmunuenu", "WpWmmunumunu", "WpWmmunutaunu",
-    "WpWmtaunuenu", "WpWmtaunumunu", "WpWmtaunutaunu",
-    "enugammaPt10", "munugammaPt10", "taunugammaPt10",
-    "eegammaPt10", "mumugammaPt10", "tautaugammaPt10",
-
+    + ["lllnu_WZ", "llll_ZZ", "llnunu_ZZ", "llnunu_WW",]
+    + ["WpWm%s%s" % (lv1, lv2)
+       for lv1 in ['enu', 'munu', 'taunu'] for lv2 in ['enu', 'munu', 'taunu']]
+    + ["%sgammaPt10" % lv for lv in  ['enu', 'munu', 'taunu',]]
+    + ["%sgammaPt10" % ll for ll in ['ee', 'mumu', 'tautau',]]
     # MISSING DIBOSON!!!!!
-    "ZZ4lep", "ZZ4e", "ZZ4mu", "ZZ2e2mu",
-    "llnunu_SS_EW6", "llnunujj_SS",
-
+    + ["ZZ%s" % l4 for l4 in ['4lep', '4e', '4mu', '2e2mu',]]
+    + ['llnunu_SS_EW6', 'llnunujj_SS',]
     # Triboson
-    "ZWWStar_lllnulnu",
-    "ZZZStar_nunullll",
-    "WWWStar_lnulnulnu",
-
+    + ['ZWWStar_lllnulnu', 'ZZZStar_nunullll', 'WWWStar_lnulnulnu',]
     # HF samples
-    "bbTomu15", "bbToe15",
-    "ccTomu15", "ccToe15",
-    )
-
+    + ["%(qq)sTo%(l)s15" % {'qq':qq, 'l':l} for qq in ['bb', 'cc'] for l in ['e', 'mu']]
+    ,
+    'susy' : []
+    + ["wA_noslep_WH_2Lep_%d" % i for i in range(1, 61+1)]  # 2l
+    + ["wA_noslep_WH_3Lep_%d" % i for i in range(1, 66+1)]  # 3l
+    }
 
 ###############################################################################################
 #                           Don't need to edit below here!!!                                  #
 ###############################################################################################
 dlist = []
-for tag in tags:
+dir = basedir[mode]
+for tag in tags :
     print tag
     ls = subprocess.Popen(["ls " + dir + " | grep " + tag + " | grep user"],shell=True,stdout=subprocess.PIPE)
     templist = (ls.stdout.read()).split("\n")
@@ -121,6 +102,7 @@ def makeFile(dataset, name):
     ls = subprocess.Popen(["ls " + dir + dataset + "/* > " + name + ".txt"],shell=True)
     ls.wait()
 
+wanted = wantedDsets[mode]
 for ds in dlist:
     print ds
     for name in wanted:
