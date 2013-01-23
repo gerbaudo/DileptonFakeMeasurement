@@ -29,11 +29,10 @@ inputFiles = [r.TFile.Open(f) for f in inputFileNames]
 assert len(inputFileNames)==len(inputFiles),"Cannot open some of the input files"
 print 'input files:\n'+'\n'.join(inputFileNames)
 
+# navigate the files and collect the histos
 refHistoType = HistoType(pr='', ch=channel, var=referenceHisto, syst=referenceSyst)
 histoNameClassifier = HistoNameClassifier()
-
 histosByType = collections.defaultdict(list)
-
 for fname, infile in zip(inputFileNames, inputFiles) :
     samplename = guessSampleFromFilename(fname)
     histoNames = [n for n in getAllHistoNames(infile, onlyTH1=True)
@@ -41,13 +40,13 @@ for fname, infile in zip(inputFileNames, inputFiles) :
     histos = [infile.Get(hn) for hn in histoNames]
     for h in histos : classifyHistoByName(h)
     organizeHistosByType(histosByType, histos, samplename)
-
 refHistos = histosByType # already filtered histonames, all histosByType are refHistos
 allSamples = list(set([h.sample for histos in refHistos.values() for h in histos]))
 allSelects = sorted(list(set([k.pr for k in histosByType.keys()])))
 print 'allSamples : ',allSamples
 print 'allSelects : ',allSelects
 
+# get the counts (adding up what needs to be merged by samplename)
 sampleCountsPerSel = dict() # counts[sample][sel]
 countsSampleSel = dict([(s, collections.defaultdict(float)) for s in allSamples])
 for t, histos in refHistos.iteritems() :
@@ -57,7 +56,10 @@ for t, histos in refHistos.iteritems() :
         countsSampleSel[sample][sel] += h.Integral()
 
 
+# print the table
 endrow = ' \\\\'
+colWidth = 12
+fwidthField = '%'+str(colWidth)+'s'
 tablePreamble = '% \usepackage{booktabs}\n' \
                 +'% \usepackage{placeins}\n' \
                 +'\\begin{table}[htbp] \n' \
@@ -70,10 +72,7 @@ tableEpilogue = '\\bottomrule \n' \
                 +'\\end{center} \n' \
                 +'\\end{table} \n' \
                 +'\\FloatBarrier \n'
-colWidth = 12
-fwidthField = '%'+str(colWidth)+'s'
 header = ' & '.join([fwidthField % t for t in ['selection']+allSamples]) + endrow
-
 
 print
 print tablePreamble
