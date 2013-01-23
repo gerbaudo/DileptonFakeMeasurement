@@ -5,7 +5,7 @@
 # davide.gerbaudo@gmail.com
 # Jan 2013
 
-import collections, re
+import collections, re, unittest
 import ROOT as r
 
 class HistoType(object):
@@ -17,6 +17,25 @@ class HistoType(object):
     def __eq__(self, other) : return self.sameas(other)
     def __str__(self) : return ', '.join(["%s : %s"%(a, getattr(self,a)) for a in ['pr', 'ch', 'var', 'syst']])
     def __hash__(self) : return hash(self.__str__())
+    def matchAllAvailabeAttrs(self, rhs) :
+        return all([ar==al for ar,al in [(getattr(self,a), getattr(rhs,a))
+                                         for a in ['pr', 'ch', 'var', 'syst']] if ar])
+
+class HistoNameClassifier :
+    "Extract PR+'_'+chan+'_'+name+'_'+sys from histoname and attach an HistoType attribute"
+    def __init__(self, verbose=False) :
+        self.verbose = verbose
+        self.rep = re.compile('(?P<pr>.*?)_'   # plot region (non greedy)
+                              +'(?P<ch>.*?)_'  # channel (non greedy)
+                              +'(?P<var>.*)_'  # var name (greedy, can contain '_')
+                              +'(?P<syst>.*)') # last token, everything that's left
+    def histoType(self, histoname='') :
+        match = self.rep.search(histoname)
+        if not match :
+            if self.verbose : print "cannot classify %s" % histoname
+        else :
+            kargs = dict([(g, match.group(g)) for g in ['pr', 'ch', 'var', 'syst']])
+            return  HistoType(**kargs)
 
 def getAllHistoNames(inputDir, verbose=False, onlyTH1=False, onlyTH2=False, onlyTH3=False) :
     "Provide a list of all histograms in the file; search recursively (use FindObjectAny to retrieve from subdirs"
@@ -42,18 +61,8 @@ def getAllHistoNames(inputDir, verbose=False, onlyTH1=False, onlyTH2=False, only
     return histoNames
 
 def classifyHistoByName(histo, verbose=False) :
-    "Extract PR+'_'+chan+'_'+name+'_'+sys from histoname and attach an HistoType attribute"
-    n = histo.GetName()
-    p = re.compile('(?P<pr>.*?)_'   # plot region (non greedy)
-                   +'(?P<ch>.*?)_'  # channel (non greedy)
-                   +'(?P<var>.*)_'  # var name (greedy, can contain '_')
-                   +'(?P<syst>.*)') # last token, everything that's left
-    match = p.search(n)
-    if not match :
-        if verbose : print "cannot classify %s" % n
-        return
-    kargs = dict([(g, match.group(g)) for g in ['pr', 'ch', 'var', 'syst']])
-    setattr(histo, 'type', HistoType(**kargs))
+    cl = HistoNameClassifier(verbose)
+    setattr(histo, 'type', cl.histoType(n))
 
 def organizeHistosByType(histosByType = collections.defaultdict(list),
                          histosToOrganize = [], sampleName = '') :
@@ -62,3 +71,39 @@ def organizeHistosByType(histosByType = collections.defaultdict(list),
         setattr(h, 'sample', sampleName)
         histosByType[h.type].append(h)
     return histosByType
+#
+# testing
+#
+class KnownHistoTypes(unittest.TestCase) :
+    def testMatchAllAvailabeAttrs(self):
+        keys = ['pr', 'ch', 'var', 'syst']
+        ht0 = HistoType(**dict(zip(keys, ('sr1','ee', 'l0_pt', 'NOM'))))
+        ht1 = HistoType(**dict(zip(keys, ('sr1','ee', 'l0_pt', 'NOM'))))
+        ht2 = HistoType(**dict(zip(keys, ('sr2','ee', 'l0_pt', 'NOM'))))
+        ht3 = HistoType(**dict(zip(keys, (''   ,'ee', 'l0_pt', 'NOM'))))
+        ht4 = HistoType(**dict(zip(keys, (''   ,'em', 'l0_pt', 'NOM'))))
+        for (l,r), expRes in zip([(ht0,ht1), (ht0,ht2), (ht0,ht3), (ht3, ht1), (ht3, ht4)],
+                                 [True,      False,     False,     True,       False]) :
+            #print l.matchAllAvailabeAttrs(r)," <--> ",l," | ",r
+            self.assertEqual(l.matchAllAvailabeAttrs(r), expRes)
+
+class KnownHistoNames(unittest.TestCase) :
+    def testAttrExtraction(self):
+        "Verifiy that we are able to extract the parameters with weird histonames"
+        hnc = HistoNameClassifier()
+        for sr, c, v, sy in [('br4', 'em', 'dPhi_woSig_llmet_j','NOM'),
+                             ('br4', 'em', 'dPhi_woSig_met_l0' ,'NOM'),
+                             ('br4', 'em', 'dPhi_woSig_l0_l1'  ,'NOM'),
+                             ('br4', 'em', 'l0_l1_pt'          ,'NOM'),
+                             ('br4', 'em', 'll_M_fine'         ,'NOM'),
+                             ('br4', 'em', 'll_M_fine.foo'     ,'NOM'),
+                             ] :
+            ht = hnc.histoType("%s_%s_%s_%s" % (sr, c, v, sy))
+            self.assertEqual(all([l==r
+                                  for l, r in zip([sr, c, v, sy],
+                                                  [getattr(ht, a) for a in 'pr', 'ch', 'var', 'syst'])]),
+                             True)
+
+if __name__ == "__main__":
+    unittest.main()
+
