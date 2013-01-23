@@ -62,7 +62,7 @@ def getAllHistoNames(inputDir, verbose=False, onlyTH1=False, onlyTH2=False, only
 
 def classifyHistoByName(histo, verbose=False) :
     cl = HistoNameClassifier(verbose)
-    setattr(histo, 'type', cl.histoType(n))
+    setattr(histo, 'type', cl.histoType(histo.GetName()))
 
 def organizeHistosByType(histosByType = collections.defaultdict(list),
                          histosToOrganize = [], sampleName = '') :
