@@ -36,7 +36,7 @@ wantedDsets = { # mode : [dsets]
        for ll in ['ee', 'mumu', 'tautau'] for np in [0, 1, 2, 3]]
     # Zcc + jets
     + ["Z%(ll)sccNp%(np)d" % {'ll':ll, 'np':np}
-       for ll in ['ee', 'mumu', 'tautau'] for np in [0, 1, 2, 3]]    
+       for ll in ['ee', 'mumu', 'tautau'] for np in [0, 1, 2, 3]]
     # Low mass Z
     + ["Z%(ll)sNp%(np)dExcl_Mll10to60" % {'ll':ll, 'np':np}
        for ll in ['ee', 'mumu', 'tautau'] for np in [0, 1, 2, 3, 4]]
@@ -87,11 +87,9 @@ dir = basedir[mode]
 for tag in tags :
     print tag
     ls = subprocess.Popen(["ls " + dir + " | grep " + tag + " | grep user"],shell=True,stdout=subprocess.PIPE)
-    templist = (ls.stdout.read()).split("\n")
-    del templist[-1]
-    for dset in templist:
-        dlist.append( dset )
-    
+    dlist  = dlist + [l for l in [ll.lstrip().rstrip()
+                                  for ll in (ls.stdout.read()).split("\n")]
+                      if l] # skip empty lines
 
 def contains(dataset, name):
     if (name + ".") in dataset:
@@ -109,4 +107,4 @@ for ds in dlist:
         if(contains(ds,name) and not ("_a" in ds)):
             makeFile(ds,name)
 
-    
+
