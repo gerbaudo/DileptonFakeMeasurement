@@ -1,13 +1,20 @@
+#!/bin/env python
+
 # Make lists of input root files
+#
+# Modified version of Matt's script
+#
+# davide.gerbaudo@gmail.com
+# Jan 2013
 
 import optparse, subprocess
 import datasets
 
-validModes = ['data', 'mc12', 'susy']
+validModes = ['mc12', 'susy', 'data',]
 defaultTag = 'n0115'
 
 parser = optparse.OptionParser()
-parser.add_option("-m", "--mode", dest="mode",
+parser.add_option("-m", "--mode", dest="mode", default=validModes[0],
                   help="possible modes : %s" % str(validModes))
 parser.add_option("-t", "--tag", dest="tag", default=defaultTag,
                   help="production tag (default '%s')" % defaultTag)
