@@ -1,10 +1,19 @@
 # Make lists of input root files
 
-import subprocess
+import optparse, subprocess
 import datasets
 
 validModes = ['data', 'mc12', 'susy']
-mode = 'mc12'
+defaultTag = 'n0115'
+
+parser = optparse.OptionParser()
+parser.add_option("-m", "--mode", dest="mode",
+                  help="possible modes : %s" % str(validModes))
+parser.add_option("-t", "--tag", dest="tag", default=defaultTag,
+                  help="production tag (default '%s')" % defaultTag)
+(options, args) = parser.parse_args()
+mode = options.mode
+tag  = options.tag
 assert mode in validModes,"Invalid mode %s (should be one of %s)" % (mode, str(validModes))
 
 # Directory where files are
@@ -12,10 +21,7 @@ basedir = {'data' : '/gdata/atlas/ucintprod/SusyNt/data12_n0115/', # data
            'mc12' : '/gdata/atlas/ucintprod/SusyNt/mc12_n0115/',   # mc backgrounds
            'susy' : '/gdata/atlas/ucintprod/SusyNt/susy_n0115/',   # mc signals
            }
-# Tag for production
-tags = []
-tags.append("n0115")
-#tags.append("n0111")
+tags = [tag]
 wantedDsets = datasets.wantedDsets
 
 ###############################################################################################
