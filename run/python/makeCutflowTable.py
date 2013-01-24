@@ -5,24 +5,41 @@
 # davide.gerbaudo@gmail.com
 # Jan 2013
 
-import collections, sys, glob
+import collections, optparse, sys, glob
 import ROOT as r
+r.gROOT.SetBatch(1)
 
 from NavUtils import getAllHistoNames, classifyHistoByName, organizeHistosByType, HistoType, HistoNameClassifier
 from SampleUtils import guessSampleFromFilename
 
-r.gROOT.SetBatch(1)
+#########
+# default parameters [begin]
+validChannels   = ['ee', 'em', 'mm', 'all']
+defaultTag      = 'Jan15_n0115'
+defaultHisto    = 'onebin'
+defaultRefSyst  = 'NOM'
+defaultInputDir = '/export/home/gerbaudo/workarea/Susy2013/SusyTest0/run/anaplots/merged'
+# default parameters [end]
+#########
 
-#######
-# begin parameters
-channel = 'ee'            # should be any of ['ee', 'em', 'mm', 'all']
-referenceHisto = 'onebin' # name of the histogram to be used to extract the counts
-referenceSyst = 'NOM'     # name of the syst to be used to extract the counts
-prodTag = 'Jan15_n0115'   # tag of the files to be used
-inputDir = '/export/home/gerbaudo/workarea/Susy2013/SusyTest0/run/anaplots/merged'
-# end parameters
-#######
-
+parser = optparse.OptionParser()
+parser.add_option("-c", "--channel", dest="channel", default=validChannels[0],
+                  help="possible channels : %s" % str(validChannels))
+parser.add_option("-i", "--input-dir", dest="inputdir", default=defaultInputDir,
+                  help="input directory (default '%s')" % defaultInputDir)
+parser.add_option("-t", "--tag", dest="tag", default=defaultTag,
+                  help="production tag (default '%s')" % defaultTag)
+parser.add_option("-H", "--histo", dest="histo", default=defaultHisto,
+                  help="histogram to get the counts from (default '%s')" % defaultHisto)
+parser.add_option("-S", "--syst", dest="syst", default=defaultRefSyst,
+                  help="systematic (default '%s')" % defaultRefSyst)
+(options, args) = parser.parse_args()
+channel         = options.channel
+inputDir        = options.inputdir
+prodTag         = options.tag
+referenceHisto  = options.histo
+referenceSyst   = options.syst
+assert channel in validChannels,"Invalid channel %s (should be one of %s)" % (channel, str(validChannels))
 
 inputFileNames = glob.glob(inputDir+'/'+'*'+prodTag+'*.root')
 inputFiles = [r.TFile.Open(f) for f in inputFileNames]
