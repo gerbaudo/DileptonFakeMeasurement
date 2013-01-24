@@ -7,6 +7,7 @@
 
 import collections, optparse, sys, glob
 import ROOT as r
+r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
 
 from NavUtils import getAllHistoNames, classifyHistoByName, organizeHistosByType, HistoType, HistoNameClassifier

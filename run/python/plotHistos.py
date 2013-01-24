@@ -7,11 +7,11 @@
 
 import collections, sys, glob
 import ROOT as r
+r.PyConfig.IgnoreCommandLineOptions = True
+r.gROOT.SetBatch(1)
 
 from NavUtils import getAllHistoNames, classifyHistoByName, organizeHistosByType
 from SampleUtils import colors, guessSampleFromFilename
-
-r.gROOT.SetBatch(1)
 
 inputDir = '/export/home/gerbaudo/workarea/Susy2013/SusyTest0/run/anaplots/merged'
 inputFileNames = glob.glob(inputDir+'/'+'*.root')
