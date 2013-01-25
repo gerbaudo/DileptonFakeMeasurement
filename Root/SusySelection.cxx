@@ -18,6 +18,7 @@ SusySelection::SusySelection() :
   m_w(1.0),
   m_do1fb(false),
   m_doAD(false),
+  m_useXsReader(false),
   m_dumpCounts(true),
   m_nLepMin(2),
   m_nLepMax(2),

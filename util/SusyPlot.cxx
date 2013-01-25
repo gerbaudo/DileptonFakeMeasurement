@@ -46,6 +46,9 @@ void help()
   cout << "  --AD to use periods A-D weights"   << endl;
   cout << "     default is false;"              << endl;
 
+  cout << "  --WH-sample : for these samples"   << endl;
+  cout << "     get xsec from SusyXSReader"     << endl;
+
   cout << "  -h print this help"                << endl;
 }
 
@@ -58,6 +61,7 @@ int main(int argc, char** argv)
   int dbg = 0;
   bool use1fb = false;
   bool useAD  = false;
+  bool useSusyXSReader = false;
   string sample;
   string file;
   string fileList;
@@ -86,6 +90,7 @@ int main(int argc, char** argv)
       use1fb = true;
     else if (strcmp(argv[i], "--AD") == 0)
       useAD = true;
+    else if (strcmp(argv[i], "--WH-sample") == 0) useSusyXSReader = true;
     //if (strcmp(argv[i], "-h") == 0)
     else
     {
@@ -106,12 +111,13 @@ int main(int argc, char** argv)
   }
 
   cout << "flags:" << endl;
-  cout << "  sample  " << sample   << endl;
-  cout << "  use 1fb " << use1fb   << endl;
-  cout << "  use A-D " << useAD    << endl;
-  cout << "  nEvt    " << nEvt     << endl;
-  cout << "  nSkip   " << nSkip    << endl;
-  cout << "  dbg     " << dbg      << endl;
+  cout << "  sample           " << sample          << endl;
+  cout << "  use 1fb          " << use1fb          << endl;
+  cout << "  use A-D          " << useAD           << endl;
+  cout << "  useSusyXSReader  " << useSusyXSReader << endl;
+  cout << "  nEvt             " << nEvt            << endl;
+  cout << "  nSkip            " << nSkip           << endl;
+  cout << "  dbg              " << dbg             << endl;
   if(!file.empty())     cout << "  input   " << file     << endl;
   if(!fileList.empty()) cout << "  input   " << fileList << endl;
   if(!fileDir.empty())  cout << "  input   " << fileDir  << endl;
@@ -133,6 +139,7 @@ int main(int argc, char** argv)
   susyPlot->setFileName(fname);
   susyPlot->setUse1fb(use1fb);
   susyPlot->setUseAD(useAD);
+  susyPlot->setUseXsReader(useSusyXSReader);
 
   // Run the job
   if(nEvt<0) nEvt = nEntries;

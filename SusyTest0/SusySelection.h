@@ -148,6 +148,7 @@ class SusySelection : public SusyNtAna
     void setUse1fb(bool use1fb){ m_do1fb = use1fb; };
     bool is1fb(){ return isPeriodAB3(nt.evt()->run); };
     void setUseAD(bool useAD){ m_doAD = useAD; };
+    void setUseXsReader(bool val){ m_useXsReader = val; };
     bool isB3(){
       uint run = nt.evt()->run;
       return 203169 <= run && run <= 203195;
@@ -198,6 +199,7 @@ class SusySelection : public SusyNtAna
 
     bool                m_do1fb;        // For get weight method
     bool                m_doAD;         // do weights for A-B
+    bool                m_useXsReader;  // use SusyXSReader to get the xsec for normalization
 
     bool                m_dumpCounts;   // Flag to dump counters
 
