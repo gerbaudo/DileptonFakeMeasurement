@@ -16,6 +16,7 @@ from SampleUtils import guessSampleFromFilename
 #########
 # default parameters [begin]
 validChannels   = ['ee', 'em', 'mm', 'all']
+defaultPickle   = 'counts.pkl'
 defaultTag      = 'Jan15_n0115'
 defaultHisto    = 'onebin'
 defaultRefSyst  = 'NOM'
@@ -28,24 +29,33 @@ parser.add_option("-c", "--channel", dest="channel", default=validChannels[0],
                   help="possible channels : %s" % str(validChannels))
 parser.add_option("-i", "--input-dir", dest="inputdir", default=defaultInputDir,
                   help="input directory (default '%s')" % defaultInputDir)
+parser.add_option("-p", "--pickle", dest="pickle", default=defaultPickle,
+                  help="save counts to the specified pikle file (default %s)" % defaultPickle)
 parser.add_option("-t", "--tag", dest="tag", default=defaultTag,
                   help="production tag (default '%s')" % defaultTag)
 parser.add_option("-H", "--histo", dest="histo", default=defaultHisto,
                   help="histogram to get the counts from (default '%s')" % defaultHisto)
 parser.add_option("-S", "--syst", dest="syst", default=defaultRefSyst,
                   help="systematic (default '%s')" % defaultRefSyst)
+parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
+                  help="print more details about what is going on")
 (options, args) = parser.parse_args()
 channel         = options.channel
 inputDir        = options.inputdir
 prodTag         = options.tag
 referenceHisto  = options.histo
 referenceSyst   = options.syst
+verbose         = options.verbose
 assert channel in validChannels,"Invalid channel %s (should be one of %s)" % (channel, str(validChannels))
-
 inputFileNames = glob.glob(inputDir+'/'+'*'+prodTag+'*.root')
 inputFiles = [r.TFile.Open(f) for f in inputFileNames]
 assert len(inputFileNames)==len(inputFiles),"Cannot open some of the input files"
-print 'input files:\n'+'\n'.join(inputFileNames)
+
+if verbose :
+    print "Options:\n" \
+          + '\n'.join(["%s : %s" % (o, eval(o))
+                       for o in ['channel','inputDir','prodTag', 'referenceHisto', 'referenceSyst']])
+    print 'Input files:\n'+'\n'.join(inputFileNames)
 
 # navigate the files and collect the histos
 refHistoType = HistoType(pr='', ch=channel, var=referenceHisto, syst=referenceSyst)
