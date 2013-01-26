@@ -1,4 +1,5 @@
 #include <iomanip>
+#include <cassert>
 #include "TCanvas.h"
 #include "SusyTest0/SusySelection.h"
 
@@ -12,6 +13,7 @@ using namespace Susy;
 /*--------------------------------------------------------------------------------*/
 SusySelection::SusySelection() :
   m_susyObj(NULL),
+  m_xsReader(NULL),
   m_trigObj(NULL),
   m_useMCTrig(false),
   m_fileName("default"),
@@ -19,6 +21,7 @@ SusySelection::SusySelection() :
   m_do1fb(false),
   m_doAD(false),
   m_useXsReader(false),
+  m_xsFromReader(-1.0),
   m_dumpCounts(true),
   m_nLepMin(2),
   m_nLepMax(2),
@@ -101,6 +104,12 @@ void SusySelection::Begin(TTree* /*tree*/)
   if(m_doAD)  per = "A-D7";
   m_trigObj = new DilTrigLogic(per);
   if(m_useMCTrig) m_trigObj->useMCTrigger();
+
+  if( m_useXsReader ){
+    m_xsReader = new XSReader();
+    m_xsReader->setDebug(m_dbg);
+    m_xsReader->LoadXSInfo();
+  } // end if(m_useXsReader)
   //setSelectTaus(true);
 }
 
@@ -186,6 +195,7 @@ void SusySelection::Terminate()
   if(m_dbg) cout << "SusySelection::Terminate" << endl;
   if(m_dumpCounts)
     dumpEventCounters();
+  if(m_xsReader) delete m_xsReader;
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -1078,7 +1088,7 @@ float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag,
   // lumi, xs, sumw, pileup
   if(m_do1fb) weight = getEventWeightAB3();
   else if(m_doAD)  weight = getEventWeight(LUMI_A_D);
-  else weight = getEventWeight(LUMI_A_E);
+  else weight = (m_useXsReader ? computeEventWeightXsFromReader(LUMI_A_E) : getEventWeight(LUMI_A_E));
   //if(m_do1fb) weight = getEventWeightFixed(nt.evt()->mcChannel, LUMI_A_B3);
   //else if(m_doAD)  weight = getEventWeightFixed(nt.evt()->mcChannel,LUMI_A_D);
   //else weight = getEventWeightFixed(nt.evt()->mcChannel,LUMI_A_E);
@@ -1604,4 +1614,22 @@ void SusySelection::printJet(const Jet* jet)
   out<<"\tjvf: "<<jet->jvf<<" sv0: "<<jet->sv0
      <<" combNN: "<<jet->combNN<<" mv1: "<<jet->mv1<<endl;
 
+}
+/*--------------------------------------------------------------------------------*/
+float SusySelection::getXsFromReader()
+{
+  if(m_dbg) cout << "SusySelection::getXsFromReader()" << endl;
+  if(!m_useXsReader || !m_xsReader) return -1.0;
+  if(m_xsFromReader < 0.0) {
+    m_xsFromReader = m_xsReader->GetXS(  static_cast<int>(nt.evt()->mcChannel) );
+  } // end if(xs<0)
+  if(m_dbg) cout << "   got " << m_xsFromReader << " for " << static_cast<int>(nt.evt()->mcChannel) << endl;
+  return m_xsFromReader;
+}
+/*--------------------------------------------------------------------------------*/
+float SusySelection::computeEventWeightXsFromReader(float lumi)
+{
+  float defaultXsec = nt.evt()->xsec;
+  assert(defaultXsec != 0.0);
+  return (getEventWeight(lumi) * getXsFromReader() / defaultXsec);
 }

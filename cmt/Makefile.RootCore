@@ -8,7 +8,7 @@ PACKAGE_CXXFLAGS =
 PACKAGE_LDFLAGS  = 
 PACKAGE_BINFLAGS = -lCintex -lReflex -lPyROOT -lXMLParser -lEG
 # PACKAGE_DEP      = SusyNtuple SusyMatrixMethod ChargeFlip DGTriggerReweight SUSYTools
-PACKAGE_DEP      = SusyNtuple DGTriggerReweight LeptonTruthTools SUSYTools
+PACKAGE_DEP      = SusyNtuple DGTriggerReweight LeptonTruthTools SUSYTools SusyXSReader
 PACKAGE_NOOPT    = 0
 
 include $(ROOTCOREDIR)/Makefile-common

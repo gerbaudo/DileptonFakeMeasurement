@@ -21,6 +21,8 @@
 
 #include "SUSYTools/SUSYObjDef.h"
 
+#include "SusyXSReader/XSReader.h"
+
 #include <fstream>
 
 enum WeightType
@@ -138,7 +140,9 @@ class SusySelection : public SusyNtAna
     // Save file name for easy writing
     void setFileName(string f){ m_fileName = f; };
     string getFileName(){ return m_fileName; };
-
+    // cache xsec from xsreader
+    float getXsFromReader();
+    float computeEventWeightXsFromReader(float lumi);
     // Get Btag weight
     float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true,
 		       bool doMediumpp=false);
@@ -190,6 +194,7 @@ class SusySelection : public SusyNtAna
   protected:
 
     SUSYObjDef* m_susyObj;            // susy obj
+    XSReader* m_xsReader;
 
     DilTrigLogic*       m_trigObj;      // My trigger logic class
     bool                m_useMCTrig;    // Use MC Trigger
@@ -200,6 +205,7 @@ class SusySelection : public SusyNtAna
     bool                m_do1fb;        // For get weight method
     bool                m_doAD;         // do weights for A-B
     bool                m_useXsReader;  // use SusyXSReader to get the xsec for normalization
+    float               m_xsFromReader; // cached xsec from reader
 
     bool                m_dumpCounts;   // Flag to dump counters
 
