@@ -12,3 +12,7 @@ def dumpToPickle(filename='', obj=None) :
     pickle.dump(obj, output)
     output.close()
 
+def readFromPickle(filename) :
+    pkl_file = open(filename, 'rb')
+    return pickle.load(pkl_file)
+
