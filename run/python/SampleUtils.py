@@ -5,7 +5,7 @@
 # davide.gerbaudo@gmail.com
 # Jan 2013
 
-import re
+import glob, os, re, unittest
 import ROOT as r
 
 colors = {
@@ -30,3 +30,75 @@ def guessSampleFromFilename(filename='', verbose=False) :
         return match.group()
     else :
         if verbose : print "cannot guess samplename for %s" % filename
+def guessReqidFromFilename(filename='', verbose=False) :
+    match = re.search('mc12\_8TeV\.(\d+)\.', filename)
+    return match.group(1)
+
+
+def basePathArea() :
+    path = os.path.realpath(__file__)
+    return path[:path.rfind('SusyTest0')]
+def xsReaderDataDir(basePath='') :
+    relPath = '/SusyXSReader/data'
+    return (basePath if basePath else basePathArea()) + relPath
+
+class ModeAWhDbPar :
+    fields = ['ds', 'mc1', 'mn1', 'xsec', 'xsecSys']
+    class Entry:
+        def __init__(self, line) :
+            """parse a line that is expected to be formatted as follow:
+            DS MC1 MN1 xsec xsec_sys
+            and store what is necessary.
+            """
+            line = line.strip()
+            words = line.split()
+            for a,w in zip(ModeAWhDbPar.fields, words) : setattr(self, a, w)
+        def valid(self) : return all([hasattr(self, a) for a in ModeAWhDbPar.fields]) and self.ds.isdigit()
+
+    def __init__(self, filename=xsReaderDataDir()+'/modeA_WH_MC1eqMN2.txt') :
+        self.entries = [e for e in [ModeAWhDbPar.Entry(l) for l in open(filename).readlines()] if e.valid()]
+    def mc1Mn1ByReqid(self, reqid) :
+        entry = next(e for e in self.entries if e.ds == reqid)
+        return float(entry.mc1), float(entry.mn1)
+
+class ModeAWhDbReqid :
+    "Using the filelists, map reqids to samplenames"
+    def __init__(self, filenames = []) :
+        self.entries = {}
+        if not filenames : filenames = glob.glob(basePathArea() + '/SusyTest0/run/filelist/wA_noslep_WH_*Lep*txt')
+        for f in filenames :
+            rootfile = open(f).read()
+            reqid  = guessReqidFromFilename(rootfile)
+            sample = guessSampleFromFilename(rootfile)
+            assert sample not in self.entries, "Cannot have several reqids with the same signal : %s, %s"%(sample, str([reqid, self.entries[sample]]))
+            self.entries[sample] = reqid
+    def reqidBySample(self, sample) :
+        return self.entries[sample]
+
+#
+# testing
+#
+class KnownReqidModeAWhDb(unittest.TestCase) :
+    def testMatchAllAvailabeAttrs(self) :
+        knownValues = [ ('176574', (130.0 , 0.0))
+                       ,('176575', (140.0, 10.0))
+                        ]
+        db = ModeAWhDbPar()
+        for reqid, valuePair in knownValues :
+            v1T, v2T = valuePair[0], valuePair[1]
+            v1, v2  = db.mc1Mn1ByReqid(reqid)
+            self.assertEqual(v1, v1T)
+            self.assertEqual(v2, v2T)
+
+class KnownEntriesModeAWhDbReqid(unittest.TestCase) :
+    def testMatchAllAvailabeAttrs(self) :
+        knownValues = [ ('176584', 'WH_2Lep_11')
+                       ,('176641', 'WH_3Lep_1')
+                        ]
+        db = ModeAWhDbReqid()
+        for reqid, sample in knownValues :
+            self.assertEqual(reqid, db.reqidBySample(sample))
+
+
+if __name__ == "__main__":
+    unittest.main()
