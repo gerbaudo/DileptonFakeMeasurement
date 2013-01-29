@@ -60,6 +60,8 @@ class ModeAWhDbPar :
     def mc1Mn1ByReqid(self, reqid) :
         entry = next(e for e in self.entries if e.ds == reqid)
         return float(entry.mc1), float(entry.mn1)
+    def allMc1(self) : return [e.mc1 for e in self.entries]
+    def allMn1(self) : return [e.mn1 for e in self.entries]
 
 class ModeAWhDbReqid :
     "Using the filelists, map reqids to samplenames"
