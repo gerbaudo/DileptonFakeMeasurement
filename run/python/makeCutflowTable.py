@@ -5,13 +5,14 @@
 # davide.gerbaudo@gmail.com
 # Jan 2013
 
-import collections, optparse, sys, glob
+import collections, optparse, pickle, sys, glob
 import ROOT as r
 r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
 
 from NavUtils import getAllHistoNames, classifyHistoByName, organizeHistosByType, HistoType, HistoNameClassifier
 from SampleUtils import guessSampleFromFilename
+from PickleUtils import dumpToPickle
 
 #########
 # default parameters [begin]
@@ -45,6 +46,7 @@ inputDir        = options.inputdir
 prodTag         = options.tag
 referenceHisto  = options.histo
 referenceSyst   = options.syst
+pickleFile      = options.pickle
 verbose         = options.verbose
 assert channel in validChannels,"Invalid channel %s (should be one of %s)" % (channel, str(validChannels))
 inputFileNames = glob.glob(inputDir+'/'+'*'+prodTag+'*.root')
@@ -83,6 +85,7 @@ for t, histos in refHistos.iteritems() :
         sample, sel = h.sample, h.type.pr
         countsSampleSel[sample][sel] += h.Integral()
 
+if pickleFile : dumpToPickle(pickleFile, countsSampleSel)
 
 # print the table
 endrow = ' \\\\'
