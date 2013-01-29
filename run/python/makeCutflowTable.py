@@ -5,7 +5,7 @@
 # davide.gerbaudo@gmail.com
 # Jan 2013
 
-import collections, optparse, pickle, sys, glob
+import collections, optparse, sys, glob
 import ROOT as r
 r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
