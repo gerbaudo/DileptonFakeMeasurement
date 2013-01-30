@@ -21,6 +21,7 @@ from SampleUtils import ModeAWhDbPar, ModeAWhDbReqid
 # default parameters [begin]
 defaultSigPickle   = 'counts_signal.pkl'
 defaultBkgPickle   = 'counts_backgr.pkl'
+defaultSigScale    = 1.0
 # default parameters [end]
 #########
 
@@ -29,8 +30,8 @@ parser.add_option("-s", "--sig-file", dest="sig", default=defaultSigPickle,
                   help="file with signal counts, default : %s" % defaultSigPickle)
 parser.add_option("-b", "--bkg-file", dest="bkg", default=defaultBkgPickle,
                   help="file with background counts, default : %s" % defaultBkgPickle)
-parser.add_option("-S", "--scale-sig", dest="sigScale", default=1.0, type='float',
-                  help="scale the signal yield by this factor (default 1.0)")
+parser.add_option("-S", "--scale-sig", dest="sigScale", default=defaultSigScale, type='float',
+                  help="scale the signal yield by this factor (default %.1f)" % defaultSigScale)
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
                   help="print more details about what is going on")
 (options, args) = parser.parse_args()
@@ -73,11 +74,19 @@ for sample, countsSel in countsSigSampleSel.iteritems() :
 
 r.gStyle.SetPaintTextFormat('.2f')
 for s, h in histos.iteritems() :
-    c = r.TCanvas(s,s)
+    c = r.TCanvas(s, s, 800, 600)
     c.cd()
     h.SetStats(0)
     h.SetMarkerSize(1.5*h.GetMarkerSize())
     h.Draw('text')
+    def writeScale(can, scale, font='') :
+        tex = r.TLatex(0.0, 0.0, '')
+        tex.SetNDC()
+        if font : tex.SetTextFont(font)
+        tex.SetTextAlign(31)
+        tex.DrawLatex(1.0-c.GetTopMargin(), 1.0-c.GetRightMargin(), "Signal: x %.1f"%scale)
+        c.Update()
+    if sigScale != defaultSigScale : writeScale(c, sigScale, h.GetTitleFont())
     c.SaveAs(s+'.png')
 
 
