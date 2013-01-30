@@ -65,11 +65,9 @@ def classifyHistoByName(histo, verbose=False) :
     setattr(histo, 'type', cl.histoType(histo.GetName()))
 
 def organizeHistosByType(histosByType = collections.defaultdict(list),
-                         histosToOrganize = [], sampleName = '') :
+                         histosToOrganize = []) :
     "Fill a dictionary where the histos are keyed by HistoType"
-    for h in histosToOrganize :
-        setattr(h, 'sample', sampleName)
-        histosByType[h.type].append(h)
+    for h in histosToOrganize : histosByType[h.type].append(h)
     return histosByType
 #
 # testing
