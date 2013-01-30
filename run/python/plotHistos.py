@@ -10,7 +10,7 @@ import ROOT as r
 r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
 
-from NavUtils import getAllHistoNames, classifyHistoByName, organizeHistosByType
+from NavUtils import getAllHistoNames, HistoNameClassifier, organizeHistosByType
 from SampleUtils import colors, guessSampleFromFilename
 
 inputDir = '/export/home/gerbaudo/workarea/Susy2013/SusyTest0/run/anaplots/merged'
@@ -20,13 +20,19 @@ inputFiles = [r.TFile.Open(f) for f in inputFileNames]
 
 
 histosByType = collections.defaultdict(list)
+classifier = HistoNameClassifier()
+
+def setHistoType(h, type) : setattr(h, 'type', type)
+def setHistoSample(h, sample) : setattr(h, 'sample', sample)
 
 for fname, infile in zip(inputFileNames, inputFiles) :
     samplename = guessSampleFromFilename(fname)
     histoNames = getAllHistoNames(inputFiles[0], onlyTH1=True)[:10] # get only 10 histos for now
     histos = [infile.Get(hn) for hn in histoNames]
-    for h in histos : classifyHistoByName(h)
-    organizeHistosByType(histosByType, histos, samplename)
+    for h in histos :
+        setHistoType(h, classifier.histoType(h.GetName()))
+        setHistoSample(h, samplename)
+    organizeHistosByType(histosByType, histos)
 
 def plotHistos(histosDict={'ttbar':None, 'zjets':None},
                extensions=['eps', 'png'], outdir='./plots',
@@ -52,7 +58,7 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
         h.SetFillColor(colors[s])
         h.SetDrawOption('bar')
         stack.Add(h)
-        leg.AddEntry(h, s, 'F')
+        leg.AddEntry(h, s+" (%.2f)"%h.Integral(), 'F')
     stack.Draw('hist')
     stack.GetXaxis().SetTitle(firstHisto.GetXaxis().GetTitle())
     stack.GetYaxis().SetTitle(firstHisto.GetYaxis().GetTitle())
