@@ -96,7 +96,7 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
         signal.SetLineWidth(2*signal.GetLineWidth())
         signal.Scale(signalScale)
         signal.Draw('same')
-        leg.AddEntry(signal, h.sample+" (x%.1f, %.2f)"%(signalScale, signal.Integral()), 'L')
+        leg.AddEntry(signal, signal.sample+" (x%.1f, %.2f)"%(signalScale, signal.Integral()), 'L')
     leg.Draw()
     channel, plotRegion = firstHisto.type.ch, firstHisto.type.pr
     def writeLabel(can, label, font='') :
@@ -107,8 +107,10 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
         tex.DrawLatex(1.0-can.GetTopMargin(), 1.0-can.GetRightMargin(), label)
     writeLabel(can, channel+', '+plotRegion, firstHisto.GetTitleFont())
     can.Update()
-    for ext in extensions :
-        can.SaveAs(outdir+'/'+hname+'.'+ext)
+    for ext in extensions : can.SaveAs(outdir+'/'+hname+'_lin'+'.'+ext)
+    firstHisto.SetMinimum(0.5)
+    can.SetLogy()
+    for ext in extensions : can.SaveAs(outdir+'/'+hname+'_log'+'.'+ext)
 
 for k,v in histosByType.iteritems() :
     plotHistos(histosDict=dict([(h.sample, h) for h in v]))
