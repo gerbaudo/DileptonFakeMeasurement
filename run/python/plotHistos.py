@@ -10,7 +10,7 @@ import ROOT as r
 r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
 
-from NavUtils import getAllHistoNames, HistoNameClassifier, organizeHistosByType
+from NavUtils import getAllHistoNames, HistoNameClassifier, organizeHistosByType, setHistoType, setHistoSample
 from SampleUtils import colors, guessSampleFromFilename
 
 inputDir = '/export/home/gerbaudo/workarea/Susy2013/SusyTest0/run/anaplots/merged'
@@ -22,12 +22,10 @@ inputFiles = [r.TFile.Open(f) for f in inputFileNames]
 histosByType = collections.defaultdict(list)
 classifier = HistoNameClassifier()
 
-def setHistoType(h, type) : setattr(h, 'type', type)
-def setHistoSample(h, sample) : setattr(h, 'sample', sample)
-
 for fname, infile in zip(inputFileNames, inputFiles) :
+    print '-'*3 + fname + '-'*3
     samplename = guessSampleFromFilename(fname)
-    histoNames = getAllHistoNames(inputFiles[0], onlyTH1=True)[:10] # get only 10 histos for now
+    histoNames = getAllHistoNames(inputFiles[0], onlyTH1=True) # [:10] # get only 10 histos for now
     histos = [infile.Get(hn) for hn in histoNames]
     for h in histos :
         setHistoType(h, classifier.histoType(h.GetName()))
@@ -37,8 +35,10 @@ for fname, infile in zip(inputFileNames, inputFiles) :
 def plotHistos(histosDict={'ttbar':None, 'zjets':None},
                extensions=['eps', 'png'], outdir='./plots',
                verbose=False) :
-    #histosDict = sorted(histosDict.iteritems(), key=lambda (k,v): v.GetEntries()) # need it to stack them?
+    allHistosEmpty = all([h.GetEntries()==0 for h in histosDict.values()])
+    if allHistosEmpty : return
     hnames = [h.GetName() for h in histosDict.values()]
+    #if '_pt_' not in hnames[0] : return
     assert 1 == len(set(hnames)),"some histos have different names, something is wrong:\n%s"%str(set(hnames))
     hname = hnames[0]
     if verbose : print "got %d histos for '%s' (samples : %s)" % (len(histosDict), hname, str(histosDict.keys()))
@@ -62,9 +62,15 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
     stack.Draw('hist')
     stack.GetXaxis().SetTitle(firstHisto.GetXaxis().GetTitle())
     stack.GetYaxis().SetTitle(firstHisto.GetYaxis().GetTitle())
-    allHistosEmpty = not stack.GetHistogram().Integral()
-    if allHistosEmpty : return
     leg.Draw()
+    channel, plotRegion = firstHisto.type.ch, firstHisto.type.pr
+    def writeLabel(can, label, font='') :
+        tex = r.TLatex(0.0, 0.0, '')
+        tex.SetNDC()
+        if font : tex.SetTextFont(font)
+        tex.SetTextAlign(31)
+        tex.DrawLatex(1.0-can.GetTopMargin(), 1.0-can.GetRightMargin(), label)
+    writeLabel(can, channel+', '+plotRegion, firstHisto.GetTitleFont())
     can.Update()
     for ext in extensions :
         can.SaveAs(outdir+'/'+hname+'.'+ext)
