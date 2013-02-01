@@ -5,7 +5,7 @@
 # davide.gerbaudo@gmail.com
 # Jan 2013
 
-import collections, sys, glob
+import collections, optparse, sys, glob
 import ROOT as r
 r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
@@ -13,8 +13,34 @@ r.gROOT.SetBatch(1)
 from NavUtils import getAllHistoNames, HistoNameClassifier, organizeHistosByType, setHistoType, setHistoSample
 from SampleUtils import colors, guessSampleFromFilename
 
-inputDir = '/export/home/gerbaudo/workarea/Susy2013/SusyTest0/run/anaplots/merged'
-inputFileNames = glob.glob(inputDir+'/'+'*.root')
+#########
+# default parameters [begin]
+defaultTag      = 'Jan21_n0115'
+defaultInputDir = './anaplots/merged'
+defaultSigFile  = './anaplots/wA_noslep_WH_2Lep_3_Jan21_n0115.AnaHists.root'
+defaultSigScale = 10.0
+# default parameters [end]
+#########
+
+parser = optparse.OptionParser()
+parser.add_option("-i", "--input-dir", dest="inputdir", default=defaultInputDir,
+                  help="input directory (default '%s')" % defaultInputDir)
+parser.add_option("-t", "--tag", dest="tag", default=defaultTag,
+                  help="production tag (default '%s')" % defaultTag)
+parser.add_option("-s", "--sig-file", dest="sigFname", default=defaultSigFile,
+                  help="signal file (default %s)" % defaultSigFile)
+parser.add_option("-S", "--sig-scale", dest="sigScale", default=defaultSigScale,
+                  help="signal scale factor (default %.1f)" % defaultSigScale)
+parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
+                  help="print more details about what is going on")
+(options, args) = parser.parse_args()
+inputDir        = options.inputdir
+prodTag         = options.tag
+signalFname     = options.sigFname
+signalScale     = options.sigScale
+verbose         = options.verbose
+
+inputFileNames = glob.glob(inputDir+'/'+'*'+prodTag+'*.root')
 print 'input files:\n'+'\n'.join(inputFileNames)
 inputFiles = [r.TFile.Open(f) for f in inputFileNames]
 
