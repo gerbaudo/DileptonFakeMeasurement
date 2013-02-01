@@ -40,7 +40,7 @@ signalFname     = options.sigFname
 signalScale     = options.sigScale
 verbose         = options.verbose
 
-inputFileNames = glob.glob(inputDir+'/'+'*'+prodTag+'*.root')
+inputFileNames = glob.glob(inputDir+'/'+'*'+prodTag+'*.root') + glob.glob(signalFname)
 print 'input files:\n'+'\n'.join(inputFileNames)
 inputFiles = [r.TFile.Open(f) for f in inputFileNames]
 
@@ -57,6 +57,8 @@ for fname, infile in zip(inputFileNames, inputFiles) :
         setHistoType(h, classifier.histoType(h.GetName()))
         setHistoSample(h, samplename)
     organizeHistosByType(histosByType, histos)
+
+def isSignal(sampleName) : return 'WH_' in sampleName
 
 def plotHistos(histosDict={'ttbar':None, 'zjets':None},
                extensions=['eps', 'png'], outdir='./plots',
@@ -88,6 +90,13 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
     stack.Draw('hist')
     stack.GetXaxis().SetTitle(firstHisto.GetXaxis().GetTitle())
     stack.GetYaxis().SetTitle(firstHisto.GetYaxis().GetTitle())
+    signal = next((h for s,h in histosDict.iteritems() if isSignal(s)), None)
+    if signal :
+        signal.SetLineColor(r.kRed)
+        signal.SetLineWidth(2*signal.GetLineWidth())
+        signal.Scale(signalScale)
+        signal.Draw('same')
+        leg.AddEntry(signal, h.sample+" (x%.1f, %.2f)"%(signalScale, signal.Integral()), 'L')
     leg.Draw()
     channel, plotRegion = firstHisto.type.ch, firstHisto.type.pr
     def writeLabel(can, label, font='') :
