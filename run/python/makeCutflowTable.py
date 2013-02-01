@@ -10,7 +10,7 @@ import ROOT as r
 r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
 
-from NavUtils import getAllHistoNames, classifyHistoByName, organizeHistosByType, HistoType, HistoNameClassifier
+from NavUtils import getAllHistoNames, HistoNameClassifier, organizeHistosByType, HistoType, HistoNameClassifier, setHistoType, setHistoSample
 from SampleUtils import guessSampleFromFilename
 from PickleUtils import dumpToPickle
 
@@ -18,7 +18,7 @@ from PickleUtils import dumpToPickle
 # default parameters [begin]
 validChannels   = ['ee', 'em', 'mm', 'all']
 defaultPickle   = 'counts.pkl'
-defaultTag      = 'Jan15_n0115'
+defaultTag      = 'Jan21_n0115'
 defaultHisto    = 'onebin'
 defaultRefSyst  = 'NOM'
 defaultInputDir = '/export/home/gerbaudo/workarea/Susy2013/SusyTest0/run/anaplots/merged'
@@ -63,13 +63,17 @@ if verbose :
 refHistoType = HistoType(pr='', ch=channel, var=referenceHisto, syst=referenceSyst)
 histoNameClassifier = HistoNameClassifier()
 histosByType = collections.defaultdict(list)
+classifier = HistoNameClassifier()
+
 for fname, infile in zip(inputFileNames, inputFiles) :
     samplename = guessSampleFromFilename(fname)
     histoNames = [n for n in getAllHistoNames(infile, onlyTH1=True)
                   if refHistoType.matchAllAvailabeAttrs( histoNameClassifier.histoType( n ) )]
     histos = [infile.Get(hn) for hn in histoNames]
-    for h in histos : classifyHistoByName(h)
-    organizeHistosByType(histosByType, histos, samplename)
+    for h in histos :
+        setHistoType(h, classifier.histoType(h.GetName()))
+        setHistoSample(h, samplename)
+    organizeHistosByType(histosByType, histos)
 refHistos = histosByType # already filtered histonames, all histosByType are refHistos
 allSamples = list(set([h.sample for histos in refHistos.values() for h in histos]))
 allSelects = sorted(list(set([k.pr for k in histosByType.keys()])))
