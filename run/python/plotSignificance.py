@@ -84,8 +84,8 @@ for s, h in histos.iteritems() :
         tex.SetNDC()
         if font : tex.SetTextFont(font)
         tex.SetTextAlign(31)
-        tex.DrawLatex(1.0-c.GetTopMargin(), 1.0-c.GetRightMargin(), "Signal: x %.1f"%scale)
-        c.Update()
+        tex.DrawLatex(1.0-can.GetTopMargin(), 1.0-can.GetRightMargin(), "Signal: x %.1f"%scale)
+        can.Update()
     if sigScale != defaultSigScale : writeScale(c, sigScale, h.GetTitleFont())
     c.SaveAs(s+'.png')
 
