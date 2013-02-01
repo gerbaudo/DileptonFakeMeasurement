@@ -21,6 +21,9 @@ class HistoType(object):
         return all([ar==al for ar,al in [(getattr(self,a), getattr(rhs,a))
                                          for a in ['pr', 'ch', 'var', 'syst']] if ar])
 
+def setHistoType(h, type) : setattr(h, 'type', type)
+def setHistoSample(h, sample) : setattr(h, 'sample', sample)
+
 class HistoNameClassifier :
     "Extract PR+'_'+chan+'_'+name+'_'+sys from histoname and attach an HistoType attribute"
     def __init__(self, verbose=False) :
