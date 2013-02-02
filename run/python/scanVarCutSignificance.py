@@ -10,7 +10,7 @@
 # Jan 2013
 
 
-import collections, optparse, sys, glob
+import collections, optparse, os, sys, glob
 import ROOT as r
 r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
@@ -111,12 +111,14 @@ for t,hSig in sigHistosByType.iteritems() :
     hBkg = bkgHistosByType[t]
     hZn  = buildHistoSigVsMinThres(hBkg, hSig)
     hZn.SetTitle(str(hBkg.type))
+    print "%s : max %.3f Z_n at %.2f" % (str(t), hZn.GetMaximum(), hZn.GetBinCenter(hZn.GetMaximumBin()))
     s = "%s_%s_%s" % (t.pr, t.ch, t.var)
     c = r.TCanvas(s, s, 800, 600)
     c.cd()
     hZn.SetStats(0)
-    hZn.SetMarkerSize(1.5*hZn.GetMarkerSize())
     hZn.Draw()
+    pname = s+'.png'
+    if os.path.exists(pname) : os.remove(pname)
     c.SaveAs(s+'.png')
 
     
