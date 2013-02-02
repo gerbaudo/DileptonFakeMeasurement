@@ -24,7 +24,8 @@ def guessSampleFromFilename(filename='', verbose=False) :
          or 'WW_' in filename \
          or 'WZ_' in filename : return 'diboson'
     elif 'Wjet_' in filename : return 'wjets'
-    elif 'WH_2Lep' in filename or 'WH_3Lep':
+    elif 'physics_Egamma' in filename or 'physics_Muons' in filename : return 'data'
+    elif 'WH_2Lep' in filename or 'WH_3Lep' in filename :
         match = re.search('(WH_\dLep_\d+)', filename)
         assert match, "failed to extract the WH pattern from %s"%filename
         return match.group()
