@@ -10,16 +10,17 @@ import ROOT as r
 
 class HistoType(object):
     "Type of histogram, defined by plot region, channel, variable, syst"
+    attributes = ['pr', 'ch', 'var', 'syst']
     def __init__(self, pr='', ch='', var='', syst=''):
-        for att in ['pr', 'ch', 'var', 'syst'] : setattr(self, att, eval(att))
+        for att in HistoType.attributes : setattr(self, att, eval(att))
     def sameas(self, rhs):
-        return all([getattr(self,att)==getattr(rhs,att) for att in ['pr', 'ch', 'var', 'syst']])
+        return all([getattr(self,att)==getattr(rhs,att) for att in HistoType.attributes])
     def __eq__(self, other) : return self.sameas(other)
-    def __str__(self) : return ', '.join(["%s : %s"%(a, getattr(self,a)) for a in ['pr', 'ch', 'var', 'syst']])
+    def __str__(self) : return ', '.join(["%s : %s"%(a, getattr(self,a)) for a in HistoType.attributes])
     def __hash__(self) : return hash(self.__str__())
     def matchAllAvailabeAttrs(self, rhs) :
         return all([ar==al for ar,al in [(getattr(self,a), getattr(rhs,a))
-                                         for a in ['pr', 'ch', 'var', 'syst']] if ar])
+                                         for a in HistoType.attributes] if ar])
 
 def setHistoType(h, type) : setattr(h, 'type', type)
 def setHistoSample(h, sample) : setattr(h, 'sample', sample)
