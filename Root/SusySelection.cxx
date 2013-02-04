@@ -448,8 +448,7 @@ bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, 
 {
   if( !oppositeSign(leptons) )          return false;
   if( !sameFlavor(leptons) )            return false;
-  //if( !passeq2Jet(jets) )               return false;
-  if( !passge2Jet(jets) )               return false;
+  if( !passeq2Jet(jets) )               return false;
   return true;
 }
 /*--------------------------------------------------------------------------------*/
@@ -457,8 +456,7 @@ bool SusySelection::passSR7(const LeptonVector& leptons, const JetVector& jets, 
 {
   if( !oppositeSign(leptons) )          return false;
   if(  sameFlavor(leptons) )            return false;
-  //if( !passeq2Jet(jets) )               return false;
-  if( !passge2Jet(jets) )               return false;
+  if( !passeq2Jet(jets) )               return false;
   return true;
 }
 /*--------------------------------------------------------------------------------*/
@@ -466,8 +464,7 @@ bool SusySelection::passSR8(const LeptonVector& leptons, const JetVector& jets, 
 {
   if( oppositeSign(leptons) )           return false;
   if( !sameFlavor(leptons) )            return false;
-  //if( !passeq2Jet(jets) )               return false;
-  if( !passge2Jet(jets) )               return false;
+  if( !passeq2Jet(jets) )               return false;
   return true;
 }
 /*--------------------------------------------------------------------------------*/
@@ -475,8 +472,7 @@ bool SusySelection::passSR9(const LeptonVector& leptons, const JetVector& jets, 
 {
   if( oppositeSign(leptons) )           return false;
   if( sameFlavor(leptons) )             return false;
-  //if( !passeq2Jet(jets) )               return false;
-  if( !passge2Jet(jets) )               return false;
+  if( !passeq2Jet(jets) )               return false;
   return true;
 }
 
