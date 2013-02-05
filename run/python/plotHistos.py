@@ -93,10 +93,10 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
     stack.GetXaxis().SetTitle(firstHisto.GetXaxis().GetTitle())
     stack.GetYaxis().SetTitle(firstHisto.GetYaxis().GetTitle())
     hTot = stack.GetHistogram()
-    legOnLeftSide = hTot.GetMaximumBin() < 0.5*hTot.GetNbinsX()
+    legOnLeftSide = hTot.GetMaximumBin() > 0.5*hTot.GetNbinsX()
     if legOnLeftSide :
-        leg.SetX1NDC(lMarg)
-        leg.SetX2NDC(lMarg+legWidth)
+        leg.SetX1(lMarg)
+        leg.SetX2(lMarg+legWidth)
 
     signal = next((h for s,h in histosDict.iteritems() if isSignal(s)), None)
     if signal :
@@ -118,11 +118,10 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
     can.Update()
     for ext in extensions : can.SaveAs(outdir+'/'+hname+'_lin'+'.'+ext)
     stack.SetMaximum(5.*stack.GetMaximum())
-    stack.SetMinimum(0.5)
+    stack.SetMinimum(0.25)
     can.SetLogy()
     for ext in extensions : can.SaveAs(outdir+'/'+hname+'_log'+'.'+ext)
 
 for k,v in histosByType.iteritems() :
     plotHistos(histosDict=dict([(h.sample, h) for h in v]))
-
                
