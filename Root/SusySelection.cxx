@@ -446,33 +446,37 @@ bool SusySelection::passSR4b(const LeptonVector& leptons, const JetVector& jets,
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
-  if( !oppositeSign(leptons) )          return false;
-  if( !sameFlavor(leptons) )            return false;
-  if( !passeq2Jet(jets) )               return false;
+  if( !oppositeSign(leptons) )            return false;
+  if( !sameFlavor(leptons) )              return false;
+  if( !passeq2Jet(jets) )                 return false;
+  if( !passMETRel(met,leptons,jets,50.) ) return false;
   return true;
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passSR7(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
-  if( !oppositeSign(leptons) )          return false;
-  if(  sameFlavor(leptons) )            return false;
-  if( !passeq2Jet(jets) )               return false;
+  if( !oppositeSign(leptons) )            return false;
+  if(  sameFlavor(leptons) )              return false;
+  if( !passeq2Jet(jets) )                 return false;
+  if( !passMETRel(met,leptons,jets,50.) ) return false;
   return true;
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passSR8(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
-  if( oppositeSign(leptons) )           return false;
-  if( !sameFlavor(leptons) )            return false;
-  if( !passeq2Jet(jets) )               return false;
+  if( oppositeSign(leptons) )             return false;
+  if( !sameFlavor(leptons) )              return false;
+  if( !passeq2Jet(jets) )                 return false;
+  if( !passMETRel(met,leptons,jets,50.) ) return false;
   return true;
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passSR9(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
-  if( oppositeSign(leptons) )           return false;
-  if( sameFlavor(leptons) )             return false;
-  if( !passeq2Jet(jets) )               return false;
+  if( oppositeSign(leptons) )             return false;
+  if( sameFlavor(leptons) )               return false;
+  if( !passeq2Jet(jets) )                 return false;
+  if( !passMETRel(met,leptons,jets,50.) ) return false;
   return true;
 }
 
