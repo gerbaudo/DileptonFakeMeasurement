@@ -51,7 +51,7 @@ classifier = HistoNameClassifier()
 for fname, infile in zip(inputFileNames, inputFiles) :
     print '-'*3 + fname + '-'*3
     samplename = guessSampleFromFilename(fname)
-    histoNames = getAllHistoNames(inputFiles[0], onlyTH1=True) # [:10] # get only 10 histos for now
+    histoNames = getAllHistoNames(inputFiles[0], onlyTH1=True) #[:10] # get only 10 histos for now
     histos = [infile.Get(hn) for hn in histoNames]
     for h in histos :
         setHistoType(h, classifier.histoType(h.GetName()))
@@ -73,11 +73,13 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
     can = r.TCanvas('can_'+hname, hname, 800, 600)
     can.cd()
     stack = r.THStack('stack_'+hname,'')
-    trX, trY = can.GetRightMargin(), can.GetTopMargin()
-    legWidth, legHeight = 0.35, 0.35
-    leg = r.TLegend(1.0 - trX - legWidth, 1.0 - trY - legHeight, 1.0 - trX, 1.0 - trY)
+    rMarg, lMarg, tMarg = can.GetRightMargin(), can.GetLeftMargin(), can.GetTopMargin()
+    legWidth, legHeight = 0.325, 0.225
+    leg = r.TLegend(1.0 - rMarg - legWidth, 1.0 - tMarg - legHeight, 1.0 - rMarg, 1.0 - tMarg)
     leg.SetBorderSize(1)
     leg.SetFillColor(0)
+    leg.SetFillStyle(0)
+
     firstHisto = None
     for s in ['diboson', 'ttbar', 'zjets', 'multijets'] :
         if s not in histosDict : continue
@@ -90,6 +92,12 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
     stack.Draw('hist')
     stack.GetXaxis().SetTitle(firstHisto.GetXaxis().GetTitle())
     stack.GetYaxis().SetTitle(firstHisto.GetYaxis().GetTitle())
+    hTot = stack.GetHistogram()
+    legOnLeftSide = hTot.GetMaximumBin() < 0.5*hTot.GetNbinsX()
+    if legOnLeftSide :
+        leg.SetX1NDC(lMarg)
+        leg.SetX2NDC(lMarg+legWidth)
+
     signal = next((h for s,h in histosDict.iteritems() if isSignal(s)), None)
     if signal :
         signal.SetLineColor(r.kRed)
@@ -97,6 +105,7 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
         signal.Scale(signalScale)
         signal.Draw('same')
         leg.AddEntry(signal, signal.sample+" (x%.1f, %.2f)"%(signalScale, signal.Integral()), 'L')
+        if signal.GetMaximum() > stack.GetMaximum() : stack.SetMaximum(1.1*signal.GetMaximum())
     leg.Draw()
     channel, plotRegion = firstHisto.type.ch, firstHisto.type.pr
     def writeLabel(can, label, font='') :
@@ -108,7 +117,8 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
     writeLabel(can, channel+', '+plotRegion, firstHisto.GetTitleFont())
     can.Update()
     for ext in extensions : can.SaveAs(outdir+'/'+hname+'_lin'+'.'+ext)
-    firstHisto.SetMinimum(0.5)
+    stack.SetMaximum(5.*stack.GetMaximum())
+    stack.SetMinimum(0.5)
     can.SetLogy()
     for ext in extensions : can.SaveAs(outdir+'/'+hname+'_log'+'.'+ext)
 
