@@ -158,16 +158,19 @@ class SusyPlotter : public SusySelection
     TH1F* DEFHIST(m_pt);
 
     TH1F* DEFHIST(j0_pt);
-    TH1F* DEFHIST(j0_eta);
+    TH1F* DEFHIST(j1_pt);
 
     // eta
     TH1F* DEFHIST(l0_eta);
     TH1F* DEFHIST(l1_eta);
     TH1F* DEFHIST(e_eta);
     TH1F* DEFHIST(m_eta);
+    TH1F* DEFHIST(j0_eta);
+    TH1F* DEFHIST(j1_eta);
 
     // Mass
     TH1F* DEFHIST(ll_M);
+    TH1F* DEFHIST(jj_M);
     
     // MET
     TH1F* DEFHIST(met);
@@ -240,6 +243,13 @@ class SusyPlotter : public SusySelection
     TH1F* DEFHIST(dPhi_l1_j);
     TH1F* DEFHIST(dPhi_l0_l1);
 
+    TH1F* DEFHIST(dPhi_ll_jj);
+    TH1F* DEFHIST(dPhi_l0_jj);
+    TH1F* DEFHIST(dPhi_l1_jj);
+    TH1F* DEFHIST(dR_l0_l1);
+    TH1F* DEFHIST(dR_ll_jj);
+
+
     TH1F* DEFHIST(dPhi_woSig_llmet_j);
     TH1F* DEFHIST(dPhi_woSig_met_l0);
     TH1F* DEFHIST(dPhi_woSig_met_l1);
@@ -260,6 +270,12 @@ class SusyPlotter : public SusySelection
     TH1F* DEFHIST(ll_M_fine);
     TH1F* DEFHIST(ll_M_finer);
     
+    TH1F* DEFHIST(l0_qeta);
+    TH1F* DEFHIST(l1_qeta);
+    TH1F* DEFHIST(mt_l0_met);
+    TH1F* DEFHIST(mt_l1_met);
+    TH1F* DEFHIST(mt_l_met_min);
+
     // Test
     //TH1F* h_met_test[Ch_N][PR_N];
     //TH1F* h_met_test2[Ch_N][PR_N];

@@ -148,6 +148,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(l0_pt, "l_{0} P_{T}", nptbins, ptmin, ptmax);
 	NEWHIST(j0_pt, "j_{0} P_{T}", nptbins, ptmin, ptmax);
 	NEWHIST(l1_pt, "l_{1} P_{T}", nptbins, ptmin, ptmax);
+	NEWHIST(j1_pt, "j_{1} P_{T}", nptbins, ptmin, ptmax);
 	NEWHIST(e_pt, "Electron P_{T}", nptbins, ptmin, ptmax);
 	NEWHIST(m_pt, "Muon P_{T}", nptbins, ptmin, ptmax);
 	
@@ -155,6 +156,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(l0_eta, "l_{0} #eta", netabins, etamin, etamax);
 	NEWHIST(j0_eta, "j_{0} #eta", netabins, etamin, etamax);
 	NEWHIST(l1_eta, "l_{1} #eta", netabins, etamin, etamax);
+	NEWHIST(j1_eta, "j_{1} #eta", netabins, etamin, etamax);
 	NEWHIST(e_eta, "Electron #eta", netabins, etamin, etamax);
 	NEWHIST(m_eta, "Muon #eta", netabins, etamin, etamax);
 	
@@ -175,6 +177,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(met_j_Mt, "m(met,j)", nmassbins, massmin, massmax);
 	NEWHIST(met_ll_Mt, "m(met,ll)", nmassbins, massmin, massmax);
 	NEWHIST(met_j_ll_Mt, "m(met,j,ll)", nmassbinsj, massminj, massmaxj);
+	NEWHIST(jj_M, "m(jj)", nmassbins, massmin, massmax);
 	
 	NEWHIST(met_l0_Mt, "m(met,l0)", nmassbins, massmin, massmax);
 	NEWHIST(met_l1_Mt, "m(met,l0)", nmassbins, massmin, massmax);
@@ -242,7 +245,22 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(dPhi_woSig_ll_j, "dPhi(ll,j)", ndphibins, dphimin, dphimax);
 	NEWHIST(dPhi_woSig_l0_j, "dPhi(l0,j)", ndphibins, dphimin, dphimax);
 	NEWHIST(dPhi_woSig_l1_j, "dPhi(l1,j)", ndphibins, dphimin, dphimax);
+
 	NEWHIST(dPhi_woSig_l0_l1, "dPhi(l0,l1)", ndphibins, dphimin, dphimax);
+
+	NEWHIST(dPhi_ll_jj, "dPhi(ll,jj)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_l0_jj, "dPhi(l0,jj)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_l1_jj, "dPhi(l1,jj)", ndphibins, dphimin, dphimax);
+
+	NEWHIST(dR_l0_l1, "dR(l,l)", ndrbins,drmin, drmax);
+	NEWHIST(dR_ll_jj, "dR(ll,jj)", ndrbins,drmin, drmax);
+
+	NEWHIST(l0_qeta, "l_{0} sign(q) #eta", netabins, etamin, etamax);
+	NEWHIST(l1_qeta, "l_{1} sign(q) #eta", netabins, etamin, etamax);
+
+	NEWHIST(mt_l0_met, "m_{T}(l_{0}, met)", nmassbins, massmin, massmax);
+	NEWHIST(mt_l1_met, "m_{T}(l_{1}, met)", nmassbins, massmin, massmax);
+	NEWHIST(mt_l_met_min, "m_{T}^{min}(l_{1}, met)", nmassbins, massmin, massmax);
 
 	NEWHIST2(l0_l1_pt, "l0 vs l1 pt", nptbins, ptmin, ptmax);
 
@@ -508,14 +526,10 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
     // Angle plots
     FILL(h_dPhi_llmet_j, fabs(jet->DeltaPhi( *l0 + *l1 + mlv)));
     FILL(h_dR_llmet_j, fabs(jet->DeltaR( *l0 + *l1 + mlv)));
-    FILL(h_dPhi_met_l0, fabs(met->lv().DeltaPhi(*l0)));
-    FILL(h_dPhi_met_l1, fabs(met->lv().DeltaPhi(*l1)));
-    FILL(h_dPhi_met_ll, fabs(met->lv().DeltaPhi(*l0+*l1)));
     FILL(h_dPhi_met_j, fabs(met->lv().DeltaPhi(*jet)));
     FILL(h_dPhi_l0_j, fabs(l0->DeltaPhi(*jet)));
     FILL(h_dPhi_l1_j, fabs(l1->DeltaPhi(*jet)));
     FILL(h_dPhi_ll_j, fabs((*l1+*l0).DeltaPhi(*jet)));
-    FILL(h_dPhi_l0_l1, fabs(l0->DeltaPhi(*l1)));
 
     float mll = (*l0 + *l1).M();
     if(90 < mll && mll < 120)
@@ -532,10 +546,37 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
       FILL(h_dPhi_woSig_ll_j, fabs((*l1+*l0).DeltaPhi(*jet)));
       FILL(h_dPhi_woSig_l0_l1, fabs(l0->DeltaPhi(*l1)));
     }
+  } // end if (nj==1)
 
-    
+  FILL(h_dR_l0_l1, fabs(l0->DeltaR(*l1)));
+  FILL(h_dPhi_l0_l1, fabs(l0->DeltaPhi(*l1)));
+  FILL(h_dPhi_met_l0, fabs(met->lv().DeltaPhi(*l0)));
+  FILL(h_dPhi_met_l1, fabs(met->lv().DeltaPhi(*l1)));
+  FILL(h_dPhi_met_ll, fabs(met->lv().DeltaPhi(*l0+*l1)));
+  FILL(h_l0_qeta, (l0->q > 0. ? +1.0 : -1.0) * l0->Eta());
+  FILL(h_l1_qeta, (l1->q > 0. ? +1.0 : -1.0) * l1->Eta());
 
-  }
+  float mt_l0 = Mt(*l0, mlv);
+  float mt_l1 = Mt(*l1, mlv);
+  FILL(h_mt_l0_met, mt_l0);
+  FILL(h_mt_l1_met, mt_l1);
+  FILL(h_mt_l_met_min, (mt_l0 < mt_l1 ? mt_l0 : mt_l1));
+
+  if(nJ==2){
+    const Jet &j0 = *jets.at(0);
+    const Jet &j1 = *jets.at(1);
+    const TLorentzVector jj = j0 + j1;
+    FILL(h_j0_pt, j0.Pt());
+    FILL(h_j1_pt, j1.Pt());
+    FILL(h_j0_eta, j0.Eta());
+    FILL(h_j1_eta, j1.Eta());
+    FILL(h_jj_M, jj.M());
+    FILL(h_dR_ll_jj, fabs(ll.DeltaR(jj)));
+    FILL(h_dPhi_ll_jj, fabs(ll.DeltaPhi(jj)));
+    FILL(h_dPhi_l0_jj, fabs(l0->DeltaPhi(jj)));
+    FILL(h_dPhi_l1_jj, fabs(l1->DeltaPhi(jj)));
+  } // end if(nJ==2)
+
   //h_met_test[ch][PR]->Fill(met->Et,weight);
   //h_met_test2[ch][PR]->Fill(met->Et,weight);
   
