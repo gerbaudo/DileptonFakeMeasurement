@@ -337,17 +337,6 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   if( passSR2(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR2);
   if( passSR3(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR3);
   if( passSR4(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR4);
-  if( passSR4b(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR4b);
-  //if( passSR5(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR5);
-  //if( passZwindow(m_signalLeptons) )                  fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_Zwindow);
-  if( passVR1(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_VR1);
-  if( passVR2(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_VR2);
-  if( passVR3(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_VR3);
-  if( passVR4(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_VR4);
-  if( passBR1(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_BR1);
-  if( passBR2(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_BR2);
-  if( passBR3(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_BR3);
-  if( passBR4(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_BR4);
 
   if( passSR6(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR6);
   if( passSR7(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR7);
