@@ -1284,6 +1284,26 @@ void SusySelection::dumpEventCounters()
       cout << "pass SR5 Sum Pt > 100:       " << n_pass_SR5SUMpt[i][w]     << endl;
       cout << "pass SR5 dPhi(Met,ll) > 2.5: " << n_pass_SR5dPhiMETLL[i][w] << endl;
       cout << "pass SR5 dPhi(Met,l1) > 0.5: " << n_pass_SR5dPhiMETL1[i][w] << endl;
+      cout << "-----------------------------------------------------"      << endl;
+      cout << "pass SR6 sign:                  " << n_pass_SR6sign[i][w]   << endl;
+      cout << "pass SR6 flavor:                " << n_pass_SR6flav[i][w]   << endl;
+      cout << "pass SR6 ==2j:                  " << n_pass_SR6eq2j[i][w]   << endl;
+      cout << "pass SR6 METRel > 50:           " << n_pass_SR6metr[i][w]   << endl;
+      cout << "-----------------------------------------------------"      << endl;
+      cout << "pass SR7 sign:                  " << n_pass_SR7sign[i][w]   << endl;
+      cout << "pass SR7 flavor:                " << n_pass_SR7flav[i][w]   << endl;
+      cout << "pass SR7 ==2j:                  " << n_pass_SR7eq2j[i][w]   << endl;
+      cout << "pass SR7 METRel > 50:           " << n_pass_SR7metr[i][w]   << endl;
+      cout << "-----------------------------------------------------"      << endl;
+      cout << "pass SR8 sign:                  " << n_pass_SR8sign[i][w]   << endl;
+      cout << "pass SR8 flavor:                " << n_pass_SR8flav[i][w]   << endl;
+      cout << "pass SR8 ==2j:                  " << n_pass_SR8eq2j[i][w]   << endl;
+      cout << "pass SR8 METRel > 50:           " << n_pass_SR8metr[i][w]   << endl;
+      cout << "-----------------------------------------------------"      << endl;
+      cout << "pass SR9 sign:                  " << n_pass_SR9sign[i][w]   << endl;
+      cout << "pass SR9 flavor:                " << n_pass_SR9flav[i][w]   << endl;
+      cout << "pass SR9 ==2j:                  " << n_pass_SR9eq2j[i][w]   << endl;
+      cout << "pass SR9 METRel > 50:           " << n_pass_SR9metr[i][w]   << endl;
 
     }// end loop over event type
   }// end loop over weight type
