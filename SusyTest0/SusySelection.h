@@ -263,6 +263,27 @@ class SusySelection : public SusyNtAna
     float                n_pass_SR4MET[ET_N][WT_N];
     float                n_pass_SR4MT2[ET_N][WT_N];
 
+    // SR6 counts
+    float                n_pass_SR6sign[ET_N][WT_N];
+    float                n_pass_SR6flav[ET_N][WT_N];
+    float                n_pass_SR6eq2j[ET_N][WT_N];
+    float                n_pass_SR6metr[ET_N][WT_N];
+    // SR7 counts
+    float                n_pass_SR7sign[ET_N][WT_N];
+    float                n_pass_SR7flav[ET_N][WT_N];
+    float                n_pass_SR7eq2j[ET_N][WT_N];
+    float                n_pass_SR7metr[ET_N][WT_N];
+    // SR8 counts
+    float                n_pass_SR8sign[ET_N][WT_N];
+    float                n_pass_SR8flav[ET_N][WT_N];
+    float                n_pass_SR8eq2j[ET_N][WT_N];
+    float                n_pass_SR8metr[ET_N][WT_N];
+    // SR9 counts
+    float                n_pass_SR9sign[ET_N][WT_N];
+    float                n_pass_SR9flav[ET_N][WT_N];
+    float                n_pass_SR9eq2j[ET_N][WT_N];
+    float                n_pass_SR9metr[ET_N][WT_N];
+
 
 
 };

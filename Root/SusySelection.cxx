@@ -78,6 +78,11 @@ SusySelection::SusySelection() :
       n_pass_SR4Zv[i][w]    = 0;
       n_pass_SR4MET[i][w]   = 0;
       n_pass_SR4MT2[i][w]   = 0;
+
+      n_pass_SR6sign[i][w] = n_pass_SR6flav[i][w] = n_pass_SR6eq2j[i][w] = n_pass_SR6metr[i][w] = 0;
+      n_pass_SR7sign[i][w] = n_pass_SR7flav[i][w] = n_pass_SR7eq2j[i][w] = n_pass_SR7metr[i][w] = 0;
+      n_pass_SR8sign[i][w] = n_pass_SR8flav[i][w] = n_pass_SR8eq2j[i][w] = n_pass_SR8metr[i][w] = 0;
+      n_pass_SR9sign[i][w] = n_pass_SR9flav[i][w] = n_pass_SR9eq2j[i][w] = n_pass_SR9metr[i][w] = 0;
     }
   }// end loop over weight types
 
@@ -446,37 +451,57 @@ bool SusySelection::passSR4b(const LeptonVector& leptons, const JetVector& jets,
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
+  bool lepSf(true), bSf(true);
   if( !oppositeSign(leptons) )            return false;
+  if( count ) increment(n_pass_SR6sign[m_ET],lepSf, bSf);
   if( !sameFlavor(leptons) )              return false;
+  if( count ) increment(n_pass_SR6flav[m_ET],lepSf, bSf);
   if( !passeq2Jet(jets) )                 return false;
+  if( count ) increment(n_pass_SR6eq2j[m_ET],lepSf, bSf);
   if( !passMETRel(met,leptons,jets,50.) ) return false;
+  if( count ) increment(n_pass_SR6metr[m_ET],lepSf, bSf);
   return true;
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passSR7(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
+  bool lepSf(true), bSf(true);
   if( !oppositeSign(leptons) )            return false;
+  if( count ) increment(n_pass_SR7sign[m_ET],lepSf, bSf);
   if(  sameFlavor(leptons) )              return false;
+  if( count ) increment(n_pass_SR7flav[m_ET],lepSf, bSf);
   if( !passeq2Jet(jets) )                 return false;
+  if( count ) increment(n_pass_SR7eq2j[m_ET],lepSf, bSf);
   if( !passMETRel(met,leptons,jets,50.) ) return false;
+  if( count ) increment(n_pass_SR7metr[m_ET],lepSf, bSf);
   return true;
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passSR8(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
+  bool lepSf(true), bSf(true);
   if( oppositeSign(leptons) )             return false;
+  if( count ) increment(n_pass_SR8sign[m_ET],lepSf, bSf);
   if( !sameFlavor(leptons) )              return false;
+  if( count ) increment(n_pass_SR8flav[m_ET],lepSf, bSf);
   if( !passeq2Jet(jets) )                 return false;
+  if( count ) increment(n_pass_SR8eq2j[m_ET],lepSf, bSf);
   if( !passMETRel(met,leptons,jets,50.) ) return false;
+  if( count ) increment(n_pass_SR8metr[m_ET],lepSf, bSf);
   return true;
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passSR9(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
+  bool lepSf(true), bSf(true);
   if( oppositeSign(leptons) )             return false;
+  if( count ) increment(n_pass_SR9sign[m_ET],lepSf, bSf);
   if( sameFlavor(leptons) )               return false;
+  if( count ) increment(n_pass_SR9flav[m_ET],lepSf, bSf);
   if( !passeq2Jet(jets) )                 return false;
+  if( count ) increment(n_pass_SR9eq2j[m_ET],lepSf, bSf);
   if( !passMETRel(met,leptons,jets,50.) ) return false;
+  if( count ) increment(n_pass_SR9metr[m_ET],lepSf, bSf);
   return true;
 }
 
