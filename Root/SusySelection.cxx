@@ -1314,7 +1314,7 @@ void SusySelection::dumpEventCounters()
       cout << "-----------------------------------------------------"      << endl;
       cout << "pass SR9 sign:                  " << n_pass_SR9sign[i][w]   << endl;
       cout << "pass SR9 flavor:                " << n_pass_SR9flav[i][w]   << endl;
-      cout << "pass SR8 >=2j:                  " << n_pass_SR8ge2j[i][w]   << endl;
+      cout << "pass SR9 >=2j:                  " << n_pass_SR9ge2j[i][w]   << endl;
       cout << "pass SR9 ==2j:                  " << n_pass_SR9eq2j[i][w]   << endl;
       cout << "pass SR9 METRel > 50:           " << n_pass_SR9metr[i][w]   << endl;
 
