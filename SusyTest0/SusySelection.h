@@ -110,6 +110,8 @@ class SusySelection : public SusyNtAna
     bool passbJetVeto(const JetVector& jets);
     bool passge2Jet(const JetVector& jets);
     bool passeq2Jet(const JetVector& jets);
+    bool passge2JetWoutFwVeto(const JetVector& jets);
+    bool passeq2JetWoutFwVeto(const JetVector& jets);
     bool passdPhi(TLorentzVector v0, TLorentzVector v1, float cut);
     bool passMT2(const LeptonVector& leptons, const Met* met, float cut);
 
@@ -267,25 +269,33 @@ class SusySelection : public SusyNtAna
     float                n_pass_SR6sign[ET_N][WT_N];
     float                n_pass_SR6flav[ET_N][WT_N];
     float                n_pass_SR6eq2j[ET_N][WT_N];
+    float                n_pass_SR6eq2jNfv[ET_N][WT_N];
     float                n_pass_SR6ge2j[ET_N][WT_N];
+    float                n_pass_SR6ge2jNfv[ET_N][WT_N];
     float                n_pass_SR6metr[ET_N][WT_N];
     // SR7 counts
     float                n_pass_SR7sign[ET_N][WT_N];
     float                n_pass_SR7flav[ET_N][WT_N];
     float                n_pass_SR7eq2j[ET_N][WT_N];
+    float                n_pass_SR7eq2jNfv[ET_N][WT_N];
     float                n_pass_SR7ge2j[ET_N][WT_N];
+    float                n_pass_SR7ge2jNfv[ET_N][WT_N];
     float                n_pass_SR7metr[ET_N][WT_N];
     // SR8 counts
     float                n_pass_SR8sign[ET_N][WT_N];
     float                n_pass_SR8flav[ET_N][WT_N];
     float                n_pass_SR8eq2j[ET_N][WT_N];
+    float                n_pass_SR8eq2jNfv[ET_N][WT_N];
     float                n_pass_SR8ge2j[ET_N][WT_N];
+    float                n_pass_SR8ge2jNfv[ET_N][WT_N];
     float                n_pass_SR8metr[ET_N][WT_N];
     // SR9 counts
     float                n_pass_SR9sign[ET_N][WT_N];
     float                n_pass_SR9flav[ET_N][WT_N];
     float                n_pass_SR9eq2j[ET_N][WT_N];
+    float                n_pass_SR9eq2jNfv[ET_N][WT_N];
     float                n_pass_SR9ge2j[ET_N][WT_N];
+    float                n_pass_SR9ge2jNfv[ET_N][WT_N];
     float                n_pass_SR9metr[ET_N][WT_N];
 
 
