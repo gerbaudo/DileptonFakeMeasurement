@@ -261,9 +261,9 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(mt_l0_met, "m_{T}(l_{0}, met)", nmassbins, massmin, massmax);
 	NEWHIST(mt_l1_met, "m_{T}(l_{1}, met)", nmassbins, massmin, massmax);
 	NEWHIST(mt_l_met_min, "m_{T}^{min}(l_{1}, met)", nmassbins, massmin, massmax);
+	NEWHIST(mct_top_tag, "m_{CT} top tag", 2, -0.5, +1.5);
 
 	NEWHIST2(l0_l1_pt, "l0 vs l1 pt", nptbins, ptmin, ptmax);
-
 
 	// Fine
 	NEWHIST(ll_M_fine, "m(ll)", nmassbinsfine, massminfine, massmaxfine);
@@ -550,6 +550,8 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   FILL(h_mt_l0_met, mt_l0);
   FILL(h_mt_l1_met, mt_l1);
   FILL(h_mt_l_met_min, (mt_l0 < mt_l1 ? mt_l0 : mt_l1));
+  bool topTag = passTopTag(leps, jets, met);
+  FILL(h_mct_top_tag, float(topTag));
 
   if(nJ==2){
     const Jet &j0 = *jets.at(0);

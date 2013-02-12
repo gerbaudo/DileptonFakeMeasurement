@@ -275,6 +275,7 @@ class SusyPlotter : public SusySelection
     TH1F* DEFHIST(mt_l0_met);
     TH1F* DEFHIST(mt_l1_met);
     TH1F* DEFHIST(mt_l_met_min);
+    TH1F* DEFHIST(mct_top_tag);
 
     // Test
     //TH1F* h_met_test[Ch_N][PR_N];
