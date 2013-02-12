@@ -259,7 +259,12 @@ bool SusySelection::selectAnaEvent(const LeptonVector& leptons, const LeptonVect
   if( !passTrigger(baseLeps) ) return false;
 
   if(m_ET == ET_mm){
-    float trigW = m_trigObj->getTriggerWeight(m_baseLeptons,nt.evt()->isMC,NtSys_NOM);
+    float trigW = m_trigObj->getTriggerWeight(m_baseLeptons,
+					      nt.evt()->isMC,
+					      m_met->Et,
+					      m_signalJets2Lep.size(),
+					      nt.evt()->nVtx,
+					      NtSys_NOM);
     if(trigW < 0){
       cout<<"Run: "<<nt.evt()->run<<" Event: "<<nt.evt()->event<<" Weight: "<<trigW<<endl;
 
@@ -509,8 +514,8 @@ bool SusySelection::passVRTL(const LeptonVector& leptons, const JetVector& jets,
   // Make sure leading is tight, subleading is not tight
   uint nVtx = nt.evt()->nVtx;
   bool isMC = nt.evt()->isMC;
-  if( !(isSignalLepton(leptons[0],nVtx,isMC) &&
-	!isSignalLepton(leptons[1],nVtx,isMC)) )   return false;
+  if( !(isSignalLepton(leptons[0], m_baseElectrons, m_baseMuons, nVtx, isMC) &&
+	!isSignalLepton(leptons[1], m_baseElectrons, m_baseMuons, nVtx, isMC)) )   return false;
 
   // Only SS
   if( !sameSign(leptons) )               return false;
@@ -790,8 +795,8 @@ bool SusySelection::passTrigger(const LeptonVector& leptons)
   if(leptons.size() != 2)
     return false;
 
-  bool passEvtTrig   = m_trigObj->passDilEvtTrig(leptons, nt.evt());
-  bool passTrigMatch = m_trigObj->passDilTrigMatch(leptons, nt.evt());
+  bool passEvtTrig   = m_trigObj->passDilEvtTrig(leptons, m_met->Et, nt.evt());
+  bool passTrigMatch = m_trigObj->passDilTrigMatch(leptons, m_met->Et, nt.evt());
 
   if( passEvtTrig ){
     increment(n_pass_evtTrig[m_ET],true);
@@ -971,7 +976,7 @@ bool SusySelection::isRealLepton(const Lepton* lep)
 {
 
   // Updated way of handling real and fake leptons using LeptonTruthTools
-  return (lep->truthMatchType == RecoTruthMatch::PROMPT);
+  return (lep->truthType == RecoTruthMatch::PROMPT);
 
   // Code taken from Steve.  There seems to be an issue with Sherpa samples, so
   // need to handle those separately. Also just for clarification:
@@ -1019,7 +1024,7 @@ bool SusySelection::isFakeLepton(const Lepton* lep)
 bool SusySelection::isConvLepton(const Lepton* lep)
 {
   //return lep->mcOrigin == 5;
-  bool isConv       = lep->truthMatchType == RecoTruthMatch::CONV;
+  bool isConv       = lep->truthType == RecoTruthMatch::CONV;
   //bool isConv       = lep->mcOrigin == 5;
   bool isChargeFlip =  lep->isEle() ? ((Electron*) lep)->isChargeFlip : false;
   return isConv && !isChargeFlip;
@@ -1029,7 +1034,7 @@ bool SusySelection::isConvLepton(const Lepton* lep)
 bool SusySelection::isHFLepton(const Lepton* lep)
 {
 
-  return (lep->truthMatchType == RecoTruthMatch::HF);
+  return (lep->truthType == RecoTruthMatch::HF);
 
   //uint origin = lep->mcOrigin;
   //return origin == 25 ||origin == 26 || origin == 27 || origin == 28 ||
@@ -1042,7 +1047,7 @@ bool SusySelection::isHFLepton(const Lepton* lep)
 bool SusySelection::isLFLepton(const Lepton* lep)
 {
 
-  return (lep->truthMatchType == RecoTruthMatch::LF);
+  return (lep->truthType == RecoTruthMatch::LF);
 
   // Steve's way:
   //bool isChargeFlip = lep->isEle() ? ((Electron*) lep)->isChargeFlip : false;
@@ -1060,8 +1065,8 @@ bool SusySelection::isTrueDilepton(const LeptonVector &leptons)
 {
 
   //if( leptons.size() !=2 ) return false;
-  //  bool l0real = leptons[0]->truthMatchType == RecoTruthMatch::PROMPT;
-  //bool l1real = leptons[1]->truthMatchType == RecoTruthMatch::PROMPT;
+  //  bool l0real = leptons[0]->truthType == RecoTruthMatch::PROMPT;
+  //bool l1real = leptons[1]->truthType == RecoTruthMatch::PROMPT;
   //return l0real && l1real;
 
 
@@ -1111,7 +1116,12 @@ float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag,
   // Trigger
   float trigW = 1;
   if(!m_useMCTrig && includeTrig){
-    trigW  = nl == 2 ? m_trigObj->getTriggerWeight(leptons, nt.evt()->isMC, NtSys_NOM) : 1.;
+    trigW  = nl == 2 ? m_trigObj->getTriggerWeight(leptons,
+						   nt.evt()->isMC,
+						   m_met->Et,
+						   m_signalJets2Lep.size(),
+						   nt.evt()->nVtx,
+						   NtSys_NOM) : 1.;
     if(trigW != trigW){ cout<<"\tTrigger weight: "<<trigW<<endl; trigW =0; }// deal with NaN
     if(trigW < 0) trigW = 0;
   }
