@@ -24,9 +24,9 @@ tag  = options.tag
 assert mode in validModes,"Invalid mode %s (should be one of %s)" % (mode, str(validModes))
 
 # Directory where files are
-basedir = {'data' : '/gdata/atlas/ucintprod/SusyNt/data12_n0115/', # data
-           'mc12' : '/gdata/atlas/ucintprod/SusyNt/mc12_n0115/',   # mc backgrounds
-           'susy' : '/gdata/atlas/ucintprod/SusyNt/susy_n0115/',   # mc signals
+basedir = {'data' : '/gdata/atlas/ucintprod/SusyNt/data12_'+tag+'/', # data
+           'mc12' : '/gdata/atlas/ucintprod/SusyNt/mc12_'+tag+'/',   # mc backgrounds
+           'susy' : '/gdata/atlas/ucintprod/SusyNt/susy_'+tag+'/',   # mc signals
            }
 tags = [tag]
 wantedDsets = datasets.wantedDsets
@@ -38,6 +38,7 @@ dlist = []
 dir = basedir[mode]
 for tag in tags :
     print tag
+    print "ls " + dir + " | grep " + tag + " | grep user"
     ls = subprocess.Popen(["ls " + dir + " | grep " + tag + " | grep user"],shell=True,stdout=subprocess.PIPE)
     dlist  = dlist + [l for l in [ll.lstrip().rstrip()
                                   for ll in (ls.stdout.read()).split("\n")]
