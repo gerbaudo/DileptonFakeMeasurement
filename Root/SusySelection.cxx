@@ -460,6 +460,35 @@ bool SusySelection::passSR4b(const LeptonVector& leptons, const JetVector& jets,
 
 }
 /*--------------------------------------------------------------------------------*/
+bool SusySelection::passSR6base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
+{
+  if( !oppositeSign(leptons) )            return false;
+  if( !sameFlavor(leptons) )              return false;
+  return true;
+}
+/*--------------------------------------------------------------------------------*/
+bool SusySelection::passSR7base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
+{
+  if( !oppositeSign(leptons) )            return false;
+  if(  sameFlavor(leptons) )              return false;
+  return true;
+}
+/*--------------------------------------------------------------------------------*/
+bool SusySelection::passSR8base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
+{
+  if( oppositeSign(leptons) )             return false;
+  if( !sameFlavor(leptons) )              return false;
+  return true;
+}
+/*--------------------------------------------------------------------------------*/
+bool SusySelection::passSR9base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
+{
+  if( oppositeSign(leptons) )             return false;
+  if( sameFlavor(leptons) )               return false;
+  return true;
+}
+
+/*--------------------------------------------------------------------------------*/
 bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
   bool lepSf(true), bSf(true);
@@ -527,7 +556,6 @@ bool SusySelection::passSR9(const LeptonVector& leptons, const JetVector& jets, 
   if( count ) increment(n_pass_SR9metr[m_ET],lepSf, bSf);
   return true;
 }
-
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passVR1(const LeptonVector& leptons, const JetVector& jets, const Met *met)
 {

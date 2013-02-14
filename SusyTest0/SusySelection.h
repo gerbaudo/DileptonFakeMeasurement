@@ -68,6 +68,10 @@ class SusySelection : public SusyNtAna
     bool passSR4(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     bool passSR4b(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     bool passSR5(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
+    bool passSR6base(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
+    bool passSR7base(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
+    bool passSR8base(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
+    bool passSR9base(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     bool passSR6(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     bool passSR7(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     bool passSR8(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
