@@ -102,3 +102,29 @@ class particlePrinter(object) :
             if not (iGen in parents) : outString+="   non-mo"
             print outString
         print
+
+def findInterestingHiggsWithChiAndPar(pdg, parents, children) :
+    #iHiggs = next((i for i,p in enumerate(pdg) if p==higgsPdg), None)
+    higgsPdg = 25
+    iHiggs = [i for i,p in enumerate(pdg) if p==higgsPdg]
+    higgsChildren = [[pdg[i] if i<len(pdg) else 0 for i in hhc]
+                     for hhc in [children[i]
+                                 for i in iHiggs] ]
+    higgsParents = [[pdg[i] if i<len(pdg) else 0 for i in hhp]
+                    for hhp in [parents[i]
+                                for i in iHiggs] ]
+    # there can be several intermediate higgs
+    boringIhiggs = [ih for i, ih in enumerate(iHiggs)
+                    if len(higgsChildren[i])<2 or higgsPdg in higgsChildren[i]]
+    interestingIhiggs = [i for i in iHiggs if i not in boringIhiggs]
+    higgsChildren = [hc for hc,ih in zip(higgsChildren, iHiggs) if ih in interestingIhiggs]
+    higgsParents = [hp for hp,ih in zip(higgsParents, iHiggs) if ih in interestingIhiggs]
+    return interestingIhiggs, higgsChildren, higgsParents
+def guessHdecayLabel(higgsChildren) :
+    ch = higgsChildren
+    if   any(p in ch for p in [-24, +24])  : return 'WW'
+    elif any(p in ch for p in [23])        : return 'ZZ'
+    elif any(p in ch for p in [-15, +15])  : return 'tautau'
+    elif any(p in ch for p in [-5, +5])    : return 'bbbar'
+    elif any(p in ch for p in [-13, +13])  : return 'mumu'
+    else                                   : return 'unknown'
