@@ -1,3 +1,4 @@
 AutoDict*
-*png
-*eps
+*.png
+*.eps
+*.pkl
