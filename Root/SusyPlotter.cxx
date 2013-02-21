@@ -327,25 +327,40 @@ Bool_t SusyPlotter::Process(Long64_t entry)
 
   float weight = getEvtWeight(m_signalLeptons);
 
+  const LeptonVector& l = m_signalLeptons;
+  const JetVector& j = m_signalJets2Lep;
+  const Met* m = m_met;
   
-  fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_NONE);
+  fillHistos(l, j, m, weight, PR_NONE);
 
-  if(sameSign(m_signalLeptons))                           fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SSInc);
-  else                                                    fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_OSInc);
+  if(sameSign(m_signalLeptons)) fillHistos(l, j, m, weight, PR_SSInc);
+  else                          fillHistos(l, j, m, weight, PR_OSInc);
 
-  //--DG--if( passSR1(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR1);
-  //--DG--if( passSR2(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR2);
-  //--DG--if( passSR3(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR3);
-  //--DG--if( passSR4(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR4);
+  //--DG--if( passSR1(l, j, m) ) fillHistos(l, j, m, weight, PR_SR1);
+  //--DG--if( passSR2(l, j, m) ) fillHistos(l, j, m, weight, PR_SR2);
+  //--DG--if( passSR3(l, j, m) ) fillHistos(l, j, m, weight, PR_SR3);
+  //--DG--if( passSR4(l, j, m) ) fillHistos(l, j, m, weight, PR_SR4);
 
-  if( passSR6base(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR6base);
-  if( passSR7base(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR7base);
-  if( passSR8base(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR8base);
-  if( passSR9base(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR9base);
-  if( passSR6(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR6);
-  if( passSR7(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR7);
-  if( passSR8(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR8);
-  if( passSR9(m_signalLeptons, m_signalJets2Lep, m_met) ) fillHistos(m_signalLeptons, m_signalJets2Lep, m_met, weight, PR_SR9);
+  if( passSR6base   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR6base);
+  if( passSR7base   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR7base);
+  if( passSR8base   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR8base);
+  if( passSR9base   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR9base);
+  if( passSR6ge2j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR6ge2j);
+  if( passSR7ge2j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR7ge2j);
+  if( passSR8ge2j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR8ge2j);
+  if( passSR9ge2j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR9ge2j);
+  if( passSR6eq2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR6eq2jNfv);
+  if( passSR7eq2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR7eq2jNfv);
+  if( passSR8eq2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR8eq2jNfv);
+  if( passSR9eq2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR9eq2jNfv);
+  if( passSR6ge2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR6ge2jNfv);
+  if( passSR7ge2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR7ge2jNfv);
+  if( passSR8ge2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR8ge2jNfv);
+  if( passSR9ge2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR9ge2jNfv);
+  if( passSR6       (l, j, m) ) fillHistos(l, j, m, weight, PR_SR6);
+  if( passSR7       (l, j, m) ) fillHistos(l, j, m, weight, PR_SR7);
+  if( passSR8       (l, j, m) ) fillHistos(l, j, m, weight, PR_SR8);
+  if( passSR9       (l, j, m) ) fillHistos(l, j, m, weight, PR_SR9);
 
   return kTRUE;
 }
