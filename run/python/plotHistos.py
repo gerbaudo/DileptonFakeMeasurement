@@ -15,9 +15,9 @@ from SampleUtils import colors, guessSampleFromFilename
 
 #########
 # default parameters [begin]
-defaultTag      = 'Jan21_n0115'
+defaultTag      = 'Feb21_n0115'
 defaultInputDir = './anaplots/merged'
-defaultSigFile  = './anaplots/wA_noslep_WH_2Lep_3_Jan21_n0115.AnaHists.root'
+defaultSigFile  = './anaplots/wA_noslep_WH_2Lep_3_Feb21_n0115.AnaHists.root'
 defaultSigScale = 10.0
 # default parameters [end]
 #########
