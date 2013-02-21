@@ -76,6 +76,19 @@ class SusySelection : public SusyNtAna
     bool passSR7(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     bool passSR8(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     bool passSR9(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
+    // std SR have exactly 2jet and fj veto, the ones below are loosened (but no counters)
+    bool passSR6ge2j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR6base(l,j,m) && passge2Jet(j); }
+    bool passSR7ge2j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR7base(l,j,m) && passge2Jet(j); }
+    bool passSR8ge2j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR8base(l,j,m) && passge2Jet(j); }
+    bool passSR9ge2j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR9base(l,j,m) && passge2Jet(j); }
+    bool passSR6eq2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR6base(l,j,m) && passeq2JetWoutFwVeto(j); }
+    bool passSR7eq2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR7base(l,j,m) && passeq2JetWoutFwVeto(j); }
+    bool passSR8eq2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR8base(l,j,m) && passeq2JetWoutFwVeto(j); }
+    bool passSR9eq2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR9base(l,j,m) && passeq2JetWoutFwVeto(j); }
+    bool passSR6ge2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR6base(l,j,m) && passge2JetWoutFwVeto(j); }
+    bool passSR7ge2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR7base(l,j,m) && passge2JetWoutFwVeto(j); }
+    bool passSR8ge2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR8base(l,j,m) && passge2JetWoutFwVeto(j); }
+    bool passSR9ge2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR9base(l,j,m) && passge2JetWoutFwVeto(j); }
 
     // Some validation regions
     // These are under development!!!
@@ -112,6 +125,7 @@ class SusySelection : public SusyNtAna
     bool passMETRel(const Met *met, const LeptonVector& leptons,
 		    const JetVector& jets, float maxMet = 100);
     bool passbJetVeto(const JetVector& jets);
+    bool passge1Jet(const JetVector& jets);
     bool passge2Jet(const JetVector& jets);
     bool passeq2Jet(const JetVector& jets);
     bool passge2JetWoutFwVeto(const JetVector& jets);
@@ -274,6 +288,7 @@ class SusySelection : public SusyNtAna
     float                n_pass_SR6flav[ET_N][WT_N];
     float                n_pass_SR6eq2j[ET_N][WT_N];
     float                n_pass_SR6eq2jNfv[ET_N][WT_N];
+    float                n_pass_SR6ge1j[ET_N][WT_N];
     float                n_pass_SR6ge2j[ET_N][WT_N];
     float                n_pass_SR6ge2jNfv[ET_N][WT_N];
     float                n_pass_SR6metr[ET_N][WT_N];
@@ -282,6 +297,7 @@ class SusySelection : public SusyNtAna
     float                n_pass_SR7flav[ET_N][WT_N];
     float                n_pass_SR7eq2j[ET_N][WT_N];
     float                n_pass_SR7eq2jNfv[ET_N][WT_N];
+    float                n_pass_SR7ge1j[ET_N][WT_N];
     float                n_pass_SR7ge2j[ET_N][WT_N];
     float                n_pass_SR7ge2jNfv[ET_N][WT_N];
     float                n_pass_SR7metr[ET_N][WT_N];
@@ -290,6 +306,7 @@ class SusySelection : public SusyNtAna
     float                n_pass_SR8flav[ET_N][WT_N];
     float                n_pass_SR8eq2j[ET_N][WT_N];
     float                n_pass_SR8eq2jNfv[ET_N][WT_N];
+    float                n_pass_SR8ge1j[ET_N][WT_N];
     float                n_pass_SR8ge2j[ET_N][WT_N];
     float                n_pass_SR8ge2jNfv[ET_N][WT_N];
     float                n_pass_SR8metr[ET_N][WT_N];
@@ -298,6 +315,7 @@ class SusySelection : public SusyNtAna
     float                n_pass_SR9flav[ET_N][WT_N];
     float                n_pass_SR9eq2j[ET_N][WT_N];
     float                n_pass_SR9eq2jNfv[ET_N][WT_N];
+    float                n_pass_SR9ge1j[ET_N][WT_N];
     float                n_pass_SR9ge2j[ET_N][WT_N];
     float                n_pass_SR9ge2jNfv[ET_N][WT_N];
     float                n_pass_SR9metr[ET_N][WT_N];
