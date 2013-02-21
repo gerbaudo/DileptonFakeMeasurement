@@ -2,7 +2,7 @@
 
 
 append="_AE_Dec17_n0115"
-append="_Jan15_n0115"
+append="_Feb21_n0115"
 
 
 # only one option supported: --1fb to use the 1/fb weights
@@ -14,11 +14,11 @@ echo "Appending " ${append} " Run option: " ${option}
 DATA=(
 
     # Data
-    #periodA_Egamma periodA_Muons
-    #periodB_Egamma periodB_Muons
-    #periodC_Egamma periodC_Muons
-    #periodD_Egamma periodD_Muons
-    #periodE_Egamma periodE_Muons
+    periodA_Egamma periodA_Muons
+    periodB_Egamma periodB_Muons
+    periodC_Egamma periodC_Muons
+    periodD_Egamma periodD_Muons
+    periodE_Egamma periodE_Muons
 
 )
 
@@ -94,19 +94,45 @@ MC=(
     # HF
     #bbTomu20 ccTomu20
 
+    # signal
+    wA_noslep_WH_2Lep_2 
+    wA_noslep_WH_2Lep_3 
+    wA_noslep_WH_2Lep_5 
+    wA_noslep_WH_2Lep_8 
+    wA_noslep_WH_2Lep_9 
+    wA_noslep_WH_2Lep_11
+    wA_noslep_WH_2Lep_13
+    wA_noslep_WH_2Lep_14
+    wA_noslep_WH_2Lep_16
+    wA_noslep_WH_2Lep_17
+    wA_noslep_WH_2Lep_18
+    wA_noslep_WH_2Lep_22
+    wA_noslep_WH_2Lep_26
+    wA_noslep_WH_2Lep_29
+    wA_noslep_WH_2Lep_30
+    wA_noslep_WH_2Lep_31
+    wA_noslep_WH_2Lep_36
+    wA_noslep_WH_2Lep_38
+    wA_noslep_WH_2Lep_47
+    wA_noslep_WH_2Lep_51
+    wA_noslep_WH_2Lep_53
+    wA_noslep_WH_2Lep_56
+    wA_noslep_WH_2Lep_59
+    wA_noslep_WH_2Lep_61
 )
 
 for d in ${DATA[@]}; do
 
-    qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d} -o batchlog batchSPSub.sh
+    echo "qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d} -o batchlog batchSPSub.sh"
     #nohup SusyPlot -f filelist/${d}.txt -s ${d}${append} ${option} > batchLog/${d}${append}.susyplot.log &
 
 done
 
 for d in ${MC[@]}; do
 
-    qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d}_${append} -o batchlog batchSPSub.sh
-    #qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d}_${append} -o batchlog batchCFSub.sh
+    #qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d}_${append} -o batchlog batchSPSub.sh
+    echo "qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d}_${append} -o batchlog batchSPSub.sh"
+    # CF qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d}_${append} -o batchlog batchCFSub.sh
 
 done
 
