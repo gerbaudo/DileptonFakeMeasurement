@@ -52,6 +52,7 @@ for fname, infile in zip(inputFileNames, inputFiles) :
     print '-'*3 + fname + '-'*3
     samplename = guessSampleFromFilename(fname)
     histoNames = getAllHistoNames(inputFiles[0], onlyTH1=True) #[:10] # get only 10 histos for now
+    histoNames = [h for h in histoNames if any([h.startswith(p) for p in ['sr6', 'sr7', 'sr8', 'sr9']])]
     histos = [infile.Get(hn) for hn in histoNames]
     for h in histos :
         setHistoType(h, classifier.histoType(h.GetName()))
@@ -61,7 +62,7 @@ for fname, infile in zip(inputFileNames, inputFiles) :
 def isSignal(sampleName) : return 'WH_' in sampleName
 
 def plotHistos(histosDict={'ttbar':None, 'zjets':None},
-               extensions=['eps', 'png'], outdir='./plots',
+                outdir='./plots', extensions=['png',], # 'eps'],
                verbose=False) :
     allHistosEmpty = all([h.GetEntries()==0 for h in histosDict.values()])
     if allHistosEmpty : return
