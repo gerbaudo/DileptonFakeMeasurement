@@ -13,6 +13,22 @@ def containerDirectory():
     "Full path of the directory where this file is located"
     path = os.path.realpath(__file__)
     return os.path.dirname(path)
+def rainbowColors(minVal, maxVal, curVal):
+    """Given a range between minVal and maxVal, return the color of
+    the visible spectrum proportional to the curVal"""
+    # make sure we're daling with numbers
+    minVal = float(minVal)
+    maxVal = float(maxVal)
+    curVal = float(curVal)
+    if minVal >= maxVal:
+        print "rainbowColors: %s <=%s  (invalid minVal >= maxVal)" % (minVal,maxVal)
+        return r.kBlack
+    if curVal<minVal or curVal>maxVal:
+        print "rainbowColors: value %s out of range [%s,%s]" % (curVal, minVal, maxVal)
+        return r.kBlack
+    colLo = 51
+    colHi = 101
+    return colLo + int((colHi-colLo)*(curVal-minVal)/(maxVal-minVal)+0.5)
 
 r.gROOT.SetBatch(1)
 r.gStyle.SetOptStat('nemri')
@@ -48,14 +64,23 @@ ptColors = [r.kRed, r.kBlue, r.kOrange, r.kMagenta, r.kAzure, ]
 ptLineStyles = int(len(ptColors)/2+1)*[1, 2]
 ptLineWidths = int(len(ptColors)/2+1)*[2, 3]
 hsNjetAbovePt  = [r.TH1F('hNjetAbove%d'%p,  'N jets with p_{T}>%d; N_{jets}; jets/event'%p, 11, -0.5, 10.5) for p in ptThresholds]
-hsMassJetPair  = [r.TH1F('hMassJetPair_%d_%d_%dj'%(i,j,nJet),  'dijet mass (%d, %d), %d jets'%(i,j, nJet), 25, 0.0, 250.)
-                  for nJet in [2,3] # consider only the cases with 2 or 3 jets
-                  for i,j in itertools.combinations(range(nJet), 2)]
+possibleJetPairs = [(nJet, i,j)
+                    for nJet in [2,3] # consider only the cases with 2 or 3 jets
+                    for i,j in itertools.combinations(range(nJet), 2)]
+hsMassJetPair  = [r.TH1F('hMassJetPair_%d_%d_%dj'%(i,j,nJet),
+                         'dijet mass (%d, %d), %d jets'%(i,j, nJet),
+                         25, 0.0, 250.)
+                  for nJet, i,j in possibleJetPairs]
 hDecays = ['WW', 'ZZ', 'tautau', 'bbar', 'mumu', 'unknown']
 hsNjetAbovePtPerHdecay = dict(zip(hDecays,
-                                  [[r.TH1F('hNjetAbove%d_%s'%(p,d), 'N jets with p_{T}>%d, H #to %s; N_{jets}; jets/event'%(p,d), 11, -0.5, 10.5)
+                                  [[r.TH1F('hNjetAbove%d_%s'%(p,d),
+                                           'N jets with p_{T}>%d, H #to %s; N_{jets}; jets/event'%(p,d),
+                                           11, -0.5, 10.5)
                                     for p in ptThresholds]
                                    for d in hDecays]))
+hsMassJetPairPerHdecay  = dict([(d,
+                                 [h.Clone(h.GetName()+'_'+d) for h in hsMassJetPair])
+                                for d in hDecays])
 
 print "looping over %d entries"%nEntries
 findHiggs = gen.findInterestingHiggsWithChiAndPar
@@ -96,7 +121,9 @@ for iEntry in xrange(nEntries) :
     nJetsForPairs = 3 if nTruthJets>2 else (2 if nTruthJets==2 else 0)
     for i, (iJ,jJ) in enumerate(itertools.combinations(range(nJetsForPairs), 2)) :
         m_ij = (truthJets[iJ] + truthJets[jJ]).M()
-        hsMassJetPair[(0 if nJetsForPairs==2 else 1) + i].Fill(m_ij)        
+        pairIndex = (0 if nJetsForPairs==2 else 1) + i
+        hsMassJetPair[pairIndex].Fill(m_ij)
+        hsMassJetPairPerHdecay[hDecay][pairIndex].Fill(m_ij)
         
 for h in [hTruthNjets, hTruthJetEta, hTruthJetPt, hTruthJet0Pt, hTruthJet1Pt, hTruthJet0Eta, hTruthJet1Eta] :
     print "%s(%d) , mean %.1f, RMS %.1f"%(h.GetName(), h.GetEntries(), h.GetMean(), h.GetRMS())
@@ -145,6 +172,36 @@ def drawPtThresHistos(histos, label,
     can.SaveAs(can.GetName()+'.png')
 for label, histos in [('any', hsNjetAbovePt)] + [(l,h) for l,h in hsNjetAbovePtPerHdecay.iteritems()]:
     drawPtThresHistos(histos, label)
+
+
+def drawPerHdecayHistos(histos={}, label='', colors={}) :
+    can = r.TCanvas('c_'+label+'perHdecay', '')
+    can.cd()
+    padMaster = histos[histos.keys()[0]].Clone('padMaster'+label)
+    padMaster.Clear()
+    padMaster.SetMaximum(1.1*max([h.GetMaximum() for h in histos.values()]))
+    padMaster.SetMinimum(1.0*min([h.GetMinimum() for h in histos.values()]))
+    padMaster.SetStats(0)
+    padMaster.Draw()
+    leg = r.TLegend(0.65, 0.65, 0.9, 0.9, label)
+    leg.SetFillColor(0)
+    leg.SetFillStyle(0)
+    for d in sorted(histos.keys()) :
+        h = histos[d]
+        c = colors[d]
+        if not h.GetEntries() : continue
+        h.SetLineColor(c)
+        h.SetLineWidth(2*h.GetLineWidth())
+        h.Draw('same')
+        leg.AddEntry(h,"%s <m>=%.2f"%(d, h.GetMean()), 'l')
+    leg.Draw()
+    can.SaveAs(can.GetName()+'.png')
+
+hdColors = dict([(d,rainbowColors(0, len(hDecays), i)) for i,d in enumerate(hDecays)])
+for i, (nJet, iJ,jJ) in enumerate(possibleJetPairs) :
+    label = "%dj_m_%d_%d"%(nJet, iJ,jJ)
+    histos = dict([(d,hsMassJetPairPerHdecay[d][i]) for d in hDecays])
+    drawPerHdecayHistos(histos, label, hdColors)
 
 # list of truth-jet branches, just for ref
 #
