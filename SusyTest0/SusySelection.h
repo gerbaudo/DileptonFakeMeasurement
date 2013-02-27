@@ -81,6 +81,10 @@ class SusySelection : public SusyNtAna
     bool passSR7ge2j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR7base(l,j,m) && passge2Jet(j); }
     bool passSR8ge2j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR8base(l,j,m) && passge2Jet(j); }
     bool passSR9ge2j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR9base(l,j,m) && passge2Jet(j); }
+    bool passSR6ge3j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR6base(l,j,m) && passge3Jet(j); }
+    bool passSR7ge3j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR7base(l,j,m) && passge3Jet(j); }
+    bool passSR8ge3j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR8base(l,j,m) && passge3Jet(j); }
+    bool passSR9ge3j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR9base(l,j,m) && passge3Jet(j); }
     bool passSR6eq2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR6base(l,j,m) && passeq2JetWoutFwVeto(j); }
     bool passSR7eq2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR7base(l,j,m) && passeq2JetWoutFwVeto(j); }
     bool passSR8eq2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR8base(l,j,m) && passeq2JetWoutFwVeto(j); }
@@ -127,6 +131,7 @@ class SusySelection : public SusyNtAna
     bool passbJetVeto(const JetVector& jets);
     bool passge1Jet(const JetVector& jets);
     bool passge2Jet(const JetVector& jets);
+    bool passge3Jet(const JetVector& jets);
     bool passeq2Jet(const JetVector& jets);
     bool passge2JetWoutFwVeto(const JetVector& jets);
     bool passeq2JetWoutFwVeto(const JetVector& jets);

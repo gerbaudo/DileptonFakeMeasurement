@@ -754,9 +754,9 @@ bool SusySelection::passTOPCR(const LeptonVector& leptons, const JetVector& jets
   if( metrel < 40 )   return false;
 
   // Jet selection
-  int N_L25 = numberOfCLJets(jets);
+  int N_L20 = numberOfCLJets(jets);
   int N_B20 = numberOfCBJets(jets);
-  if( !(N_L25+N_B20 >=2 && N_B20 >=1) ) return false;
+  if( !(N_L20+N_B20 >=2 && N_B20 >=1) ) return false;
 
   return true;
 
@@ -932,11 +932,11 @@ bool SusySelection::passJetVeto(const JetVector& jets)
 {
 
   // Require no light, b, or forward jets
-  int N_L25 = numberOfCLJets(jets);
+  int N_L20 = numberOfCLJets(jets);
   int N_B20 = numberOfCBJets(jets);
   int N_F30 = numberOfFJets(jets);
 
-  return (N_L25 + N_B20 + N_F30 == 0);
+  return (N_L20 + N_B20 + N_F30 == 0);
 
   /*
   bool failjet = false;
@@ -976,20 +976,20 @@ bool SusySelection::passbJetVeto(const JetVector& jets)
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passge1Jet(const JetVector& jets)
 {
-  int N_L25 = numberOfCLJets(jets);
+  int N_L20 = numberOfCLJets(jets);
   int N_B20 = numberOfCBJets(jets);
   int N_F30 = numberOfFJets(jets);
-  return (N_L25 >=1 && N_B20 + N_F30 == 0);
+  return (N_L20 >=1 && N_B20 + N_F30 == 0);
 }
 bool SusySelection::passge2Jet(const JetVector& jets)
 {
 
   // N_L25 >=2 N_B20 = N_F30 = 0
-  int N_L25 = numberOfCLJets(jets);
+  int N_L20 = numberOfCLJets(jets);
   int N_B20 = numberOfCBJets(jets);
   int N_F30 = numberOfFJets(jets);
 
-  return (N_L25 >=2 && N_B20 + N_F30 == 0);
+  return (N_L20 >=2 && N_B20 + N_F30 == 0);
 
   /*
   // Count jets above 30 GeV
@@ -1001,14 +1001,21 @@ bool SusySelection::passge2Jet(const JetVector& jets)
   return (njet >= 2);
   */
 }
+bool SusySelection::passge3Jet(const JetVector& jets)
+{
+  int N_L20 = numberOfCLJets(jets);
+  int N_B20 = numberOfCBJets(jets);
+  int N_F30 = numberOfFJets(jets);
+  return (N_L20 >=3 && N_B20 + N_F30 == 0);
+}
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passeq2Jet(const JetVector& jets)
 {
   // N_L25 >=2 N_B20 = N_F30 = 0
-  int N_L25 = numberOfCLJets(jets);
+  int N_L20 = numberOfCLJets(jets);
   int N_B20 = numberOfCBJets(jets);
   int N_F30 = numberOfFJets(jets);
-  return (N_L25 == 2 && N_B20 + N_F30 == 0);
+  return (N_L20 == 2 && N_B20 + N_F30 == 0);
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passge2JetWoutFwVeto(const JetVector& jets)
