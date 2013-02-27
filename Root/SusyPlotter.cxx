@@ -321,7 +321,8 @@ Bool_t SusyPlotter::Process(Long64_t entry)
 
   // Check Analysis level cuts
   if( !selectAnaEvent(m_signalLeptons, m_baseLeptons) )    return kTRUE;
-  if( nt.evt()->isMC && !isTrueDilepton(m_signalLeptons) ) return kTRUE;
+  // DG 26Feb : this needs to be understood.
+  //--DG-- if( nt.evt()->isMC && !isTrueDilepton(m_signalLeptons) ) return kTRUE;
   //if( (m_signalLeptons[0]->mcOrigin == 9 ||
   //m_signalLeptons[1]->mcOrigin == 9 ) ) return kTRUE;
 
@@ -341,6 +342,8 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   //--DG--if( passSR3(l, j, m) ) fillHistos(l, j, m, weight, PR_SR3);
   //--DG--if( passSR4(l, j, m) ) fillHistos(l, j, m, weight, PR_SR4);
 
+  bool count(true);
+
   if( passSR6base   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR6base);
   if( passSR7base   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR7base);
   if( passSR8base   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR8base);
@@ -357,10 +360,10 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   if( passSR7ge2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR7ge2jNfv);
   if( passSR8ge2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR8ge2jNfv);
   if( passSR9ge2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR9ge2jNfv);
-  if( passSR6       (l, j, m) ) fillHistos(l, j, m, weight, PR_SR6);
-  if( passSR7       (l, j, m) ) fillHistos(l, j, m, weight, PR_SR7);
-  if( passSR8       (l, j, m) ) fillHistos(l, j, m, weight, PR_SR8);
-  if( passSR9       (l, j, m) ) fillHistos(l, j, m, weight, PR_SR9);
+  if( passSR6       (l, j, m, count) ) fillHistos(l, j, m, weight, PR_SR6);
+  if( passSR7       (l, j, m, count) ) fillHistos(l, j, m, weight, PR_SR7);
+  if( passSR8       (l, j, m, count) ) fillHistos(l, j, m, weight, PR_SR8);
+  if( passSR9       (l, j, m, count) ) fillHistos(l, j, m, weight, PR_SR9);
 
   return kTRUE;
 }
@@ -372,7 +375,7 @@ void SusyPlotter::Terminate()
 {
   SusySelection::Terminate();
   if(m_dbg) cout << "SusyPlotter::Terminate" << endl;
-  
+  dumpEventCounters();
   // Save the output
   m_histFile->Write();
   m_histFile->Close();
