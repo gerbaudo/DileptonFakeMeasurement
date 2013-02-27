@@ -352,6 +352,10 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   if( passSR7ge2j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR7ge2j);
   if( passSR8ge2j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR8ge2j);
   if( passSR9ge2j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR9ge2j);
+  if( passSR6ge3j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR6ge3j);
+  if( passSR7ge3j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR7ge3j);
+  if( passSR8ge3j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR8ge3j);
+  if( passSR9ge3j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR9ge3j);
   if( passSR6eq2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR6eq2jNfv);
   if( passSR7eq2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR7eq2jNfv);
   if( passSR8eq2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR8eq2jNfv);
