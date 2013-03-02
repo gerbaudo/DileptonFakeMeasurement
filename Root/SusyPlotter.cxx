@@ -1,4 +1,6 @@
 #include <iomanip>
+#include <math.h>   // cos
+#include <numeric>  // std::accumulate
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyTest0/SusyPlotter.h"
 //--DG-- #include "SusyMatrixMethod/DiLeptonMatrixMethod.h"
@@ -673,11 +675,12 @@ bool SusyPlotter::passZwindow(const LeptonVector& leps)
   return true;
 
 }
-
+//----------------------------------------------------------
 float SusyPlotter::transverseMass(const TLorentzVector &lep, const TLorentzVector &met)
 {
   return std::sqrt(2.0 * lep.Pt() * met.Et() *(1-cos(lep.DeltaPhi(met))) );
 }
+//----------------------------------------------------------
 // re-written based on HWWlvlvCode::calculate_METBasedVariables
 float SusyPlotter::mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &met)
 {
@@ -691,4 +694,21 @@ float SusyPlotter::mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1, 
   float x2 = ( den2 != 0.0  ? (num/den2) : 0.0);
   // not guaranteed that this configuration is kinematically possible
   return (x1*x2 > 0.0 ? (l0+l1).M() / std::sqrt(x1*x2) : -1.0);
+}
+//----------------------------------------------------------
+float SusyPlotter::sumCosDeltaPhi(const TLorentzVector &l0, const TLorentzVector &l1,
+				  const TLorentzVector &met)
+{
+  return cos(l0.Phi() - met.Phi()) + cos(l1.Phi() - met.Phi());
+}
+//----------------------------------------------------------
+float addJetPt(float totPt, const Susy::Jet *j) { return totPt + j->Pt(); }
+float SusyPlotter::sumEtEtMiss(const TLorentzVector &el, const TLorentzVector &mu,
+			       const JetVector &jets, const TLorentzVector &met)
+{
+  return
+    el.Et()
+    + mu.Pt()
+    + met.Et()
+    + std::accumulate(jets.begin(), jets.end(), float(0.0), addJetPt);
 }

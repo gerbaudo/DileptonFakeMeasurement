@@ -174,6 +174,12 @@ class SusyPlotter : public SusySelection
     static float transverseMass(const TLorentzVector &lep, const TLorentzVector &met);
     //! compute tau-tau mass assuming that v's are collinear with leptons and responsible for all MET
     static float mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &met);
+    //! \f$ \Sum cos \Delta\phi \f$ used in CERN-PH-EP-2011-097
+    static float sumCosDeltaPhi(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &met);
+    //! \f$ \Sum E_{T} + E_{T}^{miss} \f$ used in CERN-PH-EP-2011-097
+    static float sumEtEtMiss(const TLorentzVector &el, const TLorentzVector &mu,
+			     const JetVector &jets, const TLorentzVector &met);
+
 
     ClassDef(SusyPlotter, 1);
 
