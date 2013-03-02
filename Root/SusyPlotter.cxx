@@ -173,21 +173,21 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(llj_M_mll_90_120, "m(llj)", nmassbins, massmin, massmax);
 	NEWHIST(llj_M_mll_90_120_pos, "m(llj)", nmassbins, massmin, massmax);
 	NEWHIST(llj_M_mll_90_120_neg, "m(llj)", nmassbins, massmin, massmax);
-	NEWHIST(met_j_M, "m(met,j)", nmassbins, massmin, massmax);
-	NEWHIST(met_ll_M, "m(met,ll)", nmassbins, massmin, massmax);
-	NEWHIST(met_j_ll_M, "m(met,j,ll)", nmassbins, massmin, massmax);
-	NEWHIST(met_j_Mt, "m(met,j)", nmassbins, massmin, massmax);
-	NEWHIST(met_ll_Mt, "m(met,ll)", nmassbins, massmin, massmax);
-	NEWHIST(met_j_ll_Mt, "m(met,j,ll)", nmassbinsj, massminj, massmaxj);
+	NEWHIST(met_j_M,     "m(met,j)",        nmassbins, massmin, massmax);
+	NEWHIST(met_ll_M,    "m(met,ll)",       nmassbins, massmin, massmax);
+	NEWHIST(met_j_ll_M,  "m(met,j,ll)",     nmassbins, massmin, massmax);
+	NEWHIST(met_j_Mt,    "m_{T}(met,j)",    nmassbins, massmin, massmax);
+	NEWHIST(met_ll_Mt,   "m_{T}(met,ll)",   nmassbins, massmin, massmax);
+	NEWHIST(met_j_ll_Mt, "m_{T}(met,j,ll)", nmassbinsj, massminj, massmaxj);
 	NEWHIST(jj_M, "m(jj)", nmassbins, massmin, massmax);
 	
-	NEWHIST(met_l0_Mt, "m(met,l0)", nmassbins, massmin, massmax);
-	NEWHIST(met_l1_Mt, "m(met,l0)", nmassbins, massmin, massmax);
-	NEWHIST(met_ll_Mt_noj, "m(met,ll)", nmassbins, massmin, massmax);
-	NEWHIST(met_ll_Mt_onej, "m(met,ll)", nmassbins, massmin, massmax);
-	NEWHIST(met_ll_Mt_twoj, "m(met,ll)", nmassbins, massmin, massmax);
-	NEWHIST(met_ll_Mt_ge3j, "m(met,ll)", nmassbins, massmin, massmax);
-	NEWHIST(met_ll_Mt_oneOrtwoj, "m(met,ll)", nmassbins, massmin, massmax);
+	NEWHIST(met_l0_Mt,           "m_{T}(met,l0)", nmassbins, massmin, massmax);
+	NEWHIST(met_l1_Mt,           "m_{T}(met,l0)", nmassbins, massmin, massmax);
+	NEWHIST(met_ll_Mt_noj,       "m_{T}(met,ll)", nmassbins, massmin, massmax);
+	NEWHIST(met_ll_Mt_onej,      "m_{T}(met,ll)", nmassbins, massmin, massmax);
+	NEWHIST(met_ll_Mt_twoj,      "m_{T}(met,ll)", nmassbins, massmin, massmax);
+	NEWHIST(met_ll_Mt_ge3j,      "m_{T}(met,ll)", nmassbins, massmin, massmax);
+	NEWHIST(met_ll_Mt_oneOrtwoj, "m_{T}(met,ll)", nmassbins, massmin, massmax);
 
 	// Met plots
 	NEWHIST(met, "#slash{E}_{T}", nptbins, ptmin, ptmax);
@@ -228,25 +228,25 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(sumQ, "SumQ", 5, -2.5, 2.5);
 
 	NEWHIST(dPhi_llmet_j, "dPhi(llmet,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dR_llmet_j, "dR(llmet,j)", ndrbins,drmin, drmax);
+	NEWHIST(dR_llmet_j,   "dR(llmet,j)", ndrbins,drmin, drmax);
 
 	NEWHIST(dPhi_met_l0, "dPhi(met,l0)", ndphibins, dphimin, dphimax);
 	NEWHIST(dPhi_met_l1, "dPhi(met,l1)", ndphibins, dphimin, dphimax);
 	NEWHIST(dPhi_met_ll, "dPhi(met,ll)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_met_j, "dPhi(met,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_ll_j, "dPhi(ll,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_l0_j, "dPhi(l0,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_l1_j, "dPhi(l1,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_l0_l1, "dPhi(l0,l1)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_met_j,  "dPhi(met,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_ll_j,   "dPhi(ll,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_l0_j,   "dPhi(l0,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_l1_j,   "dPhi(l1,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_l0_l1,  "dPhi(l0,l1)", ndphibins, dphimin, dphimax);
 
 	NEWHIST(dPhi_woSig_llmet_j, "dPhi(llmet,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_woSig_met_l0, "dPhi(met,l0)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_woSig_met_l1, "dPhi(met,l1)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_woSig_met_ll, "dPhi(met,ll)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_woSig_met_j, "dPhi(met,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_woSig_ll_j, "dPhi(ll,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_woSig_l0_j, "dPhi(l0,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_woSig_l1_j, "dPhi(l1,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_woSig_met_l0,  "dPhi(met,l0)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_woSig_met_l1,  "dPhi(met,l1)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_woSig_met_ll,  "dPhi(met,ll)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_woSig_met_j,   "dPhi(met,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_woSig_ll_j,    "dPhi(ll,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_woSig_l0_j,    "dPhi(l0,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_woSig_l1_j,    "dPhi(l1,j)", ndphibins, dphimin, dphimax);
 
 	NEWHIST(dPhi_woSig_l0_l1, "dPhi(l0,l1)", ndphibins, dphimin, dphimax);
 
@@ -257,13 +257,13 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(dR_l0_l1, "dR(l,l)", ndrbins,drmin, drmax);
 	NEWHIST(dR_ll_jj, "dR(ll,jj)", ndrbins,drmin, drmax);
 
-	NEWHIST(l0_qeta, "l_{0} sign(q) #eta", netabins, etamin, etamax);
-	NEWHIST(l1_qeta, "l_{1} sign(q) #eta", netabins, etamin, etamax);
+	NEWHIST(l0_qeta, "l_{0} sign(q) #eta", 2*netabins, -etamax, etamax);
+	NEWHIST(l1_qeta, "l_{1} sign(q) #eta", 2*netabins, -etamax, etamax);
 
-	NEWHIST(mt_l0_met, "m_{T}(l_{0}, met)", nmassbins, massmin, massmax);
-	NEWHIST(mt_l1_met, "m_{T}(l_{1}, met)", nmassbins, massmin, massmax);
+	NEWHIST(mt_l0_met,    "m_{T}(l_{0}, met)", nmassbins, massmin, massmax);
+	NEWHIST(mt_l1_met,    "m_{T}(l_{1}, met)", nmassbins, massmin, massmax);
 	NEWHIST(mt_l_met_min, "m_{T}^{min}(l_{1}, met)", nmassbins, massmin, massmax);
-	NEWHIST(mct_top_tag, "m_{CT} top tag", 2, -0.5, +1.5);
+	NEWHIST(mct_top_tag,  "m_{CT} top tag", 2, -0.5, +1.5);
 
 	NEWHIST2(l0_l1_pt, "l0 vs l1 pt", nptbins, ptmin, ptmax);
 
