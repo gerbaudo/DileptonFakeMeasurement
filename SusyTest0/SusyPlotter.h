@@ -172,6 +172,8 @@ class SusyPlotter : public SusySelection
     void setSysts();
  public:
     static float transverseMass(const TLorentzVector &lep, const TLorentzVector &met);
+    //! compute tau-tau mass assuming that v's are collinear with leptons and responsible for all MET
+    static float mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &met);
 
     ClassDef(SusyPlotter, 1);
 

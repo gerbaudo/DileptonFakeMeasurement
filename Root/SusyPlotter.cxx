@@ -505,6 +505,7 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   const TLorentzVector mlv = met->lv();
   const TLorentzVector ll  = *l0 + *l1;
   float mt_met_ll = SusyPlotter::transverseMass(ll, mlv);
+  float mZTauTau = SusyPlotter::mZTauTau(*l0, *l1, mlv);
 
   FILL(h_met_ll_M, (*l0 + *l1 + mlv).M());
   FILL(h_met_ll_Mt, mt_met_ll);
@@ -676,4 +677,18 @@ bool SusyPlotter::passZwindow(const LeptonVector& leps)
 float SusyPlotter::transverseMass(const TLorentzVector &lep, const TLorentzVector &met)
 {
   return std::sqrt(2.0 * lep.Pt() * met.Et() *(1-cos(lep.DeltaPhi(met))) );
+}
+// re-written based on HWWlvlvCode::calculate_METBasedVariables
+float SusyPlotter::mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &met)
+{
+  float px0(l0.Px()), py0(l0.Py());
+  float px1(l1.Px()), py1(l1.Py());
+  float pxm(met.Px()), pym(met.Py());
+  float num( px0*py1 - py0*px1 );
+  float den1( py1*pxm - px1*pym + px0*py1 - py0*px1 );
+  float den2( px0*pym - py0*pxm + px0*py1 - py0*px1 );
+  float x1 = ( den1 != 0.0  ? (num/den1) : 0.0);
+  float x2 = ( den2 != 0.0  ? (num/den2) : 0.0);
+  // not guaranteed that this configuration is kinematically possible
+  return (x1*x2 > 0.0 ? (l0+l1).M() / std::sqrt(x1*x2) : -1.0);
 }
