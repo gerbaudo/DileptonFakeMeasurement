@@ -170,6 +170,8 @@ class SusyPlotter : public SusySelection
     // get list of systematics to consider
     // override in SusyMatrixMethod
     void setSysts();
+ public:
+    static float transverseMass(const TLorentzVector &lep, const TLorentzVector &met);
 
     ClassDef(SusyPlotter, 1);
 

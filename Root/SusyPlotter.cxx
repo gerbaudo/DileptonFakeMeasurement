@@ -504,7 +504,7 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   
   const TLorentzVector mlv = met->lv();
   const TLorentzVector ll  = *l0 + *l1;
-  float mt_met_ll = sqrt(2*ll.Pt()*mlv.Et()*(1-cos(ll.DeltaPhi(mlv))));
+  float mt_met_ll = SusyPlotter::transverseMass(ll, mlv);
 
   FILL(h_met_ll_M, (*l0 + *l1 + mlv).M());
   FILL(h_met_ll_Mt, mt_met_ll);
@@ -671,4 +671,9 @@ bool SusyPlotter::passZwindow(const LeptonVector& leps)
   if( passZVeto(leps) ) return false;
   return true;
 
+}
+
+float SusyPlotter::transverseMass(const TLorentzVector &lep, const TLorentzVector &met)
+{
+  return std::sqrt(2.0 * lep.Pt() * met.Et() *(1-cos(lep.DeltaPhi(met))) );
 }
