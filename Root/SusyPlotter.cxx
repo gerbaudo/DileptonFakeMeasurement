@@ -281,9 +281,6 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	// Fine
 	NEWHIST(ll_M_fine, "m(ll)", nmassbinsfine, massminfine, massmaxfine);
 	NEWHIST(ll_M_finer, "m(ll)", nmassbinsfiner, massminfiner, massmaxfiner);
-	// test histogram
-	//NEWHIST(met_test, "test", nptbins, ptmin, ptmax);
-	//NEWHIST(met_test2, "test2", nptbins, ptmin, ptmax);
 
         #undef NEWHIST
         #undef NEWHIST2
@@ -321,23 +318,10 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   // select signal objects
   selectObjects();
 
-  // Tight Loose Check
-  //if(m_baseLeptons.size() == 2 && passTrigger(m_baseLeptons)
-  //&& (!nt.evt()->isMC || isTrueDilepton(m_baseLeptons))){ // basic
-
-  ////VRTL
-  //float weight = getEvtWeight(m_baseLeptons);
-  //if( passVRTL(m_baseLeptons, m_signalJets2Lep, m_met) )
-  //fillHistos(m_baseLeptons, m_signalJets2Lep, m_met, weight, PR_VRTL);
-
-  //}
-
   // Check Analysis level cuts
   if( !selectAnaEvent(m_signalLeptons, m_baseLeptons) )    return kTRUE;
   // DG 26Feb : this needs to be understood.
   //--DG-- if( nt.evt()->isMC && !isTrueDilepton(m_signalLeptons) ) return kTRUE;
-  //if( (m_signalLeptons[0]->mcOrigin == 9 ||
-  //m_signalLeptons[1]->mcOrigin == 9 ) ) return kTRUE;
 
   float weight = getEvtWeight(m_signalLeptons);
 
@@ -347,40 +331,10 @@ Bool_t SusyPlotter::Process(Long64_t entry)
 
   fillHistos(l, j, m, weight, PR_NONE);
 
-  if(sameSign(m_signalLeptons)) fillHistos(l, j, m, weight, PR_SSInc);
-  else                          fillHistos(l, j, m, weight, PR_OSInc);
-
-  //--DG--if( passSR1(l, j, m) ) fillHistos(l, j, m, weight, PR_SR1);
-  //--DG--if( passSR2(l, j, m) ) fillHistos(l, j, m, weight, PR_SR2);
-  //--DG--if( passSR3(l, j, m) ) fillHistos(l, j, m, weight, PR_SR3);
-  //--DG--if( passSR4(l, j, m) ) fillHistos(l, j, m, weight, PR_SR4);
-
   bool count(true);
 
-  if( passSR6base   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR6base);
   if( passSR7base   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR7base);
-  if( passSR8base   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR8base);
-  if( passSR9base   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR9base);
-  if( passSR6ge2j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR6ge2j);
-  if( passSR7ge2j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR7ge2j);
-  if( passSR8ge2j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR8ge2j);
-  if( passSR9ge2j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR9ge2j);
-  if( passSR6ge3j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR6ge3j);
-  if( passSR7ge3j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR7ge3j);
-  if( passSR8ge3j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR8ge3j);
-  if( passSR9ge3j   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR9ge3j);
-  if( passSR6eq2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR6eq2jNfv);
-  if( passSR7eq2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR7eq2jNfv);
-  if( passSR8eq2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR8eq2jNfv);
-  if( passSR9eq2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR9eq2jNfv);
-  if( passSR6ge2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR6ge2jNfv);
-  if( passSR7ge2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR7ge2jNfv);
-  if( passSR8ge2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR8ge2jNfv);
-  if( passSR9ge2jNfv(l, j, m) ) fillHistos(l, j, m, weight, PR_SR9ge2jNfv);
-  if( passSR6       (l, j, m, count) ) fillHistos(l, j, m, weight, PR_SR6);
   if( passSR7       (l, j, m, count) ) fillHistos(l, j, m, weight, PR_SR7);
-  if( passSR8       (l, j, m, count) ) fillHistos(l, j, m, weight, PR_SR8);
-  if( passSR9       (l, j, m, count) ) fillHistos(l, j, m, weight, PR_SR9);
 
   return kTRUE;
 }
