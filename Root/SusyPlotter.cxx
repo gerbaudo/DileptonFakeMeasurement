@@ -3,6 +3,7 @@
 #include <numeric>  // std::accumulate
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyTest0/SusyPlotter.h"
+#include "SusyTest0/DileptonAnalyticalSolver.h"
 //--DG-- #include "SusyMatrixMethod/DiLeptonMatrixMethod.h"
 
 using namespace std;
@@ -614,9 +615,24 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
     FILL(h_dPhi_l0_jj, fabs(l0->DeltaPhi(jj)));
     FILL(h_dPhi_l1_jj, fabs(l1->DeltaPhi(jj)));
     FILL(h_tot_pt, (ll+jj+mlv).Pt());
-    FILL(h_sumJ0J1_mv1tag, j0.mv1 + j1.mv1);
-
   } // end if(nJ==2)
+
+  bool oppositeCharge((l0->q * l1->q) < 0.);
+  if(nJ>1) {
+    const Jet &j0 = *jets.at(0);
+    const Jet &j1 = *jets.at(1);
+    FILL(h_sumJ0J1_mv1tag, j0.mv1 + j1.mv1);
+    if(oppositeCharge) {
+      const TLorentzVector &lPos = (l0->q > 0. ? *l0 : *l1);
+      const TLorentzVector &lNeg = (l1->q < 0. ? *l1 : *l0);
+      int numNeutrinoSol = 0;
+      numNeutrinoSol += SusyPlotter::numberOfNeutrinoSolutions(lPos, lNeg, j0, j1, mlv);
+      numNeutrinoSol += SusyPlotter::numberOfNeutrinoSolutions(lPos, lNeg, j1, j0, mlv);
+      // DG Mar13: should also we consider the combinations with the third jet?
+      FILL(h_numNeutrinoSol, numNeutrinoSol);
+    } // end if(oppositeCharge)
+  } // end(nJ>1)
+
 
   //h_met_test[ch][PR]->Fill(met->Et,weight);
   //h_met_test2[ch][PR]->Fill(met->Et,weight);
@@ -732,4 +748,25 @@ float SusyPlotter::sumEtEtMiss(const TLorentzVector &el, const TLorentzVector &m
     + mu.Pt()
     + met.Et()
     + std::accumulate(jets.begin(), jets.end(), float(0.0), addJetPt);
+}
+
+int SusyPlotter::numberOfNeutrinoSolutions(const TLorentzVector &lPos, const TLorentzVector &lNeg,
+					   const Jet &jet0, const Jet &jet1,
+					   const TLorentzVector &met)
+{
+    double mWp=80.41, mWm=80.41;
+    double mnu=0.0,   mnub=0.0;
+    double mt=172.9,  mtb=172.9;
+    double ETmiss[2] = {met.Px(), met.Py()};
+    double b[4]  = {jet0.E(), jet0.Px(), jet0.Py(), jet0.Pz()};
+    double bb[4] = {jet1.E(), jet1.Px(), jet1.Py(), jet1.Pz()};
+    double lp[4] = {lPos.E(), lPos.Px(), lPos.Py(), lPos.Pz()};
+    double lm[4] = {lNeg.E(), lNeg.Px(), lNeg.Py(), lNeg.Pz()};
+    std::vector<double> pnux, pnuy, pnuz, pnubx, pnuby, pnubz, cd_diff;
+    int cubic_single_root_cmplx;
+    llsolver::DileptonAnalyticalSolver slv;
+    slv.solve(ETmiss, b, bb, lp, lm, mWp, mWm, mt, mtb, mnu, mnub,
+	      &pnux, &pnuy, &pnuz, &pnubx, &pnuby, &pnubz,
+	      &cd_diff, cubic_single_root_cmplx);
+    return pnubx.size();
 }

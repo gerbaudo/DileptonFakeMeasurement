@@ -179,6 +179,15 @@ class SusyPlotter : public SusySelection
     //! \f$ \Sum E_{T} + E_{T}^{miss} \f$ used in CERN-PH-EP-2011-097
     static float sumEtEtMiss(const TLorentzVector &el, const TLorentzVector &mu,
 			     const JetVector &jets, const TLorentzVector &met);
+    //! compute the number of kinematically allowed neutrino solutions
+    /*! This code is based on hep-ph/0603011. The number of possible
+      solutions ranges from 0 to 4. However, you should consider
+      calling the function twice (swapping the two jets), unless you
+      can tell which one is the b and which one is the bbar.
+     */
+    static int numberOfNeutrinoSolutions(const TLorentzVector &lPos, const TLorentzVector &lNeg,
+					 const Jet &jet0, const Jet &jet1,
+					 const TLorentzVector &met);
 
 
     ClassDef(SusyPlotter, 1);
@@ -333,6 +342,7 @@ class SusyPlotter : public SusySelection
     TH1F* DEFHIST(mt_l_met_min);
     TH1F* DEFHIST(mct_top_tag);
     TH1F* DEFHIST(sumJ0J1_mv1tag);
+    TH1F* DEFHIST(numNeutrinoSol);
 
     // Test
     //TH1F* h_met_test[Ch_N][PR_N];
