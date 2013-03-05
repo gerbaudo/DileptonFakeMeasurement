@@ -9,7 +9,7 @@ using namespace std;
 using namespace Susy;
 
 
-// 
+//
 // Histogram bins
 //
 
@@ -22,15 +22,15 @@ const int  nptbins   = 25;
 
 const float etamin   = 0;
 const float etamax   = 5;
-const int   netabins = 25; 
+const int   netabins = 25;
 
 const float dphimin   = 0;
 const float dphimax   = 3.2;
-const int   ndphibins = 15; 
+const int   ndphibins = 15;
 
 const float drmin   = 0;
 const float drmax   = 5;
-const int   ndrbins = 25; 
+const int   ndrbins = 25;
 
 const float massmin  = 0;
 const float massmax  = 300;
@@ -56,7 +56,7 @@ const float njetmax = njetbins - 0.5;
 /*--------------------------------------------------------------------------------*/
 // Constructor
 /*--------------------------------------------------------------------------------*/
-SusyPlotter::SusyPlotter() : 
+SusyPlotter::SusyPlotter() :
   SusySelection(),
   m_doLepSF(false),
   m_doTrigW(false),
@@ -67,7 +67,7 @@ SusyPlotter::SusyPlotter() :
   /*
   for(uint iPR=0; iPR<PR_N; ++iPR){
     for(uint iCh=0; iCh<Ch_N; ++iCh){
-      
+
       #define NULLIFY(name) h_ ##name[iPR][iCh] = NULL
 
       NULLIFY(l0_pt);
@@ -96,7 +96,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 {
   SusySelection::Begin(0);
   if(m_dbg) cout << "SusyPlotter::Begin" << endl;
-  
+
   // Do not dump the event counts
   m_dumpCounts = false;
 
@@ -122,7 +122,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
     // lepton channel loop
     for(uint iCh=0; iCh<Ch_N; ++iCh){
       string chan = chanNames[iCh];
-      
+
       for(uint iSys=0; iSys<m_systs.size(); ++iSys){
 	string sys = m_systNames.at(iSys);
 	//cout<<"Sys: "<<sys<<endl;
@@ -139,7 +139,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	    h_ ## name[iCh][iPR][iSys] = new TH2F((PR+"_"+chan+"_"+#name+"_"+sys).c_str(), #name ";" xLbl, nbin, min, max, nbin, min, max); \
 	    h_ ## name[iCh][iPR][iSys]->Sumw2();				\
 	  }while(0)
-      
+
         #define NEWVARHIST(name, xLbl, nbin, bins)				\
 	  do{								\
 	    h_ ## name[iCh][iPR][iSys] = new TH1F((PR+"_"+chan+"_"+#name+"_"+sys).c_str(), #name ";" xLbl, nbin, bins); \
@@ -153,15 +153,21 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(j1_pt, "j_{1} P_{T}", nptbins, ptmin, ptmax);
 	NEWHIST(e_pt, "Electron P_{T}", nptbins, ptmin, ptmax);
 	NEWHIST(m_pt, "Muon P_{T}", nptbins, ptmin, ptmax);
-	
+	NEWHIST(ll_pt, "ll P_{T}", nptbins, ptmin, ptmax);
+	NEWHIST(tot_pt, "ll+jj+met P_{T}", nptbins, ptmin, ptmax);
+
+
 	// Eta Plots
 	NEWHIST(l0_eta, "l_{0} #eta", netabins, etamin, etamax);
 	NEWHIST(j0_eta, "j_{0} #eta", netabins, etamin, etamax);
 	NEWHIST(l1_eta, "l_{1} #eta", netabins, etamin, etamax);
 	NEWHIST(j1_eta, "j_{1} #eta", netabins, etamin, etamax);
+	NEWHIST(jj_deta,"#Delta #eta (j,j)", netabins, etamin, etamax);
+	NEWHIST(jj_drap,"#Delta y (j,j)", netabins, etamin, etamax);
+
 	NEWHIST(e_eta, "Electron #eta", netabins, etamin, etamax);
 	NEWHIST(m_eta, "Muon #eta", netabins, etamin, etamax);
-	
+
 	// Mass plots
 	NEWHIST(ll_M, "m(ll)", nmassbins, massmin, massmax);
 	NEWHIST(ll_M_dPhiReg, "m(ll)", nmassbins, massmin, massmax);
@@ -180,7 +186,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(met_ll_Mt,   "m_{T}(met,ll)",   nmassbins, massmin, massmax);
 	NEWHIST(met_j_ll_Mt, "m_{T}(met,j,ll)", nmassbinsj, massminj, massmaxj);
 	NEWHIST(jj_M, "m(jj)", nmassbins, massmin, massmax);
-	
+
 	NEWHIST(met_l0_Mt,           "m_{T}(met,l0)", nmassbins, massmin, massmax);
 	NEWHIST(met_l1_Mt,           "m_{T}(met,l0)", nmassbins, massmin, massmax);
 	NEWHIST(met_ll_Mt_noj,       "m_{T}(met,ll)", nmassbins, massmin, massmax);
@@ -188,11 +194,13 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(met_ll_Mt_twoj,      "m_{T}(met,ll)", nmassbins, massmin, massmax);
 	NEWHIST(met_ll_Mt_ge3j,      "m_{T}(met,ll)", nmassbins, massmin, massmax);
 	NEWHIST(met_ll_Mt_oneOrtwoj, "m_{T}(met,ll)", nmassbins, massmin, massmax);
+	NEWHIST(mtautau_l0l1met,     "m_{#tau#tau}(l0,l1,met)", nmassbins+1, massmin-((massmax-massmin)/nmassbins), massmax); // need a negative bin
+	NEWHIST(ll_met_Mt,           "m_{T}(ll,met)", nmassbins, massmin, massmax);
 
 	// Met plots
 	NEWHIST(met, "#slash{E}_{T}", nptbins, ptmin, ptmax);
 	NEWHIST(metrel, "#slash{E}^{rel}_{T}", nptbins, ptmin, ptmax);
-	
+
 	// Met terms
 	NEWHIST(met_refEle,   "#slash{E}_{T} (refEle)", nptbins, ptmin, ptmax);
 	NEWHIST(met_refMuo,   "#slash{E}_{T} (refMuo)", nptbins, ptmin, ptmax);
@@ -206,9 +214,9 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(njets, "# jets", njetbins, njetmin, njetmax);
 	NEWHIST(njets_pos, "# jets leading pos", njetbins, njetmin, njetmax);
 	NEWHIST(njets_neg, "# jets leading neg", njetbins, njetmin, njetmax);
-	NEWHIST(njets_mll_90_120, "# jets", njetbins, njetmin, njetmax);	
-	NEWHIST(njets_mll_90_120_pos, "# jets", njetbins, njetmin, njetmax);	
-	NEWHIST(njets_mll_90_120_neg, "# jets", njetbins, njetmin, njetmax);	
+	NEWHIST(njets_mll_90_120, "# jets", njetbins, njetmin, njetmax);
+	NEWHIST(njets_mll_90_120_pos, "# jets", njetbins, njetmin, njetmax);
+	NEWHIST(njets_mll_90_120_neg, "# jets", njetbins, njetmin, njetmax);
 	NEWHIST(nbjets, "# b jets", njetbins, njetmin, njetmax);
 	NEWHIST(nbjets_mll_90_120, "# b jets", njetbins, njetmin, njetmax);
 	NEWHIST(nbjets_mll_90_120_pos, "# b jets", njetbins, njetmin, njetmax);
@@ -260,10 +268,11 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(l0_qeta, "l_{0} sign(q) #eta", 2*netabins, -etamax, etamax);
 	NEWHIST(l1_qeta, "l_{1} sign(q) #eta", 2*netabins, -etamax, etamax);
 
-	NEWHIST(mt_l0_met,    "m_{T}(l_{0}, met)", nmassbins, massmin, massmax);
-	NEWHIST(mt_l1_met,    "m_{T}(l_{1}, met)", nmassbins, massmin, massmax);
-	NEWHIST(mt_l_met_min, "m_{T}^{min}(l_{1}, met)", nmassbins, massmin, massmax);
-	NEWHIST(mct_top_tag,  "m_{CT} top tag", 2, -0.5, +1.5);
+	NEWHIST(mt_l0_met,      "m_{T}(l_{0}, met)", nmassbins, massmin, massmax);
+	NEWHIST(mt_l1_met,      "m_{T}(l_{1}, met)", nmassbins, massmin, massmax);
+	NEWHIST(mt_l_met_min,   "m_{T}^{min}(l_{1}, met)", nmassbins, massmin, massmax);
+	NEWHIST(mct_top_tag,    "m_{CT} top tag", 2, -0.5, +1.5);
+	NEWHIST(sumJ0J1_mv1tag, "MV1(j0) + MV1(j1)", 25, +0.0, +2.0);
 
 	NEWHIST2(l0_l1_pt, "l0 vs l1 pt", nptbins, ptmin, ptmax);
 
@@ -285,7 +294,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 }
 
 /*--------------------------------------------------------------------------------*/
-// Main process loop function 
+// Main process loop function
 /*--------------------------------------------------------------------------------*/
 Bool_t SusyPlotter::Process(Long64_t entry)
 {
@@ -333,7 +342,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   const LeptonVector& l = m_signalLeptons;
   const JetVector& j = m_signalJets2Lep;
   const Met* m = m_met;
-  
+
   fillHistos(l, j, m, weight, PR_NONE);
 
   if(sameSign(m_signalLeptons)) fillHistos(l, j, m, weight, PR_SSInc);
@@ -390,14 +399,14 @@ void SusyPlotter::Terminate()
 /*--------------------------------------------------------------------------------*/
 // Fill histograms
 /*--------------------------------------------------------------------------------*/
-void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, const Met* met, 
+void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, const Met* met,
 			     const float weight, PlotRegion PR, uint sys)
 {
 
   if(m_dbg) cout << "SusyPlotter::fillHistos" << endl;
 
   // Get Channel for leptons
-  // ** Only dealing with exactly two leptons 
+  // ** Only dealing with exactly two leptons
   if( leps.size() != 2 ) return;
   int ch = getChan(leps);
 
@@ -405,7 +414,7 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-//
   // Some useful Definitions
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-//
-  
+
   const Lepton* l0 = leps[0];
   const Lepton* l1 = leps[1];
 
@@ -427,11 +436,17 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
       h[ch][PR][sys]->Fill(xfill,yfill,weight);			\
       h[Ch_all][PR][sys]->Fill(xfill,yfill,weight);			\
     }while(0)
-  
-  
+
+
+
+  const TLorentzVector mlv = met->lv();
+  const TLorentzVector ll  = *l0 + *l1;
+
   // Pt Plots
   FILL(h_l0_pt, l0->Pt());
   FILL(h_l1_pt, l1->Pt());
+  FILL(h_ll_pt, ll.Pt());
+
   if(l0->isEle()) FILL(h_e_pt, l0->Pt());
   else            FILL(h_m_pt, l0->Pt());
   if(l1->isEle()) FILL(h_e_pt, l1->Pt());
@@ -446,13 +461,13 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   else            FILL(h_m_eta, fabs(l1->Eta()));
 
   // Mass Plots
-  FILL(h_ll_M, (*l0 + *l1).M());
+  FILL(h_ll_M, ll.M());
 
   // Met histograms
   float metrel = getMetRel(met, leps, jets);
   FILL(h_met, met->Et);
   FILL(h_metrel, metrel);
-  
+
   // Met terms
   FILL(h_met_refEle,   met->refEle);
   FILL(h_met_refMuo,   met->refMuo);
@@ -503,14 +518,15 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
     }
 
   }
-  
-  const TLorentzVector mlv = met->lv();
-  const TLorentzVector ll  = *l0 + *l1;
+
   float mt_met_ll = SusyPlotter::transverseMass(ll, mlv);
-  float mZTauTau = SusyPlotter::mZTauTau(*l0, *l1, mlv);
+
 
   FILL(h_met_ll_M, (*l0 + *l1 + mlv).M());
   FILL(h_met_ll_Mt, mt_met_ll);
+  FILL(h_mtautau_l0l1met, SusyPlotter::mZTauTau(*l0, *l1, mlv));
+  FILL(h_ll_met_Mt, SusyPlotter::transverseMass(ll, mlv));
+
 
   if( fabs(l0->DeltaPhi(met->lv())) < 3 ){
     FILL(h_ll_M_dPhiReg, ll.M());
@@ -590,17 +606,22 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
     FILL(h_j1_pt, j1.Pt());
     FILL(h_j0_eta, j0.Eta());
     FILL(h_j1_eta, j1.Eta());
+    FILL(h_jj_deta, fabs(j0.Eta()-j1.Eta()));
+    FILL(h_jj_drap, fabs(j0.Rapidity()-j1.Rapidity()));
     FILL(h_jj_M, jj.M());
     FILL(h_dR_ll_jj, fabs(ll.DeltaR(jj)));
     FILL(h_dPhi_ll_jj, fabs(ll.DeltaPhi(jj)));
     FILL(h_dPhi_l0_jj, fabs(l0->DeltaPhi(jj)));
     FILL(h_dPhi_l1_jj, fabs(l1->DeltaPhi(jj)));
+    FILL(h_tot_pt, (ll+jj+mlv).Pt());
+    FILL(h_sumJ0J1_mv1tag, j0.mv1 + j1.mv1);
+
   } // end if(nJ==2)
 
   //h_met_test[ch][PR]->Fill(met->Et,weight);
   //h_met_test2[ch][PR]->Fill(met->Et,weight);
-  
-  
+
+
   #undef FILL
   #undef FILL2
 }
@@ -621,7 +642,7 @@ int SusyPlotter::getChan(const LeptonVector& leps)
   if( ie == 2 && im == 0 ) return Ch_ee;
   if( ie == 1 && im == 1 ) return Ch_em;
   if( ie == 0 && im == 2 ) return Ch_mm;
-  
+
   cout<<"Not ee/mm/em... Number Electrons: "<<ie<<" Number Muons: "<<im<<endl;
   return Ch_N; // not in range
 
@@ -643,21 +664,21 @@ void SusyPlotter::setSysts()
 //--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_NONE]);
 //--DG--  }
 //--DG--  /*
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_EL_RE_UP);   
+//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_EL_RE_UP);
 //--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_EL_RE_UP]);
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_EL_RE_DOWN); 
+//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_EL_RE_DOWN);
 //--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_EL_RE_DOWN]);
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_MU_RE_UP);   
+//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_MU_RE_UP);
 //--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_MU_RE_UP]);
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_MU_RE_DOWN); 
+//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_MU_RE_DOWN);
 //--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_MU_RE_DOWN]);
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_EL_FR_UP);   
+//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_EL_FR_UP);
 //--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_EL_FR_UP]);
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_EL_FR_DOWN); 
+//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_EL_FR_DOWN);
 //--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_EL_FR_DOWN]);
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_MU_FR_UP);   
+//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_MU_FR_UP);
 //--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_MU_FR_UP]);
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_MU_FR_DOWN); 
+//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_MU_FR_DOWN);
 //--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_MU_FR_DOWN]);
 //--DG--  }
 //--DG--  */

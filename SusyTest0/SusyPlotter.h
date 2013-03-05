@@ -143,22 +143,22 @@ class SusyPlotter : public SusySelection
     // Main event loop function
     virtual Bool_t  Process(Long64_t entry);
 
-    // 
+    //
     // Method to fill histograms
     //
-    void fillHistos(const LeptonVector& leps, const JetVector &jets, const Met* met, 
+    void fillHistos(const LeptonVector& leps, const JetVector &jets, const Met* met,
 		    const float weight, PlotRegion PR = PR_NONE, uint sys = 0);
 
     //
     // Define some additional plot regions
     //
-    
+
     bool passZwindow(const LeptonVector& leps);
 
     //
     // Miscellaneous methods
     //
-    
+
     // compute Mt
     float Mt(TLorentzVector p1, TLorentzVector met){
       return sqrt(2*p1.Pt()*met.Et()*(1-cos(p1.DeltaPhi(met))));
@@ -206,6 +206,8 @@ class SusyPlotter : public SusySelection
     TH1F* DEFHIST(l1_pt);
     TH1F* DEFHIST(e_pt);
     TH1F* DEFHIST(m_pt);
+    TH1F* DEFHIST(ll_pt);
+    TH1F* DEFHIST(tot_pt);
 
     TH1F* DEFHIST(j0_pt);
     TH1F* DEFHIST(j1_pt);
@@ -217,11 +219,14 @@ class SusyPlotter : public SusySelection
     TH1F* DEFHIST(m_eta);
     TH1F* DEFHIST(j0_eta);
     TH1F* DEFHIST(j1_eta);
+    TH1F* DEFHIST(jj_deta);
+    TH1F* DEFHIST(jj_drap);
 
     // Mass
     TH1F* DEFHIST(ll_M);
     TH1F* DEFHIST(jj_M);
-    
+    TH1F* DEFHIST(mtautau_l0l1met);
+
     // MET
     TH1F* DEFHIST(met);
     TH1F* DEFHIST(metrel);
@@ -276,6 +281,7 @@ class SusyPlotter : public SusySelection
 
     TH1F* DEFHIST(met_l0_Mt);
     TH1F* DEFHIST(met_l1_Mt);
+    TH1F* DEFHIST(ll_met_Mt); // duplicate of met_ll_M ? (DG Feb 2013)
 
     TH1F* DEFHIST(met_ll_Mt_noj);
     TH1F* DEFHIST(met_ll_Mt_onej);
@@ -319,13 +325,14 @@ class SusyPlotter : public SusySelection
     // Finely binned plots for Daniel
     TH1F* DEFHIST(ll_M_fine);
     TH1F* DEFHIST(ll_M_finer);
-    
+
     TH1F* DEFHIST(l0_qeta);
     TH1F* DEFHIST(l1_qeta);
     TH1F* DEFHIST(mt_l0_met);
     TH1F* DEFHIST(mt_l1_met);
     TH1F* DEFHIST(mt_l_met_min);
     TH1F* DEFHIST(mct_top_tag);
+    TH1F* DEFHIST(sumJ0J1_mv1tag);
 
     // Test
     //TH1F* h_met_test[Ch_N][PR_N];
