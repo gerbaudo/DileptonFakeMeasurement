@@ -630,30 +630,6 @@ void SusyPlotter::setSysts()
   else {
     cout<<"SusyPlotter::setSysts() : not implemented (DG Jan2013)"<<endl;
   }
-//--DG--  else{
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_NONE);
-//--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_NONE]);
-//--DG--  }
-//--DG--  /*
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_EL_RE_UP);
-//--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_EL_RE_UP]);
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_EL_RE_DOWN);
-//--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_EL_RE_DOWN]);
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_MU_RE_UP);
-//--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_MU_RE_UP]);
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_MU_RE_DOWN);
-//--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_MU_RE_DOWN]);
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_EL_FR_UP);
-//--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_EL_FR_UP]);
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_EL_FR_DOWN);
-//--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_EL_FR_DOWN]);
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_MU_FR_UP);
-//--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_MU_FR_UP]);
-//--DG--    m_systs.push_back(SusyMatrixMethod::SYS_MU_FR_DOWN);
-//--DG--    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_MU_FR_DOWN]);
-//--DG--  }
-//--DG--  */
-
 }
 
 
