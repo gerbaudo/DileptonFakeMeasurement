@@ -62,12 +62,6 @@ class SusySelection : public SusyNtAna
     bool selectAnaEvent(const LeptonVector& leptons, const LeptonVector& baseLeptons);
 
     // Signal regions
-    bool passSR1(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
-    bool passSR2(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
-    bool passSR3(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
-    bool passSR4(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
-    bool passSR4b(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
-    bool passSR5(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     bool passSR6base(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     bool passSR7base(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     bool passSR8base(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
@@ -77,40 +71,10 @@ class SusySelection : public SusyNtAna
     bool passSR8(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     bool passSR9(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
     // std SR have exactly 2jet and fj veto, the ones below are loosened (but no counters)
-    bool passSR6ge2j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR6base(l,j,m) && passge2Jet(j); }
     bool passSR7ge2j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR7base(l,j,m) && passge2Jet(j); }
-    bool passSR8ge2j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR8base(l,j,m) && passge2Jet(j); }
-    bool passSR9ge2j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR9base(l,j,m) && passge2Jet(j); }
-    bool passSR6ge3j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR6base(l,j,m) && passge3Jet(j); }
     bool passSR7ge3j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR7base(l,j,m) && passge3Jet(j); }
-    bool passSR8ge3j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR8base(l,j,m) && passge3Jet(j); }
-    bool passSR9ge3j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR9base(l,j,m) && passge3Jet(j); }
-    bool passSR6eq2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR6base(l,j,m) && passeq2JetWoutFwVeto(j); }
     bool passSR7eq2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR7base(l,j,m) && passeq2JetWoutFwVeto(j); }
-    bool passSR8eq2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR8base(l,j,m) && passeq2JetWoutFwVeto(j); }
-    bool passSR9eq2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR9base(l,j,m) && passeq2JetWoutFwVeto(j); }
-    bool passSR6ge2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR6base(l,j,m) && passge2JetWoutFwVeto(j); }
     bool passSR7ge2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR7base(l,j,m) && passge2JetWoutFwVeto(j); }
-    bool passSR8ge2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR8base(l,j,m) && passge2JetWoutFwVeto(j); }
-    bool passSR9ge2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR9base(l,j,m) && passge2JetWoutFwVeto(j); }
-
-    // Some validation regions
-    // These are under development!!!
-    bool passVR1(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    bool passVR2(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    bool passVRTL(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    bool passVR3(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    bool passVR4(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    bool passWWCR1(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    bool passWWCR2(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    bool passWWCR3(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    bool passTOPCR(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-
-    // Bonus regions to look at same-sign muons
-    bool passBR1(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    bool passBR2(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    bool passBR3(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    bool passBR4(const LeptonVector& leptons, const JetVector& jets, const Met* met);
 
     // Cut methods
     bool passHfor();
@@ -257,37 +221,6 @@ class SusySelection : public SusyNtAna
     float                n_pass_evtTrig[ET_N][WT_N];
     float                n_pass_trigMatch[ET_N][WT_N];
 
-    // SR1 counts
-    float                n_pass_SR1jv[ET_N][WT_N];
-    float                n_pass_SR1Zv[ET_N][WT_N];
-    float                n_pass_SR1MET[ET_N][WT_N];
-
-    // SR2 counts
-    float                n_pass_SR2jv[ET_N][WT_N];
-    float                n_pass_SR2MET[ET_N][WT_N];
-
-    // SR3 counts
-    float                n_pass_SR3ge2j[ET_N][WT_N];
-    float                n_pass_SR3Zv[ET_N][WT_N];
-    float                n_pass_SR3bjv[ET_N][WT_N];
-    float                n_pass_SR3mct[ET_N][WT_N];
-    float                n_pass_SR3MET[ET_N][WT_N];
-
-    // SR5 counts
-    float                n_pass_SR5jv[ET_N][WT_N];
-    float                n_pass_SR5MET[ET_N][WT_N];
-    float                n_pass_SR5Zv[ET_N][WT_N];
-    float                n_pass_SR5L0pt[ET_N][WT_N];
-    float                n_pass_SR5SUMpt[ET_N][WT_N];
-    float                n_pass_SR5dPhiMETLL[ET_N][WT_N];
-    float                n_pass_SR5dPhiMETL1[ET_N][WT_N];
-
-    // SR4 counts
-    float                n_pass_SR4jv[ET_N][WT_N];
-    float                n_pass_SR4Zv[ET_N][WT_N];
-    float                n_pass_SR4MET[ET_N][WT_N];
-    float                n_pass_SR4MT2[ET_N][WT_N];
-
     // SR6 counts
     float                n_pass_SR6sign[ET_N][WT_N];
     float                n_pass_SR6flav[ET_N][WT_N];
@@ -324,9 +257,6 @@ class SusySelection : public SusyNtAna
     float                n_pass_SR9ge2j[ET_N][WT_N];
     float                n_pass_SR9ge2jNfv[ET_N][WT_N];
     float                n_pass_SR9metr[ET_N][WT_N];
-
-
-
 };
 
 #endif
