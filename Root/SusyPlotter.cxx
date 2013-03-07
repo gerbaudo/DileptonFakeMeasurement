@@ -649,21 +649,6 @@ float SusyPlotter::transverseMass(const TLorentzVector &lep, const TLorentzVecto
   return std::sqrt(2.0 * lep.Pt() * met.Et() *(1-cos(lep.DeltaPhi(met))) );
 }
 //----------------------------------------------------------
-// re-written based on HWWlvlvCode::calculate_METBasedVariables
-float SusyPlotter::mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &met)
-{
-  float px0(l0.Px()), py0(l0.Py());
-  float px1(l1.Px()), py1(l1.Py());
-  float pxm(met.Px()), pym(met.Py());
-  float num( px0*py1 - py0*px1 );
-  float den1( py1*pxm - px1*pym + px0*py1 - py0*px1 );
-  float den2( px0*pym - py0*pxm + px0*py1 - py0*px1 );
-  float x1 = ( den1 != 0.0  ? (num/den1) : 0.0);
-  float x2 = ( den2 != 0.0  ? (num/den2) : 0.0);
-  // not guaranteed that this configuration is kinematically possible
-  return (x1*x2 > 0.0 ? (l0+l1).M() / std::sqrt(x1*x2) : -1.0);
-}
-//----------------------------------------------------------
 float SusyPlotter::sumCosDeltaPhi(const TLorentzVector &l0, const TLorentzVector &l1,
 				  const TLorentzVector &met)
 {
@@ -700,4 +685,19 @@ int SusyPlotter::numberOfNeutrinoSolutions(const TLorentzVector &lPos, const TLo
 	      &pnux, &pnuy, &pnuz, &pnubx, &pnuby, &pnubz,
 	      &cd_diff, cubic_single_root_cmplx);
     return pnubx.size();
+}
+//----------------------------------------------------------
+// re-written based on HWWlvlvCode::calculate_METBasedVariables
+float SusyPlotter::mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &met)
+{
+  float px0(l0.Px()), py0(l0.Py());
+  float px1(l1.Px()), py1(l1.Py());
+  float pxm(met.Px()), pym(met.Py());
+  float num( px0*py1 - py0*px1 );
+  float den1( py1*pxm - px1*pym + px0*py1 - py0*px1 );
+  float den2( px0*pym - py0*pxm + px0*py1 - py0*px1 );
+  float x1 = ( den1 != 0.0  ? (num/den1) : 0.0);
+  float x2 = ( den2 != 0.0  ? (num/den2) : 0.0);
+  // not guaranteed that this configuration is kinematically possible
+  return (x1*x2 > 0.0 ? (l0+l1).M() / std::sqrt(x1*x2) : -1.0);
 }
