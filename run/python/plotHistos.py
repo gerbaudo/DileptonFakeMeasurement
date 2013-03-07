@@ -90,6 +90,9 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
         h.SetDrawOption('bar')
         stack.Add(h)
         leg.AddEntry(h, s+" (%.2f)"%h.Integral(), 'F')
+    if not firstHisto :
+        if verbose : print "no bkg histos for %s...continue"%hname
+        return
     stack.Draw('hist')
     stack.GetXaxis().SetTitle(firstHisto.GetXaxis().GetTitle())
     stack.GetYaxis().SetTitle(firstHisto.GetYaxis().GetTitle())
