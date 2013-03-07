@@ -6,6 +6,7 @@
 # Jan 2013
 
 import collections, optparse, sys, glob
+#import numpy as np # not available, this hurts.
 import ROOT as r
 r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
@@ -60,6 +61,23 @@ for fname, infile in zip(inputFileNames, inputFiles) :
     organizeHistosByType(histosByType, histos)
 
 def isSignal(sampleName) : return 'WH_' in sampleName
+
+def cumsum(l) :
+    #return numpy.cumsum(l) # not available ?
+    return [sum(a[:i]) for i in range(1,len(a)-1)] if len(a) else []
+
+def cumSumHisto(histo) :
+    hCs = histo.Clone(histo.GetName()+'_cs')
+    nBinsX = 1+hCs.GetNbinsX() # TH1 starts from 1 (0 underflow, N+1 overflow)
+    bc = [hCs.GetBinContent(0)] + [hCs.GetBinContent(i) for i in range(1, nBinsX)] + [hCs.GetBinContent(nBinsX+1)]
+    def mergeOuter(bc, nOuter=2) : # add over/underflow in the first/last bin
+        return [sum(bc[:nOuter])] + bc[nOuter:-nOuter] + [sum(bc[-nOuter:])]
+    bc = cumsum(mergeOverUnderFlow(bc))
+    for i, c in enumerate(bc) :
+        hCs.SetBinContent(i+1, c)
+        hCs.SetBinError(i+1, 0.)
+    return hCs
+
 
 def plotHistos(histosDict={'ttbar':None, 'zjets':None},
                 outdir='./plots', extensions=['png',], # 'eps'],
