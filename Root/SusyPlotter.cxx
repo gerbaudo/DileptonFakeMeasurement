@@ -333,8 +333,12 @@ Bool_t SusyPlotter::Process(Long64_t entry)
 
   bool count(true);
 
-  if( passSR7base   (l, j, m) ) fillHistos(l, j, m, weight, PR_SR7base);
-  if( passSR7       (l, j, m, count) ) fillHistos(l, j, m, weight, PR_SR7);
+  if( passSR7base     (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR7base);
+  if( passSR7Nj       (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR7Nj);
+  if( passSR7NjZttVeto(l, j, m)       ) fillHistos(l, j, m, weight, PR_SR7NjZttVeto);
+  if( passSR7NjPtTot  (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR7NjPtTot);
+  if( passSR7NjMll    (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR7NjMll);
+  if( passSR7         (l, j, m, count)) fillHistos(l, j, m, weight, PR_SR7);
 
   return kTRUE;
 }
