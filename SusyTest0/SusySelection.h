@@ -42,8 +42,12 @@ enum WeightType
 class SusySelection : public SusyNtAna
 {
 
-  public:
+ public:
+  typedef const LeptonVector cvl_t;  //!< just to make some decl shorter
+  typedef const JetVector    cvj_t;  //!< just to make some decl shorter
+  typedef const Met          cmet_t; //!< just to make some decl shorter
 
+ public:
     SusySelection();
     virtual ~SusySelection(){};
 
@@ -59,22 +63,27 @@ class SusySelection : public SusyNtAna
 
     // Full event selection. Specify which leptons to use.
     bool selectEvent(bool doMll=true);
-    bool selectAnaEvent(const LeptonVector& leptons, const LeptonVector& baseLeptons);
+    bool selectAnaEvent(cvl_t& leptons, cvl_t& baseLeptons);
 
     // Signal regions
-    bool passSR6base(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
-    bool passSR7base(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
-    bool passSR8base(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
-    bool passSR9base(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
-    bool passSR6(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
-    bool passSR7(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
-    bool passSR8(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
-    bool passSR9(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false);
-    // std SR have exactly 2jet and fj veto, the ones below are loosened (but no counters)
-    bool passSR7ge2j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR7base(l,j,m) && passge2Jet(j); }
-    bool passSR7ge3j(const LeptonVector& l, const JetVector& j, const Met* m)    { return passSR7base(l,j,m) && passge3Jet(j); }
-    bool passSR7eq2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR7base(l,j,m) && passeq2JetWoutFwVeto(j); }
-    bool passSR7ge2jNfv(const LeptonVector& l, const JetVector& j, const Met* m) { return passSR7base(l,j,m) && passge2JetWoutFwVeto(j); }
+    bool passSR6base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
+    bool passSR7base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
+    bool passSR8base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
+    bool passSR9base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
+    bool passSR6(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
+    bool passSR7(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
+    bool passSR8(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
+    bool passSR9(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
+    // std SR7 has at least 2jets + the requirements below
+    // (but no counters, just so that the fit on one line)
+    bool passSR7ge2j     (cvl_t& l, cvj_t& j, const Met* m) { return passSR7base(l,j,m) && passge2Jet(j); }
+    bool passSR7ge3j     (cvl_t& l, cvj_t& j, const Met* m) { return passSR7base(l,j,m) && passge3Jet(j); }
+    bool passSR7eq2jNfv  (cvl_t& l, cvj_t& j, const Met* m) { return passSR7base(l,j,m) && passeq2JetWoutFwVeto(j); }
+    bool passSR7ge2jNfv  (cvl_t& l, cvj_t& j, const Met* m) { return passSR7base(l,j,m) && passge2JetWoutFwVeto(j); }
+    bool passSR7Nj       (cvl_t& l, cvj_t& j, const Met* m) { return passSR7base(l,j,m) && passNj(j); }
+    bool passSR7NjZttVeto(cvl_t& l, cvj_t& j, const Met* m) { return passSR7Nj(l,j,m)   && passZtautauVeto(l,j,m); }
+    bool passSR7NjPtTot  (cvl_t& l, cvj_t& j, const Met* m) { return passSR7Nj(l,j,m)   && passPtTot(l,j,m); }
+    bool passSR7NjMll    (cvl_t& l, cvj_t& j, const Met* m) { return passSR7Nj(l,j,m)   && passMllMax(l); }
 
     // Cut methods
     bool passHfor();
@@ -85,7 +94,7 @@ class SusySelection : public SusyNtAna
     bool oppositeFlavor(const LeptonVector& leptons);
     bool sameSign(const LeptonVector& leptons);
     bool oppositeSign(const LeptonVector& leptons);
-    bool passMll(const LeptonVector& leptons, float mll = 20);
+    bool passMll(const LeptonVector& leptons, float mll = 20); // this one (by Matt) increments
 
     // Signal Region Cuts
     bool passJetVeto(const JetVector& jets);
@@ -101,6 +110,10 @@ class SusySelection : public SusyNtAna
     bool passeq2JetWoutFwVeto(const JetVector& jets);
     bool passdPhi(TLorentzVector v0, TLorentzVector v1, float cut);
     bool passMT2(const LeptonVector& leptons, const Met* met, float cut);
+    bool passNj(const JetVector& jets, int minNj=2, int maxNj=3);
+    bool passZtautauVeto(cvl_t& l, cvj_t& j, const Met* m, float widthZpeak=40.0);
+    bool passPtTot(cvl_t& l, cvj_t& j, const Met* m, float maxPtTot=50.0);
+    bool passMllMax(const LeptonVector& leptons, float maxMll=80.0);
 
     // Idendification methods
     bool isRealLepton(const Lepton* lep);

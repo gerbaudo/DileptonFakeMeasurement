@@ -2,6 +2,7 @@
 #include <cassert>
 #include "TCanvas.h"
 #include "SusyTest0/SusySelection.h"
+#include "SusyTest0/SusyPlotter.h"
 
 #include "LeptonTruthTools/RecoTruthMatch.h" // provides RecoTruthMatch::
 
@@ -269,14 +270,13 @@ bool SusySelection::passSR7(const LeptonVector& leptons, const JetVector& jets, 
   if( count ) increment(n_pass_SR7sign[m_ET],lepSf, bSf);
   if(  sameFlavor(leptons) )              return false;
   if( count ) increment(n_pass_SR7flav[m_ET],lepSf, bSf);
-  if( count && passge1Jet(jets) )           increment(n_pass_SR7ge1j[m_ET],lepSf, bSf);
-  if( count && passge2Jet(jets) )           increment(n_pass_SR7ge2j[m_ET],lepSf, bSf);
-  if( count && passge2JetWoutFwVeto(jets) ) increment(n_pass_SR7ge2jNfv[m_ET],lepSf, bSf);
-  if( count && passeq2JetWoutFwVeto(jets) ) increment(n_pass_SR7eq2jNfv[m_ET],lepSf, bSf);
-  if( !passeq2Jet(jets) )                 return false;
-  if( count ) increment(n_pass_SR7eq2j[m_ET],lepSf, bSf);
-  if( !passMETRel(met,leptons,jets,50.) ) return false;
-  if( count ) increment(n_pass_SR7metr[m_ET],lepSf, bSf);
+  if( count && passge1Jet(jets) )     increment(n_pass_SR7ge1j[m_ET],lepSf, bSf);
+  if( passge2Jet(jets)) { if( count ) increment(n_pass_SR7ge2j[m_ET],lepSf, bSf); }
+  else return false;
+  // DG Mar 2013 : might want to add counters here as well
+  if( !passMllMax     (leptons))            return false;
+  if( !passPtTot      (leptons, jets, met)) return false;
+  if( !passZtautauVeto(leptons, jets, met)) return false;
   return true;
 }
 /*--------------------------------------------------------------------------------*/
@@ -555,6 +555,38 @@ bool SusySelection::passMT2(const LeptonVector& leptons, const Met* met, float c
 
   return (mt2_event.get_mt2() > cut);
 
+}
+//----------------------------------------------------------
+bool SusySelection::passNj(const JetVector& jets, int minNj, int maxNj)
+{
+  int nj(numberOfCLJets(jets));
+  return (minNj < nj && nj <= maxNj
+	  && numberOfCBJets(jets) < 1);
+}
+//----------------------------------------------------------
+bool SusySelection::passZtautauVeto(cvl_t& l, cvj_t& j, const Met* m, float widthZpeak)
+{
+  if(l.size()<2 || !l[0] || !l[1]) return false;
+  if(!m)         return false;
+  float mZ0(91.);
+  return abs(SusyPlotter::mZTauTau(*l[0], *l[1], m->lv()) - mZ0) > widthZpeak;
+}
+//----------------------------------------------------------
+bool SusySelection::passPtTot(cvl_t& l, cvj_t& j, const Met* m, float maxPtTot)
+{
+  if(!m) return false;
+  TLorentzVector mlv(m->lv()), ll, jj;
+  if (l.size()>0 && l[0]) ll += *l[0];
+  if (l.size()>1 && l[1]) ll += *l[1];
+  if (j.size()>0 && j[0]) jj += *j[0];
+  if (j.size()>1 && j[1]) jj += *j[1];
+  return (ll+jj+mlv).Pt() < maxPtTot;
+}
+//----------------------------------------------------------
+bool SusySelection::passMllMax(const LeptonVector& l, float maxMll)
+{
+  if(l.size()<2) return false;
+  return TLorentzVector(*l[0] + *l[1]).M() < maxMll;
 }
 
 /*--------------------------------------------------------------------------------*/
