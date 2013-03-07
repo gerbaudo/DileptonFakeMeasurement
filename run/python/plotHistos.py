@@ -118,7 +118,8 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
         if font : tex.SetTextFont(font)
         tex.SetTextAlign(31)
         tex.DrawLatex(1.0-can.GetTopMargin(), 1.0-can.GetRightMargin(), label)
-    writeLabel(can, channel+', '+plotRegion, firstHisto.GetTitleFont())
+    label = channel+', '+plotRegion
+    leg.SetHeader(label)
     can.Update()
     for ext in extensions : can.SaveAs(outdir+'/'+hname+'_lin'+'.'+ext)
     stack.SetMaximum(5.*stack.GetMaximum())
