@@ -186,6 +186,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(met_j_Mt,    "m_{T}(met,j)",    nmassbins, massmin, massmax);
 	NEWHIST(met_ll_Mt,   "m_{T}(met,ll)",   nmassbins, massmin, massmax);
 	NEWHIST(met_j_ll_Mt, "m_{T}(met,j,ll)", nmassbinsj, massminj, massmaxj);
+	NEWHIST(met_ll_Mt2,  "m_{T2}(met,l,l)", nmassbinsj, massminj, massmaxj);
 	NEWHIST(jj_M, "m(jj)", nmassbins, massmin, massmax);
 
 	NEWHIST(met_l0_Mt,           "m_{T}(met,l0)", nmassbins, massmin, massmax);
@@ -480,12 +481,13 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   }
 
   float mt_met_ll = SusyPlotter::transverseMass(ll, mlv);
-
+  float mt2 = SusySelection::computeMt2(*l0, *l1, mlv);
 
   FILL(h_met_ll_M, (*l0 + *l1 + mlv).M());
   FILL(h_met_ll_Mt, mt_met_ll);
   FILL(h_mtautau_l0l1met, SusyPlotter::mZTauTau(*l0, *l1, mlv));
   FILL(h_ll_met_Mt, SusyPlotter::transverseMass(ll, mlv));
+  FILL(h_met_ll_Mt2, mt2);
 
 
   if( fabs(l0->DeltaPhi(met->lv())) < 3 ){

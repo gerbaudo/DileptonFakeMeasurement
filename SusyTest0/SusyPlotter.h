@@ -216,6 +216,7 @@ class SusyPlotter : public SusySelection
     TH1F* DEFHIST(met_j_Mt);
     TH1F* DEFHIST(met_ll_Mt);
     TH1F* DEFHIST(met_j_ll_Mt);
+    TH1F* DEFHIST(met_ll_Mt2);
 
     TH1F* DEFHIST(met_l0_Mt);
     TH1F* DEFHIST(met_l1_Mt);
