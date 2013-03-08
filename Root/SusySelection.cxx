@@ -4,6 +4,7 @@
 #include "SusyTest0/SusySelection.h"
 #include "SusyTest0/SusyPlotter.h"
 
+#include "Mt2/mt2_bisect.h"
 #include "LeptonTruthTools/RecoTruthMatch.h" // provides RecoTruthMatch::
 
 using namespace std;
