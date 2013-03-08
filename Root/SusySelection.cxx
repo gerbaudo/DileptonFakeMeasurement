@@ -545,17 +545,7 @@ bool SusySelection::passMT2(const LeptonVector& leptons, const Met* met, float c
   TLorentzVector l0    = *leptons.at(0);
   TLorentzVector l1    = *leptons.at(1);
 
-  double pTMiss[3] = {0.0, metlv.Px(), metlv.Py()};
-  double pA[3]     = {0.0, l0.Px(), l0.Py()};
-  double pB[3]     = {0.0, l1.Px(), l1.Py()};
-
-  // Create Mt2 object
-  mt2_bisect::mt2 mt2_event;
-  mt2_event.set_momenta(pA,pB,pTMiss);
-  mt2_event.set_mn(0); // LSP mass = 0 is Generic
-
-  return (mt2_event.get_mt2() > cut);
-
+  return (SusySelection::computeMt2(l0, l1, metlv) > cut);
 }
 //----------------------------------------------------------
 bool SusySelection::passNj(const JetVector& jets, int minNj, int maxNj)
@@ -1272,4 +1262,15 @@ float SusySelection::computeEventWeightXsFromReader(float lumi)
   float defaultXsec = nt.evt()->xsec;
   assert(defaultXsec != 0.0);
   return (getEventWeight(lumi) * getXsFromReader() / defaultXsec);
+}
+float SusySelection::computeMt2(const TLorentzVector &l0, const TLorentzVector &l1,
+				const TLorentzVector &met)
+{
+  double pTMiss[3] = {0.0, met.Px(), met.Py()};
+  double pA[3]     = {0.0, l0.Px(), l0.Py()};
+  double pB[3]     = {0.0, l1.Px(), l1.Py()};
+  mt2_bisect::mt2 mt2_event;
+  mt2_event.set_momenta(pA,pB,pTMiss);
+  mt2_event.set_mn(0); // LSP mass = 0 is Generic
+  return mt2_event.get_mt2();
 }

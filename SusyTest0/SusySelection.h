@@ -188,6 +188,8 @@ class SusySelection : public SusyNtAna
     // Miscellaneous methods
     void printLep(const Lepton* lep);
     void printJet(const Jet* jet);
+    static float computeMt2(const TLorentzVector &l0, const TLorentzVector &l1,
+			    const TLorentzVector &met);
 
     ClassDef(SusySelection, 1);
 
