@@ -28,6 +28,8 @@ parser.add_option("-i", "--input-dir", dest="inputdir", default=defaultInputDir,
                   help="input directory (default '%s')" % defaultInputDir)
 parser.add_option("-t", "--tag", dest="tag", default=defaultTag,
                   help="production tag (default '%s')" % defaultTag)
+parser.add_option("--test", action="store_true", dest="test", default=False,
+                  help="test on a few histograms)")
 parser.add_option("-s", "--sig-file", dest="sigFname", default=defaultSigFile,
                   help="signal file (default %s)" % defaultSigFile)
 parser.add_option("-S", "--sig-scale", dest="sigScale", default=defaultSigScale,
@@ -39,6 +41,7 @@ inputDir        = options.inputdir
 prodTag         = options.tag
 signalFname     = options.sigFname
 signalScale     = options.sigScale
+justTest        = options.test
 verbose         = options.verbose
 
 inputFileNames = glob.glob(inputDir+'/'+'*'+prodTag+'*.root') + glob.glob(signalFname)
@@ -52,8 +55,9 @@ classifier = HistoNameClassifier()
 for fname, infile in zip(inputFileNames, inputFiles) :
     print '-'*3 + fname + '-'*3
     samplename = guessSampleFromFilename(fname)
-    histoNames = getAllHistoNames(inputFiles[0], onlyTH1=True) #[:10] # get only 10 histos for now
+    histoNames = getAllHistoNames(inputFiles[0], onlyTH1=True)
     histoNames = [h for h in histoNames if any([h.startswith(p) for p in ['sr6', 'sr7', 'sr8', 'sr9']])]
+    if justTest : histoNames = histoNames[:10] # just get 10 histos to run quick tests
     histos = [infile.Get(hn) for hn in histoNames]
     for h in histos :
         setHistoType(h, classifier.histoType(h.GetName()))
