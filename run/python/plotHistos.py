@@ -66,21 +66,144 @@ for fname, infile in zip(inputFileNames, inputFiles) :
 
 def isSignal(sampleName) : return 'WH_' in sampleName
 
-def cumsum(l) :
+def cumsum(l, leftToRight=True) :
     #return numpy.cumsum(l) # not available ?
-    return [sum(a[:i]) for i in range(1,len(a)-1)] if len(a) else []
+    return [sum(l[:i]) for i in range(1,len(l)+1)] if leftToRight \
+           else [sum(l[-i:]) for i in range(1,len(l)+1)][::-1]
+def mergeOuter(bc, nOuter=2) : # add over/underflow in the first/last bin
+    return [sum(bc[:nOuter])] + bc[nOuter:-nOuter] + [sum(bc[-nOuter:])]
 
-def cumSumHisto(histo) :
+def cumSumHisto(histo, leftToRight=True) :
     hCs = histo.Clone(histo.GetName()+'_cs')
     nBinsX = 1+hCs.GetNbinsX() # TH1 starts from 1 (0 underflow, N+1 overflow)
     bc = [hCs.GetBinContent(0)] + [hCs.GetBinContent(i) for i in range(1, nBinsX)] + [hCs.GetBinContent(nBinsX+1)]
-    def mergeOuter(bc, nOuter=2) : # add over/underflow in the first/last bin
-        return [sum(bc[:nOuter])] + bc[nOuter:-nOuter] + [sum(bc[-nOuter:])]
-    bc = cumsum(mergeOverUnderFlow(bc))
+    bc = cumsum(mergeOuter(bc), leftToRight)
+    tot = bc[-1] if leftToRight else bc[0]
     for i, c in enumerate(bc) :
-        hCs.SetBinContent(i+1, c)
+        hCs.SetBinContent(i+1, c/tot if tot else 0.)
         hCs.SetBinError(i+1, 0.)
+    hCs.SetMinimum(0.0)
+    hCs.SetMaximum(1.0)
+    hCs.SetTitle('')
+    hCs.SetFillStyle(0)
     return hCs
+
+def cumEffHisto(histoTemplate, bincontents=[], leftToRight=True) :
+    h, bc= histoTemplate, bincontents
+    assert h.GetNbinsX()==len(bc),"%d bincontents for %d bins"%(len(bc), h.GetNbinsX())
+    h = h.Clone(h.GetName()+'_ce')
+    tot = bc[-1] if leftToRight else bc[0]
+    for i, c in enumerate(bc) :
+        h.SetBinContent(i+1, c/tot if tot else 0.)
+        h.SetBinError(i+1, 0.)
+    h.SetMinimum(0.0)
+    h.SetMaximum(1.0)
+    h.SetTitle('')
+    h.SetFillStyle(0)
+    return h
+
+def cloneAndFillHisto(histo, bincontents=[], suffix='', zeroErr=True) :
+    h, bc= histo, bincontents
+    assert h.GetNbinsX()==len(bc),"%d bincontents for %d bins"%(len(bc), h.GetNbinsX())
+    h = h.Clone(h.GetName()+suffix)
+    for i, c in enumerate(bc) :
+        h.SetBinContent(i+1, c)
+        if zeroErr : h.SetBinError(i+1, 0.)
+    return h
+
+def plotCumulativeEfficiencyHisto(pad, h, linecolor=r.kBlack, isPadMaster=True) :
+    pad.cd()
+    h.SetLineColor(linecolor)
+    h.SetLineWidth(2)
+    isPadMaster = isPadMaster or 0==len([o for o in pad.GetListOfPrimitives()]) # safety net
+    drawOption = 'l' if isPadMaster else 'lsame'
+    if isPadMaster :
+        xA, yA = h.GetXaxis(), h.GetYaxis()
+        xA.SetLabelSize(0)
+        xA.SetTitle('')
+        yA.SetNdivisions(-201)
+        yA.SetTitle('eff')
+        yA.SetLabelSize(yA.GetLabelSize()*1.0/pad.GetHNDC())
+        yA.SetTitleSize(yA.GetTitleSize()*1.0/pad.GetHNDC())
+        yA.SetTitleOffset(yA.GetTitleOffset()*pad.GetHNDC())
+        yA.CenterTitle()
+    h.Draw(drawOption)
+    h.SetStats(0)
+    return h
+def linearTransform(values, targetRange=[0.0,1.0]) :
+    xLoT, xHiT = targetRange[0], targetRange[1]
+    xLoO, xHiO = min(values), max(values)
+    oriRange, tarRange = (xHiO-xLoO), (xHiT-xLoT)
+    return [(xLoT + (x-xLoO)*tarRange/oriRange) if oriRange else 0.0
+            for x in values]
+
+def plotZnHisto(pad, h, linecolor=r.kBlack, minY=0.0, maxY=1.0) :
+    pad.cd()
+    h.SetLineColor(linecolor)
+    h.SetLineWidth(2)
+    h.SetLineStyle(2)
+    bc = [h.GetBinContent(i+1) for i in range(h.GetNbinsX())]
+    minZn, maxZn = min(bc), max(bc)
+    bc = linearTransform(bc+[0.], [minY, maxY])[:-1] # add one 0 so that the min is at least 0
+    for i,b in enumerate(bc) : h.SetBinContent(i+1, b)
+    h.Draw('lsame')
+    x = h.GetXaxis().GetXmax()
+    ax = r.TGaxis(x, minY, x, maxY, minZn, maxZn, 001, "+L")
+    ax.SetTitle('Z_{n}')
+    ax.CenterTitle()
+    ax.SetLabelSize(ax.GetLabelSize()*1.0/pad.GetHNDC())
+    ax.SetTitleSize(ax.GetTitleSize()*1.0/pad.GetHNDC())
+    ax.SetTitleOffset(ax.GetTitleOffset()*pad.GetHNDC())
+    ax.SetLineColor(linecolor)
+    ax.SetTitleColor(linecolor)
+    ax.SetLabelColor(linecolor)
+    ax.Draw()
+    return [h, ax]
+
+def binContentsWithUoflow(h) :
+    nBinsX = h.GetNbinsX()+1
+    return [h.GetBinContent(0)] + \
+           [h.GetBinContent(i) for i in range(1, nBinsX)] + \
+           [h.GetBinContent(nBinsX+1)]
+    
+def maxSepVerticalLine(hSig, hBkg, yMin=0.0, yMax=1.0) :
+    nxS, nxB = hSig.GetNbinsX(), hBkg.GetNbinsX()
+    assert nxS==nxB,"maxSepVerticalLine : histos with differen binning (%d!=%d)"%(nxS,nxB)
+    bcS = [hSig.GetBinContent(i) for i in range(1,1+nxS)]
+    bcB = [hBkg.GetBinContent(i) for i in range(1,1+nxB)]
+    def indexMaxDist(bcS, bcB) :
+        return sorted([(i,d) for i,d in enumerate([abs(a-b) for a,b in zip(bcS, bcB)])],
+                      key= lambda x : x[1])[-1][0]
+    iMax = indexMaxDist(bcS, bcB)
+    xPos = hSig.GetBinCenter(iMax+1)
+    sep = [abs(a-b) for a,b in zip(bcS, bcB)]
+    return r.TLine(xPos, yMin, xPos, yMax)
+
+def plotTopPad(pad, hSig, hBkg) :
+    nxS, nxB = hSig.GetNbinsX()+1, hBkg.GetNbinsX()+1  # TH1 starts from 1
+    assert nxS==nxB,"maxSepVerticalLine : histos with differen binning (%d!=%d)"%(nxS,nxB)
+    bcS, bcB = binContentsWithUoflow(hSig), binContentsWithUoflow(hBkg)
+    leftToRight = True
+    bcLS, bcLB = cumsum(mergeOuter(bcS), leftToRight), cumsum(mergeOuter(bcB), leftToRight),
+    leftToRight = False    
+    bcRS, bcRB = cumsum(mergeOuter(bcS), leftToRight), cumsum(mergeOuter(bcB), leftToRight)
+    zn = r.RooStats.NumberCountingUtils.BinomialExpZ
+    bkgUnc = 0.2
+    znL = [zn(s, b, bkgUnc) if (b>4.0 and s>0.01) else 0.0 for s,b in zip(bcLS, bcLB)]
+    znR = [zn(s, b, bkgUnc) if (b>4.0 and s>0.01) else 0.0 for s,b in zip(bcRS, bcRB)]
+    leftToRight = max(znL) >= max(znR)
+    zn = znL if leftToRight else znR
+    hZn = cloneAndFillHisto(hSig, zn, '_zn')
+    hCeS = cumEffHisto(hSig, bcLS if leftToRight else bcRS, leftToRight)
+    hCeB = cumEffHisto(hBkg, bcLB if leftToRight else bcRB, leftToRight)
+    plotCumulativeEfficiencyHisto(pad, hCeS, r.kRed)
+    plotCumulativeEfficiencyHisto(pad, hCeB, r.kBlack, False)
+    mark = maxSepVerticalLine(hCeS, hCeB)
+    mark.SetLineStyle(2)
+    mark.Draw()
+    gr =  plotZnHisto(pad, hZn, r.kBlue, 0.0, 1.0) # eff go from 0 to 1
+
+    return [hCeS, hCeB, mark, gr]
 
 
 def plotHistos(histosDict={'ttbar':None, 'zjets':None},
@@ -94,15 +217,27 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
     hname = hnames[0]
     if verbose : print "got %d histos for '%s' (samples : %s)" % (len(histosDict), hname, str(histosDict.keys()))
     can = r.TCanvas('can_'+hname, hname, 800, 600)
+    splitFraction = 0.85
     can.cd()
+    botPad = r.TPad(can.GetName()+'_bot', 'bot pad', 0.0, 0.0, 1.0, splitFraction, 0, 0, 0)
+    botPad.SetTopMargin(0)
+    r.SetOwnership(botPad, False)
+    can.cd()
+    can.Update()
+    topPad = r.TPad(can.GetName()+'_top', 'top pad', 0.0, splitFraction, 1.0, 1.0, 0, 0)
+    topPad.SetBottomMargin(0)
+    r.SetOwnership(topPad, False)
+
+    botPad.Draw()
+    botPad.cd()
     stack = r.THStack('stack_'+hname,'')
-    rMarg, lMarg, tMarg = can.GetRightMargin(), can.GetLeftMargin(), can.GetTopMargin()
+    #rMarg, lMarg, tMarg = can.GetRightMargin(), can.GetLeftMargin(), can.GetTopMargin()
+    rMarg, lMarg, tMarg = botPad.GetRightMargin(), botPad.GetLeftMargin(), botPad.GetTopMargin()
     legWidth, legHeight = 0.325, 0.225
     leg = r.TLegend(1.0 - rMarg - legWidth, 1.0 - tMarg - legHeight, 1.0 - rMarg, 1.0 - tMarg)
     leg.SetBorderSize(1)
     leg.SetFillColor(0)
     leg.SetFillStyle(0)
-
     firstHisto = None
     for s in ['diboson', 'ttbar', 'zjets', 'multijets'] :
         if s not in histosDict : continue
@@ -142,13 +277,31 @@ def plotHistos(histosDict={'ttbar':None, 'zjets':None},
         tex.DrawLatex(1.0-can.GetTopMargin(), 1.0-can.GetRightMargin(), label)
     label = channel+', '+plotRegion
     leg.SetHeader(label)
+    botPad.Update()
+    can.Update()
+    #topMargin = can.GetTopMargin()
+    #topPad = r.TPad(can.GetName()+'_top', 'top pad', 0.0, topMargin, 0.0, 1.0, 0, 0, 0)
+    can.cd()
+    topPad.Draw()
+    topPad.cd()
+    hSig, hBkg = signal, stack.GetStack().Last() # 'Last' gives a hist w/ the sum
+    graphs = None
+    if signal.GetNbinsX() > 2 :
+        graphs = plotTopPad(topPad, hSig, hBkg)
+
+#    cS = plotCumulativeEfficiency(topPad, signal, r.kRed)
+#    cB = plotCumulativeEfficiency(topPad, stack.GetStack().Last())
+#    mark = maxSepVerticalLine(cS, cB)
+#    mark.Draw()
+    
+    topPad.Update()
     can.Update()
     for ext in extensions : can.SaveAs(outdir+'/'+hname+'_lin'+'.'+ext)
-    stack.SetMaximum(5.*stack.GetMaximum())
-    stack.SetMinimum(0.25)
-    can.SetLogy()
-    for ext in extensions : can.SaveAs(outdir+'/'+hname+'_log'+'.'+ext)
+#    stack.SetMaximum(5.*stack.GetMaximum())
+#    stack.SetMinimum(0.25)
+#    can.SetLogy()
+#    for ext in extensions : can.SaveAs(outdir+'/'+hname+'_log'+'.'+ext)
 
 for k,v in histosByType.iteritems() :
     plotHistos(histosDict=dict([(h.sample, h) for h in v]))
-               
+
