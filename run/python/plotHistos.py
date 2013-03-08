@@ -10,6 +10,8 @@ import collections, optparse, sys, glob
 import ROOT as r
 r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
+r.gStyle.SetPadTickX(1)
+r.gStyle.SetPadTickY(1)
 
 from NavUtils import getAllHistoNames, HistoNameClassifier, organizeHistosByType, setHistoType, setHistoSample
 from SampleUtils import colors, guessSampleFromFilename
@@ -182,6 +184,7 @@ def maxSepVerticalLine(hSig, hBkg, yMin=0.0, yMax=1.0) :
 def plotTopPad(pad, hSig, hBkg) :
     nxS, nxB = hSig.GetNbinsX()+1, hBkg.GetNbinsX()+1  # TH1 starts from 1
     assert nxS==nxB,"maxSepVerticalLine : histos with differen binning (%d!=%d)"%(nxS,nxB)
+    pad.SetGridy()
     bcS, bcB = binContentsWithUoflow(hSig), binContentsWithUoflow(hBkg)
     leftToRight = True
     bcLS, bcLB = cumsum(mergeOuter(bcS), leftToRight), cumsum(mergeOuter(bcB), leftToRight),
@@ -202,8 +205,13 @@ def plotTopPad(pad, hSig, hBkg) :
     mark.SetLineStyle(2)
     mark.Draw()
     gr =  plotZnHisto(pad, hZn, r.kBlue, 0.0, 1.0) # eff go from 0 to 1
-
-    return [hCeS, hCeB, mark, gr]
+    xAx = hSig.GetXaxis()
+    x0, x1 = xAx.GetBinLowEdge(xAx.GetFirst()), xAx.GetBinUpEdge(xAx.GetLast())
+    midline = r.TLine(x0, 0.5, x1, 0.5)
+    midline.SetLineStyle(2)
+    midline.SetLineColor(r.kGray)
+    midline.Draw()
+    return [hCeS, hCeB, mark, gr, midline]
 
 
 def plotHistos(histosDict={'ttbar':None, 'zjets':None},
