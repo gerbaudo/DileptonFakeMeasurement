@@ -185,8 +185,8 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(met_j_ll_M,  "m(met,j,ll)",     nmassbins, massmin, massmax);
 	NEWHIST(met_j_Mt,    "m_{T}(met,j)",    nmassbins, massmin, massmax);
 	NEWHIST(met_ll_Mt,   "m_{T}(met,ll)",   nmassbins, massmin, massmax);
-	NEWHIST(met_j_ll_Mt, "m_{T}(met,j,ll)", nmassbinsj, massminj, massmaxj);
-	NEWHIST(met_ll_Mt2,  "m_{T2}(met,l,l)", nmassbinsj, massminj, massmaxj);
+	NEWHIST(met_j_ll_Mt, "m_{T}(met,j,ll)", nmassbins, massmin, massmax);
+	NEWHIST(met_ll_Mt2,  "m_{T2}(met,l,l)", nmassbins, massmin, massmax);
 	NEWHIST(jj_M, "m(jj)", nmassbins, massmin, massmax);
 
 	NEWHIST(met_l0_Mt,           "m_{T}(met,l0)", nmassbins, massmin, massmax);
