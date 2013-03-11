@@ -3,7 +3,7 @@
 # dropped all 'cfappend' samples (see Matt's original script for the complete list)
 # /home/mrelich/workarea/SUSY2012/SusyAna2012/run/anaplots/groupMCwChargeFlip.sh
 
-ending="_Feb21_n0115"
+ending="_Mar08_n0115"
 outdir="merged"
 #addition="CFPtFix" 
 addition=""
