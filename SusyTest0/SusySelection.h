@@ -112,6 +112,7 @@ class SusySelection : public SusyNtAna
     bool passZtautauVeto(cvl_t& l, cvj_t& j, const Met* m, float widthZpeak=40.0);
     bool passPtTot(cvl_t& l, cvj_t& j, const Met* m, float maxPtTot=50.0);
     bool passMllMax(const LeptonVector& leptons, float maxMll=80.0);
+    bool passDrllMax(const LeptonVector& leptons, float maxDr=2.0);
 
     // Idendification methods
     bool isRealLepton(const Lepton* lep);

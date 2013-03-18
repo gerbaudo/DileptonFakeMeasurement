@@ -575,6 +575,11 @@ bool SusySelection::passMllMax(const LeptonVector& l, float maxMll)
   return TLorentzVector(*l[0] + *l[1]).M() < maxMll;
 }
 
+bool SusySelection::passDrllMax(const LeptonVector& l, float maxDr)
+{
+  if(l.size()<2) return false;
+  return  l[0]->DeltaR(*(static_cast<TLorentzVector*>(l[1]))) < maxDr;
+}
 /*--------------------------------------------------------------------------------*/
 // Check MC Lepton
 /*--------------------------------------------------------------------------------*/
