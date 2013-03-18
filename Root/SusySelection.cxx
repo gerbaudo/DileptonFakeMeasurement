@@ -537,6 +537,16 @@ bool SusySelection::passMtLlmetMin(const LeptonVector& l, const Met* met, float 
   return SusyPlotter::transverseMass(TLorentzVector(*l[0]+*l[1]), met->lv()) > minVal;
 }
 //----------------------------------------------------------
+bool SusySelection::passMtMinlmetMin(const LeptonVector& l, const Met* met, float minVal)
+{
+  if( l.size() < 2 ) return false;
+  const TLorentzVector *l0 = static_cast<TLorentzVector*>(l[0]);
+  const TLorentzVector *l1 = static_cast<TLorentzVector*>(l[1]);
+  float mtL0Met = SusyPlotter::transverseMass(*l0, met->lv());
+  float mtL1Met = SusyPlotter::transverseMass(*l1, met->lv());
+  return (mtL0Met < mtL1Met ? mtL0Met : mtL1Met) > minVal;
+}
+//----------------------------------------------------------
 bool SusySelection::passMT2(const LeptonVector& leptons, const Met* met, float cut)
 {
   if( leptons.size() < 2 ) return false;

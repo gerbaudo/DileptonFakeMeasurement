@@ -110,6 +110,7 @@ class SusySelection : public SusyNtAna
     bool passeq2JetWoutFwVeto(const JetVector& jets);
     bool passdPhi(TLorentzVector v0, TLorentzVector v1, float cut);
     bool passMtLlmetMin(const LeptonVector& leptons, const Met* met, float minVal=50.0);
+    bool passMtMinlmetMin(const LeptonVector& leptons, const Met* met, float minVal=50.0);
     bool passMT2(const LeptonVector& leptons, const Met* met, float cut);
     bool passNj(const JetVector& jets, int minNj=2, int maxNj=3);
     bool passZtautauVeto(cvl_t& l, cvj_t& j, const Met* m, float widthZpeak=40.0);
