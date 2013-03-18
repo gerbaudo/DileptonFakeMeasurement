@@ -2,3 +2,6 @@ AutoDict*
 *.png
 *.eps
 *.pkl
+*.txy
+*.log
+*~
