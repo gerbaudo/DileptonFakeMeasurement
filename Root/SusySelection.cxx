@@ -257,7 +257,7 @@ bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, 
   if( count && passge2Jet(jets) )           increment(n_pass_SR6ge2j[m_ET],lepSf, bSf);
   if( count && passge2JetWoutFwVeto(jets) ) increment(n_pass_SR6ge2jNfv[m_ET],lepSf, bSf);
   if( count && passeq2JetWoutFwVeto(jets) ) increment(n_pass_SR6eq2jNfv[m_ET],lepSf, bSf);
-  if( !passeq2Jet(jets) )                 return false;
+  if( !passge2Jet(jets) )                 return false;
   if( count ) increment(n_pass_SR6eq2j[m_ET],lepSf, bSf);
   if( !passMETRel(met,leptons,jets,50.) ) return false;
   if( count ) increment(n_pass_SR6metr[m_ET],lepSf, bSf);
@@ -292,7 +292,7 @@ bool SusySelection::passSR8(const LeptonVector& leptons, const JetVector& jets, 
   if( count && passge2Jet(jets) )           increment(n_pass_SR8ge2j[m_ET],lepSf, bSf);
   if( count && passge2JetWoutFwVeto(jets) ) increment(n_pass_SR8ge2jNfv[m_ET],lepSf, bSf);
   if( count && passeq2JetWoutFwVeto(jets) ) increment(n_pass_SR8eq2jNfv[m_ET],lepSf, bSf);
-  if( !passeq2Jet(jets) )                 return false;
+  if( !passge2Jet(jets) )                 return false;
   if( count ) increment(n_pass_SR8eq2j[m_ET],lepSf, bSf);
   if( !passMETRel(met,leptons,jets,50.) ) return false;
   if( count ) increment(n_pass_SR8metr[m_ET],lepSf, bSf);
@@ -310,7 +310,7 @@ bool SusySelection::passSR9(const LeptonVector& leptons, const JetVector& jets, 
   if( count && passge2Jet(jets) )           increment(n_pass_SR9ge2j[m_ET],lepSf, bSf);
   if( count && passge2JetWoutFwVeto(jets) ) increment(n_pass_SR9ge2jNfv[m_ET],lepSf, bSf);
   if( count && passeq2JetWoutFwVeto(jets) ) increment(n_pass_SR9eq2jNfv[m_ET],lepSf, bSf);
-  if( !passeq2Jet(jets) )                 return false;
+  if( !passge2Jet(jets) )                 return false;
   if( count ) increment(n_pass_SR9eq2j[m_ET],lepSf, bSf);
   if( !passMETRel(met,leptons,jets,50.) ) return false;
   if( count ) increment(n_pass_SR9metr[m_ET],lepSf, bSf);
