@@ -267,13 +267,13 @@ bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, 
 bool SusySelection::passSR7(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
   bool lepSf(true), bSf(true);
-  if( !oppositeSign(leptons) )            return false;
-  if( count ) increment(n_pass_SR7sign[m_ET],lepSf, bSf);
-  if(  sameFlavor(leptons) )              return false;
-  if( count ) increment(n_pass_SR7flav[m_ET],lepSf, bSf);
-  if( count && passge1Jet(jets) )     increment(n_pass_SR7ge1j[m_ET],lepSf, bSf);
-  if( passge2Jet(jets)) { if( count ) increment(n_pass_SR7ge2j[m_ET],lepSf, bSf); }
-  else return false;
+  if( !oppositeSign(leptons) )     return false;
+  if( count )                      increment(n_pass_SR7sign[m_ET],lepSf, bSf);
+  if(  sameFlavor(leptons) )       return false;
+  if( count )                      increment(n_pass_SR7flav[m_ET],lepSf, bSf);
+  if( count && passge1Jet(jets) )  increment(n_pass_SR7ge1j[m_ET],lepSf, bSf);
+  if( !passge2Jet(jets))           return false;
+  else if( count )                 increment(n_pass_SR7ge2j[m_ET],lepSf, bSf);
   // DG Mar 2013 : might want to add counters here as well
   if( !passMllMax     (leptons))            return false;
   if( !passPtTot      (leptons, jets, met)) return false;
