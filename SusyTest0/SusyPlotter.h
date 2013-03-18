@@ -34,24 +34,35 @@ static string chanNames[] = {
 // Plotting regions
 enum PlotRegion{
   PR_NONE,
+  PR_SR6base,
+  PR_SR6,
   PR_SR7base,
   PR_SR7Nj,
   PR_SR7NjZttVeto,
   PR_SR7NjPtTot,
   PR_SR7NjMll,
   PR_SR7,
+  PR_SR8base,
+  PR_SR8,
+  PR_SR9base,
+  PR_SR9,
   PR_N
 };
 
 static string PRNames[] = {
   "srnone",
+  "sr6base",
+  "sr6",
   "sr7base",
   "sr7Nj",
   "sr7NjZttVeto",
   "sr7NjPtTot",
   "sr7NjMll",
-  "sr7"
-
+  "sr7",
+  "sr8base",
+  "sr8",
+  "sr9base",
+  "sr9"
 };
 
 class SusyPlotter : public SusySelection
