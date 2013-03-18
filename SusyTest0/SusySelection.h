@@ -97,8 +97,10 @@ class SusySelection : public SusyNtAna
     // Signal Region Cuts
     bool passJetVeto(const JetVector& jets);
     bool passZVeto(const LeptonVector& leptons, float Zlow = 81.2, float Zhigh = 101.2);
-    bool passMETRel(const Met *met, const LeptonVector& leptons,
-		    const JetVector& jets, float maxMet = 100);
+    bool passMETRel(const Met *met, const LeptonVector& leptons, const JetVector& jets, float maxMet = 100);
+    bool passMETRelMin(const Met *met, const LeptonVector& leptons, const JetVector& jets, float minVal = 50.0) {
+      return !passMETRel(met, leptons, jets, minVal);
+    };
     bool passbJetVeto(const JetVector& jets);
     bool passge1Jet(const JetVector& jets);
     bool passge2Jet(const JetVector& jets);
