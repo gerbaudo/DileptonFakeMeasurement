@@ -249,16 +249,14 @@ bool SusySelection::passSR9base(const LeptonVector& leptons, const JetVector& je
 bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
   bool lepSf(true), bSf(true);
-  if( !oppositeSign(leptons) )            return false;
-  if( count ) increment(n_pass_SR6sign[m_ET],lepSf, bSf);
-  if( !sameFlavor(leptons) )              return false;
-  if( count ) increment(n_pass_SR6flav[m_ET],lepSf, bSf);
-  if( count && passge1Jet(jets) )           increment(n_pass_SR6ge1j[m_ET],lepSf, bSf);
-  if( count && passge2Jet(jets) )           increment(n_pass_SR6ge2j[m_ET],lepSf, bSf);
-  if( count && passge2JetWoutFwVeto(jets) ) increment(n_pass_SR6ge2jNfv[m_ET],lepSf, bSf);
-  if( count && passeq2JetWoutFwVeto(jets) ) increment(n_pass_SR6eq2jNfv[m_ET],lepSf, bSf);
-  if( !passge2Jet(jets) )                 return false;
-  if( count ) increment(n_pass_SR6eq2j[m_ET],lepSf, bSf);
+  if( !oppositeSign(leptons) )     return false;
+  if( count )                      increment(n_pass_SR6sign[m_ET],lepSf, bSf);
+  if( !sameFlavor(leptons) )       return false;
+  if( count )                      increment(n_pass_SR6flav[m_ET],lepSf, bSf);
+  if( count && passge1Jet(jets) )  increment(n_pass_SR6ge1j[m_ET],lepSf, bSf);
+  if( !passge2Jet(jets))           return false;
+  else if( count )                 increment(n_pass_SR6ge2j[m_ET],lepSf, bSf);
+
   if( !passMETRel(met,leptons,jets,50.) ) return false;
   if( count ) increment(n_pass_SR6metr[m_ET],lepSf, bSf);
   return true;
@@ -284,15 +282,14 @@ bool SusySelection::passSR7(const LeptonVector& leptons, const JetVector& jets, 
 bool SusySelection::passSR8(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
   bool lepSf(true), bSf(true);
-  if( oppositeSign(leptons) )             return false;
-  if( count ) increment(n_pass_SR8sign[m_ET],lepSf, bSf);
-  if( !sameFlavor(leptons) )              return false;
-  if( count ) increment(n_pass_SR8flav[m_ET],lepSf, bSf);
-  if( count && passge1Jet(jets) )           increment(n_pass_SR8ge1j[m_ET],lepSf, bSf);
-  if( count && passge2Jet(jets) )           increment(n_pass_SR8ge2j[m_ET],lepSf, bSf);
-  if( count && passge2JetWoutFwVeto(jets) ) increment(n_pass_SR8ge2jNfv[m_ET],lepSf, bSf);
-  if( count && passeq2JetWoutFwVeto(jets) ) increment(n_pass_SR8eq2jNfv[m_ET],lepSf, bSf);
-  if( !passge2Jet(jets) )                 return false;
+  if( oppositeSign(leptons) )      return false;
+  if( count )                      increment(n_pass_SR8sign[m_ET],lepSf, bSf);
+  if( !sameFlavor(leptons) )       return false;
+  if( count )                      increment(n_pass_SR8flav[m_ET],lepSf, bSf);
+  if( count && passge1Jet(jets) )  increment(n_pass_SR8ge1j[m_ET],lepSf, bSf);
+  if( !passge2Jet(jets))           return false;
+  else if( count )                 increment(n_pass_SR8ge2j[m_ET],lepSf, bSf);
+
   if( count ) increment(n_pass_SR8eq2j[m_ET],lepSf, bSf);
   if( !passMETRel(met,leptons,jets,50.) ) return false;
   if( count ) increment(n_pass_SR8metr[m_ET],lepSf, bSf);
@@ -302,16 +299,14 @@ bool SusySelection::passSR8(const LeptonVector& leptons, const JetVector& jets, 
 bool SusySelection::passSR9(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
   bool lepSf(true), bSf(true);
-  if( oppositeSign(leptons) )             return false;
-  if( count ) increment(n_pass_SR9sign[m_ET],lepSf, bSf);
-  if( sameFlavor(leptons) )               return false;
-  if( count ) increment(n_pass_SR9flav[m_ET],lepSf, bSf);
-  if( count && passge1Jet(jets) )           increment(n_pass_SR9ge1j[m_ET],lepSf, bSf);
-  if( count && passge2Jet(jets) )           increment(n_pass_SR9ge2j[m_ET],lepSf, bSf);
-  if( count && passge2JetWoutFwVeto(jets) ) increment(n_pass_SR9ge2jNfv[m_ET],lepSf, bSf);
-  if( count && passeq2JetWoutFwVeto(jets) ) increment(n_pass_SR9eq2jNfv[m_ET],lepSf, bSf);
-  if( !passge2Jet(jets) )                 return false;
-  if( count ) increment(n_pass_SR9eq2j[m_ET],lepSf, bSf);
+  if( oppositeSign(leptons) )      return false;
+  if( count )                      increment(n_pass_SR9sign[m_ET],lepSf, bSf);
+  if( sameFlavor(leptons) )        return false;
+  if( count )                      increment(n_pass_SR9flav[m_ET],lepSf, bSf);
+  if( count && passge1Jet(jets) )  increment(n_pass_SR9ge1j[m_ET],lepSf, bSf);
+  if( !passge2Jet(jets))           return false;
+  else if( count )                 increment(n_pass_SR9ge2j[m_ET],lepSf, bSf);
+
   if( !passMETRel(met,leptons,jets,50.) ) return false;
   if( count ) increment(n_pass_SR9metr[m_ET],lepSf, bSf);
   return true;
