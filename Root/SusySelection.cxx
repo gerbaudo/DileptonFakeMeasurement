@@ -531,6 +531,12 @@ bool SusySelection::passdPhi(TLorentzVector v0, TLorentzVector v1, float cut)
   return v0.DeltaPhi(v1) > cut;
 }
 /*--------------------------------------------------------------------------------*/
+bool SusySelection::passMtLlmetMin(const LeptonVector& l, const Met* met, float minVal)
+{
+  if( l.size() < 2 ) return false;
+  return SusyPlotter::transverseMass(TLorentzVector(*l[0]+*l[1]), met->lv()) > minVal;
+}
+//----------------------------------------------------------
 bool SusySelection::passMT2(const LeptonVector& leptons, const Met* met, float cut)
 {
   if( leptons.size() < 2 ) return false;
