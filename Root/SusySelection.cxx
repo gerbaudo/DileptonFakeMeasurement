@@ -558,6 +558,12 @@ bool SusySelection::passZtautauVeto(cvl_t& l, cvj_t& j, const Met* m, float widt
   return abs(SusyPlotter::mZTauTau(*l[0], *l[1], m->lv()) - mZ0) > widthZpeak;
 }
 //----------------------------------------------------------
+bool SusySelection::passPtllMin(cvl_t& l, float minPt)
+{
+  if(l.size()<2) return false;
+  return TLorentzVector(*l[0] + *l[1]).Pt() > minPt;
+}
+//----------------------------------------------------------
 bool SusySelection::passPtTot(cvl_t& l, cvj_t& j, const Met* m, float maxPtTot)
 {
   if(!m) return false;
@@ -574,7 +580,7 @@ bool SusySelection::passMllMax(const LeptonVector& l, float maxMll)
   if(l.size()<2) return false;
   return TLorentzVector(*l[0] + *l[1]).M() < maxMll;
 }
-
+//----------------------------------------------------------
 bool SusySelection::passDrllMax(const LeptonVector& l, float maxDr)
 {
   if(l.size()<2) return false;
