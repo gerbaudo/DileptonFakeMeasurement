@@ -197,15 +197,6 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(met, "#slash{E}_{T}", nptbins, ptmin, ptmax);
 	NEWHIST(metrel, "#slash{E}^{rel}_{T}", nptbins, ptmin, ptmax);
 
-	// Met terms
-	NEWHIST(met_refEle,   "#slash{E}_{T} (refEle)", nptbins, ptmin, ptmax);
-	NEWHIST(met_refMuo,   "#slash{E}_{T} (refMuo)", nptbins, ptmin, ptmax);
-	NEWHIST(met_refJet,   "#slash{E}_{T} (refJet)", nptbins, ptmin, ptmax);
-	NEWHIST(met_softJet,  "#slash{E}_{T} (softJet)", nptbins, ptmin, ptmax);
-	NEWHIST(met_refGamma, "#slash{E}_{T} (refGamma)", nptbins, ptmin, ptmax);
-	NEWHIST(met_refCell,  "#slash{E}_{T} (refCell)", nptbins, ptmin, ptmax);
-
-
 	// njet plots
 	NEWHIST(njets, "# jets", njetbins, njetmin, njetmax);
 	NEWHIST(njets_pos, "# jets leading pos", njetbins, njetmin, njetmax);
@@ -418,14 +409,6 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   float metrel = getMetRel(met, leps, jets);
   FILL(h_met, met->Et);
   FILL(h_metrel, metrel);
-
-  // Met terms
-  FILL(h_met_refEle,   met->refEle);
-  FILL(h_met_refMuo,   met->refMuo);
-  FILL(h_met_refJet,   met->refJet);
-  FILL(h_met_softJet,  met->softJet);
-  FILL(h_met_refGamma, met->refGamma);
-  FILL(h_met_refCell,  met->refCell);
 
   int nJ = jets.size() > 4 ? 4 : jets.size();
   int nbJ = numberOfCBJets(jets);

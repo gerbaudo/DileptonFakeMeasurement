@@ -179,12 +179,6 @@ class SusyPlotter : public SusySelection
     // MET
     TH1F* DEFHIST(met);
     TH1F* DEFHIST(metrel);
-    TH1F* DEFHIST(met_refEle);
-    TH1F* DEFHIST(met_refMuo);
-    TH1F* DEFHIST(met_refJet);
-    TH1F* DEFHIST(met_softJet);
-    TH1F* DEFHIST(met_refGamma);
-    TH1F* DEFHIST(met_refCell);
 
     // # of jets
     TH1F* DEFHIST(njets);
