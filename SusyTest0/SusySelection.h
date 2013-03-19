@@ -249,6 +249,7 @@ class SusySelection : public SusyNtAna
     float                n_pass_SR6ge2j[ET_N][WT_N];
     float                n_pass_SR6ge2jNfv[ET_N][WT_N];
     float                n_pass_SR6metr[ET_N][WT_N];
+    float                n_pass_SR6[ET_N][WT_N];
     // SR7 counts
     float                n_pass_SR7sign[ET_N][WT_N];
     float                n_pass_SR7flav[ET_N][WT_N];
@@ -258,6 +259,7 @@ class SusySelection : public SusyNtAna
     float                n_pass_SR7ge2j[ET_N][WT_N];
     float                n_pass_SR7ge2jNfv[ET_N][WT_N];
     float                n_pass_SR7metr[ET_N][WT_N];
+    float                n_pass_SR7[ET_N][WT_N];
     // SR8 counts
     float                n_pass_SR8sign[ET_N][WT_N];
     float                n_pass_SR8flav[ET_N][WT_N];
@@ -267,6 +269,7 @@ class SusySelection : public SusyNtAna
     float                n_pass_SR8ge2j[ET_N][WT_N];
     float                n_pass_SR8ge2jNfv[ET_N][WT_N];
     float                n_pass_SR8metr[ET_N][WT_N];
+    float                n_pass_SR8[ET_N][WT_N];
     // SR9 counts
     float                n_pass_SR9sign[ET_N][WT_N];
     float                n_pass_SR9flav[ET_N][WT_N];
@@ -276,6 +279,7 @@ class SusySelection : public SusyNtAna
     float                n_pass_SR9ge2j[ET_N][WT_N];
     float                n_pass_SR9ge2jNfv[ET_N][WT_N];
     float                n_pass_SR9metr[ET_N][WT_N];
+    float                n_pass_SR9[ET_N][WT_N];
 };
 
 #endif
