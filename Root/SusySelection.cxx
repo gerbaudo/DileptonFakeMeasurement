@@ -255,10 +255,10 @@ bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, 
   bool lepSf(true), bSf(true);
   if (oppositeSign(leptons)) { if (count) increment(n_pass_SR6sign[m_ET],lepSf, bSf); }
   else return false;
-  if (sameFlavor(lepSf)) { if (count) increment(n_pass_SR6flav[m_ET],lepSf, bSf); }
+  if (sameFlavor(leptons))   { if (count) increment(n_pass_SR6flav[m_ET],lepSf, bSf); }
   else return false;
-  if (count && passge1Jet(jets) )           increment(n_pass_SR6ge1j[m_ET],lepSf, bSf);
-  if (passge2Jet(jets))  { if (count) increment(n_pass_SR6ge2j[m_ET],lepSf, bSf); }
+  if (count && passge1Jet(jets) )         increment(n_pass_SR6ge1j[m_ET],lepSf, bSf);
+  if (passge2Jet(jets))      { if (count) increment(n_pass_SR6ge2j[m_ET],lepSf, bSf); }
   else return false;
   if( !passDrllMax(leptons) )               return false;
   if( !passPtllMin(leptons) )               return false;
