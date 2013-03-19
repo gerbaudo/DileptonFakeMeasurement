@@ -233,12 +233,6 @@ class SusyPlotter : public SusySelection
     TH1F* DEFHIST(met_l1_Mt);
     TH1F* DEFHIST(ll_met_Mt); // duplicate of met_ll_M ? (DG Feb 2013)
 
-    TH1F* DEFHIST(met_ll_Mt_noj);
-    TH1F* DEFHIST(met_ll_Mt_onej);
-    TH1F* DEFHIST(met_ll_Mt_twoj);
-    TH1F* DEFHIST(met_ll_Mt_ge3j);
-    TH1F* DEFHIST(met_ll_Mt_oneOrtwoj);
-
     TH1F* DEFHIST(dPhi_llmet_j);
     TH1F* DEFHIST(dPhi_met_l0);
     TH1F* DEFHIST(dPhi_met_l1);

@@ -191,11 +191,6 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 
 	NEWHIST(met_l0_Mt,           "m_{T}(met,l0)", nmassbins, massmin, massmax);
 	NEWHIST(met_l1_Mt,           "m_{T}(met,l0)", nmassbins, massmin, massmax);
-	NEWHIST(met_ll_Mt_noj,       "m_{T}(met,ll)", nmassbins, massmin, massmax);
-	NEWHIST(met_ll_Mt_onej,      "m_{T}(met,ll)", nmassbins, massmin, massmax);
-	NEWHIST(met_ll_Mt_twoj,      "m_{T}(met,ll)", nmassbins, massmin, massmax);
-	NEWHIST(met_ll_Mt_ge3j,      "m_{T}(met,ll)", nmassbins, massmin, massmax);
-	NEWHIST(met_ll_Mt_oneOrtwoj, "m_{T}(met,ll)", nmassbins, massmin, massmax);
 	NEWHIST(mtautau_l0l1met,     "m_{#tau#tau}(l0,l1,met)", nmassbins+1, massmin-((massmax-massmin)/nmassbins), massmax); // need a negative bin
 	NEWHIST(ll_met_Mt,           "m_{T}(ll,met)", nmassbins, massmin, massmax);
 
@@ -498,12 +493,6 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
 
   FILL(h_met_l0_Mt, Mt(*l0,met->lv()));
   FILL(h_met_l1_Mt, Mt(*l1,met->lv()));
-
-  if(nJ==0) FILL(h_met_ll_Mt_noj, mt_met_ll);
-  if(nJ==1) FILL(h_met_ll_Mt_onej, mt_met_ll);
-  if(nJ==2) FILL(h_met_ll_Mt_twoj, mt_met_ll);
-  if(nJ>=3) FILL(h_met_ll_Mt_ge3j, mt_met_ll);
-  if(nJ==1||nJ==4) FILL(h_met_ll_Mt_oneOrtwoj, mt_met_ll);
 
   FILL(h_dR_l0_l1, fabs(l0->DeltaR(*l1)));
   FILL(h_dPhi_l0_l1, fabs(l0->DeltaPhi(*l1)));
