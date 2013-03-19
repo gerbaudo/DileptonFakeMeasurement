@@ -417,10 +417,8 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   FILL(h_njets, nJ);
   FILL(h_nbjets, nbJ);
   FILL(h_nfjets, nfJ);
-  if(l0->q > 0)
-    FILL(h_njets_pos,nJ);
-  else
-    FILL(h_njets_neg, nJ);
+  if(l0->q > 0) FILL(h_njets_pos,nJ);
+  else          FILL(h_njets_neg, nJ);
 
   FILL(h_l_type, l0->mcType);
   FILL(h_l_origin, l0->mcOrigin);
@@ -430,10 +428,8 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   FILL(h_onebin, 0.);
 
   FILL(h_sumQ, l0->q + l1->q);
-  if(l0->q > 0)
-    FILL(h_ll_M_pos, (*l0+*l1).M());
-  else
-    FILL(h_ll_M_neg, (*l0+*l1).M());
+  if(l0->q > 0) FILL(h_ll_M_pos, (*l0+*l1).M());
+  else          FILL(h_ll_M_neg, (*l0+*l1).M());
   float mll = (*l0+*l1).M();
   if(90 <= mll && mll <= 110){
     FILL(h_njets_mll_90_120, nJ);
