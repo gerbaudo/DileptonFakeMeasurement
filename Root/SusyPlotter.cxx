@@ -505,45 +505,6 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   if(nJ>=3) FILL(h_met_ll_Mt_ge3j, mt_met_ll);
   if(nJ==1||nJ==4) FILL(h_met_ll_Mt_oneOrtwoj, mt_met_ll);
 
-  if(nJ==1){
-    float mllj = (*l0+*l1+*jets.at(0)).M();
-    FILL(h_llj_M, mllj);
-    if(l0->q > 0) FILL(h_llj_M_pos, mllj);
-    else           FILL(h_llj_M_neg, mllj);
-
-    const Jet* jet = jets.at(0);
-    FILL(h_met_j_M, (*jet+mlv).M());
-    FILL(h_met_j_ll_M, Mt(*l0+*l1+*jet,mlv));
-    FILL(h_met_j_Mt, Mt(*jet, mlv));
-    FILL(h_met_j_ll_Mt, Mt(*l0 + *l1 + *jet , mlv));
-    FILL(h_j0_pt, jet->Pt());
-    FILL(h_j0_eta, fabs(jet->Eta()));
-
-    // Angle plots
-    FILL(h_dPhi_llmet_j, fabs(jet->DeltaPhi( *l0 + *l1 + mlv)));
-    FILL(h_dR_llmet_j, fabs(jet->DeltaR( *l0 + *l1 + mlv)));
-    FILL(h_dPhi_met_j, fabs(met->lv().DeltaPhi(*jet)));
-    FILL(h_dPhi_l0_j, fabs(l0->DeltaPhi(*jet)));
-    FILL(h_dPhi_l1_j, fabs(l1->DeltaPhi(*jet)));
-    FILL(h_dPhi_ll_j, fabs((*l1+*l0).DeltaPhi(*jet)));
-
-    float mll = (*l0 + *l1).M();
-    if(90 < mll && mll < 120)
-      FILL2(h_l0_l1_pt,l0->Pt(),l1->Pt());
-
-    if(!(90 < mll && mll < 120)){
-      FILL(h_dPhi_woSig_llmet_j, fabs(jet->DeltaPhi( *l0 + *l1 + mlv)));
-      FILL(h_dPhi_woSig_met_l0, fabs(met->lv().DeltaPhi(*l0)));
-      FILL(h_dPhi_woSig_met_l1, fabs(met->lv().DeltaPhi(*l1)));
-      FILL(h_dPhi_woSig_met_ll, fabs(met->lv().DeltaPhi(*l0+*l1)));
-      FILL(h_dPhi_woSig_met_j, fabs(met->lv().DeltaPhi(*jet)));
-      FILL(h_dPhi_woSig_l0_j, fabs(l0->DeltaPhi(*jet)));
-      FILL(h_dPhi_woSig_l1_j, fabs(l1->DeltaPhi(*jet)));
-      FILL(h_dPhi_woSig_ll_j, fabs((*l1+*l0).DeltaPhi(*jet)));
-      FILL(h_dPhi_woSig_l0_l1, fabs(l0->DeltaPhi(*l1)));
-    }
-  } // end if (nj==1)
-
   FILL(h_dR_l0_l1, fabs(l0->DeltaR(*l1)));
   FILL(h_dPhi_l0_l1, fabs(l0->DeltaPhi(*l1)));
   FILL(h_dPhi_met_l0, fabs(met->lv().DeltaPhi(*l0)));
