@@ -246,7 +246,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 
 	NEWHIST(mt_l0_met,      "m_{T}(l_{0}, met)", nmassbins, massmin, massmax);
 	NEWHIST(mt_l1_met,      "m_{T}(l_{1}, met)", nmassbins, massmin, massmax);
-	NEWHIST(mt_l_met_min,   "m_{T}^{min}(l_{1}, met)", nmassbins, massmin, massmax);
+	NEWHIST(mt_l_met_min,   "m_{T}^{min}(l, met)", nmassbins, massmin, massmax);
 	NEWHIST(mct_top_tag,    "m_{CT} top tag", 2, -0.5, +1.5);
 	NEWHIST(sumJ0J1_mv1tag, "MV1(j0) + MV1(j1)", 50, +0.0, +0.5);
 	NEWHIST(numNeutrinoSol, "Number of neutrino solutions (2l+2j)", 9, -0.5, +8.5);
