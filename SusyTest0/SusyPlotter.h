@@ -264,12 +264,6 @@ class SusyPlotter : public SusySelection
 
     TH2F* DEFHIST(l0_l1_pt);
 
-    TH1F* DEFHIST(ll_M_dPhiReg);
-
-    // Finely binned plots for Daniel
-    TH1F* DEFHIST(ll_M_fine);
-    TH1F* DEFHIST(ll_M_finer);
-
     TH1F* DEFHIST(l0_qeta);
     TH1F* DEFHIST(l1_qeta);
     TH1F* DEFHIST(mt_l0_met);
@@ -278,11 +272,6 @@ class SusyPlotter : public SusySelection
     TH1F* DEFHIST(mct_top_tag);
     TH1F* DEFHIST(sumJ0J1_mv1tag);
     TH1F* DEFHIST(numNeutrinoSol);
-
-    // Test
-    //TH1F* h_met_test[Ch_N][PR_N];
-    //TH1F* h_met_test2[Ch_N][PR_N];
-
 
     #undef DEFHIST
 

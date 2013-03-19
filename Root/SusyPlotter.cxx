@@ -171,7 +171,6 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 
 	// Mass plots
 	NEWHIST(ll_M, "m(ll)", nmassbins, massmin, massmax);
-	NEWHIST(ll_M_dPhiReg, "m(ll)", nmassbins, massmin, massmax);
 	NEWHIST(ll_M_pos, "m(ll)", nmassbins, massmin, massmax);
 	NEWHIST(ll_M_neg, "m(ll)", nmassbins, massmin, massmax);
 	NEWHIST(llj_M, "m(llj)", nmassbins, massmin, massmax);
@@ -273,10 +272,6 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(numNeutrinoSol, "Number of neutrino solutions (2l+2j)", 9, -0.5, +8.5);
 
 	NEWHIST2(l0_l1_pt, "l0 vs l1 pt", nptbins, ptmin, ptmax);
-
-	// Fine
-	NEWHIST(ll_M_fine, "m(ll)", nmassbinsfine, massminfine, massmaxfine);
-	NEWHIST(ll_M_finer, "m(ll)", nmassbinsfiner, massminfiner, massmaxfiner);
 
         #undef NEWHIST
         #undef NEWHIST2
@@ -484,13 +479,6 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   FILL(h_ll_met_Mt, SusyPlotter::transverseMass(ll, mlv));
   FILL(h_met_ll_Mt2, mt2);
 
-
-  if( fabs(l0->DeltaPhi(met->lv())) < 3 ){
-    FILL(h_ll_M_dPhiReg, ll.M());
-    FILL(h_ll_M_fine, ll.M());
-    FILL(h_ll_M_finer, ll.M());
-  }
-
   FILL(h_met_l0_Mt, Mt(*l0,met->lv()));
   FILL(h_met_l1_Mt, Mt(*l1,met->lv()));
 
@@ -538,12 +526,6 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
       FILL(h_numNeutrinoSol, numNeutrinoSol);
     } // end if(oppositeCharge)
   } // end if(nJ>=2)
-
-
-
-  //h_met_test[ch][PR]->Fill(met->Et,weight);
-  //h_met_test2[ch][PR]->Fill(met->Et,weight);
-
 
   #undef FILL
   #undef FILL2
