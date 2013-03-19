@@ -510,7 +510,7 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   bool topTag = passTopTag(leps, jets, met);
   FILL(h_mct_top_tag, float(topTag));
 
-  if(nJ==2){
+  if(nJ>=2){
     const Jet &j0 = *jets.at(0);
     const Jet &j1 = *jets.at(1);
     const TLorentzVector jj = j0 + j1;
@@ -526,13 +526,8 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
     FILL(h_dPhi_l0_jj, fabs(l0->DeltaPhi(jj)));
     FILL(h_dPhi_l1_jj, fabs(l1->DeltaPhi(jj)));
     FILL(h_tot_pt, (ll+jj+mlv).Pt());
-  } // end if(nJ==2)
-
-  bool oppositeCharge((l0->q * l1->q) < 0.);
-  if(nJ>1) {
-    const Jet &j0 = *jets.at(0);
-    const Jet &j1 = *jets.at(1);
     FILL(h_sumJ0J1_mv1tag, j0.mv1 + j1.mv1);
+    bool oppositeCharge((l0->q * l1->q) < 0.);
     if(oppositeCharge) {
       const TLorentzVector &lPos = (l0->q > 0. ? *l0 : *l1);
       const TLorentzVector &lNeg = (l1->q < 0. ? *l1 : *l0);
@@ -542,7 +537,8 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
       // DG Mar13: should also we consider the combinations with the third jet?
       FILL(h_numNeutrinoSol, numNeutrinoSol);
     } // end if(oppositeCharge)
-  } // end(nJ>1)
+  } // end if(nJ>=2)
+
 
 
   //h_met_test[ch][PR]->Fill(met->Et,weight);
