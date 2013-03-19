@@ -304,6 +304,15 @@ Bool_t SusyPlotter::Process(Long64_t entry)
 
   bool count(true);
 
+
+
+  if( passSR6base     (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR6base);
+  if( passSR6         (l, j, m, count)) fillHistos(l, j, m, weight, PR_SR6);
+  if( passSR8base     (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR8base);
+  if( passSR8         (l, j, m, count)) fillHistos(l, j, m, weight, PR_SR8);
+  if( passSR9base     (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR9base);
+  if( passSR9         (l, j, m, count)) fillHistos(l, j, m, weight, PR_SR9);
+
   if( passSR7base     (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR7base);
   if( passSR7Nj       (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR7Nj);
   if( passSR7NjZttVeto(l, j, m)       ) fillHistos(l, j, m, weight, PR_SR7NjZttVeto);
