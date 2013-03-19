@@ -197,22 +197,11 @@ class SusyPlotter : public SusySelection
     TH1F* DEFHIST(ll_M_neg);
     TH1F* DEFHIST(njets_pos);
     TH1F* DEFHIST(njets_neg);
-    TH1F* DEFHIST(njets_mll_90_120);
-    TH1F* DEFHIST(njets_mll_90_120_pos);
-    TH1F* DEFHIST(njets_mll_90_120_neg);
-    TH1F* DEFHIST(nbjets_mll_90_120);
-    TH1F* DEFHIST(nbjets_mll_90_120_pos);
-    TH1F* DEFHIST(nbjets_mll_90_120_neg);
-
     TH1F* DEFHIST(nfjets);
-    TH1F* DEFHIST(nfjets_mll_90_120);
 
     TH1F* DEFHIST(llj_M);
     TH1F* DEFHIST(llj_M_pos);
     TH1F* DEFHIST(llj_M_neg);
-    TH1F* DEFHIST(llj_M_mll_90_120);
-    TH1F* DEFHIST(llj_M_mll_90_120_pos);
-    TH1F* DEFHIST(llj_M_mll_90_120_neg);
 
     // Met mass plots
     TH1F* DEFHIST(met_j_M);

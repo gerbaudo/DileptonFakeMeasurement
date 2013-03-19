@@ -176,9 +176,6 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(llj_M, "m(llj)", nmassbins, massmin, massmax);
 	NEWHIST(llj_M_pos, "m(llj)", nmassbins, massmin, massmax);
 	NEWHIST(llj_M_neg, "m(llj)", nmassbins, massmin, massmax);
-	NEWHIST(llj_M_mll_90_120, "m(llj)", nmassbins, massmin, massmax);
-	NEWHIST(llj_M_mll_90_120_pos, "m(llj)", nmassbins, massmin, massmax);
-	NEWHIST(llj_M_mll_90_120_neg, "m(llj)", nmassbins, massmin, massmax);
 	NEWHIST(met_j_M,     "m(met,j)",        nmassbins, massmin, massmax);
 	NEWHIST(met_ll_M,    "m(met,ll)",       nmassbins, massmin, massmax);
 	NEWHIST(met_j_ll_M,  "m(met,j,ll)",     nmassbins, massmin, massmax);
@@ -201,16 +198,8 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(njets, "# jets", njetbins, njetmin, njetmax);
 	NEWHIST(njets_pos, "# jets leading pos", njetbins, njetmin, njetmax);
 	NEWHIST(njets_neg, "# jets leading neg", njetbins, njetmin, njetmax);
-	NEWHIST(njets_mll_90_120, "# jets", njetbins, njetmin, njetmax);
-	NEWHIST(njets_mll_90_120_pos, "# jets", njetbins, njetmin, njetmax);
-	NEWHIST(njets_mll_90_120_neg, "# jets", njetbins, njetmin, njetmax);
 	NEWHIST(nbjets, "# b jets", njetbins, njetmin, njetmax);
-	NEWHIST(nbjets_mll_90_120, "# b jets", njetbins, njetmin, njetmax);
-	NEWHIST(nbjets_mll_90_120_pos, "# b jets", njetbins, njetmin, njetmax);
-	NEWHIST(nbjets_mll_90_120_neg, "# b jets", njetbins, njetmin, njetmax);
-
 	NEWHIST(nfjets, "# f jets", njetbins, njetmin, njetmax);
-	NEWHIST(nfjets_mll_90_120, "# f jets", njetbins, njetmin, njetmax);
 
 	// Type and origin
 	NEWHIST(l_type, "l_type", nType, Typemin, Typemax);
@@ -428,27 +417,8 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   FILL(h_onebin, 0.);
 
   FILL(h_sumQ, l0->q + l1->q);
-  if(l0->q > 0) FILL(h_ll_M_pos, (*l0+*l1).M());
-  else          FILL(h_ll_M_neg, (*l0+*l1).M());
-  float mll = (*l0+*l1).M();
-  if(90 <= mll && mll <= 110){
-    FILL(h_njets_mll_90_120, nJ);
-    FILL(h_nbjets_mll_90_120, nbJ);
-    FILL(h_nfjets_mll_90_120, nfJ);
-    if(nJ==1) FILL(h_llj_M_mll_90_120, (*l0+*l1+*jets.at(0)).M());
-    if(l0->q > 0){
-      FILL(h_njets_mll_90_120_pos, nJ);
-      FILL(h_nbjets_mll_90_120_pos, nbJ);
-      if(nJ==1) FILL(h_llj_M_mll_90_120_pos, (*l0+*l1+*jets.at(0)).M());
-    }
-    else{
-      FILL(h_njets_mll_90_120_neg, nJ);
-      FILL(h_nbjets_mll_90_120_neg, nbJ);
-      if(nJ==1) FILL(h_llj_M_mll_90_120_neg, (*l0+*l1+*jets.at(0)).M());
-    }
-
-  }
-
+  if(l0->q > 0) FILL(h_ll_M_pos, ll.M());
+  else          FILL(h_ll_M_neg, ll.M());
   float mt_met_ll = SusyPlotter::transverseMass(ll, mlv);
   float mt2 = SusySelection::computeMt2(*l0, *l1, mlv);
 
