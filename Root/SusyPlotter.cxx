@@ -170,12 +170,8 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(m_eta, "Muon #eta", netabins, etamin, etamax);
 
 	// Mass plots
-	NEWHIST(ll_M, "m(ll)", nmassbins, massmin, massmax);
-	NEWHIST(ll_M_pos, "m(ll)", nmassbins, massmin, massmax);
-	NEWHIST(ll_M_neg, "m(ll)", nmassbins, massmin, massmax);
-	NEWHIST(llj_M, "m(llj)", nmassbins, massmin, massmax);
-	NEWHIST(llj_M_pos, "m(llj)", nmassbins, massmin, massmax);
-	NEWHIST(llj_M_neg, "m(llj)", nmassbins, massmin, massmax);
+	NEWHIST(ll_M,        "m(ll)",           nmassbins, massmin, massmax);
+	NEWHIST(llj_M,       "m(llj)",          nmassbins, massmin, massmax);
 	NEWHIST(met_j_M,     "m(met,j)",        nmassbins, massmin, massmax);
 	NEWHIST(met_ll_M,    "m(met,ll)",       nmassbins, massmin, massmax);
 	NEWHIST(met_j_ll_M,  "m(met,j,ll)",     nmassbins, massmin, massmax);
@@ -183,12 +179,17 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(met_ll_Mt,   "m_{T}(met,ll)",   nmassbins, massmin, massmax);
 	NEWHIST(met_j_ll_Mt, "m_{T}(met,j,ll)", nmassbins, massmin, massmax);
 	NEWHIST(met_ll_Mt2,  "m_{T2}(met,l,l)", nmassbins, massmin, massmax);
-	NEWHIST(jj_M, "m(jj)", nmassbins, massmin, massmax);
+	NEWHIST(jj_M,        "m(jj)",           nmassbins, massmin, massmax);
 
-	NEWHIST(met_l0_Mt,           "m_{T}(met,l0)", nmassbins, massmin, massmax);
-	NEWHIST(met_l1_Mt,           "m_{T}(met,l0)", nmassbins, massmin, massmax);
-	NEWHIST(mtautau_l0l1met,     "m_{#tau#tau}(l0,l1,met)", nmassbins+1, massmin-((massmax-massmin)/nmassbins), massmax); // need a negative bin
-	NEWHIST(ll_met_Mt,           "m_{T}(ll,met)", nmassbins, massmin, massmax);
+	NEWHIST(mt_ll_met,       "m_{T}(ll,met)", nmassbins, massmin, massmax);
+	NEWHIST(mt_l0_met,       "m_{T}(l_{0}, met)", nmassbins, massmin, massmax);
+	NEWHIST(mt_l1_met,       "m_{T}(l_{1}, met)", nmassbins, massmin, massmax);
+	NEWHIST(mt_l_met_min,    "m_{T}^{min}(l, met)", nmassbins, massmin, massmax);
+	NEWHIST(mtautau_l0l1met, "m_{#tau#tau}(l0,l1,met)", nmassbins+1, massmin-((massmax-massmin)/nmassbins), massmax); // need a negative bin
+	NEWHIST(mct_top_tag,     "m_{CT} top tag", 2, -0.5, +1.5);
+	NEWHIST(sumJ0J1_mv1tag,  "MV1(j0) + MV1(j1)", 50, +0.0, +0.5);
+	NEWHIST(numNeutrinoSol,  "Number of neutrino solutions (2l+2j)", 9, -0.5, +8.5);
+
 
 	// Met plots
 	NEWHIST(met, "#slash{E}_{T}", nptbins, ptmin, ptmax);
@@ -244,12 +245,6 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(l0_qeta, "l_{0} sign(q) #eta", 2*netabins, -etamax, etamax);
 	NEWHIST(l1_qeta, "l_{1} sign(q) #eta", 2*netabins, -etamax, etamax);
 
-	NEWHIST(mt_l0_met,      "m_{T}(l_{0}, met)", nmassbins, massmin, massmax);
-	NEWHIST(mt_l1_met,      "m_{T}(l_{1}, met)", nmassbins, massmin, massmax);
-	NEWHIST(mt_l_met_min,   "m_{T}^{min}(l, met)", nmassbins, massmin, massmax);
-	NEWHIST(mct_top_tag,    "m_{CT} top tag", 2, -0.5, +1.5);
-	NEWHIST(sumJ0J1_mv1tag, "MV1(j0) + MV1(j1)", 50, +0.0, +0.5);
-	NEWHIST(numNeutrinoSol, "Number of neutrino solutions (2l+2j)", 9, -0.5, +8.5);
 
 	NEWHIST2(l0_l1_pt, "l0 vs l1 pt", nptbins, ptmin, ptmax);
 
@@ -426,19 +421,14 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   FILL(h_onebin, 0.);
 
   FILL(h_sumQ, l0->q + l1->q);
-  if(l0->q > 0) FILL(h_ll_M_pos, ll.M());
-  else          FILL(h_ll_M_neg, ll.M());
   float mt_met_ll = SusyPlotter::transverseMass(ll, mlv);
   float mt2 = SusySelection::computeMt2(*l0, *l1, mlv);
 
   FILL(h_met_ll_M, (*l0 + *l1 + mlv).M());
   FILL(h_met_ll_Mt, mt_met_ll);
   FILL(h_mtautau_l0l1met, SusyPlotter::mZTauTau(*l0, *l1, mlv));
-  FILL(h_ll_met_Mt, SusyPlotter::transverseMass(ll, mlv));
+  FILL(h_mt_ll_met, SusyPlotter::transverseMass(ll, mlv));
   FILL(h_met_ll_Mt2, mt2);
-
-  FILL(h_met_l0_Mt, Mt(*l0,met->lv()));
-  FILL(h_met_l1_Mt, Mt(*l1,met->lv()));
 
   FILL(h_dR_l0_l1, fabs(l0->DeltaR(*l1)));
   FILL(h_dPhi_l0_l1, fabs(l0->DeltaPhi(*l1)));

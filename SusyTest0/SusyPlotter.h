@@ -212,9 +212,13 @@ class SusyPlotter : public SusySelection
     TH1F* DEFHIST(met_j_ll_Mt);
     TH1F* DEFHIST(met_ll_Mt2);
 
-    TH1F* DEFHIST(met_l0_Mt);
-    TH1F* DEFHIST(met_l1_Mt);
-    TH1F* DEFHIST(ll_met_Mt); // duplicate of met_ll_M ? (DG Feb 2013)
+    TH1F* DEFHIST(mt_ll_met);
+    TH1F* DEFHIST(mt_l0_met);
+    TH1F* DEFHIST(mt_l1_met);
+    TH1F* DEFHIST(mt_l_met_min);
+    TH1F* DEFHIST(mct_top_tag);
+    TH1F* DEFHIST(sumJ0J1_mv1tag);
+    TH1F* DEFHIST(numNeutrinoSol);
 
     TH1F* DEFHIST(dPhi_llmet_j);
     TH1F* DEFHIST(dPhi_met_l0);
@@ -249,12 +253,6 @@ class SusyPlotter : public SusySelection
 
     TH1F* DEFHIST(l0_qeta);
     TH1F* DEFHIST(l1_qeta);
-    TH1F* DEFHIST(mt_l0_met);
-    TH1F* DEFHIST(mt_l1_met);
-    TH1F* DEFHIST(mt_l_met_min);
-    TH1F* DEFHIST(mct_top_tag);
-    TH1F* DEFHIST(sumJ0J1_mv1tag);
-    TH1F* DEFHIST(numNeutrinoSol);
 
     #undef DEFHIST
 
