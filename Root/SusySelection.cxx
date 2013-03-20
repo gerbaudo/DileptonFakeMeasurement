@@ -263,7 +263,7 @@ bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, 
   if( !passDrllMax(leptons) )               return false;
   if( !passPtllMin(leptons) )               return false;
   if( !passMllMax(leptons) )                return false;
-  if( !passMETRelMin(met, leptons, jets) )  return false;
+  if( !passMETRel(met, leptons, jets) )     return false;
   if( !passMtLlmetMin(leptons, met) )       return false;
   if( !passMtMinlmetMin(leptons, met) )     return false;
   if( !passZtautauVeto(leptons, jets, met)) return false;
@@ -285,7 +285,7 @@ bool SusySelection::passSR7(const LeptonVector& leptons, const JetVector& jets, 
   if( !passDrllMax(leptons) )               return false;
   if( !passPtllMin(leptons) )               return false;
   if( !passMllMax(leptons) )                return false;
-  if( !passMETRelMin(met, leptons, jets) )  return false;
+  if( !passMETRel(met, leptons, jets) )     return false;
   if( !passMtLlmetMin(leptons, met) )       return false;
   if( !passMtMinlmetMin(leptons, met) )     return false;
   if( !passZtautauVeto(leptons, jets, met)) return false;
@@ -532,10 +532,7 @@ bool SusySelection::passZVeto(const LeptonVector& leptons, float Zlow, float Zhi
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passMETRel(const Met *met, const LeptonVector& leptons,
 				 const JetVector& jets, float metMax){
-
-
-  if( getMetRel(met,leptons,jets) < metMax ) return false;
-  return true;
+  return (getMetRel(met,leptons,jets) > metMax);
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passdPhi(TLorentzVector v0, TLorentzVector v1, float cut)
