@@ -141,7 +141,10 @@ Bool_t SusySelection::Process(Long64_t entry)
 
   // Check Signal regions
   bool count(true);
+  passSR6(m_baseLeptons, m_signalJets2Lep, m_met, count);
   passSR7(m_baseLeptons, m_signalJets2Lep, m_met, count);
+  passSR8(m_baseLeptons, m_signalJets2Lep, m_met, count);
+  passSR9(m_baseLeptons, m_signalJets2Lep, m_met, count);
 
   return kTRUE;
 }
