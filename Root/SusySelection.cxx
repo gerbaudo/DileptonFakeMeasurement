@@ -54,10 +54,18 @@ SusySelection::SusySelection() :
       n_pass_SR6sign[i][w] = n_pass_SR6flav[i][w] = n_pass_SR6metr[i][w] = 0;
       n_pass_SR6ge1j[i][w] = n_pass_SR6ge2j[i][w] = n_pass_SR6eq2j[i][w] = 0;
       n_pass_SR6eq2jNfv[i][w] = n_pass_SR6ge2jNfv[i][w] = n_pass_SR6[i][w] = 0;
+      n_pass_SR6DrllMax     [i][w] = n_pass_SR6PtllMin     [i][w] = 0;
+      n_pass_SR6MllMax      [i][w] = n_pass_SR6METRel      [i][w] = 0;
+      n_pass_SR6MtLlmetMin  [i][w] = n_pass_SR6MtMinlmetMin[i][w] = 0;
+      n_pass_SR6ZtautauVeto [i][w] = 0;
 
       n_pass_SR7sign[i][w] = n_pass_SR7flav[i][w] = n_pass_SR7metr[i][w] = 0;
       n_pass_SR7ge1j[i][w] = n_pass_SR7ge2j[i][w] = n_pass_SR7eq2j[i][w] = 0;
       n_pass_SR7eq2jNfv[i][w] = n_pass_SR7ge2jNfv[i][w] = n_pass_SR7[i][w] = 0;
+      n_pass_SR7DrllMax     [i][w] = n_pass_SR7PtllMin     [i][w] = 0;
+      n_pass_SR7MllMax      [i][w] = n_pass_SR7METRel      [i][w] = 0;
+      n_pass_SR7MtLlmetMin  [i][w] = n_pass_SR7MtMinlmetMin[i][w] = 0;
+      n_pass_SR7ZtautauVeto [i][w] = 0;
 
       n_pass_SR8sign[i][w] = n_pass_SR8flav[i][w] = n_pass_SR8metr[i][w] = 0;
       n_pass_SR8ge1j[i][w] = n_pass_SR8ge2j[i][w] = n_pass_SR8eq2j[i][w] = 0;
@@ -263,13 +271,20 @@ bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, 
   if (count && passge1Jet(jets) )         increment(n_pass_SR6ge1j[m_ET],lepSf, bSf);
   if (passge2Jet(jets))      { if (count) increment(n_pass_SR6ge2j[m_ET],lepSf, bSf); }
   else return false;
-  if( !passDrllMax(leptons) )               return false;
-  if( !passPtllMin(leptons) )               return false;
-  if( !passMllMax(leptons) )                return false;
-  if( !passMETRel(met, leptons, jets) )     return false;
-  if( !passMtLlmetMin(leptons, met) )       return false;
-  if( !passMtMinlmetMin(leptons, met) )     return false;
-  if( !passZtautauVeto(leptons, jets, met)) return false;
+  if( passDrllMax(leptons) )               {if(count) increment(n_pass_SR6DrllMax     [m_ET], lepSf, bSf);}
+  else return false;
+  if( passPtllMin(leptons) )               {if(count) increment(n_pass_SR6PtllMin     [m_ET], lepSf, bSf);}
+  else return false;
+  if( passMllMax(leptons) )                {if(count) increment(n_pass_SR6MllMax      [m_ET], lepSf, bSf);}
+  else return false;
+  if( passMETRel(met, leptons, jets) )     {if(count) increment(n_pass_SR6METRel      [m_ET], lepSf, bSf);}
+  else return false;
+  if( passMtLlmetMin(leptons, met) )       {if(count) increment(n_pass_SR6MtLlmetMin  [m_ET], lepSf, bSf);}
+  else return false;
+  if( passMtMinlmetMin(leptons, met) )     {if(count) increment(n_pass_SR6MtMinlmetMin[m_ET], lepSf, bSf);}
+  else return false;
+  if( passZtautauVeto(leptons, jets, met)) {if(count) increment(n_pass_SR6ZtautauVeto [m_ET], lepSf, bSf);}
+  else return false;
   if( count )                               increment(n_pass_SR6[m_ET],lepSf, bSf);
   return true;
 }
@@ -284,14 +299,20 @@ bool SusySelection::passSR7(const LeptonVector& leptons, const JetVector& jets, 
   if( count && passge1Jet(jets) )           increment(n_pass_SR7ge1j[m_ET],lepSf, bSf);
   if( passge2Jet(jets)) { if(count)         increment(n_pass_SR7ge2j[m_ET],lepSf, bSf);}
   else return false;
-  // DG Mar 2013 : might want to add counters here as well
-  if( !passDrllMax(leptons) )               return false;
-  if( !passPtllMin(leptons) )               return false;
-  if( !passMllMax(leptons) )                return false;
-  if( !passMETRel(met, leptons, jets) )     return false;
-  if( !passMtLlmetMin(leptons, met) )       return false;
-  if( !passMtMinlmetMin(leptons, met) )     return false;
-  if( !passZtautauVeto(leptons, jets, met)) return false;
+  if( passDrllMax(leptons) )               {if(count) increment(n_pass_SR7DrllMax     [m_ET], lepSf, bSf);}
+  else return false;
+  if( passPtllMin(leptons) )               {if(count) increment(n_pass_SR7PtllMin     [m_ET], lepSf, bSf);}
+  else return false;
+  if( passMllMax(leptons) )                {if(count) increment(n_pass_SR7MllMax      [m_ET], lepSf, bSf);}
+  else return false;
+  if( passMETRel(met, leptons, jets) )     {if(count) increment(n_pass_SR7METRel      [m_ET], lepSf, bSf);}
+  else return false;
+  if( passMtLlmetMin(leptons, met) )       {if(count) increment(n_pass_SR7MtLlmetMin  [m_ET], lepSf, bSf);}
+  else return false;
+  if( passMtMinlmetMin(leptons, met) )     {if(count) increment(n_pass_SR7MtMinlmetMin[m_ET], lepSf, bSf);}
+  else return false;
+  if( passZtautauVeto(leptons, jets, met)) {if(count) increment(n_pass_SR7ZtautauVeto [m_ET], lepSf, bSf);}
+  else return false;
   //if( !passPtTot      (leptons, jets, met)) return false;
   if( count )                               increment(n_pass_SR7[m_ET],lepSf, bSf);
   return true;
@@ -883,42 +904,45 @@ void SusySelection::dumpEventCounters()
       cout << "pass trig match: " << n_pass_trigMatch[i][w] << endl;
       cout << "pass OS:         " << n_pass_os[i][w]        << endl;
       cout << "pass SS:         " << n_pass_ss[i][w]        << endl;
-      cout << "-----------------------------------------------------"      << endl;
-      cout << "pass SR6 sign:                  " << n_pass_SR6sign[i][w]   << endl;
-      cout << "pass SR6 flavor:                " << n_pass_SR6flav[i][w]   << endl;
-      cout << "pass SR6 >=2j (no fw veto):     " << n_pass_SR6ge2jNfv[i][w]<< endl;
-      cout << "pass SR6 ==2j (no fw veto):     " << n_pass_SR6eq2jNfv[i][w]<< endl;
-      cout << "pass SR6 >=1j:                  " << n_pass_SR6ge1j[i][w]   << endl;
-      cout << "pass SR6 >=2j:                  " << n_pass_SR6ge2j[i][w]   << endl;
-      cout << "pass SR6 ==2j:                  " << n_pass_SR6eq2j[i][w]   << endl;
-      cout << "pass SR6 METRel > 50:           " << n_pass_SR6metr[i][w]   << endl;
-      cout << "-----------------------------------------------------"      << endl;
-      cout << "pass SR7 sign:                  " << n_pass_SR7sign[i][w]   << endl;
-      cout << "pass SR7 flavor:                " << n_pass_SR7flav[i][w]   << endl;
-      cout << "pass SR7 >=2j (no fw veto):     " << n_pass_SR7ge2jNfv[i][w]<< endl;
-      cout << "pass SR7 ==2j (no fw veto):     " << n_pass_SR7eq2jNfv[i][w]<< endl;
-      cout << "pass SR7 >=1j:                  " << n_pass_SR7ge1j[i][w]   << endl;
-      cout << "pass SR7 >=2j:                  " << n_pass_SR7ge2j[i][w]   << endl;
-      cout << "pass SR7 ==2j:                  " << n_pass_SR7eq2j[i][w]   << endl;
-      cout << "pass SR7 METRel > 50:           " << n_pass_SR7metr[i][w]   << endl;
-      cout << "-----------------------------------------------------"      << endl;
-      cout << "pass SR8 sign:                  " << n_pass_SR8sign[i][w]   << endl;
-      cout << "pass SR8 flavor:                " << n_pass_SR8flav[i][w]   << endl;
-      cout << "pass SR8 >=2j (no fw veto):     " << n_pass_SR8ge2jNfv[i][w]<< endl;
-      cout << "pass SR8 ==2j (no fw veto):     " << n_pass_SR8eq2jNfv[i][w]<< endl;
-      cout << "pass SR8 >=1j:                  " << n_pass_SR8ge1j[i][w]   << endl;
-      cout << "pass SR8 >=2j:                  " << n_pass_SR8ge2j[i][w]   << endl;
-      cout << "pass SR8 ==2j:                  " << n_pass_SR8eq2j[i][w]   << endl;
-      cout << "pass SR8 METRel > 50:           " << n_pass_SR8metr[i][w]   << endl;
-      cout << "-----------------------------------------------------"      << endl;
-      cout << "pass SR9 sign:                  " << n_pass_SR9sign[i][w]   << endl;
-      cout << "pass SR9 flavor:                " << n_pass_SR9flav[i][w]   << endl;
-      cout << "pass SR9 >=2j (no fw veto):     " << n_pass_SR9ge2jNfv[i][w]<< endl;
-      cout << "pass SR9 ==2j (no fw veto):     " << n_pass_SR9eq2jNfv[i][w]<< endl;
-      cout << "pass SR9 >=1j:                  " << n_pass_SR9ge1j[i][w]   << endl;
-      cout << "pass SR9 >=2j:                  " << n_pass_SR9ge2j[i][w]   << endl;
-      cout << "pass SR9 ==2j:                  " << n_pass_SR9eq2j[i][w]   << endl;
-      cout << "pass SR9 METRel > 50:           " << n_pass_SR9metr[i][w]   << endl;
+      cout << "-----------------------------------------------------"    << endl;
+      cout << "pass SR6 sign:        : " << n_pass_SR6sign        [i][w] << endl;
+      cout << "pass SR6 flavor:      : " << n_pass_SR6flav        [i][w] << endl;
+      cout << "pass SR6 >=1j:        : " << n_pass_SR6ge1j        [i][w] << endl;
+      cout << "pass SR6 >=2j:        : " << n_pass_SR6ge2j        [i][w] << endl;
+      cout << "pass SR6 DrllMax      : " << n_pass_SR6DrllMax     [i][w] << endl;
+      cout << "pass SR6 PtllMin      : " << n_pass_SR6PtllMin     [i][w] << endl;
+      cout << "pass SR6 MllMax       : " << n_pass_SR6MllMax      [i][w] << endl;
+      cout << "pass SR6 METRel       : " << n_pass_SR6METRel      [i][w] << endl;
+      cout << "pass SR6 MtLlmetMin   : " << n_pass_SR6MtLlmetMin  [i][w] << endl;
+      cout << "pass SR6 MtMinlmetMin : " << n_pass_SR6MtMinlmetMin[i][w] << endl;
+      cout << "pass SR6 ZtautauVeto  : " << n_pass_SR6ZtautauVeto [i][w] << endl;
+      cout << "pass SR6              : " << n_pass_SR6            [i][w] << endl;
+      cout << "-----------------------------------------------------"    << endl;
+      cout << "pass SR7 sign:        : " << n_pass_SR7sign        [i][w] << endl;
+      cout << "pass SR7 flavor:      : " << n_pass_SR7flav        [i][w] << endl;
+      cout << "pass SR7 >=1j:        : " << n_pass_SR7ge1j        [i][w] << endl;
+      cout << "pass SR7 >=2j:        : " << n_pass_SR7ge2j        [i][w] << endl;
+      cout << "pass SR7 DrllMax      : " << n_pass_SR7DrllMax     [i][w] << endl;
+      cout << "pass SR7 PtllMin      : " << n_pass_SR7PtllMin     [i][w] << endl;
+      cout << "pass SR7 MllMax       : " << n_pass_SR7MllMax      [i][w] << endl;
+      cout << "pass SR7 METRel       : " << n_pass_SR7METRel      [i][w] << endl;
+      cout << "pass SR7 MtLlmetMin   : " << n_pass_SR7MtLlmetMin  [i][w] << endl;
+      cout << "pass SR7 MtMinlmetMin : " << n_pass_SR7MtMinlmetMin[i][w] << endl;
+      cout << "pass SR7 ZtautauVeto  : " << n_pass_SR7ZtautauVeto [i][w] << endl;
+      cout << "pass SR7              : " << n_pass_SR7            [i][w] << endl;
+      cout << "-----------------------------------------------------"    << endl;
+      cout << "pass SR8 sign         : " << n_pass_SR8sign        [i][w] << endl;
+      cout << "pass SR8 flavor       : " << n_pass_SR8flav        [i][w] << endl;
+      cout << "pass SR8 >=1j         : " << n_pass_SR8ge1j        [i][w] << endl;
+      cout << "pass SR8 >=2j         : " << n_pass_SR8ge2j        [i][w] << endl;
+      cout << "pass SR8 METRel > 50  : " << n_pass_SR8metr        [i][w] << endl;
+      cout << "-----------------------------------------------------"    << endl;
+      cout << "pass SR9 sign         : " << n_pass_SR9sign        [i][w] << endl;
+      cout << "pass SR9 flavor       : " << n_pass_SR9flav        [i][w] << endl;
+      cout << "pass SR9 >=1j         : " << n_pass_SR9ge1j        [i][w] << endl;
+      cout << "pass SR9 >=2j         : " << n_pass_SR9ge2j        [i][w] << endl;
+      cout << "pass SR9 METRel > 50  : " << n_pass_SR9metr        [i][w] << endl;
+      cout << "-----------------------------------------------------"    << endl;
 
     }// end loop over event type
   }// end loop over weight type
