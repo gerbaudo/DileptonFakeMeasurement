@@ -182,6 +182,7 @@ class SusyPlotter : public SusySelection
 
     // # of jets
     TH1F* DEFHIST(njets);
+    TH1F* DEFHIST(nbasejets);
     TH1F* DEFHIST(nbjets);
 
     // Type and origin
