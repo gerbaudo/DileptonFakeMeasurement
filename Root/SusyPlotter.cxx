@@ -49,7 +49,7 @@ const float massminj  = 0;
 const float massmaxj  = 1000;
 const int  nmassbinsj = 100;
 
-const int   njetbins = 5;
+const int   njetbins = 7;
 const float njetmin = -0.5;
 const float njetmax = njetbins - 0.5;
 
@@ -197,6 +197,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 
 	// njet plots
 	NEWHIST(njets, "# jets", njetbins, njetmin, njetmax);
+	NEWHIST(nbasejets, "# base jets", njetbins, njetmin, njetmax);
 	NEWHIST(njets_pos, "# jets leading pos", njetbins, njetmin, njetmax);
 	NEWHIST(njets_neg, "# jets leading neg", njetbins, njetmin, njetmax);
 	NEWHIST(nbjets, "# b jets", njetbins, njetmin, njetmax);
@@ -403,13 +404,15 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   FILL(h_met, met->Et);
   FILL(h_metrel, metrel);
 
-  int nJ = jets.size() > 4 ? 4 : jets.size();
+  int nJ = jets.size() ; //> 4 ? 4 : jets.size();
+  int nBaseJets = m_baseJets.size();
   int nbJ = numberOfCBJets(jets);
   int nfJ = numberOfFJets(jets);
 
-  FILL(h_njets, nJ);
-  FILL(h_nbjets, nbJ);
-  FILL(h_nfjets, nfJ);
+  FILL(h_njets,     nJ);
+  FILL(h_nbasejets, nBaseJets);
+  FILL(h_nbjets,    nbJ);
+  FILL(h_nfjets,    nfJ);
   if(l0->q > 0) FILL(h_njets_pos,nJ);
   else          FILL(h_njets_neg, nJ);
 
