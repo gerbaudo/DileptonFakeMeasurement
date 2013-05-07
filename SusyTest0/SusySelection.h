@@ -176,7 +176,13 @@ class SusySelection : public SusyNtAna
       flag[WT_Btag]  += nt.evt()->w * btag;
 
       float trig = m_baseLeptons.size() == 2 && nt.evt()->isMC ?
-	m_trigObj->getTriggerWeight(m_baseLeptons,nt.evt()->isMC,NtSys_NOM) : 1;
+	m_trigObj->getTriggerWeight(m_baseLeptons,
+				    nt.evt()->isMC,
+				    m_met->Et,
+				    m_signalJets2Lep.size(),
+				    nt.evt()->nVtx,
+				    NtSys_NOM) : 1;
+
       //cout<<"\tTrigger weight: "<<trig<<endl;
       flag[WT_Trig] += trig * nt.evt()->w;
 
