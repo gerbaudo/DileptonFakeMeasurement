@@ -11,7 +11,7 @@ import optparse, subprocess
 import datasets
 
 validModes = ['mc12', 'susy', 'data',]
-defaultTag = 'n0115'
+defaultTag = 'n0139'
 
 parser = optparse.OptionParser()
 parser.add_option("-m", "--mode", dest="mode", default=validModes[0],
