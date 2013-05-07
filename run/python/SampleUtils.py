@@ -7,6 +7,7 @@
 
 import glob, os, re, unittest
 import ROOT as r
+r.gROOT.SetBatch(1)
 
 colors = {
     'ttbar'     : r.kRed+1,
