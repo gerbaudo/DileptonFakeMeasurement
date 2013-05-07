@@ -13,7 +13,6 @@ import collections, optparse, re, sys
 import ROOT as r
 r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
-r.gStyle.SetPalette(1)
 
 from PickleUtils import readFromPickle
 from SampleUtils import ModeAWhDbPar, ModeAWhDbReqid
@@ -79,7 +78,7 @@ for sel in allNumeratorSelections :
     baseSel = getBaseSel(sel)
     histos[sel] = r.TH2F(sel+'_'+baseSel,
                          #nicefySelectionName(sel)+' : eff. [%] rel. to '+baseSel+';mc_{1};mn_{1}',
-                         nicefySelectionName(sel)+' signal raw counts;mc_{1};mn_{1}',
+                         nicefySelectionName(sel)+' signal counts;mc_{1};mn_{1}',
                          50, float(mc1Range['min']), float(mc1Range['max']),
                          50, float(mn1Range['min']), float(mn1Range['max']))
 
@@ -98,13 +97,13 @@ for sample, countsSel in countsSigSampleSel.iteritems() :
 
 # draw histos and print bkg eff
 r.gStyle.SetPaintTextFormat('.0f')
-maxEff = 10.
+maxEff = 500.
 for s, h in histos.iteritems() :
-    c = r.TCanvas('c_raw_'+s, 'relative eff '+s, 800, 600)
+    c = r.TCanvas('c_eff_'+s, 'relative eff '+s, 800, 600)
     c.cd()
     h.SetStats(0)
     h.SetMarkerSize(1.5*h.GetMarkerSize())
-    #h.SetMaximum(maxEff)
+    h.SetMaximum(maxEff)
     h.Draw('colz') #contz
     h.SetMarkerSize(2.*h.GetMarkerSize())
     h.Draw('text same')
@@ -118,7 +117,7 @@ for s, h in histos.iteritems() :
             
             #tex.DrawLatex(1.0-c.GetTopMargin(), 1.0-c.GetRightMargin(), "Signal: x %.1f"%scale)
             selCnt, refCnt =  cnts[s], cnts[getBaseSel(s)]
-            #tex.DrawLatex(x, y, bkg +': '+ ('-' if not refCnt else "%.1f%%"%(percent*selCnt/refCnt)))
+            tex.DrawLatex(x, y, bkg +': '+ ('-' if not refCnt else "%.1f%%"%(percent*selCnt/refCnt)))
             y += slope
     def writeSigMinMaxAvg(h, x=0.9, y=0.9) :
         tex = r.TLatex(0.0, 0.0, '')
