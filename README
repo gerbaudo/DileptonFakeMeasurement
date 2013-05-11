@@ -1,9 +1,11 @@
 localSetupROOT
-svn co svn+ssh://svn.cern.ch/reps/atlasinst/Institutes/UCIrvine/SUSYAnalysis/SusyNtuple/tags/SusyNtuple-00-00-47 SusyNtuple
-svn co svn+ssh://svn.cern.ch/reps/atlasphys/Physics/SUSY/Analyses/WeakProduction/LeptonTruthTools/tags/LeptonTruthTools-00-01-02/ LeptonTruthTools
-svn co svn+ssh://svn.cern.ch/reps/atlasinst/Institutes/UCIrvine/mrelich/SusyXSReader/trunk SusyXSReader
-source SusyNtuple/scripts/install.sh
+SVN_INST=svn+ssh://svn.cern.ch/reps/atlasinst/Institutes
+SVN_PHYS=svn+ssh://svn.cern.ch/reps/atlasphys/Physics
+svn co ${SVN_INST}/UCIrvine/SUSYAnalysis/SusyNtuple/tags/SusyNtuple-00-00-53                    SusyNtuple
+svn co ${SVN_PHYS}/SUSY/Analyses/WeakProduction/LeptonTruthTools/tags/LeptonTruthTools-00-01-03 LeptonTruthTools
+svn co ${SVN_PHYS}/SUSY/Analyses/WeakProduction/MultiLep/tags/MultiLep-01-04-14                 MultiLep
+svn co ${SVN_INST}/UCIrvine/mrelich/SusyXSReader/trunk                                          SusyXSReader
+source MultiLep/installscripts/install_script.sh
 
 ./RootCore/scripts/find_packages.sh
 ./RootCore/scripts/build.sh
-
