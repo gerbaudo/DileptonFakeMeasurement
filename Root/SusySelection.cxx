@@ -191,16 +191,12 @@ bool SusySelection::selectEvent(bool doMll)
   if(passTTCVeto    (flag)) { increment(n_pass_TTCVeto ); } else { return false; }
   if(passGoodVtx    (flag)) { increment(n_pass_GoodVtx ); } else { return false; }
   if(passTileTripCut(flag)) { increment(n_pass_TileTrip); } else { return false; }
-  if( !passHfor() )                 return false;
-  if( !passLAr(flag) )              return false;
-  increment(n_pass_LAr);
-  if( !passBadJet(flag) )           return false;
-  increment(n_pass_BadJet);
-  if( !passBadMuon(flag) )          return false;
-  increment(n_pass_BadMuon);
-  if( !passCosmic(flag) )           return false;
-  increment(n_pass_Cosmic);
-  if( !passHotSpot(flag) )          return false;
+  if(passHfor       (    )) {                           ; } else { return false; }
+  if(passLAr        (flag)) { increment(n_pass_LAr     ); } else { return false; }
+  if(passBadJet     (flag)) { increment(n_pass_BadJet  ); } else { return false; }
+  if(passBadMuon    (flag)) { increment(n_pass_BadMuon ); } else { return false; }
+  if(passCosmic     (flag)) { increment(n_pass_Cosmic  ); } else { return false; }
+  if(passHotSpot    (flag)) {                           ; } else { return false; }
   //--- NEW ---//
   //if( hasJetInBadFCAL(m_baseJets) ) return false;
 
