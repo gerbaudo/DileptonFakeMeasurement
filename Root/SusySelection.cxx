@@ -32,14 +32,20 @@ SusySelection::SusySelection() :
 {
   // Loop over weight types
   for(int w=0; w<WT_N; ++w){
-    n_readin[w]       = 0;
-    n_pass_LAr[w]     = 0;
-    n_pass_BadJet[w]  = 0;
-    n_pass_BadMuon[w] = 0;
-    n_pass_Cosmic[w]  = 0;
+    n_readin          [w] = 0;
+    n_pass_Grl        [w] = 0;
+    n_pass_LarErr     [w] = 0;
+    n_pass_TileErr    [w] = 0;
+    n_pass_TTCVeto    [w] = 0;
+    n_pass_GoodVtx    [w] = 0;
+    n_pass_TileTrip   [w] = 0;
+    n_pass_LAr        [w] = 0;
+    n_pass_BadJet     [w] = 0;
+    n_pass_BadMuon    [w] = 0;
+    n_pass_Cosmic     [w] = 0;
     n_pass_atleast2Lep[w] = 0;
     n_pass_exactly2Lep[w] = 0;
-    n_pass_signalLep[w]   = 0;
+    n_pass_signalLep  [w] = 0;
 
     // The rest are channel specific.
     for(int i=0; i<ET_N; ++i){
@@ -178,6 +184,13 @@ bool SusySelection::selectEvent(bool doMll)
   // Basic event cuts
 
   int flag = nt.evt()->cutFlags[NtSys_NOM];
+
+  if(passGRL        (flag)) { increment(n_pass_Grl     ); } else { return false; }
+  if(passLarErr     (flag)) { increment(n_pass_LarErr  ); } else { return false; }
+  if(passTileErr    (flag)) { increment(n_pass_TileErr ); } else { return false; }
+  if(passTTCVeto    (flag)) { increment(n_pass_TTCVeto ); } else { return false; }
+  if(passGoodVtx    (flag)) { increment(n_pass_GoodVtx ); } else { return false; }
+  if(passTileTripCut(flag)) { increment(n_pass_TileTrip); } else { return false; }
   if( !passHfor() )                 return false;
   if( !passLAr(flag) )              return false;
   increment(n_pass_LAr);
@@ -895,11 +908,17 @@ void SusySelection::dumpEventCounters()
     cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" << endl;
     cout << "SusySelection Event counts for weight: " << v_WT[w] << endl;
     cout << endl;
-    cout << "read in:       " << n_readin[w]           << endl;
-    cout << "pass LAr:      " << n_pass_LAr[w]         << endl;
-    cout << "pass BadJet:   " << n_pass_BadJet[w]      << endl;
-    cout << "pass BadMu:    " << n_pass_BadMuon[w]     << endl;
-    cout << "pass Cosmic:   " << n_pass_Cosmic[w]      << endl;
+    cout << "read in:         " << n_readin       [w] << endl;
+    cout << "pass GRL         " << n_pass_Grl     [w] << endl;
+    cout << "pass LarErr      " << n_pass_LarErr  [w] << endl;
+    cout << "pass TileErr     " << n_pass_TileErr [w] << endl;
+    cout << "pass TTCVeto     " << n_pass_TTCVeto [w] << endl;
+    cout << "pass GoodVtx     " << n_pass_GoodVtx [w] << endl;
+    cout << "pass TileTripCut " << n_pass_TileTrip[w] << endl;
+    cout << "pass LAr:        " << n_pass_LAr     [w] << endl;
+    cout << "pass BadJet:     " << n_pass_BadJet  [w] << endl;
+    cout << "pass BadMu:      " << n_pass_BadMuon [w] << endl;
+    cout << "pass Cosmic:     " << n_pass_Cosmic  [w] << endl;
     cout << "   ------  Start Comparison Here ------ " << endl;
     cout << "pass atleast 2 " << n_pass_atleast2Lep[w] << endl;
     cout << "pass exactly 2 " << n_pass_exactly2Lep[w] << endl;

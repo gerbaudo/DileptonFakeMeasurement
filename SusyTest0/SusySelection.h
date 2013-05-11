@@ -229,20 +229,26 @@ class SusySelection : public SusyNtAna
     DiLepEvtType        m_ET;           // Dilepton event type to store cf
 
     // Event counters
-    float                n_readin[WT_N];
-    float                n_pass_LAr[WT_N];
-    float                n_pass_BadJet[WT_N];
-    float                n_pass_BadMuon[WT_N];
-    float                n_pass_Cosmic[WT_N];
-    float                n_pass_atleast2Lep[WT_N];
-    float                n_pass_exactly2Lep[WT_N];
-    float                n_pass_signalLep[WT_N];
-    float                n_pass_flavor[ET_N][WT_N];
-    float                n_pass_mll[ET_N][WT_N];
-    float                n_pass_os[ET_N][WT_N];
-    float                n_pass_ss[ET_N][WT_N];
-    float                n_pass_evtTrig[ET_N][WT_N];
-    float                n_pass_trigMatch[ET_N][WT_N];
+    float n_readin          [WT_N];
+    float n_pass_Grl        [WT_N];
+    float n_pass_LarErr     [WT_N];
+    float n_pass_TileErr    [WT_N];
+    float n_pass_TTCVeto    [WT_N];
+    float n_pass_GoodVtx    [WT_N];
+    float n_pass_TileTrip   [WT_N];
+    float n_pass_LAr        [WT_N];
+    float n_pass_BadJet     [WT_N];
+    float n_pass_BadMuon    [WT_N];
+    float n_pass_Cosmic     [WT_N];
+    float n_pass_atleast2Lep[WT_N];
+    float n_pass_exactly2Lep[WT_N];
+    float n_pass_signalLep  [WT_N];
+    float n_pass_flavor     [ET_N][WT_N];
+    float n_pass_mll        [ET_N][WT_N];
+    float n_pass_os         [ET_N][WT_N];
+    float n_pass_ss         [ET_N][WT_N];
+    float n_pass_evtTrig    [ET_N][WT_N];
+    float n_pass_trigMatch  [ET_N][WT_N];
 
     // SR6 counts
     float                n_pass_SR6sign[ET_N][WT_N];
