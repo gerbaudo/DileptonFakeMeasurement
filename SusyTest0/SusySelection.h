@@ -93,7 +93,7 @@ class SusySelection : public SusyNtAna
     bool sameSign(const LeptonVector& leptons);
     bool oppositeSign(const LeptonVector& leptons);
     bool passMll(const LeptonVector& leptons, float mll = 20); // this one (by Matt) increments
-
+    bool passHtautauVeto(int hdecay);
     // Signal Region Cuts
     bool passJetVeto(const JetVector& jets);
     bool passZVeto(const LeptonVector& leptons, float Zlow = 81.2, float Zhigh = 101.2);
@@ -240,6 +240,7 @@ class SusySelection : public SusyNtAna
     float n_pass_BadJet     [WT_N];
     float n_pass_BadMuon    [WT_N];
     float n_pass_Cosmic     [WT_N];
+    float n_pass_HttVeto    [WT_N];
     float n_pass_atleast2Lep[WT_N];
     float n_pass_exactly2Lep[WT_N];
     float n_pass_signalLep  [WT_N];

@@ -6,6 +6,7 @@
 
 #include "Mt2/mt2_bisect.h"
 #include "LeptonTruthTools/RecoTruthMatch.h" // provides RecoTruthMatch::
+#include "SusyNtuple/WhTruthExtractor.h"
 
 using namespace std;
 using namespace Susy;
@@ -43,6 +44,7 @@ SusySelection::SusySelection() :
     n_pass_BadJet     [w] = 0;
     n_pass_BadMuon    [w] = 0;
     n_pass_Cosmic     [w] = 0;
+    n_pass_HttVeto    [w] = 0;
     n_pass_atleast2Lep[w] = 0;
     n_pass_exactly2Lep[w] = 0;
     n_pass_signalLep  [w] = 0;
@@ -133,7 +135,8 @@ Bool_t SusySelection::Process(Long64_t entry)
   {
     cout << "**** Processing entry " << setw(6) << m_chainEntry
          << " run " << setw(6) << nt.evt()->run
-         << " event " << setw(7) << nt.evt()->event << " ****" << endl;
+         << " event " << setw(7) << nt.evt()->event
+         << " ****" << endl;
   }
 
   // select signal objects
@@ -184,7 +187,7 @@ bool SusySelection::selectEvent(bool doMll)
   // Basic event cuts
 
   int flag = nt.evt()->cutFlags[NtSys_NOM];
-
+  int hdec = nt.evt()->hDecay;
   if(passGRL        (flag)) { increment(n_pass_Grl     ); } else { return false; }
   if(passLarErr     (flag)) { increment(n_pass_LarErr  ); } else { return false; }
   if(passTileErr    (flag)) { increment(n_pass_TileErr ); } else { return false; }
@@ -197,6 +200,7 @@ bool SusySelection::selectEvent(bool doMll)
   if(passBadMuon    (flag)) { increment(n_pass_BadMuon ); } else { return false; }
   if(passCosmic     (flag)) { increment(n_pass_Cosmic  ); } else { return false; }
   if(passHotSpot    (flag)) {                           ; } else { return false; }
+  if(passHtautauVeto(hdec)) { increment(n_pass_HttVeto ); } else { return false; }
   //--- NEW ---//
   //if( hasJetInBadFCAL(m_baseJets) ) return false;
 
@@ -455,7 +459,10 @@ bool SusySelection::passMll(const LeptonVector& leptons, float mll)
   increment(n_pass_mll[m_ET]);
   return true;
 }
-
+bool SusySelection::passHtautauVeto(int hdecay)
+{
+  return (hdecay!=WhTruthExtractor::kPtauAtau);
+}
 /*--------------------------------------------------------------------------------*/
 // Signal region cuts
 /*--------------------------------------------------------------------------------*/
@@ -904,17 +911,18 @@ void SusySelection::dumpEventCounters()
     cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" << endl;
     cout << "SusySelection Event counts for weight: " << v_WT[w] << endl;
     cout << endl;
-    cout << "read in:         " << n_readin       [w] << endl;
-    cout << "pass GRL         " << n_pass_Grl     [w] << endl;
-    cout << "pass LarErr      " << n_pass_LarErr  [w] << endl;
-    cout << "pass TileErr     " << n_pass_TileErr [w] << endl;
-    cout << "pass TTCVeto     " << n_pass_TTCVeto [w] << endl;
-    cout << "pass GoodVtx     " << n_pass_GoodVtx [w] << endl;
-    cout << "pass TileTripCut " << n_pass_TileTrip[w] << endl;
-    cout << "pass LAr:        " << n_pass_LAr     [w] << endl;
-    cout << "pass BadJet:     " << n_pass_BadJet  [w] << endl;
-    cout << "pass BadMu:      " << n_pass_BadMuon [w] << endl;
-    cout << "pass Cosmic:     " << n_pass_Cosmic  [w] << endl;
+    cout << "read in:          " << n_readin       [w] << endl;
+    cout << "pass GRL          " << n_pass_Grl     [w] << endl;
+    cout << "pass LarErr       " << n_pass_LarErr  [w] << endl;
+    cout << "pass TileErr      " << n_pass_TileErr [w] << endl;
+    cout << "pass TTCVeto      " << n_pass_TTCVeto [w] << endl;
+    cout << "pass GoodVtx      " << n_pass_GoodVtx [w] << endl;
+    cout << "pass TileTripCut  " << n_pass_TileTrip[w] << endl;
+    cout << "pass LAr:         " << n_pass_LAr     [w] << endl;
+    cout << "pass BadJet:      " << n_pass_BadJet  [w] << endl;
+    cout << "pass BadMu:       " << n_pass_BadMuon [w] << endl;
+    cout << "pass Cosmic:      " << n_pass_Cosmic  [w] << endl;
+    cout << "pass Htautau veto " << n_pass_HttVeto [w] << endl;
     cout << "   ------  Start Comparison Here ------ " << endl;
     cout << "pass atleast 2 " << n_pass_atleast2Lep[w] << endl;
     cout << "pass exactly 2 " << n_pass_exactly2Lep[w] << endl;
