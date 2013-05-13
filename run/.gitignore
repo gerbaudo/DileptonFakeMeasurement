@@ -1,4 +1,5 @@
 AutoDict*
+batchLog/*
 *.png
 *.eps
 *.pkl
