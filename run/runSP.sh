@@ -2,7 +2,7 @@
 
 
 append="_AE_Dec17_n0115"
-append="_Feb21_n0115"
+append="_May12_n0139"
 
 
 # only one option supported: --1fb to use the 1/fb weights
@@ -121,18 +121,34 @@ MC=(
     wA_noslep_WH_2Lep_61
 )
 
-for d in ${DATA[@]}; do
+write_script () {
+    local dset=$1
+    local suffix=$2
+    local options=""
+    local template="batchSPSub.sh"
+    local outFile="batchScripts/${dset}.sh"
+    local inp=${dset}
+    local out=${dset}${suffix}
+    local opt=${options}
+    cat  "${template}" \
+        | sed "s/\${inp}/${inp}/g" \
+        | sed "s/\${out}/${out}/g" \
+        | sed "s/\${opt}/${opt}/g" > ${outFile}
+    echo ${outFile}
+    }
 
-    echo "qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d} -o batchlog batchSPSub.sh"
-    #nohup SusyPlot -f filelist/${d}.txt -s ${d}${append} ${option} > batchLog/${d}${append}.susyplot.log &
+for d in ${DATA[@]}; do
+    #echo "qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d} -o batchlog batchSPSub.sh"
+    scriptFile=$(write_script ${d} ${append})
+    qsub -j oe -V -N ${d}_${append} -o batchLog ${scriptFile}
 
 done
 
 for d in ${MC[@]}; do
+    #echo "qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d}_${append} -o batchlog batchSPSub.sh"
+    scriptFile=$(write_script ${d} ${append})
+    qsub -j oe -V -N ${d}_${append} -o batchLog ${scriptFile}
 
-    #qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d}_${append} -o batchlog batchSPSub.sh
-    echo "qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d}_${append} -o batchlog batchSPSub.sh"
-    # CF qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d}_${append} -o batchlog batchCFSub.sh
 
 done
 
