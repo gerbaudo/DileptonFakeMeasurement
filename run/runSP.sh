@@ -2,7 +2,7 @@
 
 
 append="_AE_Dec17_n0115"
-append="_May12_n0139"
+append="_May17_n0139"
 
 
 # only one option supported: --1fb to use the 1/fb weights
@@ -19,7 +19,11 @@ DATA=(
     periodC_Egamma periodC_Muons
     periodD_Egamma periodD_Muons
     periodE_Egamma periodE_Muons
-
+    periodG_Egamma periodG_Muons
+    periodH_Egamma periodH_Muons
+    periodI_Egamma periodI_Muons
+    periodJ_Egamma periodJ_Muons
+    periodL_Egamma periodL_Muons
 )
 
 MC=(
@@ -141,15 +145,12 @@ for d in ${DATA[@]}; do
     #echo "qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d} -o batchlog batchSPSub.sh"
     scriptFile=$(write_script ${d} ${append})
     qsub -j oe -V -N ${d}_${append} -o batchLog ${scriptFile}
-
 done
 
 for d in ${MC[@]}; do
     #echo "qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d}_${append} -o batchlog batchSPSub.sh"
     scriptFile=$(write_script ${d} ${append})
     qsub -j oe -V -N ${d}_${append} -o batchLog ${scriptFile}
-
-
 done
 
 echo "Finished submitting Susy Plot"
