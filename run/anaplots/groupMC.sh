@@ -3,7 +3,7 @@
 # dropped all 'cfappend' samples (see Matt's original script for the complete list)
 # /home/mrelich/workarea/SUSY2012/SusyAna2012/run/anaplots/groupMCwChargeFlip.sh
 
-ending="_Mar08_n0115"
+ending="_May17_n0139"
 outdir="merged"
 #addition="CFPtFix" 
 addition=""
@@ -12,21 +12,12 @@ cfappend=${ending}.ChargeFlipHists
 
 # ttbar
 hadd -f ${outdir}/top${append}${addition}.root \
-    TtbarHadTauhad${append}.root \
-    TtbarLeptHad${append}.root \
-    TtbarLeptLept${append}.root \
-    TtbarLeptTauhad${append}.root \
-    TtbarLeptTaulept${append}.root \
-    TtbarTauhadTauhad${append}.root \
-    TtbarTauleptHad${append}.root \
-    TtbarTauleptTauhad${append}.root \
-    TtbarTauleptTaulept${append}.root \
+    ttbar_LeptonFilter${append}.root \
     ttbarW${append}.root \
     ttbarZ${append}.root  \
     ttbarWj${append}.root \
     ttbarZj${append}.root  \
     SingleTopWtChanIncl${append}.root \
-
 
 # Z+jet
 hadd -f ${outdir}/Zjet${append}${addition}.root \

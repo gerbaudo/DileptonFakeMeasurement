@@ -65,20 +65,19 @@ MC=(
     SingleTopWtChanIncl
 
     # ttbar
-    #ttbar_LeptonFilter
+    ttbar_LeptonFilter
     #PowhegPythia_AUET2BCT10_ttbar_LeptonFilter_AF2
-
-    # Core Samples
     ttbarZ ttbarZj ttbarW ttbarWj
-    TtbarHadTauhad
-    TtbarLeptHad
-    TtbarLeptLept
-    TtbarLeptTauhad
-    TtbarLeptTaulept
-    TtbarTauhadTauhad
-    TtbarTauleptHad
-    TtbarTauleptTauhad
-    TtbarTauleptTaulept
+    #TtbarHadTauhad
+    #TtbarLeptHad
+    #TtbarLeptLept
+    #TtbarLeptTauhad
+    #TtbarLeptTaulept
+    #TtbarTauhadTauhad
+    #TtbarTauleptHad
+    #TtbarTauleptTauhad
+    #TtbarTauleptTaulept
+
 
     # Core Samples
     # diboson
@@ -99,30 +98,16 @@ MC=(
     #bbTomu20 ccTomu20
 
     # signal
-    wA_noslep_WH_2Lep_2 
-    wA_noslep_WH_2Lep_3 
-    wA_noslep_WH_2Lep_5 
-    wA_noslep_WH_2Lep_8 
-    wA_noslep_WH_2Lep_9 
-    wA_noslep_WH_2Lep_11
-    wA_noslep_WH_2Lep_13
-    wA_noslep_WH_2Lep_14
-    wA_noslep_WH_2Lep_16
-    wA_noslep_WH_2Lep_17
-    wA_noslep_WH_2Lep_18
-    wA_noslep_WH_2Lep_22
-    wA_noslep_WH_2Lep_26
-    wA_noslep_WH_2Lep_29
-    wA_noslep_WH_2Lep_30
-    wA_noslep_WH_2Lep_31
-    wA_noslep_WH_2Lep_36
-    wA_noslep_WH_2Lep_38
-    wA_noslep_WH_2Lep_47
-    wA_noslep_WH_2Lep_51
-    wA_noslep_WH_2Lep_53
-    wA_noslep_WH_2Lep_56
-    wA_noslep_WH_2Lep_59
-    wA_noslep_WH_2Lep_61
+    wA_noslep_WH_2Lep_1   wA_noslep_WH_2Lep_2   wA_noslep_WH_2Lep_29  wA_noslep_WH_2Lep_38  wA_noslep_WH_2Lep_48  wA_noslep_WH_2Lep_57
+    wA_noslep_WH_2Lep_10  wA_noslep_WH_2Lep_20  wA_noslep_WH_2Lep_3   wA_noslep_WH_2Lep_39  wA_noslep_WH_2Lep_49  wA_noslep_WH_2Lep_58
+    wA_noslep_WH_2Lep_11  wA_noslep_WH_2Lep_21  wA_noslep_WH_2Lep_30  wA_noslep_WH_2Lep_4   wA_noslep_WH_2Lep_5   wA_noslep_WH_2Lep_59
+    wA_noslep_WH_2Lep_13  wA_noslep_WH_2Lep_22  wA_noslep_WH_2Lep_31  wA_noslep_WH_2Lep_40  wA_noslep_WH_2Lep_50  wA_noslep_WH_2Lep_6
+    wA_noslep_WH_2Lep_14  wA_noslep_WH_2Lep_23  wA_noslep_WH_2Lep_32  wA_noslep_WH_2Lep_42  wA_noslep_WH_2Lep_51  wA_noslep_WH_2Lep_60
+    wA_noslep_WH_2Lep_15  wA_noslep_WH_2Lep_24  wA_noslep_WH_2Lep_33  wA_noslep_WH_2Lep_43  wA_noslep_WH_2Lep_52  wA_noslep_WH_2Lep_61
+    wA_noslep_WH_2Lep_16  wA_noslep_WH_2Lep_25  wA_noslep_WH_2Lep_34  wA_noslep_WH_2Lep_44  wA_noslep_WH_2Lep_53  wA_noslep_WH_2Lep_7
+    wA_noslep_WH_2Lep_17  wA_noslep_WH_2Lep_26  wA_noslep_WH_2Lep_35  wA_noslep_WH_2Lep_45  wA_noslep_WH_2Lep_54  wA_noslep_WH_2Lep_8
+    wA_noslep_WH_2Lep_18  wA_noslep_WH_2Lep_27  wA_noslep_WH_2Lep_36  wA_noslep_WH_2Lep_46  wA_noslep_WH_2Lep_55  wA_noslep_WH_2Lep_9
+    wA_noslep_WH_2Lep_19  wA_noslep_WH_2Lep_28  wA_noslep_WH_2Lep_37  wA_noslep_WH_2Lep_47  wA_noslep_WH_2Lep_56
 )
 
 write_script () {

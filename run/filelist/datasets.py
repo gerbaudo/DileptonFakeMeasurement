@@ -48,6 +48,7 @@ wantedDsets = { # mode : [dsets]
                                    "LeptHad", "LeptTauhad", "TauleptHad",
                                    "TauleptTauhad", "HadTauhad", "TauhadTauhad",]]
     # + ["PowhegPythia_AUET2BCT10_ttbar_LeptonFilter_AF2",]
+    + ["ttbar_LeptonFilter"]
     + ["ttbar%s" % ttX for ttX in ["Z", "Zj", "W","Wj",]]
     # diboson
     + ["lllnu_WZ", "llll_ZZ", "llnunu_ZZ", "llnunu_WW",]
