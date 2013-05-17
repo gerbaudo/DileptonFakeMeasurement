@@ -106,7 +106,7 @@ void SusySelection::Begin(TTree* /*tree*/)
   string per = "HCP";
   if(m_do1fb) per = "A-B3";
   if(m_doAD)  per = "A-D7";
-  m_trigObj = new DilTrigLogic(per);
+  m_trigObj = new DilTrigLogic(per,false/*No Reweight Utils!*/);
   if(m_useMCTrig) m_trigObj->useMCTrigger();
 
   if( m_useXsReader ){
