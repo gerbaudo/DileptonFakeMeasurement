@@ -9,7 +9,7 @@
 wantedDsets = { # mode : [dsets]
     'data' : []
     + ["period%(p)s.physics_%(s)s" % {'p':p, 's':s}
-       for p in ['A', 'B', 'C', 'D', 'E'] for s in ['Egamma', 'Muons']]
+       for p in ['A', 'B', 'C', 'D', 'E', 'G', 'H', 'I', 'J', 'L'] for s in ['Egamma', 'Muons']]
     ,
     'mc12' : []
     ## # Alternative Z+jets AFII samples
