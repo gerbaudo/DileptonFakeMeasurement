@@ -190,7 +190,7 @@ class SusySelection : public SusyNtAna
       all = includeLepSF ? all * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : all;
       flag[WT_AllAB3] += all;
 
-      float allAE = getEventWeightFixed(nt.evt()->mcChannel,LUMI_A_E) * btag * trig;
+      float allAE = getEventWeightFixed(nt.evt()->mcChannel,LUMI_A_L) * btag * trig;
       allAE = includeLepSF ? allAE * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : allAE;
       flag[WT_AllAE] += allAE;
     };
