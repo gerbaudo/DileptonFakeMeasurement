@@ -58,7 +58,6 @@ mc1Range = {'min': min(parDb.allMc1()), 'max' : max(parDb.allMc1())}
 mn1Range = {'min': min(parDb.allMn1()), 'max' : max(parDb.allMn1())}
 
 histos = dict()
-print countsSigVetoSampleSel.values()
 allNumeratorSelections = [s for s in list(set(k for countsSel in countsSigVetoSampleSel.values() for k in countsSel.keys()))
                           if selIsFinal(s)]
 print allNumeratorSelections
@@ -67,7 +66,7 @@ allSignalSamples = countsSigVetoSampleSel.keys()
 histos = dict()
 for sel in allNumeratorSelections :
     histos[sel] = r.TH2F(sel+'_veto_nove',
-                         nicefySelectionName(sel)+' : yield veto(HTautau)/ yield noveto. [%] ;mc_{1};mn_{1}',
+                         nicefySelectionName(sel)+' : fraction yield veto(HTautau) / yield noveto. ;mc_{1};mn_{1}',
                          50, float(mc1Range['min']), float(mc1Range['max']),
                          50, float(mn1Range['min']), float(mn1Range['max']))
 
@@ -79,11 +78,11 @@ for sample, countsSel in countsSigVetoSampleSel.iteritems() :
         if not selIsFinal(sel) : continue
         histo = histos[sel]
         refCounts = countsSigNoveSampleSel[sample][sel]
-        if refCounts : histo.Fill(mc1, mn1, percent*counts/refCounts)
+        if refCounts : histo.Fill(mc1, mn1, counts/refCounts)
 
 # draw histos and print eff
 r.gStyle.SetPaintTextFormat('.1f')
-maxEff = 100.
+maxEff = 1.0
 for s, h in histos.iteritems() :
     c = r.TCanvas('c_effVeto_'+s, 'relative eff '+s, 800, 600)
     c.cd()
