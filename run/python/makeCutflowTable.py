@@ -11,7 +11,7 @@ r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
 
 from NavUtils import getAllHistoNames, HistoNameClassifier, organizeHistosByType, HistoType, HistoNameClassifier, setHistoType, setHistoSample
-from SampleUtils import guessSampleFromFilename
+from SampleUtils import guessSampleFromFilename, isBkgSample
 from PickleUtils import dumpToPickle
 
 #########
@@ -34,6 +34,8 @@ parser.add_option("-p", "--pickle", dest="pickle", default=defaultPickle,
                   help="save counts to the specified pikle file (default %s)" % defaultPickle)
 parser.add_option("-t", "--tag", dest="tag", default=defaultTag,
                   help="production tag (default '%s')" % defaultTag)
+parser.add_option("-b", "--tot-bkg", action='store_true', dest="totbkg", default=False,
+                  help="print column with tot. bkg")
 parser.add_option("-H", "--histo", dest="histo", default=defaultHisto,
                   help="histogram to get the counts from (default '%s')" % defaultHisto)
 parser.add_option("-S", "--syst", dest="syst", default=defaultRefSyst,
@@ -44,6 +46,7 @@ parser.add_option("-v", "--verbose", action="store_true", dest="verbose", defaul
 channel         = options.channel
 inputDir        = options.inputdir
 prodTag         = options.tag
+printTotBkg     = options.totbkg
 referenceHisto  = options.histo
 referenceSyst   = options.syst
 pickleFile      = options.pickle
@@ -75,7 +78,8 @@ for fname, infile in zip(inputFileNames, inputFiles) :
         setHistoSample(h, samplename)
     organizeHistosByType(histosByType, histos)
 refHistos = histosByType # already filtered histonames, all histosByType are refHistos
-allSamples = list(set([h.sample for histos in refHistos.values() for h in histos]))
+allSamples = list(set([h.sample for histos in refHistos.values() for h in histos])) \
+             + (['totbkg'] if printTotBkg else [])
 allSelects = sorted(list(set([k.pr for k in histosByType.keys()])))
 print 'allSamples : ',allSamples
 print 'allSelects : ',allSelects
