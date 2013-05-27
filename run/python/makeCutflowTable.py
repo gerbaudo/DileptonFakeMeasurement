@@ -92,6 +92,7 @@ for t, histos in refHistos.iteritems() :
     for h in histos :
         sample, sel = h.sample, h.type.pr
         countsSampleSel[sample][sel] += h.Integral()
+        if printTotBkg and isBkgSample(sample) : countsSampleSel['totbkg'][sel] += h.Integral()
 
 if pickleFile : dumpToPickle(pickleFile, countsSampleSel)
 
