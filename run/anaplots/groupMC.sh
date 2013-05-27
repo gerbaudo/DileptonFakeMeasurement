@@ -3,12 +3,19 @@
 # dropped all 'cfappend' samples (see Matt's original script for the complete list)
 # /home/mrelich/workarea/SUSY2012/SusyAna2012/run/anaplots/groupMCwChargeFlip.sh
 
-ending="_May17_n0139"
+ending="_May27_n0139"
 outdir="merged"
 #addition="CFPtFix" 
 addition=""
 append=${ending}.AnaHists 
 cfappend=${ending}.ChargeFlipHists
+
+
+# data
+hadd -f ${outdir}/data_physics_Egamma${append}${addition}.root \
+    period?.physics_Egamma${append}.root
+hadd -f ${outdir}/data_physics_Muons${append}${addition}.root \
+    period?.physics_Muons${append}.root
 
 # ttbar
 hadd -f ${outdir}/top${append}${addition}.root \
