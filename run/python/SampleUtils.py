@@ -32,6 +32,10 @@ def guessSampleFromFilename(filename='', verbose=False) :
         return match.group()
     else :
         if verbose : print "cannot guess samplename for %s" % filename
+
+def isDataSample(samplename) : return 'data' in samplename
+def isSigSample(samplename) : return 'WH_' in samplename
+def isBkgSample(samplename) : return not isDataSample(samplename) and not isSigSample(samplename)
 def guessReqidFromFilename(filename='', verbose=False) :
     match = re.search('mc12\_8TeV\.(\d+)\.', filename)
     return match.group(1)
