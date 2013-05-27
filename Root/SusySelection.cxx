@@ -784,7 +784,9 @@ float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag,
   // lumi, xs, sumw, pileup
   if(m_do1fb) weight = getEventWeightAB3();
   else if(m_doAD)  weight = getEventWeight(LUMI_A_D);
-  else weight = (m_useXsReader ? computeEventWeightXsFromReader(LUMI_A_L) : getEventWeight(LUMI_A_L));
+  else weight = (m_useXsReader ?
+                 computeEventWeightXsFromReader(LUMI_A_L) :
+                 getEventWeight(LUMI_A_L, true));
   //if(m_do1fb) weight = getEventWeightFixed(nt.evt()->mcChannel, LUMI_A_B3);
   //else if(m_doAD)  weight = getEventWeightFixed(nt.evt()->mcChannel,LUMI_A_D);
   //else weight = getEventWeightFixed(nt.evt()->mcChannel,LUMI_A_L);

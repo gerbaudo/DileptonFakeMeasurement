@@ -141,6 +141,7 @@ int main(int argc, char** argv)
   susyPlot->setUseAD(useAD);
   susyPlot->setUseXsReader(useSusyXSReader);
 
+  susyPlot->buildSumwMap(chain);
   // Run the job
   if(nEvt<0) nEvt = nEntries;
   cout << endl;

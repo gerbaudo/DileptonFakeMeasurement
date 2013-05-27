@@ -126,6 +126,7 @@ int main(int argc, char** argv)
   susyAna->setFileName(fname);
   //susyAna->setSelection(sel);
 
+  susyAna->buildSumwMap(chain);
   // Run the job
   if(nEvt<0) nEvt = nEntries;
   cout << endl;
