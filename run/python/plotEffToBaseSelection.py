@@ -30,6 +30,10 @@ parser.add_option("-s", "--sig-file", dest="sig", default=defaultSigPickle,
                   help="file with signal counts, default : %s" % defaultSigPickle)
 parser.add_option("-b", "--bkg-file", dest="bkg", default=defaultBkgPickle,
                   help="file with background counts, default : %s" % defaultBkgPickle)
+parser.add_option("-c", "--counts", action='store_true', dest="cnt", default=False,
+                  help="plot counts rather than efficiencies")
+parser.add_option("-r", "--raw-counts", action='store_true', dest="rawcnt", default=False,
+                  help="plot raw counts rather than efficiencies")
 parser.add_option("-S", "--scale-sig", dest="sigScale", default=defaultSigScale, type='float',
                   help="scale the signal yield by this factor (default %.1f)" % defaultSigScale)
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
@@ -37,8 +41,13 @@ parser.add_option("-v", "--verbose", action="store_true", dest="verbose", defaul
 (options, args) = parser.parse_args()
 sigInputFname   = options.sig
 bkgInputFname   = options.bkg
+cnt             = options.cnt
+rawcnt          = options.rawcnt
 sigScale        = options.sigScale
 verbose         = options.verbose
+
+doCounts = cnt or rawcnt
+doEff = not doCounts
 
 countsSigSampleSel = readFromPickle(sigInputFname)
 countsBkgSampleSel = readFromPickle(bkgInputFname)
@@ -76,9 +85,11 @@ histos = dict()
 for sel in allNumeratorSelections :
     if not selIsRelevant(sel) or selIsBase(sel) : continue
     baseSel = getBaseSel(sel)
-    histos[sel] = r.TH2F(sel+'_'+baseSel,
-                         #nicefySelectionName(sel)+' : eff. [%] rel. to '+baseSel+';mc_{1};mn_{1}',
-                         nicefySelectionName(sel)+' signal counts;mc_{1};mn_{1}',
+    title = nicefySelectionName(sel)
+    title += (' : eff. [%] rel. to '+baseSel+';mc_{1};mn_{1}') if  doEff else ''
+    title += ' signal counts;mc_{1};mn_{1}' if doCounts and cnt else ''
+    title += ' signal raw counts;mc_{1};mn_{1}' if doCounts and rawcnt else ''
+    histos[sel] = r.TH2F(sel+'_'+baseSel, title,
                          50, float(mc1Range['min']), float(mc1Range['max']),
                          50, float(mn1Range['min']), float(mn1Range['max']))
 
@@ -92,20 +103,20 @@ for sample, countsSel in countsSigSampleSel.iteritems() :
         baseSel = getBaseSel(sel)
         histo = histos[sel]
         refCounts = countsSigSampleSel[sample][baseSel]
-        #if refCounts : histo.Fill(mc1, mn1, percent*counts/refCounts)
-        if refCounts : histo.Fill(mc1, mn1, counts)
+        if doCounts            : histo.Fill(mc1, mn1, counts)
+        if doEff and refCounts : histo.Fill(mc1, mn1, percent*counts/refCounts)
 
 # draw histos and print bkg eff
-r.gStyle.SetPaintTextFormat('.0f')
-maxEff = 500.
+r.gStyle.SetPaintTextFormat('.0f' if rawcnt else '.2f')
+maxEff = 100. if doEff else max([h.GetMaximum() for h in histos.values()])
 for s, h in histos.iteritems() :
-    c = r.TCanvas('c_eff_'+s, 'relative eff '+s, 800, 600)
+    c = r.TCanvas(('c_eff_' if doEff else 'c_counts_raw_' if rawcnt else 'c_counts_')+s, ''+s, 800, 600)
     c.cd()
     h.SetStats(0)
     h.SetMarkerSize(1.5*h.GetMarkerSize())
     h.SetMaximum(maxEff)
     h.Draw('colz') #contz
-    h.SetMarkerSize(2.*h.GetMarkerSize())
+    h.SetMarkerSize(1.5*h.GetMarkerSize())
     h.Draw('text same')
     def writeBkgEff(backgrounds, counts,
                     font='', x=0.125, y=0.9, slope=-0.05) :
