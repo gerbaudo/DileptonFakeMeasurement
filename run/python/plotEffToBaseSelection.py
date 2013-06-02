@@ -144,46 +144,8 @@ for s, h in histos.iteritems() :
                                                                            ('max',max(effs))]]))
     backgrounds = countsBkgSampleSel.keys()
     counts = [countsBkgSampleSel[b] for b in backgrounds]
-    writeBkgEff(backgrounds, counts, font=h.GetTitleFont())
-    writeSigMinMaxAvg(h)
+    if doEff : writeBkgEff(backgrounds, counts, font=h.GetTitleFont())
+    #writeSigMinMaxAvg(h)
     c.Update()
     c.SaveAs(c.GetName()+'.png')
-
-
-    
-
-sys.exit()
-
-for sample, countsSel in countsSigSampleSel.iteritems() :
-    mc1, mn1 = parDb.mc1Mn1ByReqid(reqDb.reqidBySample(sample))
-    print "%s (%.1f, %.1f) " % (sample, mc1, mn1)
-    for sel, counts in sorted(countsSel.iteritems()) :
-        if not selIsRelevant(sel) : continue
-        histo = histos[sel] if sel in histos else r.TH2F(sel+'_zn', sel+';mc_{1};mn_{1}',
-                                                         50, float(mc1Range['min']), float(mc1Range['max']),
-                                                         50, float(mn1Range['min']), float(mn1Range['max']))
-        if sel not in histos : histos[sel] = histo
-        sig, bkg, dBkg = counts, countBkgTot[sel], 0.2
-        zn = r.RooStats.NumberCountingUtils.BinomialExpZ(sigScale*sig, bkg, dBkg)
-        histo.Fill(mc1, mn1, zn)
-        print "%s : %.2f / %.2f -> %.2f"%(sel, sig, bkg, zn)
-
-r.gStyle.SetPaintTextFormat('.1f')
-for s, h in histos.iteritems() :
-    c = r.TCanvas(s, s, 800, 600)
-    c.cd()
-    h.SetStats(0)
-    h.SetMarkerSize(1.5*h.GetMarkerSize())
-    h.Draw('text')
-    def writeScale(can, scale, font='') :
-        tex = r.TLatex(0.0, 0.0, '')
-        tex.SetNDC()
-        if font : tex.SetTextFont(font)
-        tex.SetTextAlign(31)
-        tex.DrawLatex(1.0-can.GetTopMargin(), 1.0-can.GetRightMargin(), "Signal: x %.1f"%scale)
-        can.Update()
-    if sigScale != defaultSigScale : writeScale(c, sigScale, h.GetTitleFont())
-    c.SaveAs(s+'.png')
-
-
 
