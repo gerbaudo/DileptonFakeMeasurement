@@ -36,6 +36,8 @@ parser.add_option("-t", "--tag", dest="tag", default=defaultTag,
                   help="production tag (default '%s')" % defaultTag)
 parser.add_option("-b", "--tot-bkg", action='store_true', dest="totbkg", default=False,
                   help="print column with tot. bkg")
+parser.add_option("-r", "--raw-counts", action='store_true', dest="rawcnt", default=False,
+                  help="print histo raw Nentries rather than integrals")
 parser.add_option("-H", "--histo", dest="histo", default=defaultHisto,
                   help="histogram to get the counts from (default '%s')" % defaultHisto)
 parser.add_option("-S", "--syst", dest="syst", default=defaultRefSyst,
@@ -48,6 +50,7 @@ inputDir        = options.inputdir
 prodTag         = options.tag
 printTotBkg     = options.totbkg
 referenceHisto  = options.histo
+rawcnt          = options.rawcnt
 referenceSyst   = options.syst
 pickleFile      = options.pickle
 verbose         = options.verbose
@@ -91,8 +94,10 @@ for t, histos in refHistos.iteritems() :
     if t.ch != channel : continue
     for h in histos :
         sample, sel = h.sample, h.type.pr
-        countsSampleSel[sample][sel] += h.Integral()
-        if printTotBkg and isBkgSample(sample) : countsSampleSel['totbkg'][sel] += h.Integral()
+        cnt = h.GetEntries() if rawcnt else h.Integral()
+        countsSampleSel[sample][sel] += cnt
+        if printTotBkg and isBkgSample(sample) :
+            countsSampleSel['totbkg'][sel] += cnt
 
 if pickleFile : dumpToPickle(pickleFile, countsSampleSel)
 
@@ -122,7 +127,7 @@ for sel in allSelects : # should really use list comprehension
     counts = [countsSampleSel[sam][sel]
               if sam in countsSampleSel and sel in countsSampleSel[sam] else None \
               for sam in allSamples ]
-    line = ' & '.join([fwidthField % f for f in [sel]+["%.1f" % c for c in counts]]) + endrow
+    line = ' & '.join([fwidthField % f for f in [sel]+[("%.0f" if rawcnt else "%.1f") % c for c in counts]]) + endrow
     print line
 print tableEpilogue
 
