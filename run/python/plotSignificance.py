@@ -58,16 +58,18 @@ mc1Range = {'min': min(parDb.allMc1()), 'max' : max(parDb.allMc1())}
 mn1Range = {'min': min(parDb.allMn1()), 'max' : max(parDb.allMn1())}
 
 histos = dict()
+backgroundRelErr = 0.2
 for sample, countsSel in countsSigSampleSel.iteritems() :
     mc1, mn1 = parDb.mc1Mn1ByReqid(reqDb.reqidBySample(sample))
     print "%s (%.1f, %.1f) " % (sample, mc1, mn1)
     for sel, counts in sorted(countsSel.iteritems()) :
         if not selIsRelevant(sel) : continue
-        histo = histos[sel] if sel in histos else r.TH2F(sel+'_zn', sel+';mc_{1};mn_{1}',
+        histo = histos[sel] if sel in histos else r.TH2F(sel+'_zn',
+                                                         sel+" Z_{n} (#deltab=%.2f);mc_{1};mn_{1}"%backgroundRelErr,
                                                          50, float(mc1Range['min']), float(mc1Range['max']),
                                                          50, float(mn1Range['min']), float(mn1Range['max']))
         if sel not in histos : histos[sel] = histo
-        sig, bkg, dBkg = counts, countBkgTot[sel], 0.2
+        sig, bkg, dBkg = counts, countBkgTot[sel], backgroundRelErr
         zn = r.RooStats.NumberCountingUtils.BinomialExpZ(sigScale*sig, bkg, dBkg)
         histo.Fill(mc1, mn1, zn)
         print "%s : %.2f / %.2f -> %.2f"%(sel, sig, bkg, zn)
@@ -77,8 +79,16 @@ for s, h in histos.iteritems() :
     c = r.TCanvas(s, s, 800, 600)
     c.cd()
     h.SetStats(0)
-    h.SetMarkerSize(1.5*h.GetMarkerSize())
+    h.SetMarkerSize(1.75*h.GetMarkerSize())
+    hOnlyPos = h.Clone(h.GetName()+'OnlyPos')
+    for i in range(hOnlyPos.GetNbinsX()+1) :
+        for j in range(hOnlyPos.GetNbinsY()+1) :
+            if hOnlyPos.GetBinContent(i,j)<0. :
+                hOnlyPos.SetBinContent(i,j,0.)
+                hOnlyPos.SetBinError(i,j,0.)
     h.Draw('text')
+    hOnlyPos.Draw('colz same') #contz
+    h.Draw('text same')
     def writeScale(can, scale, font='') :
         tex = r.TLatex(0.0, 0.0, '')
         tex.SetNDC()
