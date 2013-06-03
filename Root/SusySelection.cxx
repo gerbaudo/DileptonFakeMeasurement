@@ -103,7 +103,7 @@ void SusySelection::Begin(TTree* /*tree*/)
   SusyNtAna::Begin(0);
   if(m_dbg) cout << "SusySelection::Begin" << endl;
 
-  string per = "HCP";
+  string per = "Moriond";
   if(m_do1fb) per = "A-B3";
   if(m_doAD)  per = "A-D7";
   m_trigObj = new DilTrigLogic(per,false/*No Reweight Utils!*/);
