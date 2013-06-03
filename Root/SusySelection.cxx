@@ -42,6 +42,7 @@ SusySelection::SusySelection() :
     n_pass_TileTrip   [w] = 0;
     n_pass_LAr        [w] = 0;
     n_pass_BadJet     [w] = 0;
+    n_pass_FEBCut     [w] = 0;
     n_pass_BadMuon    [w] = 0;
     n_pass_Cosmic     [w] = 0;
     n_pass_HttVeto    [w] = 0;
@@ -188,19 +189,24 @@ bool SusySelection::selectEvent(bool doMll)
 
   int flag = nt.evt()->cutFlags[NtSys_NOM];
   int hdec = nt.evt()->hDecay;
-  if(passGRL        (flag)) { increment(n_pass_Grl     ); } else { return false; }
-  if(passLarErr     (flag)) { increment(n_pass_LarErr  ); } else { return false; }
-  if(passTileErr    (flag)) { increment(n_pass_TileErr ); } else { return false; }
-  if(passTTCVeto    (flag)) { increment(n_pass_TTCVeto ); } else { return false; }
-  if(passGoodVtx    (flag)) { increment(n_pass_GoodVtx ); } else { return false; }
-  if(passTileTripCut(flag)) { increment(n_pass_TileTrip); } else { return false; }
-  if(passHfor       (    )) {                           ; } else { return false; }
-  if(passLAr        (flag)) { increment(n_pass_LAr     ); } else { return false; }
-  if(passBadJet     (flag)) { increment(n_pass_BadJet  ); } else { return false; }
-  if(passBadMuon    (flag)) { increment(n_pass_BadMuon ); } else { return false; }
-  if(passCosmic     (flag)) { increment(n_pass_Cosmic  ); } else { return false; }
-  if(passHotSpot    (flag)) {                           ; } else { return false; }
-  if(passHtautauVeto(hdec)) { increment(n_pass_HttVeto ); } else { return false; }
+  JetVector &jets = m_baseJets;
+  const Susy::Met *met = m_met;
+  uint run = nt.evt()->run;
+  bool mc = nt.evt()->isMC;
+  if(passGRL        (flag           ))  { increment(n_pass_Grl     ); } else { return false; }
+  if(passLarErr     (flag           ))  { increment(n_pass_LarErr  ); } else { return false; }
+  if(passTileErr    (flag           ))  { increment(n_pass_TileErr ); } else { return false; }
+  if(passTTCVeto    (flag           ))  { increment(n_pass_TTCVeto ); } else { return false; }
+  if(passGoodVtx    (flag           ))  { increment(n_pass_GoodVtx ); } else { return false; }
+  if(passTileTripCut(flag           ))  { increment(n_pass_TileTrip); } else { return false; }
+  if(passHfor       (               ))  {                           ; } else { return false; }
+  if(passLAr        (flag           ))  { increment(n_pass_LAr     ); } else { return false; }
+  if(passBadJet     (flag           ))  { increment(n_pass_BadJet  ); } else { return false; }
+  if(passDeadRegions(jets,met,run,mc))  { increment(n_pass_FEBCut  ); } else { return false; }
+  if(passBadMuon    (flag           ))  { increment(n_pass_BadMuon ); } else { return false; }
+  if(passCosmic     (flag           ))  { increment(n_pass_Cosmic  ); } else { return false; }
+  if(passHotSpot    (flag           ))  {                           ; } else { return false; }
+  //if(passHtautauVeto(hdec)) { increment(n_pass_HttVeto ); } else { return false; }
   //--- NEW ---//
   //if( hasJetInBadFCAL(m_baseJets) ) return false;
 
@@ -922,6 +928,7 @@ void SusySelection::dumpEventCounters()
     cout << "pass TileTripCut  " << n_pass_TileTrip[w] << endl;
     cout << "pass LAr:         " << n_pass_LAr     [w] << endl;
     cout << "pass BadJet:      " << n_pass_BadJet  [w] << endl;
+    cout << "pass FEB:         " << n_pass_FEBCut  [w] << endl;
     cout << "pass BadMu:       " << n_pass_BadMuon [w] << endl;
     cout << "pass Cosmic:      " << n_pass_Cosmic  [w] << endl;
     cout << "pass Htautau veto " << n_pass_HttVeto [w] << endl;

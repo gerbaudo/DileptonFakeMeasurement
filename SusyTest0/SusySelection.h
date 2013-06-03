@@ -238,6 +238,7 @@ class SusySelection : public SusyNtAna
     float n_pass_TileTrip   [WT_N];
     float n_pass_LAr        [WT_N];
     float n_pass_BadJet     [WT_N];
+    float n_pass_FEBCut     [WT_N];
     float n_pass_BadMuon    [WT_N];
     float n_pass_Cosmic     [WT_N];
     float n_pass_HttVeto    [WT_N];
