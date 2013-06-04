@@ -1,5 +1,7 @@
 #include <iomanip>
 #include <cassert>
+#include <iomanip> // setw
+#include <sstream>
 #include "TCanvas.h"
 #include "SusyTest0/SusySelection.h"
 #include "SusyTest0/SusyPlotter.h"
@@ -907,88 +909,101 @@ float SusySelection::getPhotonXS(int mcRunNumber)
 /*--------------------------------------------------------------------------------*/
 // Event counters
 /*--------------------------------------------------------------------------------*/
+// helper function: write header with event types
+std::string lineLabelsPerEventType(const string *labels, int colWidth){
+  std::ostringstream oss;
+  for(int i=0; i<ET_N-1; ++i)
+    oss<<std::setw(colWidth)<<labels[i];
+  return oss.str();
+}
+// helper function: for a given weight type, write line with counts for each event type
+std::string lineCountersPerEventType(const float cnt[ET_N][WT_N], int weightType, int colWidth){
+  std::ostringstream oss;
+  for(int i=0; i<ET_N-1; ++i)
+    oss<<std::setw(colWidth)<<cnt[i][weightType];
+  return oss.str();
+}
 void SusySelection::dumpEventCounters()
 {
-
-
   string v_ET[] = {"ee","mm","em","me"};
   string v_WT[] = {"Raw","Event","Pileup","Pileup A-B3",
-		   "LeptonSF","btagSF","TrigSF","All A-B3", "All A-E"};
-
+                   "LeptonSF","btagSF","TrigSF","All A-B3", "All A-E"};
+  int colWidth(10);
+  int &cw = colWidth;
+  int nCols(ET_N-1);
+  string topRule(nCols*colWidth, '*');
+  string midRule(nCols*colWidth, '-');
+  // define a function reference to shorten lines
+  string (&lcpet)(const float cnt[ET_N][WT_N], int weightType, int colWidth) = lineCountersPerEventType;
   for(int w=0; w<WT_N; ++w){
-    cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" << endl;
-    cout << "SusySelection Event counts for weight: " << v_WT[w] << endl;
-    cout << endl;
-    cout << "read in:          " << n_readin       [w] << endl;
-    cout << "pass GRL          " << n_pass_Grl     [w] << endl;
-    cout << "pass LarErr       " << n_pass_LarErr  [w] << endl;
-    cout << "pass TileErr      " << n_pass_TileErr [w] << endl;
-    cout << "pass TTCVeto      " << n_pass_TTCVeto [w] << endl;
-    cout << "pass GoodVtx      " << n_pass_GoodVtx [w] << endl;
-    cout << "pass TileTripCut  " << n_pass_TileTrip[w] << endl;
-    cout << "pass LAr:         " << n_pass_LAr     [w] << endl;
-    cout << "pass BadJet:      " << n_pass_BadJet  [w] << endl;
-    cout << "pass FEB:         " << n_pass_FEBCut  [w] << endl;
-    cout << "pass BadMu:       " << n_pass_BadMuon [w] << endl;
-    cout << "pass Cosmic:      " << n_pass_Cosmic  [w] << endl;
-    cout << "pass Htautau veto " << n_pass_HttVeto [w] << endl;
-    cout << "   ------  Start Comparison Here ------ " << endl;
-    cout << "pass atleast 2 " << n_pass_atleast2Lep[w] << endl;
-    cout << "pass exactly 2 " << n_pass_exactly2Lep[w] << endl;
-    cout << "pass nSigLep:  " << n_pass_signalLep[w]   << endl;
-
-    for(int i=0; i<ET_N-1; ++i){
-      cout << "************************************" << endl;
-      cout << "For dilepton type: " << v_ET[i]       << endl;
-
-      cout << "pass flavor:     " << n_pass_flavor[i][w]    << endl;
-      cout << "pass evt trig:   " << n_pass_evtTrig[i][w]   << endl;
-      cout << "pass trig match: " << n_pass_trigMatch[i][w] << endl;
-      cout << "pass OS:         " << n_pass_os[i][w]        << endl;
-      cout << "pass SS:         " << n_pass_ss[i][w]        << endl;
-      cout << "-----------------------------------------------------"    << endl;
-      cout << "pass SR6 sign:        : " << n_pass_SR6sign        [i][w] << endl;
-      cout << "pass SR6 flavor:      : " << n_pass_SR6flav        [i][w] << endl;
-      cout << "pass SR6 >=1j:        : " << n_pass_SR6ge1j        [i][w] << endl;
-      cout << "pass SR6 >=2j:        : " << n_pass_SR6ge2j        [i][w] << endl;
-      cout << "pass SR6 DrllMax      : " << n_pass_SR6DrllMax     [i][w] << endl;
-      cout << "pass SR6 PtllMin      : " << n_pass_SR6PtllMin     [i][w] << endl;
-      cout << "pass SR6 MllMax       : " << n_pass_SR6MllMax      [i][w] << endl;
-      cout << "pass SR6 METRel       : " << n_pass_SR6METRel      [i][w] << endl;
-      cout << "pass SR6 MtLlmetMin   : " << n_pass_SR6MtLlmetMin  [i][w] << endl;
-      cout << "pass SR6 MtMinlmetMin : " << n_pass_SR6MtMinlmetMin[i][w] << endl;
-      cout << "pass SR6 ZtautauVeto  : " << n_pass_SR6ZtautauVeto [i][w] << endl;
-      cout << "pass SR6              : " << n_pass_SR6            [i][w] << endl;
-      cout << "-----------------------------------------------------"    << endl;
-      cout << "pass SR7 sign:        : " << n_pass_SR7sign        [i][w] << endl;
-      cout << "pass SR7 flavor:      : " << n_pass_SR7flav        [i][w] << endl;
-      cout << "pass SR7 >=1j:        : " << n_pass_SR7ge1j        [i][w] << endl;
-      cout << "pass SR7 >=2j:        : " << n_pass_SR7ge2j        [i][w] << endl;
-      cout << "pass SR7 DrllMax      : " << n_pass_SR7DrllMax     [i][w] << endl;
-      cout << "pass SR7 PtllMin      : " << n_pass_SR7PtllMin     [i][w] << endl;
-      cout << "pass SR7 MllMax       : " << n_pass_SR7MllMax      [i][w] << endl;
-      cout << "pass SR7 METRel       : " << n_pass_SR7METRel      [i][w] << endl;
-      cout << "pass SR7 MtLlmetMin   : " << n_pass_SR7MtLlmetMin  [i][w] << endl;
-      cout << "pass SR7 MtMinlmetMin : " << n_pass_SR7MtMinlmetMin[i][w] << endl;
-      cout << "pass SR7 ZtautauVeto  : " << n_pass_SR7ZtautauVeto [i][w] << endl;
-      cout << "pass SR7              : " << n_pass_SR7            [i][w] << endl;
-      cout << "-----------------------------------------------------"    << endl;
-      cout << "pass SR8 sign         : " << n_pass_SR8sign        [i][w] << endl;
-      cout << "pass SR8 flavor       : " << n_pass_SR8flav        [i][w] << endl;
-      cout << "pass SR8 >=1j         : " << n_pass_SR8ge1j        [i][w] << endl;
-      cout << "pass SR8 >=2j         : " << n_pass_SR8ge2j        [i][w] << endl;
-      cout << "pass SR8 METRel > 50  : " << n_pass_SR8metr        [i][w] << endl;
-      cout << "-----------------------------------------------------"    << endl;
-      cout << "pass SR9 sign         : " << n_pass_SR9sign        [i][w] << endl;
-      cout << "pass SR9 flavor       : " << n_pass_SR9flav        [i][w] << endl;
-      cout << "pass SR9 >=1j         : " << n_pass_SR9ge1j        [i][w] << endl;
-      cout << "pass SR9 >=2j         : " << n_pass_SR9ge2j        [i][w] << endl;
-      cout << "pass SR9 METRel > 50  : " << n_pass_SR9metr        [i][w] << endl;
-      cout << "-----------------------------------------------------"    << endl;
-
-    }// end loop over event type
-  }// end loop over weight type
-
+    cout<<topRule                                                         <<endl;
+    cout<<"Event counts for weight: "<< v_WT             [w]              <<endl;
+    cout<<midRule                                                         <<endl;
+    cout<<"read in:              : "<<n_readin           [w]              <<endl;
+    cout<<"pass GRL              : "<<n_pass_Grl         [w]              <<endl;
+    cout<<"pass LarErr           : "<<n_pass_LarErr      [w]              <<endl;
+    cout<<"pass TileErr          : "<<n_pass_TileErr     [w]              <<endl;
+    cout<<"pass TTCVeto          : "<<n_pass_TTCVeto     [w]              <<endl;
+    cout<<"pass GoodVtx          : "<<n_pass_GoodVtx     [w]              <<endl;
+    cout<<"pass TileTripCut      : "<<n_pass_TileTrip    [w]              <<endl;
+    cout<<"pass LAr:             : "<<n_pass_LAr         [w]              <<endl;
+    cout<<"pass BadJet:          : "<<n_pass_BadJet      [w]              <<endl;
+    cout<<"pass FEB:             : "<<n_pass_FEBCut      [w]              <<endl;
+    cout<<"pass BadMu:           : "<<n_pass_BadMuon     [w]              <<endl;
+    cout<<"pass Cosmic:          : "<<n_pass_Cosmic      [w]              <<endl;
+    cout<<"pass Htautau veto     : "<<n_pass_HttVeto     [w]              <<endl;
+    cout<<"   ------  Start Comparison Here ------ "                      <<endl;
+    cout<<"pass atleast 2        : "<<n_pass_atleast2Lep [w]              <<endl;
+    cout<<"pass exactly 2        : "<<n_pass_exactly2Lep [w]              <<endl;
+    cout<<"pass nSigLep          : "<<n_pass_signalLep   [w]              <<endl;
+    cout<<midRule                                                         <<endl;
+    cout<<"For dilepton type     : "<<lineLabelsPerEventType(v_ET, cw)    <<endl;
+    cout<<midRule                                                         <<endl;
+    cout<<"pass flavor:          : "<<lcpet(n_pass_flavor         , w, cw)<<endl;
+    cout<<"pass evt trig:        : "<<lcpet(n_pass_evtTrig        , w, cw)<<endl;
+    cout<<"pass trig match:      : "<<lcpet(n_pass_trigMatch      , w, cw)<<endl;
+    cout<<"pass OS:              : "<<lcpet(n_pass_os             , w, cw)<<endl;
+    cout<<"pass SS:              : "<<lcpet(n_pass_ss             , w, cw)<<endl;
+    cout<<midRule                                                         <<endl;
+    cout<<"pass SR6 sign:        : "<<lcpet(n_pass_SR6sign        , w, cw)<<endl;
+    cout<<"pass SR6 flavor:      : "<<lcpet(n_pass_SR6flav        , w, cw)<<endl;
+    cout<<"pass SR6 >=1j:        : "<<lcpet(n_pass_SR6ge1j        , w, cw)<<endl;
+    cout<<"pass SR6 >=2j:        : "<<lcpet(n_pass_SR6ge2j        , w, cw)<<endl;
+    cout<<"pass SR6 DrllMax      : "<<lcpet(n_pass_SR6DrllMax     , w, cw)<<endl;
+    cout<<"pass SR6 PtllMin      : "<<lcpet(n_pass_SR6PtllMin     , w, cw)<<endl;
+    cout<<"pass SR6 MllMax       : "<<lcpet(n_pass_SR6MllMax      , w, cw)<<endl;
+    cout<<"pass SR6 METRel       : "<<lcpet(n_pass_SR6METRel      , w, cw)<<endl;
+    cout<<"pass SR6 MtLlmetMin   : "<<lcpet(n_pass_SR6MtLlmetMin  , w, cw)<<endl;
+    cout<<"pass SR6 MtMinlmetMin : "<<lcpet(n_pass_SR6MtMinlmetMin, w, cw)<<endl;
+    cout<<"pass SR6 ZtautauVeto  : "<<lcpet(n_pass_SR6ZtautauVeto , w, cw)<<endl;
+    cout<<"pass SR6              : "<<lcpet(n_pass_SR6            , w, cw)<<endl;
+    cout<<midRule                                                         <<endl;
+    cout<<"pass SR7 sign:        : "<<lcpet(n_pass_SR7sign        , w, cw)<<endl;
+    cout<<"pass SR7 flavor:      : "<<lcpet(n_pass_SR7flav        , w, cw)<<endl;
+    cout<<"pass SR7 >=1j:        : "<<lcpet(n_pass_SR7ge1j        , w, cw)<<endl;
+    cout<<"pass SR7 >=2j:        : "<<lcpet(n_pass_SR7ge2j        , w, cw)<<endl;
+    cout<<"pass SR7 DrllMax      : "<<lcpet(n_pass_SR7DrllMax     , w, cw)<<endl;
+    cout<<"pass SR7 PtllMin      : "<<lcpet(n_pass_SR7PtllMin     , w, cw)<<endl;
+    cout<<"pass SR7 MllMax       : "<<lcpet(n_pass_SR7MllMax      , w, cw)<<endl;
+    cout<<"pass SR7 METRel       : "<<lcpet(n_pass_SR7METRel      , w, cw)<<endl;
+    cout<<"pass SR7 MtLlmetMin   : "<<lcpet(n_pass_SR7MtLlmetMin  , w, cw)<<endl;
+    cout<<"pass SR7 MtMinlmetMin : "<<lcpet(n_pass_SR7MtMinlmetMin, w, cw)<<endl;
+    cout<<"pass SR7 ZtautauVeto  : "<<lcpet(n_pass_SR7ZtautauVeto , w, cw)<<endl;
+    cout<<"pass SR7              : "<<lcpet(n_pass_SR7            , w, cw)<<endl;
+    cout<<midRule                                                         <<endl;
+    cout<<"pass SR8 sign         : "<<lcpet(n_pass_SR8sign        , w, cw)<<endl;
+    cout<<"pass SR8 flavor       : "<<lcpet(n_pass_SR8flav        , w, cw)<<endl;
+    cout<<"pass SR8 >=1j         : "<<lcpet(n_pass_SR8ge1j        , w, cw)<<endl;
+    cout<<"pass SR8 >=2j         : "<<lcpet(n_pass_SR8ge2j        , w, cw)<<endl;
+    cout<<"pass SR8 METRel > 50  : "<<lcpet(n_pass_SR8metr        , w, cw)<<endl;
+    cout<<midRule                                                         <<endl;
+    cout<<"pass SR9 sign         : "<<lcpet(n_pass_SR9sign        , w, cw)<<endl;
+    cout<<"pass SR9 flavor       : "<<lcpet(n_pass_SR9flav        , w, cw)<<endl;
+    cout<<"pass SR9 >=1j         : "<<lcpet(n_pass_SR9ge1j        , w, cw)<<endl;
+    cout<<"pass SR9 >=2j         : "<<lcpet(n_pass_SR9ge2j        , w, cw)<<endl;
+    cout<<"pass SR9 METRel > 50  : "<<lcpet(n_pass_SR9metr        , w, cw)<<endl;
+    cout<<midRule                                                         <<endl;
+  }// end for(w)
 }
 
 /*--------------------------------------------------------------------------------*/
