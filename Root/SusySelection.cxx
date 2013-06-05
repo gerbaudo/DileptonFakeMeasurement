@@ -90,10 +90,10 @@ SusySelection::SusySelection() :
 
   //out.open("event.dump");
 
-  //setAnaType(Ana_2Lep);
+  setAnaType(Ana_2Lep);
   //out.open("InterestingEventsWPreTaus.txt");
   //out.open("InterestingEventsNoJetReq.txt");
-  out.open("InterestingEvents3Lep.txt");
+  //out.open("InterestingEvents3Lep.txt");
   //out.open("SSMMInclusive.txt");
   //out.open("dump.txt");
 }
