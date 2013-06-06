@@ -292,6 +292,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
 
   bool count(true);
   bool includeBTag(true), includeTrig(true);
+  includeBTag=false;
   const Met*          m = m_met;
   const JetVector&    j = m_signalJets2Lep;
   const LeptonVector& l = m_signalLeptons;
