@@ -1360,12 +1360,13 @@ void SusySelection::printJet(const Jet* jet)
 /*--------------------------------------------------------------------------------*/
 float SusySelection::getXsFromReader()
 {
-  if(m_dbg) cout << "SusySelection::getXsFromReader()" << endl;
   if(!m_useXsReader || !m_xsReader) return -1.0;
-  if(m_xsFromReader < 0.0) {
-    m_xsFromReader = m_xsReader->GetXS(  static_cast<int>(nt.evt()->mcChannel) );
-  } // end if(xs<0)
-  if(m_dbg) cout << "   got " << m_xsFromReader << " for " << static_cast<int>(nt.evt()->mcChannel) << endl;
+  bool xsIsNotCached(m_xsFromReader < 0.0); // was initialized to -1
+  if(xsIsNotCached){
+    int dsid(static_cast<int>(nt.evt()->mcChannel));
+    m_xsFromReader = m_xsReader->GetXS(dsid);
+    if(m_dbg) cout<<"SusySelection::getXsFromReader: got "<<m_xsFromReader<<" for "<<dsid<<endl;
+  }
   return m_xsFromReader;
 }
 /*--------------------------------------------------------------------------------*/
