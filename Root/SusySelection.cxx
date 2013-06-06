@@ -783,21 +783,17 @@ bool SusySelection::isTrueDilepton(const LeptonVector &leptons)
 // Get Event weight
 /*--------------------------------------------------------------------------------*/
 float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag, bool includeTrig,
-				  bool doMediumpp)
+                                  bool doMediumpp)
 {
   if( !nt.evt()->isMC ) return 1.;
   uint nl = leptons.size();
   float weight = 1;
 
   // lumi, xs, sumw, pileup
-  if(m_do1fb) weight = getEventWeightAB3();
-  else if(m_doAD)  weight = getEventWeight(LUMI_A_D);
-  else weight = (m_useXsReader ?
-                 computeEventWeightXsFromReader(LUMI_A_L) :
-                 getEventWeight(LUMI_A_L, true));
-  //if(m_do1fb) weight = getEventWeightFixed(nt.evt()->mcChannel, LUMI_A_B3);
-  //else if(m_doAD)  weight = getEventWeightFixed(nt.evt()->mcChannel,LUMI_A_D);
-  //else weight = getEventWeightFixed(nt.evt()->mcChannel,LUMI_A_L);
+  bool useSumwMap(true);
+  weight = (m_useXsReader ?
+            computeEventWeightXsFromReader(LUMI_A_L) :
+            SusyNtAna::getEventWeight(LUMI_A_L, useSumwMap));
 
   // bbbar/ccbar scale factor
   uint chNum = nt.evt()->mcChannel;
