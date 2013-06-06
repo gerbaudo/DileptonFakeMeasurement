@@ -794,17 +794,7 @@ float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag,
   weight = (m_useXsReader ?
             computeEventWeightXsFromReader(LUMI_A_L) :
             SusyNtAna::getEventWeight(LUMI_A_L, useSumwMap));
-
-  // bbbar/ccbar scale factor
-  uint chNum = nt.evt()->mcChannel;
-  if(chNum == 129136 || chNum == 147668){
-    if(leptons[0]->isMu() && leptons[1]->isMu()) weight *= 0.706074;
-    else weight = 0;
-  }
-  if(chNum == 129135 || chNum == 147667){
-    if(leptons[0]->isEle() && leptons[1]->isEle()) weight *= 0.706074;
-    else weight = 0;
-  }
+  weight *= getPythiaBbCcScaleFactor(nt.evt()->mcChannel, leptons);
 
   float trigW = 1.0; // Trigger
   if(!m_useMCTrig && includeTrig){
@@ -825,7 +815,18 @@ float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag,
   float bTag = (includeBTag ? getBTagWeight(nt.evt()) : 1.0);
   return weight * trigW * lepW * bTag;
 }
+//-----------------------------------------
+float SusySelection::getPythiaBbCcScaleFactor(uint datasetId, const LeptonVector &leptons) const
+{
+  bool isBb2el(datasetId==129135), isBb2mu(datasetId==129136);
+  bool isCc2el(datasetId==147667), isCc2mu(datasetId==147668);
+  bool isPythiaBbCcSample(isBb2el || isBb2mu || isCc2el || isCc2mu);
+  bool rigthLepton(isBb2mu || isCc2mu ?
+                   leptons[0]->isMu()  && leptons[1]->isMu() :
+                   leptons[0]->isEle() && leptons[1]->isEle());
+  return (isPythiaBbCcSample ? (rigthLepton ? 0.706074 : 0.0) : 1.0);
 
+}
 /*--------------------------------------------------------------------------------*/
 // Get Btag weight
 /*--------------------------------------------------------------------------------*/
