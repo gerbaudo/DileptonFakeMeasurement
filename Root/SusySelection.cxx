@@ -854,8 +854,9 @@ float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag,
 float SusySelection::getBTagWeight(const Event* evt)
 {
   JetVector tempJets;
-  for(uint ij=0; ij<m_baseJets.size(); ++ij){
-    Jet* jet = m_baseJets.at(ij);
+  const JetVector& jets = m_signalJets2Lep; //m_baseJets
+  for(uint ij=0; ij<jets.size(); ++ij){
+    Jet* jet = jets.at(ij);
     if( !(jet->Pt() > 20 && fabs(jet->Eta()) < 2.5) ) continue;
     //if( fabs(jet->Eta()) > JET_ETA_CUT  ) continue;
     tempJets.push_back(jet);
