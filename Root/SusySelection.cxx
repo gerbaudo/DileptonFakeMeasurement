@@ -796,19 +796,7 @@ float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag,
             SusyNtAna::getEventWeight(LUMI_A_L, useSumwMap));
   weight *= getPythiaBbCcScaleFactor(nt.evt()->mcChannel, leptons);
 
-  float trigW = 1.0; // Trigger
-  if(!m_useMCTrig && includeTrig){
-    if(nl==2) trigW = m_trigObj->getTriggerWeight(leptons, nt.evt()->isMC, m_met->Et,
-                                                  m_signalJets2Lep.size(),
-                                                  nt.evt()->nVtx, NtSys_NOM);
-    bool twIsInvalid(isnan(trigW) || trigW<0.0);
-    assert(!twIsInvalid);
-    if(twIsInvalid){
-      if(m_dbg) cout<<"SusySelection::getEventWeight: invalid weigth "<<trigW<<", using 0.0"<<endl;
-      trigW = (twIsInvalid ? 0.0 : trigW);
-    }
-  }
-
+  float trigW = (includeTrig ? getTriggerWeight2Lep(leptons) : 1.0);
   float lepW=1.0;
   if(nl > 0) lepW *= leptons[0]->effSF;
   if(nl > 1) lepW *= leptons[1]->effSF;
@@ -841,6 +829,29 @@ float SusySelection::getBTagWeight(const Event* evt)
     tempJets.push_back(jet);
   }
   return bTagSF(evt, tempJets, true);
+}
+//-----------------------------------------
+float SusySelection::getTriggerWeight2Lep(const LeptonVector &leptons)
+{
+  float trigW = 1.0;
+  // if m_useMCTrig, then we are dropping evts with DilTrigLogic::passDil*, not weighting them
+  // DG Jun2013 : verify this with Matt & Josephine
+  if(!m_useMCTrig){
+    if(leptons.size()==2) trigW = m_trigObj->getTriggerWeight(leptons,
+                                                              nt.evt()->isMC,
+                                                              m_met->Et,
+                                                              m_signalJets2Lep.size(),
+                                                              nt.evt()->nVtx,
+                                                              NtSys_NOM);
+    bool twIsInvalid(isnan(trigW) || trigW<0.0);
+    assert(!twIsInvalid);
+    if(twIsInvalid){
+      if(m_dbg)
+        cout<<"SusySelection::getTriggerWeight: invalid weigth "<<trigW<<", using 0.0"<<endl;
+      trigW = (twIsInvalid ? 0.0 : trigW);
+    }
+  }
+  return trigW;
 }
 
 /*--------------------------------------------------------------------------------*/

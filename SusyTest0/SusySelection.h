@@ -201,7 +201,7 @@ class SusySelection : public SusyNtAna
     float getXsFromReader();     //!< cache xsec from xsreader
     float getBTagWeight(const Event* evt);
     float getPythiaBbCcScaleFactor(uint datasetId, const LeptonVector &leptons) const;
-
+    float getTriggerWeight2Lep(const LeptonVector &leptons);
     ClassDef(SusySelection, 1);
 
   protected:
@@ -210,7 +210,7 @@ class SusySelection : public SusyNtAna
     XSReader* m_xsReader;
 
     DilTrigLogic*       m_trigObj;      // My trigger logic class
-    bool                m_useMCTrig;    // Use MC Trigger
+    bool                m_useMCTrig;    // Use MC Trigger, i.e. toggle the matching in DilTrigLogic::passDil*()
 
     string              m_fileName;     // File name
     float               m_w;            // mc weight
