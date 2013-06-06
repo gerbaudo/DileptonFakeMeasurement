@@ -144,12 +144,8 @@ class SusySelection : public SusyNtAna
     // Save file name for easy writing
     void setFileName(string f){ m_fileName = f; };
     string getFileName(){ return m_fileName; };
-    // cache xsec from xsreader
-    float getXsFromReader();
-    float computeEventWeightXsFromReader(float lumi);
+    //! method that should be used to fill the histos
     float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true);
-    float getBTagWeight(const Event* evt);
-    float getPythiaBbCcScaleFactor(uint datasetId, const LeptonVector &leptons) const;
 
     // Some controls
     void setUse1fb(bool use1fb){ m_do1fb = use1fb; };
@@ -199,6 +195,12 @@ class SusySelection : public SusyNtAna
     void printJet(const Jet* jet);
     static float computeMt2(const TLorentzVector &l0, const TLorentzVector &l1,
 			    const TLorentzVector &met);
+ protected:
+    //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
+    float computeEventWeightXsFromReader(float lumi);
+    float getXsFromReader();     //!< cache xsec from xsreader
+    float getBTagWeight(const Event* evt);
+    float getPythiaBbCcScaleFactor(uint datasetId, const LeptonVector &leptons) const;
 
     ClassDef(SusySelection, 1);
 
