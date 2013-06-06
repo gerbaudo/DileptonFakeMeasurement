@@ -783,8 +783,7 @@ bool SusySelection::isTrueDilepton(const LeptonVector &leptons)
 /*--------------------------------------------------------------------------------*/
 // Get Event weight
 /*--------------------------------------------------------------------------------*/
-float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag, bool includeTrig,
-                                  bool doMediumpp)
+float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag, bool includeTrig)
 {
   if( !nt.evt()->isMC ) return 1.;
   uint nl = leptons.size();

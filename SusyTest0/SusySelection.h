@@ -147,9 +147,7 @@ class SusySelection : public SusyNtAna
     // cache xsec from xsreader
     float getXsFromReader();
     float computeEventWeightXsFromReader(float lumi);
-    // Get Btag weight
-    float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true,
-		       bool doMediumpp=false);
+    float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true);
     float getBTagWeight(const Event* evt);
 
     // Some controls
