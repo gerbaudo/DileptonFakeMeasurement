@@ -203,6 +203,7 @@ class SusySelection : public SusyNtAna
     float getPythiaBbCcScaleFactor(uint datasetId, const LeptonVector &leptons) const;
     float getTriggerWeight2Lep(const LeptonVector &leptons);
     float getLeptonEff2Lep(const LeptonVector &leptons) const;
+    void resetAllCounters();
     ClassDef(SusySelection, 1);
 
   protected:

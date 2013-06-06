@@ -34,61 +34,7 @@ SusySelection::SusySelection() :
   m_cutNBaseLep(true),
   m_ET(ET_Unknown)
 {
-  // Loop over weight types
-  for(int w=0; w<WT_N; ++w){
-    n_readin          [w] = 0;
-    n_pass_Grl        [w] = 0;
-    n_pass_LarErr     [w] = 0;
-    n_pass_TileErr    [w] = 0;
-    n_pass_TTCVeto    [w] = 0;
-    n_pass_GoodVtx    [w] = 0;
-    n_pass_TileTrip   [w] = 0;
-    n_pass_LAr        [w] = 0;
-    n_pass_BadJet     [w] = 0;
-    n_pass_FEBCut     [w] = 0;
-    n_pass_BadMuon    [w] = 0;
-    n_pass_Cosmic     [w] = 0;
-    n_pass_HttVeto    [w] = 0;
-    n_pass_atleast2Lep[w] = 0;
-    n_pass_exactly2Lep[w] = 0;
-    n_pass_signalLep  [w] = 0;
-
-    // The rest are channel specific.
-    for(int i=0; i<ET_N; ++i){
-      n_pass_flavor[i][w]   = 0;
-      n_pass_evtTrig[i][w]     = 0;
-      n_pass_trigMatch[i][w]   = 0;
-      n_pass_mll[i][w]         = 0;
-      n_pass_ss[i][w]          = 0;
-      n_pass_os[i][w]          = 0;
-
-      // per-SR counters
-      n_pass_SR6sign[i][w] = n_pass_SR6flav[i][w] = n_pass_SR6metr[i][w] = 0;
-      n_pass_SR6ge1j[i][w] = n_pass_SR6ge2j[i][w] = n_pass_SR6eq2j[i][w] = 0;
-      n_pass_SR6eq2jNfv[i][w] = n_pass_SR6ge2jNfv[i][w] = n_pass_SR6[i][w] = 0;
-      n_pass_SR6DrllMax     [i][w] = n_pass_SR6PtllMin     [i][w] = 0;
-      n_pass_SR6MllMax      [i][w] = n_pass_SR6METRel      [i][w] = 0;
-      n_pass_SR6MtLlmetMin  [i][w] = n_pass_SR6MtMinlmetMin[i][w] = 0;
-      n_pass_SR6ZtautauVeto [i][w] = 0;
-
-      n_pass_SR7sign[i][w] = n_pass_SR7flav[i][w] = n_pass_SR7metr[i][w] = 0;
-      n_pass_SR7ge1j[i][w] = n_pass_SR7ge2j[i][w] = n_pass_SR7eq2j[i][w] = 0;
-      n_pass_SR7eq2jNfv[i][w] = n_pass_SR7ge2jNfv[i][w] = n_pass_SR7[i][w] = 0;
-      n_pass_SR7DrllMax     [i][w] = n_pass_SR7PtllMin     [i][w] = 0;
-      n_pass_SR7MllMax      [i][w] = n_pass_SR7METRel      [i][w] = 0;
-      n_pass_SR7MtLlmetMin  [i][w] = n_pass_SR7MtMinlmetMin[i][w] = 0;
-      n_pass_SR7ZtautauVeto [i][w] = 0;
-
-      n_pass_SR8sign[i][w] = n_pass_SR8flav[i][w] = n_pass_SR8metr[i][w] = 0;
-      n_pass_SR8ge1j[i][w] = n_pass_SR8ge2j[i][w] = n_pass_SR8eq2j[i][w] = 0;
-      n_pass_SR8eq2jNfv[i][w] = n_pass_SR8ge2jNfv[i][w] = n_pass_SR8[i][w] = 0;
-
-      n_pass_SR9sign[i][w] = n_pass_SR9flav[i][w] = n_pass_SR9metr[i][w] = 0;
-      n_pass_SR9ge1j[i][w] = n_pass_SR9ge2j[i][w] = n_pass_SR9eq2j[i][w] = 0;
-      n_pass_SR9eq2jNfv[i][w] = n_pass_SR9ge2jNfv[i][w] = n_pass_SR9[i][w] = 0;
-    }
-  }// end loop over weight types
-
+  resetAllCounters();
   //out.open("event.dump");
 
   setAnaType(Ana_2Lep);
@@ -1377,4 +1323,57 @@ float SusySelection::computeMt2(const TLorentzVector &l0, const TLorentzVector &
   mt2_event.set_momenta(pA,pB,pTMiss);
   mt2_event.set_mn(0); // LSP mass = 0 is Generic
   return mt2_event.get_mt2();
+}
+void SusySelection::resetAllCounters()
+{
+  for(int w=0; w<WT_N; ++w){// Loop over weight types
+    n_readin          [w] = 0;
+    n_pass_Grl        [w] = 0;
+    n_pass_LarErr     [w] = 0;
+    n_pass_TileErr    [w] = 0;
+    n_pass_TTCVeto    [w] = 0;
+    n_pass_GoodVtx    [w] = 0;
+    n_pass_TileTrip   [w] = 0;
+    n_pass_LAr        [w] = 0;
+    n_pass_BadJet     [w] = 0;
+    n_pass_FEBCut     [w] = 0;
+    n_pass_BadMuon    [w] = 0;
+    n_pass_Cosmic     [w] = 0;
+    n_pass_HttVeto    [w] = 0;
+    n_pass_atleast2Lep[w] = 0;
+    n_pass_exactly2Lep[w] = 0;
+    n_pass_signalLep  [w] = 0;
+    for(int i=0; i<ET_N; ++i){ // loop over weight x channel.
+      n_pass_flavor[i][w]   = 0;
+      n_pass_evtTrig[i][w]     = 0;
+      n_pass_trigMatch[i][w]   = 0;
+      n_pass_mll[i][w]         = 0;
+      n_pass_ss[i][w]          = 0;
+      n_pass_os[i][w]          = 0;
+      // per-SR counters
+      n_pass_SR6sign[i][w] = n_pass_SR6flav[i][w] = n_pass_SR6metr[i][w] = 0;
+      n_pass_SR6ge1j[i][w] = n_pass_SR6ge2j[i][w] = n_pass_SR6eq2j[i][w] = 0;
+      n_pass_SR6eq2jNfv[i][w] = n_pass_SR6ge2jNfv[i][w] = n_pass_SR6[i][w] = 0;
+      n_pass_SR6DrllMax     [i][w] = n_pass_SR6PtllMin     [i][w] = 0;
+      n_pass_SR6MllMax      [i][w] = n_pass_SR6METRel      [i][w] = 0;
+      n_pass_SR6MtLlmetMin  [i][w] = n_pass_SR6MtMinlmetMin[i][w] = 0;
+      n_pass_SR6ZtautauVeto [i][w] = 0;
+
+      n_pass_SR7sign[i][w] = n_pass_SR7flav[i][w] = n_pass_SR7metr[i][w] = 0;
+      n_pass_SR7ge1j[i][w] = n_pass_SR7ge2j[i][w] = n_pass_SR7eq2j[i][w] = 0;
+      n_pass_SR7eq2jNfv[i][w] = n_pass_SR7ge2jNfv[i][w] = n_pass_SR7[i][w] = 0;
+      n_pass_SR7DrllMax     [i][w] = n_pass_SR7PtllMin     [i][w] = 0;
+      n_pass_SR7MllMax      [i][w] = n_pass_SR7METRel      [i][w] = 0;
+      n_pass_SR7MtLlmetMin  [i][w] = n_pass_SR7MtMinlmetMin[i][w] = 0;
+      n_pass_SR7ZtautauVeto [i][w] = 0;
+
+      n_pass_SR8sign[i][w] = n_pass_SR8flav[i][w] = n_pass_SR8metr[i][w] = 0;
+      n_pass_SR8ge1j[i][w] = n_pass_SR8ge2j[i][w] = n_pass_SR8eq2j[i][w] = 0;
+      n_pass_SR8eq2jNfv[i][w] = n_pass_SR8ge2jNfv[i][w] = n_pass_SR8[i][w] = 0;
+
+      n_pass_SR9sign[i][w] = n_pass_SR9flav[i][w] = n_pass_SR9metr[i][w] = 0;
+      n_pass_SR9ge1j[i][w] = n_pass_SR9ge2j[i][w] = n_pass_SR9eq2j[i][w] = 0;
+      n_pass_SR9eq2jNfv[i][w] = n_pass_SR9ge2jNfv[i][w] = n_pass_SR9[i][w] = 0;
+    } // end for(i)
+  } // end for(w)
 }
