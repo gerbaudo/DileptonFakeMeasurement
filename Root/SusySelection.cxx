@@ -785,23 +785,18 @@ bool SusySelection::isTrueDilepton(const LeptonVector &leptons)
 /*--------------------------------------------------------------------------------*/
 float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag, bool includeTrig)
 {
-  if( !nt.evt()->isMC ) return 1.;
-  uint nl = leptons.size();
-  float weight = 1;
-
-  // lumi, xs, sumw, pileup
+  float weight = 1.0;
   bool useSumwMap(true);
+  if( !nt.evt()->isMC ) return weight;
+  // lumi, xs, sumw, pileup
   weight = (m_useXsReader ?
             computeEventWeightXsFromReader(LUMI_A_L) :
             SusyNtAna::getEventWeight(LUMI_A_L, useSumwMap));
   weight *= getPythiaBbCcScaleFactor(nt.evt()->mcChannel, leptons);
-
+  weight *= getLeptonEff2Lep(leptons);
   float trigW = (includeTrig ? getTriggerWeight2Lep(leptons) : 1.0);
-  float lepW=1.0;
-  if(nl > 0) lepW *= leptons[0]->effSF;
-  if(nl > 1) lepW *= leptons[1]->effSF;
-  float bTag = (includeBTag ? getBTagWeight(nt.evt()) : 1.0);
-  return weight * trigW * lepW * bTag;
+  float bTag  = (includeBTag ? getBTagWeight(nt.evt()) : 1.0);
+  return weight * trigW * bTag;
 }
 //-----------------------------------------
 float SusySelection::getPythiaBbCcScaleFactor(uint datasetId, const LeptonVector &leptons) const
@@ -853,7 +848,12 @@ float SusySelection::getTriggerWeight2Lep(const LeptonVector &leptons)
   }
   return trigW;
 }
-
+//-----------------------------------------
+float SusySelection::getLeptonEff2Lep(const LeptonVector &leptons) const
+{
+  assert(leptons.size()>1);
+  return leptons[0]->effSF * leptons[1]->effSF;
+}
 /*--------------------------------------------------------------------------------*/
 // Photon methods
 /*--------------------------------------------------------------------------------*/
