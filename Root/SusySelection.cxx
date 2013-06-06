@@ -1,5 +1,6 @@
 #include <iomanip>
 #include <cassert>
+#include <cmath> // isnan
 #include <iomanip> // setw
 #include <sstream>
 #include "TCanvas.h"
@@ -806,42 +807,24 @@ float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag,
     else weight = 0;
   }
 
-  // Trigger
-  float trigW = 1;
+  float trigW = 1.0; // Trigger
   if(!m_useMCTrig && includeTrig){
-    trigW  = nl == 2 ? m_trigObj->getTriggerWeight(leptons,
-						   nt.evt()->isMC,
-						   m_met->Et,
-						   m_signalJets2Lep.size(),
-						   nt.evt()->nVtx,
-						   NtSys_NOM) : 1.;
-    if(trigW != trigW){ cout<<"\tTrigger weight: "<<trigW<<endl; trigW =0; }// deal with NaN
-    if(trigW < 0) trigW = 0;
+    if(nl==2) trigW = m_trigObj->getTriggerWeight(leptons, nt.evt()->isMC, m_met->Et,
+                                                  m_signalJets2Lep.size(),
+                                                  nt.evt()->nVtx, NtSys_NOM);
+    bool twIsInvalid(isnan(trigW) || trigW<0.0);
+    assert(!twIsInvalid);
+    if(twIsInvalid){
+      if(m_dbg) cout<<"SusySelection::getEventWeight: invalid weigth "<<trigW<<", using 0.0"<<endl;
+      trigW = (twIsInvalid ? 0.0 : trigW);
+    }
   }
 
-  // Lepton eff
-  /*
-  float effW   =  1;
-  if(nl > 0 && leptons[0]->isEle){
-    Electron* elec = (Electron*) leptons[0];
-    effW *= m_susyObj->GetSignalElecSF(elec->clusEta,elec->Pt(),6);
-  }
-  else if(nl > 0) effW *= leptons[0]->effSF;
-
-  if(nl > 1 && leptons[1]->isEle){
-    Electron* elec = (Electron*) leptons[1];
-    effW *= m_susyObj->GetSignalElecSF(elec->clusEta,elec->Pt(),6);
-  }
-  else if(nl > 1) effW *= leptons[1]->effSF;
-  */
-
-  float effW   = nl > 0 ? leptons[0]->effSF : 1.;
-  effW        *=  nl > 1 ? leptons[1]->effSF : 1.;
-
-
-  // btag, if included
-  float bTag   =  includeBTag ? getBTagWeight(nt.evt()) : 1.;
-  return weight * trigW * effW * bTag;
+  float lepW=1.0;
+  if(nl > 0) lepW *= leptons[0]->effSF;
+  if(nl > 1) lepW *= leptons[1]->effSF;
+  float bTag = (includeBTag ? getBTagWeight(nt.evt()) : 1.0);
+  return weight * trigW * lepW * bTag;
 }
 
 /*--------------------------------------------------------------------------------*/
