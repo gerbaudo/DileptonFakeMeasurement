@@ -291,10 +291,11 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   //--DG-- if( nt.evt()->isMC && !isTrueDilepton(m_signalLeptons) ) return kTRUE;
 
   bool count(true);
+  bool includeBTag(true), includeTrig(true);
   const Met*          m = m_met;
   const JetVector&    j = m_signalJets2Lep;
   const LeptonVector& l = m_signalLeptons;
-  float weight = SusySelection::getEvtWeight(l);
+  float weight = SusySelection::getEvtWeight(l, includeBTag, includeTrig);
   fillHistos(l, j, m, weight, PR_NONE);
 
   if( passSR6base     (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR6base);
