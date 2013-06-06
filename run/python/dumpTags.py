@@ -48,7 +48,7 @@ def getTagOrRev(dir) :
     return "%s @ %s"%(pkg, tag if tag else rev)
 
 
-dirs = [path+'/'+p for p in os.listdir(path)]
+dirs = sorted([path+'/'+p for p in os.listdir(path)])
 dirs = filter(os.path.isdir, dirs)
 dirs = filter(lambda x : 'SusyTest0' not in x, dirs) # we use git!
 labels = []
