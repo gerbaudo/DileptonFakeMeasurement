@@ -612,32 +612,7 @@ float SusySelection::getLeptonEff2Lep(const LeptonVector &leptons) const
   assert(leptons.size()>1);
   return leptons[0]->effSF * leptons[1]->effSF;
 }
-/*--------------------------------------------------------------------------------*/
-// Photon methods
-/*--------------------------------------------------------------------------------*/
-bool SusySelection::passCheckMC(int mcRunNumber, float pt)
-{
-  if( !(159100 <= mcRunNumber && mcRunNumber <= 159104) ) return true;
-  // Need to bin the samples in order to combine them
-  if(mcRunNumber == 159100 &&  25 < pt && pt <  65 ) return true; // Unbinned 17
-  if(mcRunNumber == 159101 &&  65 < pt && pt < 110 ) return true; // Unbinned 35
-  if(mcRunNumber == 159102 && 110 < pt && pt < 210 ) return true; // Unbinned 70
-  if(mcRunNumber == 159103 && 210 < pt && pt < 400 ) return true; // Unbinned 140
-  if(mcRunNumber == 159104 && 400 < pt             ) return true; // Unbinned 280
-  return false;
-}
-/*--------------------------------------------------------------------------------*/
-// Photon xs
-/*--------------------------------------------------------------------------------*/
-float SusySelection::getPhotonXS(int mcRunNumber)
-{
-  if(mcRunNumber == 159101) return 18652  * 0.57334;
-  if(mcRunNumber == 159102) return 1640.1 * 0.6398;
-  if(mcRunNumber == 159103) return 91.747 * 0.77879;
-  if(mcRunNumber == 159104) return 3.8119 * 0.84244;
-  return 1.0;
-}
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 // helper function: write header with event types
 std::string lineLabelsPerEventType(const string *labels, int colWidth){
   std::ostringstream oss;

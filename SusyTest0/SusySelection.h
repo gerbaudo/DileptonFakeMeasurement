@@ -125,10 +125,6 @@ class SusySelection : public SusyNtAna
     bool isLFLepton(const Lepton* lep);
     bool isTrueDilepton(const LeptonVector &leptons);
 
-    // Photon+jet MC methods
-    bool passCheckMC(int mcRunNumber, float pt);
-    float getPhotonXS(int mcRunNumber);
-
     // Dump cutflow - if derived class uses different cut ordering,
     // override this method
     virtual void dumpEventCounters();
