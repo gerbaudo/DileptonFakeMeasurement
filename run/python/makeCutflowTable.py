@@ -34,6 +34,8 @@ parser.add_option("-p", "--pickle", dest="pickle", default=defaultPickle,
                   help="save counts to the specified pikle file (default %s)" % defaultPickle)
 parser.add_option("-t", "--tag", dest="tag", default=defaultTag,
                   help="production tag (default '%s')" % defaultTag)
+parser.add_option("-d", "--data", action='store_true', dest="data", default=False,
+                  help="print column with data")
 parser.add_option("-b", "--tot-bkg", action='store_true', dest="totbkg", default=False,
                   help="print column with tot. bkg")
 parser.add_option("-r", "--raw-counts", action='store_true', dest="rawcnt", default=False,
@@ -48,6 +50,7 @@ parser.add_option("-v", "--verbose", action="store_true", dest="verbose", defaul
 channel         = options.channel
 inputDir        = options.inputdir
 prodTag         = options.tag
+printData       = options.data
 printTotBkg     = options.totbkg
 referenceHisto  = options.histo
 rawcnt          = options.rawcnt
@@ -95,7 +98,9 @@ for t, histos in refHistos.iteritems() :
     for h in histos :
         sample, sel = h.sample, h.type.pr
         cnt = h.GetEntries() if rawcnt else h.Integral()
-        countsSampleSel[sample][sel] += cnt
+        skipIt = not printData and sample=='data'
+        countIt = not skipIt
+        countsSampleSel[sample][sel] += cnt if countIt else 0.0
         if printTotBkg and isBkgSample(sample) :
             countsSampleSel['totbkg'][sel] += cnt
 
