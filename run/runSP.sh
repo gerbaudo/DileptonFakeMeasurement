@@ -2,7 +2,7 @@
 
 
 append="_AE_Dec17_n0115"
-append="_May17_n0139"
+append="_Jun06_n0139"
 
 
 # only one option supported: --1fb to use the 1/fb weights
@@ -96,8 +96,9 @@ MC=(
 
     # HF
     #bbTomu20 ccTomu20
+)
 
-    # signal
+SIGNALS=(
     wA_noslep_WH_2Lep_1   wA_noslep_WH_2Lep_2   wA_noslep_WH_2Lep_29  wA_noslep_WH_2Lep_38  wA_noslep_WH_2Lep_48  wA_noslep_WH_2Lep_57
     wA_noslep_WH_2Lep_10  wA_noslep_WH_2Lep_20  wA_noslep_WH_2Lep_3   wA_noslep_WH_2Lep_39  wA_noslep_WH_2Lep_49  wA_noslep_WH_2Lep_58
     wA_noslep_WH_2Lep_11  wA_noslep_WH_2Lep_21  wA_noslep_WH_2Lep_30  wA_noslep_WH_2Lep_4   wA_noslep_WH_2Lep_5   wA_noslep_WH_2Lep_59
@@ -114,6 +115,9 @@ write_script () {
     local dset=$1
     local suffix=$2
     local options=""
+    if [[ -n `echo ${dset} | grep WH` ]]; then
+        options="${options} --WH-sample "
+    fi
     local template="batchSPSub.sh"
     local outFile="batchScripts/${dset}.sh"
     local inp=${dset}
@@ -127,13 +131,16 @@ write_script () {
     }
 
 for d in ${DATA[@]}; do
-    #echo "qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d} -o batchlog batchSPSub.sh"
     scriptFile=$(write_script ${d} ${append})
     qsub -j oe -V -N ${d}_${append} -o batchLog ${scriptFile}
 done
 
 for d in ${MC[@]}; do
-    #echo "qsub -j oe -V -v inp=${d},out=${d}${append},opt=${option} -N ${d}_${append} -o batchlog batchSPSub.sh"
+    scriptFile=$(write_script ${d} ${append})
+    qsub -j oe -V -N ${d}_${append} -o batchLog ${scriptFile}
+done
+
+for d in ${SIGNALS[@]}; do
     scriptFile=$(write_script ${d} ${append})
     qsub -j oe -V -N ${d}_${append} -o batchLog ${scriptFile}
 done
