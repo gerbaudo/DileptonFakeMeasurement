@@ -6,6 +6,7 @@
 # Jan 2013
 
 import collections, optparse, sys, glob
+import re
 import ROOT as r
 r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
@@ -42,6 +43,8 @@ parser.add_option("-r", "--raw-counts", action='store_true', dest="rawcnt", defa
                   help="print histo raw Nentries rather than integrals")
 parser.add_option("-H", "--histo", dest="histo", default=defaultHisto,
                   help="histogram to get the counts from (default '%s')" % defaultHisto)
+parser.add_option("-s", "--sel-regexp", dest="sel", default='.*',
+                  help="print only mathing selections (default '.*', any sel); example -s '^sr\d$', see http://www.debuggex.com/r/V82_pzhNDT0ukHMR/1")
 parser.add_option("-S", "--syst", dest="syst", default=defaultRefSyst,
                   help="systematic (default '%s')" % defaultRefSyst)
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
@@ -52,9 +55,10 @@ inputDir        = options.inputdir
 prodTag         = options.tag
 printData       = options.data
 printTotBkg     = options.totbkg
-referenceHisto  = options.histo
 rawcnt          = options.rawcnt
+referenceHisto  = options.histo
 referenceSyst   = options.syst
+selRegexp       = options.sel
 pickleFile      = options.pickle
 verbose         = options.verbose
 assert channel in validChannels,"Invalid channel %s (should be one of %s)" % (channel, str(validChannels))
@@ -65,7 +69,9 @@ assert len(inputFileNames)==len(inputFiles),"Cannot open some of the input files
 if verbose :
     print "Options:\n" \
           + '\n'.join(["%s : %s" % (o, eval(o))
-                       for o in ['channel','inputDir','prodTag', 'referenceHisto', 'referenceSyst']])
+                       for o in ['channel','inputDir','prodTag', 'printData', 'printTotBkg',
+                                 'rawcnt', 'referenceHisto', 'referenceSyst','selRegexp',
+                                 'pickleFile']])
     print 'Input files:\n'+'\n'.join(inputFileNames)
 
 # navigate the files and collect the histos
@@ -87,8 +93,8 @@ refHistos = histosByType # already filtered histonames, all histosByType are ref
 allSamples = list(set([h.sample for histos in refHistos.values() for h in histos])) \
              + (['totbkg'] if printTotBkg else [])
 allSelects = sorted(list(set([k.pr for k in histosByType.keys()])))
-print 'allSamples : ',allSamples
-print 'allSelects : ',allSelects
+if verbose : print 'allSamples : ',allSamples
+if verbose : print 'allSelects : ',allSelects
 
 # get the counts (adding up what needs to be merged by samplename)
 sampleCountsPerSel = dict() # counts[sample][sel]
@@ -129,6 +135,7 @@ print tablePreamble
 print header
 print '\\midrule'
 for sel in allSelects : # should really use list comprehension
+    if not re.match(selRegexp, sel.strip()) : continue
     counts = [countsSampleSel[sam][sel]
               if sam in countsSampleSel and sel in countsSampleSel[sam] else None \
               for sam in allSamples ]
