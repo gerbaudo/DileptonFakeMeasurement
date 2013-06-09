@@ -34,38 +34,38 @@ regexp = options.samples
 tag    = options.tag
 verbose= options.verbose
 assert mode in validModes,"Invalid mode %s (should be one of %s)" % (mode, str(validModes))
+if verbose :
+    print "Options:\n"
+    print '\n'.join(["%s : %s" % (o, eval(o)) for o in ['mode','outdir','regexp', 'tag',]])
+
+def filterWithRegexp(stringList, regexp) :
+    return [d for d in stringList if re.search(regexp, d)]
+wantedDsets = datasets.wantedDsets
+wantedDsets = dict([(k, filterWithRegexp(vals, regexp)) for k, vals in wantedDsets.iteritems()])
 
 # Directory where files are
-basedir = {'data' : '/gdata/atlas/ucintprod/SusyNt/data12_'+tag+'/', # data
+basedirs = {'data' : '/gdata/atlas/ucintprod/SusyNt/data12_'+tag+'/', # data
            'mc12' : '/gdata/atlas/ucintprod/SusyNt/mc12_'+tag+'/',   # mc backgrounds
            'susy' : '/gdata/atlas/ucintprod/SusyNt/susy_'+tag+'/',   # mc signals
            }
-wantedDsets = datasets.wantedDsets
-def filterWithRegexp(stringList, regexp) :
-    return [d for d in stringList if re.search(regexp, d)]
-wantedDsets = dict([(k, filterWithRegexp(vals, regexp)) for k, vals in wantedDsets.iteritems()])
-
-if verbose :
-    print "Options:\n" \
-          + '\n'.join(["%s : %s" % (o, eval(o)) for o in ['mode','outdir','regexp', 'tag',]])
-
-dir = basedir[mode]
-dirlist = glob.glob(dir+'/user.*'+tag)
+basedir = basedirs[mode]
+dirlist = glob.glob(basedir+'/user.*'+tag)
 
 def isDatasetDir(dirname, datasetname):
     "expect the dirname to be smth like *_<samplename>.SusyNt*"
     return re.search('_'+datasetname+'\.SusyNt', dirname)
-
 def makeFile(datasetdir, destfilename):
     ls = subprocess.Popen(['ls '+datasetdir+'/*.root* > '+destfilename],shell=True)
     ls.wait()
 
-wanted = wantedDsets[mode]
-for dsdir in dirlist:
+datasets = wantedDsets[mode]
+outlistCount = 0
+for dsdir in dirlist :
+    dsname = next((d for d in datasets if isDatasetDir(dsdir, d)), None)
+    if not dsname : continue # not a directory we're interested in
     if verbose : print dsdir
-    for dsname in wanted:
-        if not isDatasetDir(dsdir, dsname) : continue
-        flistname = outdir+'/'+dsname+'.txt'
-        makeFile(dsdir, flistname)
-
+    flistname = outdir+'/'+dsname+'.txt'
+    makeFile(dsdir, flistname)
+    outlistCount += 1
+if verbose : print "%s filelists created in %s"%(outlistCount, outdir)
 
