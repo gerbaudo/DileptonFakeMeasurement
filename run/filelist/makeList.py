@@ -9,6 +9,7 @@
 
 import optparse, subprocess
 import datasets
+import re
 
 validModes = ['mc12', 'susy', 'data',]
 defaultTag = 'n0139'
@@ -16,11 +17,14 @@ defaultTag = 'n0139'
 parser = optparse.OptionParser()
 parser.add_option("-m", "--mode", dest="mode", default=validModes[0],
                   help="possible modes : %s" % str(validModes))
+parser.add_option("-s", "--sample-regexp", dest="samples", default='.*',
+                  help="create filelists only for matching samples (default '.*'). Example: Alpgen Z+jets -s '^Z(ee|mumu|tautau).*'")
 parser.add_option("-t", "--tag", dest="tag", default=defaultTag,
                   help="production tag (default '%s')" % defaultTag)
 (options, args) = parser.parse_args()
-mode = options.mode
-tag  = options.tag
+mode   = options.mode
+regexp = options.samples
+tag    = options.tag
 assert mode in validModes,"Invalid mode %s (should be one of %s)" % (mode, str(validModes))
 
 # Directory where files are
@@ -30,7 +34,8 @@ basedir = {'data' : '/gdata/atlas/ucintprod/SusyNt/data12_'+tag+'/', # data
            }
 tags = [tag]
 wantedDsets = datasets.wantedDsets
-
+wantedDsets = dict([(k, [d for d in vals if re.search(regexp, d)])
+                    for k, vals in wantedDsets.iteritems()])
 ###############################################################################################
 #                           Don't need to edit below here!!!                                  #
 ###############################################################################################
