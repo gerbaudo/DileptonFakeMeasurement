@@ -7,9 +7,11 @@
 # davide.gerbaudo@gmail.com
 # Jan 2013
 
-import optparse, subprocess
 import datasets
+import glob
+import optparse
 import re
+import subprocess
 
 validModes = ['mc12', 'susy', 'data',]
 defaultTag = 'n0139'
@@ -47,27 +49,23 @@ if verbose :
     print "Options:\n" \
           + '\n'.join(["%s : %s" % (o, eval(o)) for o in ['mode','outdir','regexp', 'tag',]])
 
-dlist = []
 dir = basedir[mode]
-cmd = 'ls '+dir+' | grep '+tag+' | grep user'
-if verbose : print cmd
-ls = subprocess.Popen([cmd], shell=True,stdout=subprocess.PIPE)
-dlist  = [l for l in [ll.lstrip().rstrip() for ll in (ls.stdout.read()).split("\n")]
-          if l] # skip empty lines
+dirlist = glob.glob(dir+'/user.*'+tag)
 
 def isDatasetDir(dirname, datasetname):
     "expect the dirname to be smth like *_<samplename>.SusyNt*"
     return re.search('_'+datasetname+'\.SusyNt', dirname)
 
-def makeFile(dataset, name):
-    ls = subprocess.Popen(['ls '+dir+dataset+'/*.root* > '+outdir+'/'+name+'.txt'],shell=True)
+def makeFile(datasetdir, destfilename):
+    ls = subprocess.Popen(['ls '+datasetdir+'/*.root* > '+destfilename],shell=True)
     ls.wait()
 
 wanted = wantedDsets[mode]
-for ds in dlist:
-    if verbose : print ds
-    for name in wanted:
-        if isDatasetDir(ds,name):
-            makeFile(ds,name)
+for dsdir in dirlist:
+    if verbose : print dsdir
+    for dsname in wanted:
+        if not isDatasetDir(dsdir, dsname) : continue
+        flistname = outdir+'/'+dsname+'.txt'
+        makeFile(dsdir, flistname)
 
 
