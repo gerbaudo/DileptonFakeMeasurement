@@ -2,8 +2,6 @@
 
 # Make lists of input root files
 #
-# Modified version of Matt's script
-#
 # davide.gerbaudo@gmail.com
 # Jan 2013
 
@@ -16,13 +14,18 @@ import subprocess
 validModes = ['mc12', 'susy', 'data',]
 defaultTag = 'n0139'
 
-parser = optparse.OptionParser()
+usage="""Create the filelists to be used by SusyPlotter.
+
+Example:
+./python/makeList.py -s 'Z(ee|mumu|tautau)' -v
+"""
+parser = optparse.OptionParser(usage=usage)
 parser.add_option("-m", "--mode", dest="mode", default=validModes[0],
                   help="possible modes : %s" % str(validModes))
 parser.add_option("-o", "--output-dir", dest="outdir", default='filelist/',
                   help="output directory")
 parser.add_option("-s", "--sample-regexp", dest="samples", default='.*',
-                  help="create filelists only for matching samples (default '.*'). Example: Alpgen Z+jets -s '^Z(ee|mumu|tautau).*'")
+                  help="create filelists only for matching samples (default '.*')")
 parser.add_option("-t", "--tag", dest="tag", default=defaultTag,
                   help="production tag (default '%s')" % defaultTag)
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
