@@ -26,7 +26,13 @@ defaultInputDir = '/export/home/gerbaudo/workarea/Susy2013/SusyTest0/run/anaplot
 # default parameters [end]
 #########
 
-parser = optparse.OptionParser()
+usage="""Using the histograms produced by SusyPlot, print a latex cutflow table.
+
+Examples:
+> ./python/makeCutflowTable.py -i anaplots/merged/ -t Jun06 -c all -b -d -s '^sr\d$' # background
+> ./python/makeCutflowTable.py -i anaplots/ -t WH_2Lep_*_Jun06 -c all  -s '^sr\d$'   # signals
+"""
+parser = optparse.OptionParser(usage=usage)
 parser.add_option("-c", "--channel", dest="channel", default=validChannels[0],
                   help="possible channels : %s" % str(validChannels))
 parser.add_option("-i", "--input-dir", dest="inputdir", default=defaultInputDir,
