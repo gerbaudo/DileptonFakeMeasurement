@@ -52,8 +52,8 @@ basedir = basedirs[mode]
 dirlist = glob.glob(basedir+'/user.*'+tag)
 
 def isDatasetDir(dirname, datasetname):
-    "expect the dirname to be smth like *_<samplename>.SusyNt*"
-    return re.search('_'+datasetname+'\.SusyNt', dirname)
+    "expect the dirname to be smth like *.<samplename>.SusyNt*"
+    return re.search('\.'+datasetname+'\.SusyNt', dirname)
 def makeFile(datasetdir, destfilename):
     ls = subprocess.Popen(['ls '+datasetdir+'/*.root* > '+destfilename],shell=True)
     ls.wait()

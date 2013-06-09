@@ -18,16 +18,16 @@ wantedDsets = { # mode : [dsets]
     # New alternative Z+jets (Yippeee)
     + ["Sherpa_CT10_Z%s" % ll for ll in ['ee', 'mumu', 'tautau']]
     # Z+jets
-    + ["Z%(ll)sNp%(np)d" % {'ll':ll, 'np':np}
+    + ["AlpgenPythia_P2011C_Z%(ll)sNp%(np)d" % {'ll':ll, 'np':np}
        for ll in ['ee', 'mumu', 'tautau'] for np in [0, 1, 2, 3, 4, 5]]
     # Zbb + jets
-    + ["Z%(ll)sbbNp%(np)d" % {'ll':ll, 'np':np}
+    + ["AlpgenPythia_P2011C_Z%(ll)sbbNp%(np)d" % {'ll':ll, 'np':np}
        for ll in ['ee', 'mumu', 'tautau'] for np in [0, 1, 2, 3]]
     # Zcc + jets
-    + ["Z%(ll)sccNp%(np)d" % {'ll':ll, 'np':np}
+    + ["AlpgenPythia_P2011C_Z%(ll)sccNp%(np)d" % {'ll':ll, 'np':np}
        for ll in ['ee', 'mumu', 'tautau'] for np in [0, 1, 2, 3]]
     # Low mass Z
-    + ["Z%(ll)sNp%(np)dExcl" % {'ll':ll, 'np':np}
+    + ["AlpgenPythia_P2011C_Z%(ll)sNp%(np)dExcl" % {'ll':ll, 'np':np}
        for ll in ['ee', 'mumu', 'tautau'] for np in [0, 1, 2, 3, 4]]
     ##- # W+Jets (temporary due to bugs)
     ##- + ["Sherpa_CT10_W%s" % lv for lv in ['enu', 'munu', 'taunu']]
