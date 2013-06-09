@@ -90,8 +90,8 @@ for fname, infile in zip(inputFileNames, inputFiles) :
         setHistoSample(h, samplename)
     organizeHistosByType(histosByType, histos)
 refHistos = histosByType # already filtered histonames, all histosByType are refHistos
-allSamples = list(set([h.sample for histos in refHistos.values() for h in histos])) \
-             + (['totbkg'] if printTotBkg else [])
+allSamples = sorted(list(set([h.sample for histos in refHistos.values() for h in histos])))
+allSamples += ['totbkg'] if printTotBkg else []
 allSelects = sorted(list(set([k.pr for k in histosByType.keys()])))
 if verbose : print 'allSamples : ',allSamples
 if verbose : print 'allSelects : ',allSelects
