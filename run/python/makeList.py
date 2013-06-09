@@ -59,13 +59,14 @@ def makeFile(datasetdir, destfilename):
     ls.wait()
 
 datasets = wantedDsets[mode]
-outlistCount = 0
+processedDsets = []
 for dsdir in dirlist :
     dsname = next((d for d in datasets if isDatasetDir(dsdir, d)), None)
     if not dsname : continue # not a directory we're interested in
+    assert dsname not in processedDsets, "%s has already been processed "%dsname
     if verbose : print dsdir
     flistname = outdir+'/'+dsname+'.txt'
     makeFile(dsdir, flistname)
-    outlistCount += 1
-if verbose : print "%s filelists created in %s"%(outlistCount, outdir)
+    processedDsets.append(dsname)
+if verbose : print "%s filelists created in %s"%(len(processedDsets), outdir)
 
