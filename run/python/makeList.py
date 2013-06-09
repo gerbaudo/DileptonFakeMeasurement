@@ -55,10 +55,9 @@ ls = subprocess.Popen([cmd], shell=True,stdout=subprocess.PIPE)
 dlist  = [l for l in [ll.lstrip().rstrip() for ll in (ls.stdout.read()).split("\n")]
           if l] # skip empty lines
 
-def contains(dataset, name):
-    if (name + ".") in dataset:
-        return True
-    return False
+def isDatasetDir(dirname, datasetname):
+    "expect the dirname to be smth like *_<samplename>.SusyNt*"
+    return re.search('_'+datasetname+'\.SusyNt', dirname)
 
 def makeFile(dataset, name):
     ls = subprocess.Popen(['ls '+dir+dataset+'/*.root* > '+outdir+'/'+name+'.txt'],shell=True)
@@ -68,7 +67,7 @@ wanted = wantedDsets[mode]
 for ds in dlist:
     if verbose : print ds
     for name in wanted:
-        if(contains(ds,name) and not ("_a" in ds)):
+        if isDatasetDir(ds,name):
             makeFile(ds,name)
 
 
