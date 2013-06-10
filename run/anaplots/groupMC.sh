@@ -3,9 +3,8 @@
 # dropped all 'cfappend' samples (see Matt's original script for the complete list)
 # /home/mrelich/workarea/SUSY2012/SusyAna2012/run/anaplots/groupMCwChargeFlip.sh
 
-ending="_May27_n0139"
+ending="_Jun06_n0139"
 outdir="merged"
-#addition="CFPtFix" 
 addition=""
 append=${ending}.AnaHists 
 cfappend=${ending}.ChargeFlipHists
@@ -75,3 +74,49 @@ hadd -f ${outdir}/WW${append}${addition}.root \
     WpWmtaunumunu${append}.root \
     WpWmtaunutaunu${append}.root \
 
+
+# Z+jet Alpgen
+
+hadd -f ${outdir}/Zjet${append}${addition}.root \
+    AlpgenPythia_P2011C_ZeeNp0${append}.root        \
+    AlpgenPythia_P2011C_ZeeNp1${append}.root        \
+    AlpgenPythia_P2011C_ZeeNp2${append}.root        \
+    AlpgenPythia_P2011C_ZeeNp3${append}.root        \
+    AlpgenPythia_P2011C_ZeeNp4${append}.root        \
+    AlpgenPythia_P2011C_ZeeNp5${append}.root        \
+    AlpgenPythia_P2011C_ZeebbNp0${append}.root      \
+    AlpgenPythia_P2011C_ZeebbNp1${append}.root      \
+    AlpgenPythia_P2011C_ZeebbNp2${append}.root      \
+    AlpgenPythia_P2011C_ZeebbNp3${append}.root      \
+    AlpgenPythia_P2011C_ZeeccNp0${append}.root      \
+    AlpgenPythia_P2011C_ZeeccNp1${append}.root      \
+    AlpgenPythia_P2011C_ZeeccNp2${append}.root      \
+    AlpgenPythia_P2011C_ZeeccNp3${append}.root      \
+    AlpgenPythia_P2011C_ZmumuNp0${append}.root      \
+    AlpgenPythia_P2011C_ZmumuNp1${append}.root      \
+    AlpgenPythia_P2011C_ZmumuNp2${append}.root      \
+    AlpgenPythia_P2011C_ZmumuNp3${append}.root      \
+    AlpgenPythia_P2011C_ZmumuNp4${append}.root      \
+    AlpgenPythia_P2011C_ZmumuNp5${append}.root      \
+    AlpgenPythia_P2011C_ZmumubbNp0${append}.root    \
+    AlpgenPythia_P2011C_ZmumubbNp1${append}.root    \
+    AlpgenPythia_P2011C_ZmumubbNp2${append}.root    \
+    AlpgenPythia_P2011C_ZmumubbNp3${append}.root    \
+    AlpgenPythia_P2011C_ZmumuccNp0${append}.root    \
+    AlpgenPythia_P2011C_ZmumuccNp1${append}.root    \
+    AlpgenPythia_P2011C_ZmumuccNp2${append}.root    \
+    AlpgenPythia_P2011C_ZmumuccNp3${append}.root    \
+    AlpgenPythia_P2011C_ZtautauNp0${append}.root    \
+    AlpgenPythia_P2011C_ZtautauNp1${append}.root    \
+    AlpgenPythia_P2011C_ZtautauNp2${append}.root    \
+    AlpgenPythia_P2011C_ZtautauNp3${append}.root    \
+    AlpgenPythia_P2011C_ZtautauNp4${append}.root    \
+    AlpgenPythia_P2011C_ZtautauNp5${append}.root    \
+    AlpgenPythia_P2011C_ZtautaubbNp0${append}.root  \
+    AlpgenPythia_P2011C_ZtautaubbNp1${append}.root  \
+    AlpgenPythia_P2011C_ZtautaubbNp2${append}.root  \
+    AlpgenPythia_P2011C_ZtautaubbNp3${append}.root  \
+    AlpgenPythia_P2011C_ZtautauccNp0${append}.root  \
+    AlpgenPythia_P2011C_ZtautauccNp1${append}.root  \
+    AlpgenPythia_P2011C_ZtautauccNp2${append}.root  \
+    AlpgenPythia_P2011C_ZtautauccNp3${append}.root
