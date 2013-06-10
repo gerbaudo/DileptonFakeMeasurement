@@ -5,14 +5,14 @@
 #include "TChain.h"
 #include "Cintex/Cintex.h"
 
-#include "SusyAna2012/MeasureFakeRate2.h"
+#include "SusyAna2012/MatrixPrediction.h"
 #include "SusyNtuple/ChainHelper.h"
 
 using namespace std;
 
 /*
 
-Measure Fake Rate
+SusyPlotter - perform selection and dump cutflows 
 
 */
 
@@ -28,23 +28,22 @@ void help()
   cout << "  -d debug printout level"           << endl;
   cout << "     defaults: 0 (quiet) "           << endl;
 
+  cout << "  -F name of single input file"      << endl;
+  cout << "     defaults: ''"                   << endl;
+
   cout << "  -f name of input filelist"         << endl;
+  cout << "     defaults: ''"                   << endl;
+
+  cout << "  -D name of input file dir"         << endl;
   cout << "     defaults: ''"                   << endl;
 
   cout << "  -s sample name, for naming files"  << endl;
   cout << "     defaults: ntuple sample name"   << endl;
 
-  cout << "  -mc measure MC rates"              << endl;
-  cout << "      default is off"                << endl;
+  cout << "  --1fb to use the 1/fb mc weights"  << endl;
+  cout << "     defualt is false"               << endl;
 
-  cout << "  -mcTrig use MC triggers"           << endl;
-  cout << "      default is off"                << endl;
-
-  cout << "  -altIso to use 2011 isolation"    << endl;
-  cout << "      default is off"                << endl;
-
-  cout << "  --optCut to fill histos useful for"<<endl;
-  cout << "           determining optimum cuts "<<endl;
+  cout << "  --mcfake to do mc closure test "   << endl;
 
   cout << "  -h print this help"                << endl;
 }
@@ -56,15 +55,14 @@ int main(int argc, char** argv)
   int nEvt = -1;
   int nSkip = 0;
   int dbg = 0;
-  bool useAltIso = false;
-  bool ismc       = false;
-  bool useMCTrig  = false;
+  bool use1fb = false;
+  bool doMCFake = false;
   string sample;
+  string file;
   string fileList;
-  string output = "";
-  bool optCuts = false;
-
-  cout << "MeasureFakeRate2" << endl;
+  string fileDir;
+  
+  cout << "FakePrediction" << endl;
   cout << endl;
 
   /** Read inputs to program */
@@ -75,20 +73,19 @@ int main(int argc, char** argv)
       nSkip = atoi(argv[++i]);
     else if (strcmp(argv[i], "-d") == 0)
       dbg = atoi(argv[++i]);
+    else if (strcmp(argv[i], "-F") == 0)
+      file = argv[++i];
     else if (strcmp(argv[i], "-f") == 0)
       fileList = argv[++i];
-    else if (strcmp(argv[i], "-o") == 0)
-      output = argv[++i];
+    else if (strcmp(argv[i], "-D") == 0)
+      fileDir = argv[++i];
     else if (strcmp(argv[i], "-s") == 0)
       sample = argv[++i];
-    else if (strcmp(argv[i], "-mc") == 0)
-      ismc = true;
-    else if (strcmp(argv[i], "-altIso") == 0)
-      useAltIso = true;
-    else if (strcmp(argv[i], "-mcTrig") == 0)
-      useMCTrig = true;
-    else if (strcmp(argv[i], "--optCut") == 0)
-      optCuts = true;
+    else if (strcmp(argv[i], "--1fb") == 0)
+      use1fb = true;
+    else if (strcmp(argv[i], "--mcfake") == 0)
+      doMCFake = true;
+    //if (strcmp(argv[i], "-h") == 0)
     else
     {
       help();
@@ -97,55 +94,56 @@ int main(int argc, char** argv)
   }
 
   // If no input specified except sample name, use a standard fileList
-  if(fileList.empty())
-    return 0;
+  if(file.empty() && fileList.empty() && fileDir.empty() && !sample.empty())
+    fileList = "files/" + sample + ".txt";
 
   // Save the file name
-  string fname = output;
-  if(output.empty()){
-    int pos0 = fileList.find("/");  
-    int pos1 = fileList.find(".txt");
-    fname = fileList.substr(pos0+1,pos1-pos0-1);
+  string fname = "default";
+  if( !(fileList.empty()) ){
+    int pos = fileList.find(".txt");
+    fname = fileList.substr(0,pos);
   }
-  sample = fname;
 
   cout << "flags:" << endl;
   cout << "  sample  " << sample   << endl;
+  cout << "  use 1fb " << use1fb   << endl;
   cout << "  nEvt    " << nEvt     << endl;
   cout << "  nSkip   " << nSkip    << endl;
   cout << "  dbg     " << dbg      << endl;
-  cout << "  input   " << fileList << endl;
+  if(!file.empty())     cout << "  input   " << file     << endl;
+  if(!fileList.empty()) cout << "  input   " << fileList << endl;
+  if(!fileDir.empty())  cout << "  input   " << fileDir  << endl;
   cout << "  output  " << fname    << endl;
   cout << endl;
 
   // Build the input chain
   TChain* chain = new TChain("susyNt");
+  ChainHelper::addFile(chain, file);
   ChainHelper::addFileList(chain, fileList);
+  ChainHelper::addFileDir(chain, fileDir);
   Long64_t nEntries = chain->GetEntries();
   chain->ls();
 
-  cout << "Chain built" << endl;
   // Build the TSelector
-  MeasureFakeRate2 *fakeRate = new MeasureFakeRate2();
-  fakeRate->buildSumwMap(chain);
-  fakeRate->setDebug(dbg);
-  fakeRate->setSampleName(sample);
-  fakeRate->setFileName(fname);
-  fakeRate->setIsMC(ismc);
-  fakeRate->setUseMCTrig(useMCTrig);
-  if(useAltIso) fakeRate->setAltIso();
-  fakeRate->setFindOptCut(optCuts);
+  MatrixPrediction* fakePred = new MatrixPrediction();
+  fakePred->buildSumwMap(chain);
+  fakePred->setDebug(dbg);
+  fakePred->setSampleName(sample);
+  fakePred->setFileName(fname);
+  fakePred->setUse1fb(use1fb);
+  fakePred->setDoMCFake(doMCFake);
 
   // Run the job
   if(nEvt<0) nEvt = nEntries;
   cout << endl;
   cout << "Total entries:   " << nEntries << endl;
   cout << "Process entries: " << nEvt << endl;
-  if(nEvt>0) chain->Process(fakeRate, sample.c_str(), nEvt, nSkip);
+  if(nEvt>0) chain->Process(fakePred, sample.c_str(), nEvt, nSkip);
 
   cout << endl;
-  cout << "MeasureFakeRate job done" << endl;
+  cout << "SusyPlotter job done" << endl;
 
   delete chain;
+  delete fakePred;
   return 0;
 }
