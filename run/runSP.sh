@@ -27,35 +27,78 @@ DATA=(
 )
 
 MC=(
-    # New Z+Jets
-    #ZeeLightJets_AF2 ZmumuLightJets_AF2 ZtautauLightJets_AF2
-    #ZeeHeavyJets_AF2 ZmumuHeavyJets_AF2 ZtautauHeavyJets_AF2
+#     # New Z+Jets
+#     #ZeeLightJets_AF2 ZmumuLightJets_AF2 ZtautauLightJets_AF2
+#     #ZeeHeavyJets_AF2 ZmumuHeavyJets_AF2 ZtautauHeavyJets_AF2
 
-    # Core Samples
-    Sherpa_CT10_Zee
-    Sherpa_CT10_Zmumu
-    Sherpa_CT10_Ztautau
+#     # Core Samples
+#     Sherpa_CT10_Zee
+#     Sherpa_CT10_Zmumu
+#     Sherpa_CT10_Ztautau
 
-    # Z+jets
-    #ZeeNp0 ZeeNp1 ZeeNp2 ZeeNp3 ZeeNp4 Zweep5
-    #ZmumuNp0 ZmumuNp1 ZmumuNp2 ZmumuNp3 ZmumuNp4 ZmumuNp5
-    #ZtautauNp0 ZtautauNp1 ZtautauNp2 ZtautauNp3 ZtautauNp4 ZtautauNp5
+    AlpgenPythia_P2011C_ZeeNp0
+    AlpgenPythia_P2011C_ZeeNp1
+    AlpgenPythia_P2011C_ZeeNp2
+    AlpgenPythia_P2011C_ZeeNp3
+    AlpgenPythia_P2011C_ZeeNp4
+    AlpgenPythia_P2011C_ZeeNp5
+    AlpgenPythia_P2011C_ZeebbNp0
+    AlpgenPythia_P2011C_ZeebbNp1
+    AlpgenPythia_P2011C_ZeebbNp2
+    AlpgenPythia_P2011C_ZeebbNp3
+    AlpgenPythia_P2011C_ZeeccNp0
+    AlpgenPythia_P2011C_ZeeccNp1
+    AlpgenPythia_P2011C_ZeeccNp2
+    AlpgenPythia_P2011C_ZeeccNp3
+    AlpgenPythia_P2011C_ZmumuNp0
+    AlpgenPythia_P2011C_ZmumuNp1
+    AlpgenPythia_P2011C_ZmumuNp2
+    AlpgenPythia_P2011C_ZmumuNp3
+    AlpgenPythia_P2011C_ZmumuNp4
+    AlpgenPythia_P2011C_ZmumuNp5
+    AlpgenPythia_P2011C_ZmumubbNp0
+    AlpgenPythia_P2011C_ZmumubbNp1
+    AlpgenPythia_P2011C_ZmumubbNp2
+    AlpgenPythia_P2011C_ZmumubbNp3
+    AlpgenPythia_P2011C_ZmumuccNp0
+    AlpgenPythia_P2011C_ZmumuccNp1
+    AlpgenPythia_P2011C_ZmumuccNp2
+    AlpgenPythia_P2011C_ZmumuccNp3
+    AlpgenPythia_P2011C_ZtautauNp0
+    AlpgenPythia_P2011C_ZtautauNp1
+    AlpgenPythia_P2011C_ZtautauNp2
+    AlpgenPythia_P2011C_ZtautauNp3
+    AlpgenPythia_P2011C_ZtautauNp4
+    AlpgenPythia_P2011C_ZtautauNp5
+    AlpgenPythia_P2011C_ZtautaubbNp0
+    AlpgenPythia_P2011C_ZtautaubbNp1
+    AlpgenPythia_P2011C_ZtautaubbNp2
+    AlpgenPythia_P2011C_ZtautaubbNp3
+    AlpgenPythia_P2011C_ZtautauccNp0
+    AlpgenPythia_P2011C_ZtautauccNp1
+    AlpgenPythia_P2011C_ZtautauccNp2
+    AlpgenPythia_P2011C_ZtautauccNp3
 
-    # Z + bb + jets
-    #ZeebbNp0 ZeebbNp1 ZeebbNp2 ZeebbNp3 ZeebbNp4 ZeebbNp5
-    #ZmumubbNp0 ZmumubbNp1 ZmumubbNp2 ZmumubbNp3 ZmumubbNp4 ZmumubbNp5
-    #ZtautaubbNp0 ZtautaubbNp1 ZtautaubbNp2 ZtautaubbNp3 ZtautaubbNp4 ZtautaubbNp5
+#     # Z+jets
+#     #ZeeNp0 ZeeNp1 ZeeNp2 ZeeNp3 ZeeNp4 Zweep5
+#     #ZmumuNp0 ZmumuNp1 ZmumuNp2 ZmumuNp3 ZmumuNp4 ZmumuNp5
+#     #ZtautauNp0 ZtautauNp1 ZtautauNp2 ZtautauNp3 ZtautauNp4 ZtautauNp5
 
-    # Z + cc + jets
-    #ZeeccNp0 ZeeccNp1 ZeeccNp2 ZeeccNp3 ZeeccNp4 ZeeccNp5
-    #ZmumuccNp0 ZmumuccNp1 ZmumuccNp2 ZmumuccNp3 ZmumuccNp4 ZmumuccNp5
-    #ZtautauccNp0 ZtautauccNp1 ZtautauccNp2 ZtautauccNp3 ZtautauccNp4 ZtautauccNp5
+#     # Z + bb + jets
+#     #ZeebbNp0 ZeebbNp1 ZeebbNp2 ZeebbNp3 ZeebbNp4 ZeebbNp5
+#     #ZmumubbNp0 ZmumubbNp1 ZmumubbNp2 ZmumubbNp3 ZmumubbNp4 ZmumubbNp5
+#     #ZtautaubbNp0 ZtautaubbNp1 ZtautaubbNp2 ZtautaubbNp3 ZtautaubbNp4 ZtautaubbNp5
 
-    # Core Samples
-    # Low mass Z
-    ZeeNp0Excl_Mll10to60 ZeeNp1Excl_Mll10to60 ZeeNp2Excl_Mll10to60 ZeeNp3Excl_Mll10to60 ZeeNp4Excl_Mll10to60
-    ZmumuNp0Excl_Mll10to60 ZmumuNp1Excl_Mll10to60 ZmumuNp2Excl_Mll10to60 ZmumuNp3Excl_Mll10to60 ZmumuNp4Excl_Mll10to60
-    ZtautauNp0Excl_Mll10to60 ZtautauNp1Excl_Mll10to60 ZtautauNp2Excl_Mll10to60 ZtautauNp3Excl_Mll10to60
+#     # Z + cc + jets
+#     #ZeeccNp0 ZeeccNp1 ZeeccNp2 ZeeccNp3 ZeeccNp4 ZeeccNp5
+#     #ZmumuccNp0 ZmumuccNp1 ZmumuccNp2 ZmumuccNp3 ZmumuccNp4 ZmumuccNp5
+#     #ZtautauccNp0 ZtautauccNp1 ZtautauccNp2 ZtautauccNp3 ZtautauccNp4 ZtautauccNp5
+
+#     # Core Samples
+#     # Low mass Z
+#     ZeeNp0Excl_Mll10to60 ZeeNp1Excl_Mll10to60 ZeeNp2Excl_Mll10to60 ZeeNp3Excl_Mll10to60 ZeeNp4Excl_Mll10to60
+#     ZmumuNp0Excl_Mll10to60 ZmumuNp1Excl_Mll10to60 ZmumuNp2Excl_Mll10to60 ZmumuNp3Excl_Mll10to60 ZmumuNp4Excl_Mll10to60
+#     ZtautauNp0Excl_Mll10to60 ZtautauNp1Excl_Mll10to60 ZtautauNp2Excl_Mll10to60 ZtautauNp3Excl_Mll10to60
 
     # W+jets
     #Sherpa_CT10_Wenu Sherpa_CT10_Wmunu Sherpa_CT10_Wtaunu
