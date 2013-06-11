@@ -5,7 +5,7 @@
 #include "TChain.h"
 #include "Cintex/Cintex.h"
 
-#include "SusyAna2012/MatrixPrediction.h"
+#include "SusyTest0/MatrixPrediction.h"
 #include "SusyNtuple/ChainHelper.h"
 
 using namespace std;
@@ -131,8 +131,6 @@ int main(int argc, char** argv)
   fakePred->setSampleName(sample);
   fakePred->setFileName(fname);
   fakePred->setUse1fb(use1fb);
-  fakePred->setDoMCFake(doMCFake);
-
   // Run the job
   if(nEvt<0) nEvt = nEntries;
   cout << endl;

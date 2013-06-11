@@ -1,9 +1,9 @@
 #ifndef SusyAna_MatrixPrediction_h
 #define SusyAna_MatrixPrediction_h
 
-#include "SusyAna2012/SusyPlotter.h"
-//#include "SusyMatrixMethod/DiLeptonMatrixMethod.h"
+#include "SusyTest0/SusyPlotter.h"
 #include "SusyMatrixMethod/MatrixLepton.h"
+#include "SusyMatrixMethod/DiLeptonMatrixMethod.h"
 
 /*
 
@@ -52,44 +52,25 @@ class MatrixPrediction : public SusyPlotter
 
     MatrixPrediction();
     virtual ~MatrixPrediction(){};
-
-    // Begin is called before looping on entries
-    virtual void    Begin(TTree *tree);
-    // Terminate is called after looping is finished
-    virtual void    Terminate();
-
-    // Main event loop function
+    virtual void    Begin(TTree *tree); //!< called before looping on entries
+    virtual void    Terminate(); //!< called after looping is finished
     virtual Bool_t  Process(Long64_t entry);
-
-    // Extra histograms and plotting function specific to matrix method
+    //! Extra histograms and plotting function specific to matrix method
     void bookFakeHisto();
     void fillFakeHistos(const LeptonVector &baseLeps, const JetVector &jets, 
-			const Met* met,float weight, PlotRegion PR, uint sys = 0);
-
-
+                        const Met* met,float weight, PlotRegion PR, uint sys = 0);
     // Get the fake event weight given a signal region
     float getFakeWeight(const LeptonVector &baseLeps, SusyMatrixMethod::FAKE_REGION region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NONE);
     float getRFWeight(const LeptonVector &baseLeps, SusyMatrixMethod::FAKE_REGION region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NONE);
-    // Get the Matrix Pair type
-    MatrixPair getMatrixPair(const LeptonVector &baseLeps);
-
+    MatrixPair getMatrixPair(const LeptonVector &baseLeps); //!< Get the Matrix Pair type
     ofstream dump;
-
     ClassDef(MatrixPrediction, 1);
 
   protected:
-
     std::vector<uint> m_matrixSys;      // systematics to process
-
     SusyMatrixMethod::DiLeptonMatrixMethod* m_matrix;
-
-    // 
     // Histograms
-    //
-
 #define FAKEHIST( name ) hf_ ## name[Ch_N][PR_N][MP_N][WTog_N][SusyMatrixMethod::SYS_N_USER];
-
-    
     TH1F* FAKEHIST( ll_M );
     TH1F* FAKEHIST( l0_pt );
     TH1F* FAKEHIST( l1_pt );
@@ -108,9 +89,7 @@ class MatrixPrediction : public SusyPlotter
     TH1F* FAKEHIST( njets );
     TH1F* FAKEHIST( bjet_pt );
     TH1F* FAKEHIST( ljet_pt );
-
-    #undef FAKEHIST
-
+#undef FAKEHIST
 };
 
 #endif
