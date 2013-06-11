@@ -12,14 +12,14 @@ const int  nptbins   = 25;
 
 const float etamin   = -3;
 const float etamax   = 3;
-const int   netabins = 30; 
+const int   netabins = 30;
 
 const float massmin  = 0;
 const float massmax  = 300;
 const int  nmassbins = 30;
 
 //----------------------------------------------------------
-MatrixPrediction::MatrixPrediction() : 
+MatrixPrediction::MatrixPrediction() :
   SusyPlotter()
 {
 }
@@ -71,7 +71,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
     if( passSR1(m_baseLeptons, m_signalJets2Lep, m_met) ){
     float weight = getFakeWeight(m_baseLeptons, SusyMatrixMethod::FR_SROSjveto, metRel,sys);
     fillHistos(m_baseLeptons, m_signalJets2Lep, m_met, weight, PR_SR1, s);
-    fillFakeHistos(m_baseLeptons, m_signalJets2Lep, m_met, weight, PR_SR1,s);    
+    fillFakeHistos(m_baseLeptons, m_signalJets2Lep, m_met, weight, PR_SR1,s);
     }
     */
   }// end loop over systematics
@@ -90,7 +90,7 @@ void MatrixPrediction::bookFakeHisto()
   m_histFile->cd();  // Histogram file from SusyPlotter
   for(uint iPR=0; iPR<PR_N; ++iPR){ // Plot Region names
     string PR = PRNames[iPR];
-    //if( !(iPR == PR_VR1 || iPR == PR_VR3) ) continue; 
+    //if( !(iPR == PR_VR1 || iPR == PR_VR3) ) continue;
     for(uint iCh=0; iCh<Ch_N; ++iCh){ // lepton channel loop
       string chan = chanNames[iCh];
       for(uint iMP=0; iMP<MP_N; ++iMP){
@@ -112,18 +112,18 @@ void MatrixPrediction::bookFakeHisto()
 		hf_ ## name[iCh][iPR][iMP][iWT][iSYS] = new TH2F((base+"_"+#name).c_str(), #name ";" xLbl, nbin, min, max,nbin,min,max); \
 		hf_ ## name[iCh][iPR][iMP][iWT][iSYS]->Sumw2();		\
 	      }while(0)
-      
+
             #define NEWVARHIST(name, xLbl, nbin, bins)				\
 	      do{							\
 		hf_ ## name[iCh][iPR][iMP][iWT][iSYS] = new TH1F((base+"_"+#name).c_str(), #name ";" xLbl, nbin, bins); \
 		hf_ ## name[iCh][iPR][iMP][iWT][iSYS]->Sumw2();		\
-	      }while(0)          
-	    
+	      }while(0)
+
             // Lepton Kin
             NEWHIST(l0_pt, "Lepton P_{T}", nptbins, ptmin, ptmax);
             NEWHIST(l1_pt, "Lepton P_{T}", nptbins, ptmin, ptmax);
             // Mass
-            NEWHIST(ll_M, "m(ll)", nmassbins, massmin, massmax);  
+            NEWHIST(ll_M, "m(ll)", nmassbins, massmin, massmax);
             // Met
             NEWHIST(met, "#slash{E}_{T}", nptbins, ptmin, ptmax);
             NEWHIST(metrel, "#slash{E}^{rel}_{T}", nptbins, ptmin, ptmax);
@@ -150,7 +150,7 @@ void MatrixPrediction::bookFakeHisto()
   }// end loop over plot regions
 }
 //----------------------------------------------------------
-void MatrixPrediction::fillFakeHistos(const LeptonVector &baseLeps, const JetVector &jets, 
+void MatrixPrediction::fillFakeHistos(const LeptonVector &baseLeps, const JetVector &jets,
 				      const Met* met,float weight, PlotRegion PR, uint sys)
 {
 
@@ -210,32 +210,26 @@ void MatrixPrediction::fillFakeHistos(const LeptonVector &baseLeps, const JetVec
   #undef FILL2
 }
 //----------------------------------------------------------
-float MatrixPrediction::getFakeWeight(const LeptonVector &baseLeps, 
-				      SusyMatrixMethod::FAKE_REGION region, 
-				      float metRel,
-				      SusyMatrixMethod::SYSTEMATIC sys)
+float MatrixPrediction::getFakeWeight(const LeptonVector &baseLeps,
+                                      SusyMatrixMethod::FAKE_REGION region,
+                                      float metRel,
+                                      SusyMatrixMethod::SYSTEMATIC sys)
 {
-
   if(baseLeps.size() != 2) return 0.0;
   uint nVtx = nt.evt()->nVtx;
   bool isMC = nt.evt()->isMC;
+  float gev2mev(1000.);
   //m_matrix->setDileptonType(baseLeps[0]->isEle(), baseLeps[1]->isEle());
-  float weight = m_matrix->getTotalFake( isSignalLepton(baseLeps[0],m_baseElectrons, m_baseMuons,nVtx,isMC),
-					 baseLeps[0]->isEle(),
-					 baseLeps[0]->Pt() * 1000.,
-					 baseLeps[0]->Eta(),
-					 isSignalLepton(baseLeps[1],m_baseElectrons, m_baseMuons,nVtx,isMC),
-					 baseLeps[1]->isEle(),
-					 baseLeps[1]->Pt() * 1000.,
-					 baseLeps[1]->Eta(),
-					 region,
-					 metRel * 1000.,
-					 sys);
-  return weight;
+  const Susy::Lepton *l0=baseLeps[0], *l1=baseLeps[1];
+  bool l0IsSig(SusyNtTools::isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMC));
+  bool l1IsSig(SusyNtTools::isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMC));
+  return m_matrix->getTotalFake(l0IsSig, l0->isEle(), l0->Pt()*gev2mev, l0->Eta(),
+                                l1IsSig, l1->isEle(), l1->Pt()*gev2mev, l1->Eta(),
+                                region, metRel*gev2mev, sys);
 }
 //----------------------------------------------------------
-float MatrixPrediction::getRFWeight(const LeptonVector &baseLeps, 
-				      SusyMatrixMethod::FAKE_REGION region, 
+float MatrixPrediction::getRFWeight(const LeptonVector &baseLeps,
+				      SusyMatrixMethod::FAKE_REGION region,
 				      float metRel,
 				      SusyMatrixMethod::SYSTEMATIC sys)
 {
