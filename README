@@ -5,6 +5,7 @@ svn co ${SVN_INST}/UCIrvine/SUSYAnalysis/SusyNtuple/tags/SusyNtuple-00-00-53    
 svn co ${SVN_PHYS}/SUSY/Analyses/WeakProduction/LeptonTruthTools/tags/LeptonTruthTools-00-01-03 LeptonTruthTools
 svn co ${SVN_PHYS}/SUSY/Analyses/WeakProduction/MultiLep/tags/MultiLep-01-04-14                 MultiLep
 svn co ${SVN_INST}/UCIrvine/mrelich/SusyXSReader/trunk                                          SusyXSReader
+svn co ${SVN_PHYS}/SUSY/Analyses/WeakProduction/SusyMatrixMethod/trunk                          SusyMatrixMethod
 source MultiLep/installscripts/install_script.sh
 
 ./RootCore/scripts/find_packages.sh
