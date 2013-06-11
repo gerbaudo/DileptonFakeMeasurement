@@ -32,12 +32,9 @@ void MatrixPrediction::Begin(TTree* /*tree*/)
   if(m_dbg) cout << "MatrixPrediction::Begin" << endl;
   // Load the matrix method package
   m_matrix = new SusyMatrixMethod::DiLeptonMatrixMethod();
-  cout<<"dir: "<<std::getenv("ROOTCOREDIR")<<endl;
-  string fakefile = "pass0_Summer2013_May24";
-  string cd = string(std::getenv("ROOTCOREDIR"));
-  string path = cd + "/../SusyPlotting/run/finalfake/"+fakefile+".root";
-  cout<<"Path: "<<path<<endl;
-  m_matrix->configure(path, 
+  string pathRateFile = (string( std::getenv("ROOTCOREDIR"))
+                         +"/../SusyMatrixMethod/data/pass6_Apr2_2013.root");
+  m_matrix->configure(pathRateFile,
                       SusyMatrixMethod::PT,     // Electron Real
                       SusyMatrixMethod::PT,     // Electron Fake
                       SusyMatrixMethod::PT,     // Muon Real
