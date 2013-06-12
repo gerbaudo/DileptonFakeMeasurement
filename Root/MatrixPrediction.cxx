@@ -72,8 +72,12 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
 //               float weight, PlotRegion PR, uint sys) = fillFakeHistos
   if(passSR6(l, j, m, count)) { fillHistos(l, j, m, weight, PR_SR6); fillFakeHistos(l, j, m, weight, PR_SR6, sys); }
   if(passSR7(l, j, m, count)) { fillHistos(l, j, m, weight, PR_SR7); fillFakeHistos(l, j, m, weight, PR_SR7, sys); }
-  if(passSR8(l, j, m, count)) { fillHistos(l, j, m, weight, PR_SR8); fillFakeHistos(l, j, m, weight, PR_SR8, sys); }
-  if(passSR9(l, j, m, count)) { fillHistos(l, j, m, weight, PR_SR9); fillFakeHistos(l, j, m, weight, PR_SR9, sys); }
+  if(passSR8(l, j, m, count)) {
+    cout<<"passSR8"<<endl;
+    fillHistos(l, j, m, weight, PR_SR8); fillFakeHistos(l, j, m, weight, PR_SR8, sys); }
+  if(passSR9(l, j, m, count)) {
+    cout<<"passSR9"<<endl;
+fillHistos(l, j, m, weight, PR_SR9); fillFakeHistos(l, j, m, weight, PR_SR9, sys); }
   return kTRUE;
 }
 //----------------------------------------------------------
