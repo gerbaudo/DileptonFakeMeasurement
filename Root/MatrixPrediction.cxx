@@ -34,12 +34,7 @@ void MatrixPrediction::Begin(TTree* /*tree*/)
   m_matrix = new SusyMatrixMethod::DiLeptonMatrixMethod();
   string pathRateFile = (string( std::getenv("ROOTCOREDIR"))
                          +"/../SusyMatrixMethod/data/pass6_Apr2_2013.root");
-  m_matrix->configure(pathRateFile,
-                      SusyMatrixMethod::PT,     // Electron Real
-                      SusyMatrixMethod::PT,     // Electron Fake
-                      SusyMatrixMethod::PT,     // Muon Real
-                      SusyMatrixMethod::PT      // Muon Fake
-                      );
+  m_matrix->configure(pathRateFile, SusyMatrixMethod::PT);
   cout<<"Matrix method initialized: "<<endl;
   bookFakeHisto();
   dump.open("fakeDump.txt");
@@ -62,19 +57,23 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   if( !selectEvent() )              return kTRUE;
   if( m_baseLeptons.size() != 2 )   return kTRUE;
   if( !passTrigger(m_baseLeptons) ) return kTRUE;
-  for(uint s = 0; s<m_systs.size(); ++s){
-    // Plot Regions and use appropriate weights
-    //float metRel = getMetRel(m_met, m_baseLeptons, m_signalJets);
-    /*
-    SusyMatrixMethod::SYSTEMATIC sys = (SusyMatrixMethod::SYSTEMATIC) m_systs.at(s);
-    // SR1
-    if( passSR1(m_baseLeptons, m_signalJets2Lep, m_met) ){
-    float weight = getFakeWeight(m_baseLeptons, SusyMatrixMethod::FR_SROSjveto, metRel,sys);
-    fillHistos(m_baseLeptons, m_signalJets2Lep, m_met, weight, PR_SR1, s);
-    fillFakeHistos(m_baseLeptons, m_signalJets2Lep, m_met, weight, PR_SR1,s);
-    }
-    */
-  }// end loop over systematics
+  bool count(true);
+  SusyMatrixMethod::FAKE_REGION reg = SusyMatrixMethod::FR_VRSSbtag;
+  SusyMatrixMethod::SYSTEMATIC  sys = SusyMatrixMethod::SYS_NONE;
+  const Met*          m = m_met;
+  const JetVector&    j = m_signalJets2Lep;
+  const LeptonVector& l = m_baseLeptons;
+  float metRel = getMetRel(m, l, j);
+  float weight = getFakeWeight(l, reg, metRel, sys);
+  // function references to shorten lines
+//   void (&fh)(const LeptonVector &l, const JetVector &j, const Met* m,
+//              const float weight, PlotRegion PR, uint sys) = fillHistos;
+//   void (&ffh)(const LeptonVector &l, const JetVector &j, const Met *m,
+//               float weight, PlotRegion PR, uint sys) = fillFakeHistos
+  if(passSR6(l, j, m, count)) { fillHistos(l, j, m, weight, PR_SR6); fillFakeHistos(l, j, m, weight, PR_SR6, sys); }
+  if(passSR7(l, j, m, count)) { fillHistos(l, j, m, weight, PR_SR7); fillFakeHistos(l, j, m, weight, PR_SR7, sys); }
+  if(passSR8(l, j, m, count)) { fillHistos(l, j, m, weight, PR_SR8); fillFakeHistos(l, j, m, weight, PR_SR8, sys); }
+  if(passSR9(l, j, m, count)) { fillHistos(l, j, m, weight, PR_SR9); fillFakeHistos(l, j, m, weight, PR_SR9, sys); }
   return kTRUE;
 }
 //----------------------------------------------------------
