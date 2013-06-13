@@ -14,7 +14,7 @@ r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
 
 from PickleUtils import readFromPickle
-from SampleUtils import ModeAWhDbPar, ModeAWhDbReqid
+from SampleUtils import ModeAWhDbPar, ModeAWhDbReqid, ModeAWhDbMergedFake2Lreqid
 
 
 parser = optparse.OptionParser()
@@ -55,6 +55,18 @@ for entry in parDb.entries :
     assert h,"%s is not 2l nor 3l"%sample
     h.Fill(mc1, mn1, float(reqid))
 
+def buildMergedHisto(histo) :
+    merge = ModeAWhDbMergedFake2Lreqid()
+    h = histo.Clone(histo.GetName()+'_merged')
+    h.Reset()
+    xAx, yAx = h.GetXaxis(), h.GetYaxis()
+    for iX in range(1, h.GetNbinsX()+1) :
+        for iY in range(1, h.GetNbinsY()+1) :
+            x,y = xAx.GetBinCenter(iX), yAx.GetBinCenter(iY)
+            fakeReqid = merge.reqidByMc1Mn1(x, y)
+            if fakeReqid : h.Fill(x, y, fakeReqid)
+    return h
+
 r.gStyle.SetPaintTextFormat('.0f')
 c = r.TCanvas('c_reqids', 'WH reqids', 800, 600)
 c.cd()
@@ -63,6 +75,8 @@ for h in [histo2l, histo3l] :
     h.SetTitle(h.GetTitle()+" (%d points)"%h.GetEntries())
     h.SetStats(0)
     h.SetMarkerSize(1.25*h.GetMarkerSize())
-    h.Draw('text20')
+    hMerge = buildMergedHisto(h)
+    hMerge.Draw('col')
+    h.Draw('text20 same')
     c.Update()
     c.SaveAs('c_'+h.GetName()+'.png')
