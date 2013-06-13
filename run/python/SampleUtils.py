@@ -92,8 +92,8 @@ class ModeAWhDbMergedFake2Lreqid :
     def reqidByMc1Mn1(self, mc1, mn1) :
         x, y = float(mc1), float(mn1)
         if   y<(-x+210) : return 1765700
-        elif y<(-x+280) : return 1765800 if y>(x-210) else 1765900
-        elif y<(-x+360) : return 1766000 if y>(x-210) else 1766100 if y>(x-280) else 1766200
+        elif y<(-x+290) : return 1765800 if y>(x-210) else 1765900
+        elif y<(-x+360) : return 1766000 if y>(x-210) else 1766100 if y>(x-290) else 1766200
         else            : return 1766300
         #if y<(x-100) else None # this is messing up also the bottom half? later on...
 
