@@ -82,6 +82,8 @@ class ModeAWhDbReqid :
             self.entries[sample] = reqid
     def reqidBySample(self, sample) :
         return self.entries[sample]
+    def sampleByReqid(self, reqid) :
+        return next((s for s,r in self.entries.iteritems() if r == reqid), None)
 
 #
 # testing
