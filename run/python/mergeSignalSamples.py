@@ -97,6 +97,7 @@ if __name__=='__main__' :
     overwrite, verbose = options.overwrite, options.verbose
     
     inputFileNames = glob.glob(inputDir+'/'+'*WH_2Lep*'+tag+'*.root')
+    if not os.path.isdir(outputDir) : os.mkdir(outputDir)
     if verbose :
         print 'Options:\n' \
           + '\n'.join(["%s : %s" % (o, eval(o))
