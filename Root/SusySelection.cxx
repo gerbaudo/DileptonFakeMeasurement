@@ -556,6 +556,7 @@ float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag,
   weight *= getLeptonEff2Lep(leptons);
   float trigW = (includeTrig ? getTriggerWeight2Lep(leptons) : 1.0);
   float bTag  = (includeBTag ? getBTagWeight(nt.evt()) : 1.0);
+  cout<<"bTag : "<<bTag<<endl;
   return weight * trigW * bTag;
 }
 //-----------------------------------------
@@ -581,7 +582,7 @@ float SusySelection::getBTagWeight(const Event* evt)
     //if( fabs(jet->Eta()) > JET_ETA_CUT  ) continue;
     tempJets.push_back(jet);
   }
-  return bTagSF(evt, tempJets, true);
+  return bTagSF(evt, tempJets, true, "MV1", "0_3511", MV1_80, BTag_NOM);
 }
 //-----------------------------------------
 float SusySelection::getTriggerWeight2Lep(const LeptonVector &leptons)
