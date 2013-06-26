@@ -14,6 +14,7 @@
 
 import collections
 import glob
+import math
 import operator
 import optparse
 import sys
@@ -137,8 +138,20 @@ def plotBestZns(znDict, histoname, histotitle, alsoNegative=False) :
     c.Update()
     for ext in extensions : c.SaveAs(c.GetName()+'.'+ext)
 
-def combineZn(znPerChannel={}) :
-    pass
+def combineZn(znDictPerChannel={}, alsoNegative=False) :
+    """combine the zn from multiple channels by summing them in
+    quadrature; return a dict with the same keys(except the selection)
+    as input and val=combined zn
+    """
+    sqrt = math.sqrt
+    values = collections.defaultdict(list)
+    for ch, valsPerCh in znDictPerChannel.iteritems() :
+        for k, v in valsPerCh.iteritems() :
+            k = dict(k)
+            k = frozenset(dict([(p, k[p]) for p in ['ds','mc1','mn1']]).items()) # don't care about sel
+            values[k].append(v)
+    return dict([(k, sqrt(sum([v*v for v in vv if v>0.0 or alsoNegative]))) for k, vv in values.iteritems()])
+
 #_______________________________________
 
 if __name__=='__main__' :
@@ -182,3 +195,5 @@ if __name__=='__main__' :
         plotBestZns(znThisChannel, ch+'_optZn', 'Best Zn: '+ch+' '+setupLabel)
         plotBestSelection(znThisChannel.keys(), ch+'_optSel', 'Optimal selection: '+ch+' '+setupLabel)
         optimalZnPerChannel[ch] = znThisChannel
+    optimalZnPerChannel['ll'] = combineZn(optimalZnPerChannel)
+    plotBestZns(optimalZnPerChannel['ll'], 'll_optZn', 'Best Zn: ll '+setupLabel)
