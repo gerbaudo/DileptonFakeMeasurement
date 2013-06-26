@@ -117,8 +117,26 @@ def plotBestSelection(pointsWithSel, histoname, histotitle) :
     c.Update()
     for ext in extensions : c.SaveAs(c.GetName()+'.'+ext)
 
-def plotBestZns() :
-    points = []
+def plotBestZns(znDict, histoname, histotitle, alsoNegative=False) :
+    pm = buildPadMaster(znDict.keys(), histoname, histotitle)
+    points = [(p['mc1'], p['mn1'], zn) for p, zn in [(dict(pp), v) for pp,v in znDict.iteritems()]]
+    gr = r.TGraph2D(1)
+    gr.SetTitle('g_'+histoname)
+    gr.SetMarkerStyle(r.kFullSquare)
+    gr.SetMarkerSize(2*gr.GetMarkerSize())
+    for i, (x, y, zn) in enumerate(points) :
+        if zn>0.0 or alsoNegative : gr.SetPoint(i+1, float(x), float(y), zn)
+    c = r.TCanvas('c_'+histoname, histoname, 800, 600)
+    c.cd()
+    pm.SetStats(0)
+    pm.Draw('axis')
+    gr.Draw('colz same')
+    tex = r.TLatex(0.0, 0.0, '')
+    tex.SetTextFont(pm.GetTitleFont())
+    for x, y, zn in points : tex.DrawLatex(float(x), float(y), "%.2f"%zn)
+    c.Update()
+    for ext in extensions : c.SaveAs(c.GetName()+'.'+ext)
+
 def combineZn(znPerChannel={}) :
     pass
 #_______________________________________
@@ -133,6 +151,7 @@ if __name__=='__main__' :
     sigScale        = options.sigScale
     verbose         = options.verbose
     extensions      = ['eps','png']
+    setupLabel = "(SS, signal x%.1f)"%sigScale
 
     filesBkg = glob.glob('estimatedYield/*bkg*txt')
     filesSig = glob.glob('estimatedYield/*signal*txt')
@@ -160,8 +179,6 @@ if __name__=='__main__' :
             key = frozenset(key.items())
             assert key not in znThisChannel,"duplicate optimal selection? %s"%str(key)
             znThisChannel[key] = bestZn
-        #plotBestZns()
-        plotBestSelection(znThisChannel.keys(),
-                          ch+'_optSel',
-                          'Optimal selection: '+ch)
-optimalZnPerChannel[ch] = znThisChannel
+        plotBestZns(znThisChannel, ch+'_optZn', 'Best Zn: '+ch+' '+setupLabel)
+        plotBestSelection(znThisChannel.keys(), ch+'_optSel', 'Optimal selection: '+ch+' '+setupLabel)
+        optimalZnPerChannel[ch] = znThisChannel
