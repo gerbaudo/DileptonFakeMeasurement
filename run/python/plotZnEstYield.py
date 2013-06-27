@@ -167,8 +167,8 @@ def exclusionContourGraph(znTGraph2D) :
     _h = znGr.GetHistogram().Clone('tmp_h_'+znGr.GetName())
     _h.SetDirectory(0)
     gbc, nx, ny = _h.GetBinContent, _h.GetNbinsX(), _h.GetNbinsY()
-    nBinsExcluded = len([1 for i in range(1, nx+1) for j in range(1, ny+1) if gbc(i,j) > signif])
-    canSmooth = nBinsExcluded > 4 # at least a triangle enclosing one point
+    nPointsExcluded = len([1 for i in range(znGr.GetN()) if znGr.GetZ()[i] > signif])
+    canSmooth = nPointsExcluded > 3 # at least a closed area
     if canSmooth : _h.Smooth()
     _h.SetContour(1)
     _h.SetContourLevel(0, signif)
