@@ -83,13 +83,13 @@ def findBestZn(countsPerSelBkg={}, countsPerSelSig={},
 def buildPadMaster(points, histoname='padmaster', histotitle='') :
     points = [dict(p) for p in points]
     xLabel, yLabel = 'mc1', 'mn1'
-    xs, ys = [p[xLabel] for p in points], [p[yLabel] for p in points]
-    xRange = {'min': min(xs), 'max' : max(xs)}
-    yRange = {'min': min(ys), 'max' : max(ys)}
+    xs, ys = [float(p[xLabel]) for p in points], [float(p[yLabel]) for p in points]
+    xMin, xMax = min(xs), max(xs)
+    yMin, yMax = min(ys), max(ys)
+    xMax, yMax = xMax+0.1*(xMax-xMin), yMax+0.1*(yMax-yMin) # add 10% margin for labels
     return r.TH2F(histoname,
                   histotitle+';'+xLabel+';'+yLabel,
-                  50, float(xRange['min']), float(xRange['max']),
-                  50, float(yRange['min']), float(yRange['max']))
+                  50, xMin, xMax, 50, yMin, yMax)
 def plotBestSelection(pointsWithSel, histoname, histotitle) :
     pm = buildPadMaster(pointsWithSel, histoname, histotitle)
     points = [(p['mc1'], p['mn1'], p['sel']) for p in [dict(pp) for pp in pointsWithSel]]
@@ -126,14 +126,17 @@ def plotBestZns(znDict, histoname, histotitle, alsoNegative=False) :
     gr.SetMarkerStyle(r.kFullSquare)
     gr.SetMarkerSize(2*gr.GetMarkerSize())
     for i, (x, y, zn) in enumerate(points) :
-        if zn>0.0 or alsoNegative : gr.SetPoint(i+1, float(x), float(y), zn)
+        firstPoint = gr.GetN()==1 and gr.GetZ()[0]==0.0
+        if zn>0.0 or alsoNegative : gr.SetPoint(0 if firstPoint else gr.GetN(),
+                                                float(x), float(y), zn)
     c = r.TCanvas('c_'+histoname, histoname, 800, 600)
     c.cd()
     pm.SetStats(0)
     pm.Draw('axis')
-    gr.Draw('colz same')
+    if gr.GetN() : gr.Draw('colz same') #'pcol')
     tex = r.TLatex(0.0, 0.0, '')
     tex.SetTextFont(pm.GetTitleFont())
+    tex.SetTextSize(0.75*tex.GetTextSize())
     for x, y, zn in points : tex.DrawLatex(float(x), float(y), "%.2f"%zn)
     c.Update()
     for ext in extensions : c.SaveAs(c.GetName()+'.'+ext)
@@ -165,6 +168,9 @@ if __name__=='__main__' :
     verbose         = options.verbose
     extensions      = ['eps','png']
     setupLabel = "(SS, signal x%.1f)"%sigScale
+    r.gStyle.SetPadTickX(1)
+    r.gStyle.SetPadTickY(1)
+    r.gStyle.SetTitleFillColor(0)
 
     filesBkg = glob.glob('estimatedYield/*bkg*txt')
     filesSig = glob.glob('estimatedYield/*signal*txt')
