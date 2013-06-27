@@ -138,6 +138,10 @@ def plotBestZns(znDict, histoname, histotitle, alsoNegative=False) :
     tex.SetTextFont(pm.GetTitleFont())
     tex.SetTextSize(0.75*tex.GetTextSize())
     for x, y, zn in points : tex.DrawLatex(float(x), float(y), "%.2f"%zn)
+    graphExcl = exclusionContourGraph(gr)
+    if graphExcl :
+        c.cd()
+        graphExcl.Draw('l')
     c.Update()
     for ext in extensions : c.SaveAs(c.GetName()+'.'+ext)
 
@@ -155,6 +159,29 @@ def combineZn(znDictPerChannel={}, alsoNegative=False) :
             values[k].append(v)
     return dict([(k, sqrt(sum([v*v for v in vv if v>0.0 or alsoNegative]))) for k, vv in values.iteritems()])
 
+def exclusionContourGraph(znTGraph2D) :
+    znGr = znTGraph2D
+    pval = 0.05
+    signif = r.TMath.NormQuantile(1.0-pval)
+    if znGr.GetZmax() < signif : return
+    _h = znGr.GetHistogram().Clone('tmp_h_'+znGr.GetName())
+    _h.SetDirectory(0)
+    gbc, nx, ny = _h.GetBinContent, _h.GetNbinsX(), _h.GetNbinsY()
+    nBinsExcluded = len([1 for i in range(1, nx+1) for j in range(1, ny+1) if gbc(i,j) > signif])
+    canSmooth = nBinsExcluded > 4 # at least a triangle enclosing one point
+    if canSmooth : _h.Smooth()
+    _h.SetContour(1)
+    _h.SetContourLevel(0, signif)
+    _c = r.TCanvas('tmp_can','')
+    _c.cd()
+    _h.Draw('CONT LIST') # see http://root.cern.ch/root/html/THistPainter.html#HP16a
+    _c.Update()
+    contours = r.gROOT.GetListOfSpecials().FindObject('contours')
+    if contours.GetEntries() :
+        gr = contours.At(0).First()
+        gr.SetLineWidth(2*gr.GetLineWidth())
+        gr.SetLineColor(r.kBlack)
+        return gr
 #_______________________________________
 
 if __name__=='__main__' :
