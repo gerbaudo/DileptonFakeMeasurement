@@ -1,2 +1,2 @@
 	"mWWT,metrel"	mT2
-BKG	17.38	1.51
+BKG	14.47	1.65
