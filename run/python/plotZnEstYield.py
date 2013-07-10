@@ -67,6 +67,7 @@ def channelFromFilename(filename) :
     if   '_ee' in filename : return 'ee'
     elif '_em' in filename : return 'em'
     elif '_mm' in filename : return 'mm'
+    elif '_ll' in filename : return 'll'
 def sigBkgFromFilename(filename) :
     filename = filename.lower()
     if   '_signal' in filename : return 'sig'
