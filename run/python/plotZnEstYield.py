@@ -189,19 +189,27 @@ if __name__=='__main__' :
     parser = optparse.OptionParser()
     parser.add_option("-S", "--scale-sig", dest="sigScale", default=defaultSigScale, type='float',
                       help="scale the signal yield by this factor (default %.1f)" % defaultSigScale)
+    parser.add_option('--same-sign', action="store_true", dest="samesign", default=False,
+                      help="consider same-sign input files *SS*txt")
+    parser.add_option('--opp-sign', action="store_true", dest="oppsign", default=False,
+                      help="consider same-sign input files *OS*txt")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
                       help="print more details about what is going on")
     (options, args) = parser.parse_args()
     sigScale        = options.sigScale
+    samesign        = options.samesign
+    oppsign         = options.oppsign
     verbose         = options.verbose
     extensions      = ['eps','png']
-    setupLabel = "(SS, signal x%.1f)"%sigScale
+    assert samesign!=oppsign,"pick either same-sign or opp-sign"
+    dilepType = 'OS' if oppsign else 'SS'
+    setupLabel = "(%s, signal x%.1f)"%(dilepType, sigScale)
     r.gStyle.SetPadTickX(1)
     r.gStyle.SetPadTickY(1)
     r.gStyle.SetTitleFillColor(0)
 
-    filesBkg = glob.glob('estimatedYield/*bkg*txt')
-    filesSig = glob.glob('estimatedYield/*signal*txt')
+    filesBkg = glob.glob('estimatedYield/*'+dilepType+'*bkg*txt')
+    filesSig = glob.glob('estimatedYield/*'+dilepType+'*signal*txt')
 
     filesPerChannel = collections.defaultdict(list)
     for f in filesSig + filesBkg : filesPerChannel[channelFromFilename(f)].append(f)
@@ -226,8 +234,10 @@ if __name__=='__main__' :
             key = frozenset(key.items())
             assert key not in znThisChannel,"duplicate optimal selection? %s"%str(key)
             znThisChannel[key] = bestZn
-        plotBestZns(znThisChannel, ch+'_optZn', 'Best Zn: '+ch+' '+setupLabel)
-        plotBestSelection(znThisChannel.keys(), ch+'_optSel', 'Optimal selection: '+ch+' '+setupLabel)
+        plotBestZns(znThisChannel, ch+'_'+dilepType+'_optZn',
+                    'Best Zn: '+ch+' '+setupLabel)
+        plotBestSelection(znThisChannel.keys(), ch+'_'+dilepType+'_optSel',
+                          'Optimal selection: '+ch+' '+setupLabel)
         optimalZnPerChannel[ch] = znThisChannel
     optimalZnPerChannel['ll'] = combineZn(optimalZnPerChannel)
     plotBestZns(optimalZnPerChannel['ll'], 'll_optZn', 'Best Zn: ll '+setupLabel)
