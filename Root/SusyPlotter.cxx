@@ -1,10 +1,11 @@
+#include <cassert>
 #include <iomanip>
 #include <math.h>   // cos
 #include <numeric>  // std::accumulate
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyTest0/SusyPlotter.h"
 #include "SusyTest0/DileptonAnalyticalSolver.h"
-//--DG-- #include "SusyMatrixMethod/DiLeptonMatrixMethod.h"
+#include "SusyMatrixMethod/DiLeptonMatrixMethod.h"
 
 using namespace std;
 using namespace Susy;
@@ -350,7 +351,8 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   const Lepton* l0 = leps[0];
   const Lepton* l1 = leps[1];
 
-
+  assert(l0);
+  assert(l1);
   #define FILL(h, var)					\
     do{								\
       float max   = h[ch][PR][sys]->GetXaxis()->GetXmax();	\
@@ -507,8 +509,10 @@ void SusyPlotter::setSysts()
 {
   if(!m_doFake){
     m_systs.push_back(NtSys_NOM);  m_systNames.push_back(SusyNtSystNames[NtSys_NOM]);
-  }
-  else {
+  } else if(m_doFake){
+    m_systs.push_back(SusyMatrixMethod::SYS_NONE);
+    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_NONE]);
+  } else {
     cout<<"SusyPlotter::setSysts() : not implemented (DG Jan2013)"<<endl;
   }
 }

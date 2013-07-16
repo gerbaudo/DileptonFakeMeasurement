@@ -4,7 +4,7 @@ CalibrationDataInterface @ CalibrationDataInterface-00-02-01/cmt
 DGTriggerReweight @ DGTriggerReweight-00-00-28
 ElectronEfficiencyCorrection @ ElectronEfficiencyCorrection-00-00-09
 GoodRunsLists @ GoodRunsLists-00-00-96
-HistFitterTree @ HistFitterTree-00-00-05
+HistFitterTree @ HistFitterTree-00-00-15
 JetResolution @ JetResolution-02-00-01
 JetSelectorTools @ JetSelectorTools-00-00-16
 JetUncertainties @ JetUncertainties-00-08-04
@@ -21,6 +21,7 @@ ReweightUtils @ ReweightUtils-00-02-13
 RootCore @ RootCore-00-01-45
 SUSYTools @ SUSYTools-00-02-06-02
 SignificanceCalculator @ SignificanceCalculator-00-00-02
+SusyMatrixMethod @ SusyMatrixMethod-00-01-26
 SusyNtuple @ SusyNtuple-00-00-54
 SusyXSReader @ 325559
 TauCorrections @ TauCorrections-00-00-07
