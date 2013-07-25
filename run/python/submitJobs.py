@@ -81,7 +81,6 @@ for d in datasets :
 
     cmd = "qsub " \
           "-j oe -V " \
-          "-v inp=%(d)s,out=%(d)s%(append)s,opt=%(option)s " \
           "-N %(d)s%(append)s " \
           "-o batchlog " \
           " %(sn)s" \
