@@ -15,15 +15,11 @@
 
 import os
 import re
-import subprocess
+
+from utils import getCommandOutput
 
 path     = '../../'          # assume we are running from SusyTest0/run
 outFname = '../doc/tags.txt' # where the tags will be written
-def getCommandOutput(command):
-    "lifted from supy (https://github.com/elaird/supy/blob/master/utils/io.py)"
-    p = subprocess.Popen(command, shell = True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    stdout,stderr = p.communicate()
-    return {"stdout":stdout, "stderr":stderr, "returncode":p.returncode}
 def extractPkg(line) :
     match = re.search('.*/(\S+)/((tags)|(trunk))/?', line)
     return match.group(1) if match else None
