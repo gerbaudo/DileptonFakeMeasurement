@@ -91,3 +91,5 @@ for d in datasets :
     if submit :
         out = getCommandOutput(cmd)
         if verbose : print out['stdout']
+
+if not submit : print "This was a dry run; use '--submit' to actually submit the jobs"
