@@ -12,7 +12,7 @@ import re
 import subprocess
 
 validModes = ['mc12', 'susy', 'data',]
-defaultTag = 'n0139'
+defaultTag = 'n0145'
 
 usage="""Create the filelists to be used by SusyPlotter.
 
@@ -56,7 +56,7 @@ dirlist = glob.glob(basedir+'/user.*'+tag)
 
 def isDatasetDir(dirname, datasetname):
     "expect the dirname to be smth like *.<samplename>.SusyNt*"
-    return re.search('\.'+datasetname+'\.SusyNt', dirname)
+    return re.search('\.'+datasetname+'\..*SusyNt', dirname)
 def makeFile(datasetdir, destfilename):
     ls = subprocess.Popen(['ls '+datasetdir+'/*.root* > '+destfilename],shell=True)
     ls.wait()
