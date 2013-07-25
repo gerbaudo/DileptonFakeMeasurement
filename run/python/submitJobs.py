@@ -4,11 +4,9 @@
 #
 # Converted from Matt's runSP.sh
 # Should be run from the directory 'run'
-# (todo: move to python and adjust path names)
 #
 # Example usage:
-# $ ./filelist/submitJobs.py > submit.sh
-# $ source submit.sh
+# $ python/submitJobs.py -m data -s periodA.physics_Egamma
 #
 # davide.gerbaudo@gmail.com
 # Jan 2013
