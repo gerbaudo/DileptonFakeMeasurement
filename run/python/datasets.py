@@ -48,7 +48,7 @@ wantedDsets = { # mode : [dsets]
                                    "LeptHad", "LeptTauhad", "TauleptHad",
                                    "TauleptTauhad", "HadTauhad", "TauhadTauhad",]]
     # + ["PowhegPythia_AUET2BCT10_ttbar_LeptonFilter_AF2",]
-    + ["ttbar_LeptonFilter"]
+    + ['McAtNloJimmy_CT10_ttbar_LeptonFilter']
     + ["ttbar%s" % ttX for ttX in ["Z", "Zj", "W","Wj",]]
     # diboson
     + ["lllnu_WZ", "llll_ZZ", "llnunu_ZZ", "llnunu_WW",]
@@ -68,3 +68,145 @@ wantedDsets = { # mode : [dsets]
     + ["wA_noslep_WH_2Lep_%d" % i for i in range(1, 61+1)]  # 2l
     + ["wA_noslep_WH_3Lep_%d" % i for i in range(1, 66+1)]  # 3l
     }
+
+class Dataset :
+    """Container to uniquely specify a dataset (through a dsid), and
+    specify additional user-friendly attributes"""
+    def __init__(self, sampleType, dsid=None, group=None, name=None, process=None) :
+        assert sampleType in ['data','mc'], "sampleType: %s for %s"%(sampleType, name)
+        self.type = sampleType # data or mc
+        self.dsid = dsid # 6-digit id for mc; none for data
+        self.group = group # group in which the histo will appear in the stack
+        self.name = name # full name, usually as in <stuff>.<dsid>.<name>.SusyNt.<tags>
+        self.process = process # physical process, for example 'Zbb + jets' (short, generic, usually appears as the common root of the name)
+
+
+datasets = []
+sampleType, group, process = None, None, None
+
+
+
+sampleType = 'data'
+periods = ['A', 'B', 'C', 'D', 'E', 'G', 'H', 'I', 'J', 'L']
+group, dsid = 'Egamma', None
+datasets += [Dataset(sampleType, dsid, group, n, process)
+             for n in ["period%(p)s.physics_%(g)s.PhysCont" % {'p':p, 'g':group}
+                       for p in periods]]
+group, dsid = 'Muons', None
+datasets += [Dataset(sampleType, dsid, group, n, process)
+             for n in ["period%(p)s.physics_%(g)s.PhysCont" % {'p':p, 'g':group}
+                       for p in periods]]
+
+sampleType = 'mc'
+
+group = 'Zjets'
+## # Alternative Z+jets AFII samples
+## + ["Z%(ll)s%(f)%sJets_AF2" % {'ll':ll, 'f':f}
+##    for ll in ['ee', 'mumu', 'tautau'] for f in ['Heavy', 'Light']]
+## # New alternative Z+jets (Yippeee)
+## + ["Sherpa_CT10_Z%s" % ll for ll in ['ee', 'mumu', 'tautau']]
+
+nps = [0, 1, 2, 3, 4, 5]
+template, process = "AlpgenPythia_P2011C_Z%(ll)sNp%(np)d", 'Zlljets'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
+             for ll, dsids in [('ee',     range(117650, 117655+1)),
+                               ('mumu',   range(117660, 117665+1)),
+                               ('tautau', range(117670, 117675+1))]
+             for d, np in zip(dsids, nps)]
+
+nps = [0, 1, 2, 3]
+template, process = "AlpgenPythia_P2011C_Z%(ll)sbbNp%(np)d", 'Zbbjets'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
+             for ll, dsids in [('ee',     range(110817, 110820+1)),
+                               ('mumu',   range(110821, 110824+1)),
+                               ('tautau', range(110825, 110828+1))]
+             for d, np in zip(dsids, nps)]
+
+nps = [0, 1, 2, 3]
+template, process = "AlpgenPythia_P2011C_Z%(ll)sccNp%(np)d", 'Zccjets'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
+             for ll, dsids in [('ee',     range(110805, 110808+1)),
+                               ('mumu',   range(110809, 110812+1)),
+                               ('tautau', range(110813, 110816+1))]
+             for d, np in zip(dsids, nps)]
+
+#- nps = [0, 1, 2, 3, 4]
+#- template, process = "AlpgenPythia_P2011C_Z%(ll)sNp%(np)dExcl", 'Low mass Z'
+#- datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
+#-              for ll, dsids in [('ee',     range(0, 0+1)),
+#-                                ('mumu',   range(0, 0+1)),
+#-                                ('tautau', range(0, 0+1))]
+#-              for d, np in zip(dsids, nps)]
+
+#- # W+Jets (temporary due to bugs)
+#- + ["Sherpa_CT10_W%s" % lv for lv in ['enu', 'munu', 'taunu']]
+#- # W+jets
+#- + ["W%(lv)sNp%(np)d" % {'lv':lv, 'np':np}
+#-    for lv in ['enu', 'munu', 'taunu'] for np in [0, 1, 2, 3, 4, 5]]
+#- # Wbb
+#- + ["WbbNp%d" % np for np in [0, 1, 2, 3]]
+#- # Wcc
+#- + ["WccNp%d" % np for np in [0, 1, 2, 3]]
+#- + ["WcNp%d" % np for np in [0, 1, 2, 3]]
+
+group = 'ttbar'
+
+name, process = 'McAtNloJimmy_AUET2CT10_SingleTopWtChanIncl', 'singletop'
+datasets += [Dataset(sampleType, 108346, group, name, process)]
+
+name, process = 'McAtNloJimmy_CT10_ttbar_LeptonFilter', 'ttbar'
+datasets += [Dataset(sampleType, 105200, group, name, process)]
+
+template, process = "MadGraphPythia_AUET2BCTEQ6L1_ttbar%(ttX)s", 'ttbarV'
+datasets += [Dataset(sampleType, d, group, template%{'ttX':ttX}, process)
+             for d, ttX in [(119353, 'W' ), (119354, 'Wj'),
+                            (119355, 'Z' ), (119356, 'Zj')]]
+
+#- ["singletop_tchan_%s" % l for l in ['e', 'mu', 'tau']]
+#- ["Ttbar%s" % ttd for ttd in ["LeptLept", "LeptTaulept", "TauleptTaulept",
+#-                              "LeptHad", "LeptTauhad", "TauleptHad",
+#-                              "TauleptTauhad", "HadTauhad", "TauhadTauhad",]]
+#- ["PowhegPythia_AUET2BCT10_ttbar_LeptonFilter_AF2",]
+
+group = 'diboson'
+
+template, process = "gg2wwJimmy_AUET2CT10_WpWm%(lvlv)s", 'gg2wwJimmy'
+datasets += [Dataset(sampleType, d, group, template%{'lvlv':lvlv}, process)
+             for d, lvlv in [(169471, 'WpWmenuenu'), (169472, 'WpWmenumunu'), (169473, 'WpWmenutaunu'),
+                             (169474, 'WpWmmunumunu'), (169475, 'WpWmmunuenu'), (169476, 'WpWmmunutaunu'),
+                             (169477, 'WpWmtaunutaunu'), (169478, 'WpWmtaunuenu'), (169479, 'WpWmtaunumunu')]]
+template, process = "gg2ZZJimmy_AUET2CT10_ZZ%(l4)s", 'gg2ZZJimmy'
+datasets += [Dataset(sampleType, d, group, template%{'l4':l4}, process)
+             for d, l4 in [(116601, '4e'),
+                           (116602, '4mu'),
+                           (116603, '2e2mu')]]
+template, process = "Sherpa_CT10_%(lepVV)s", 'Sherpa_VV_lep'
+datasets += [Dataset(sampleType, d, group, template%{'lepVV':lepVV}, process)
+             for d, lepVV in [(174834, 'llll_ZZ'),   (161963, 'llnunu_ZZ'),
+                              (126892, 'llnunu_WW'), (161961, 'lllnu_WZ')]]
+template, process = "Sherpa_CT10_%(ll)sPt10", 'Sherpa_Vgamma'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process)
+             for d, ll in [(145161, 'eegamma'),   (145162, 'mumugamma'),
+                           (126739, 'enugamma'),   (126742, 'munugamma'),
+                           (126856, 'taunugamma'), (126854, 'tautaugamma')]]
+template, process = "Sherpa_CT10_%(llss)s", 'Sherpa_llnunu'
+datasets += [Dataset(sampleType, d, group, template%{'llss':llss}, process)
+             for d, llss in [(126988, 'llnunu_SS_EW6'), (126989, 'llnunujj_SS')]]
+
+#- 160305.Pythia8_AU2CTEQ6L1_ZH125_ZZ4lep
+#- # Triboson
+#- + ['ZWWStar_lllnulnu', 'ZZZStar_nunullll', 'WWWStar_lnulnulnu',]
+#- # HF samples
+#- # + ["%(qq)sTo%(l)s15" % {'qq':qq, 'l':l} for qq in ['bb', 'cc'] for l in ['e', 'mu']]
+
+group = None
+template, process = "Herwigpp_simplifiedModel_wA_noslep_WH_2Lep_%d", "wA_noslep_WH_2Lep_%d"
+datasets += [Dataset(sampleType, d, group, template%nth, process%nth)
+             for d, nth in zip(range(176574, 176634+1), range(1, 61+1))]
+template, process = "Herwigpp_simplifiedModel_wA_noslep_WH_3Lep_%d", "wA_noslep_WH_3Lep_%d"
+datasets += [Dataset(sampleType, d, group, template%nth, process%nth)
+             for d, nth in zip(range(176641, 176706+1), range(1, 66+1))]
+
+
+# debug:
+# print '\n'.join(["%s : %s"%(s.group, s.name) for s in datasets])
