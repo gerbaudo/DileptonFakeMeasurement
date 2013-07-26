@@ -69,9 +69,11 @@ def fillInScriptTemplate(dataset, suffix, outputfilename,
     outFile.close()
 
 for d in datasets :
-    skip = not listExists(d) or not re.search(regexp, d)
-    if skip :
-        print "# skipping %s" % d
+    missList, regexUnmatch = not listExists(d), not re.search(regexp, d)
+    if missList or regexUnmatch:
+        print "# skipping %s (%s)" % (d, 'no list' if missList
+                                      else ('regex unmatch' if regexUnmatch
+                                            else ''))
         continue
     scriptName = scriptDir+'/'+d+'.sh'
     if overwrite or not os.path.exists(scriptName) :
