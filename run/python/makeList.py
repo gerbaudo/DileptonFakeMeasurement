@@ -65,8 +65,10 @@ datasets = wantedDsets[mode]
 processedDsets = []
 for dsdir in dirlist :
     dsname = next((d for d in datasets if isDatasetDir(dsdir, d)), None)
+    if not dsname :
+        print 'invalid dir ',dsdir
     if not dsname : continue # not a directory we're interested in
-    assert dsname not in processedDsets, "%s has already been processed "%dsname
+    assert dsname not in processedDsets, "%s has already been processed %s"%(dsname, dsdir)
     if verbose : print dsdir
     flistname = outdir+'/'+dsname+'.txt'
     makeFile(dsdir, flistname)
