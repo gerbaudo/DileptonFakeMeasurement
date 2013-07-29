@@ -208,5 +208,8 @@ datasets += [Dataset(sampleType, d, group, template%nth, process%nth)
              for d, nth in zip(range(176641, 176706+1), range(1, 66+1))]
 
 
-# debug:
-# print '\n'.join(["%s : %s"%(s.group, s.name) for s in datasets])
+if __name__=='__main__' :
+    print "List of available datasets[%d]"%len(datasets)
+    print '-'*20
+    print "Group Dsid Name Type Process"
+    print '\n'.join(["%s %s %s %s %s"%(s.group, s.dsid, s.name, s.type, s.process) for s in datasets])
