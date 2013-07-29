@@ -79,13 +79,14 @@ def rzip(*iterables) :
 class Dataset :
     """Container to uniquely specify a dataset (through a dsid), and
     specify additional user-friendly attributes"""
-    def __init__(self, sampleType, dsid=None, group=None, name=None, process=None) :
+    def __init__(self, sampleType, dsid=None, group=None, name=None, process=None, placeholder=False) :
         assert sampleType in ['data','mc'], "sampleType: %s for %s"%(sampleType, name)
         self.type = sampleType # data or mc
         self.dsid = dsid # 6-digit id for mc; none for data
         self.group = group # group in which the histo will appear in the stack
         self.name = name # full name, usually as in <stuff>.<dsid>.<name>.SusyNt.<tags>
         self.process = process # physical process, for example 'Zbb + jets' (short, generic, usually appears as the common root of the name)
+        self.placeholder = placeholder # just a placeholder, its job won't be submitted
 
 
 datasets = []
@@ -107,12 +108,6 @@ datasets += [Dataset(sampleType, dsid, group, n, process)
 sampleType = 'mc'
 
 group = 'Zjets'
-## # Alternative Z+jets AFII samples
-## + ["Z%(ll)s%(f)%sJets_AF2" % {'ll':ll, 'f':f}
-##    for ll in ['ee', 'mumu', 'tautau'] for f in ['Heavy', 'Light']]
-## # New alternative Z+jets (Yippeee)
-## + ["Sherpa_CT10_Z%s" % ll for ll in ['ee', 'mumu', 'tautau']]
-
 nps = [0, 1, 2, 3, 4, 5]
 template, process = "AlpgenPythia_P2011C_Z%(ll)sNp%(np)d", 'Zlljets'
 datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
@@ -120,7 +115,6 @@ datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
                                ('mumu',   range(117660, 117665+1)),
                                ('tautau', range(117670, 117675+1))]
              for d, np in rzip(dsids, nps)]
-
 nps = [0, 1, 2, 3]
 template, process = "AlpgenPythia_P2011C_Z%(ll)sbbNp%(np)d", 'Zbbjets'
 datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
@@ -128,7 +122,6 @@ datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
                                ('mumu',   range(110821, 110824+1)),
                                ('tautau', range(110825, 110828+1))]
              for d, np in rzip(dsids, nps)]
-
 nps = [0, 1, 2, 3]
 template, process = "AlpgenPythia_P2011C_Z%(ll)sccNp%(np)d", 'Zccjets'
 datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
@@ -136,6 +129,11 @@ datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
                                ('mumu',   range(110809, 110812+1)),
                                ('tautau', range(110813, 110816+1))]
              for d, np in rzip(dsids, nps)]
+## # Alternative Z+jets AFII samples
+## + ["Z%(ll)s%(f)%sJets_AF2" % {'ll':ll, 'f':f}
+##    for ll in ['ee', 'mumu', 'tautau'] for f in ['Heavy', 'Light']]
+## # New alternative Z+jets (Yippeee)
+## + ["Sherpa_CT10_Z%s" % ll for ll in ['ee', 'mumu', 'tautau']]
 
 #- nps = [0, 1, 2, 3, 4]
 #- template, process = "AlpgenPythia_P2011C_Z%(ll)sNp%(np)dExcl", 'Low mass Z'
