@@ -5,11 +5,11 @@
 # davide.gerbaudo@gmail.com
 # Jan 2013
 
-import datasets
 import glob
 import optparse
 import re
 import subprocess
+from datasets import datasets
 
 validModes = ['mc12', 'susy', 'data',]
 defaultTag = 'n0145'
@@ -39,12 +39,14 @@ verbose= options.verbose
 assert mode in validModes,"Invalid mode %s (should be one of %s)" % (mode, str(validModes))
 if verbose :
     print "Options:\n"
-    print '\n'.join(["%s : %s" % (o, eval(o)) for o in ['mode','outdir','regexp', 'tag',]])
+    print '\n'.join(["%s : %s" % (o, eval(o))
+                     for o in ['mode','outdir','regexp', 'tag',]])
 
 def filterWithRegexp(stringList, regexp) :
     return [d for d in stringList if re.search(regexp, d)]
-wantedDsets = datasets.wantedDsets
-wantedDsets = dict([(k, filterWithRegexp(vals, regexp)) for k, vals in wantedDsets.iteritems()])
+
+dsetsNames = [d.name for d in datasets]
+dsetsNames = filterWithRegexp(dsetsNames, regexp)
 
 # Directory where files are
 basedirs = {'data' : '/gdata/atlas/ucintprod/SusyNt/data12_'+tag+'/', # data
@@ -56,22 +58,25 @@ dirlist = glob.glob(basedir+'/user.*'+tag)
 
 def isDatasetDir(dirname, datasetname):
     "expect the dirname to be smth like *.<samplename>.SusyNt*"
-    return re.search('\..*'+datasetname+'\..*SusyNt', dirname)
+    return re.search('\.'+datasetname+'\.SusyNt', dirname)
 def makeFile(datasetdir, destfilename):
     ls = subprocess.Popen(['ls '+datasetdir+'/*.root* > '+destfilename],shell=True)
     ls.wait()
 
-datasets = wantedDsets[mode]
-processedDsets = []
+processedDsets = dict()
 for dsdir in dirlist :
-    dsname = next((d for d in datasets if isDatasetDir(dsdir, d)), None)
+    dsname = next((d for d in dsetsNames if isDatasetDir(dsdir, d)), None)
     if not dsname :
-        print 'invalid dir ',dsdir
-    if not dsname : continue # not a directory we're interested in
-    assert dsname not in processedDsets, "%s has already been processed %s"%(dsname, dsdir)
+        print "%s dataset not in list...skip it"%dsdir
+        continue
+    if dsname in processedDsets :
+        print "%s already processed...skip it\n%s"%(dsname,
+                                                    '\n'.join([dsdir,
+                                                               processedDsets[dsname]]))
+        continue
     if verbose : print dsdir
     flistname = outdir+'/'+dsname+'.txt'
     makeFile(dsdir, flistname)
-    processedDsets.append(dsname)
+    processedDsets[dsname] = dsdir
 if verbose : print "%s filelists created in %s"%(len(processedDsets), outdir)
 
