@@ -69,6 +69,13 @@ wantedDsets = { # mode : [dsets]
     + ["wA_noslep_WH_3Lep_%d" % i for i in range(1, 66+1)]  # 3l
     }
 
+def rzip(*iterables) :
+    """rigid zip: ensures input iterables have the same length.
+    Used to make sure that the dsid ranges match the dset names."""
+    lengths = list(set([len(l) for l in iterables]))
+    assert len(lengths)==1,"zip lists with etherogeneus lengths %s"%str(lengths)
+    return zip(*iterables)
+
 class Dataset :
     """Container to uniquely specify a dataset (through a dsid), and
     specify additional user-friendly attributes"""
@@ -112,7 +119,7 @@ datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
              for ll, dsids in [('ee',     range(117650, 117655+1)),
                                ('mumu',   range(117660, 117665+1)),
                                ('tautau', range(117670, 117675+1))]
-             for d, np in zip(dsids, nps)]
+             for d, np in rzip(dsids, nps)]
 
 nps = [0, 1, 2, 3]
 template, process = "AlpgenPythia_P2011C_Z%(ll)sbbNp%(np)d", 'Zbbjets'
@@ -120,7 +127,7 @@ datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
              for ll, dsids in [('ee',     range(110817, 110820+1)),
                                ('mumu',   range(110821, 110824+1)),
                                ('tautau', range(110825, 110828+1))]
-             for d, np in zip(dsids, nps)]
+             for d, np in rzip(dsids, nps)]
 
 nps = [0, 1, 2, 3]
 template, process = "AlpgenPythia_P2011C_Z%(ll)sccNp%(np)d", 'Zccjets'
@@ -128,7 +135,7 @@ datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
              for ll, dsids in [('ee',     range(110805, 110808+1)),
                                ('mumu',   range(110809, 110812+1)),
                                ('tautau', range(110813, 110816+1))]
-             for d, np in zip(dsids, nps)]
+             for d, np in rzip(dsids, nps)]
 
 #- nps = [0, 1, 2, 3, 4]
 #- template, process = "AlpgenPythia_P2011C_Z%(ll)sNp%(np)dExcl", 'Low mass Z'
@@ -136,7 +143,7 @@ datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
 #-              for ll, dsids in [('ee',     range(0, 0+1)),
 #-                                ('mumu',   range(0, 0+1)),
 #-                                ('tautau', range(0, 0+1))]
-#-              for d, np in zip(dsids, nps)]
+#-              for d, np in rzip(dsids, nps)]
 
 #- # W+Jets (temporary due to bugs)
 #- + ["Sherpa_CT10_W%s" % lv for lv in ['enu', 'munu', 'taunu']]
@@ -202,10 +209,10 @@ datasets += [Dataset(sampleType, d, group, template%{'llss':llss}, process)
 group = None
 template, process = "Herwigpp_simplifiedModel_wA_noslep_WH_2Lep_%d", "wA_noslep_WH_2Lep_%d"
 datasets += [Dataset(sampleType, d, group, template%nth, process%nth)
-             for d, nth in zip(range(176574, 176634+1), range(1, 61+1))]
+             for d, nth in rzip(range(176574, 176634+1), range(1, 61+1))]
 template, process = "Herwigpp_simplifiedModel_wA_noslep_WH_3Lep_%d", "wA_noslep_WH_3Lep_%d"
 datasets += [Dataset(sampleType, d, group, template%nth, process%nth)
-             for d, nth in zip(range(176641, 176706+1), range(1, 66+1))]
+             for d, nth in rzip(range(176641, 176706+1), range(1, 66+1))]
 
 
 if __name__=='__main__' :
