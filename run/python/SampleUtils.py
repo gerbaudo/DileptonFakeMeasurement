@@ -33,7 +33,7 @@ def guessSampleFromFilename(filename='', verbose=False) :
     else :
         if verbose : print "cannot guess samplename for %s" % filename
 
-def isDataSample(samplename) : return 'data' in samplename
+def isDataSample(samplename) : return 'data' in samplename or 'period' in samplename
 def isSigSample(samplename) : return 'WH_' in samplename
 def isBkgSample(samplename) : return not isDataSample(samplename) and not isSigSample(samplename)
 def guessReqidFromFilename(filename='', verbose=False) :
