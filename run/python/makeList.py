@@ -30,15 +30,18 @@ parser.add_option("-t", "--tag", dest="tag", default=defaultTag,
                   help="production tag (default '%s')" % defaultTag)
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
                   help="print more details about what is going on")
+parser.add_option("-d", "--debug", action="store_true", dest="debug", default=False,
+                  help="print even more details, only useful to debug problems")
 (options, args) = parser.parse_args()
 mode   = options.mode
 outdir = options.outdir
 regexp = options.samples
 tag    = options.tag
 verbose= options.verbose
+debug  = options.debug
 assert mode in validModes,"Invalid mode %s (should be one of %s)" % (mode, str(validModes))
 if verbose :
-    print "Options:\n"
+    print "Options:"
     print '\n'.join(["%s : %s" % (o, eval(o))
                      for o in ['mode','outdir','regexp', 'tag',]])
 
@@ -64,19 +67,25 @@ def makeFile(datasetdir, destfilename):
     ls.wait()
 
 processedDsets = dict()
+nMatching = 0
+if verbose : print "Processing..."
 for dsdir in dirlist :
     dsname = next((d for d in dsetsNames if isDatasetDir(dsdir, d)), None)
     if not dsname :
-        print "%s dataset not in list...skip it"%dsdir
+        if debug : print "%s dataset not in list...skip it"%dsdir
         continue
+    nMatching += 1
     if dsname in processedDsets :
-        print "%s already processed...skip it\n%s"%(dsname,
-                                                    '\n'.join([dsdir,
-                                                               processedDsets[dsname]]))
+        if debug : print "%s already processed...skip it\n%s"%(dsname,
+                                                               '\n'.join([dsdir,
+                                                                          processedDsets[dsname]]))
         continue
     if verbose : print dsdir
     flistname = outdir+'/'+dsname+'.txt'
     makeFile(dsdir, flistname)
     processedDsets[dsname] = dsdir
-if verbose : print "%s filelists created in %s"%(len(processedDsets), outdir)
+if verbose :
+    print "considered %d directories" % len(dirlist)
+    print "%d directories matching one of the %d known dataset" % (nMatching, len(dsetsNames))
+    print "%s filelists created in %s"%(len(processedDsets), outdir)
 
