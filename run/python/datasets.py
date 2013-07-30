@@ -135,6 +135,17 @@ datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process, placehol
              for ll, d in [('ee',     147770),
                            ('mumu',   147771),
                            ('tautau', 147772)]]
+nps = ['0Excl', '1Excl', '2Excl', '3Excl', '4Excl', '5Incl']
+template, process = "AlpgenJimmy_Auto_AUET2CTEQ6L1_Z%(ll)sNp%(np)s_Mll10to60", 'Zlljets_Mll10to60'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
+             for ll, dsids in [('ee', range(146830, 146835+1))]
+             for d, np in rzip(dsids, nps)]
+nps = ['0Excl', '1Excl', '2Excl', '3Excl', '4Excl', '5Incl']
+template, process = "AlpgenJimmy_Auto_Z%(ll)sNp%(np)s_Mll10to60", 'Zlljets_Mll10to60'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
+             for ll, dsids in [('mumu', range(146840,   146845+1)),
+                               ('tautau', range(146850, 146855+1))]
+             for d, np in rzip(dsids, nps)]
 
 group = 'Wjets'
 template, process = "Sherpa_CT10_W%(lv)s", 'Sherpa W+jets'
