@@ -318,10 +318,11 @@ datasets += [Dataset(sampleType, d, group, template%{'fs':fs}, process)
                            (161708, 'tautaull'), (161719, 'tautaulh'), (161730, 'tautauhh'),
                            (169072, 'ZZinclusive')]]
 
-group = None
+group = 'WH_2Lep'
 template, process = "Herwigpp_simplifiedModel_wA_noslep_WH_2Lep_%d", "wA_noslep_WH_2Lep_%d"
 datasets += [Dataset(sampleType, d, group, template%nth, process%nth)
              for d, nth in rzip(range(176574, 176634+1), range(1, 61+1))]
+group = 'WH_3Lep'
 template, process = "Herwigpp_simplifiedModel_wA_noslep_WH_3Lep_%d", "wA_noslep_WH_3Lep_%d"
 datasets += [Dataset(sampleType, d, group, template%nth, process%nth)
              for d, nth in rzip(range(176641, 176706+1), range(1, 66+1))]
