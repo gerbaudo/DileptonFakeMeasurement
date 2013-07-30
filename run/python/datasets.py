@@ -329,7 +329,42 @@ datasets += [Dataset(sampleType, d, group, template%nth, process%nth)
 
 
 if __name__=='__main__' :
+    def filterByGroup(dsets) :
+        groups = sorted(d.group for d in dsets)
+        return dict((g, filter(lambda x: g==x.group, dsets)) for g in groups)
+    def filterByProcess(dsets) :
+        processes = sorted(d.process for d in dsets)
+        return dict((p, filter(lambda x: p==x.process, dsets)) for p in processes)
+    def printByGroupByProcess(dsets) :
+        for g, gdsets in filterByGroup(dsets).iteritems() :
+            print "------- %s ------"%g
+            for p, pdsets in filterByProcess(gdsets).iteritems() :
+                print "---   %s    ---"%p
+                print "Group Dsid Name Type Process"
+                print '\n'.join(["%s %s %s %s %s"%(s.group, s.dsid, s.name, s.type,
+                                                   s.process)
+                                 for s in pdsets])
+    unusedDsets = filter(lambda x:     x.placeholder, datasets)
+    usedDsets   = filter(lambda x: not x.placeholder, datasets)
+    linebreak = '-'*20
     print "List of available datasets[%d]"%len(datasets)
-    print '-'*20
-    print "Group Dsid Name Type Process"
-    print '\n'.join(["%s %s %s %s %s"%(s.group, s.dsid, s.name, s.type, s.process) for s in datasets])
+    print linebreak
+    print "Unused datasets (placeholders)"
+    print linebreak
+    printByGroupByProcess(unusedDsets)
+    print linebreak
+    print linebreak
+    print "Used datasets"
+    print linebreak
+    printByGroupByProcess(usedDsets)
+    print linebreak
+    print
+    print
+    print "Summary:"
+    print "Total number of datasets : %d"%len(datasets)
+    print "  unused : %d"%len(unusedDsets)
+    print '\n'.join("         : %d : %s"%(len(gdsets), g)
+                    for g, gdsets in filterByGroup(unusedDsets).iteritems())
+    print "    used : %d"%len(usedDsets)
+    print '\n'.join("         : %d : %s"%(len(gdsets), g)
+                    for g, gdsets in filterByGroup(usedDsets).iteritems())
