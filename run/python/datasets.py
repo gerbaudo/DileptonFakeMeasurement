@@ -49,7 +49,7 @@ datasets += [Dataset(sampleType, dsid, group, n, process)
 
 sampleType = 'mc'
 
-group = 'Zjets'
+group = 'zjets'
 nps = [0, 1, 2, 3, 4, 5]
 template, process = "AlpgenPythia_P2011C_Z%(ll)sNp%(np)d", 'Zlljets'
 datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
@@ -88,7 +88,7 @@ datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
                                ('tautau', range(146850, 146855+1))]
              for d, np in rzip(dsids, nps)]
 
-group = 'Wjets'
+group = 'wjets'
 template, process = "Sherpa_CT10_W%(lv)s", 'Sherpa W+jets'
 datasets += [Dataset(sampleType, d, group, template%{'lv':lv}, process, placeholder)
              for ll, d in [('enu',   147774),
@@ -234,7 +234,7 @@ datasets += [Dataset(sampleType, d, group, template%{'lvll':lvll, 'mll':mll}, pr
 #- # HF samples
 #- # + ["%(qq)sTo%(l)s15" % {'qq':qq, 'l':l} for qq in ['bb', 'cc'] for l in ['e', 'mu']]
 
-group = 'Higgs'
+group = 'higgs'
 template, process = "PowhegPythia8_AU2CT10_ggH125_%(fs)s", 'ggH125'
 datasets += [Dataset(sampleType, d, group, template%{'fs':fs}, process)
              for d, fs in [(160155, 'ZZ4lep'), (160655, 'ZZllnunu'),
