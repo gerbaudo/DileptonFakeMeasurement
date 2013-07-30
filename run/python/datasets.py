@@ -73,7 +73,8 @@ def rzip(*iterables) :
     """rigid zip: ensures input iterables have the same length.
     Used to make sure that the dsid ranges match the dset names."""
     lengths = list(set([len(l) for l in iterables]))
-    assert len(lengths)==1,"zip lists with etherogeneus lengths %s"%str(lengths)
+    assert len(lengths)==1,"zip lists with etherogeneus lengths \n"\
+           "%s"%'\n'.join(["[%d] : %s"%(len(l), str(l)) for l in iterables])
     return zip(*iterables)
 
 class Dataset :
