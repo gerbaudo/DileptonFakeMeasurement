@@ -293,6 +293,31 @@ datasets += [Dataset(sampleType, d, group, template%{'lvll':lvll, 'mll':mll}, pr
 #- # HF samples
 #- # + ["%(qq)sTo%(l)s15" % {'qq':qq, 'l':l} for qq in ['bb', 'cc'] for l in ['e', 'mu']]
 
+group = 'Higgs'
+template, process = "PowhegPythia8_AU2CT10_ggH125_%(fs)s", 'ggH125'
+datasets += [Dataset(sampleType, d, group, template%{'fs':fs}, process)
+             for d, fs in [(160155, 'ZZ4lep'), (160655, 'ZZllnunu'),
+                           (161005, 'WW2lep_EF_15_5')]]
+template, process = "PowhegPythia8_AU2CT10_VBFH125_%(fs)s", 'VBFH125'
+datasets += [Dataset(sampleType, d, group, template%{'fs':fs}, process)
+             for d, fs in [(160205, 'ZZ4lep'), (160705, 'ZZllnunu'),
+                           (161055, 'WW2lep_EF_15_5')]]
+template, process = "Pythia8_AU2CTEQ6L1_WH125_%(fs)s", 'WH125'
+datasets += [Dataset(sampleType, d, group, template%{'fs':fs}, process)
+             for d, fs in [(160255, 'ZZ4lep'), (160505, 'ZZllqq'), (160755, 'ZZllnunu'),
+                           (161105, 'WW2lep'), (161805, 'lnubb')]]
+template, process = "Pythia8_AU2CTEQ6L1_ZH125_%(fs)s", 'ZH125'
+datasets += [Dataset(sampleType, d, group, template%{'fs':fs}, process)
+             for d, fs in [(160305, 'ZZ4lep'), (160555, 'ZZllqq'), (160805, 'ZZllnunu'),
+                           (161155, 'WW2lep'),
+                           (161675, 'tautaull'), (161686, 'tautaulh'), (161697, 'tautauhh'),
+                           (167418, 'mumu')]]
+template, process = "Pythia8_AU2CTEQ6L1_ttH125_%(fs)s", 'ttH125'
+datasets += [Dataset(sampleType, d, group, template%{'fs':fs}, process)
+             for d, fs in [(161305, 'WWinclusive'),
+                           (161708, 'tautaull'), (161719, 'tautaulh'), (161730, 'tautauhh'),
+                           (169072, 'ZZinclusive')]]
+
 group = None
 template, process = "Herwigpp_simplifiedModel_wA_noslep_WH_2Lep_%d", "wA_noslep_WH_2Lep_%d"
 datasets += [Dataset(sampleType, d, group, template%nth, process%nth)
