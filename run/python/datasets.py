@@ -193,17 +193,16 @@ datasets += [Dataset(sampleType, d, group, template%{'qq':qq, 'np':np}, process,
              for d, np in rzip(dsids, nps)]
 
 group = 'ttbar'
-
 name, process = 'McAtNloJimmy_AUET2CT10_SingleTopWtChanIncl', 'singletop'
 datasets += [Dataset(sampleType, 108346, group, name, process)]
-
 name, process = 'McAtNloJimmy_CT10_ttbar_LeptonFilter', 'ttbar'
 datasets += [Dataset(sampleType, 105200, group, name, process)]
-
 template, process = "MadGraphPythia_AUET2BCTEQ6L1_ttbar%(ttX)s", 'ttbarV'
 datasets += [Dataset(sampleType, d, group, template%{'ttX':ttX}, process)
              for d, ttX in [(119353, 'W' ), (119354, 'Wj'),
                             (119355, 'Z' ), (119356, 'Zj')]]
+name, process = 'MadgraphPythia_AUET2B_CTEQ6L1_ttbarWW', 'ttbarWW'
+datasets += [Dataset(sampleType, 119583, group, name, process)]
 
 #- ["singletop_tchan_%s" % l for l in ['e', 'mu', 'tau']]
 #- ["Ttbar%s" % ttd for ttd in ["LeptLept", "LeptTaulept", "TauleptTaulept",
