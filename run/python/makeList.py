@@ -10,7 +10,6 @@ import optparse
 import re
 import subprocess
 from datasets import datasets
-from utils import filterWithRegexp
 
 validModes = ['mc12', 'susy', 'data',]
 defaultTag = 'n0145'
@@ -49,8 +48,7 @@ if verbose :
     print '\n'.join(["%s : %s" % (o, eval(o))
                      for o in ['mode','outdir','regexp', 'tag',]])
 
-dsetsNames = [d.name for d in datasets if not d.placeholder or alsoPh]
-dsetsNames = filterWithRegexp(dsetsNames, regexp)
+datasets = [d for d in datasets if re.search(regexp, d.name)]
 
 # Directory where files are
 basedirs = {'data' : '/gdata/atlas/ucintprod/SusyNt/data12_'+tag+'/', # data
@@ -60,9 +58,14 @@ basedirs = {'data' : '/gdata/atlas/ucintprod/SusyNt/data12_'+tag+'/', # data
 basedir = basedirs[mode]
 dirlist = glob.glob(basedir+'/user.*'+tag)
 
-def isDatasetDir(dirname, datasetname):
-    "expect the dirname to be smth like *.<samplename>.SusyNt*"
-    return re.search('\.'+datasetname+'\.SusyNt', dirname)
+def isDirForThisDset(dirname, dataset) :
+    """Expect the dirname to be smth like '*.<samplename>.SusyNt*'.\
+    If dsid is defined, also check that's in dirname.
+    """
+    dsname, dsid = dataset.name, dataset.dsid
+    matchPattern = re.search('\.'+dsname+'\.SusyNt', dirname)
+    matchDsid = str(dsid) in dirname if dsid else False
+    return matchPattern and (matchDsid or not dsid)
 def makeFile(datasetdir, destfilename):
     ls = subprocess.Popen(['ls '+datasetdir+'/*.root* > '+destfilename],shell=True)
     ls.wait()
@@ -71,7 +74,7 @@ processedDsets = dict()
 nMatching = 0
 if verbose : print "Processing..."
 for dsdir in dirlist :
-    dsname = next((d for d in dsetsNames if isDatasetDir(dsdir, d)), None)
+    dsname = next((d.name for d in datasets if isDirForThisDset(dsdir, d)), None)
     if not dsname :
         if debug : print "%s dataset not in list...skip it"%dsdir
         continue
@@ -87,6 +90,6 @@ for dsdir in dirlist :
     processedDsets[dsname] = dsdir
 if verbose :
     print "considered %d directories" % len(dirlist)
-    print "%d directories matching one of the %d known dataset" % (nMatching, len(dsetsNames))
+    print "%d directories matching one of the %d known dataset" % (nMatching, len(datasets))
     print "%s filelists created in %s"%(len(processedDsets), outdir)
 
