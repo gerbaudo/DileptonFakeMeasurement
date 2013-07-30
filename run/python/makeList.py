@@ -32,6 +32,8 @@ parser.add_option("-v", "--verbose", action="store_true", dest="verbose", defaul
                   help="print more details about what is going on")
 parser.add_option("-d", "--debug", action="store_true", dest="debug", default=False,
                   help="print even more details, only useful to debug problems")
+parser.add_option("--also-placeholders", action="store_true", dest="alsoplaceholders", default=False,
+                  help="process dummy samples as well (skip them by default)")
 (options, args) = parser.parse_args()
 mode   = options.mode
 outdir = options.outdir
@@ -39,6 +41,7 @@ regexp = options.samples
 tag    = options.tag
 verbose= options.verbose
 debug  = options.debug
+alsoPh = options.alsoplaceholders
 assert mode in validModes,"Invalid mode %s (should be one of %s)" % (mode, str(validModes))
 if verbose :
     print "Options:"
@@ -48,7 +51,7 @@ if verbose :
 def filterWithRegexp(stringList, regexp) :
     return [d for d in stringList if re.search(regexp, d)]
 
-dsetsNames = [d.name for d in datasets]
+dsetsNames = [d.name for d in datasets if not d.placeholder or alsoPh]
 dsetsNames = filterWithRegexp(dsetsNames, regexp)
 
 # Directory where files are
