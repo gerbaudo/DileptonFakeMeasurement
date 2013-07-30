@@ -183,11 +183,11 @@ template, process = "Sherpa_CT10_%(lepVV)s", 'Sherpa_VV_lep'
 datasets += [Dataset(sampleType, d, group, template%{'lepVV':lepVV}, process)
              for d, lepVV in [(174834, 'llll_ZZ'),   (161963, 'llnunu_ZZ'),
                               (126892, 'llnunu_WW'), (126893, 'lllnu_WZ')]]
-template, process = "Sherpa_CT10_%(ll)sPt10", 'Sherpa_Vgamma'
+template, process = "Sherpa_CT10_%(ll)sgammaPt10", 'Sherpa_Vgamma'
 datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process)
-             for d, ll in [(145161, 'eegamma'),   (145162, 'mumugamma'),
-                           (126739, 'enugamma'),   (126742, 'munugamma'),
-                           (126856, 'taunugamma'), (126854, 'tautaugamma')]]
+             for d, ll in [(145161, 'ee'),    (145162, 'mumu'),
+                           (126739, 'enu'),   (126742, 'munu'),
+                           (126856, 'taunu'), (126854, 'tautau')]]
 template, process = "Sherpa_CT10_%(llss)s", 'Sherpa_llnunu'
 datasets += [Dataset(sampleType, d, group, template%{'llss':llss}, process)
              for d, llss in [(126988, 'llnunu_SS_EW6'), (126989, 'llnunujj_SS')]]
