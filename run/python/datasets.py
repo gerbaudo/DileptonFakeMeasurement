@@ -211,12 +211,11 @@ datasets += [Dataset(sampleType, 119583, group, name, process)]
 #- ["PowhegPythia_AUET2BCT10_ttbar_LeptonFilter_AF2",]
 
 group = 'diboson'
-
 template, process = "PowhegPythia8_AU2CT10_WpWm_%(ll)s", 'PowhegPythia8_WpWm'
 datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process)
              for d, ll in [(126928, 'ee'), (126929, 'me'), (126930, 'te'),
                            (126931, 'em'), (126932, 'mm'), (126933, 'tm'),
-                           (126934, 'et'), (126935, 'mt'), (126936, 'tt')]
+                           (126934, 'et'), (126935, 'mt'), (126936, 'tt')]]
 template, process = "gg2wwJimmy_AUET2CT10_WpWm%(lvlv)s", 'gg2wwJimmy'
 datasets += [Dataset(sampleType, d, group, template%{'lvlv':lvlv}, process)
              for d, lvlv in [(169471, 'enuenu'),     (169472, 'enumunu'),  (169473, 'enutaunu'),
@@ -239,10 +238,19 @@ datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process)
 template, process = "Sherpa_CT10_%(llss)s", 'Sherpa_llnunu'
 datasets += [Dataset(sampleType, d, group, template%{'llss':llss}, process)
              for d, llss in [(126988, 'llnunu_SS_EW6'), (126989, 'llnunujj_SS')]]
+template, process = "Sherpa_CT10_VVto%(l)snuqq", 'Sherpa_VVtolnuqq'
+datasets += [Dataset(sampleType, d, group, template%{'l':l}, process)
+             for d, l in [(157817, 'e'), (157818, 'mu'), (157819, 'tau')]]
+template, process = "Sherpa_CT10_VVto%(ll)sqq", 'Sherpa_VVtollqq'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process, placeholder)
+             for d, l in [(157814, 'ee'), (157815, 'mumu'), (157816, 'tautau')]]
+template, process = "MadGraphPythia_AUET2BCTEQ6L1_%(VVV)sStar_%(fs)s", 'Triboson'
+datasets += [Dataset(sampleType, d, group, template%{'VVV':VVV, 'fs':fs}, process)
+             for d, VVV, fs in [(167006, 'WWW', 'lnulnulnu'),
+                                (167007, 'ZWW', 'lllnulnu'),
+                                (167008, 'ZZZ', 'nunullll')]]
 
 #- 160305.Pythia8_AU2CTEQ6L1_ZH125_ZZ4lep
-#- # Triboson
-#- + ['ZWWStar_lllnulnu', 'ZZZStar_nunullll', 'WWWStar_lnulnulnu',]
 #- # HF samples
 #- # + ["%(qq)sTo%(l)s15" % {'qq':qq, 'l':l} for qq in ['bb', 'cc'] for l in ['e', 'mu']]
 
