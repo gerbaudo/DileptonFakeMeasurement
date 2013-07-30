@@ -91,14 +91,14 @@ datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
 group = 'wjets'
 template, process = "Sherpa_CT10_W%(lv)s", 'Sherpa W+jets'
 datasets += [Dataset(sampleType, d, group, template%{'lv':lv}, process, placeholder)
-             for ll, d in [('enu',   147774),
+             for lv, d in [('enu',   147774),
                            ('munu',  147775),
                            ('taunu', 147776)]]
 nps = [0, 1, 2, 3, 4, 5]
 template, process = "AlpgenJimmy_AUET2CTEQ6L1_W%(lv)sNp%(np)d", 'Wlvjets'
 datasets += [Dataset(sampleType, d, group, template%{'lv':lv, 'np':np}, process,
                      placeholder)
-             for ll, dsids in [('enu',   range(107680, 107685+1)),
+             for lv, dsids in [('enu',   range(107680, 107685+1)),
                                ('munu',  range(107690, 107695+1)),
                                ('taunu', range(107700, 107705+1))]
              for d, np in rzip(dsids, nps)]
@@ -106,7 +106,7 @@ nps = [0, 1, 2, 3, 4, 5]
 template, process = "AlpgenPythia_P2011C_W%(lv)sNp%(np)d", 'Wlvjets'
 datasets += [Dataset(sampleType, d, group, template%{'lv':lv, 'np':np}, process,
                      placeholder)
-             for ll, dsids in [('enu',   range(117680, 117685+1)),
+             for lv, dsids in [('enu',   range(117680, 117685+1)),
                                ('munu',  range(117690, 117695+1)),
                                ('taunu', range(117700, 117705+1))]
              for d, np in rzip(dsids, nps)]
@@ -114,7 +114,7 @@ nps = ['0', '1', '2', '3', '4', '5incl']
 template, process = "AlpgenPythia_Auto_P2011C_W%(lv)sNp%(np)s", 'Wlvjets'
 datasets += [Dataset(sampleType, d, group, template%{'lv':lv, 'np':np}, process,
                      placeholder)
-             for ll, dsids in [('enu',   range(147025, 147030+1)),
+             for lv, dsids in [('enu',   range(147025, 147030+1)),
                                ('munu',  range(147033, 147038+1)),
                                ('taunu', range(147041, 147046+1))]
              for d, np in rzip(dsids, nps)]
