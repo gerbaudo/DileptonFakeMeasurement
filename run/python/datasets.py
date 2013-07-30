@@ -212,6 +212,11 @@ datasets += [Dataset(sampleType, 119583, group, name, process)]
 
 group = 'diboson'
 
+template, process = "PowhegPythia8_AU2CT10_WpWm_%(ll)s", 'PowhegPythia8_WpWm'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process)
+             for d, ll in [(126928, 'ee'), (126929, 'me'), (126930, 'te'),
+                           (126931, 'em'), (126932, 'mm'), (126933, 'tm'),
+                           (126934, 'et'), (126935, 'mt'), (126936, 'tt')]
 template, process = "gg2wwJimmy_AUET2CT10_WpWm%(lvlv)s", 'gg2wwJimmy'
 datasets += [Dataset(sampleType, d, group, template%{'lvlv':lvlv}, process)
              for d, lvlv in [(169471, 'enuenu'),     (169472, 'enumunu'),  (169473, 'enutaunu'),
