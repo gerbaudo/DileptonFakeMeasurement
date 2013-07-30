@@ -267,6 +267,26 @@ datasets += [Dataset(sampleType, d, group, template%{'l4':l4}, process)
 template, process = "PowhegPythia8_AU2CT10_ZZllnunu_%(ll)s_mll4", 'PowhegPythia8_ZZ'
 datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process)
              for d, l4 in [(126949, 'ee'), (126950, 'mm'), (126951, 'tt')]]
+template, process = "PowhegPythia8_AU2CT10_WZ_%(lvll)s_mll%(mll)s_2L5", 'PowhegPythia8_WZ'
+datasets += [Dataset(sampleType, d, group, template%{'lvll':lvll, 'mll':mll}, process)
+             for d, lvll, mll in [(129477, 'Wm11Z11', '0p250d0'),
+                                  (129478, 'Wm11Z13', '0p4614d0'),
+                                  (129479, 'Wm11Z15', '3p804d0'),
+                                  (129480, 'Wm13Z11', '0p250d0'),
+                                  (129481, 'Wm13Z13', '0p4614d0'),
+                                  (129482, 'Wm13Z15', '3p804d0'),
+                                  (129483, 'Wm15Z11', '0p250d0'),
+                                  (129484, 'Wm15Z13', '0p4614d0'),
+                                  (129485, 'Wm15Z15', '3p804d0'),
+                                  (129486, 'W11Z11',  '0p250d0'),# these are actually Wp
+                                  (129487, 'W11Z13',  '0p4614d0'),
+                                  (129488, 'W11Z15',  '3p804d0'),
+                                  (129489, 'W13Z11',  '0p250d0'),
+                                  (129490, 'W13Z13',  '0p4614d0'),
+                                  (129491, 'W13Z15',  '3p804d0'),
+                                  (129492, 'W15Z11',  '0p250d0'),
+                                  (129493, 'W15Z13',  '0p4614d0'),
+                                  (129494, 'W15Z15',  '3p804d0')]]
 
 #- 160305.Pythia8_AU2CTEQ6L1_ZH125_ZZ4lep
 #- # HF samples
