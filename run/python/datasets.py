@@ -234,9 +234,10 @@ datasets += [Dataset(sampleType, d, group, template%{'lvlv':lvlv}, process)
                              (169477, 'taunutaunu'), (169478, 'taunuenu'), (169479, 'taunumunu')]]
 template, process = "gg2ZZJimmy_AUET2CT10_ZZ%(l4)s", 'gg2ZZJimmy'
 datasets += [Dataset(sampleType, d, group, template%{'l4':l4}, process)
-             for d, l4 in [(116601, '4e'),
+             for d, l4 in [(116601, '4e'), #(116600, '4lep') # <- DG : needed?
                            (116602, '4mu'),
                            (116603, '2e2mu')]]
+
 template, process = "Sherpa_CT10_%(lepVV)s", 'Sherpa_VV_lep'
 datasets += [Dataset(sampleType, d, group, template%{'lepVV':lepVV}, process)
              for d, lepVV in [(174834, 'llll_ZZ'),   (161963, 'llnunu_ZZ'),
