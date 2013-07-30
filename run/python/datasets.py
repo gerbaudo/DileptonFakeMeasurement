@@ -237,7 +237,6 @@ datasets += [Dataset(sampleType, d, group, template%{'l4':l4}, process)
              for d, l4 in [(116601, '4e'), #(116600, '4lep') # <- DG : needed?
                            (116602, '4mu'),
                            (116603, '2e2mu')]]
-
 template, process = "Sherpa_CT10_%(lepVV)s", 'Sherpa_VV_lep'
 datasets += [Dataset(sampleType, d, group, template%{'lepVV':lepVV}, process)
              for d, lepVV in [(174834, 'llll_ZZ'),   (161963, 'llnunu_ZZ'),
@@ -261,6 +260,13 @@ datasets += [Dataset(sampleType, d, group, template%{'VVV':VVV, 'fs':fs}, proces
              for d, VVV, fs in [(167006, 'WWW', 'lnulnulnu'),
                                 (167007, 'ZWW', 'lllnulnu'),
                                 (167008, 'ZZZ', 'nunullll')]]
+template, process = "PowhegPythia8_AU2CT10_ZZ_%(l4)s_mll4_2pt5", 'PowhegPythia8_ZZ'
+datasets += [Dataset(sampleType, d, group, template%{'l4':l4}, process)
+             for d, l4 in [(126937, '4e'),  (126938, '2e2mu'),   (126939, '2e2tau'),
+                           (126940, '4mu'), (126941, '2mu2tau'), (126942, '4tau'),]]
+template, process = "PowhegPythia8_AU2CT10_ZZllnunu_%(ll)s_mll4", 'PowhegPythia8_ZZ'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process)
+             for d, l4 in [(126949, 'ee'), (126950, 'mm'), (126951, 'tt')]]
 
 #- 160305.Pythia8_AU2CTEQ6L1_ZH125_ZZ4lep
 #- # HF samples
