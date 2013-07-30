@@ -214,9 +214,9 @@ group = 'diboson'
 
 template, process = "gg2wwJimmy_AUET2CT10_WpWm%(lvlv)s", 'gg2wwJimmy'
 datasets += [Dataset(sampleType, d, group, template%{'lvlv':lvlv}, process)
-             for d, lvlv in [(169471, 'WpWmenuenu'), (169472, 'WpWmenumunu'), (169473, 'WpWmenutaunu'),
-                             (169474, 'WpWmmunumunu'), (169475, 'WpWmmunuenu'), (169476, 'WpWmmunutaunu'),
-                             (169477, 'WpWmtaunutaunu'), (169478, 'WpWmtaunuenu'), (169479, 'WpWmtaunumunu')]]
+             for d, lvlv in [(169471, 'enuenu'),     (169472, 'enumunu'),  (169473, 'enutaunu'),
+                             (169474, 'munumunu'),   (169475, 'munuenu'),  (169476, 'munutaunu'),
+                             (169477, 'taunutaunu'), (169478, 'taunuenu'), (169479, 'taunumunu')]]
 template, process = "gg2ZZJimmy_AUET2CT10_ZZ%(l4)s", 'gg2ZZJimmy'
 datasets += [Dataset(sampleType, d, group, template%{'l4':l4}, process)
              for d, l4 in [(116601, '4e'),
