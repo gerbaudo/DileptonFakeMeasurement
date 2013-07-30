@@ -10,6 +10,7 @@ import optparse
 import re
 import subprocess
 from datasets import datasets
+from utils import filterWithRegexp
 
 validModes = ['mc12', 'susy', 'data',]
 defaultTag = 'n0145'
@@ -47,9 +48,6 @@ if verbose :
     print "Options:"
     print '\n'.join(["%s : %s" % (o, eval(o))
                      for o in ['mode','outdir','regexp', 'tag',]])
-
-def filterWithRegexp(stringList, regexp) :
-    return [d for d in stringList if re.search(regexp, d)]
 
 dsetsNames = [d.name for d in datasets if not d.placeholder or alsoPh]
 dsetsNames = filterWithRegexp(dsetsNames, regexp)
