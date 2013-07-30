@@ -15,17 +15,14 @@ import optparse
 import os
 import re
 import datasets
-from utils import getCommandOutput
+from utils import getCommandOutput, filterWithRegexp
+from datasets import datasets
 
-validModes = ['mc12', 'susy', 'data',]
 validOtherOptions = ['', '--1fb', '--AD']
 defaultBatchTag = '_Jul25_n0145'
 defaultOtherOptions = ''
 
-
 parser = optparse.OptionParser()
-parser.add_option("-m", "--mode", dest="mode", default=validModes[0],
-                  help="possible modes : %s" % str(validModes))
 parser.add_option("-o", "--overwrite", action="store_true", dest="overwrite", default=False,
                   help="overwrite existing batch scripts")
 parser.add_option("-O", "--other-opt", dest="otherOptions", default=defaultOtherOptions,
@@ -40,7 +37,6 @@ parser.add_option("-t", "--tag", dest="tag", default=defaultBatchTag,
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
                   help="print more details about what is going on")
 (options, args) = parser.parse_args()
-mode         = options.mode
 batchTag     = options.tag
 otherOptions = options.otherOptions
 overwrite    = options.overwrite
@@ -48,11 +44,10 @@ regexp       = options.samples
 submit       = options.submit
 scriptDir    = 'batchScripts'
 verbose      = options.verbose
-assert mode in validModes,"Invalid mode %s (should be one of %s)" % (mode, str(validModes))
 assert otherOptions in validOtherOptions, "Invalid otherOptions '%s' (should be one of %s)" % (otherOptions, str(validOtherOptions))
 
-datasets = datasets.wantedDsets[mode]
-
+dsetsNames = [d.name for d in datasets if not d.placeholder]
+dsetsNames = filterWithRegexp(dsetsNames, regexp)
 
 def listExists(dset='', flistDir='./filelist') : return os.path.exists(flistDir+'/'+dset+'.txt')
 def fillInScriptTemplate(dataset, suffix, outputfilename,
@@ -68,7 +63,7 @@ def fillInScriptTemplate(dataset, suffix, outputfilename,
         outFile.write(line)
     outFile.close()
 
-for d in datasets :
+for d in dsetsNames :
     missList, regexUnmatch = not listExists(d), not re.search(regexp, d)
     if missList or regexUnmatch:
         print "# skipping %s (%s)" % (d, 'no list' if missList
