@@ -37,11 +37,20 @@ enum WeightType
   WT_N
 };
 
+enum WH_SR {
+  WH_SRSS1=0,
+  WH_SRSS2,
+  WH_SRSS3,
+  WH_SRSS4,
+  WH_SRN
+};
+
 class SusySelection : public SusyNtAna
 {
 
  public:
   typedef const LeptonVector cvl_t;  //!< just to make some decl shorter
+  typedef const TauVector    cvt_t;  //!< just to make some decl shorter
   typedef const JetVector    cvj_t;  //!< just to make some decl shorter
   typedef const Met          cmet_t; //!< just to make some decl shorter
 
