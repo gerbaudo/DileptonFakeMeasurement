@@ -280,11 +280,67 @@ bool SusySelection::passSrSsBase()
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passSrSs(const DiLepEvtType eventType,
+                             const WH_SR signalRegion,
                              const LeptonVector& leptons,
                              const TauVector& taus,
                              const JetVector& jets,
                              const Met *met)
 {
+  m_ET = getDiLepEvtType(leptons);
+  DiLepEvtType llType = m_ET;
+  WH_SR sr = signalRegion;
+  bool selSS     = true;
+  bool vetoBj    = true;
+  bool vetoFj    = true;
+  float minC20   = 1;
+  float pTl0Min  = 30;
+  float pTl1Min  = 20;
+  float d0SMin   = ((llType==ET_ee || llType==ET_em) ? 3 : 0);
+  bool mllZveto  = (llType==ET_ee ? true : false);
+  float mZ0(91.);
+  float loMll(mZ0-10.), hiMll(mZ0+10.);
+  float highMTWW = (llType==ET_ee ? 150 :
+                    (llType==ET_em ? 140 :
+                     (llType==ET_mm ?
+                      (sr==WH_SRSS1 ? 100 :
+                       (sr==WH_SRSS2 ? 150 :
+                        (sr==WH_SRSS3 ? 200 :
+                         0))) :
+                      0)));
+  float metRelMin = (llType==ET_ee ? 50 :
+                     (llType==ET_em ? 50 :
+                      (llType==ET_mm ?
+                       (sr==WH_SRSS4 ? 50 : 0) :
+                       0)));
+  /*
+  if(m_sel.Contains("WH_SRSS")){
+    if(dilType==ET_ee){
+      m_d0SMin    = 3;
+      m_mllIn     = true;
+      m_lowMll    = MZ-10;
+      m_highMll   = MZ+10;
+      m_pTl1Min   = 20;
+      m_highMTWW  = 150;
+      m_metRelMin = 50;
+      if(m_sel.Contains("WH_SRSS2")){ m_mt2Min    = 90; }
+    }
+    else if(dilType==ET_mm){
+      m_IsoMin    = 0.1;
+      m_HTMin     = 200;
+      m_highMTWW  = 100;
+      if(m_sel.Contains("WH_SRSS2")){ m_highMTWW  = 150; }
+      if(m_sel.Contains("WH_SRSS3")){ m_highMTWW  = 200; }
+      if(m_sel.Contains("WH_SRSS4")){ m_highMTWW  = 200; m_metRelMin = 50; }
+    }
+    else if(dilType==ET_em){
+      m_d0SMin    = 3;
+      m_IsoMin    = 0.1;
+      m_pTl1Min   = 20;
+      m_highMTWW  = 140;
+      m_HTMin     = 200;
+      if(m_sel.Contains("WH_SRSS2")){ m_metRelMin = 50; }
+    }
+  */
   return false;
 }
 /*--------------------------------------------------------------------------------*/

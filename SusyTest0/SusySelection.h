@@ -92,7 +92,8 @@ class SusySelection : public SusyNtAna
     bool passSR7NjPtTot  (cvl_t& l, cvj_t& j, const Met* m) { return passSR7Nj(l,j,m)   && passPtTot(l,j,m); }
     bool passSR7NjMll    (cvl_t& l, cvj_t& j, const Met* m) { return passSR7Nj(l,j,m)   && passMllMax(l); }
     bool passSrSsBase();
-    bool passSrSs(const DiLepEvtType eventType, cvl_t &l, cvt_t &t, cvj_t &j, const Met* m);
+    bool passSrSs(const DiLepEvtType eventType, const WH_SR signalRegion,
+                  cvl_t &l, cvt_t &t, cvj_t &j, const Met* m);
     // Cut methods
     bool passHfor();
     bool passNLepCut(const LeptonVector& leptons);
