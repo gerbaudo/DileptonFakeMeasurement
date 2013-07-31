@@ -629,6 +629,16 @@ bool SusySelection::passMuonRelIso(const LeptonVector &leptons, float maxVal)
   return true;
 }
 /*--------------------------------------------------------------------------------*/
+bool SusySelection::passEleD0S(const LeptonVector &leptons, float maxVal)
+{
+  for(size i=0; i<leptons.size(); ++i){
+      const Susy::Lepton* l = leptons[i];
+      if(l->isEle() && (fabs(l->d0Sig(true)) > maxVal)) return false;
+  } // end for(i)
+  return true;
+}
+
+/*--------------------------------------------------------------------------------*/
 float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag, bool includeTrig)
 {
   float weight = 1.0;
