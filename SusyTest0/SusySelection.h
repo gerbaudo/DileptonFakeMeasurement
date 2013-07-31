@@ -228,7 +228,7 @@ class SusySelection : public SusyNtAna
     DiLepEvtType        m_ET;           // Dilepton event type to store cf
 
     // Event counters
-    float n_readin          [WT_N];
+    float n_readin          [WT_N]; // [weight type]
     float n_pass_Grl        [WT_N];
     float n_pass_LarErr     [WT_N];
     float n_pass_TileErr    [WT_N];
@@ -244,7 +244,7 @@ class SusySelection : public SusyNtAna
     float n_pass_atleast2Lep[WT_N];
     float n_pass_exactly2Lep[WT_N];
     float n_pass_signalLep  [WT_N];
-    float n_pass_flavor     [ET_N][WT_N];
+    float n_pass_flavor     [ET_N][WT_N]; // [event type][weight type]
     float n_pass_mll        [ET_N][WT_N];
     float n_pass_os         [ET_N][WT_N];
     float n_pass_ss         [ET_N][WT_N];
