@@ -1016,6 +1016,18 @@ void SusySelection::resetAllCounters()
       n_pass_SR9sign[i][w] = n_pass_SR9flav[i][w] = n_pass_SR9metr[i][w] = 0;
       n_pass_SR9ge1j[i][w] = n_pass_SR9ge2j[i][w] = n_pass_SR9eq2j[i][w] = 0;
       n_pass_SR9eq2jNfv[i][w] = n_pass_SR9ge2jNfv[i][w] = n_pass_SR9[i][w] = 0;
+
+      n_pass_ss      [i][w] = 0;
+      n_pass_muIso   [i][w] = 0;
+      n_pass_elD0Sig [i][w] = 0;
+      n_pass_fjVeto  [i][w] = 0;
+      n_pass_bjVeto  [i][w] = 0;
+      n_pass_ge1j    [i][w] = 0;
+      n_pass_lepPt   [i][w] = 0;
+      n_pass_mllZveto[i][w] = 0;
+      n_pass_mWwt    [i][w] = 0;
+      n_pass_ht      [i][w] = 0;
+      n_pass_metRel  [i][w] = 0;
     } // end for(i)
   } // end for(w)
 }
