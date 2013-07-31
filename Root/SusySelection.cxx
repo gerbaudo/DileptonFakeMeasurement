@@ -273,7 +273,20 @@ bool SusySelection::passSR9(const LeptonVector& leptons, const JetVector& jets, 
   else return false;
   return true;
 }
-
+/*--------------------------------------------------------------------------------*/
+bool SusySelection::passSrSsBase()
+{
+  return false;
+}
+/*--------------------------------------------------------------------------------*/
+bool SusySelection::passSrSs(const DiLepEvtType eventType,
+                             const LeptonVector& leptons,
+                             const TauVector& taus,
+                             const JetVector& jets,
+                             const Met *met)
+{
+  return false;
+}
 /*--------------------------------------------------------------------------------*/
 // Generic cuts
 /*--------------------------------------------------------------------------------*/
