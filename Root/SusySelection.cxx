@@ -127,7 +127,8 @@ bool SusySelection::selectEvent(bool doMll)
   return true;
 }
 /*--------------------------------------------------------------------------------*/
-bool SusySelection::selectAnaEvent(const LeptonVector& leptons, const LeptonVector& baseLeps)
+bool SusySelection::selectAnaEvent(const LeptonVector& leptons,
+                                   const LeptonVector& baseLeps)
 {
 
   if(m_dbg) cout << "SusySelection::selectAnaEvent" << endl;
