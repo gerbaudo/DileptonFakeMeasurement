@@ -292,6 +292,7 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   bool selSS     = true;
   bool vetoBj    = true;
   bool vetoFj    = true;
+  float muIsoMax = 0.1;
   float minC20   = 1;
   float pTl0Min  = 30;
   float pTl1Min  = 20;
@@ -611,6 +612,21 @@ bool SusySelection::isTrueDilepton(const LeptonVector &leptons)
   bool l0_cf = leptons[0]->isEle() ? ((Electron*) leptons[0])->isChargeFlip : false;
   bool l1_cf = leptons[1]->isEle() ? ((Electron*) leptons[1])->isChargeFlip : false;
   return l0_real && l1_real && !l0_cf && !l1_cf; // ignoring charge flip
+}
+/*--------------------------------------------------------------------------------*/
+bool SusySelection::passMuonRelIso(const LeptonVector &leptons, float maxVal)
+{
+  for(size_t i=0; i<leptons.size(); ++i){
+    const Susy::Lepton* l = leptons[i];
+    if(l->isMu()){
+      Muon* mu = static_cast<Muon*>(l);
+      if(!mu) continue;
+      float etcone30 = muEtConeCorr(mu, m_baseElectrons, m_baseMuons,
+                                    nt->evt()->nVtx, nt->evt()->isMC);
+      if(mu->Pt() && (etcone30/mu->Pt() > maxVal)) return false;
+    } // end if(isMu)
+  } // end for(i)
+  return true;
 }
 /*--------------------------------------------------------------------------------*/
 float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag, bool includeTrig)

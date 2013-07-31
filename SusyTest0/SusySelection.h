@@ -135,6 +135,7 @@ class SusySelection : public SusyNtAna
     bool isHFLepton(const Lepton* lep);
     bool isLFLepton(const Lepton* lep);
     bool isTrueDilepton(const LeptonVector &leptons);
+    bool passMuonRelIso(const LeptonVector &leptons, float maxVal);
 
     // Dump cutflow - if derived class uses different cut ordering,
     // override this method
