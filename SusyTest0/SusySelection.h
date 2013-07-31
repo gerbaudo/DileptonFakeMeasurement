@@ -315,7 +315,6 @@ class SusySelection : public SusyNtAna
     float                n_pass_SR9metr[ET_N][WT_N];
     float                n_pass_SR9[ET_N][WT_N];
     // SS counts
-    float n_pass_ss      [ET_N][WT_N];
     float n_pass_muIso   [ET_N][WT_N];
     float n_pass_elD0Sig [ET_N][WT_N];
     float n_pass_fjVeto  [ET_N][WT_N];
