@@ -76,10 +76,16 @@ Bool_t SusySelection::Process(Long64_t entry)
   if(sameSign(m_signalLeptons))     increment(n_pass_ss[m_ET], includeLepSF);
   if(oppositeSign(m_signalLeptons)) increment(n_pass_os[m_ET], includeLepSF);
   // Check Signal regions
-  passSR6(m_baseLeptons, m_signalJets2Lep, m_met, count);
-  passSR7(m_baseLeptons, m_signalJets2Lep, m_met, count);
-  passSR8(m_baseLeptons, m_signalJets2Lep, m_met, count);
-  passSR9(m_baseLeptons, m_signalJets2Lep, m_met, count);
+  //passSR6(m_baseLeptons, m_signalJets2Lep, m_met, count);
+  //passSR7(m_baseLeptons, m_signalJets2Lep, m_met, count);
+  //passSR8(m_baseLeptons, m_signalJets2Lep, m_met, count);
+  //passSR9(m_baseLeptons, m_signalJets2Lep, m_met, count);
+
+  if(oppositeSign(m_signalLeptons)) return kTRUE;
+
+  m_ET = getDiLepEvtType(m_baseLeptons);
+  passSrSs(m_ET, WH_SRSS1, m_baseLeptons, m_signalTaus, m_signalJets2Lep, m_met);
+
   return kTRUE;
 }
 void SusySelection::Terminate()
@@ -286,8 +292,7 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
                              const JetVector& jets,
                              const Met *met)
 {
-  m_ET = getDiLepEvtType(leptons);
-  DiLepEvtType llType = m_ET;
+  DiLepEvtType llType = eventType;
   WH_SR sr = signalRegion;
   bool selSS     = true;
   bool vetoBj    = true;
