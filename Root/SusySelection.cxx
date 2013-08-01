@@ -205,7 +205,7 @@ bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, 
   else return false;
   if( passMETRel(met, leptons, jets) )     {if(count) increment(n_pass_SR6METRel      [m_ET], lepSf, bSf);}
   else return false;
-  if( passMtLlmetMin(leptons, met) )       {if(count) increment(n_pass_SR6MtLlmetMin  [m_ET], lepSf, bSf);}
+  if( passMtLlMetMin(leptons, met) )       {if(count) increment(n_pass_SR6MtLlmetMin  [m_ET], lepSf, bSf);}
   else return false;
   if( passMtMinlmetMin(leptons, met) )     {if(count) increment(n_pass_SR6MtMinlmetMin[m_ET], lepSf, bSf);}
   else return false;
@@ -233,7 +233,7 @@ bool SusySelection::passSR7(const LeptonVector& leptons, const JetVector& jets, 
   else return false;
   if( passMETRel(met, leptons, jets) )     {if(count) increment(n_pass_SR7METRel      [m_ET], lepSf, bSf);}
   else return false;
-  if( passMtLlmetMin(leptons, met) )       {if(count) increment(n_pass_SR7MtLlmetMin  [m_ET], lepSf, bSf);}
+  if( passMtLlMetMin(leptons, met) )       {if(count) increment(n_pass_SR7MtLlmetMin  [m_ET], lepSf, bSf);}
   else return false;
   if( passMtMinlmetMin(leptons, met) )     {if(count) increment(n_pass_SR7MtMinlmetMin[m_ET], lepSf, bSf);}
   else return false;
@@ -294,12 +294,14 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   bool vetoFj    = true;
   float muIsoMax = 0.1;
   float minC20   = 1;
-  float pTl0Min  = 30;
-  float pTl1Min  = 20;
-  float d0SMin   = ((llType==ET_ee || llType==ET_em) ? 3 : 0);
+  float ptL0Min  = 30;
+  float ptL1Min  = 20;
+  float htMin    = ((llType==ET_em || llType==ET_mm) ? 200 : 0);
+  float d0SMax   = ((llType==ET_ee || llType==ET_em) ? 3 : 0);
   bool mllZveto  = (llType==ET_ee ? true : false);
   float mZ0(91.);
-  float loMll(mZ0-10.), hiMll(mZ0+10.);
+  float loMllZ(mZ0-10.), hiMllZ(mZ0+10.);
+  float mllMin(20);
   float highMTWW = (llType==ET_ee ? 150 :
                     (llType==ET_em ? 140 :
                      (llType==ET_mm ?
@@ -313,7 +315,29 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
                       (llType==ET_mm ?
                        (sr==WH_SRSS4 ? 50 : 0) :
                        0)));
-  /*
+  // if(!passEventCleaning()){ return false; }
+  if(!passMllMin(leptons, mllMin)) return false; //baseLeps
+
+//   bool lepSf(true), bSf(true);
+//   if( oppositeSign(leptons) ) { if (count) increment(n_pass_SR7sign[m_ET],lepSf, bSf);}
+//   else return false;
+
+  // Apply event selection cuts
+  // if(!passFlavor(leptons)) return false;
+  if(!passMuonRelIso(leptons, muIsoMax)) return false;
+  if(!passEleD0S(leptons, d0SMax)) return false;
+  if(!passZllVeto(leptons, loMllZ, hiMllZ))  return false;
+  if(!passfJetVeto(jets)) return false;
+  if(!passbJetVeto(jets)) return false;
+  if(!passeq2Jet(jets)) return false;
+  //  if(!passLead2JetsPt(jets) ) return false;
+  if(!pass2LepPt(leptons, ptL0Min, ptL1Min)) return false;
+  //  if(!passMll(leptons) ) return false; // already passZllVeto
+  if(!passMtLlMetMin(leptons, met) ) return false; // ? new_met ?
+  if(htMin && !passHtMin(leptons, jets, met, htMin) ) return false; // ? new_met ?
+  if(metRelMin && !passMETRel(met, leptons, jets, metRelMin) ) return false; // ? new_met ?
+
+ /*
   if(m_sel.Contains("WH_SRSS")){
     if(dilType==ET_ee){
       m_d0SMin    = 3;
@@ -444,6 +468,11 @@ bool SusySelection::passbJetVeto(const JetVector& jets)
   return (N_B20 == 0);
 }
 /*--------------------------------------------------------------------------------*/
+bool SusySelection::passfJetVeto(const JetVector& jets)
+{
+  return (0 == numberOfFJets(jets));
+}
+/*--------------------------------------------------------------------------------*/
 bool SusySelection::passge1Jet(const JetVector& jets)
 {
   int N_L20 = numberOfCLJets(jets);
@@ -494,8 +523,8 @@ bool SusySelection::passZVeto(const LeptonVector& leptons, float Zlow, float Zhi
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passMETRel(const Met *met, const LeptonVector& leptons,
-				 const JetVector& jets, float metMax){
-  return (getMetRel(met,leptons,jets) > metMax);
+                               const JetVector& jets, float minVal){
+  return (minVal < getMetRel(met,leptons,jets));
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passdPhi(TLorentzVector v0, TLorentzVector v1, float cut)
@@ -503,10 +532,12 @@ bool SusySelection::passdPhi(TLorentzVector v0, TLorentzVector v1, float cut)
   return v0.DeltaPhi(v1) > cut;
 }
 /*--------------------------------------------------------------------------------*/
-bool SusySelection::passMtLlmetMin(const LeptonVector& l, const Met* met, float minVal)
+bool SusySelection::passMtLlMetMin(const LeptonVector& l, const Met* met,
+                                   float minVal)
 {
-  if( l.size() < 2 ) return false;
-  return SusyPlotter::transverseMass(TLorentzVector(*l[0]+*l[1]), met->lv()) > minVal;
+  if(l.size() < 2 || !l[0] || !l[1]) return false;
+  TLorentzVector ll = (*l[0] + *l[1]);
+  return (minVal < SusyPlotter::transverseMass(ll, met->lv()));
 }
 //----------------------------------------------------------
 bool SusySelection::passMtMinlmetMin(const LeptonVector& l, const Met* met, float minVal)
@@ -528,6 +559,14 @@ bool SusySelection::passMT2(const LeptonVector& leptons, const Met* met, float c
   return (SusySelection::computeMt2(l0, l1, metlv) > cut);
 }
 //----------------------------------------------------------
+bool SusySelection::passHtMin(const LeptonVector& leptons,
+                              const JetVector &jets,
+                              const Met* met,
+                              float minVal)
+{ // DG : SusyNtTools::Meff uses all leptons, all jets, and met; is this what we want?
+  return (minVal < SusyNtTools::Meff(leptons, jets, met));
+}
+//----------------------------------------------------------
 bool SusySelection::passNj(const JetVector& jets, int minNj, int maxNj)
 {
   int nj(numberOfCLJets(jets));
@@ -541,6 +580,22 @@ bool SusySelection::passZtautauVeto(cvl_t& l, cvj_t& j, const Met* m, float widt
   if(!m)         return false;
   float mZ0(91.);
   return abs(SusyPlotter::mZTauTau(*l[0], *l[1], m->lv()) - mZ0) > widthZpeak;
+}
+//----------------------------------------------------------
+bool SusySelection::passZllVeto(cvl_t& l, float mllLo, float mllHi)
+{
+  if(l.size()<2 || !l[0] || !l[1]) return false;
+  float mll((*l[0] + *l[1]).M());
+  return (mll<mllLo && mllHi<mll);
+}
+//----------------------------------------------------------
+void swap(float &a, float &b) { float c(a); a=b; b=c; };
+bool SusySelection::pass2LepPt(cvl_t& l, float minPt0, float minPt1)
+{
+  if(l.size()<2) return false;
+  float pt0(l[0]->Pt()), pt1(l[1]->Pt());
+  if(pt0 < pt1) swap(pt0, pt1);
+  return (pt0>minPt0 && pt1>minPt1);
 }
 //----------------------------------------------------------
 bool SusySelection::passPtllMin(cvl_t& l, float minPt)
@@ -562,8 +617,14 @@ bool SusySelection::passPtTot(cvl_t& l, cvj_t& j, const Met* m, float maxPtTot)
 //----------------------------------------------------------
 bool SusySelection::passMllMax(const LeptonVector& l, float maxMll)
 {
-  if(l.size()<2) return false;
+  if(l.size()<2 || !l[0] || !l[1]) return false;
   return TLorentzVector(*l[0] + *l[1]).M() < maxMll;
+}
+//----------------------------------------------------------
+bool SusySelection::passMllMin(const LeptonVector& l, float minVal)
+{
+  if(l.size()<2 || !l[0] || !l[1]) return false;
+  return minVal < TLorentzVector(*l[0] + *l[1]).M();
 }
 //----------------------------------------------------------
 bool SusySelection::passDrllMax(const LeptonVector& l, float maxDr)
@@ -619,10 +680,10 @@ bool SusySelection::passMuonRelIso(const LeptonVector &leptons, float maxVal)
   for(size_t i=0; i<leptons.size(); ++i){
     const Susy::Lepton* l = leptons[i];
     if(l->isMu()){
-      Muon* mu = static_cast<Muon*>(l);
+      const Muon* mu = static_cast<const Muon*>(l);
       if(!mu) continue;
       float etcone30 = muEtConeCorr(mu, m_baseElectrons, m_baseMuons,
-                                    nt->evt()->nVtx, nt->evt()->isMC);
+                                    nt.evt()->nVtx, nt.evt()->isMC);
       if(mu->Pt() && (etcone30/mu->Pt() > maxVal)) return false;
     } // end if(isMu)
   } // end for(i)
@@ -631,7 +692,7 @@ bool SusySelection::passMuonRelIso(const LeptonVector &leptons, float maxVal)
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passEleD0S(const LeptonVector &leptons, float maxVal)
 {
-  for(size i=0; i<leptons.size(); ++i){
+  for(size_t i=0; i<leptons.size(); ++i){
       const Susy::Lepton* l = leptons[i];
       if(l->isEle() && (fabs(l->d0Sig(true)) > maxVal)) return false;
   } // end for(i)

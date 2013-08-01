@@ -108,9 +108,10 @@ class SusySelection : public SusyNtAna
     // Signal Region Cuts
     bool passJetVeto(const JetVector& jets);
     bool passZVeto(const LeptonVector& leptons, float Zlow = 81.2, float Zhigh = 101.2);
-    bool passMETRel(const Met *met, const LeptonVector& leptons, const JetVector& jets, float maxMet = 50.0);
+    bool passMETRel(const Met *met, cvl_t &leptons, cvj_t &jets, float minVal = 50.0);
 
     bool passbJetVeto(const JetVector& jets);
+    bool passfJetVeto(const JetVector& jets);
     bool passge1Jet(const JetVector& jets);
     bool passge2Jet(const JetVector& jets);
     bool passge3Jet(const JetVector& jets);
@@ -118,14 +119,18 @@ class SusySelection : public SusyNtAna
     bool passge2JetWoutFwVeto(const JetVector& jets);
     bool passeq2JetWoutFwVeto(const JetVector& jets);
     bool passdPhi(TLorentzVector v0, TLorentzVector v1, float cut);
-    bool passMtLlmetMin(const LeptonVector& leptons, const Met* met, float minVal=50.0);
+    bool passMtLlMetMin(const LeptonVector& leptons, const Met* met, float minVal=50.0);
     bool passMtMinlmetMin(const LeptonVector& leptons, const Met* met, float minVal=50.0);
     bool passMT2(const LeptonVector& leptons, const Met* met, float cut);
+    bool passHtMin(const cvl_t& l, cvj_t &j, const Met* met, float minVal);
     bool passNj(const JetVector& jets, int minNj=2, int maxNj=3);
     bool passZtautauVeto(cvl_t& l, cvj_t& j, const Met* m, float widthZpeak=40.0);
+    bool passZllVeto(cvl_t& l, float mllLo, float mllHi);
+    bool pass2LepPt(cvl_t& l, float minPt0, float minPt1); //!< assume pt0 > pt1
     bool passPtllMin(cvl_t& l, float minPt=50.0);
     bool passPtTot(cvl_t& l, cvj_t& j, const Met* m, float maxPtTot=50.0);
     bool passMllMax(const LeptonVector& leptons, float maxMll=80.0);
+    bool passMllMin(const LeptonVector& leptons, float minVal);
     bool passDrllMax(const LeptonVector& leptons, float maxDr=2.0);
 
     // Idendification methods
