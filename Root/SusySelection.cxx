@@ -320,8 +320,10 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
                       (llType==ET_mm ?
                        (sr==WH_SRSS4 ? 50 : 0) :
                        0)));
+  bool lepSf(true), bSf(true);
   // if(!passEventCleaning()){ return false; }
   if(!passMllMin(leptons, mllMin)) return false; //baseLeps
+
 
 //   bool lepSf(true), bSf(true);
 //   if( oppositeSign(leptons) ) { if (count) increment(n_pass_SR7sign[m_ET],lepSf, bSf);}
@@ -329,18 +331,28 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
 
   // Apply event selection cuts
   // if(!passFlavor(leptons)) return false;
-  if(!passMuonRelIso(leptons, muIsoMax)) return false;
-  if(!passEleD0S(leptons, d0SMax)) return false;
-  if(!passZllVeto(leptons, loMllZ, hiMllZ))  return false;
-  if(!passfJetVeto(jets)) return false;
-  if(!passbJetVeto(jets)) return false;
-  if(!passeq2Jet(jets)) return false;
+  if(passMuonRelIso(leptons, muIsoMax)) increment(n_pass_muIso[m_ET], lepSf, bSf);
+  else return false;
+  if(passEleD0S(leptons, d0SMax))          increment(n_pass_elD0Sig[m_ET], lepSf, bSf);
+  else return false;
+  if(passZllVeto(leptons, loMllZ, hiMllZ)) increment(n_pass_mllZveto[m_ET], lepSf, bSf);
+  else return false;
+  if(passfJetVeto(jets))                   increment(n_pass_fjVeto[m_ET], lepSf, bSf);
+  else return false;
+  if(passbJetVeto(jets))                   increment(n_pass_bjVeto[m_ET], lepSf, bSf);
+  else return false;
+  if(passeq2Jet(jets))                     increment(n_pass_ge1j[m_ET], lepSf, bSf);
+  else return false;
   //  if(!passLead2JetsPt(jets) ) return false;
-  if(!pass2LepPt(leptons, ptL0Min, ptL1Min)) return false;
+  if(pass2LepPt(leptons, ptL0Min, ptL1Min)) increment(n_pass_lepPt[m_ET], lepSf, bSf);
+  else return false;
   //  if(!passMll(leptons) ) return false; // already passZllVeto
-  if(!passMtLlMetMin(leptons, met) ) return false; // ? new_met ?
-  if(htMin && !passHtMin(leptons, jets, met, htMin) ) return false; // ? new_met ?
-  if(metRelMin && !passMETRel(met, leptons, jets, metRelMin) ) return false; // ? new_met ?
+  if(passMtLlMetMin(leptons, met) )        increment(n_pass_mWwt[m_ET], lepSf, bSf);
+  else return false; // ? new_met ?
+  if(htMin && !passHtMin(leptons, jets, met, htMin) ) increment(n_pass_ht[m_ET], lepSf, bSf);
+  else return false; // ? new_met ?
+  if(metRelMin && !passMETRel(met, leptons, jets, metRelMin) ) increment(n_pass_metRel[m_ET], lepSf, bSf);
+  else return false; // ? new_met ?
 
  /*
   if(m_sel.Contains("WH_SRSS")){
