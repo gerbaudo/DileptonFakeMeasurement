@@ -603,7 +603,7 @@ bool SusySelection::passZllVeto(cvl_t& l, float mllLo, float mllHi)
 {
   if(l.size()<2 || !l[0] || !l[1]) return false;
   float mll((*l[0] + *l[1]).M());
-  return (mll<mllLo && mllHi<mll);
+  return (mll<mllLo || mllHi<mll);
 }
 //----------------------------------------------------------
 void swap(float &a, float &b) { float c(a); a=b; b=c; };
