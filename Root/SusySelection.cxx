@@ -844,6 +844,18 @@ void SusySelection::dumpEventCounters()
     cout<<"pass OS:              : "<<lcpet(n_pass_os             , w, cw)<<endl;
     cout<<"pass SS:              : "<<lcpet(n_pass_ss             , w, cw)<<endl;
     cout<<midRule                                                         <<endl;
+    cout<<"pass muIso    : "<<lcpet(n_pass_muIso   , w, cw)<<endl;
+    cout<<"pass elD0Sig  : "<<lcpet(n_pass_elD0Sig , w, cw)<<endl;
+    cout<<"pass mllZveto : "<<lcpet(n_pass_mllZveto, w, cw)<<endl;
+    cout<<"pass fjVeto   : "<<lcpet(n_pass_fjVeto  , w, cw)<<endl;
+    cout<<"pass bjVeto   : "<<lcpet(n_pass_bjVeto  , w, cw)<<endl;
+    cout<<"pass ge1j     : "<<lcpet(n_pass_ge1j    , w, cw)<<endl;
+    cout<<"pass lepPt    : "<<lcpet(n_pass_lepPt   , w, cw)<<endl;
+    cout<<"pass mWwt     : "<<lcpet(n_pass_mWwt    , w, cw)<<endl;
+    cout<<"pass ht       : "<<lcpet(n_pass_ht      , w, cw)<<endl;
+    cout<<"pass metRel   : "<<lcpet(n_pass_metRel  , w, cw)<<endl;
+
+    /*
     cout<<"pass SR6 sign:        : "<<lcpet(n_pass_SR6sign        , w, cw)<<endl;
     cout<<"pass SR6 flavor:      : "<<lcpet(n_pass_SR6flav        , w, cw)<<endl;
     cout<<"pass SR6 >=1j:        : "<<lcpet(n_pass_SR6ge1j        , w, cw)<<endl;
@@ -882,6 +894,7 @@ void SusySelection::dumpEventCounters()
     cout<<"pass SR9 >=2j         : "<<lcpet(n_pass_SR9ge2j        , w, cw)<<endl;
     cout<<"pass SR9 METRel > 50  : "<<lcpet(n_pass_SR9metr        , w, cw)<<endl;
     cout<<midRule                                                         <<endl;
+    */
   }// end for(w)
 }
 
