@@ -2,7 +2,7 @@
 #include <cassert>
 #include <cmath> // isnan
 #include <cfloat> // FLT_MAX, FLT_MIN
-#include <iomanip> // setw
+#include <iomanip> // setw, setprecision
 #include <sstream>
 #include "TCanvas.h"
 #include "SusyTest0/SusySelection.h"
@@ -782,10 +782,15 @@ std::string lineLabelsPerEventType(const string *labels, int colWidth){
   return oss.str();
 }
 // helper function: for a given weight type, write line with counts for each event type
-std::string lineCountersPerEventType(const float cnt[ET_N][WT_N], int weightType, int colWidth){
+std::string lineCountersPerEventType(const float cnt[ET_N][WT_N],
+                                     int weightType, int colWidth){
   std::ostringstream oss;
+  int precision(weightType==WT_Raw ? 0 : 2);
   for(int i=0; i<ET_N-1; ++i)
-    oss<<std::setw(colWidth)<<cnt[i][weightType];
+    oss<<std::setw(colWidth)
+       <<std::fixed
+       <<std::setprecision(precision)
+       <<cnt[i][weightType];
   return oss.str();
 }
 void SusySelection::dumpEventCounters()
