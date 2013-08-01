@@ -72,7 +72,7 @@ Bool_t SusySelection::Process(Long64_t entry)
   }
   selectObjects();
   if(!selectAnaEvent(m_signalLeptons, m_baseLeptons)) return kTRUE;
-  bool count(true), includeLepSF(false);
+  bool includeLepSF(false); //count(true);
   // Count SS and OS
   if(sameSign(m_signalLeptons))     increment(n_pass_ss[m_ET], includeLepSF);
   if(oppositeSign(m_signalLeptons)) increment(n_pass_os[m_ET], includeLepSF);
@@ -105,9 +105,8 @@ bool SusySelection::selectEvent(bool doMll)
 {
   if(m_dbg) cout << "SusySelection::selectEvent" << endl;
   // Basic event cuts
-
   int flag = nt.evt()->cutFlags[NtSys_NOM];
-  int hdec = nt.evt()->hDecay;
+  //int hdec = nt.evt()->hDecay;
   JetVector &jets = m_baseJets;
   const Susy::Met *met = m_met;
   uint run = nt.evt()->run;
@@ -296,18 +295,15 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   DiLepEvtType ll = eventType;
   const DiLepEvtType ee(ET_ee), em(ET_em), mm(ET_mm);
   WH_SR sr = signalRegion;
-  bool selSS     = true;
-  bool vetoBj    = true;
-  bool vetoFj    = true;
   float muIsoMax = 0.1;
-  float minC20   = 1;
   float ptL0Min  = 30;
   float ptL1Min  = 20;
   float htMin    = ((ll==ET_em || ll==ET_mm) ? 200 : FLT_MIN);
   float d0SMax   = ((ll==ET_ee || ll==ET_em) ?   3 : FLT_MAX);
-  bool mllZveto  = (ll==ET_ee ? true : false);
+  bool applyMllZveto(ll==ET_ee);
   float mZ0(91.);
-  float loMllZ(mZ0-10.), hiMllZ(mZ0+10.);
+  float loMllZ(applyMllZveto ? mZ0-10. : FLT_MAX);
+  float hiMllZ(applyMllZveto ? mZ0+10. : FLT_MIN);
   float mllMin(20);
   float mtwwMin = (ll==ee ? 150 :
                     (ll==em ? 140 :
