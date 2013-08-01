@@ -1,6 +1,7 @@
 #include <iomanip>
 #include <cassert>
 #include <cmath> // isnan
+#include <cfloat> // FLT_MAX, FLT_MIN
 #include <iomanip> // setw
 #include <sstream>
 #include "TCanvas.h"
@@ -292,7 +293,8 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
                              const JetVector& jets,
                              const Met *met)
 {
-  DiLepEvtType llType = eventType;
+  DiLepEvtType ll = eventType;
+  const DiLepEvtType ee(ET_ee), em(ET_em), mm(ET_mm);
   WH_SR sr = signalRegion;
   bool selSS     = true;
   bool vetoBj    = true;
@@ -301,58 +303,42 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   float minC20   = 1;
   float ptL0Min  = 30;
   float ptL1Min  = 20;
-  float htMin    = ((llType==ET_em || llType==ET_mm) ? 200 : 0);
-  float d0SMax   = ((llType==ET_ee || llType==ET_em) ? 3 : 0);
-  bool mllZveto  = (llType==ET_ee ? true : false);
+  float htMin    = ((ll==ET_em || ll==ET_mm) ? 200 : FLT_MIN);
+  float d0SMax   = ((ll==ET_ee || ll==ET_em) ?   3 : FLT_MAX);
+  bool mllZveto  = (ll==ET_ee ? true : false);
   float mZ0(91.);
   float loMllZ(mZ0-10.), hiMllZ(mZ0+10.);
   float mllMin(20);
-  float highMTWW = (llType==ET_ee ? 150 :
-                    (llType==ET_em ? 140 :
-                     (llType==ET_mm ?
+  float mtwwMin = (ll==ee ? 150 :
+                    (ll==em ? 140 :
+                     (ll==mm ?
                       (sr==WH_SRSS1 ? 100 :
                        (sr==WH_SRSS2 ? 150 :
                         (sr==WH_SRSS3 ? 200 :
-                         0))) :
+                         FLT_MIN))) :
                       0)));
-  float metRelMin = (llType==ET_ee ? 50 :
-                     (llType==ET_em ? 50 :
-                      (llType==ET_mm ?
-                       (sr==WH_SRSS4 ? 50 : 0) :
-                       0)));
+  float metRelMin = (ll==ee ? 50 :
+                     (ll==em ? 50 :
+                      (ll==mm ?
+                       (sr==WH_SRSS4 ? 50 : FLT_MIN) :
+                       FLT_MIN)));
   bool lepSf(true), bSf(true);
   // if(!passEventCleaning()){ return false; }
-  if(!passMllMin(leptons, mllMin)) return false; //baseLeps
-
-
-//   bool lepSf(true), bSf(true);
-//   if( oppositeSign(leptons) ) { if (count) increment(n_pass_SR7sign[m_ET],lepSf, bSf);}
-//   else return false;
 
   // Apply event selection cuts
-  // if(!passFlavor(leptons)) return false;
-  if(passMuonRelIso(leptons, muIsoMax)) increment(n_pass_muIso[m_ET], lepSf, bSf);
-  else return false;
-  if(passEleD0S(leptons, d0SMax))          increment(n_pass_elD0Sig[m_ET], lepSf, bSf);
-  else return false;
-  if(passZllVeto(leptons, loMllZ, hiMllZ)) increment(n_pass_mllZveto[m_ET], lepSf, bSf);
-  else return false;
-  if(passfJetVeto(jets))                   increment(n_pass_fjVeto[m_ET], lepSf, bSf);
-  else return false;
-  if(passbJetVeto(jets))                   increment(n_pass_bjVeto[m_ET], lepSf, bSf);
-  else return false;
-  if(passeq2Jet(jets))                     increment(n_pass_ge1j[m_ET], lepSf, bSf);
-  else return false;
-  //  if(!passLead2JetsPt(jets) ) return false;
-  if(pass2LepPt(leptons, ptL0Min, ptL1Min)) increment(n_pass_lepPt[m_ET], lepSf, bSf);
-  else return false;
-  //  if(!passMll(leptons) ) return false; // already passZllVeto
-  if(passMtLlMetMin(leptons, met) )        increment(n_pass_mWwt[m_ET], lepSf, bSf);
-  else return false; // ? new_met ?
-  if(htMin && !passHtMin(leptons, jets, met, htMin) ) increment(n_pass_ht[m_ET], lepSf, bSf);
-  else return false; // ? new_met ?
-  if(metRelMin && !passMETRel(met, leptons, jets, metRelMin) ) increment(n_pass_metRel[m_ET], lepSf, bSf);
-  else return false; // ? new_met ?
+  const LeptonVector &ls = leptons;
+  const JetVector    &js = jets;
+  if(passMllMin    (ls, mllMin))             increment(n_pass_mllMin   [m_ET], lepSf, bSf); else return false; //baseLeps
+  if(passMuonRelIso(ls, muIsoMax))           increment(n_pass_muIso    [m_ET], lepSf, bSf); else return false;
+  if(passEleD0S    (ls, d0SMax))             increment(n_pass_elD0Sig  [m_ET], lepSf, bSf); else return false;
+  if(passZllVeto   (ls, loMllZ, hiMllZ))     increment(n_pass_mllZveto [m_ET], lepSf, bSf); else return false;
+  if(passfJetVeto  (js))                     increment(n_pass_fjVeto   [m_ET], lepSf, bSf); else return false;
+  if(passbJetVeto  (js))                     increment(n_pass_bjVeto   [m_ET], lepSf, bSf); else return false;
+  if(passeq2Jet    (js))                     increment(n_pass_ge1j     [m_ET], lepSf, bSf); else return false;
+  if(pass2LepPt    (ls, ptL0Min, ptL1Min))   increment(n_pass_lepPt    [m_ET], lepSf, bSf); else return false;
+  if(passMtLlMetMin(ls, met), mtwwMin)       increment(n_pass_mWwt     [m_ET], lepSf, bSf); else return false; // ? new_met ?
+  if(passHtMin     (ls, js, met, htMin))     increment(n_pass_ht       [m_ET], lepSf, bSf); else return false; // ? new_met ?
+  if(passMETRel    (met, ls, js, metRelMin)) increment(n_pass_metRel   [m_ET], lepSf, bSf); else return false; // ? new_met ?
 
  /*
   if(m_sel.Contains("WH_SRSS")){
@@ -844,6 +830,7 @@ void SusySelection::dumpEventCounters()
     cout<<"pass OS:              : "<<lcpet(n_pass_os             , w, cw)<<endl;
     cout<<"pass SS:              : "<<lcpet(n_pass_ss             , w, cw)<<endl;
     cout<<midRule                                                         <<endl;
+    cout<<"pass mllMin           : "<<lcpet(n_pass_mllMin         , w, cw)<<endl;
     cout<<"pass muIso            : "<<lcpet(n_pass_muIso          , w, cw)<<endl;
     cout<<"pass elD0Sig          : "<<lcpet(n_pass_elD0Sig        , w, cw)<<endl;
     cout<<"pass mllZveto         : "<<lcpet(n_pass_mllZveto       , w, cw)<<endl;
@@ -1205,6 +1192,7 @@ void SusySelection::resetAllCounters()
       n_pass_SR9eq2jNfv[i][w] = n_pass_SR9ge2jNfv[i][w] = n_pass_SR9[i][w] = 0;
 
       n_pass_ss      [i][w] = 0;
+      n_pass_mllMin  [i][w] = 0;
       n_pass_muIso   [i][w] = 0;
       n_pass_elD0Sig [i][w] = 0;
       n_pass_fjVeto  [i][w] = 0;
