@@ -258,12 +258,13 @@ class SusySelection : public SusyNtAna
     float n_pass_FEBCut     [WT_N];
     float n_pass_BadMuon    [WT_N];
     float n_pass_Cosmic     [WT_N];
+    float n_pass_hfor       [WT_N];
     float n_pass_HttVeto    [WT_N];
     float n_pass_atleast2Lep[WT_N];
     float n_pass_exactly2Lep[WT_N];
+    float n_pass_mll        [WT_N];
     float n_pass_signalLep  [WT_N];
     float n_pass_flavor     [ET_N][WT_N]; // [event type][weight type]
-    float n_pass_mll        [ET_N][WT_N];
     float n_pass_os         [ET_N][WT_N];
     float n_pass_ss         [ET_N][WT_N];
     float n_pass_evtTrig    [ET_N][WT_N];
@@ -324,6 +325,8 @@ class SusySelection : public SusyNtAna
     float                n_pass_SR9metr[ET_N][WT_N];
     float                n_pass_SR9[ET_N][WT_N];
     // SS counts
+    float n_pass_category[ET_N][WT_N];
+    float n_pass_tauVeto [ET_N][WT_N];
     float n_pass_mllMin  [ET_N][WT_N];
     float n_pass_muIso   [ET_N][WT_N];
     float n_pass_elD0Sig [ET_N][WT_N];
