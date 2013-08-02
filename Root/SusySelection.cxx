@@ -118,7 +118,7 @@ bool SusySelection::selectEvent()
   //if(passHtautauVeto(hdec)) { increment(n_pass_HttVeto ); } else { return false; }
   if(bleps.size() >= 2               )  { increment(n_pass_atleast2Lep);} else { return false; }
   if(bleps.size() == 2               )  { increment(n_pass_exactly2Lep);} else { return false; }
-  if(passMllMin(bleps, 20.))increment(n_pass_mll);         else return false;
+  if(passMllMin(bleps, 20.)          )  { increment(n_pass_mll);        } else { return false; }
   return true;
 }
 /*--------------------------------------------------------------------------------*/
@@ -274,20 +274,19 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   // Apply event selection cuts
   const LeptonVector &ls = leptons;
   const JetVector    &js = jets;
-  if(true)                                   increment(n_pass_category [m_ET], lepSf, bSf); else return false;
-  if(passMllMin    (ls, mllMin))             increment(n_pass_mllMin   [m_ET], lepSf, bSf); else return false; //baseLeps
-  if(m_signalTaus.size()==0)                 increment(n_pass_tauVeto  [m_ET], lepSf, bSf); else return false;
-  if(sameSign      (m_signalLeptons))        increment(n_pass_ss       [m_ET], lepSf, bSf); else return false;
-  if(passMuonRelIso(ls, muIsoMax))           increment(n_pass_muIso    [m_ET], lepSf, bSf); else return false;
-  if(passEleD0S    (ls, d0SMax))             increment(n_pass_elD0Sig  [m_ET], lepSf, bSf); else return false;
-  if(passZllVeto   (ls, loMllZ, hiMllZ))     increment(n_pass_mllZveto [m_ET], lepSf, bSf); else return false;
-  if(passfJetVeto  (js))                     increment(n_pass_fjVeto   [m_ET], lepSf, bSf); else return false;
-  if(passbJetVeto  (js))                     increment(n_pass_bjVeto   [m_ET], lepSf, bSf); else return false;
-  if(passeq2Jet    (js))                     increment(n_pass_ge1j     [m_ET], lepSf, bSf); else return false;
-  if(pass2LepPt    (ls, ptL0Min, ptL1Min))   increment(n_pass_lepPt    [m_ET], lepSf, bSf); else return false;
-  if(passMtLlMetMin(ls, met), mtwwMin)       increment(n_pass_mWwt     [m_ET], lepSf, bSf); else return false; // ? new_met ?
-  if(passHtMin     (ls, js, met, htMin))     increment(n_pass_ht       [m_ET], lepSf, bSf); else return false; // ? new_met ?
-  if(passMETRel    (met, ls, js, metRelMin)) increment(n_pass_metRel   [m_ET], lepSf, bSf); else return false; // ? new_met ?
+  if(true)                                   increment(n_pass_category [ll], lepSf, bSf); else return false;
+  if(m_signalTaus.size()==0)                 increment(n_pass_tauVeto  [ll], lepSf, bSf); else return false;
+  if(sameSign      (m_signalLeptons))        increment(n_pass_ss       [ll], lepSf, bSf); else return false;
+  if(passMuonRelIso(ls, muIsoMax))           increment(n_pass_muIso    [ll], lepSf, bSf); else return false;
+  if(passEleD0S    (ls, d0SMax))             increment(n_pass_elD0Sig  [ll], lepSf, bSf); else return false;
+  if(passZllVeto   (ls, loMllZ, hiMllZ))     increment(n_pass_mllZveto [ll], lepSf, bSf); else return false;
+  if(passfJetVeto  (js))                     increment(n_pass_fjVeto   [ll], lepSf, bSf); else return false;
+  if(passbJetVeto  (js))                     increment(n_pass_bjVeto   [ll], lepSf, bSf); else return false;
+  if(passeq2Jet    (js))                     increment(n_pass_ge1j     [ll], lepSf, bSf); else return false;
+  if(pass2LepPt    (ls, ptL0Min, ptL1Min))   increment(n_pass_lepPt    [ll], lepSf, bSf); else return false;
+  if(passMtLlMetMin(ls, met), mtwwMin)       increment(n_pass_mWwt     [ll], lepSf, bSf); else return false; // ? new_met ?
+  if(passHtMin     (ls, js, met, htMin))     increment(n_pass_ht       [ll], lepSf, bSf); else return false; // ? new_met ?
+  if(passMETRel    (met, ls, js, metRelMin)) increment(n_pass_metRel   [ll], lepSf, bSf); else return false; // ? new_met ?
   return false;
 }
 /*--------------------------------------------------------------------------------*/
