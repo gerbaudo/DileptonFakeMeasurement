@@ -116,8 +116,8 @@ bool SusySelection::selectEvent()
   if(!hasCosmicMuon (m_baseMuons    ))  { increment(n_pass_Cosmic  );} else { return false; }
   if(passHfor       (               ))  { increment(n_pass_hfor    );} else { return false; }
   //if(passHtautauVeto(hdec)) { increment(n_pass_HttVeto ); } else { return false; }
-  if(bleps.size() >= 2               )  { increment(n_pass_atleast2Lep);} else { return false; }
-  if(bleps.size() == 2               )  { increment(n_pass_exactly2Lep);} else { return false; }
+  if(bleps.size() >= 2               )  { increment(n_pass_ge2l    );} else { return false; }
+  if(bleps.size() == 2               )  { increment(n_pass_eq2l    );} else { return false; }
   if(passMllMin(bleps, 20.)          )  { increment(n_pass_mll);        } else { return false; }
   return true;
 }
@@ -743,8 +743,8 @@ void SusySelection::dumpEventCounters()
     cout<<"pass hfor:            : "<<setw(cw)<<n_pass_hfor        [w]              <<endl;
 
     cout<<"pass Htautau veto     : "<<setw(cw)<<n_pass_HttVeto     [w]              <<endl;
-    cout<<"pass atleast 2        : "<<setw(cw)<<n_pass_atleast2Lep [w]              <<endl;
-    cout<<"pass exactly 2        : "<<setw(cw)<<n_pass_exactly2Lep [w]              <<endl;
+    cout<<"pass atleast 2        : "<<setw(cw)<<n_pass_ge2l        [w]              <<endl;
+    cout<<"pass exactly 2        : "<<setw(cw)<<n_pass_eq2l        [w]              <<endl;
     cout<<"pass mll              : "<<setw(cw)<<n_pass_mll         [w]              <<endl;
     cout<<"pass nSigLep          : "<<setw(cw)<<n_pass_signalLep   [w]              <<endl;
     cout<<"   ------  Start Comparison Here ------ "                      <<endl;
@@ -1085,8 +1085,8 @@ void SusySelection::resetAllCounters()
     n_pass_Cosmic     [w] = 0;
     n_pass_hfor       [w] = 0;
     n_pass_HttVeto    [w] = 0;
-    n_pass_atleast2Lep[w] = 0;
-    n_pass_exactly2Lep[w] = 0;
+    n_pass_ge2l       [w] = 0;
+    n_pass_eq2l       [w] = 0;
     n_pass_mll        [w] = 0;
     n_pass_signalLep  [w] = 0;
     for(int i=0; i<ET_N; ++i){ // loop over weight x channel.

@@ -259,8 +259,8 @@ class SusySelection : public SusyNtAna
     float n_pass_Cosmic     [WT_N];
     float n_pass_hfor       [WT_N];
     float n_pass_HttVeto    [WT_N];
-    float n_pass_atleast2Lep[WT_N];
-    float n_pass_exactly2Lep[WT_N];
+    float n_pass_ge2l       [WT_N];
+    float n_pass_eq2l       [WT_N];
     float n_pass_mll        [WT_N];
     float n_pass_signalLep  [WT_N];
 
