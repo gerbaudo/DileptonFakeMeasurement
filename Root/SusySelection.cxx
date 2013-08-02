@@ -34,6 +34,7 @@ SusySelection::SusySelection() :
 {
   resetAllCounters();
   setAnaType(Ana_2Lep);
+  setSelectTaus(true);
 }
 void SusySelection::Begin(TTree* /*tree*/)
 {
@@ -70,7 +71,8 @@ Bool_t SusySelection::Process(Long64_t entry)
         <<" event "           <<setw(7)<<nt.evt()->event
         <<" ****"<<endl;
   }
-  selectObjects();
+  bool removeLepsFromIso(false);
+  selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if(!selectAnaEvent(m_signalLeptons, m_baseLeptons)) return kTRUE;
   bool includeLepSF(false); //count(true);
   // Count SS and OS
