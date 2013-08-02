@@ -417,7 +417,6 @@ bool SusySelection::passMll(const LeptonVector& leptons, float mll)
 {
   if( leptons.size() < 2 ) return false;
   if( (*leptons.at(0) + *leptons.at(1)).M() < mll ) return false;
-  increment(n_pass_mll[m_ET]);
   return true;
 }
 bool SusySelection::passHtautauVeto(int hdecay)
