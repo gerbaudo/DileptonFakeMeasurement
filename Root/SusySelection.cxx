@@ -121,9 +121,9 @@ bool SusySelection::selectEvent(bool doMll)
   if(passLAr        (flag           ))  { increment(n_pass_LAr     ); } else { return false; }
   if(!hasBadJet     (jets           ))  { increment(n_pass_BadJet  ); } else { return false; }
   if(passDeadRegions(jets,met,run,mc))  { increment(n_pass_FEBCut  ); } else { return false; }
-  if(passBadMuon    (flag           ))  { increment(n_pass_BadMuon ); } else { return false; }
-  if(passCosmic     (flag           ))  { increment(n_pass_Cosmic  ); } else { return false; }
-  if(passHotSpot    (flag           ))  {                           ; } else { return false; }
+  if(!hasBadMuon    (m_preMuons     ))  { increment(n_pass_BadMuon ); } else { return false; }
+  if(!hasCosmicMuon (m_baseMuons    ))  { increment(n_pass_Cosmic  ); } else { return false; }
+  if(!hasHotSpotJet (m_preJets      ))  {                           ; } else { return false; }
   //if(passHtautauVeto(hdec)) { increment(n_pass_HttVeto ); } else { return false; }
   if( !nt.evt()->passMllForAlpgen ) return false;
   if(doMll && m_baseLeptons.size() == 2){
