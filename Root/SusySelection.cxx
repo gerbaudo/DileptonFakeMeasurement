@@ -813,7 +813,7 @@ void SusySelection::dumpEventCounters()
     cout<<"pass OS:              : "<<lcpet(n_pass_os             , w, cw)<<endl;
     cout<<"pass SS:              : "<<lcpet(n_pass_ss             , w, cw)<<endl;
     cout<<midRule                                                         <<endl;
-    cout<<"pass mllMin           : "<<lcpet(n_pass_mllMin         , w, cw)<<endl;
+    cout<<"pass tauVeto          : "<<lcpet(n_pass_tauVeto        , w, cw)<<endl;
     cout<<"pass muIso            : "<<lcpet(n_pass_muIso          , w, cw)<<endl;
     cout<<"pass elD0Sig          : "<<lcpet(n_pass_elD0Sig        , w, cw)<<endl;
     cout<<"pass mllZveto         : "<<lcpet(n_pass_mllZveto       , w, cw)<<endl;
