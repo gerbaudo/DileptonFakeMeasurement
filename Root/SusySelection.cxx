@@ -1,4 +1,3 @@
-#include <iomanip>
 #include <cassert>
 #include <cmath> // isnan
 #include <cfloat> // FLT_MAX, FLT_MIN
