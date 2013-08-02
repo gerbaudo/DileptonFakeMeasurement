@@ -284,7 +284,7 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
                        (sr==WH_SRSS2 ? 150 :
                         (sr==WH_SRSS3 ? 200 :
                          FLT_MIN))) :
-                      0)));
+                      FLT_MIN)));
   float metRelMin = (ll==ee ? 50 :
                      (ll==em ? 50 :
                       (ll==mm ?
