@@ -74,9 +74,6 @@ Bool_t SusySelection::Process(Long64_t entry)
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if(!selectAnaEvent(m_signalLeptons, m_baseLeptons)) return kTRUE;
   bool includeLepSF(false); //count(true);
-  // Count SS and OS
-  if(sameSign(m_signalLeptons))     increment(n_pass_ss[m_ET], includeLepSF);
-  if(oppositeSign(m_signalLeptons)) increment(n_pass_os[m_ET], includeLepSF);
   // Check Signal regions
   //passSR6(m_baseLeptons, m_signalJets2Lep, m_met, count);
   //passSR7(m_baseLeptons, m_signalJets2Lep, m_met, count);
@@ -84,6 +81,7 @@ Bool_t SusySelection::Process(Long64_t entry)
   //passSR9(m_baseLeptons, m_signalJets2Lep, m_met, count);
 
   m_ET = getDiLepEvtType(m_baseLeptons);
+
   passSrSs(m_ET, WH_SRSS1, m_baseLeptons, m_signalTaus, m_signalJets2Lep, m_met);
 
   return kTRUE;
@@ -268,9 +266,9 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   float muIsoMax = 0.1;
   float ptL0Min  = 30;
   float ptL1Min  = 20;
-  float htMin    = ((ll==ET_em || ll==ET_mm) ? 200 : FLT_MIN);
-  float d0SMax   = ((ll==ET_ee || ll==ET_em) ?   3 : FLT_MAX);
-  bool applyMllZveto(ll==ET_ee);
+  float htMin    = ((ll==em || ll==mm) ? 200 : FLT_MIN);
+  float d0SMax   = ((ll==ee || ll==em) ?   3 : FLT_MAX);
+  bool applyMllZveto(ll==ee);
   float mZ0(91.);
   float loMllZ(applyMllZveto ? mZ0-10. : FLT_MAX);
   float hiMllZ(applyMllZveto ? mZ0+10. : FLT_MIN);
@@ -773,7 +771,6 @@ void SusySelection::dumpEventCounters()
     cout<<"For dilepton type     : "<<lineLabelsPerEventType(v_ET, cw)    <<endl;
     cout<<"pass category         : "<<lcpet(n_pass_category       , w, cw)<<endl;
     cout<<"pass mllMin           : "<<lcpet(n_pass_mllMin         , w, cw)<<endl;
-    cout<<midRule                                                         <<endl;
     cout<<midRule                                                         <<endl;
     cout<<"pass flavor:          : "<<lcpet(n_pass_flavor         , w, cw)<<endl;
     cout<<"pass evt trig:        : "<<lcpet(n_pass_evtTrig        , w, cw)<<endl;
