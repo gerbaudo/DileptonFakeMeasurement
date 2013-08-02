@@ -136,34 +136,10 @@ bool SusySelection::selectAnaEvent(const LeptonVector& leptons,
   if(m_dbg) cout << "SusySelection::selectAnaEvent" << endl;
   if( !selectEvent() )                     return false;
   // Lepton Analysis cuts
-  if( baseLeps.size() < 2 )                return false;
-  increment(n_pass_atleast2Lep);
-  if(baseLeps.size() != 2)                 return false;
-  //if(!(isFakeLepton(baseLeps[0]) || isFakeLepton(baseLeps[1]))) return false;
-  increment(n_pass_exactly2Lep);
-
-  m_ET = getDiLepEvtType(baseLeps);
-  if(m_ET == ET_me) m_ET = ET_em;
-
-  if( !passNLepCut(leptons) )              return false;
-
-  // only check trigger for MC
-  //if( !nt.evt()->isMC && !passTrigger(baseLeps) ) return false;
-  if( !passTrigger(baseLeps) ) return false;
-
-  if(m_ET == ET_mm){
-    float trigW = m_trigObj->getTriggerWeight(m_baseLeptons,
-					      nt.evt()->isMC,
-					      m_met->Et,
-					      m_signalJets2Lep.size(),
-					      nt.evt()->nVtx,
-					      NtSys_NOM);
-    if(trigW < 0){
-      cout<<"Run: "<<nt.evt()->run<<" Event: "<<nt.evt()->event<<" Weight: "<<trigW<<endl;
-      m_baseLeptons[0]->print();
-      m_baseLeptons[1]->print();
-    }
-  }
+  if(baseLeps.size() >= 2)     increment(n_pass_atleast2Lep); else return false;
+  if(baseLeps.size() == 2)     increment(n_pass_exactly2Lep); else return false;
+  if(passMllMin(baseLeps, 20.))increment(n_pass_mll);         else return false;
+   //if(!(isFakeLepton(baseLeps[0]) || isFakeLepton(baseLeps[1]))) return false;
   return true;
 }
 
