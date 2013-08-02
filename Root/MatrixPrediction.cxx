@@ -56,7 +56,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   selectObjects(); // select signal objects
   if( !selectEvent() )              return kTRUE;
   if( m_baseLeptons.size() != 2 )   return kTRUE;
-  if( !passTrigger(m_baseLeptons) ) return kTRUE;
+  if( !passTrig2LwithMatch(m_baseLeptons) ) return kTRUE;
   bool count(true);
   SusyMatrixMethod::FAKE_REGION reg = SusyMatrixMethod::FR_VRSSbtag;
   SusyMatrixMethod::SYSTEMATIC  sys = SusyMatrixMethod::SYS_NONE;

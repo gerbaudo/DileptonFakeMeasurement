@@ -277,6 +277,8 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   if(true)                                   increment(n_pass_category [ll], lepSf, bSf); else return false;
   if(passNlepMin   (m_signalLeptons, 2))     increment(n_pass_nSigLep  [ll], lepSf, bSf); else return false;
   if(m_signalTaus.size()==0)                 increment(n_pass_tauVeto  [ll], lepSf, bSf); else return false;
+  if(passTrig2L     (m_signalLeptons))       increment(n_pass_tr2L     [ll], lepSf, bSf); else return false;
+  if(passTrig2LMatch(m_signalLeptons))       increment(n_pass_tr2LMatch[ll], lepSf, bSf); else return false;
   if(sameSign      (m_signalLeptons))        increment(n_pass_ss       [ll], lepSf, bSf); else return false;
   if(passMuonRelIso(ls, muIsoMax))           increment(n_pass_muIso    [ll], lepSf, bSf); else return false;
   if(passEleD0S    (ls, d0SMax))             increment(n_pass_elD0Sig  [ll], lepSf, bSf); else return false;
@@ -324,17 +326,21 @@ bool SusySelection::passNBaseLepCut(const LeptonVector& baseLeptons)
   return true;
 }
 /*--------------------------------------------------------------------------------*/
-bool SusySelection::passTrigger(const LeptonVector& leptons)
+bool SusySelection::passTrig2L(const LeptonVector& leptons)
 {
-  if(leptons.size() != 2) return false;
-  bool passEvtTrig   = m_trigObj->passDilEvtTrig(leptons, m_met->Et, nt.evt());
-  bool passTrigMatch = m_trigObj->passDilTrigMatch(leptons, m_met->Et, nt.evt());
-  if( passEvtTrig ){ increment(n_pass_evtTrig[m_ET],true); }
-  if( passEvtTrig && passTrigMatch){
-    increment(n_pass_trigMatch[m_ET],true);
-    return true;
-  }
-  return false;
+  if(leptons.size() != 2 || !m_trigObj) return false;
+  return m_trigObj->passDilEvtTrig(leptons, m_met->Et, nt.evt());
+}
+/*--------------------------------------------------------------------------------*/
+bool SusySelection::passTrig2LMatch(const LeptonVector& leptons)
+{
+  if(leptons.size() != 2 || !m_trigObj) return false;
+  return m_trigObj->passDilTrigMatch(leptons, m_met->Et, nt.evt());
+}
+/*--------------------------------------------------------------------------------*/
+bool SusySelection::passTrig2LwithMatch(const LeptonVector& leptons)
+{
+  return (passTrig2L(leptons) && passTrig2LwithMatch(leptons));
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::sameFlavor(const LeptonVector& leptons)
@@ -766,11 +772,11 @@ void SusySelection::dumpEventCounters()
     cout<<"pass category         : "<<lcpet(n_pass_category       , w, cw)<<endl;
     cout<<"pass nSigLep          : "<<lcpet(n_pass_nSigLep        , w, cw)<<endl;
     cout<<"pass tauVeto          : "<<lcpet(n_pass_tauVeto        , w, cw)<<endl;
+    cout<<"pass trig:            : "<<lcpet(n_pass_tr2L           , w, cw)<<endl;
+    cout<<"pass trig match:      : "<<lcpet(n_pass_tr2LMatch      , w, cw)<<endl;
     cout<<"pass mllMin           : "<<lcpet(n_pass_mllMin         , w, cw)<<endl;
     cout<<midRule                                                         <<endl;
     cout<<"pass flavor:          : "<<lcpet(n_pass_flavor         , w, cw)<<endl;
-    cout<<"pass evt trig:        : "<<lcpet(n_pass_evtTrig        , w, cw)<<endl;
-    cout<<"pass trig match:      : "<<lcpet(n_pass_trigMatch      , w, cw)<<endl;
     cout<<"pass OS:              : "<<lcpet(n_pass_os             , w, cw)<<endl;
     cout<<"pass SS:              : "<<lcpet(n_pass_ss             , w, cw)<<endl;
     cout<<midRule                                                         <<endl;
@@ -1130,25 +1136,25 @@ void SusySelection::resetAllCounters()
       n_pass_SR9ge1j[i][w] = n_pass_SR9ge2j[i][w] = n_pass_SR9eq2j[i][w] = 0;
       n_pass_SR9eq2jNfv[i][w] = n_pass_SR9ge2jNfv[i][w] = n_pass_SR9[i][w] = 0;
 
-      n_pass_flavor   [i][w] = 0;
-      n_pass_os       [i][w] = 0;
-      n_pass_ss       [i][w] = 0;
-      n_pass_evtTrig  [i][w] = 0;
-      n_pass_trigMatch[i][w] = 0;
-      n_pass_category [i][w] = 0;
-      n_pass_nSigLep  [i][w] = 0;
-      n_pass_tauVeto  [i][w] = 0;
-      n_pass_mllMin   [i][w] = 0;
-      n_pass_muIso    [i][w] = 0;
-      n_pass_elD0Sig  [i][w] = 0;
-      n_pass_fjVeto   [i][w] = 0;
-      n_pass_bjVeto   [i][w] = 0;
-      n_pass_ge1j     [i][w] = 0;
-      n_pass_lepPt    [i][w] = 0;
-      n_pass_mllZveto [i][w] = 0;
-      n_pass_mWwt     [i][w] = 0;
-      n_pass_ht       [i][w] = 0;
-      n_pass_metRel   [i][w] = 0;
+      n_pass_flavor     [i][w] = 0;
+      n_pass_os         [i][w] = 0;
+      n_pass_ss         [i][w] = 0;
+      n_pass_tr2L       [i][w] = 0;
+      n_pass_tr2LMatch  [i][w] = 0;
+      n_pass_category   [i][w] = 0;
+      n_pass_nSigLep    [i][w] = 0;
+      n_pass_tauVeto    [i][w] = 0;
+      n_pass_mllMin     [i][w] = 0;
+      n_pass_muIso      [i][w] = 0;
+      n_pass_elD0Sig    [i][w] = 0;
+      n_pass_fjVeto     [i][w] = 0;
+      n_pass_bjVeto     [i][w] = 0;
+      n_pass_ge1j       [i][w] = 0;
+      n_pass_lepPt      [i][w] = 0;
+      n_pass_mllZveto   [i][w] = 0;
+      n_pass_mWwt       [i][w] = 0;
+      n_pass_ht         [i][w] = 0;
+      n_pass_metRel     [i][w] = 0;
     } // end for(i)
   } // end for(w)
 }

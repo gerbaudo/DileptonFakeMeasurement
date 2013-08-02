@@ -97,7 +97,9 @@ class SusySelection : public SusyNtAna
     bool passHfor();
     bool passNLepCut(const LeptonVector& leptons);
     bool passNBaseLepCut(const LeptonVector& baseLeptons);
-    bool passTrigger(const LeptonVector& leptons);
+    bool passTrig2L(const LeptonVector& leptons);
+    bool passTrig2LMatch(const LeptonVector& leptons);
+    bool passTrig2LwithMatch(const LeptonVector& leptons);
     bool sameFlavor(const LeptonVector& leptons);
     bool oppositeFlavor(const LeptonVector& leptons);
     bool sameSign(const LeptonVector& leptons);
@@ -323,8 +325,8 @@ class SusySelection : public SusyNtAna
     float n_pass_flavor     [ET_N][WT_N]; // [event type][weight type]
     float n_pass_os         [ET_N][WT_N];
     float n_pass_ss         [ET_N][WT_N];
-    float n_pass_evtTrig    [ET_N][WT_N];
-    float n_pass_trigMatch  [ET_N][WT_N];
+    float n_pass_tr2L       [ET_N][WT_N];
+    float n_pass_tr2LMatch  [ET_N][WT_N];
     float n_pass_category   [ET_N][WT_N];
     float n_pass_nSigLep    [ET_N][WT_N];
     float n_pass_tauVeto    [ET_N][WT_N];
