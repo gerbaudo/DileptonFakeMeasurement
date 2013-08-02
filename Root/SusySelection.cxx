@@ -110,6 +110,7 @@ bool SusySelection::selectEvent(bool doMll)
   int flag = nt.evt()->cutFlags[NtSys_NOM];
   //int hdec = nt.evt()->hDecay;
   JetVector &jets = m_baseJets;
+  JetVector &pjets = m_preJets;
   const Susy::Met *met = m_met;
   uint run = nt.evt()->run;
   bool mc = nt.evt()->isMC;
@@ -119,19 +120,13 @@ bool SusySelection::selectEvent(bool doMll)
   if(passTTCVeto    (flag           ))  { increment(n_pass_TTCVeto ); } else { return false; }
   if(passGoodVtx    (flag           ))  { increment(n_pass_GoodVtx ); } else { return false; }
   if(passTileTripCut(flag           ))  { increment(n_pass_TileTrip); } else { return false; }
-  if(passHfor       (               ))  {                           ; } else { return false; }
   if(passLAr        (flag           ))  { increment(n_pass_LAr     ); } else { return false; }
   if(!hasBadJet     (jets           ))  { increment(n_pass_BadJet  ); } else { return false; }
-  if(passDeadRegions(jets,met,run,mc))  { increment(n_pass_FEBCut  ); } else { return false; }
+  if(passDeadRegions(pjets,met,run,mc)) { increment(n_pass_FEBCut  ); } else { return false; }
   if(!hasBadMuon    (m_preMuons     ))  { increment(n_pass_BadMuon ); } else { return false; }
   if(!hasCosmicMuon (m_baseMuons    ))  { increment(n_pass_Cosmic  ); } else { return false; }
-  if(!hasHotSpotJet (m_preJets      ))  {                           ; } else { return false; }
+  if(passHfor       (               ))  { increment(n_pass_hfor    ); } else { return false; }
   //if(passHtautauVeto(hdec)) { increment(n_pass_HttVeto ); } else { return false; }
-  if( !nt.evt()->passMllForAlpgen ) return false;
-  if(doMll && m_baseLeptons.size() == 2){
-    if( Mll(m_baseLeptons[0], m_baseLeptons[1]) < 20 )
-      return false;
-  }
   return true;
 }
 /*--------------------------------------------------------------------------------*/
