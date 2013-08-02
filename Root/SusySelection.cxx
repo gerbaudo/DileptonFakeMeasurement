@@ -311,36 +311,6 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   if(passMtLlMetMin(ls, met), mtwwMin)       increment(n_pass_mWwt     [m_ET], lepSf, bSf); else return false; // ? new_met ?
   if(passHtMin     (ls, js, met, htMin))     increment(n_pass_ht       [m_ET], lepSf, bSf); else return false; // ? new_met ?
   if(passMETRel    (met, ls, js, metRelMin)) increment(n_pass_metRel   [m_ET], lepSf, bSf); else return false; // ? new_met ?
-
- /*
-  if(m_sel.Contains("WH_SRSS")){
-    if(dilType==ET_ee){
-      m_d0SMin    = 3;
-      m_mllIn     = true;
-      m_lowMll    = MZ-10;
-      m_highMll   = MZ+10;
-      m_pTl1Min   = 20;
-      m_highMTWW  = 150;
-      m_metRelMin = 50;
-      if(m_sel.Contains("WH_SRSS2")){ m_mt2Min    = 90; }
-    }
-    else if(dilType==ET_mm){
-      m_IsoMin    = 0.1;
-      m_HTMin     = 200;
-      m_highMTWW  = 100;
-      if(m_sel.Contains("WH_SRSS2")){ m_highMTWW  = 150; }
-      if(m_sel.Contains("WH_SRSS3")){ m_highMTWW  = 200; }
-      if(m_sel.Contains("WH_SRSS4")){ m_highMTWW  = 200; m_metRelMin = 50; }
-    }
-    else if(dilType==ET_em){
-      m_d0SMin    = 3;
-      m_IsoMin    = 0.1;
-      m_pTl1Min   = 20;
-      m_highMTWW  = 140;
-      m_HTMin     = 200;
-      if(m_sel.Contains("WH_SRSS2")){ m_metRelMin = 50; }
-    }
-  */
   return false;
 }
 /*--------------------------------------------------------------------------------*/
