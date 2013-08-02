@@ -122,6 +122,7 @@ class SusySelection : public SusyNtAna
     bool passMtMinlmetMin(const LeptonVector& leptons, const Met* met, float minVal=50.0);
     bool passMT2(const LeptonVector& leptons, const Met* met, float cut);
     bool passHtMin(const cvl_t& l, cvj_t &j, const Met* met, float minVal);
+    bool passNlepMin(const LeptonVector &leptons, size_t minVal);
     bool passNj(const JetVector& jets, int minNj=2, int maxNj=3);
     bool passZtautauVeto(cvl_t& l, cvj_t& j, const Met* m, float widthZpeak=40.0);
     bool passZllVeto(cvl_t& l, float mllLo, float mllHi);
@@ -325,6 +326,7 @@ class SusySelection : public SusyNtAna
     float n_pass_evtTrig    [ET_N][WT_N];
     float n_pass_trigMatch  [ET_N][WT_N];
     float n_pass_category   [ET_N][WT_N];
+    float n_pass_nSigLep    [ET_N][WT_N];
     float n_pass_tauVeto    [ET_N][WT_N];
     float n_pass_mllMin     [ET_N][WT_N];
     float n_pass_muIso      [ET_N][WT_N];

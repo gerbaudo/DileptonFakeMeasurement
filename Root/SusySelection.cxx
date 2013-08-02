@@ -275,7 +275,7 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   const LeptonVector &ls = leptons;
   const JetVector    &js = jets;
   if(true)                                   increment(n_pass_category [ll], lepSf, bSf); else return false;
-  if(passNlepMin   (m_signalLeptons, 2)      increment(n_pass_signalLep[ll], lepSf, bSf); else return false;
+  if(passNlepMin   (m_signalLeptons, 2))     increment(n_pass_nSigLep  [ll], lepSf, bSf); else return false;
   if(m_signalTaus.size()==0)                 increment(n_pass_tauVeto  [ll], lepSf, bSf); else return false;
   if(sameSign      (m_signalLeptons))        increment(n_pass_ss       [ll], lepSf, bSf); else return false;
   if(passMuonRelIso(ls, muIsoMax))           increment(n_pass_muIso    [ll], lepSf, bSf); else return false;
@@ -491,18 +491,15 @@ bool SusySelection::passHtMin(const LeptonVector& leptons,
 bool SusySelection::passNlepMin(const LeptonVector &leptons, size_t minVal)
 {
   return (leptons.size() >= minVal);
-  /*
-  // similar to Anyes' implementation
-  size_t nLep=0;
-  for(size_t i=0;i<leptons.size(); ++i){
-    if(const Susy::Lepton* l = leptons[i])
-      if(l->isMu() && fabs(l->Eta())>2.4) // DG20130802 Why? ask Anyes
-        return false;
-    nLep++;
-  }
-  return true;
-  */
-  return nLep>=minVal;
+  // -- // similar to Anyes' implementation
+  // -- size_t nLep=0;
+  // -- for(size_t i=0;i<leptons.size(); ++i){
+  // --   if(const Susy::Lepton* l = leptons[i])
+  // --     if(l->isMu() && fabs(l->Eta())>2.4) // DG20130802 Why? ask Anyes
+  // --       return false;
+  // --   nLep++;
+  // -- }
+  // -- return nLep>=minVal;
 }
 //----------------------------------------------------------
 bool SusySelection::passNj(const JetVector& jets, int minNj, int maxNj)
