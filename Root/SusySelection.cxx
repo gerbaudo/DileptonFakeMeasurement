@@ -119,7 +119,7 @@ bool SusySelection::selectEvent(bool doMll)
   if(passTileTripCut(flag           ))  { increment(n_pass_TileTrip); } else { return false; }
   if(passHfor       (               ))  {                           ; } else { return false; }
   if(passLAr        (flag           ))  { increment(n_pass_LAr     ); } else { return false; }
-  if(passBadJet     (flag           ))  { increment(n_pass_BadJet  ); } else { return false; }
+  if(!hasBadJet     (jets           ))  { increment(n_pass_BadJet  ); } else { return false; }
   if(passDeadRegions(jets,met,run,mc))  { increment(n_pass_FEBCut  ); } else { return false; }
   if(passBadMuon    (flag           ))  { increment(n_pass_BadMuon ); } else { return false; }
   if(passCosmic     (flag           ))  { increment(n_pass_Cosmic  ); } else { return false; }
