@@ -781,11 +781,12 @@ std::string lineLabelsPerEventType(const string *labels, int colWidth){
 std::string lineCountersPerEventType(const float cnt[ET_N][WT_N],
                                      int weightType, int colWidth){
   std::ostringstream oss;
-  int precision(weightType==WT_Raw ? 0 : 2);
+  bool raw(weightType==WT_Raw);
+  int precision(raw ? 0 : 2);
   for(int i=0; i<ET_N-1; ++i)
     oss<<std::setw(colWidth)
-       <<std::fixed
-       <<std::setprecision(precision)
+      //<<(raw ? std::fixed : "")
+      //<<std::setprecision(precision)
        <<cnt[i][weightType];
   return oss.str();
 }
