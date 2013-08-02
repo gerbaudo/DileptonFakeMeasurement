@@ -279,6 +279,7 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   if(m_signalTaus.size()==0)                 increment(n_pass_tauVeto  [ll], lepSf, bSf); else return false;
   if(passTrig2L     (m_signalLeptons))       increment(n_pass_tr2L     [ll], lepSf, bSf); else return false;
   if(passTrig2LMatch(m_signalLeptons))       increment(n_pass_tr2LMatch[ll], lepSf, bSf); else return false;
+  if(isTrueDilepton(m_signalLeptons))        increment(n_pass_mcTrue2l [ll], lepSf, bSf); else return false;
   if(sameSign      (m_signalLeptons))        increment(n_pass_ss       [ll], lepSf, bSf); else return false;
   if(passMuonRelIso(ls, muIsoMax))           increment(n_pass_muIso    [ll], lepSf, bSf); else return false;
   if(passEleD0S    (ls, d0SMax))             increment(n_pass_elD0Sig  [ll], lepSf, bSf); else return false;
@@ -774,6 +775,7 @@ void SusySelection::dumpEventCounters()
     cout<<"pass tauVeto          : "<<lcpet(n_pass_tauVeto        , w, cw)<<endl;
     cout<<"pass trig:            : "<<lcpet(n_pass_tr2L           , w, cw)<<endl;
     cout<<"pass trig match:      : "<<lcpet(n_pass_tr2LMatch      , w, cw)<<endl;
+    cout<<"pass mc prompt2l      : "<<lcpet(n_pass_mcTrue2l       , w, cw)<<endl;
     cout<<"pass mllMin           : "<<lcpet(n_pass_mllMin         , w, cw)<<endl;
     cout<<midRule                                                         <<endl;
     cout<<"pass flavor:          : "<<lcpet(n_pass_flavor         , w, cw)<<endl;
@@ -1141,6 +1143,7 @@ void SusySelection::resetAllCounters()
       n_pass_ss         [i][w] = 0;
       n_pass_tr2L       [i][w] = 0;
       n_pass_tr2LMatch  [i][w] = 0;
+      n_pass_mcTrue2l   [i][w] = 0;
       n_pass_category   [i][w] = 0;
       n_pass_nSigLep    [i][w] = 0;
       n_pass_tauVeto    [i][w] = 0;

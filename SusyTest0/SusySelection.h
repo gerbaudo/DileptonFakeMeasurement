@@ -327,6 +327,7 @@ class SusySelection : public SusyNtAna
     float n_pass_ss         [ET_N][WT_N];
     float n_pass_tr2L       [ET_N][WT_N];
     float n_pass_tr2LMatch  [ET_N][WT_N];
+    float n_pass_mcTrue2l   [ET_N][WT_N];
     float n_pass_category   [ET_N][WT_N];
     float n_pass_nSigLep    [ET_N][WT_N];
     float n_pass_tauVeto    [ET_N][WT_N];
