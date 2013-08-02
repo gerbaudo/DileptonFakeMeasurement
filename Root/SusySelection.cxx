@@ -296,11 +296,10 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   // Apply event selection cuts
   const LeptonVector &ls = leptons;
   const JetVector    &js = jets;
-  if(m_baseLeptons.size()==2 && m_signalLeptons.size()==2)
-    increment(n_pass_category[m_ET], lepSf, bSf); else return false;
+  bool validCategory(m_baseLeptons.size()==2 && m_signalLeptons.size()==2);
+  if(validCategory)                          increment(n_pass_category [m_ET], lepSf, bSf); else return false;
   if(passMllMin    (ls, mllMin))             increment(n_pass_mllMin   [m_ET], lepSf, bSf); else return false; //baseLeps
-  if(m_signalTaus.size()==0) increment(n_pass_tauVeto[m_ET], lepSf, bSf); else return false;
-
+  if(m_signalTaus.size()==0)                 increment(n_pass_tauVeto  [m_ET], lepSf, bSf); else return false;
   if(passMuonRelIso(ls, muIsoMax))           increment(n_pass_muIso    [m_ET], lepSf, bSf); else return false;
   if(passEleD0S    (ls, d0SMax))             increment(n_pass_elD0Sig  [m_ET], lepSf, bSf); else return false;
   if(passZllVeto   (ls, loMllZ, hiMllZ))     increment(n_pass_mllZveto [m_ET], lepSf, bSf); else return false;
