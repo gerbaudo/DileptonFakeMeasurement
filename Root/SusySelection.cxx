@@ -72,16 +72,9 @@ Bool_t SusySelection::Process(Long64_t entry)
   }
   bool removeLepsFromIso(false);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
-  if(!selectAnaEvent(m_signalLeptons, m_baseLeptons)) return kTRUE;
-  bool includeLepSF(false); //count(true);
-  // Check Signal regions
-  //passSR6(m_baseLeptons, m_signalJets2Lep, m_met, count);
-  //passSR7(m_baseLeptons, m_signalJets2Lep, m_met, count);
-  //passSR8(m_baseLeptons, m_signalJets2Lep, m_met, count);
-  //passSR9(m_baseLeptons, m_signalJets2Lep, m_met, count);
+  if(!selectEvent()) return kTRUE;
 
   m_ET = getDiLepEvtType(m_baseLeptons);
-
   passSrSs(m_ET, WH_SRSS1, m_baseLeptons, m_signalTaus, m_signalJets2Lep, m_met);
 
   return kTRUE;
@@ -98,47 +91,36 @@ void SusySelection::Terminate()
 /*--------------------------------------------------------------------------------*/
 // Full event selection
 /*--------------------------------------------------------------------------------*/
-bool SusySelection::selectEvent(bool doMll)
+bool SusySelection::selectEvent()
 {
   if(m_dbg) cout << "SusySelection::selectEvent" << endl;
   // Basic event cuts
   int flag = nt.evt()->cutFlags[NtSys_NOM];
   //int hdec = nt.evt()->hDecay;
-  JetVector &jets = m_baseJets;
-  JetVector &pjets = m_preJets;
+  const LeptonVector& bleps = m_baseLeptons;
+  const JetVector &jets = m_baseJets;
+  const JetVector &pjets = m_preJets;
   const Susy::Met *met = m_met;
   uint run = nt.evt()->run;
   bool mc = nt.evt()->isMC;
-  if(passGRL        (flag           ))  { increment(n_pass_Grl     ); } else { return false; }
-  if(passLarErr     (flag           ))  { increment(n_pass_LarErr  ); } else { return false; }
-  if(passTileErr    (flag           ))  { increment(n_pass_TileErr ); } else { return false; }
-  if(passTTCVeto    (flag           ))  { increment(n_pass_TTCVeto ); } else { return false; }
-  if(passGoodVtx    (flag           ))  { increment(n_pass_GoodVtx ); } else { return false; }
-  if(passTileTripCut(flag           ))  { increment(n_pass_TileTrip); } else { return false; }
-  if(passLAr        (flag           ))  { increment(n_pass_LAr     ); } else { return false; }
-  if(!hasBadJet     (jets           ))  { increment(n_pass_BadJet  ); } else { return false; }
-  if(passDeadRegions(pjets,met,run,mc)) { increment(n_pass_FEBCut  ); } else { return false; }
-  if(!hasBadMuon    (m_preMuons     ))  { increment(n_pass_BadMuon ); } else { return false; }
-  if(!hasCosmicMuon (m_baseMuons    ))  { increment(n_pass_Cosmic  ); } else { return false; }
-  if(passHfor       (               ))  { increment(n_pass_hfor    ); } else { return false; }
+  if(passGRL        (flag           ))  { increment(n_pass_Grl     );} else { return false; }
+  if(passLarErr     (flag           ))  { increment(n_pass_LarErr  );} else { return false; }
+  if(passTileErr    (flag           ))  { increment(n_pass_TileErr );} else { return false; }
+  if(passTTCVeto    (flag           ))  { increment(n_pass_TTCVeto );} else { return false; }
+  if(passGoodVtx    (flag           ))  { increment(n_pass_GoodVtx );} else { return false; }
+  if(passTileTripCut(flag           ))  { increment(n_pass_TileTrip);} else { return false; }
+  if(passLAr        (flag           ))  { increment(n_pass_LAr     );} else { return false; }
+  if(!hasBadJet     (jets           ))  { increment(n_pass_BadJet  );} else { return false; }
+  if(passDeadRegions(pjets,met,run,mc)) { increment(n_pass_FEBCut  );} else { return false; }
+  if(!hasBadMuon    (m_preMuons     ))  { increment(n_pass_BadMuon );} else { return false; }
+  if(!hasCosmicMuon (m_baseMuons    ))  { increment(n_pass_Cosmic  );} else { return false; }
+  if(passHfor       (               ))  { increment(n_pass_hfor    );} else { return false; }
   //if(passHtautauVeto(hdec)) { increment(n_pass_HttVeto ); } else { return false; }
+  if(bleps.size() >= 2               )  { increment(n_pass_atleast2Lep);} else { return false; }
+  if(bleps.size() == 2               )  { increment(n_pass_exactly2Lep);} else { return false; }
+  if(passMllMin(bleps, 20.))increment(n_pass_mll);         else return false;
   return true;
 }
-/*--------------------------------------------------------------------------------*/
-bool SusySelection::selectAnaEvent(const LeptonVector& leptons,
-                                   const LeptonVector& baseLeps)
-{
-
-  if(m_dbg) cout << "SusySelection::selectAnaEvent" << endl;
-  if( !selectEvent() )                     return false;
-  // Lepton Analysis cuts
-  if(baseLeps.size() >= 2)     increment(n_pass_atleast2Lep); else return false;
-  if(baseLeps.size() == 2)     increment(n_pass_exactly2Lep); else return false;
-  if(passMllMin(baseLeps, 20.))increment(n_pass_mll);         else return false;
-   //if(!(isFakeLepton(baseLeps[0]) || isFakeLepton(baseLeps[1]))) return false;
-  return true;
-}
-
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passSR6base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {

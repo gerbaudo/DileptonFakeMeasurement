@@ -287,7 +287,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   selectObjects();
 
   // Check Analysis level cuts
-  if( !selectAnaEvent(m_signalLeptons, m_baseLeptons) )    return kTRUE;
+  if( !selectEvent())    return kTRUE;
   // DG 26Feb : this needs to be understood.
   //--DG-- if( nt.evt()->isMC && !isTrueDilepton(m_signalLeptons) ) return kTRUE;
 

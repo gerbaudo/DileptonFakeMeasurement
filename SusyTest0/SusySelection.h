@@ -69,8 +69,7 @@ class SusySelection : public SusyNtAna
     virtual Bool_t  Process(Long64_t entry);
 
     // Full event selection. Specify which leptons to use.
-    bool selectEvent(bool doMll=true);
-    bool selectAnaEvent(cvl_t& leptons, cvl_t& baseLeptons);
+    bool selectEvent();
 
     // Signal regions
     bool passSR6base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
