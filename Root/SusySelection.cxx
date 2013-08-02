@@ -1138,15 +1138,16 @@ void SusySelection::resetAllCounters()
     n_pass_FEBCut     [w] = 0;
     n_pass_BadMuon    [w] = 0;
     n_pass_Cosmic     [w] = 0;
+    n_pass_hfor       [w] = 0;
     n_pass_HttVeto    [w] = 0;
     n_pass_atleast2Lep[w] = 0;
     n_pass_exactly2Lep[w] = 0;
+    n_pass_mll        [w] = 0;
     n_pass_signalLep  [w] = 0;
     for(int i=0; i<ET_N; ++i){ // loop over weight x channel.
       n_pass_flavor[i][w]   = 0;
       n_pass_evtTrig[i][w]     = 0;
       n_pass_trigMatch[i][w]   = 0;
-      n_pass_mll[i][w]         = 0;
       n_pass_ss[i][w]          = 0;
       n_pass_os[i][w]          = 0;
       // per-SR counters
@@ -1175,6 +1176,8 @@ void SusySelection::resetAllCounters()
       n_pass_SR9eq2jNfv[i][w] = n_pass_SR9ge2jNfv[i][w] = n_pass_SR9[i][w] = 0;
 
       n_pass_ss      [i][w] = 0;
+      n_pass_category[i][w] = 0;
+      n_pass_tauVeto [i][w] = 0;
       n_pass_mllMin  [i][w] = 0;
       n_pass_muIso   [i][w] = 0;
       n_pass_elD0Sig [i][w] = 0;
