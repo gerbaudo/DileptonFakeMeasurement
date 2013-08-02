@@ -83,8 +83,6 @@ Bool_t SusySelection::Process(Long64_t entry)
   //passSR8(m_baseLeptons, m_signalJets2Lep, m_met, count);
   //passSR9(m_baseLeptons, m_signalJets2Lep, m_met, count);
 
-  if(oppositeSign(m_signalLeptons)) return kTRUE;
-
   m_ET = getDiLepEvtType(m_baseLeptons);
   passSrSs(m_ET, WH_SRSS1, m_baseLeptons, m_signalTaus, m_signalJets2Lep, m_met);
 
@@ -300,6 +298,7 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   if(validCategory)                          increment(n_pass_category [m_ET], lepSf, bSf); else return false;
   if(passMllMin    (ls, mllMin))             increment(n_pass_mllMin   [m_ET], lepSf, bSf); else return false; //baseLeps
   if(m_signalTaus.size()==0)                 increment(n_pass_tauVeto  [m_ET], lepSf, bSf); else return false;
+  if(sameSign      (m_signalLeptons))        increment(n_pass_ss       [m_ET], lepSf, bSf); else return false;
   if(passMuonRelIso(ls, muIsoMax))           increment(n_pass_muIso    [m_ET], lepSf, bSf); else return false;
   if(passEleD0S    (ls, d0SMax))             increment(n_pass_elD0Sig  [m_ET], lepSf, bSf); else return false;
   if(passZllVeto   (ls, loMllZ, hiMllZ))     increment(n_pass_mllZveto [m_ET], lepSf, bSf); else return false;
@@ -1114,11 +1113,6 @@ void SusySelection::resetAllCounters()
     n_pass_mll        [w] = 0;
     n_pass_signalLep  [w] = 0;
     for(int i=0; i<ET_N; ++i){ // loop over weight x channel.
-      n_pass_flavor[i][w]   = 0;
-      n_pass_evtTrig[i][w]     = 0;
-      n_pass_trigMatch[i][w]   = 0;
-      n_pass_ss[i][w]          = 0;
-      n_pass_os[i][w]          = 0;
       // per-SR counters
       n_pass_SR6sign[i][w] = n_pass_SR6flav[i][w] = n_pass_SR6metr[i][w] = 0;
       n_pass_SR6ge1j[i][w] = n_pass_SR6ge2j[i][w] = n_pass_SR6eq2j[i][w] = 0;
@@ -1144,20 +1138,24 @@ void SusySelection::resetAllCounters()
       n_pass_SR9ge1j[i][w] = n_pass_SR9ge2j[i][w] = n_pass_SR9eq2j[i][w] = 0;
       n_pass_SR9eq2jNfv[i][w] = n_pass_SR9ge2jNfv[i][w] = n_pass_SR9[i][w] = 0;
 
-      n_pass_ss      [i][w] = 0;
-      n_pass_category[i][w] = 0;
-      n_pass_tauVeto [i][w] = 0;
-      n_pass_mllMin  [i][w] = 0;
-      n_pass_muIso   [i][w] = 0;
-      n_pass_elD0Sig [i][w] = 0;
-      n_pass_fjVeto  [i][w] = 0;
-      n_pass_bjVeto  [i][w] = 0;
-      n_pass_ge1j    [i][w] = 0;
-      n_pass_lepPt   [i][w] = 0;
-      n_pass_mllZveto[i][w] = 0;
-      n_pass_mWwt    [i][w] = 0;
-      n_pass_ht      [i][w] = 0;
-      n_pass_metRel  [i][w] = 0;
+      n_pass_flavor   [i][w] = 0;
+      n_pass_os       [i][w] = 0;
+      n_pass_ss       [i][w] = 0;
+      n_pass_evtTrig  [i][w] = 0;
+      n_pass_trigMatch[i][w] = 0;
+      n_pass_category [i][w] = 0;
+      n_pass_tauVeto  [i][w] = 0;
+      n_pass_mllMin   [i][w] = 0;
+      n_pass_muIso    [i][w] = 0;
+      n_pass_elD0Sig  [i][w] = 0;
+      n_pass_fjVeto   [i][w] = 0;
+      n_pass_bjVeto   [i][w] = 0;
+      n_pass_ge1j     [i][w] = 0;
+      n_pass_lepPt    [i][w] = 0;
+      n_pass_mllZveto [i][w] = 0;
+      n_pass_mWwt     [i][w] = 0;
+      n_pass_ht       [i][w] = 0;
+      n_pass_metRel   [i][w] = 0;
     } // end for(i)
   } // end for(w)
 }
