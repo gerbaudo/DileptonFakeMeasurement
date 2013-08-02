@@ -274,8 +274,7 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   // Apply event selection cuts
   const LeptonVector &ls = leptons;
   const JetVector    &js = jets;
-  bool validCategory(m_baseLeptons.size()==2 && m_signalLeptons.size()==2);
-  if(validCategory)                          increment(n_pass_category [m_ET], lepSf, bSf); else return false;
+  if(true)                                   increment(n_pass_category [m_ET], lepSf, bSf); else return false;
   if(passMllMin    (ls, mllMin))             increment(n_pass_mllMin   [m_ET], lepSf, bSf); else return false; //baseLeps
   if(m_signalTaus.size()==0)                 increment(n_pass_tauVeto  [m_ET], lepSf, bSf); else return false;
   if(sameSign      (m_signalLeptons))        increment(n_pass_ss       [m_ET], lepSf, bSf); else return false;
