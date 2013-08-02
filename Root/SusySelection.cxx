@@ -275,6 +275,7 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   const LeptonVector &ls = leptons;
   const JetVector    &js = jets;
   if(true)                                   increment(n_pass_category [ll], lepSf, bSf); else return false;
+  if(passNlepMin   (m_signalLeptons, 2)      increment(n_pass_signalLep[ll], lepSf, bSf); else return false;
   if(m_signalTaus.size()==0)                 increment(n_pass_tauVeto  [ll], lepSf, bSf); else return false;
   if(sameSign      (m_signalLeptons))        increment(n_pass_ss       [ll], lepSf, bSf); else return false;
   if(passMuonRelIso(ls, muIsoMax))           increment(n_pass_muIso    [ll], lepSf, bSf); else return false;
@@ -485,6 +486,23 @@ bool SusySelection::passHtMin(const LeptonVector& leptons,
                               float minVal)
 { // DG : SusyNtTools::Meff uses all leptons, all jets, and met; is this what we want?
   return (minVal < SusyNtTools::Meff(leptons, jets, met));
+}
+//----------------------------------------------------------
+bool SusySelection::passNlepMin(const LeptonVector &leptons, size_t minVal)
+{
+  return (leptons.size() >= minVal);
+  /*
+  // similar to Anyes' implementation
+  size_t nLep=0;
+  for(size_t i=0;i<leptons.size(); ++i){
+    if(const Susy::Lepton* l = leptons[i])
+      if(l->isMu() && fabs(l->Eta())>2.4) // DG20130802 Why? ask Anyes
+        return false;
+    nLep++;
+  }
+  return true;
+  */
+  return nLep>=minVal;
 }
 //----------------------------------------------------------
 bool SusySelection::passNj(const JetVector& jets, int minNj, int maxNj)
@@ -749,6 +767,8 @@ void SusySelection::dumpEventCounters()
     cout<<"   ------  Start Comparison Here ------ "                      <<endl;
     cout<<"For dilepton type     : "<<lineLabelsPerEventType(v_ET, cw)    <<endl;
     cout<<"pass category         : "<<lcpet(n_pass_category       , w, cw)<<endl;
+    cout<<"pass nSigLep          : "<<lcpet(n_pass_nSigLep        , w, cw)<<endl;
+    cout<<"pass tauVeto          : "<<lcpet(n_pass_tauVeto        , w, cw)<<endl;
     cout<<"pass mllMin           : "<<lcpet(n_pass_mllMin         , w, cw)<<endl;
     cout<<midRule                                                         <<endl;
     cout<<"pass flavor:          : "<<lcpet(n_pass_flavor         , w, cw)<<endl;
@@ -757,7 +777,6 @@ void SusySelection::dumpEventCounters()
     cout<<"pass OS:              : "<<lcpet(n_pass_os             , w, cw)<<endl;
     cout<<"pass SS:              : "<<lcpet(n_pass_ss             , w, cw)<<endl;
     cout<<midRule                                                         <<endl;
-    cout<<"pass tauVeto          : "<<lcpet(n_pass_tauVeto        , w, cw)<<endl;
     cout<<"pass muIso            : "<<lcpet(n_pass_muIso          , w, cw)<<endl;
     cout<<"pass elD0Sig          : "<<lcpet(n_pass_elD0Sig        , w, cw)<<endl;
     cout<<"pass mllZveto         : "<<lcpet(n_pass_mllZveto       , w, cw)<<endl;
@@ -1120,6 +1139,7 @@ void SusySelection::resetAllCounters()
       n_pass_evtTrig  [i][w] = 0;
       n_pass_trigMatch[i][w] = 0;
       n_pass_category [i][w] = 0;
+      n_pass_nSigLep  [i][w] = 0;
       n_pass_tauVeto  [i][w] = 0;
       n_pass_mllMin   [i][w] = 0;
       n_pass_muIso    [i][w] = 0;
