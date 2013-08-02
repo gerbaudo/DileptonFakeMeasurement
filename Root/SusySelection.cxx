@@ -741,7 +741,6 @@ void SusySelection::dumpEventCounters()
     cout<<"pass BadMu:           : "<<setw(cw)<<n_pass_BadMuon     [w]              <<endl;
     cout<<"pass Cosmic:          : "<<setw(cw)<<n_pass_Cosmic      [w]              <<endl;
     cout<<"pass hfor:            : "<<setw(cw)<<n_pass_hfor        [w]              <<endl;
-
     cout<<"pass Htautau veto     : "<<setw(cw)<<n_pass_HttVeto     [w]              <<endl;
     cout<<"pass atleast 2        : "<<setw(cw)<<n_pass_ge2l        [w]              <<endl;
     cout<<"pass exactly 2        : "<<setw(cw)<<n_pass_eq2l        [w]              <<endl;
