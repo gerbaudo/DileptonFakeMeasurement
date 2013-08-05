@@ -103,6 +103,8 @@ class SusySelection : public SusyNtAna
     bool sameFlavor(const LeptonVector& leptons);
     bool oppositeFlavor(const LeptonVector& leptons);
     bool sameSign(const LeptonVector& leptons);
+    //! for the SS selection we want to accept OS events with an el, for Qflip
+    bool sameSignOrEl(const LeptonVector& leptons, const DiLepEvtType eventType);
     bool oppositeSign(const LeptonVector& leptons);
     bool passMll(const LeptonVector& leptons, float mll = 20); // this one (by Matt) increments
     bool passHtautauVeto(int hdecay);

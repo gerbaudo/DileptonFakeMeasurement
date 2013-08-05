@@ -280,7 +280,7 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   if(passTrig2L     (m_signalLeptons))       increment(n_pass_tr2L     [ll], lepSf, bSf); else return false;
   if(passTrig2LMatch(m_signalLeptons))       increment(n_pass_tr2LMatch[ll], lepSf, bSf); else return false;
   if(isTrueDilepton(m_signalLeptons))        increment(n_pass_mcTrue2l [ll], lepSf, bSf); else return false;
-  if(sameSign      (m_signalLeptons))        increment(n_pass_ss       [ll], lepSf, bSf); else return false;
+  if(sameSignOrEl  (m_signalLeptons, ll))    increment(n_pass_ss       [ll], lepSf, bSf); else return false;
   if(passMuonRelIso(ls, muIsoMax))           increment(n_pass_muIso    [ll], lepSf, bSf); else return false;
   if(passEleD0S    (ls, d0SMax))             increment(n_pass_elD0Sig  [ll], lepSf, bSf); else return false;
   if(passfJetVeto  (js))                     increment(n_pass_fjVeto   [ll], lepSf, bSf); else return false;
@@ -360,6 +360,13 @@ bool SusySelection::sameSign(const LeptonVector& leptons)
 {
   if( leptons.size() < 2 ) return false;
   return leptons.at(0)->q * leptons.at(1)->q > 0;
+}
+/*--------------------------------------------------------------------------------*/
+bool SusySelection::sameSignOrEl(const LeptonVector& leptons,
+                                 const DiLepEvtType eventType)
+{
+  if(eventType==ET_ee || eventType==ET_em) return true;
+  else return sameSign(leptons);
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::oppositeSign(const LeptonVector& leptons)
