@@ -10,6 +10,7 @@
 #include "Mt2/mt2_bisect.h"
 #include "LeptonTruthTools/RecoTruthMatch.h" // provides RecoTruthMatch::
 #include "SusyNtuple/WhTruthExtractor.h"
+#include "ChargeFlip/chargeFlip.h"
 
 using namespace std;
 using namespace Susy;
@@ -34,6 +35,7 @@ SusySelection::SusySelection() :
   resetAllCounters();
   setAnaType(Ana_2Lep);
   setSelectTaus(true);
+  initChargeFlipTool();
 }
 void SusySelection::Begin(TTree* /*tree*/)
 {
@@ -86,6 +88,7 @@ void SusySelection::Terminate()
   if(m_dumpCounts)
     dumpEventCounters();
   if(m_xsReader) delete m_xsReader;
+  if(m_chargeFlip) delete m_chargeFlip;
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -1168,3 +1171,11 @@ void SusySelection::resetAllCounters()
     } // end for(i)
   } // end for(w)
 }
+//-----------------------------------------
+void SusySelection::initChargeFlipTool()
+{
+  string chargeFlipInput(getenv("WORKAREA"));
+  chargeFlipInput += "/ChargeFlip/data/chargeFlip.root";
+  m_chargeFlip = new chargeFlip(chargeFlipInput);
+}
+//-----------------------------------------

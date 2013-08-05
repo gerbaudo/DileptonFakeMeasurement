@@ -45,6 +45,9 @@ enum WH_SR {
   WH_SRN
 };
 
+// fw decl
+class chargeFlip;
+
 class SusySelection : public SusyNtAna
 {
 
@@ -222,6 +225,7 @@ class SusySelection : public SusyNtAna
     float getTriggerWeight2Lep(const LeptonVector &leptons);
     float getLeptonEff2Lep(const LeptonVector &leptons) const;
     void resetAllCounters();
+    void initChargeFlipTool();
     ClassDef(SusySelection, 1);
 
   protected:
@@ -232,6 +236,7 @@ class SusySelection : public SusyNtAna
     DilTrigLogic*       m_trigObj;      // My trigger logic class
     bool                m_useMCTrig;    // Use MC Trigger, i.e. toggle the matching in DilTrigLogic::passDil*()
 
+    chargeFlip*         m_chargeFlip;   //!< tool providing the electron charge flip probability
     string              m_fileName;     // File name
     float               m_w;            // mc weight
 
