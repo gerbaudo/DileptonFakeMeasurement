@@ -283,11 +283,11 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   if(sameSign      (m_signalLeptons))        increment(n_pass_ss       [ll], lepSf, bSf); else return false;
   if(passMuonRelIso(ls, muIsoMax))           increment(n_pass_muIso    [ll], lepSf, bSf); else return false;
   if(passEleD0S    (ls, d0SMax))             increment(n_pass_elD0Sig  [ll], lepSf, bSf); else return false;
-  if(passZllVeto   (ls, loMllZ, hiMllZ))     increment(n_pass_mllZveto [ll], lepSf, bSf); else return false;
   if(passfJetVeto  (js))                     increment(n_pass_fjVeto   [ll], lepSf, bSf); else return false;
   if(passbJetVeto  (js))                     increment(n_pass_bjVeto   [ll], lepSf, bSf); else return false;
-  if(passeq2Jet    (js))                     increment(n_pass_ge1j     [ll], lepSf, bSf); else return false;
+  if(passge1Jet    (js))                     increment(n_pass_ge1j     [ll], lepSf, bSf); else return false;
   if(pass2LepPt    (ls, ptL0Min, ptL1Min))   increment(n_pass_lepPt    [ll], lepSf, bSf); else return false;
+  if(passZllVeto   (ls, loMllZ, hiMllZ))     increment(n_pass_mllZveto [ll], lepSf, bSf); else return false;
   if(passMtLlMetMin(ls, met), mtwwMin)       increment(n_pass_mWwt     [ll], lepSf, bSf); else return false; // ? new_met ?
   if(passHtMin     (ls, js, met, htMin))     increment(n_pass_ht       [ll], lepSf, bSf); else return false; // ? new_met ?
   if(passMETRel    (met, ls, js, metRelMin)) increment(n_pass_metRel   [ll], lepSf, bSf); else return false; // ? new_met ?
@@ -776,15 +776,9 @@ void SusySelection::dumpEventCounters()
     cout<<"pass trig:            : "<<lcpet(n_pass_tr2L           , w, cw)<<endl;
     cout<<"pass trig match:      : "<<lcpet(n_pass_tr2LMatch      , w, cw)<<endl;
     cout<<"pass mc prompt2l      : "<<lcpet(n_pass_mcTrue2l       , w, cw)<<endl;
-    cout<<"pass mllMin           : "<<lcpet(n_pass_mllMin         , w, cw)<<endl;
-    cout<<midRule                                                         <<endl;
-    cout<<"pass flavor:          : "<<lcpet(n_pass_flavor         , w, cw)<<endl;
-    cout<<"pass OS:              : "<<lcpet(n_pass_os             , w, cw)<<endl;
     cout<<"pass SS:              : "<<lcpet(n_pass_ss             , w, cw)<<endl;
-    cout<<midRule                                                         <<endl;
     cout<<"pass muIso            : "<<lcpet(n_pass_muIso          , w, cw)<<endl;
     cout<<"pass elD0Sig          : "<<lcpet(n_pass_elD0Sig        , w, cw)<<endl;
-    cout<<"pass mllZveto         : "<<lcpet(n_pass_mllZveto       , w, cw)<<endl;
     cout<<"pass fjVeto           : "<<lcpet(n_pass_fjVeto         , w, cw)<<endl;
     cout<<"pass bjVeto           : "<<lcpet(n_pass_bjVeto         , w, cw)<<endl;
     cout<<"pass ge1j             : "<<lcpet(n_pass_ge1j           , w, cw)<<endl;
@@ -792,6 +786,12 @@ void SusySelection::dumpEventCounters()
     cout<<"pass mWwt             : "<<lcpet(n_pass_mWwt           , w, cw)<<endl;
     cout<<"pass ht               : "<<lcpet(n_pass_ht             , w, cw)<<endl;
     cout<<"pass metRel           : "<<lcpet(n_pass_metRel         , w, cw)<<endl;
+    cout<<midRule                                                         <<endl;
+    cout<<"pass mllMin           : "<<lcpet(n_pass_mllMin         , w, cw)<<endl;
+    cout<<"pass flavor:          : "<<lcpet(n_pass_flavor         , w, cw)<<endl;
+    cout<<"pass OS:              : "<<lcpet(n_pass_os             , w, cw)<<endl;
+    cout<<midRule                                                         <<endl;
+    cout<<"pass mllZveto         : "<<lcpet(n_pass_mllZveto       , w, cw)<<endl;
 
     /*
     cout<<"pass SR6 sign:        : "<<lcpet(n_pass_SR6sign        , w, cw)<<endl;
