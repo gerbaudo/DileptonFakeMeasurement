@@ -1101,6 +1101,33 @@ float SusySelection::computeMt2(const TLorentzVector &l0, const TLorentzVector &
   return mt2_event.get_mt2();
 }
 //-----------------------------------------
+float SusySelection::computeChargeFlipProb(cvl_t leptons, const Met* met,
+                                           uint systematic)
+{
+  cvl_t &ls = leptons;
+  if(ls.size()<2 || !ls[0] || !ls[1] || !met || !m_chargeFlip) return 0.0;
+  const Lepton *l0(ls[0]), *l1(ls[1]);
+  int pdg0(pdgIdFromLep(l0)), pdg1(pdgIdFromLep(l1));
+  TLorentzVector lv0(*l0), lv1(*l1);
+  TVector2 smearedMet(met->lv().Px(), met->lv().Py());
+  int sys(NtSys_NOM==systematic ? 0 : 0);
+  //(DGSys_BKGMETHOD_UP==systematic ? +1 : // DG todo : implement syst
+  // (DGSys_BKGMETHOD_DN==systematic ? -1 : 0)));
+  float flipProb(m_chargeFlip->OS2SS(pdg0, &lv0, pdg1, &lv1, &smearedMet, sys));
+  float overlapFrac(m_chargeFlip->overlapFrac().first);
+  // DG todo: update lepton pt and met et on the input objects
+  return flipProb*overlapFrac;
+}
+//-----------------------------------------
+int SusySelection::pdgIdFromLep(const Lepton *l)
+{
+  // particles have positive codes, see doi:10.1146/annurev.ns.25.120175.003011
+  int kPel(+13), kAel(-13), kPmu(+13), kAmu(-13), kUnknown(0);
+  if     (l->isEle()) return (l->q < 0 ? kPel : kAel);
+  else if(l->isMu() ) return (l->q < 0 ? kPmu : kAmu);
+  else                return kUnknown;
+}
+//-----------------------------------------
 void SusySelection::resetAllCounters()
 {
   for(int w=0; w<WT_N; ++w){// Loop over weight types
