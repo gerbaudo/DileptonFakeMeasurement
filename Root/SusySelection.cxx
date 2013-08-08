@@ -1201,8 +1201,13 @@ void SusySelection::resetAllCounters()
 //-----------------------------------------
 void SusySelection::initChargeFlipTool()
 {
-  string chargeFlipInput(getenv("WORKAREA"));
-  chargeFlipInput += "/ChargeFlip/data/chargeFlip.root";
+  char* rcdir = getenv("ROOTCOREDIR");
+  if(!rcdir){
+    if(m_dbg) cout<<"invalid ROOTCOREDIR, cannot initialize chargeFlipTool"<<endl;
+    return;
+  }
+  string chargeFlipInput(rcdir);
+  chargeFlipInput += "/../ChargeFlip/data/chargeFlip.root";
   m_chargeFlip = new chargeFlip(chargeFlipInput);
 }
 //-----------------------------------------
