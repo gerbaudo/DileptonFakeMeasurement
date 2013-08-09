@@ -534,6 +534,17 @@ float SusyPlotter::transverseMass(const TLorentzVector &lep, const TLorentzVecto
   return std::sqrt(2.0 * lep.Pt() * met.Et() *(1-cos(lep.DeltaPhi(met))) );
 }
 //----------------------------------------------------------
+float SusyPlotter::mtWW(const TLorentzVector &ll, const TLorentzVector &met)
+{
+  using std::sqrt;
+  float dphi = acos(cos(ll.Phi() - met.Phi()));
+  float mll(ll.M()), ptll(ll.Pt()), ptvv(met.Pt());
+  float mvv = (/*mvvTrue*/ true ? mll : 0.0);
+  return sqrt(mll*mll + mvv*mvv + 2.0*(sqrt  (ptll*ptll + mll*mll)
+                                       * sqrt(ptvv*ptvv + mvv*mvv)
+                                       - ptll * ptvv * cos(dphi)));
+}
+//----------------------------------------------------------
 float SusyPlotter::sumCosDeltaPhi(const TLorentzVector &l0, const TLorentzVector &l1,
 				  const TLorentzVector &met)
 {
