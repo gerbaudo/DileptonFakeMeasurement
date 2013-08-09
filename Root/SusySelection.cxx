@@ -250,11 +250,11 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   WH_SR sr = signalRegion;
   float muIsoMax = 0.1;
   float ptL0Min  = 30;
-  float ptL1Min  = 20;
+  float ptL1Min  = (ll==mm ? 0.0 : 20.0);
   float htMin    = ((ll==em || ll==mm) ? 200 : FLT_MIN);
   float d0SMax   = ((ll==ee || ll==em) ?   3 : FLT_MAX);
   bool applyMllZveto(ll==ee);
-  float mZ0(91.);
+  float mZ0(91.2);
   float loMllZ(applyMllZveto ? mZ0-10. : FLT_MAX);
   float hiMllZ(applyMllZveto ? mZ0+10. : FLT_MIN);
   float mllMin(20);
