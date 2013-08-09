@@ -251,7 +251,7 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   float muIsoMax = 0.1;
   float ptL0Min  = 30;
   float ptL1Min  = (ll==mm ? 0.0 : 20.0);
-  float htMin    = ((ll==em || ll==mm) ? 200 : FLT_MIN);
+  float htMin    = 200;
   float d0SMax   = ((ll==ee || ll==em) ?   3 : FLT_MAX);
   bool applyMllZveto(ll==ee);
   float mZ0(91.2);
