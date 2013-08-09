@@ -246,28 +246,28 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
                              const Met *met)
 {
   DiLepEvtType ll = eventType;
-  const DiLepEvtType ee(ET_ee), em(ET_em), mm(ET_mm);
+  const DiLepEvtType ee(ET_ee), em(ET_em), me(ET_me), mm(ET_mm);
   WH_SR sr = signalRegion;
   float muIsoMax = 0.1;
   float ptL0Min  = 30;
   float ptL1Min  = (ll==mm ? 0.0 : 20.0);
   float htMin    = 200;
-  float d0SMax   = ((ll==ee || ll==em) ?   3 : FLT_MAX);
+  float d0SMax   = (ll==ee || ll==em || ll==me ?   3 : FLT_MAX);
   bool applyMllZveto(ll==ee);
   float mZ0(91.2);
   float loMllZ(applyMllZveto ? mZ0-10. : FLT_MAX);
   float hiMllZ(applyMllZveto ? mZ0+10. : FLT_MIN);
   float mllMin(20);
   float mtwwMin = (ll==ee ? 150 :
-                    (ll==em ? 140 :
-                     (ll==mm ?
-                      (sr==WH_SRSS1 ? 100 :
-                       (sr==WH_SRSS2 ? 150 :
-                        (sr==WH_SRSS3 ? 200 :
-                         FLT_MIN))) :
+                   (ll==em || ll==me ? 140 :
+                    (ll==mm ?
+                     (sr==WH_SRSS1 ? 100 :
+                      (sr==WH_SRSS2 ? 150 :
+                       (sr==WH_SRSS3 ? 200 :
+                        FLT_MIN))) :
                       FLT_MIN)));
   float metRelMin = (ll==ee ? 50 :
-                     (ll==em ? 50 :
+                     (ll==em || ll==me ? 50 :
                       (ll==mm ?
                        (sr==WH_SRSS4 ? 50 : FLT_MIN) :
                        FLT_MIN)));
