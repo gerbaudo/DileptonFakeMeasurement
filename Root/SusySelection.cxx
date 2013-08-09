@@ -368,7 +368,7 @@ bool SusySelection::sameSign(const LeptonVector& leptons)
 bool SusySelection::sameSignOrEl(const LeptonVector& leptons,
                                  const DiLepEvtType eventType)
 {
-  if(eventType==ET_ee || eventType==ET_em) return true;
+  if(eventType==ET_ee || eventType==ET_em || eventType==ET_me) return true;
   else return sameSign(leptons);
 }
 /*--------------------------------------------------------------------------------*/
