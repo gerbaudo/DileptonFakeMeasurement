@@ -291,7 +291,7 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   if(passge1Jet    (js))                     increment(n_pass_ge1j     [ll], lepSf, bSf); else return false;
   if(pass2LepPt    (ls, ptL0Min, ptL1Min))   increment(n_pass_lepPt    [ll], lepSf, bSf); else return false;
   if(passZllVeto   (ls, loMllZ, hiMllZ))     increment(n_pass_mllZveto [ll], lepSf, bSf); else return false;
-  if(passMtLlMetMin(ls, met), mtwwMin)       increment(n_pass_mWwt     [ll], lepSf, bSf); else return false; // ? new_met ?
+  if(passMtLlMetMin(ls, met, mtwwMin))       increment(n_pass_mWwt     [ll], lepSf, bSf); else return false; // ? new_met ?
   if(passHtMin     (ls, js, met, htMin))     increment(n_pass_ht       [ll], lepSf, bSf); else return false; // ? new_met ?
   if(passMETRel    (met, ls, js, metRelMin)) increment(n_pass_metRel   [ll], lepSf, bSf); else return false; // ? new_met ?
   return false;
