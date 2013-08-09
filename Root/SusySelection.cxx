@@ -728,6 +728,7 @@ std::string lineLabelsPerEventType(const string *labels, int colWidth){
   std::ostringstream oss;
   for(int i=0; i<ET_N-1; ++i)
     oss<<std::setw(colWidth)<<labels[i];
+  oss<<std::setw(colWidth)<<"em+me";
   return oss.str();
 }
 // helper function: for a given weight type, write line with counts for each event type
@@ -741,6 +742,7 @@ std::string lineCountersPerEventType(const float cnt[ET_N][WT_N],
       //<<(raw ? std::fixed : "")
       //<<std::setprecision(precision)
        <<cnt[i][weightType];
+  oss<<std::setw(colWidth)<<(cnt[ET_em][weightType] + cnt[ET_me][weightType]);
   return oss.str();
 }
 void SusySelection::dumpEventCounters()
