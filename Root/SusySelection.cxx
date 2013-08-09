@@ -507,16 +507,17 @@ bool SusySelection::passHtMin(const LeptonVector& leptons,
 //----------------------------------------------------------
 bool SusySelection::passNlepMin(const LeptonVector &leptons, size_t minVal)
 {
-  return (leptons.size() >= minVal);
-  // -- // similar to Anyes' implementation
-  // -- size_t nLep=0;
-  // -- for(size_t i=0;i<leptons.size(); ++i){
-  // --   if(const Susy::Lepton* l = leptons[i])
-  // --     if(l->isMu() && fabs(l->Eta())>2.4) // DG20130802 Why? ask Anyes
-  // --       return false;
-  // --   nLep++;
-  // -- }
-  // -- return nLep>=minVal;
+  // return (leptons.size() >= minVal);
+  // DG we should define a m_signalLeptons2L instead
+  // similar to Anyes' implementation
+  size_t nLep=0;
+  for(size_t i=0;i<leptons.size(); ++i){
+    if(const Susy::Lepton* l = leptons[i])
+      if(l->isMu() && fabs(l->Eta())>2.4) // 2L muon trig, see Anyes' email 2013-08-02
+        return false;
+    nLep++;
+  }
+  return nLep>=minVal;
 }
 //----------------------------------------------------------
 bool SusySelection::passNj(const JetVector& jets, int minNj, int maxNj)
