@@ -1197,5 +1197,6 @@ void SusySelection::initChargeFlipTool()
   string chargeFlipInput(rcdir);
   chargeFlipInput += "/../ChargeFlip/data/chargeFlip.root";
   m_chargeFlip = new chargeFlip(chargeFlipInput);
+  if(m_dbg) m_chargeFlip->printSettings();
 }
 //-----------------------------------------
