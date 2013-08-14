@@ -184,8 +184,8 @@ class SusySelection : public SusyNtAna
     void printJet(const Jet* jet);
     static float computeMt2(const TLorentzVector &l0, const TLorentzVector &l1,
 			    const TLorentzVector &met);
-    float computeChargeFlipProb(cvl_t leptons, const Met* met,
-                                uint systematic=NtSys_NOM);
+    float computeChargeFlipProb(LeptonVector &leptons, Met &met,
+                                uint systematic, bool update4mom);
     static int pdgIdFromLep(const Lepton *l);
  protected:
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
