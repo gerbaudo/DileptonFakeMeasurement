@@ -41,11 +41,9 @@ void SusySelection::Begin(TTree* /*tree*/)
 {
   SusyNtAna::Begin(0);
   if(m_dbg) cout << "SusySelection::Begin" << endl;
-
-  string per = "Moriond";
-  if(m_do1fb) per = "A-B3";
-  if(m_doAD)  per = "A-D7";
-  m_trigObj = new DilTrigLogic(per,false/*No Reweight Utils!*/);
+  string period = "Moriond";
+  bool useReweightUtils = false;
+  m_trigObj = new DilTrigLogic(period, useReweightUtils);
   if(m_useMCTrig) m_trigObj->useMCTrigger();
   if( m_useXsReader ){
     m_xsReader = new XSReader();
@@ -89,6 +87,34 @@ void SusySelection::Terminate()
     dumpEventCounters();
   if(m_xsReader) delete m_xsReader;
   if(m_chargeFlip) delete m_chargeFlip;
+}
+
+void SusySelection::increment(float counters[],
+                              bool includeLepSF, bool includeBtag)
+{
+  float eventWeight = nt.evt()->w;
+  float pileup = nt.evt()->wPileup;
+  float lepSf = (includeLepSF ?
+                 m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF
+                 : 1.0);
+  float btag = includeBtag ? getBTagWeight(nt.evt()) : 1.0;
+  bool includeTrig(m_baseLeptons.size() == 2 && nt.evt()->isMC); //DG should be arg?
+  float trig = (includeTrig ?
+                m_trigObj->getTriggerWeight(m_baseLeptons,
+                                            nt.evt()->isMC,
+                                            m_met->Et,
+                                            m_signalJets2Lep.size(),
+                                            nt.evt()->nVtx,
+                                            NtSys_NOM)
+                : 1.0);
+  float all = getEventWeightFixed(nt.evt()->mcChannel,LUMI_A_L) *btag*trig*lepSf;
+  counters[WT_Raw ] += 1.0;
+  counters[WT_Evt ] += eventWeight;
+  counters[WT_PU  ] += eventWeight * pileup;
+  counters[WT_LSF ] += eventWeight * lepSf;
+  counters[WT_Btag] += eventWeight * btag;
+  counters[WT_Trig] += eventWeight * trig;
+  counters[WT_All ] += all;
 }
 
 /*--------------------------------------------------------------------------------*/
@@ -653,7 +679,8 @@ bool SusySelection::passEleD0S(const LeptonVector &leptons, float maxVal)
 }
 
 /*--------------------------------------------------------------------------------*/
-float SusySelection::getEvtWeight(const LeptonVector& leptons, bool includeBTag, bool includeTrig)
+float SusySelection::getEvtWeight(const LeptonVector& leptons,
+                                  bool includeBTag, bool includeTrig)
 {
   float weight = 1.0;
   bool useSumwMap(true);
@@ -749,8 +776,7 @@ std::string lineCountersPerEventType(const float cnt[ET_N][WT_N],
 void SusySelection::dumpEventCounters()
 {
   string v_ET[] = {"ee","mm","em","me"};
-  string v_WT[] = {"Raw","Event","Pileup","Pileup A-B3",
-                   "LeptonSF","btagSF","TrigSF","All A-B3", "All A-E"};
+  string v_WT[] = {"Raw","Event","Pileup","LeptonSF","btagSF","TrigSF","All"};
   int colWidth(10);
   int &cw = colWidth;
   using std::setw;

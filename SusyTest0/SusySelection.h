@@ -25,15 +25,13 @@
 
 enum WeightType
 {
-  WT_Raw = 0,   // weight = 1;
-  WT_Evt,       // weight = gen weight
-  WT_PU,        // weight = pileup weight
-  WT_PU1fb,     // weight = pileup weight for 1/fb
-  WT_LSF,       // weight = lepton SF
-  WT_Btag,      // weight = btag
-  WT_Trig,      // Trigger weight
-  WT_AllAB3,    // all weights for A-B3
-  WT_AllAE,     // all weights for A-E
+  WT_Raw = 0,   // raw counts
+  WT_Evt,       // include gen weight (from ntuple or xsreader)
+  WT_PU,        // include pileup weight
+  WT_LSF,       // include lepton scale factor
+  WT_Btag,      // include b-tag scale factor
+  WT_Trig,      // include trigger weight
+  WT_All,       // include all weights above
   WT_N
 };
 
@@ -178,38 +176,8 @@ class SusySelection : public SusyNtAna
       return 203169 <= run && run <= 203195;
     };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
-
-    // Method to increment the counters for the event weight types
-    void increment(float flag[], bool includeLepSF=false, bool includeBtag=false){
-      flag[WT_Raw]   += 1.0;
-      flag[WT_Evt]   += nt.evt()->w;
-      flag[WT_PU]    += nt.evt()->w * nt.evt()->wPileup;
-      flag[WT_PU1fb] += nt.evt()->w * nt.evt()->wPileupAB3;
-      flag[WT_LSF]   += (includeLepSF ?
-			 nt.evt()->w * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF :
-			 nt.evt()->w);
-      float btag = includeBtag ? getBTagWeight(nt.evt()) : 1.0;
-      flag[WT_Btag]  += nt.evt()->w * btag;
-
-      float trig = m_baseLeptons.size() == 2 && nt.evt()->isMC ?
-        m_trigObj->getTriggerWeight(m_baseLeptons,
-                                    nt.evt()->isMC,
-                                    m_met->Et,
-                                    m_signalJets2Lep.size(),
-                                    nt.evt()->nVtx,
-                                    NtSys_NOM) : 1;
-
-      //cout<<"\tTrigger weight: "<<trig<<endl;
-      flag[WT_Trig] += trig * nt.evt()->w;
-
-      float all = getEventWeightAB3() * btag * trig;
-      all = includeLepSF ? all * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : all;
-      flag[WT_AllAB3] += all;
-
-      float allAE = getEventWeightFixed(nt.evt()->mcChannel,LUMI_A_L) * btag * trig;
-      allAE = includeLepSF ? allAE * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : allAE;
-      flag[WT_AllAE] += allAE;
-    };
+    //! increment the counters for the all event weight types
+    void increment(float counters[], bool includeLepSF=false, bool includeBtag=false);
 
     // Miscellaneous methods
     void printLep(const Lepton* lep);
