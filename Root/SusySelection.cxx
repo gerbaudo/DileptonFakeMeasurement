@@ -392,11 +392,19 @@ bool SusySelection::sameSign(const LeptonVector& leptons)
   return leptons.at(0)->q * leptons.at(1)->q > 0;
 }
 /*--------------------------------------------------------------------------------*/
-bool SusySelection::sameSignOrEl(const LeptonVector& leptons,
-                                 const DiLepEvtType eventType)
+bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
+                                    const DiLepEvtType eventType,
+                                    bool update4mom)
 {
-  if(eventType==ET_ee || eventType==ET_em || eventType==ET_me) return true;
-  else return sameSign(leptons);
+  bool isSS(sameSign(leptons));
+  bool isOS(!isSS);
+  bool canBeQflip(isOS && (eventType==ET_ee || eventType==ET_em || eventType==ET_me));
+  if (!isSS && !canBeQflip) return false;
+  if(canBeQflip){
+    uint systematic=NtSys_NOM; // DG sys todo
+    m_qflipProb = computeChargeFlipProb(leptons, met, systematic, update4mom);
+  }
+  return true;
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::oppositeSign(const LeptonVector& leptons)

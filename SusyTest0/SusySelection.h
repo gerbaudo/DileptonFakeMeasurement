@@ -105,7 +105,13 @@ class SusySelection : public SusyNtAna
     bool oppositeFlavor(const LeptonVector& leptons);
     bool sameSign(const LeptonVector& leptons);
     //! for the SS selection we want to accept OS events with an el, for Qflip
-    bool sameSignOrEl(const LeptonVector& leptons, const DiLepEvtType eventType);
+    /*!  For MC events that are OS, but that we want to consider as SS
+      with some charge-flip probability, the 4-mom of the q-flipped
+      electron is modified if update4mom==true.
+     */
+    bool sameSignOrQflip(LeptonVector &leptons, Met &met,
+                         const DiLepEvtType eventType,
+                         bool update4mom);
     bool oppositeSign(const LeptonVector& leptons);
     bool passMll(const LeptonVector& leptons, float mll = 20); // this one (by Matt) increments
     bool passHtautauVeto(int hdecay);
