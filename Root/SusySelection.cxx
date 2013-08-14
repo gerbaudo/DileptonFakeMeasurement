@@ -1110,7 +1110,7 @@ float SusySelection::computeChargeFlipProb(cvl_t leptons, const Met* met,
 int SusySelection::pdgIdFromLep(const Lepton *l)
 {
   // particles have positive codes, see doi:10.1146/annurev.ns.25.120175.003011
-  int kPel(+13), kAel(-13), kPmu(+13), kAmu(-13), kUnknown(0);
+  int kPel(+11), kAel(-11), kPmu(+13), kAmu(-13), kUnknown(0);
   if     (l->isEle()) return (l->q < 0 ? kPel : kAel);
   else if(l->isMu() ) return (l->q < 0 ? kPmu : kAmu);
   else                return kUnknown;
