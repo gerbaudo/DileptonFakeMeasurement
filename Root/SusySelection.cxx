@@ -30,7 +30,8 @@ SusySelection::SusySelection() :
   m_nLepMin(2),
   m_nLepMax(2),
   m_cutNBaseLep(true),
-  m_ET(ET_Unknown)
+  m_ET(ET_Unknown),
+  m_qflipProb(0.0)
 {
   resetAllCounters();
   setAnaType(Ana_2Lep);

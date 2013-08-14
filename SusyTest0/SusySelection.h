@@ -224,7 +224,10 @@ class SusySelection : public SusyNtAna
     bool                m_cutNBaseLep;  // apply nLep cuts to baseline leptons as well as signal
 
     DiLepEvtType        m_ET;           // Dilepton event type to store cf
-
+    float               m_qflipProb;     //! charge flip probability
+    TLorentzVector      m_unsmeared_lv0; //! cached lepton LV before charge-flip smearing
+    TLorentzVector      m_unsmeared_lv1; //! see above
+    Met                 m_unsmeared_met; //! cached met before charge-flip smearing
     // Event counters
     float n_readin          [WT_N]; // [weight type]
     float n_pass_Grl        [WT_N];
