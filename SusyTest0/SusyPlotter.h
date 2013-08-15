@@ -90,12 +90,6 @@ class SusyPlotter : public SusySelection
 		    const float weight, PlotRegion PR = PR_NONE, uint sys = 0);
 
     //
-    // Define some additional plot regions
-    //
-
-    bool passZwindow(const LeptonVector& leps);
-
-    //
     // Miscellaneous methods
     //
 

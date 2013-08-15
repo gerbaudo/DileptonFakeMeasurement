@@ -516,18 +516,6 @@ void SusyPlotter::setSysts()
     cout<<"SusyPlotter::setSysts() : not implemented (DG Jan2013)"<<endl;
   }
 }
-
-
-/*--------------------------------------------------------------------------------*/
-// *** TEMPORARY ***
-/*--------------------------------------------------------------------------------*/
-bool SusyPlotter::passZwindow(const LeptonVector& leps)
-{
-  // Just require events to be in the Z window
-  if( passZVeto(leps) ) return false;
-  return true;
-
-}
 //----------------------------------------------------------
 float SusyPlotter::transverseMass(const TLorentzVector &lep, const TLorentzVector &met)
 {
