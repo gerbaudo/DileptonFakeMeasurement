@@ -116,7 +116,7 @@ class SusySelection : public SusyNtAna
     bool passHtautauVeto(int hdecay);
     // Signal Region Cuts
     bool passJetVeto(const JetVector& jets);
-    bool passMETRel(const Met *met, cvl_t &leptons, cvj_t &jets, float minVal = 50.0);
+    bool passMetRelMin(const Met *met, cvl_t &leptons, cvj_t &jets, float minVal);
     bool passbJetVeto(const JetVector& jets);
     bool passfJetVeto(const JetVector& jets);
     bool passge1Jet(const JetVector& jets);

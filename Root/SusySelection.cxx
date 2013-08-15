@@ -189,7 +189,7 @@ bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, 
   else return false;
   if( passMllMax(leptons) )                {if(count) increment(n_pass_SR6MllMax      [m_ET], lepSf, bSf);}
   else return false;
-  if( passMETRel(met, leptons, jets) )     {if(count) increment(n_pass_SR6METRel      [m_ET], lepSf, bSf);}
+  if(passMetRelMin(met,leptons,jets,50.0)) {if(count) increment(n_pass_SR6METRel      [m_ET], lepSf, bSf);}
   else return false;
   if( passMtLlMetMin(leptons, met) )       {if(count) increment(n_pass_SR6MtLlmetMin  [m_ET], lepSf, bSf);}
   else return false;
@@ -217,7 +217,7 @@ bool SusySelection::passSR7(const LeptonVector& leptons, const JetVector& jets, 
   else return false;
   if( passMllMax(leptons) )                {if(count) increment(n_pass_SR7MllMax      [m_ET], lepSf, bSf);}
   else return false;
-  if( passMETRel(met, leptons, jets) )     {if(count) increment(n_pass_SR7METRel      [m_ET], lepSf, bSf);}
+  if(passMetRelMin(met,leptons,jets,50.0)) {if(count) increment(n_pass_SR7METRel      [m_ET], lepSf, bSf);}
   else return false;
   if( passMtLlMetMin(leptons, met) )       {if(count) increment(n_pass_SR7MtLlmetMin  [m_ET], lepSf, bSf);}
   else return false;
@@ -240,7 +240,7 @@ bool SusySelection::passSR8(const LeptonVector& leptons, const JetVector& jets, 
   if( count && passge1Jet(jets) )                      increment(n_pass_SR8ge1j[m_ET],lepSf, bSf);
   if( passge2Jet(jets))                  {if( count ) increment(n_pass_SR8ge2j[m_ET],lepSf, bSf); }
   else return false;
-  if( passMETRel(met,leptons,jets,50.) ) {if( count ) increment(n_pass_SR8metr[m_ET],lepSf, bSf);}
+  if(passMetRelMin(met,leptons,jets,50.)){if( count ) increment(n_pass_SR8metr[m_ET],lepSf, bSf);}
   else return false;
   return true;
 }
@@ -255,7 +255,7 @@ bool SusySelection::passSR9(const LeptonVector& leptons, const JetVector& jets, 
   if( count && passge1Jet(jets) )                     increment(n_pass_SR9ge1j[m_ET],lepSf, bSf);
   if( passge2Jet(jets))                  {if( count ) increment(n_pass_SR9ge2j[m_ET],lepSf, bSf);}
   else return false;
-  if( passMETRel(met,leptons,jets,50.) ) {if( count ) increment(n_pass_SR9metr[m_ET],lepSf, bSf);}
+  if(passMetRelMin(met,leptons,jets,50.)){if( count ) increment(n_pass_SR9metr[m_ET],lepSf, bSf);}
   else return false;
   return true;
 }
@@ -325,7 +325,7 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   if(passZllVeto   (ncls, loMllZ, hiMllZ))   increment(n_pass_mllZveto [ll], lepSf, bSf); else return false;
   if(passMtLlMetMin(ncls, met, mtwwMin))     increment(n_pass_mWwt     [ll], lepSf, bSf); else return false;
   if(passHtMin     (ncls, js, met, htMin))   increment(n_pass_ht       [ll], lepSf, bSf); else return false;
-  if(passMETRel    (met,ncls,js,metRelMin))  increment(n_pass_metRel   [ll], lepSf, bSf); else return false;
+  if(passMetRelMin (met,ncls,js,metRelMin))  increment(n_pass_metRel   [ll], lepSf, bSf); else return false;
   return false;
 }
 /*--------------------------------------------------------------------------------*/
@@ -485,8 +485,8 @@ bool SusySelection::passeq2JetWoutFwVeto(const JetVector& jets)
   return (numberOfCLJets(jets) == 2 && numberOfCBJets(jets) < 1);
 }
 /*--------------------------------------------------------------------------------*/
-bool SusySelection::passMetRel(const Met *met, const LeptonVector& leptons,
-                               const JetVector& jets, float minVal){
+bool SusySelection::passMetRelMin(const Met *met, const LeptonVector& leptons,
+                                  const JetVector& jets, float minVal){
   return (minVal < getMetRel(met,leptons,jets));
 }
 /*--------------------------------------------------------------------------------*/
