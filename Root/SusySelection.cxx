@@ -417,12 +417,6 @@ bool SusySelection::oppositeSign(const LeptonVector& leptons)
   return !(sameSign(leptons));
 }
 /*--------------------------------------------------------------------------------*/
-bool SusySelection::passMll(const LeptonVector& leptons, float mll)
-{
-  if( leptons.size() < 2 ) return false;
-  if( (*leptons.at(0) + *leptons.at(1)).M() < mll ) return false;
-  return true;
-}
 bool SusySelection::passHtautauVeto(int hdecay)
 {
   return (hdecay!=WhTruthExtractor::kPtauAtau);
@@ -491,16 +485,7 @@ bool SusySelection::passeq2JetWoutFwVeto(const JetVector& jets)
   return (numberOfCLJets(jets) == 2 && numberOfCBJets(jets) < 1);
 }
 /*--------------------------------------------------------------------------------*/
-bool SusySelection::passZVeto(const LeptonVector& leptons, float Zlow, float Zhigh)
-{
-  if( leptons.size() < 2 )   return false;
-  //if( !sameFlavor(leptons) ) return true;
-  float mll = (*leptons.at(0) + *leptons.at(1)).M();
-  if( Zlow < mll && mll < Zhigh ) return false;
-  return true;
-}
-/*--------------------------------------------------------------------------------*/
-bool SusySelection::passMETRel(const Met *met, const LeptonVector& leptons,
+bool SusySelection::passMetRel(const Met *met, const LeptonVector& leptons,
                                const JetVector& jets, float minVal){
   return (minVal < getMetRel(met,leptons,jets));
 }

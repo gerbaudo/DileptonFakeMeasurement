@@ -113,13 +113,10 @@ class SusySelection : public SusyNtAna
                          const DiLepEvtType eventType,
                          bool update4mom);
     bool oppositeSign(const LeptonVector& leptons);
-    bool passMll(const LeptonVector& leptons, float mll = 20); // this one (by Matt) increments
     bool passHtautauVeto(int hdecay);
     // Signal Region Cuts
     bool passJetVeto(const JetVector& jets);
-    bool passZVeto(const LeptonVector& leptons, float Zlow = 81.2, float Zhigh = 101.2);
     bool passMETRel(const Met *met, cvl_t &leptons, cvj_t &jets, float minVal = 50.0);
-
     bool passbJetVeto(const JetVector& jets);
     bool passfJetVeto(const JetVector& jets);
     bool passge1Jet(const JetVector& jets);
