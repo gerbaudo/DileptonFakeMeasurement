@@ -99,9 +99,6 @@ void SusyPlotter::Begin(TTree* /*tree*/)
   SusySelection::Begin(0);
   if(m_dbg) cout << "SusyPlotter::Begin" << endl;
 
-  // Do not dump the event counts
-  m_dumpCounts = false;
-
   // systematics
   setSysts();
 
@@ -270,8 +267,6 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   // Communicate tree entry number to SusyNtObject
   GetEntry(entry);
   clearObjects();
-
-  if(m_do1fb && !is1fb()){ return kTRUE; }
 
   // Chain entry not the same as tree entry
   static Long64_t chainEntry = -1;

@@ -44,7 +44,6 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
 {
   GetEntry(entry);
   clearObjects();
-  if(m_do1fb && !is1fb()) return kTRUE;
   static Long64_t chainEntry = -1;
   chainEntry++;
   if(m_dbg || chainEntry%50000==0)

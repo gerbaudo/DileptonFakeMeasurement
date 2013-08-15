@@ -59,8 +59,6 @@ int main(int argc, char** argv)
   int nEvt = -1;
   int nSkip = 0;
   int dbg = 0;
-  bool use1fb = false;
-  bool useAD  = false;
   bool useSusyXSReader = false;
   string sample;
   string file;
@@ -86,10 +84,6 @@ int main(int argc, char** argv)
       fileDir = argv[++i];
     else if (strcmp(argv[i], "-s") == 0)
       sample = argv[++i];
-    else if (strcmp(argv[i], "--1fb") == 0)
-      use1fb = true;
-    else if (strcmp(argv[i], "--AD") == 0)
-      useAD = true;
     else if (strcmp(argv[i], "--WH-sample") == 0) useSusyXSReader = true;
     //if (strcmp(argv[i], "-h") == 0)
     else
@@ -112,8 +106,6 @@ int main(int argc, char** argv)
 
   cout << "flags:" << endl;
   cout << "  sample           " << sample          << endl;
-  cout << "  use 1fb          " << use1fb          << endl;
-  cout << "  use A-D          " << useAD           << endl;
   cout << "  useSusyXSReader  " << useSusyXSReader << endl;
   cout << "  nEvt             " << nEvt            << endl;
   cout << "  nSkip            " << nSkip           << endl;
@@ -136,9 +128,6 @@ int main(int argc, char** argv)
   SusyPlotter* susyPlot = new SusyPlotter();
   susyPlot->setDebug(dbg);
   susyPlot->setSampleName(sample);
-  susyPlot->setFileName(fname);
-  susyPlot->setUse1fb(use1fb);
-  susyPlot->setUseAD(useAD);
   susyPlot->setUseXsReader(useSusyXSReader);
 
   susyPlot->buildSumwMap(chain);

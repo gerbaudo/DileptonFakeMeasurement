@@ -123,7 +123,6 @@ int main(int argc, char** argv)
   SusySelection* susyAna = new SusySelection();
   susyAna->setDebug(dbg);
   susyAna->setSampleName(sample);
-  susyAna->setFileName(fname);
   //susyAna->setSelection(sel);
 
   susyAna->buildSumwMap(chain);

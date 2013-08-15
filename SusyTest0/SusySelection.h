@@ -64,8 +64,8 @@ class SusySelection : public SusyNtAna
     virtual void    Begin(TTree *tree); //!< called before looping on entries
     virtual void    Terminate(); //!< called after looping is finished
     virtual Bool_t  Process(Long64_t entry); //!< called at each event
+    virtual void dumpEventCounters();
     bool selectEvent(); //!< event selection  based on event qtities (mostly...)
-
     // Signal regions
     bool passSR6base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
     bool passSR7base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
@@ -90,8 +90,6 @@ class SusySelection : public SusyNtAna
                   cvl_t &l, cvt_t &t, cvj_t &j, const Met* m);
     // Cut methods
     bool passHfor();
-    bool passNLepCut(const LeptonVector& leptons);
-    bool passNBaseLepCut(const LeptonVector& baseLeptons);
     bool passTrig2L(const LeptonVector& leptons);
     bool passTrig2LMatch(const LeptonVector& leptons);
     bool passTrig2LwithMatch(const LeptonVector& leptons);
@@ -145,42 +143,14 @@ class SusySelection : public SusyNtAna
     bool passMuonRelIso(const LeptonVector &leptons, float maxVal);
     bool passEleD0S(const LeptonVector &leptons, float maxVal);
 
-    // Dump cutflow - if derived class uses different cut ordering,
-    // override this method
-    virtual void dumpEventCounters();
-    void dumpInterestingEvents(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    void dumpTrigFlag(uint flag);
-
-    // debug check
-    bool debugEvent();
-    void dumpPreObjects();
-    void dumpJets();
-    void checkSys();
-
-    // Save file name for easy writing
-    void setFileName(string f){ m_fileName = f; };
-    string getFileName(){ return m_fileName; };
     //! method that should be used to fill the histos
     float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true);
-
-    // Some controls
-    void setUse1fb(bool use1fb){ m_do1fb = use1fb; };
-    bool is1fb(){ return isPeriodAB3(nt.evt()->run); };
-    void setUseAD(bool useAD){ m_doAD = useAD; };
     void setUseXsReader(bool val){ m_useXsReader = val; };
-    bool isB3(){
-      uint run = nt.evt()->run;
-      return 203169 <= run && run <= 203195;
-    };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
     //! increment the counters for the all event weight types
     void increment(float counters[], bool includeLepSF=false, bool includeBtag=false);
-
-    // Miscellaneous methods
-    void printLep(const Lepton* lep);
-    void printJet(const Jet* jet);
     static float computeMt2(const TLorentzVector &l0, const TLorentzVector &l1,
-			    const TLorentzVector &met);
+                            const TLorentzVector &met);
     float computeChargeFlipProb(LeptonVector &leptons, Met &met,
                                 uint systematic, bool update4mom);
     static int pdgIdFromLep(const Lepton *l);
@@ -203,23 +173,10 @@ class SusySelection : public SusyNtAna
 
     DilTrigLogic*       m_trigObj;      // My trigger logic class
     bool                m_useMCTrig;    // Use MC Trigger, i.e. toggle the matching in DilTrigLogic::passDil*()
-
     chargeFlip*         m_chargeFlip;   //!< tool providing the electron charge flip probability
-    string              m_fileName;     // File name
     float               m_w;            // mc weight
-
-    bool                m_do1fb;        // For get weight method
-    bool                m_doAD;         // do weights for A-B
     bool                m_useXsReader;  // use SusyXSReader to get the xsec for normalization
     float               m_xsFromReader; // cached xsec from reader
-
-    bool                m_dumpCounts;   // Flag to dump counters
-
-    // Cut variables
-    float                m_nLepMin;      // min leptons
-    float                m_nLepMax;      // max leptons
-    bool                m_cutNBaseLep;  // apply nLep cuts to baseline leptons as well as signal
-
     DiLepEvtType        m_ET;           // Dilepton event type to store cf
     float               m_qflipProb;     //! charge flip probability
     TLorentzVector      m_unsmeared_lv0; //! cached lepton LV before charge-flip smearing

@@ -40,9 +40,6 @@ void help()
   cout << "  -s sample name, for naming files"  << endl;
   cout << "     defaults: ntuple sample name"   << endl;
 
-  cout << "  --1fb to use the 1/fb mc weights"  << endl;
-  cout << "     defualt is false"               << endl;
-
   cout << "  --mcfake to do mc closure test "   << endl;
 
   cout << "  -h print this help"                << endl;
@@ -55,7 +52,6 @@ int main(int argc, char** argv)
   int nEvt = -1;
   int nSkip = 0;
   int dbg = 0;
-  bool use1fb = false;
   bool doMCFake = false;
   string sample;
   string file;
@@ -81,8 +77,6 @@ int main(int argc, char** argv)
       fileDir = argv[++i];
     else if (strcmp(argv[i], "-s") == 0)
       sample = argv[++i];
-    else if (strcmp(argv[i], "--1fb") == 0)
-      use1fb = true;
     else if (strcmp(argv[i], "--mcfake") == 0)
       doMCFake = true;
     //if (strcmp(argv[i], "-h") == 0)
@@ -97,23 +91,14 @@ int main(int argc, char** argv)
   if(file.empty() && fileList.empty() && fileDir.empty() && !sample.empty())
     fileList = "files/" + sample + ".txt";
 
-  // Save the file name
-  string fname = "default";
-  if( !(fileList.empty()) ){
-    int pos = fileList.find(".txt");
-    fname = fileList.substr(0,pos);
-  }
-
   cout << "flags:" << endl;
   cout << "  sample  " << sample   << endl;
-  cout << "  use 1fb " << use1fb   << endl;
   cout << "  nEvt    " << nEvt     << endl;
   cout << "  nSkip   " << nSkip    << endl;
   cout << "  dbg     " << dbg      << endl;
   if(!file.empty())     cout << "  input   " << file     << endl;
   if(!fileList.empty()) cout << "  input   " << fileList << endl;
   if(!fileDir.empty())  cout << "  input   " << fileDir  << endl;
-  cout << "  output  " << fname    << endl;
   cout << endl;
 
   // Build the input chain
@@ -129,8 +114,6 @@ int main(int argc, char** argv)
   fakePred->buildSumwMap(chain);
   fakePred->setDebug(dbg);
   fakePred->setSampleName(sample);
-  fakePred->setFileName(fname);
-  fakePred->setUse1fb(use1fb);
   // Run the job
   if(nEvt<0) nEvt = nEntries;
   cout << endl;

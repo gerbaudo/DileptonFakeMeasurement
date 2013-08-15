@@ -20,16 +20,9 @@ SusySelection::SusySelection() :
   m_xsReader(NULL),
   m_trigObj(NULL),
   m_useMCTrig(false),
-  m_fileName("default"),
   m_w(1.0),
-  m_do1fb(false),
-  m_doAD(false),
   m_useXsReader(false),
   m_xsFromReader(-1.0),
-  m_dumpCounts(true),
-  m_nLepMin(2),
-  m_nLepMax(2),
-  m_cutNBaseLep(true),
   m_ET(ET_Unknown),
   m_qflipProb(0.0)
 {
@@ -84,8 +77,7 @@ void SusySelection::Terminate()
 {
   SusyNtAna::Terminate();
   if(m_dbg) cout << "SusySelection::Terminate" << endl;
-  if(m_dumpCounts)
-    dumpEventCounters();
+  dumpEventCounters();
   if(m_xsReader) delete m_xsReader;
   if(m_chargeFlip) delete m_chargeFlip;
 }
@@ -334,31 +326,6 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
 bool SusySelection::passHfor()
 {
   if(nt.evt()->hfor == 4 ) return false;
-  return true;
-}
-/*--------------------------------------------------------------------------------*/
-bool SusySelection::passNLepCut(const LeptonVector& leptons)
-{
-  uint nLep = leptons.size();
-  if(m_nLepMin>=0 && nLep < m_nLepMin) return false;
-  if(m_nLepMax>=0 && nLep > m_nLepMax) return false;
-  increment(n_pass_signalLep); //+=m_w;
-  increment(n_pass_flavor[m_ET]);
-
-  // To stay inline with Anders' cutflow
-  if(m_ET == ET_me) increment(n_pass_flavor[ET_em],true);
-  if(m_ET == ET_em) increment(n_pass_flavor[ET_me],true);
-
-  return true;
-}
-/*--------------------------------------------------------------------------------*/
-bool SusySelection::passNBaseLepCut(const LeptonVector& baseLeptons)
-{
-  if(m_cutNBaseLep){
-    uint nLep = baseLeptons.size();
-    if(m_nLepMin>=0 && nLep < m_nLepMin) return false;
-    if(m_nLepMax>=0 && nLep > m_nLepMax) return false;
-  }
   return true;
 }
 /*--------------------------------------------------------------------------------*/
@@ -833,229 +800,6 @@ void SusySelection::dumpEventCounters()
   }// end for(w)
 }
 
-/*--------------------------------------------------------------------------------*/
-void SusySelection::dumpPreObjects()
-{
-  ElectronVector preElectrons = getPreElectrons(&nt, NtSys_NOM);
-  MuonVector preMuons = getPreMuons(&nt, NtSys_NOM);
-  JetVector preJets = getPreJets(&nt, NtSys_NOM);
-  cout<<"Pre Electrons: "<<preElectrons.size()<<endl;
-  for(uint ie=0; ie<preElectrons.size(); ++ie){ preElectrons[ie]->print(); }
-  cout<<endl;
-  cout<<"Pre Muons: "<<preMuons.size()<<endl;
-  for(uint im=0; im<preMuons.size(); ++im){ preMuons[im]->print(); }
-  cout<<endl;
-  cout<<"Pre Jets: "<<preJets.size()<<endl;
-  for(uint ij=0; ij<preJets.size(); ++ij){ preJets[ij]->print(); }
-}
-/*--------------------------------------------------------------------------------*/
-// Dump Jets with more information
-/*--------------------------------------------------------------------------------*/
-void SusySelection::dumpJets()
-{
-  cout<<"Jets:"<<endl;
-  for(uint j=0; j<m_signalJets2Lep.size(); ++j){ m_signalJets2Lep.at(j)->print(); }
-}
-/*--------------------------------------------------------------------------------*/
-// Method for checking systematics
-/*--------------------------------------------------------------------------------*/
-void SusySelection::checkSys()
-{
-
-  bool electronSys = false;
-  bool muonSys = false; //false;
-  bool jetSys = false;
-  bool metSys = true; //true;
-  bool effSys = false; //true; //true;
-  cout<<endl;
-  cout<<"*********************************************"<<endl;
-  cout<<"Run: "<<nt.evt()->run<<" Event: "<<nt.evt()->event<<endl;
-  // Electron systematics
-  if(electronSys){
-    for(uint i=0; i<m_signalLeptons.size(); ++i){
-      if( !m_signalLeptons.at(i)->isEle() ) continue;
-      const Electron* lep = (Electron*) m_signalLeptons.at(i);
-      cout<<"Electron Pt: "<<lep->Pt()<<" Eta: "<<lep->Eta()<<" Phi: "<<lep->Phi()<<endl;
-      cout<<"\tEnergy Scale Z Up:            "<<lep->Pt() * lep->ees_z_up<<endl;
-      cout<<"\tEnergy Scale Z Down:          "<<lep->Pt() * lep->ees_z_dn<<endl;
-      cout<<"\tEnergy Scale Material Up:     "<<lep->Pt() * lep->ees_mat_up<<endl;
-      cout<<"\tEnergy Scale Material Down:   "<<lep->Pt() * lep->ees_mat_dn<<endl;
-      cout<<"\tEnergy Scale Presampler Up:   "<<lep->Pt() * lep->ees_ps_up<<endl;
-      cout<<"\tEnergy Scale Presampler Down: "<<lep->Pt() * lep->ees_ps_dn<<endl;
-      cout<<"\tEnergy Scale Low Pt Up:       "<<lep->Pt() * lep->ees_low_up<<endl;
-      cout<<"\tEnergy Scale Low Pt Down:     "<<lep->Pt() * lep->ees_low_dn<<endl;
-      cout<<"\tEnergy Resolution Up:         "<<lep->Pt() * lep->eer_up<<endl;
-      cout<<"\tEnergy Resolution Down:       "<<lep->Pt() * lep->eer_dn<<endl;
-      cout<<endl;
-    }// end loop over leptons
-  } // end electron sys
-  // Muon Systematics
-  if(muonSys){
-    for(uint i=0; i<m_signalLeptons.size(); ++i){
-      if( m_signalLeptons.at(i)->isEle() ) continue;
-      const Muon* lep = (Muon*) m_signalLeptons.at(i);
-      cout<<"Muon Pt: "<<lep->Pt()<<" Eta: "<<lep->Eta()<<" Phi: "<<lep->Phi()<<endl;
-      cout<<"\tMuon MS Up:   "<<lep->Pt() * lep->ms_up<<endl;
-      cout<<"\tMuon MS Down: "<<lep->Pt() * lep->ms_dn<<endl;
-      cout<<"\tMuon ID Up:   "<<lep->Pt() * lep->id_up<<endl;
-      cout<<"\tMuon ID Down: "<<lep->Pt() * lep->id_dn<<endl;
-      cout<<endl;
-    }
-  }// end muon sys
-
-  // Jet Systematics
-  if(jetSys){
-    if(m_signalJets2Lep.size() > 0) cout<<"-----------------------------------"<<endl;
-    for(uint i=0; i<m_signalJets2Lep.size(); ++i){
-      const Jet* jet = m_signalJets2Lep.at(i);
-      cout<<"Jet Pt: "<<jet->Pt()<<" Eta: "<<jet->Eta()<<" Phi: "<<jet->Phi()<<endl;
-      cout<<"\t JES Up:   "<<jet->Pt() * jet->jes_up<<endl;
-      cout<<"\t JES Down: "<<jet->Pt() * jet->jes_dn<<endl;
-      cout<<"\t JER:      "<<jet->Pt() * jet->jer<<endl;
-      cout<<endl;
-    }// end loop over jets
-  }// end if jet sys
-
-  // Print Met info for all the shifts
-  if(metSys){
-    #define printMet(met) cout<<" Et: "<<met->Et<<" Phi: "<<met->phi<<endl;
-    cout<<"Met Systematics:"<<endl;
-    for(int i=NtSys_SCALEST_UP; i<NtSys_TRIGSF_EL_UP; ++i){
-      cout<<"\t"<<i<<endl;
-      const Met* tmp_met = getMet(&nt, (SusyNtSys) i);
-      if(i == NtSys_NOM)            { cout<<"\tNominal:                         "; printMet(tmp_met); }
-      else if(i == NtSys_EES_Z_UP)  { cout<<"\tEl Energy Scale Z UP:            "; printMet(tmp_met); }
-      else if(i == NtSys_EES_Z_DN)  { cout<<"\tEl Energy Scale Z Down:          "; printMet(tmp_met); }
-      else if(i == NtSys_EES_MAT_UP){ cout<<"\tEl Energy Scale Material UP:     "; printMet(tmp_met); }
-      else if(i == NtSys_EES_MAT_DN){ cout<<"\tEl Energy Scale Material Down:   "; printMet(tmp_met); }
-      else if(i == NtSys_EES_PS_UP) { cout<<"\tEl Energy Scale PreSampler UP:   "; printMet(tmp_met); }
-      else if(i == NtSys_EES_PS_DN) { cout<<"\tEl Energy Scale PreSampler Down: "; printMet(tmp_met); }
-      else if(i == NtSys_EES_LOW_UP){ cout<<"\tEl Energy Scale Low Pt UP:       "; printMet(tmp_met); }
-      else if(i == NtSys_EES_LOW_DN){ cout<<"\tEl Energy Scale Low Pt Down:     "; printMet(tmp_met); }
-      else if(i == NtSys_EER_UP)    { cout<<"\tEl Energy Resolution UP:         "; printMet(tmp_met); }
-      else if(i == NtSys_EER_DN)    { cout<<"\tEl Energy Resolution Down:       "; printMet(tmp_met); }
-      else if(i == NtSys_JES_UP)    { cout<<"\tJet Energy Scale UP:             "; printMet(tmp_met); }
-      else if(i == NtSys_JES_DN)    { cout<<"\tJet Energy Scale Down:           "; printMet(tmp_met); }
-      else if(i == NtSys_JER)       { cout<<"\tJet Energy Resolution:           "; printMet(tmp_met); }
-      else if(i == NtSys_SCALEST_UP){ cout<<"\tMet Scale Soft Term UP:          "; printMet(tmp_met); }
-      else if(i == NtSys_SCALEST_DN){ cout<<"\tMet Scale Soft Term Down:        "; printMet(tmp_met); }
-      else if(i == NtSys_RESOST)    { cout<<"\tMet Resolution Soft Term:        "; printMet(tmp_met); }
-
-    }
-    #undef printMet
-  }// end if met sys
-
-  if(effSys){
-    float elEff = 1;
-    float elEffUp = 1;
-    float elEffDn = 1;
-    float muEff = 1;
-    float muEffUp = 1;
-    float muEffDn = 1;
-    for(uint i=0; i<m_signalLeptons.size(); ++i){
-      const Lepton* lep = m_signalLeptons.at(i);
-      if(lep->isEle()){
-        elEff   *= lep->effSF;
-        elEffUp *= (lep->effSF + lep->errEffSF);
-        elEffDn *= (lep->effSF - lep->errEffSF);
-      }
-      else{
-        muEff   *= lep->effSF;
-        muEffUp *= (lep->effSF + lep->errEffSF);
-        muEffDn *= (lep->effSF - lep->errEffSF);
-        cout<<"Error: "<<lep->errEffSF<<endl;
-      }
-    }// end loop over leptons
-
-    cout<<"Efficiency Systematics:"<<endl;
-    cout<<"\tNominal:     "<<elEff*muEff<<endl;
-    cout<<"\tEl Eff Up:   "<<elEffUp * muEff<<endl;
-    cout<<"\tEl Eff Down: "<<elEffDn * muEff<<endl;
-    cout<<"\tMu Eff Up:   "<<elEff   * muEffUp<<endl;
-    cout<<"\tMu Eff Down: "<<elEff   * muEffDn<<endl;
-  }// end if efficiency sys
-}
-/*--------------------------------------------------------------------------------*/
-// Debug event
-/*--------------------------------------------------------------------------------*/
-bool SusySelection::debugEvent()
-{
-  uint run = nt.evt()->run;
-  uint evt = nt.evt()->event;
-  if(run == 0 && evt == 0) return true;
-  return false;
-}
-/*--------------------------------------------------------------------------------*/
-// Dump interesting events
-/*--------------------------------------------------------------------------------*/
-void SusySelection::dumpInterestingEvents(const LeptonVector& leptons,
-                                          const JetVector& jets,
-                                          const Met* met)
-{
-  // Look for 1 jet, SS muons, 90-120 GeV
-  if(!sameSign(leptons)) return;
-  if(!(leptons[0]->isMu() && leptons[1]->isMu())) return;
-  float mll = Mll(leptons[0],leptons[1]);
-  if(!(100 < mll && mll < 110)) return;
-  if(jets.size() != 1) return;
-  if( met->Et < 40 ) return;
-  out<<"-----------------------------------------------"<<endl;
-  out<<"Run: "<<nt.evt()->run<<" Event: "<<nt.evt()->event<<endl;
-  out<<"Mll "<<mll<<" Met: "<<met->Et<<endl;
-  out<<"Signal Leptons: "<<endl;
-  for(uint i=0; i<leptons.size(); ++i){
-    out<<"Lepton "<<i<<endl;
-    printLep(leptons[i]);
-  }
-  out<<"++++++++++++++++++++++"<<endl;
-  out<<"Pre Leptons: "<<endl;
-  ElectronVector elecs = getPreElectrons(&nt, NtSys_NOM);
-  MuonVector muons     = getPreMuons(&nt, NtSys_NOM);
-  TauVector taus       = getPreTaus(&nt, NtSys_NOM);
-  for(uint i=0; i<elecs.size(); ++i){ out<<"Pre Electron: "<<i<<endl; printLep((Lepton*) elecs[i]); }
-  for(uint i=0; i<muons.size(); ++i){ out<<"Pre Muons: "<<i<<endl; printLep((Lepton*) muons[i]); }
-  for(uint i=0; i<taus.size(); ++i){ out<<"Pre Taus: "<<i<<endl; printLep((Lepton*) taus[i]); }
-  out<<"++++++++++++++++++++++"<<endl;
-  out<<"N Signal Jets"<<jets.size()<<endl;
-  for(uint i=0; i<jets.size(); ++i){ out<<"Jet: "<<i<<endl; printJet(jets[i]); }
-  out<<"++++++++++++++++++++++"<<endl;
-  JetVector prejets = getPreJets(&nt, NtSys_NOM);
-  out<<"N Pre Jets"<<prejets.size()<<endl;
-  for(uint i=0; i<prejets.size(); ++i){ out<<"Jet: "<<i<<endl; printJet(prejets[i]); }
-}
-/*--------------------------------------------------------------------------------*/
-void SusySelection::dumpTrigFlag(uint flag)
-{
-  out << "\tEF_e7_medium1               " << (flag & TRIG_e7_medium1)               << endl;
-  out << "\tEF_e12Tvh_medium1           " << (flag & TRIG_e12Tvh_medium1)           << endl;
-  out << "\tEF_e24vh_medium1            " << (flag & TRIG_e24vh_medium1)            << endl;
-  out << "\tEF_e24vhi_medium1           " << (flag & TRIG_e24vhi_medium1)           << endl;
-  out << "\tEF_2e12Tvh_loose1           " << (flag & TRIG_2e12Tvh_loose1)           << endl;
-  out << "\tEF_e24vh_medium1_e7_medium1 " << (flag & TRIG_e24vh_medium1_e7_medium1) << endl;
-  out << "\tEF_mu8                      " << (flag & TRIG_mu8)                      << endl;
-  out << "\tEF_mu18_tight               " << (flag & TRIG_mu18_tight)               << endl;
-  out << "\tEF_mu24i_tight              " << (flag & TRIG_mu24i_tight)              << endl;
-  out << "\tEF_2mu13                    " << (flag & TRIG_2mu13)                    << endl;
-  out << "\tEF_mu18_tight_mu8_EFFS      " << (flag & TRIG_mu18_tight_mu8_EFFS)      << endl;
-  out << "\tEF_e12Tvh_medium1_mu8       " << (flag & TRIG_e12Tvh_medium1_mu8)       << endl;
-  out << "\tEF_mu18_tight_e7_medium1    " << (flag & TRIG_mu18_tight_e7_medium1)    << endl;
-}
-/*--------------------------------------------------------------------------------*/
-void SusySelection::printLep(const Lepton* lep)
- {
-  out<<"\tLepton is Muon: "<<lep->isMu()<<" Charge: "<<lep->q<<endl;
-  if(lep->isMu())out<<"\tCombined: "<<((Muon*)lep)->isCombined<<endl;
-  out<<"\tPt: "<<lep->Pt()<<" Eta: "<<lep->Eta()<<" Phi: "<<lep->Phi()<<endl;
-  out<<"\tptcone20: "<<lep->ptcone20<<" ptcone30: "<<lep->ptcone30<<endl;
-  out<<"\td0: "<<lep->d0<<" d0err: "<<lep->errD0<<endl;
-}
-/*--------------------------------------------------------------------------------*/
-void SusySelection::printJet(const Jet* jet)
-{
-  out<<"\tPt: "<<jet->Pt()<<" Eta: "<<jet->Eta()<<" Phi: "<<jet->Phi()<<endl;
-  out<<"\tjvf: "<<jet->jvf<<" sv0: "<<jet->sv0
-     <<" combNN: "<<jet->combNN<<" mv1: "<<jet->mv1<<endl;
-}
 /*--------------------------------------------------------------------------------*/
 float SusySelection::getXsFromReader()
 {
