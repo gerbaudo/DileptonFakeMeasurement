@@ -61,16 +61,10 @@ class SusySelection : public SusyNtAna
 
     ofstream out;
 
-    // Begin is called before looping on entries
-    virtual void    Begin(TTree *tree);
-    // Terminate is called after looping is finished
-    virtual void    Terminate();
-
-    // Main event loop function
-    virtual Bool_t  Process(Long64_t entry);
-
-    // Full event selection. Specify which leptons to use.
-    bool selectEvent();
+    virtual void    Begin(TTree *tree); //!< called before looping on entries
+    virtual void    Terminate(); //!< called after looping is finished
+    virtual Bool_t  Process(Long64_t entry); //!< called at each event
+    bool selectEvent(); //!< event selection  based on event qtities (mostly...)
 
     // Signal regions
     bool passSR6base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
