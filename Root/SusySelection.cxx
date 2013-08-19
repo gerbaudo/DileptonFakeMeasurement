@@ -69,7 +69,7 @@ Bool_t SusySelection::Process(Long64_t entry)
   if(!selectEvent()) return kTRUE;
 
   m_ET = getDiLepEvtType(m_baseLeptons);
-  passSrSs(m_ET, WH_SRSS1, m_baseLeptons, m_signalTaus, m_signalJets2Lep, m_met);
+  passSrSs(m_ET, WH_SRSS1, m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met);
 
   return kTRUE;
 }
@@ -259,7 +259,7 @@ bool SusySelection::passSrSsBase()
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passSrSs(const DiLepEvtType eventType,
                              const WH_SR signalRegion,
-                             const LeptonVector& leptons,
+                             LeptonVector& leptons,
                              const TauVector& taus,
                              const JetVector& jets,
                              const Met *met)
@@ -296,8 +296,8 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   // if(!passEventCleaning()){ return false; }
 
   // Apply event selection cuts
-  const LeptonVector &ls = m_signalLeptons; //leptons;
-  LeptonVector &ncls = m_signalLeptons; // non-const leptons: can be modified by qflip
+  const LeptonVector &ls = leptons;
+  LeptonVector &ncls = leptons; // non-const leptons: can be modified by qflip
   Met ncmet(*m_met); // non-const met
   const JetVector    &js = jets;
   if(true)                                   increment(n_pass_category [ll], lepSf, bSf); else return false;
@@ -454,7 +454,8 @@ bool SusySelection::passeq2JetWoutFwVeto(const JetVector& jets)
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passMetRelMin(const Met *met, const LeptonVector& leptons,
                                   const JetVector& jets, float minVal){
-  return (minVal < getMetRel(met,leptons,jets));
+  float metrel = getMetRel(met,leptons,jets);
+  return (minVal < metrel);
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelection::passdPhi(TLorentzVector v0, TLorentzVector v1, float cut)
@@ -467,7 +468,8 @@ bool SusySelection::passMtLlMetMin(const LeptonVector& l, const Met* met,
 {
   if(l.size() < 2 || !l[0] || !l[1]) return false;
   TLorentzVector ll = (*l[0] + *l[1]);
-  return (minVal < SusyPlotter::transverseMass(ll, met->lv()));
+  float mww=SusyPlotter::transverseMass(ll, met->lv());
+  return (minVal < mww);
 }
 //----------------------------------------------------------
 bool SusySelection::passMtMinlmetMin(const LeptonVector& l, const Met* met, float minVal)

@@ -50,6 +50,7 @@ class SusySelection : public SusyNtAna
 {
 
  public:
+  typedef       LeptonVector  vl_t;  //!< just to make some decl shorter
   typedef const LeptonVector cvl_t;  //!< just to make some decl shorter
   typedef const TauVector    cvt_t;  //!< just to make some decl shorter
   typedef const JetVector    cvj_t;  //!< just to make some decl shorter
@@ -87,7 +88,7 @@ class SusySelection : public SusyNtAna
     bool passSR7NjMll    (cvl_t& l, cvj_t& j, const Met* m) { return passSR7Nj(l,j,m)   && passMllMax(l); }
     bool passSrSsBase();
     bool passSrSs(const DiLepEvtType eventType, const WH_SR signalRegion,
-                  cvl_t &l, cvt_t &t, cvj_t &j, const Met* m);
+                  vl_t &l, cvt_t &t, cvj_t &j, const Met* m);
     // Cut methods
     bool passHfor();
     bool passTrig2L(const LeptonVector& leptons);
