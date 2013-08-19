@@ -1,6 +1,7 @@
 #include "SusyTest0/MatrixPrediction.h"
 #include "SusyTest0/SusySelection.h"
 #include "SusyTest0/SusyPlotter.h"
+#include "SusyTest0/TightProbability.h"
 
 #ifdef __CINT__
 
@@ -12,4 +13,5 @@
 #pragma link C++ class MatrixPrediction;
 #pragma link C++ class SusySelection;
 #pragma link C++ class SusyPlotter;
+#pragma link C++ class TightProbability;
 #endif
