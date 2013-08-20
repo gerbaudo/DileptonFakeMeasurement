@@ -107,24 +107,5 @@ int main(int argc, char** argv)
   tp.buildSumwMap(chain);
   chain->Process(&tp, sample.c_str(), nEvt, nSkip);
   delete chain;
-
-//   // Build the TSelector
-//   MatrixPrediction* fakePred = new MatrixPrediction();
-//   fakePred->buildSumwMap(chain);
-//   fakePred->setDebug(dbg);
-//   fakePred->setSampleName(sample);
-//   // Run the job
-//   if(nEvt<0) nEvt = nEntries;
-//   cout << endl;
-//   cout << "Total entries:   " << nEntries << endl;
-//   cout << "Process entries: " << nEvt << endl;
-//   if(nEvt>0) chain->Process(fakePred, sample.c_str(), nEvt, nSkip);
-
-//   cout << endl;
-//   cout << "SusyPlotter job done" << endl;
-
-//   delete chain;
-//   delete fakePred;
   return 0;
-
 }
