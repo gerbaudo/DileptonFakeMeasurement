@@ -6,6 +6,8 @@
 #include "SusyTest0/SusySelection.h"
 
 
+class TDirectory;
+
 namespace Susy {
 
 //! A class to determine p(tight|real) and p(tight|fake)
@@ -39,6 +41,7 @@ class TightProbability : public SusySelection
   };
   //! container used instead of TEfficiency; also catches under/overflow
   struct NumDenHisto {
+    // \todo implement automatic rebinning when computing ratio
     TH1F m_num, m_den;
     float m_min, m_max;
     float m_widthFirst, m_widthLast;
@@ -46,6 +49,7 @@ class TightProbability : public SusySelection
     NumDenHisto(string name, int nbins, const float* binEdges);
     void Fill(bool alsoFillNum, float weight, float value);
     void Sumw2() { m_num.Sumw2(); m_den.Sumw2(); }
+    void SetDirectory(TDirectory* dir) {m_num.SetDirectory(dir); m_den.SetDirectory(dir);}
     void setMinMax();
   };
 
@@ -80,6 +84,7 @@ class TightProbability : public SusySelection
   LeptonVector m_probes;            // Probe lepton vector
   LeptonVector m_tags;              // Tag Lepton vector
   float        m_evtWeight;         // Event Weight
+  NumDenHisto  m_h_pt;
 };
 
 } // end namespace Susy
