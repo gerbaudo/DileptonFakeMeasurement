@@ -37,6 +37,17 @@ class TightProbability : public SusySelection
     kAnyAny,
     kTightLoosePairTypeN
   };
+  //! container used instead of TEfficiency; also catches under/overflow
+  struct NumDenHisto {
+    TH1F m_num, m_den;
+    float m_min, m_max;
+    float m_widthFirst, m_widthLast;
+    NumDenHisto(string name, int nbins, float min, float max);
+    NumDenHisto(string name, int nbins, const float* binEdges);
+    void Fill(bool alsoFillNum, float weight, float value);
+    void Sumw2() { m_num.Sumw2(); m_den.Sumw2(); }
+    void setMinMax();
+  };
 
  public:
   TightProbability();

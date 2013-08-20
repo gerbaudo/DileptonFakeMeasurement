@@ -4,12 +4,49 @@
 
 #include "TFile.h"
 #include "TH1F.h"
+#include "TAxis.h"
 
 using std::cout;
 using std::endl;
 
 using Susy::TightProbability;
 
+
+//----------------------------------------------------------
+TightProbability::NumDenHisto::NumDenHisto(string name, int nbins, float min, float max):
+  m_num((name+"_num").c_str(), (name+" numerator"  ).c_str(),nbins,min, max),
+  m_den((name+"_den").c_str(), (name+" denominator").c_str(),nbins,min, max),
+  m_min(0.0), m_max(0.0),
+  m_widthFirst(0.0), m_widthLast(0.0)
+{
+  Sumw2();
+  setMinMax();
+}
+TightProbability::NumDenHisto::NumDenHisto(string name, int nbins, const float* binEdges):
+  m_num((name+"_num").c_str(), (name+" numerator"  ).c_str(),nbins, binEdges),
+  m_den((name+"_den").c_str(), (name+" denominator").c_str(),nbins, binEdges),
+  m_min(0.0), m_max(0.0),
+  m_widthFirst(0.0), m_widthLast(0.0)
+{
+  Sumw2();
+  setMinMax();
+}
+void TightProbability::NumDenHisto::Fill(bool alsoFillNum, float weight, float value)
+{
+  bool undeflow(value<m_min), overflow(value>m_max);
+  value = (undeflow ? m_min+0.5*m_widthFirst : value);
+  value = (overflow ? m_max-0.5*m_widthLast  : value);
+  m_den.Fill(value, weight);
+  if(alsoFillNum) m_num.Fill(value, weight);
+}
+void TightProbability::NumDenHisto::setMinMax() {
+  if(const TAxis *ax = m_den.GetXaxis()){
+    m_max = ax->GetXmax();
+    m_min = ax->GetXmin();
+    m_widthFirst = ax->GetBinWidth(1);
+    m_widthLast = ax->GetBinWidth(ax->GetNbins());
+  }
+}
 //----------------------------------------------------------
 TightProbability::TightProbability():
   m_outFname("tightProbabilityOut.root"),
