@@ -57,6 +57,7 @@ int main(int argc, char** argv)
   string file;
   string fileList;
   string fileDir;
+  string outFile;
 
   int optind(1);
   while ((optind < argc)) {
@@ -72,6 +73,7 @@ int main(int argc, char** argv)
     else if(sw=="-F") { file = argv[++optind]; }
     else if(sw=="-f") { fileList = argv[++optind]; }
     else if(sw=="-D") { fileDir = argv[++optind]; }
+    else if(sw=="-o") { outFile = argv[++optind]; }
     else if(sw=="-s") { sample = argv[++optind]; }
     else if(sw=="-h") { usage(argv[0]); return 0; }
     else cout<<"Unknown switch "<<sw<<endl;
@@ -87,6 +89,7 @@ int main(int argc, char** argv)
                        (fileList.size() ? fileList :
                         (fileDir.size() ? fileDir :
                          "None")))<<endl
+      <<"  output  "<<outFile<<endl
       <<endl;
 
   // Build the input chain
@@ -99,7 +102,8 @@ int main(int argc, char** argv)
   if(dbg) chain->ls();
   Susy::TightProbability tp;
   tp.setDebug(dbg);
-  tp.setSampleName(sample);
+  if(sample.size()) tp.setSampleName(sample);
+  if(outFile.size()) tp.setOutputFilename(outFile);
   tp.buildSumwMap(chain);
   chain->Process(&tp, sample.c_str(), nEvt, nSkip);
   delete chain;
