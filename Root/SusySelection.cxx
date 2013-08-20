@@ -318,7 +318,7 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   if(passMtLlMetMin(ncls, met, mtwwMin))     increment(n_pass_mWwt     [ll], lepSf, bSf); else return false;
   if(passHtMin     (ncls, js, met, htMin))   increment(n_pass_ht       [ll], lepSf, bSf); else return false;
   if(passMetRelMin (met,ncls,js,metRelMin))  increment(n_pass_metRel   [ll], lepSf, bSf); else return false;
-  return false;
+  return true;
 }
 /*--------------------------------------------------------------------------------*/
 // Generic cuts
