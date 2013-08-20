@@ -1,6 +1,8 @@
 #ifndef TIGHTPROBABILITY_H
 #define TIGHTPROBABILITY_H
 
+#include <string>
+
 #include "SusyTest0/SusySelection.h"
 
 
@@ -42,7 +44,9 @@ class TightProbability : public SusySelection
   virtual void    Begin(TTree *tree);
   virtual void    Terminate();
   virtual Bool_t  Process(Long64_t entry);
-  void initHistos(string outName);
+  void initOutput(string outName);
+  void finalizeOutput();
+  TightProbability& setOutputFilename(const std::string &s);
 
   TightProbability::LeptonOrigin getLeptonOrigin(const Lepton* l);
   TightProbability::TightLoosePairType getTightLoosePairType(const Lepton* tag,
@@ -59,6 +63,7 @@ class TightProbability : public SusySelection
 
  protected:
 
+  std::string  m_outFname;
   TFile*       m_outFile;           // Output file
   bool         m_isMC;              // is MC
   LeptonVector m_probes;            // Probe lepton vector
