@@ -70,7 +70,6 @@ class TightProbability : public SusySelection
   LeptonVector m_tags;              // Tag Lepton vector
   float        m_evtWeight;         // Event Weight
   bool         m_AltIso;            // If true, use Alt isolation
-  float        m_metRel;            // Met Rel to be plotted
   int          m_ch;                // Set the channel
 
 };
