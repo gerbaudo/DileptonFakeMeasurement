@@ -69,9 +69,6 @@ class TightProbability : public SusySelection
   LeptonVector m_probes;            // Probe lepton vector
   LeptonVector m_tags;              // Tag Lepton vector
   float        m_evtWeight;         // Event Weight
-  bool         m_AltIso;            // If true, use Alt isolation
-  int          m_ch;                // Set the channel
-
 };
 
 } // end namespace Susy

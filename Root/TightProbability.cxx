@@ -15,9 +15,7 @@ TightProbability::TightProbability():
   m_outFname("tightProbabilityOut.root"),
   m_outFile(0),
   m_isMC(false),
-  m_evtWeight(0.0),
-  m_AltIso(false),
-  m_ch(ET_Unknown)
+  m_evtWeight(0.0)
 {}
 //----------------------------------------------------------
 TightProbability::~TightProbability() {}
