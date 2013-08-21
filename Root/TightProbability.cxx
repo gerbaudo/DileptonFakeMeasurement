@@ -71,7 +71,6 @@ void TightProbability::Terminate() {
 }
 //----------------------------------------------------------
 Bool_t TightProbability::Process(Long64_t entry) {
-  cout<<"processing entry "<<entry<<endl;
   GetEntry(entry);
   m_chainEntry++;
   clearObjects();
