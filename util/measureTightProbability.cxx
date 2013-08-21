@@ -36,14 +36,15 @@ using std::string;
 void usage(const char *exeName) {
   cout<<"Usage:"<<endl
       <<exeName<<" options"<<endl
-      <<"\t"<<"-n nEvt"        <<endl  
-      <<"\t"<<"-k nSkip"       <<endl
-      <<"\t"<<"-d : debug"     <<endl
-      <<"\t"<<"-F inputFile"   <<endl
-      <<"\t"<<"-f inputList"   <<endl
-      <<"\t"<<"-D inputDir"    <<endl
-      <<"\t"<<"-s samplename"  <<endl
-      <<"\t"<<"-h : print help"<<endl
+      <<"\t"<<"-n [--num-event]   nEvt"       <<endl
+      <<"\t"<<"-k [--num-skip]    nSkip"      <<endl
+      <<"\t"<<"-d [--debug]    :  debug"      <<endl
+      <<"\t"<<"-F [--input-file]  inputFile"  <<endl
+      <<"\t"<<"-f [--input-list]  inputList"  <<endl
+      <<"\t"<<"-D [--input-dir]   inputDir"   <<endl
+      <<"\t"<<"-o [--output-file] samplename" <<endl
+      <<"\t"<<"-s [--sample]      output file"<<endl
+      <<"\t"<<"-h [--help]      : print help" <<endl
       <<endl;
 }
 
@@ -67,15 +68,15 @@ int main(int argc, char** argv)
       continue;
     }
     std::string sw = argv[optind];
-    if     (sw=="-n") { nEvt = atoi(argv[++optind]); }
-    else if(sw=="-k") { nSkip = atoi(argv[++optind]); }
-    else if(sw=="-d") { dbg = atoi(argv[++optind]); }
-    else if(sw=="-F") { file = argv[++optind]; }
-    else if(sw=="-f") { fileList = argv[++optind]; }
-    else if(sw=="-D") { fileDir = argv[++optind]; }
-    else if(sw=="-o") { outFile = argv[++optind]; }
-    else if(sw=="-s") { sample = argv[++optind]; }
-    else if(sw=="-h") { usage(argv[0]); return 0; }
+    if     (sw=="-n"||sw=="--num-event"  ) { nEvt = atoi(argv[++optind]); }
+    else if(sw=="-k"||sw=="--num-skip"   ) { nSkip = atoi(argv[++optind]); }
+    else if(sw=="-d"||sw=="--debug"      ) { dbg = atoi(argv[++optind]); }
+    else if(sw=="-F"||sw=="--input-file" ) { file = argv[++optind]; }
+    else if(sw=="-f"||sw=="--input-list" ) { fileList = argv[++optind]; }
+    else if(sw=="-D"||sw=="--input-dir"  ) { fileDir = argv[++optind]; }
+    else if(sw=="-o"||sw=="--output-file") { outFile = argv[++optind]; }
+    else if(sw=="-s"||sw=="--sample"     ) { sample = argv[++optind]; }
+    else if(sw=="-h"||sw=="--help"       ) { usage(argv[0]); return 0; }
     else cout<<"Unknown switch "<<sw<<endl;
     optind++;
   } // end while(optind<argc)
