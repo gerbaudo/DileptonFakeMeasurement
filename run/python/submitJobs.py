@@ -51,7 +51,7 @@ dsetsNames = filterWithRegexp(dsetsNames, regexp)
 
 def listExists(dset='', flistDir='./filelist') : return os.path.exists(flistDir+'/'+dset+'.txt')
 def fillInScriptTemplate(dataset, suffix, outputfilename,
-                         templateFname='batchScripts/batchSub.sh.template') :
+                         templateFname='batchScripts/susyPlot.sh.template') :
     options = ''
     options = options+' --WH-sample' if 'WH' in dataset else options
     outFname= scriptDir+'/'+dataset+'.sh'
