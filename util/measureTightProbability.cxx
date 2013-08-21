@@ -36,16 +36,20 @@ using std::string;
 void usage(const char *exeName) {
   cout<<"Usage:"<<endl
       <<exeName<<" options"<<endl
-      <<"\t"<<"-n [--num-event]   nEvt"       <<endl
-      <<"\t"<<"-k [--num-skip]    nSkip"      <<endl
-      <<"\t"<<"-d [--debug]    :  debug"      <<endl
-      <<"\t"<<"-F [--input-file]  inputFile"  <<endl
-      <<"\t"<<"-f [--input-list]  inputList"  <<endl
-      <<"\t"<<"-D [--input-dir]   inputDir"   <<endl
-      <<"\t"<<"-o [--output-file] samplename" <<endl
-      <<"\t"<<"-s [--sample]      output file"<<endl
-      <<"\t"<<"-h [--help]      : print help" <<endl
+      <<"\t"<<"-n [--num-event]   nEvt (default -1, all)"<<endl
+      <<"\t"<<"-k [--num-skip]    nSkip (default 0)"     <<endl
+      <<"\t"<<"-i [--input]       (file, list, or dir)"  <<endl
+      <<"\t"<<"-o [--output]      samplename"            <<endl
+      <<"\t"<<"-s [--sample]      output file"           <<endl
+      <<"\t"<<"-d [--debug]     : debug (>0 print stuff)"<<endl
+      <<"\t"<<"-h [--help]      : print help"            <<endl
       <<endl;
+}
+
+bool endswith(const string &s, const string &end) {
+  //http://stackoverflow.com/questions/874134/find-if-string-endswith-another-string-in-c
+  if(s.length()<end.length()) return false;
+  else return (0==s.compare(s.length() - end.length(), end.length(), end));
 }
 
 int main(int argc, char** argv)
@@ -55,10 +59,8 @@ int main(int argc, char** argv)
   int nSkip = 0;
   int dbg = 0;
   string sample;
-  string file;
-  string fileList;
-  string fileDir;
-  string outFile;
+  string input;
+  string output;
 
   int optind(1);
   while ((optind < argc)) {
@@ -71,10 +73,8 @@ int main(int argc, char** argv)
     if     (sw=="-n"||sw=="--num-event"  ) { nEvt = atoi(argv[++optind]); }
     else if(sw=="-k"||sw=="--num-skip"   ) { nSkip = atoi(argv[++optind]); }
     else if(sw=="-d"||sw=="--debug"      ) { dbg = atoi(argv[++optind]); }
-    else if(sw=="-F"||sw=="--input-file" ) { file = argv[++optind]; }
-    else if(sw=="-f"||sw=="--input-list" ) { fileList = argv[++optind]; }
-    else if(sw=="-D"||sw=="--input-dir"  ) { fileDir = argv[++optind]; }
-    else if(sw=="-o"||sw=="--output-file") { outFile = argv[++optind]; }
+    else if(sw=="-i"||sw=="--input"      ) { input = argv[++optind]; }
+    else if(sw=="-o"||sw=="--output"     ) { output = argv[++optind]; }
     else if(sw=="-s"||sw=="--sample"     ) { sample = argv[++optind]; }
     else if(sw=="-h"||sw=="--help"       ) { usage(argv[0]); return 0; }
     else cout<<"Unknown switch "<<sw<<endl;
@@ -86,25 +86,25 @@ int main(int argc, char** argv)
       <<"  nEvt    "<<nEvt   <<endl
       <<"  nSkip   "<<nSkip  <<endl
       <<"  dbg     "<<dbg    <<endl
-      <<"  input   "<<(file.size() ? file :
-                       (fileList.size() ? fileList :
-                        (fileDir.size() ? fileDir :
-                         "None")))<<endl
-      <<"  output  "<<outFile<<endl
+      <<"  input   "<<input  <<endl
+      <<"  output  "<<output <<endl
       <<endl;
 
   // Build the input chain
   TChain* chain = new TChain("susyNt");
-  ChainHelper::addFile(chain, file);
-  ChainHelper::addFileList(chain, fileList);
-  ChainHelper::addFileDir(chain, fileDir);
+  bool inputIsFile(string::npos!=input.find(".root"));
+  bool inputIsList(string::npos!=input.find(".txt"));
+  bool inputIsDir (endswith(input, "/"));
+  if(inputIsFile) ChainHelper::addFile    (chain, input);
+  if(inputIsList) ChainHelper::addFileList(chain, input);
+  if(inputIsDir ) ChainHelper::addFileDir (chain, input);
   Long64_t nEntries = chain->GetEntries();
   nEvt = (nEvt<0 ? nEntries : nEvt);
   if(dbg) chain->ls();
   Susy::TightProbability tp;
   tp.setDebug(dbg);
   if(sample.size()) tp.setSampleName(sample);
-  if(outFile.size()) tp.setOutputFilename(outFile);
+  if(output.size()) tp.setOutputFilename(output);
   tp.buildSumwMap(chain);
   chain->Process(&tp, sample.c_str(), nEvt, nSkip);
   delete chain;
