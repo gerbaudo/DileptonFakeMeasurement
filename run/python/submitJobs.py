@@ -6,7 +6,7 @@
 # Should be run from the directory 'run'
 #
 # Example usage:
-# $ python/submitJobs.py -m data -s periodA.physics_Egamma
+# $ python/submitJobs.py --susyplot -s periodA.physics_Egamma
 #
 # davide.gerbaudo@gmail.com
 # Jan 2013
@@ -18,16 +18,16 @@ import datasets
 from utils import getCommandOutput, filterWithRegexp
 from datasets import datasets
 
-validOtherOptions = ['', '--1fb', '--AD']
 defaultBatchTag = '_Jul25_n0145'
-defaultOtherOptions = ''
 
 parser = optparse.OptionParser()
+parser.add_option('--susyplot', action='store_true', default=False)
+parser.add_option('--susysel',  action='store_true', default=False)
+parser.add_option('--fakeprob', action='store_true', default=False)
 parser.add_option("-o", "--overwrite", action="store_true", dest="overwrite", default=False,
                   help="overwrite existing batch scripts")
-parser.add_option("-O", "--other-opt", dest="otherOptions", default=defaultOtherOptions,
-                  help="other options for qsub script (default '%s', possible values %s)" \
-                  % (defaultOtherOptions, str(validOtherOptions)))
+parser.add_option("-O", "--other-opt", dest="otherOptions", default='',
+                  help="other options that will be passed on to the executable; double quotes if necessary")
 parser.add_option("-s", "--sample-regexp", dest="samples", default='.*',
                   help="create filelists only for matching samples (default '.*')")
 parser.add_option("-S", "--submit", dest="submit", action='store_true', default=False,
@@ -42,22 +42,30 @@ otherOptions = options.otherOptions
 overwrite    = options.overwrite
 regexp       = options.samples
 submit       = options.submit
+susyplot     = options.susyplot
+susysel      = options.susysel
+fakeprob     = options.fakeprob
 scriptDir    = 'batchScripts'
 verbose      = options.verbose
-assert otherOptions in validOtherOptions, "Invalid otherOptions '%s' (should be one of %s)" % (otherOptions, str(validOtherOptions))
+
+assert [susyplot, susysel, fakeprob].count(True)==1,"specify one executable"
+template  = ''
+template += 'batchScripts/susyPlot.sh.template' if susyplot else ''
+template += 'batchScripts/susySel.sh.template'  if susysel else ''
+template += 'batchScripts/fakeprob.sh.template' if fakeprob else ''
 
 dsetsNames = [d.name for d in datasets if not d.placeholder]
 dsetsNames = filterWithRegexp(dsetsNames, regexp)
 
 def listExists(dset='', flistDir='./filelist') : return os.path.exists(flistDir+'/'+dset+'.txt')
-def fillInScriptTemplate(dataset, suffix, outputfilename,
-                         templateFname='batchScripts/susyPlot.sh.template') :
-    options = ''
-    options = options+' --WH-sample' if 'WH' in dataset else options
+def fillInScriptTemplate(dataset, suffix, outputfilename, templatefilename) :
+    options  = otherOptions
+    options += ' --WH-sample' if 'WH' in dataset else ''
     outFname= scriptDir+'/'+dataset+'.sh'
     outFile = open(outFname, 'w')
-    for line in open(templateFname).readlines() :
-        line = line.replace('${inp}', dataset)
+    for line in open(templatefilename).readlines() :
+        line = line.replace('${inp}', "filelist/%s.txt"%dataset)
+        line = line.replace('${sample}', dataset)
         line = line.replace('${out}', dataset+suffix)
         line = line.replace('${opt}', options)
         outFile.write(line)
@@ -72,15 +80,15 @@ for d in dsetsNames :
         continue
     scriptName = scriptDir+'/'+d+'.sh'
     if overwrite or not os.path.exists(scriptName) :
-        fillInScriptTemplate(d, batchTag, scriptName)
+        fillInScriptTemplate(d, batchTag, scriptName, template)
 
     cmd = "qsub " \
           "-j oe -V " \
-          "-N %(d)s%(append)s " \
+          "-N %(jobname)s " \
           "-o batchlog " \
-          " %(sn)s" \
+          " %(scripname)s" \
           % \
-          {'d':d, 'append':batchTag, 'sn':scriptName, 'option':otherOptions}
+          {'jobname':"%s%s"%(d,batchTag), 'scripname':scriptName}
     print cmd
     if submit :
         out = getCommandOutput(cmd)
