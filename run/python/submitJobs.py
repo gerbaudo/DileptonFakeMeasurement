@@ -45,42 +45,49 @@ submit       = options.submit
 susyplot     = options.susyplot
 susysel      = options.susysel
 fakeprob     = options.fakeprob
-scriptDir    = 'batchScripts'
 verbose      = options.verbose
 
 assert [susyplot, susysel, fakeprob].count(True)==1,"specify one executable"
+scriptDir = 'batchScripts'
 template  = ''
-template += 'batchScripts/susyPlot.sh.template' if susyplot else ''
-template += 'batchScripts/susySel.sh.template'  if susysel else ''
-template += 'batchScripts/fakeprob.sh.template' if fakeprob else ''
+template += scriptDir+'/susyPlot.sh.template' if susyplot else ''
+template += scriptDir+'/susySel.sh.template'  if susysel else ''
+template += scriptDir+'/fakeprob.sh.template' if fakeprob else ''
+outdir  = ''
+outdir += 'susyplot_out' if susyplot else ''
+outdir += 'susysel_out'  if susysel  else ''
+outdir += 'fakeprob_out' if fakeprob else ''
+inputTemplate = "filelist/%(sample)s.txt"
+outScriptTemplate = scriptDir+'/%(sample)s.sh'
+outRootTemplate = "%(outdir)s/%(sample)s_%(tag)s.root"
 
-dsetsNames = [d.name for d in datasets if not d.placeholder]
-dsetsNames = filterWithRegexp(dsetsNames, regexp)
+sampleNames = [d.name for d in datasets if not d.placeholder]
+sampleNames = filterWithRegexp(sampleNames, regexp)
 
 def listExists(dset='', flistDir='./filelist') : return os.path.exists(flistDir+'/'+dset+'.txt')
-def fillInScriptTemplate(dataset, suffix, outputfilename, templatefilename) :
+def fillInScriptTemplate(sample, input, output, otherOptions, outScript, scriptTemplate) :
     options  = otherOptions
-    options += ' --WH-sample' if 'WH' in dataset else ''
-    outFname= scriptDir+'/'+dataset+'.sh'
-    outFile = open(outFname, 'w')
-    for line in open(templatefilename).readlines() :
-        line = line.replace('${inp}', "filelist/%s.txt"%dataset)
-        line = line.replace('${sample}', dataset)
-        line = line.replace('${out}', dataset+suffix)
+    options += ' --WH-sample' if 'WH' in sample else ''
+    outFile = open(outScript, 'w')
+    for line in open(scriptTemplate).readlines() :
+        line = line.replace('${inp}', input)
+        line = line.replace('${out}', output)
         line = line.replace('${opt}', options)
+        line = line.replace('${sample}', sample)
         outFile.write(line)
     outFile.close()
 
-for d in dsetsNames :
-    missList, regexUnmatch = not listExists(d), not re.search(regexp, d)
+for sample in sampleNames :
+    missList, regexUnmatch = not listExists(sample), not re.search(regexp, sample)
     if missList or regexUnmatch:
-        print "# skipping %s (%s)" % (d, 'no list' if missList
-                                      else ('regex unmatch' if regexUnmatch
-                                            else ''))
+        msg = "# skipping %s (%s)" % (sample, 'no list' if missList else 'regex unmatch')
+        print msg
         continue
-    scriptName = scriptDir+'/'+d+'.sh'
+    input      = inputTemplate%{'sample':sample}
+    output     = outRootTemplate%{'outdir':outdir, 'sample':sample, 'tag':batchTag}
+    scriptName = outScriptTemplate%{'sample':sample}
     if overwrite or not os.path.exists(scriptName) :
-        fillInScriptTemplate(d, batchTag, scriptName, template)
+        fillInScriptTemplate(sample, input, output, otherOptions, scriptName, template)
 
     cmd = "qsub " \
           "-j oe -V " \
@@ -88,7 +95,7 @@ for d in dsetsNames :
           "-o batchlog " \
           " %(scripname)s" \
           % \
-          {'jobname':"%s%s"%(d,batchTag), 'scripname':scriptName}
+          {'jobname':"%s%s"%(sample, batchTag), 'scripname':scriptName}
     print cmd
     if submit :
         out = getCommandOutput(cmd)
