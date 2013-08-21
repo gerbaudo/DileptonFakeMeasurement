@@ -5,5 +5,5 @@
 
 cd $PBS_O_WORKDIR
 
-measureTightProbability -i ${inp} -s ${sample} ${opt} > batchLog/${sample}.measureTight.log
+measureTightProbability -i ${inp} -o ${out} -s ${sample} ${opt} > batchLog/${sample}.measureTight.log
 
