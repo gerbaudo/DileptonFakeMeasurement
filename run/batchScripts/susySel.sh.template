@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#PBS -q atlas
+#PBS -l nodes=1:ppn=1
+
+cd $PBS_O_WORKDIR
+
+SusySel -i ${inp} -s ${sample} ${opt} > batchLog/${sample}.susysel.log
+
