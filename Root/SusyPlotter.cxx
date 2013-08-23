@@ -57,30 +57,6 @@ SusyPlotter::SusyPlotter() :
   m_histFile(0),
   m_doFake(false)
 {
-
-  /*
-  for(uint iPR=0; iPR<PR_N; ++iPR){
-    for(uint iCh=0; iCh<Ch_N; ++iCh){
-
-      #define NULLIFY(name) h_ ##name[iPR][iCh] = NULL
-
-      NULLIFY(l0_pt);
-      NULLIFY(l1_pt);
-      NULLIFY(e_pt);
-      NULLIFY(m_pt);
-      NULLIFY(l0_eta);
-      NULLIFY(l1_eta);
-      NULLIFY(e_eta);
-      NULLIFY(m_eta);
-      NULLIFY(ll_M);
-      NULLIFY(met);
-      NULLIFY(metrel);
-
-      #undef NULLIFY
-
-    }
-  }
-  */
 }
 //-----------------------------------------
 void SusyPlotter::Begin(TTree* /*tree*/)
