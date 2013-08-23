@@ -1,6 +1,7 @@
 AutoDict*
 batchLog/*
 batchScripts/*
+out/*
 *.png
 *.eps
 *.pkl
