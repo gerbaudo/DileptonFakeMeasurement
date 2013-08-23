@@ -12,7 +12,7 @@ import os
 import re
 import subprocess
 from datasets import datasets, groupsNotToBeMerged
-
+from utils import getCommandOutput
 
 def findLatestOneOrTwoRootFiles(dir) :
     files = filter(os.path.isfile, glob.glob(dir + "*.root"))
@@ -76,9 +76,19 @@ for rf in rootfiles :
     if not group : print "warning, invalid group '%s' for '%s'"%(group, rf)
     if verbose and group not in filenamesByGroup : print "adding group '%s'"%group
     filenamesByGroup[group].append(rf)
+for group in filenamesByGroup.keys() :
+    if not isGroupToBeMerged(group) or not re.search(group_regexp, group) :
+        filenamesByGroup.pop(group, None)
+nGroupsToMerge = len(filenamesByGroup.keys())
+groupCounter = 0
 for group, files in filenamesByGroup.iteritems() :
-    if not isGroupToBeMerged(group) or not re.search(group_regexp, group) : continue
+    groupCounter += 1
+    if verbose :
+        print "[%d/%d] %s (%d files)"%(groupCounter, nGroupsToMerge, group, len(files))
     outfile = outdir+'/'+group+tag+'.root'
-    if verbose : print "hadd %s\n\t%s"%(outfile, '\n\t'.join(files))
+    if debug : print "hadd %s\n\t%s"%(outfile, '\n\t'.join(files))
     cmd = "hadd %s %s" % (outfile, ' '.join(files))
-
+    out = getCommandOutput(cmd)
+    success = out['returncode']==0
+    if not success : print "'%s' failed..."%group
+    if debug : print out['stderr']+'\n'+out['stdout']
