@@ -50,9 +50,9 @@ verbose      = options.verbose
 assert [susyplot, susysel, fakeprob].count(True)==1,"specify one executable"
 scriptDir = 'batchScripts'
 template  = ''
-template += scriptDir+'/susyPlot.sh.template' if susyplot else ''
-template += scriptDir+'/susySel.sh.template'  if susysel else ''
-template += scriptDir+'/fakeprob.sh.template' if fakeprob else ''
+template += scriptDir+'/templates/susyPlot.sh.template' if susyplot else ''
+template += scriptDir+'/templates/susySel.sh.template'  if susysel else ''
+template += scriptDir+'/templates/fakeprob.sh.template' if fakeprob else ''
 outdir  = ''
 outdir += 'susyplot_out' if susyplot else ''
 outdir += 'susysel_out'  if susysel  else ''
