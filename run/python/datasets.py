@@ -265,7 +265,7 @@ datasets += [Dataset(sampleType, d, group, template%nth, process%nth)
              for d, nth in rzip(range(176574, 176634+1), range(1, 61+1))]
 group = 'WH_3Lep'
 template, process = "Herwigpp_simplifiedModel_wA_noslep_WH_3Lep_%d", "wA_noslep_WH_3Lep_%d"
-datasets += [Dataset(sampleType, d, group, template%nth, process%nth)
+datasets += [Dataset(sampleType, d, group, template%nth, process%nth, placeholder)
              for d, nth in rzip(range(176641, 176706+1), range(1, 66+1))]
 
 
