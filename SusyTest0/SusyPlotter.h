@@ -124,7 +124,7 @@ class SusyPlotter : public SusySelection
     static int numberOfNeutrinoSolutions(const TLorentzVector &lPos, const TLorentzVector &lNeg,
 					 const Jet &jet0, const Jet &jet1,
 					 const TLorentzVector &met);
-
+    SusyPlotter& setOutputFilename(const std::string &name);
 
     ClassDef(SusyPlotter, 1);
 

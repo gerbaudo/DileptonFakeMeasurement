@@ -63,7 +63,8 @@ SusyPlotter::SusyPlotter() :
   m_doLepSF(false),
   m_doTrigW(false),
   m_doFake(false),
-  m_doCF(false)
+  m_doCF(false),
+  m_histFileName("susyPlotterOut.root")
 {
 
   /*
@@ -98,19 +99,9 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 {
   SusySelection::Begin(0);
   if(m_dbg) cout << "SusyPlotter::Begin" << endl;
-
-  // systematics
   setSysts();
-
-  // open the output file
-  //system("mkdir -p anaplots");
-  string append = "AnaHists";
-  if(m_doFake) append = "FakeHists";
-  if(m_doCF)   append = "ChargeFlipHists";
-  if(m_histFileName.empty()) m_histFileName = "anaplots/"+m_sample+"." + append + ".root";
   m_histFile = new TFile(m_histFileName.c_str(), "recreate");
   TH1::SetDefaultSumw2(true);
-
   m_histFile->cd();
   //m_histFile->mkdir( sysNames[sys].c_str() ) -> cd();
 
@@ -322,6 +313,15 @@ void SusyPlotter::Terminate()
   // Save the output
   m_histFile->Write();
   m_histFile->Close();
+}
+//----------------------------------------------------------
+SusyPlotter& SusyPlotter::setOutputFilename(const std::string &name)
+{
+  if(string::npos==name.find(".root"))
+    cout<<"SusyPlotter::setOutputFilename('"<<name<<"')"
+        <<" Warning! not a root file."<<endl;
+  m_histFileName = name;
+  return *this;
 }
 
 /*--------------------------------------------------------------------------------*/
