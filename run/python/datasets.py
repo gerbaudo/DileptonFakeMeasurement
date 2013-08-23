@@ -30,6 +30,8 @@ class Dataset :
         self.process = process # physical process, for example 'Zbb + jets' (short, generic, usually appears as the common root of the name)
         self.placeholder = placeholder # just a placeholder, its job won't be submitted
 
+def groupsNotToBeMerged() :
+    return ['WH_2Lep', 'WH_3Lep']
 
 datasets = []
 sampleType, group, process = None, None, None
