@@ -96,15 +96,11 @@ class SusyPlotter : public SusySelection
   ClassDef(SusyPlotter, 1);
 
  protected:
-  std::vector<uint> m_systs;                // systematics to process
+  std::vector<uint>   m_systs;              // systematics to process
   std::vector<string> m_systNames;          // systematics to process
-  std::string         m_histFileName;         // output histo file name
-  TFile*              m_histFile;             // output histo file
-  // control flags
-  bool                m_doLepSF;              // use lepton efficiency SF
-  bool                m_doTrigW;              // do trigger reweighting
-  bool                m_doFake;               // do Fake estimate
-  bool                m_doCF;                 // do charge flip
+  std::string         m_histFileName;       // output histo file name
+  TFile*              m_histFile;           // output histo file
+  bool                m_doFake;             // do Fake estimate
 
   // preprocessor convenience - add more indices later
 #define DEFHIST( name ) h_ ## name[Ch_N][PR_N][40/*Guess for # of sys*/];  

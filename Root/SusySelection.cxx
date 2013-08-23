@@ -120,6 +120,7 @@ bool SusySelection::selectEvent()
   const Susy::Met *met = m_met;
   uint run = nt.evt()->run;
   bool mc = nt.evt()->isMC;
+  float mllMin(20);
   if(passGRL        (flag           ))  { increment(n_pass_Grl     );} else { return false; }
   if(passLarErr     (flag           ))  { increment(n_pass_LarErr  );} else { return false; }
   if(passTileErr    (flag           ))  { increment(n_pass_TileErr );} else { return false; }
@@ -135,7 +136,7 @@ bool SusySelection::selectEvent()
   //if(passHtautauVeto(hdec)) { increment(n_pass_HttVeto ); } else { return false; }
   if(bleps.size() >= 2               )  { increment(n_pass_ge2l    );} else { return false; }
   if(bleps.size() == 2               )  { increment(n_pass_eq2l    );} else { return false; }
-  if(passMllMin(bleps, 20.)          )  { increment(n_pass_mll);        } else { return false; }
+  if(passMllMin(bleps, mllMin       ))  { increment(n_pass_mll     );} else { return false; }
   return true;
 }
 //-----------------------------------------
@@ -270,20 +271,14 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   float mZ0(91.2);
   float loMllZ(applyMllZveto ? mZ0-10. : FLT_MAX);
   float hiMllZ(applyMllZveto ? mZ0+10. : FLT_MIN);
-  float mllMin(20);
-  float mtwwMin = (ll==ee ? 150 :
-                   (ll==em || ll==me ? 140 :
-                    (ll==mm ?
-                     (sr==WH_SRSS1 ? 100 :
-                      (sr==WH_SRSS2 ? 150 :
-                       (sr==WH_SRSS3 ? 200 :
-                        FLT_MIN))) :
-                      FLT_MIN)));
-  float metRelMin = (ll==ee ? 50 :
-                     (ll==em || ll==me ? 50 :
-                      (ll==mm ?
-                       (sr==WH_SRSS4 ? 50 : FLT_MIN) :
-                       FLT_MIN)));
+  float mtwwMin = (ll==ee ? 150 : (ll==em || ll==me ? 140 :
+                                   (ll==mm ? (sr==WH_SRSS1 ? 100 :
+                                              (sr==WH_SRSS2 ? 150 :
+                                               (sr==WH_SRSS3 ? 200 :
+                                                FLT_MIN))) : FLT_MIN)));
+  float metRelMin = (ll==ee ? 50 : (ll==em || ll==me ? 50 :
+                                    (ll==mm ? (sr==WH_SRSS4 ? 50 :
+                                               FLT_MIN) : FLT_MIN)));
   bool lepSf(true), bSf(true);
   bool update4mom(true); // charge flip
   bool u4m=update4mom;
@@ -721,8 +716,8 @@ std::string lineLabelsPerEventType(const string *labels, int colWidth){
 std::string lineCountersPerEventType(const float cnt[ET_N][WT_N],
                                      int weightType, int colWidth){
   std::ostringstream oss;
-  bool raw(weightType==WT_Raw);
-  int precision(raw ? 0 : 2);
+  // bool raw(weightType==WT_Raw);
+  // int precision(raw ? 0 : 2); // DG Aug2013 not working properly tobefixed
   for(int i=0; i<ET_N-1; ++i)
     oss<<std::setw(colWidth)
       //<<(raw ? std::fixed : "")

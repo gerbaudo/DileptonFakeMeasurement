@@ -53,11 +53,9 @@ const float njetmax = njetbins - 0.5;
 //-----------------------------------------
 SusyPlotter::SusyPlotter() :
   SusySelection(),
-  m_doLepSF(false),
-  m_doTrigW(false),
-  m_doFake(false),
-  m_doCF(false),
-  m_histFileName("susyPlotterOut.root")
+  m_histFileName("susyPlotterOut.root"),
+  m_histFile(0),
+  m_doFake(false)
 {
 
   /*
@@ -438,7 +436,7 @@ int SusyPlotter::getChan(const LeptonVector& leps)
 //-----------------------------------------
 void SusyPlotter::setSysts()
 {
-  if(!m_doFake) {
+  if(true) { // (!m_doFake) { // DG cleanup
     m_systs.push_back(NtSys_NOM);  m_systNames.push_back(SusyNtSystNames[NtSys_NOM]);
   } else if(m_doFake) {
     m_systs.push_back(SusyMatrixMethod::SYS_NONE);
