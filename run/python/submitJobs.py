@@ -53,11 +53,13 @@ template  = ''
 template += scriptDir+'/templates/susyPlot.sh.template' if susyplot else ''
 template += scriptDir+'/templates/susySel.sh.template'  if susysel else ''
 template += scriptDir+'/templates/fakeprob.sh.template' if fakeprob else ''
-outdir  = ''
-outdir += 'susyplot_out' if susyplot else ''
-outdir += 'susysel_out'  if susysel  else ''
-outdir += 'fakeprob_out' if fakeprob else ''
-if not os.path.isdir(outdir)  : os.mkdir(outdir)
+outdir = 'out/'
+logdir = 'log/'
+for d in [outdir, logdir] :
+    d += 'susyplot' if susyplot else ''
+    d += 'susysel'  if susysel  else ''
+    d += 'fakeprob' if fakeprob else ''
+    if not os.path.isdir(d)  : os.makedirs(d)
 inputTemplate = "filelist/%(sample)s.txt"
 outScriptTemplate = scriptDir+'/%(sample)s.sh'
 outRootTemplate = "%(outdir)s/%(sample)s_%(tag)s.root"
