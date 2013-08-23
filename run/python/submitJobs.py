@@ -55,14 +55,20 @@ template += scriptDir+'/templates/susySel.sh.template'  if susysel else ''
 template += scriptDir+'/templates/fakeprob.sh.template' if fakeprob else ''
 outdir = 'out/'
 logdir = 'log/'
-for d in [outdir, logdir] :
-    d += 'susyplot' if susyplot else ''
-    d += 'susysel'  if susysel  else ''
-    d += 'fakeprob' if fakeprob else ''
+def subdir() :
+    if susyplot : return 'susyplot'
+    if susysel  : return 'susysel'
+    if fakeprob : return 'fakeprob'
+def formAndCreateOutdir(basedir, subdir) :
+    d = basedir+'/'+subdir
     if not os.path.isdir(d)  : os.makedirs(d)
+    return d
+outdir = formAndCreateOutdir('out/', subdir())
+logdir = formAndCreateOutdir('log/', subdir())
 inputTemplate = "filelist/%(sample)s.txt"
 outScriptTemplate = scriptDir+'/%(sample)s.sh'
 outRootTemplate = "%(outdir)s/%(sample)s_%(tag)s.root"
+outLogTemplate = "%(logdir)s/%(sample)s_%(tag)s.log"
 
 sampleNames = [d.name for d in datasets if not d.placeholder]
 sampleNames = filterWithRegexp(sampleNames, regexp)
@@ -88,6 +94,7 @@ for sample in sampleNames :
         continue
     input      = inputTemplate%{'sample':sample}
     output     = outRootTemplate%{'outdir':outdir, 'sample':sample, 'tag':batchTag}
+    outlog     = outLogTemplate%{'logdir':logdir, 'sample':sample, 'tag':batchTag}
     scriptName = outScriptTemplate%{'sample':sample}
     if overwrite or not os.path.exists(scriptName) :
         fillInScriptTemplate(sample, input, output, otherOptions, scriptName, template)
@@ -95,10 +102,10 @@ for sample in sampleNames :
     cmd = "qsub " \
           "-j oe -V " \
           "-N %(jobname)s " \
-          "-o batchlog " \
+          "-o %(outlog)s " \
           " %(scripname)s" \
           % \
-          {'jobname':"%s%s"%(sample, batchTag), 'scripname':scriptName}
+          {'jobname':"%s%s"%(sample, batchTag), 'outlog':outlog, 'scripname':scriptName}
     print cmd
     if submit :
         out = getCommandOutput(cmd)
