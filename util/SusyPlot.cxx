@@ -26,7 +26,7 @@ void usage(const char *exeName) {
       <<"\t"<<"-n [--num-event]   nEvt (default -1, all)"<<endl
       <<"\t"<<"-k [--num-skip]    nSkip (default 0)"     <<endl
       <<"\t"<<"-i [--input]       (file, list, or dir)"  <<endl
-    //<<"\t"<<"-o [--output]      samplename"            <<endl // DG: should be there
+      <<"\t"<<"-o [--output]      samplename"            <<endl
       <<"\t"<<"-s [--sample]      output file"           <<endl
       <<"\t"<<"-d [--debug]     : debug (>0 print stuff)"<<endl
       <<"\t"<<"-h [--help]      : print help"            <<endl
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
     else if(sw=="-k"||sw=="--num-skip"   ) { nSkip = atoi(argv[++optind]); }
     else if(sw=="-d"||sw=="--debug"      ) { dbg = atoi(argv[++optind]); }
     else if(sw=="-i"||sw=="--input"      ) { input = argv[++optind]; }
-    //else if(sw=="-o"||sw=="--output"     ) { output = argv[++optind]; }
+    else if(sw=="-o"||sw=="--output"     ) { output = argv[++optind]; }
     else if(sw=="-s"||sw=="--sample"     ) { sample = argv[++optind]; }
     else if(sw=="-h"||sw=="--help"       ) { usage(argv[0]); return 0; }
     else if(sw=="--WH-sample"            ) { useSusyXSReader = true; }
@@ -93,6 +93,7 @@ int main(int argc, char** argv)
   susyPlot->setDebug(dbg);
   susyPlot->setSampleName(sample);
   susyPlot->setUseXsReader(useSusyXSReader);
+  if(output.length()) susyPlot->setOutputFilename(output);
   susyPlot->buildSumwMap(chain);
   nEvt = (nEvt>0 ? nEvt : nEntries);
   cout<<"Total entries:   "<<nEntries<<endl
