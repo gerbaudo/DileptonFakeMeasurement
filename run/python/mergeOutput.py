@@ -36,7 +36,7 @@ usage="""%prog [options] dir
 Merge root files from samples belonging to the same group.
 
 Example:
-.%prog -s 'Z(ee|mumu|tautau)' out/susysel
+.%prog -v -g ttbar out/susysel
 """
 parser = optparse.OptionParser(usage=usage)
 parser.add_option('-o', '--output', help='output directory; default <input>/merged/')
