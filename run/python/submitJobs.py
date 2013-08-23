@@ -57,6 +57,7 @@ outdir  = ''
 outdir += 'susyplot_out' if susyplot else ''
 outdir += 'susysel_out'  if susysel  else ''
 outdir += 'fakeprob_out' if fakeprob else ''
+if not os.path.isdir(outdir)  : os.mkdir(outdir)
 inputTemplate = "filelist/%(sample)s.txt"
 outScriptTemplate = scriptDir+'/%(sample)s.sh'
 outRootTemplate = "%(outdir)s/%(sample)s_%(tag)s.root"
