@@ -10,11 +10,7 @@
 using namespace std;
 using namespace Susy;
 
-
-//
 // Histogram bins
-//
-
 const float varptbins[] = {0,10,20,30,40,50,70,100,150,200,250};
 const int    varnptbins = 10;
 
@@ -54,10 +50,7 @@ const int   njetbins = 7;
 const float njetmin = -0.5;
 const float njetmax = njetbins - 0.5;
 
-
-/*--------------------------------------------------------------------------------*/
-// Constructor
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 SusyPlotter::SusyPlotter() :
   SusySelection(),
   m_doLepSF(false),
@@ -91,10 +84,7 @@ SusyPlotter::SusyPlotter() :
   }
   */
 }
-
-/*--------------------------------------------------------------------------------*/
-// The Begin() function is called at the start of the query.
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 void SusyPlotter::Begin(TTree* /*tree*/)
 {
   SusySelection::Begin(0);
@@ -104,18 +94,12 @@ void SusyPlotter::Begin(TTree* /*tree*/)
   TH1::SetDefaultSumw2(true);
   m_histFile->cd();
   //m_histFile->mkdir( sysNames[sys].c_str() ) -> cd();
-
-  // Plot Region names
-  for(uint iPR=0; iPR<PR_N; ++iPR){
+  for(uint iPR=0; iPR<PR_N; ++iPR){   // for(Plot Region)
     string PR = PRNames[iPR];
-
-    // lepton channel loop
-    for(uint iCh=0; iCh<Ch_N; ++iCh){
+    for(uint iCh=0; iCh<Ch_N; ++iCh){ // for(lepton channel)
       string chan = chanNames[iCh];
-
       for(uint iSys=0; iSys<m_systs.size(); ++iSys){
-	string sys = m_systNames.at(iSys);
-	//cout<<"Sys: "<<sys<<endl;
+        string sys = m_systNames.at(iSys);
 
 	// Preprocessor convenience
 	// make a histogram by name (leave off the "h_") and binning
@@ -245,35 +229,22 @@ void SusyPlotter::Begin(TTree* /*tree*/)
       }// end loop over systematics
     }// end loop over channels
   }// end loop over Plot regions
-
 }
-
-/*--------------------------------------------------------------------------------*/
-// Main process loop function
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 Bool_t SusyPlotter::Process(Long64_t entry)
 {
-
   if(m_dbg) cout<<"SusyPlotter::Process"<<endl;
-  // Communicate tree entry number to SusyNtObject
   GetEntry(entry);
   clearObjects();
-
-  // Chain entry not the same as tree entry
   static Long64_t chainEntry = -1;
   chainEntry++;
-  if(m_dbg || chainEntry%50000==0)
-  {
+  if(m_dbg || chainEntry%50000==0) {
     cout << "**** Processing entry " << setw(6) << chainEntry
          << " run " << setw(6) << nt.evt()->run
          << " event " << setw(7) << nt.evt()->event << " ****" << endl;
   }
-
-  // select signal objects
   selectObjects();
-
-  // Check Analysis level cuts
-  if( !selectEvent())    return kTRUE;
+  if(!selectEvent())    return kTRUE;
   // DG 26Feb : this needs to be understood.
   //--DG-- if( nt.evt()->isMC && !isTrueDilepton(m_signalLeptons) ) return kTRUE;
 
@@ -301,10 +272,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
 
   return kTRUE;
 }
-
-/*--------------------------------------------------------------------------------*/
-// The Terminate() function is the last function to be called during a query
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 void SusyPlotter::Terminate()
 {
   SusySelection::Terminate();
@@ -323,29 +291,16 @@ SusyPlotter& SusyPlotter::setOutputFilename(const std::string &name)
   m_histFileName = name;
   return *this;
 }
-
-/*--------------------------------------------------------------------------------*/
-// Fill histograms
-/*--------------------------------------------------------------------------------*/
-void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, const Met* met,
-			     const float weight, PlotRegion PR, uint sys)
+//-----------------------------------------
+void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
+                             const Met* met, const float weight,
+                             PlotRegion PR, uint sys)
 {
-
   if(m_dbg) cout << "SusyPlotter::fillHistos" << endl;
-
-  // Get Channel for leptons
-  // ** Only dealing with exactly two leptons
   if( leps.size() != 2 ) return;
   int ch = getChan(leps);
-
-
-  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-//
-  // Some useful Definitions
-  //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-//
-
   const Lepton* l0 = leps[0];
   const Lepton* l1 = leps[1];
-
   assert(l0);
   assert(l1);
   #define FILL(h, var)					\
@@ -366,22 +321,18 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
       h[Ch_all][PR][sys]->Fill(xfill,yfill,weight);			\
     }while(0)
 
-
-
   const TLorentzVector mlv = met->lv();
   const TLorentzVector ll  = *l0 + *l1;
 
-  // Pt Plots
+  FILL(h_onebin, 0.);
   FILL(h_l0_pt, l0->Pt());
   FILL(h_l1_pt, l1->Pt());
   FILL(h_ll_pt, ll.Pt());
-
   if(l0->isEle()) FILL(h_e_pt, l0->Pt());
   else            FILL(h_m_pt, l0->Pt());
   if(l1->isEle()) FILL(h_e_pt, l1->Pt());
   else            FILL(h_m_pt, l1->Pt());
 
-  // Eta plots
   FILL(h_l0_eta, l0->Eta());
   FILL(h_l1_eta, l1->Eta());
   if(l0->isEle()) FILL(h_e_eta, fabs(l0->Eta()));
@@ -389,10 +340,8 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   if(l1->isEle()) FILL(h_e_eta, fabs(l1->Eta()));
   else            FILL(h_m_eta, fabs(l1->Eta()));
 
-  // Mass Plots
   FILL(h_ll_M, ll.M());
 
-  // Met histograms
   float metrel = getMetRel(met, leps, jets);
   FILL(h_met, met->Et);
   FILL(h_metrel, metrel);
@@ -413,8 +362,6 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
   FILL(h_l_origin, l0->mcOrigin);
   FILL(h_l_type, l1->mcType);
   FILL(h_l_origin, l1->mcOrigin);
-
-  FILL(h_onebin, 0.);
 
   FILL(h_sumQ, l0->q + l1->q);
   float mt_met_ll = SusyPlotter::transverseMass(ll, mlv);
@@ -470,53 +417,42 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets, co
       FILL(h_numNeutrinoSol, numNeutrinoSol);
     } // end if(oppositeCharge)
   } // end if(nJ>=2)
-
   #undef FILL
   #undef FILL2
 }
-
-/*--------------------------------------------------------------------------------*/
-// Get lepton channel
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 int SusyPlotter::getChan(const LeptonVector& leps)
 {
-
   uint ie = 0;
   uint im = 0;
   for(uint i=0; i<leps.size(); ++i){
     if( leps.at(i)->isEle() ) ie++;
     else if( leps.at(i)->isMu() ) im++;
   }
-
   if( ie == 2 && im == 0 ) return Ch_ee;
   if( ie == 1 && im == 1 ) return Ch_em;
   if( ie == 0 && im == 2 ) return Ch_mm;
-
   cout<<"Not ee/mm/em... Number Electrons: "<<ie<<" Number Muons: "<<im<<endl;
   return Ch_N; // not in range
-
 }
-
-/*--------------------------------------------------------------------------------*/
-// Get systematics
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 void SusyPlotter::setSysts()
 {
-  if(!m_doFake){
+  if(!m_doFake) {
     m_systs.push_back(NtSys_NOM);  m_systNames.push_back(SusyNtSystNames[NtSys_NOM]);
-  } else if(m_doFake){
+  } else if(m_doFake) {
     m_systs.push_back(SusyMatrixMethod::SYS_NONE);
     m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_NONE]);
   } else {
     cout<<"SusyPlotter::setSysts() : not implemented (DG Jan2013)"<<endl;
   }
 }
-//----------------------------------------------------------
+//-----------------------------------------
 float SusyPlotter::transverseMass(const TLorentzVector &lep, const TLorentzVector &met)
 {
   return std::sqrt(2.0 * lep.Pt() * met.Et() *(1-cos(lep.DeltaPhi(met))) );
 }
-//----------------------------------------------------------
+//-----------------------------------------
 float SusyPlotter::mtWW(const TLorentzVector &ll, const TLorentzVector &met)
 {
   using std::sqrt;
@@ -527,13 +463,13 @@ float SusyPlotter::mtWW(const TLorentzVector &ll, const TLorentzVector &met)
                                        * sqrt(ptvv*ptvv + mvv*mvv)
                                        - ptll * ptvv * cos(dphi)));
 }
-//----------------------------------------------------------
+//-----------------------------------------
 float SusyPlotter::sumCosDeltaPhi(const TLorentzVector &l0, const TLorentzVector &l1,
 				  const TLorentzVector &met)
 {
   return cos(l0.Phi() - met.Phi()) + cos(l1.Phi() - met.Phi());
 }
-//----------------------------------------------------------
+//-----------------------------------------
 float addJetPt(float totPt, const Susy::Jet *j) { return totPt + j->Pt(); }
 float SusyPlotter::sumEtEtMiss(const TLorentzVector &el, const TLorentzVector &mu,
 			       const JetVector &jets, const TLorentzVector &met)
@@ -565,10 +501,10 @@ int SusyPlotter::numberOfNeutrinoSolutions(const TLorentzVector &lPos, const TLo
 	      &cd_diff, cubic_single_root_cmplx);
     return pnubx.size();
 }
-//----------------------------------------------------------
-// re-written based on HWWlvlvCode::calculate_METBasedVariables
-float SusyPlotter::mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &met)
-{
+//-----------------------------------------
+float SusyPlotter::mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1,
+                            const TLorentzVector &met)
+{ // re-written based on HWWlvlvCode::calculate_METBasedVariables
   float px0(l0.Px()), py0(l0.Py());
   float px1(l1.Px()), py1(l1.Py());
   float pxm(met.Px()), pym(met.Py());
@@ -577,6 +513,7 @@ float SusyPlotter::mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1, 
   float den2( px0*pym - py0*pxm + px0*py1 - py0*px1 );
   float x1 = ( den1 != 0.0  ? (num/den1) : 0.0);
   float x2 = ( den2 != 0.0  ? (num/den2) : 0.0);
-  // not guaranteed that this configuration is kinematically possible
-  return (x1*x2 > 0.0 ? (l0+l1).M() / std::sqrt(x1*x2) : -1.0);
+  bool kinematicallyPossible(x1*x2 > 0.0);
+  return (kinematicallyPossible ? (l0+l1).M() / std::sqrt(x1*x2) : -1.0);
 }
+//-----------------------------------------

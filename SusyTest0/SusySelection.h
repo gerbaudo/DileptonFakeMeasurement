@@ -23,8 +23,7 @@
 
 #include <fstream>
 
-enum WeightType
-{
+enum WeightType {
   WT_Raw = 0,   // raw counts
   WT_Evt,       // include gen weight (from ntuple or xsreader)
   WT_PU,        // include pileup weight
@@ -48,7 +47,6 @@ class chargeFlip;
 
 class SusySelection : public SusyNtAna
 {
-
  public:
   typedef       LeptonVector  vl_t;  //!< just to make some decl shorter
   typedef const LeptonVector cvl_t;  //!< just to make some decl shorter
@@ -280,4 +278,4 @@ class SusySelection : public SusyNtAna
     float n_pass_metRel     [ET_N][WT_N];
 };
 
-#endif
+#endif // SusySelection_h

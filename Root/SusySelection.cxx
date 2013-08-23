@@ -45,10 +45,7 @@ void SusySelection::Begin(TTree* /*tree*/)
     m_xsReader->LoadXSInfo();
   } // end if(m_useXsReader)
 }
-
-/*--------------------------------------------------------------------------------*/
-// Main process loop function
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 Bool_t SusySelection::Process(Long64_t entry)
 {
   GetEntry(entry);
@@ -73,6 +70,7 @@ Bool_t SusySelection::Process(Long64_t entry)
 
   return kTRUE;
 }
+//-----------------------------------------
 void SusySelection::Terminate()
 {
   SusyNtAna::Terminate();
@@ -81,7 +79,7 @@ void SusySelection::Terminate()
   if(m_xsReader) delete m_xsReader;
   if(m_chargeFlip) delete m_chargeFlip;
 }
-
+//-----------------------------------------
 void SusySelection::increment(float counters[],
                               bool includeLepSF, bool includeBtag)
 {
@@ -109,10 +107,7 @@ void SusySelection::increment(float counters[],
   counters[WT_Trig] += eventWeight * trig;
   counters[WT_All ] += all;
 }
-
-/*--------------------------------------------------------------------------------*/
-// Full event selection
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::selectEvent()
 {
   if(m_dbg) cout << "SusySelection::selectEvent" << endl;
@@ -143,28 +138,27 @@ bool SusySelection::selectEvent()
   if(passMllMin(bleps, 20.)          )  { increment(n_pass_mll);        } else { return false; }
   return true;
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passSR6base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
   return oppositeSign(leptons) && sameFlavor(leptons);
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passSR7base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
   return oppositeSign(leptons) && oppositeFlavor(leptons);
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passSR8base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
   return sameSign(leptons) && sameFlavor(leptons);
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passSR9base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
   return sameSign(leptons) && oppositeFlavor(leptons);
 }
-
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
   bool lepSf(true), bSf(true);
@@ -192,7 +186,7 @@ bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, 
   if( count )                               increment(n_pass_SR6[m_ET],lepSf, bSf);
   return true;
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passSR7(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
   bool lepSf(true), bSf(true);
@@ -221,7 +215,7 @@ bool SusySelection::passSR7(const LeptonVector& leptons, const JetVector& jets, 
   if( count )                               increment(n_pass_SR7[m_ET],lepSf, bSf);
   return true;
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passSR8(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
   bool lepSf(true), bSf(true);
@@ -236,7 +230,7 @@ bool SusySelection::passSR8(const LeptonVector& leptons, const JetVector& jets, 
   else return false;
   return true;
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passSR9(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
   bool lepSf(true), bSf(true);
@@ -251,12 +245,12 @@ bool SusySelection::passSR9(const LeptonVector& leptons, const JetVector& jets, 
   else return false;
   return true;
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passSrSsBase()
 {
   return false;
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passSrSs(const DiLepEvtType eventType,
                              const WH_SR signalRegion,
                              LeptonVector& leptons,
@@ -320,50 +314,48 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   if(passMetRelMin (met,ncls,js,metRelMin))  increment(n_pass_metRel   [ll], lepSf, bSf); else return false;
   return true;
 }
-/*--------------------------------------------------------------------------------*/
-// Generic cuts
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passHfor()
 {
   if(nt.evt()->hfor == 4 ) return false;
   return true;
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passTrig2L(const LeptonVector& leptons)
 {
   if(leptons.size() != 2 || !m_trigObj) return false;
   return m_trigObj->passDilEvtTrig(leptons, m_met->Et, nt.evt());
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passTrig2LMatch(const LeptonVector& leptons)
 {
   if(leptons.size() != 2 || !m_trigObj) return false;
   return m_trigObj->passDilTrigMatch(leptons, m_met->Et, nt.evt());
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passTrig2LwithMatch(const LeptonVector& leptons)
 {
   return (passTrig2L(leptons) && passTrig2LwithMatch(leptons));
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::sameFlavor(const LeptonVector& leptons)
 {
   if( leptons.size() < 2 ) return false;
   return (leptons.at(0)->isMu() == leptons.at(1)->isMu());
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::oppositeFlavor(const LeptonVector& leptons)
 {
   if( leptons.size() < 2 ) return false;
   return !(leptons.at(0)->isMu() == leptons.at(1)->isMu());
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::sameSign(const LeptonVector& leptons)
 {
   if( leptons.size() < 2 ) return false;
   return leptons.at(0)->q * leptons.at(1)->q > 0;
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
                                     const DiLepEvtType eventType,
                                     bool update4mom)
@@ -378,19 +370,17 @@ bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
   }
   return true;
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::oppositeSign(const LeptonVector& leptons)
 {
   return !(sameSign(leptons));
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passHtautauVeto(int hdecay)
 {
   return (hdecay!=WhTruthExtractor::kPtauAtau);
 }
-/*--------------------------------------------------------------------------------*/
-// Signal region cuts
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passJetVeto(const JetVector& jets)
 {
   // Require no light, b, or forward jets
@@ -399,19 +389,19 @@ bool SusySelection::passJetVeto(const JetVector& jets)
   int N_F30 = numberOfFJets(jets);
   return (N_L20 + N_B20 + N_F30 == 0);
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passbJetVeto(const JetVector& jets)
 {
   // Reject if there is a b jet using 2L definition
   int N_B20 = numberOfCBJets(jets);
   return (N_B20 == 0);
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passfJetVeto(const JetVector& jets)
 {
   return (0 == numberOfFJets(jets));
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passge1Jet(const JetVector& jets)
 {
   int N_L20 = numberOfCLJets(jets);
@@ -433,7 +423,7 @@ bool SusySelection::passge3Jet(const JetVector& jets)
   int N_F30 = numberOfFJets(jets);
   return (N_L20 >=3 && N_B20 + N_F30 == 0);
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passeq2Jet(const JetVector& jets)
 {
   int N_L20 = numberOfCLJets(jets);
@@ -441,28 +431,28 @@ bool SusySelection::passeq2Jet(const JetVector& jets)
   int N_F30 = numberOfFJets(jets);
   return (N_L20 == 2 && N_B20 + N_F30 == 0);
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passge2JetWoutFwVeto(const JetVector& jets)
 {
   return (numberOfCLJets(jets) >= 2 && numberOfCBJets(jets) < 1);
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passeq2JetWoutFwVeto(const JetVector& jets)
 {
   return (numberOfCLJets(jets) == 2 && numberOfCBJets(jets) < 1);
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passMetRelMin(const Met *met, const LeptonVector& leptons,
                                   const JetVector& jets, float minVal){
   float metrel = getMetRel(met,leptons,jets);
   return (minVal < metrel);
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passdPhi(TLorentzVector v0, TLorentzVector v1, float cut)
 {
   return v0.DeltaPhi(v1) > cut;
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passMtLlMetMin(const LeptonVector& l, const Met* met,
                                    float minVal)
 {
@@ -579,37 +569,37 @@ bool SusySelection::passDrllMax(const LeptonVector& l, float maxDr)
   if(l.size()<2) return false;
   return  l[0]->DeltaR(*(static_cast<TLorentzVector*>(l[1]))) < maxDr;
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 // Check MC Lepton
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::isRealLepton(const Lepton* lep)
 {
   // Updated way of handling real and fake leptons using LeptonTruthTools
   return (lep->truthType == RecoTruthMatch::PROMPT);
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::isFakeLepton(const Lepton* lep)
 {
   return !isRealLepton(lep);
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::isConvLepton(const Lepton* lep)
 {
   bool isConv       = lep->truthType == RecoTruthMatch::CONV;
   bool isChargeFlip =  lep->isEle() ? static_cast<const Electron*>(lep)->isChargeFlip : false;
   return isConv && !isChargeFlip;
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::isHFLepton(const Lepton* lep)
 {
   return (lep->truthType == RecoTruthMatch::HF);
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::isLFLepton(const Lepton* lep)
 {
   return (lep->truthType == RecoTruthMatch::LF);
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::isTrueDilepton(const LeptonVector &leptons)
 {
   // Maybe not 100% kosher, but I just want to make sure I am not
@@ -621,7 +611,7 @@ bool SusySelection::isTrueDilepton(const LeptonVector &leptons)
   bool l1_cf = leptons[1]->isEle() ? ((Electron*) leptons[1])->isChargeFlip : false;
   return l0_real && l1_real && !l0_cf && !l1_cf; // ignoring charge flip
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passMuonRelIso(const LeptonVector &leptons, float maxVal)
 {
   for(size_t i=0; i<leptons.size(); ++i){
@@ -636,7 +626,7 @@ bool SusySelection::passMuonRelIso(const LeptonVector &leptons, float maxVal)
   } // end for(i)
   return true;
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 bool SusySelection::passEleD0S(const LeptonVector &leptons, float maxVal)
 {
   for(size_t i=0; i<leptons.size(); ++i){
@@ -646,7 +636,7 @@ bool SusySelection::passEleD0S(const LeptonVector &leptons, float maxVal)
   return true;
 }
 
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 float SusySelection::getEvtWeight(const LeptonVector& leptons,
                                   bool includeBTag, bool includeTrig)
 {
@@ -676,7 +666,7 @@ float SusySelection::getPythiaBbCcScaleFactor(uint datasetId, const LeptonVector
   return (isPythiaBbCcSample ? (rigthLepton ? 0.706074 : 0.0) : 1.0);
 
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 float SusySelection::getBTagWeight(const Event* evt)
 {
   JetVector tempJets;
@@ -801,8 +791,7 @@ void SusySelection::dumpEventCounters()
     cout<<midRule                                                    <<endl;
   }// end for(w)
 }
-
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 float SusySelection::getXsFromReader()
 {
   if(!m_useXsReader || !m_xsReader) return -1.0;
@@ -814,7 +803,7 @@ float SusySelection::getXsFromReader()
   }
   return m_xsFromReader;
 }
-/*--------------------------------------------------------------------------------*/
+//-----------------------------------------
 float SusySelection::computeEventWeightXsFromReader(float lumi)
 {
   float defaultXsec = nt.evt()->xsec;
