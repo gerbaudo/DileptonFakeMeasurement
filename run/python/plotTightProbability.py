@@ -22,6 +22,7 @@ from NavUtils import getAllHistoNames
 
 def buildRatioHisto(hNumerator, hDenominator) :
     hN, hD = hNumerator, hDenominator
+    if not hD.GetEntries() : return
     # todo: rebin when low stats
     eff = r.TGraphAsymmErrors()
     lcs = longestCommonSubstring
@@ -48,6 +49,7 @@ def processFile(filename, outdir) :
     histonames = getAllHistoNames(file, onlyTH1=True)
     probHistos = [buildProbHisto(file, n, d)
                   for n,d in findHistonamePairs(histonames, '_num', '_den')]
+    probHistos = filter(None, probHistos) # remove empty graphs that make TAxis complain
     c = r.TCanvas('p_tight','')
     for ph in probHistos :
         c.cd()
