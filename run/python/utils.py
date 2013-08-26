@@ -9,6 +9,7 @@ import glob
 import os
 import re
 import subprocess
+import unittest
 
 def getCommandOutput(command):
     "lifted from supy (https://github.com/elaird/supy/blob/master/utils/io.py)"
@@ -31,8 +32,33 @@ def guessLatestTagFromLatestRootFiles(dir, debug) :
     suffix = commonSuffix(files)
     if not len(suffix) : return ''
     def cleanupSampleName(suff) :
-        "if the suffix includes part of a sample name, it can be isolated by the ."
+        "if the suffix includes part of a sample name, it can be isolated by the '.'"
         lastDot = max(0, suffix.rfind('.'))
         return suffix[suffix.find('_', lastDot):]
     if debug : print "guessLatestTagFromLatestRootFiles: cleanup '%s'"%suffix
     return cleanupSampleName(suffix) if len(suffix) else suffix
+def guessMonthDayTag(name) :
+    "extract a '_Xxx_yy' tag with a 3-char month and a day"
+    match = re.search('(?P<tag>'
+                      '_(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)_\d+)',
+                      name)
+    if match : return match.group('tag')
+
+
+
+#
+# testing
+#
+class testGuessMdTag(unittest.TestCase) :
+    def testKnownValues(self) :
+        knownValues = [('out/foo/ttbar_Aug_23.root',     '_Aug_23'),
+                       ('foo/baz_Aug/ttbar_Aug_23.root', '_Aug_23'),
+                       ('out/foo/ttbar_Aug_2.root',      '_Aug_2'),
+                       ('out/foo/ttbar_August_2.root',      None),
+                       ]
+        for s, tag in  knownValues :
+            gTag = guessMonthDayTag(s)
+            self.assertEqual(tag, gTag)
+
+if __name__ == "__main__":
+    unittest.main()
