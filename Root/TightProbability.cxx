@@ -48,8 +48,8 @@ void TightProbability::NumDenHisto::setMinMax() {
   }
 }
 //----------------------------------------------------------
-const float edgesFakePtbins[] = {10,20,35,100};
-const int  nFakePtbins   = 3;
+const float edgesFakePtbins[] = {5, 10, 15, 20, 25, 30, 35, 50, 100,500};
+const int  nFakePtbins   = sizeof(edgesFakePtbins)/sizeof(float) - 1;
 TightProbability::TightProbability():
   m_outFname("tightProbabilityOut.root"),
   m_outFile(0),
