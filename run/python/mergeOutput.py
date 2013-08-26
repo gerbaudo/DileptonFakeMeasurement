@@ -11,7 +11,7 @@ import optparse
 import os
 import re
 import subprocess
-from datasets import datasets, groupsNotToBeMerged
+from datasets import datasets
 from utils import getCommandOutput
 
 def findLatestOneOrTwoRootFiles(dir) :
@@ -30,7 +30,6 @@ def guessLatestTagFromLatestRootFiles(dir, debug) :
         return suffix[suffix.find('_', lastDot):]
     if debug : print "guessLatestTagFromLatestRootFiles: cleanup '%s'"%suffix
     return cleanupSampleName(suffix) if len(suffix) else suffix
-def isGroupToBeMerged(groupname) : return groupname not in groupsNotToBeMerged()
 
 usage="""%prog [options] dir
 Merge root files from samples belonging to the same group.
@@ -73,12 +72,11 @@ for rf in rootfiles :
         print "warning, cannot identify dataset for '%s'"%rf
         continue
     group = dataset.group
+    if dataset.isNotToBeMerged : continue
+    if not re.search(group_regexp, group) : continue
     if not group : print "warning, invalid group '%s' for '%s'"%(group, rf)
     if verbose and group not in filenamesByGroup : print "adding group '%s'"%group
     filenamesByGroup[group].append(rf)
-for group in filenamesByGroup.keys() :
-    if not isGroupToBeMerged(group) or not re.search(group_regexp, group) :
-        filenamesByGroup.pop(group, None)
 nGroupsToMerge = len(filenamesByGroup.keys())
 groupCounter = 0
 for group, files in filenamesByGroup.iteritems() :

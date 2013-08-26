@@ -21,6 +21,7 @@ def rzip(*iterables) :
 class Dataset :
     """Container to uniquely specify a dataset (through a dsid), and
     specify additional user-friendly attributes"""
+    groupsNotToBeMerged = ['WH_2Lep', 'WH_3Lep']
     def __init__(self, sampleType, dsid=None, group=None, name=None, process=None, placeholder=False) :
         assert sampleType in ['data','mc'], "sampleType: %s for %s"%(sampleType, name)
         self.type = sampleType # data or mc
@@ -29,9 +30,10 @@ class Dataset :
         self.name = name # full name, usually as in <stuff>.<dsid>.<name>.SusyNt.<tags>
         self.process = process # physical process, for example 'Zbb + jets' (short, generic, usually appears as the common root of the name)
         self.placeholder = placeholder # just a placeholder, its job won't be submitted
-
-def groupsNotToBeMerged() :
-    return ['WH_2Lep', 'WH_3Lep']
+    @property
+    def isNotToBeMerged(self) : return self.group in Dataset.groupsNotToBeMerged
+    @property
+    def isToBeMerged(self) : return not self.isNotToBeMerged
 
 datasets = []
 sampleType, group, process = None, None, None
