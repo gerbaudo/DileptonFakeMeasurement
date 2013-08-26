@@ -5,6 +5,7 @@
 # davide.gerbaudo@gmail.com
 # 2013-07-25
 
+import difflib
 import glob
 import os
 import re
@@ -43,8 +44,11 @@ def guessMonthDayTag(name) :
                       '_(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)_\d+)',
                       name)
     if match : return match.group('tag')
-
-
+def commonPrefix(list) : return os.path.commonprefix(list)
+def commonSuffix(list) : return os.path.commonprefix([l[::-1] for l in list])[::-1]
+def longestCommonSubstring(s1, s2) :
+    m = difflib.SequenceMatcher(None, s1, s2).find_longest_match(0, len(s1), 0, len(s2))
+    return s1[m.a : m.a+m.size]
 
 #
 # testing
