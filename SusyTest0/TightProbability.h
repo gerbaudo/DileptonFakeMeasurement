@@ -84,7 +84,13 @@ class TightProbability : public SusySelection
   LeptonVector m_probes;            // Probe lepton vector
   LeptonVector m_tags;              // Tag Lepton vector
   float        m_evtWeight;         // Event Weight
-  NumDenHisto  m_h_pt;
+  NumDenHisto  m_h_pt_any;
+  NumDenHisto  m_h_pt_real;
+  NumDenHisto  m_h_pt_hf;
+  NumDenHisto  m_h_pt_lf;
+  NumDenHisto  m_h_pt_conv;
+  NumDenHisto  m_h_pt_mjet;
+  NumDenHisto  m_h_pt_other;
 };
 
 } // end namespace Susy

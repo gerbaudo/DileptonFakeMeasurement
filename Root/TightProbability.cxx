@@ -55,7 +55,13 @@ TightProbability::TightProbability():
   m_outFile(0),
   m_isMC(false),
   m_evtWeight(0.0),
-  m_h_pt("pt", nFakePtbins, edgesFakePtbins)
+  m_h_pt_any  ("pt_any",   nFakePtbins, edgesFakePtbins),
+  m_h_pt_real ("pt_real",  nFakePtbins, edgesFakePtbins),
+  m_h_pt_hf   ("pt_hf",    nFakePtbins, edgesFakePtbins),
+  m_h_pt_lf   ("pt_lf",    nFakePtbins, edgesFakePtbins),
+  m_h_pt_conv ("pt_conv",  nFakePtbins, edgesFakePtbins),
+  m_h_pt_mjet ("pt_mjet",  nFakePtbins, edgesFakePtbins),
+  m_h_pt_other("pt_other", nFakePtbins, edgesFakePtbins)
 {}
 //----------------------------------------------------------
 TightProbability::~TightProbability() {}
@@ -87,9 +93,18 @@ Bool_t TightProbability::Process(Long64_t entry) {
     bool fillNum = isSignalLepton(l, m_baseElectrons, m_baseMuons,
                                   nt.evt()->nVtx,nt.evt()->isMC);
     float weight(1.0); // for now assume ~uniform weight; we're considering a ratio...
-    m_h_pt.Fill(fillNum, l->Pt(), weight);
+    float pt(l->Pt());
+    LeptonOrigin lo(getLeptonOrigin(l));
+    m_h_pt_any.Fill(fillNum, weight, pt);
+    switch(lo){
+    case kReal         : m_h_pt_real .Fill(fillNum, weight, pt); break;
+    case kHeavyFlavor  : m_h_pt_hf   .Fill(fillNum, weight, pt); break;
+    case kLigthFlavor  : m_h_pt_lf   .Fill(fillNum, weight, pt); break;
+    case kConversion   : m_h_pt_conv .Fill(fillNum, weight, pt); break;
+    case kMultijet     : m_h_pt_mjet .Fill(fillNum, weight, pt); break;
+    default            : m_h_pt_other.Fill(fillNum, weight, pt); break;
+    }
   } // end for(iL)
-   cout<<endl;
   return true;
 }
 //----------------------------------------------------------
@@ -97,7 +112,13 @@ void TightProbability::initOutput(string outName) {
   if(m_dbg>0) cout<<"TightProbability::initOutput Creating file: "<<outName<<endl;
   m_outFile = new TFile(outName.c_str(),"recreate");
   m_outFile->cd();
-  m_h_pt.SetDirectory(m_outFile);
+  m_h_pt_any  .SetDirectory(m_outFile);
+  m_h_pt_real .SetDirectory(m_outFile);
+  m_h_pt_hf   .SetDirectory(m_outFile);
+  m_h_pt_lf   .SetDirectory(m_outFile);
+  m_h_pt_conv .SetDirectory(m_outFile);
+  m_h_pt_mjet .SetDirectory(m_outFile);
+  m_h_pt_other.SetDirectory(m_outFile);
 }
 //----------------------------------------------------------
 void TightProbability::finalizeOutput() {
