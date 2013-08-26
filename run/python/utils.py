@@ -25,7 +25,7 @@ def findLatestOneOrTwoRootFiles(dir) :
     files = filter(os.path.isfile, glob.glob(dir + "*.root"))
     files.sort(key=lambda x: os.path.getmtime(x))
     return files[-2:] if len(files)>=2 else files
-
+def findLastRootFile(dir) : return findLatestOneOrTwoRootFiles(dir)[-1]
 def guessLatestTagFromLatestRootFiles(dir, debug) :
     "Latest tag if there are at least 2 root files; otherwise empty string"
     files = [f.replace('.root','').rstrip() for f in findLatestOneOrTwoRootFiles(dir)]
@@ -44,6 +44,10 @@ def guessMonthDayTag(name) :
                       '_(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)_\d+)',
                       name)
     if match : return match.group('tag')
+def guessMonthDayTagFromLastRootFile(dir, debug) :
+    lastFile = findLastRootFile(dir)
+    if lastFile : return guessMonthDayTag(lastFile)
+    elif debug : print "guessMonthDayTagFromLastRootFile: no root files"
 def commonPrefix(list) : return os.path.commonprefix(list)
 def commonSuffix(list) : return os.path.commonprefix([l[::-1] for l in list])[::-1]
 def longestCommonSubstring(s1, s2) :
