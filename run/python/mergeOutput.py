@@ -12,7 +12,7 @@ import os
 import re
 import subprocess
 from datasets import datasets
-from utils import getCommandOutput, guessLatestTagFromLatestRootFiles
+from utils import getCommandOutput, guessLatestTagFromLatestRootFiles, guessMonthDayTagFromLastRootFile
 
 usage="""%prog [options] dir
 Merge root files from samples belonging to the same group.
@@ -35,6 +35,7 @@ debug         = options.debug
 outdir        = options.output if options.output else inputdir+'/merged/'
 tag           = (options.tag if options.tag
                  else guessLatestTagFromLatestRootFiles(inputdir, debug))
+tag           = tag if tag else guessMonthDayTagFromLastRootFile(inputdir, debug)
 if verbose :
     print "Options:"
     print '\n'.join(["%s : %s" % (o, eval(o))
