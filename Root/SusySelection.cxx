@@ -582,9 +582,10 @@ bool SusySelection::isFakeLepton(const Lepton* lep)
 //-----------------------------------------
 bool SusySelection::isConvLepton(const Lepton* lep)
 {
-  bool isConv       = lep->truthType == RecoTruthMatch::CONV;
-  bool isChargeFlip =  lep->isEle() ? static_cast<const Electron*>(lep)->isChargeFlip : false;
-  return isConv && !isChargeFlip;
+  bool isConverted(lep->truthType == RecoTruthMatch::CONV);
+  bool isChargeFlip(lep->isEle() ?
+                    static_cast<const Electron*>(lep)->isChargeFlip : false);
+  return isConverted && !isChargeFlip;
 }
 //-----------------------------------------
 bool SusySelection::isHFLepton(const Lepton* lep)
