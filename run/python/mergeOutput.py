@@ -22,6 +22,7 @@ Example:
 """
 parser = optparse.OptionParser(usage=usage)
 parser.add_option('-o', '--output', help='output directory; default <input>/merged/')
+parser.add_option('-O', '--overwrite', action='store_true', help='overwrite output')
 parser.add_option('-g', '--groupregexp', default='.*', help='only matching groups')
 parser.add_option('-t', '--tag', help='production tag; by default the latest one')
 parser.add_option('-v', '--verbose', action='store_true', help='print details')
@@ -32,6 +33,7 @@ inputdir      = args[0]
 group_regexp  = options.groupregexp
 verbose       = options.verbose
 debug         = options.debug
+overwrite     = options.overwrite
 outdir        = options.output if options.output else inputdir+'/merged/'
 tag           = (options.tag if options.tag
                  else guessLatestTagFromLatestRootFiles(inputdir, debug))
@@ -39,7 +41,7 @@ tag           = tag if tag else guessMonthDayTagFromLastRootFile(inputdir, debug
 if verbose :
     print "Options:"
     print '\n'.join(["%s : %s" % (o, eval(o))
-                     for o in ['inputdir', 'outdir', 'group_regexp', 'tag',
+                     for o in ['inputdir', 'outdir', 'group_regexp', 'tag', 'overwrite',
                                'verbose', 'debug',]])
 if not os.path.isdir(outdir) :
     os.mkdir(outdir)
@@ -68,6 +70,7 @@ for group, files in filenamesByGroup.iteritems() :
     if verbose :
         print "[%d/%d] %s (%d files)"%(groupCounter, nGroupsToMerge, group, len(files))
     outfile = outdir+'/'+group+tag+'.root'
+    if overwrite and os.path.isfile(outfile) : os.remove(outfile)
     if debug : print "hadd %s\n\t%s"%(outfile, '\n\t'.join(files))
     cmd = "hadd %s %s" % (outfile, ' '.join(files))
     out = getCommandOutput(cmd)
