@@ -35,6 +35,8 @@ class Dataset :
     @property
     def isToBeMerged(self) : return not self.isNotToBeMerged
 
+def allGroups(datasets=[]) : return list(set(d.group for d in datasets))
+
 datasets = []
 sampleType, group, process = None, None, None
 placeholder = True
