@@ -102,7 +102,7 @@ class SusySelection : public SusyNtAna
      */
     bool sameSignOrQflip(LeptonVector &leptons, Met &met,
                          const DiLepEvtType eventType,
-                         bool update4mom);
+                         bool update4mom, bool isMC);
     bool oppositeSign(const LeptonVector& leptons);
     bool passHtautauVeto(int hdecay);
     // Signal Region Cuts

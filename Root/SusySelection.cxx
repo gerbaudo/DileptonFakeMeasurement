@@ -285,28 +285,29 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   // if(!passEventCleaning()){ return false; }
 
   // Apply event selection cuts
+  bool mc(nt.evt()->isMC), data(!mc);
   const LeptonVector &ls = leptons;
   LeptonVector &ncls = leptons; // non-const leptons: can be modified by qflip
   Met ncmet(*m_met); // non-const met
   const JetVector    &js = jets;
-  if(true)                                   increment(n_pass_category [ll], lepSf, bSf); else return false;
-  if(passNlepMin   (ls, 2))                  increment(n_pass_nSigLep  [ll], lepSf, bSf); else return false;
-  if(m_signalTaus.size()==0)                 increment(n_pass_tauVeto  [ll], lepSf, bSf); else return false;
-  if(passTrig2L     (ls))                    increment(n_pass_tr2L     [ll], lepSf, bSf); else return false;
-  if(passTrig2LMatch(ls))                    increment(n_pass_tr2LMatch[ll], lepSf, bSf); else return false;
-  if(isTrueDilepton(ls))                     increment(n_pass_mcTrue2l [ll], lepSf, bSf); else return false;
-  if(sameSignOrQflip(ncls, ncmet, ll, u4m))  increment(n_pass_ss       [ll], lepSf, bSf); else return false;
+  if(true)                                      increment(n_pass_category [ll], lepSf, bSf); else return false;
+  if(passNlepMin   (ls, 2))                     increment(n_pass_nSigLep  [ll], lepSf, bSf); else return false;
+  if(m_signalTaus.size()==0)                    increment(n_pass_tauVeto  [ll], lepSf, bSf); else return false;
+  if(passTrig2L     (ls))                       increment(n_pass_tr2L     [ll], lepSf, bSf); else return false;
+  if(passTrig2LMatch(ls))                       increment(n_pass_tr2LMatch[ll], lepSf, bSf); else return false;
+  if(data || isTrueDilepton(ls))                increment(n_pass_mcTrue2l [ll], lepSf, bSf); else return false;
+  if(sameSignOrQflip(ncls, ncmet, ll, u4m, mc)) increment(n_pass_ss       [ll], lepSf, bSf); else return false;
   met = &ncmet; // after qflip, use potentially smeared lep and met
-  if(passMuonRelIso(ncls, muIsoMax))         increment(n_pass_muIso    [ll], lepSf, bSf); else return false;
-  if(passEleD0S    (ncls, d0SMax))           increment(n_pass_elD0Sig  [ll], lepSf, bSf); else return false;
-  if(passfJetVeto  (js))                     increment(n_pass_fjVeto   [ll], lepSf, bSf); else return false;
-  if(passbJetVeto  (js))                     increment(n_pass_bjVeto   [ll], lepSf, bSf); else return false;
-  if(passge1Jet    (js))                     increment(n_pass_ge1j     [ll], lepSf, bSf); else return false;
-  if(pass2LepPt    (ncls, ptL0Min, ptL1Min)) increment(n_pass_lepPt    [ll], lepSf, bSf); else return false;
-  if(passZllVeto   (ncls, loMllZ, hiMllZ))   increment(n_pass_mllZveto [ll], lepSf, bSf); else return false;
-  if(passMtLlMetMin(ncls, met, mtwwMin))     increment(n_pass_mWwt     [ll], lepSf, bSf); else return false;
-  if(passHtMin     (ncls, js, met, htMin))   increment(n_pass_ht       [ll], lepSf, bSf); else return false;
-  if(passMetRelMin (met,ncls,js,metRelMin))  increment(n_pass_metRel   [ll], lepSf, bSf); else return false;
+  if(passMuonRelIso(ncls, muIsoMax))            increment(n_pass_muIso    [ll], lepSf, bSf); else return false;
+  if(passEleD0S    (ncls, d0SMax))              increment(n_pass_elD0Sig  [ll], lepSf, bSf); else return false;
+  if(passfJetVeto  (js))                        increment(n_pass_fjVeto   [ll], lepSf, bSf); else return false;
+  if(passbJetVeto  (js))                        increment(n_pass_bjVeto   [ll], lepSf, bSf); else return false;
+  if(passge1Jet    (js))                        increment(n_pass_ge1j     [ll], lepSf, bSf); else return false;
+  if(pass2LepPt    (ncls, ptL0Min, ptL1Min))    increment(n_pass_lepPt    [ll], lepSf, bSf); else return false;
+  if(passZllVeto   (ncls, loMllZ, hiMllZ))      increment(n_pass_mllZveto [ll], lepSf, bSf); else return false;
+  if(passMtLlMetMin(ncls, met, mtwwMin))        increment(n_pass_mWwt     [ll], lepSf, bSf); else return false;
+  if(passHtMin     (ncls, js, met, htMin))      increment(n_pass_ht       [ll], lepSf, bSf); else return false;
+  if(passMetRelMin (met,ncls,js,metRelMin))     increment(n_pass_metRel   [ll], lepSf, bSf); else return false;
   return true;
 }
 //-----------------------------------------
@@ -353,9 +354,10 @@ bool SusySelection::sameSign(const LeptonVector& leptons)
 //-----------------------------------------
 bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
                                     const DiLepEvtType eventType,
-                                    bool update4mom)
+                                    bool update4mom, bool isMc)
 {
   bool isSS(sameSign(leptons));
+  if(!isMc) return isSS;
   bool isOS(!isSS);
   bool canBeQflip(isOS && (eventType==ET_ee || eventType==ET_em || eventType==ET_me));
   if (!isSS && !canBeQflip) return false;
