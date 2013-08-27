@@ -15,10 +15,12 @@ import subprocess
 import ROOT as r
 r.gROOT.SetBatch(True)                     # no windows popping up
 r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
+from rootUtils import referenceLine
 
 #from datasets import datasets
 from utils import getCommandOutput, guessMonthDayTag, longestCommonSubstring
 from NavUtils import getAllHistoNames
+import datasets
 
 def buildRatioHisto(hNumerator, hDenominator) :
     hN, hD = hNumerator, hDenominator
@@ -41,8 +43,10 @@ def findHistonamePairs(histonames, suffix1st='', suffix2nd='') :
     return pairs
 def buildProbHisto(file, hnameNum, hnameDen) :
     hNum, hDen = file.Get(hnameNum), file.Get(hnameDen)
+    # hNum.Rebin(2)
+    # hDen.Rebin(2)
     return buildRatioHisto(hNum, hDen)
-def processFile(filename, outdir) :
+def processFile(filename, outdir, group='') :
     file = r.TFile.Open(filename)
     outfname = (outdir+'/%(histoname)s_'
                 +os.path.basename(filename).replace('.root','.png'))
@@ -54,10 +58,14 @@ def processFile(filename, outdir) :
     for ph in probHistos :
         c.cd()
         c.Clear()
+        if group : ph.SetTitle("%s %s"%(ph.GetTitle(), ", %s"%group if group else ''))
         ph.Draw('ap')
+        xAx, yAx = ph.GetXaxis(), ph.GetYaxis()
+        yAx.SetRangeUser(0.0, 1.1)
+        l = referenceLine(xAx.GetXmin(), xAx.GetXmax())
+        l.Draw()
         c.Update()
         c.SaveAs(outfname%{'histoname':ph.GetName()})
-        
 
 usage="""%prog [options] input1 [input2...]
 Compute the conditional probability and plot it
@@ -89,9 +97,11 @@ if not os.path.isdir(outdir) :
     os.mkdir(outdir)
     if verbose : print "created directory '%s'"%outdir
 
-
+allGroups = datasets.allGroups(datasets.datasets)
 for f in inputs :
-    processFile(f, outdir)
+    group = next((g for g in allGroups if g in f), None)
+    processFile(f, outdir, group)
+
 # allDatasets = [d for d in datasets if not d.placeholder]
 # filenamesByGroup = collections.defaultdict(list)
 # rootfiles = filter(os.path.isfile, glob.glob(inputdir + "*.root"))
