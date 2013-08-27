@@ -55,13 +55,20 @@ TightProbability::TightProbability():
   m_outFile(0),
   m_isMC(false),
   m_evtWeight(0.0),
-  m_h_pt_any  ("pt_any",   nFakePtbins, edgesFakePtbins),
-  m_h_pt_real ("pt_real",  nFakePtbins, edgesFakePtbins),
-  m_h_pt_hf   ("pt_hf",    nFakePtbins, edgesFakePtbins),
-  m_h_pt_lf   ("pt_lf",    nFakePtbins, edgesFakePtbins),
-  m_h_pt_conv ("pt_conv",  nFakePtbins, edgesFakePtbins),
-  m_h_pt_mjet ("pt_mjet",  nFakePtbins, edgesFakePtbins),
-  m_h_pt_other("pt_other", nFakePtbins, edgesFakePtbins),
+  m_h_el_pt_any  ("pt_el_any",   nFakePtbins, edgesFakePtbins),
+  m_h_el_pt_real ("pt_el_real",  nFakePtbins, edgesFakePtbins),
+  m_h_el_pt_hf   ("pt_el_hf",    nFakePtbins, edgesFakePtbins),
+  m_h_el_pt_lf   ("pt_el_lf",    nFakePtbins, edgesFakePtbins),
+  m_h_el_pt_conv ("pt_el_conv",  nFakePtbins, edgesFakePtbins),
+  m_h_el_pt_mjet ("pt_el_mjet",  nFakePtbins, edgesFakePtbins),
+  m_h_el_pt_other("pt_el_other", nFakePtbins, edgesFakePtbins),
+  m_h_mu_pt_any  ("pt_mu_any",   nFakePtbins, edgesFakePtbins),
+  m_h_mu_pt_real ("pt_mu_real",  nFakePtbins, edgesFakePtbins),
+  m_h_mu_pt_hf   ("pt_mu_hf",    nFakePtbins, edgesFakePtbins),
+  m_h_mu_pt_lf   ("pt_mu_lf",    nFakePtbins, edgesFakePtbins),
+  m_h_mu_pt_conv ("pt_mu_conv",  nFakePtbins, edgesFakePtbins),
+  m_h_mu_pt_mjet ("pt_mu_mjet",  nFakePtbins, edgesFakePtbins),
+  m_h_mu_pt_other("pt_mu_other", nFakePtbins, edgesFakePtbins),
   m_leptonOriginCounter(kLeptonOriginN, 0)
 {}
 //----------------------------------------------------------
@@ -78,6 +85,35 @@ void TightProbability::Terminate() {
   dumpEventCounters();
   printLeptonOriginCounters();
   finalizeOutput();
+}
+//----------------------------------------------------------
+TightProbability::NumDenHisto* TightProbability::histoForLepForOrigin(const Lepton *l,
+                                                                      const LeptonOrigin &lo)
+{
+  NumDenHisto *h = NULL;
+  bool el(l->isEle()), mu(l->isMu());
+  if(!el && !mu) return h;
+  switch(lo){
+  case kReal        : h = &(el? m_h_el_pt_real  : m_h_mu_pt_real ); break;
+  case kHeavyFlavor : h = &(el? m_h_el_pt_hf    : m_h_mu_pt_hf   ); break;
+  case kLigthFlavor : h = &(el? m_h_el_pt_lf    : m_h_mu_pt_lf   ); break;
+  case kConversion  : h = &(el? m_h_el_pt_conv  : m_h_mu_pt_conv ); break;
+  case kMultijet    : h = &(el? m_h_el_pt_mjet  : m_h_mu_pt_mjet ); break;
+  default           : h = &(el? m_h_el_pt_other : m_h_mu_pt_other); break;
+  } // end switch(lo)
+  return h;
+}
+//----------------------------------------------------------
+void TightProbability::incrementLeptonOriginCounter(const LeptonOrigin &lo)
+{
+  switch(lo){
+  case kReal        :  m_leptonOriginCounter[kReal         ]++; break;
+  case kHeavyFlavor :  m_leptonOriginCounter[kHeavyFlavor  ]++; break;
+  case kLigthFlavor :  m_leptonOriginCounter[kLigthFlavor  ]++; break;
+  case kConversion  :  m_leptonOriginCounter[kConversion   ]++; break;
+  case kMultijet    :  m_leptonOriginCounter[kMultijet     ]++; break;
+  default           :  m_leptonOriginCounter[kUnknownOrigin]++; break;
+  }
 }
 //----------------------------------------------------------
 Bool_t TightProbability::Process(Long64_t entry) {
@@ -106,16 +142,10 @@ Bool_t TightProbability::Process(Long64_t entry) {
     float weight(1.0), w(weight); // assume ~uniform weight; we're using a ratio...
     float pt(l->Pt());
     LeptonOrigin lo(getLeptonOrigin(l));
-    m_h_pt_any.Fill(fillNum, weight, pt);
-    vector<size_t> &oc = m_leptonOriginCounter;
-    switch(lo){
-    case kReal        : m_h_pt_real .Fill(fn, w, pt); oc[kReal         ]++; break;
-    case kHeavyFlavor : m_h_pt_hf   .Fill(fn, w, pt); oc[kHeavyFlavor  ]++; break;
-    case kLigthFlavor : m_h_pt_lf   .Fill(fn, w, pt); oc[kLigthFlavor  ]++; break;
-    case kConversion  : m_h_pt_conv .Fill(fn, w, pt); oc[kConversion   ]++; break;
-    case kMultijet    : m_h_pt_mjet .Fill(fn, w, pt); oc[kMultijet     ]++; break;
-    default           : m_h_pt_other.Fill(fn, w, pt); oc[kUnknownOrigin]++; break;
-    }
+    if     (l->isEle()) m_h_el_pt_any.Fill(fillNum, weight, pt);
+    else if(l->isMu() ) m_h_mu_pt_any.Fill(fillNum, weight, pt);
+    if(NumDenHisto *h = histoForLepForOrigin(l, lo)) h->Fill(fn, w, pt);
+    incrementLeptonOriginCounter(lo);
     pts[iL] = pt;
   } // end for(iL)
 //   cout<<" pts: ";
@@ -128,13 +158,20 @@ void TightProbability::initOutput(string outName) {
   if(m_dbg>0) cout<<"TightProbability::initOutput Creating file: "<<outName<<endl;
   m_outFile = new TFile(outName.c_str(),"recreate");
   m_outFile->cd();
-  m_h_pt_any  .SetDirectory(m_outFile);
-  m_h_pt_real .SetDirectory(m_outFile);
-  m_h_pt_hf   .SetDirectory(m_outFile);
-  m_h_pt_lf   .SetDirectory(m_outFile);
-  m_h_pt_conv .SetDirectory(m_outFile);
-  m_h_pt_mjet .SetDirectory(m_outFile);
-  m_h_pt_other.SetDirectory(m_outFile);
+  m_h_el_pt_any  .SetDirectory(m_outFile);
+  m_h_el_pt_real .SetDirectory(m_outFile);
+  m_h_el_pt_hf   .SetDirectory(m_outFile);
+  m_h_el_pt_lf   .SetDirectory(m_outFile);
+  m_h_el_pt_conv .SetDirectory(m_outFile);
+  m_h_el_pt_mjet .SetDirectory(m_outFile);
+  m_h_el_pt_other.SetDirectory(m_outFile);
+  m_h_mu_pt_any  .SetDirectory(m_outFile);
+  m_h_mu_pt_real .SetDirectory(m_outFile);
+  m_h_mu_pt_hf   .SetDirectory(m_outFile);
+  m_h_mu_pt_lf   .SetDirectory(m_outFile);
+  m_h_mu_pt_conv .SetDirectory(m_outFile);
+  m_h_mu_pt_mjet .SetDirectory(m_outFile);
+  m_h_mu_pt_other.SetDirectory(m_outFile);
 }
 //----------------------------------------------------------
 void TightProbability::finalizeOutput() {

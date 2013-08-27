@@ -77,7 +77,9 @@ class TightProbability : public SusySelection
   float getPtcone(const Lepton* lep);
   float getEtcone(const Lepton* lep);
   void printLeptonOriginCounters() const;
-
+ protected:
+  NumDenHisto* histoForLepForOrigin(const Lepton *l, const LeptonOrigin &lo);
+  void incrementLeptonOriginCounter(const LeptonOrigin &lo);
  protected:
 
   std::string  m_outFname;
@@ -86,13 +88,20 @@ class TightProbability : public SusySelection
   LeptonVector m_probes;            // Probe lepton vector
   LeptonVector m_tags;              // Tag Lepton vector
   float        m_evtWeight;         // Event Weight
-  NumDenHisto  m_h_pt_any;
-  NumDenHisto  m_h_pt_real;
-  NumDenHisto  m_h_pt_hf;
-  NumDenHisto  m_h_pt_lf;
-  NumDenHisto  m_h_pt_conv;
-  NumDenHisto  m_h_pt_mjet;
-  NumDenHisto  m_h_pt_other;
+  NumDenHisto  m_h_el_pt_any;  // electron probabilities
+  NumDenHisto  m_h_el_pt_real;
+  NumDenHisto  m_h_el_pt_hf;
+  NumDenHisto  m_h_el_pt_lf;
+  NumDenHisto  m_h_el_pt_conv;
+  NumDenHisto  m_h_el_pt_mjet;
+  NumDenHisto  m_h_el_pt_other;
+  NumDenHisto  m_h_mu_pt_any;  // muon probabilities
+  NumDenHisto  m_h_mu_pt_real;
+  NumDenHisto  m_h_mu_pt_hf;
+  NumDenHisto  m_h_mu_pt_lf;
+  NumDenHisto  m_h_mu_pt_conv;
+  NumDenHisto  m_h_mu_pt_mjet;
+  NumDenHisto  m_h_mu_pt_other;
   std::vector< size_t > m_leptonOriginCounter;
 };
 
