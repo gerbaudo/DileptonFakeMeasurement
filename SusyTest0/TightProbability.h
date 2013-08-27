@@ -2,6 +2,7 @@
 #define TIGHTPROBABILITY_H
 
 #include <string>
+#include <vector>
 
 #include "SusyTest0/SusySelection.h"
 
@@ -75,6 +76,7 @@ class TightProbability : public SusySelection
 
   float getPtcone(const Lepton* lep);
   float getEtcone(const Lepton* lep);
+  void printLeptonOriginCounters() const;
 
  protected:
 
@@ -91,6 +93,7 @@ class TightProbability : public SusySelection
   NumDenHisto  m_h_pt_conv;
   NumDenHisto  m_h_pt_mjet;
   NumDenHisto  m_h_pt_other;
+  std::vector< size_t > m_leptonOriginCounter;
 };
 
 } // end namespace Susy

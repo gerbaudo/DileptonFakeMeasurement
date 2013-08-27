@@ -61,7 +61,8 @@ TightProbability::TightProbability():
   m_h_pt_lf   ("pt_lf",    nFakePtbins, edgesFakePtbins),
   m_h_pt_conv ("pt_conv",  nFakePtbins, edgesFakePtbins),
   m_h_pt_mjet ("pt_mjet",  nFakePtbins, edgesFakePtbins),
-  m_h_pt_other("pt_other", nFakePtbins, edgesFakePtbins)
+  m_h_pt_other("pt_other", nFakePtbins, edgesFakePtbins),
+  m_leptonOriginCounter(kLeptonOriginN, 0)
 {}
 //----------------------------------------------------------
 TightProbability::~TightProbability() {}
@@ -73,38 +74,53 @@ void TightProbability::Begin(TTree *tree) {
 }
 //----------------------------------------------------------
 void TightProbability::Terminate() {
+  //if(m_dbg)
+  dumpEventCounters();
+  printLeptonOriginCounters();
   finalizeOutput();
 }
 //----------------------------------------------------------
 Bool_t TightProbability::Process(Long64_t entry) {
+  //  cout<<"entry "<<entry;
   GetEntry(entry);
   m_chainEntry++;
   clearObjects();
   m_ET = ET_Unknown;
   bool removeLepsFromIso(false);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
-  if(!selectEvent()) return true;
+  bool passEvent(selectEvent());
+  //  cout<<(passEvent ? " passEvent " : "!passEvent\n");
+  if(!passEvent) return true;
   m_ET = getDiLepEvtType(m_baseLeptons);
-  bool passSr = passSrSs(m_ET, WH_SRSS1, m_baseLeptons, m_signalTaus, m_signalJets2Lep, m_met);
+  bool passSr = passSrSs(m_ET, WH_SRSS1, m_baseLeptons, m_signalTaus, m_signalJets2Lep,
+                         m_met);
+  //  cout<<(passSr ? " passSrSs \n" : "!passSrSs\n");
   if(!passSr) return true;
   //  LeptonVector tags, probes;
+  vector<float> pts(m_baseLeptons.size());
   for(size_t iL=0; iL<m_baseLeptons.size(); ++iL) {
     Lepton *l = m_baseLeptons[iL];
     bool fillNum = isSignalLepton(l, m_baseElectrons, m_baseMuons,
                                   nt.evt()->nVtx,nt.evt()->isMC);
-    float weight(1.0); // for now assume ~uniform weight; we're considering a ratio...
+    bool fn(fillNum);
+    float weight(1.0), w(weight); // assume ~uniform weight; we're using a ratio...
     float pt(l->Pt());
     LeptonOrigin lo(getLeptonOrigin(l));
     m_h_pt_any.Fill(fillNum, weight, pt);
+    vector<size_t> &oc = m_leptonOriginCounter;
     switch(lo){
-    case kReal         : m_h_pt_real .Fill(fillNum, weight, pt); break;
-    case kHeavyFlavor  : m_h_pt_hf   .Fill(fillNum, weight, pt); break;
-    case kLigthFlavor  : m_h_pt_lf   .Fill(fillNum, weight, pt); break;
-    case kConversion   : m_h_pt_conv .Fill(fillNum, weight, pt); break;
-    case kMultijet     : m_h_pt_mjet .Fill(fillNum, weight, pt); break;
-    default            : m_h_pt_other.Fill(fillNum, weight, pt); break;
+    case kReal        : m_h_pt_real .Fill(fn, w, pt); oc[kReal         ]++; break;
+    case kHeavyFlavor : m_h_pt_hf   .Fill(fn, w, pt); oc[kHeavyFlavor  ]++; break;
+    case kLigthFlavor : m_h_pt_lf   .Fill(fn, w, pt); oc[kLigthFlavor  ]++; break;
+    case kConversion  : m_h_pt_conv .Fill(fn, w, pt); oc[kConversion   ]++; break;
+    case kMultijet    : m_h_pt_mjet .Fill(fn, w, pt); oc[kMultijet     ]++; break;
+    default           : m_h_pt_other.Fill(fn, w, pt); oc[kUnknownOrigin]++; break;
     }
+    pts[iL] = pt;
   } // end for(iL)
+//   cout<<" pts: ";
+//   copy(pts.begin(), pts.end(), ostream_iterator<float>(cout, " "));
+//   cout<<endl;
   return true;
 }
 //----------------------------------------------------------
@@ -166,5 +182,17 @@ float TightProbability::getPtcone(const Lepton* lep){
 float TightProbability::getEtcone(const Lepton* lep){
   if( lep->isEle() ) return ((Electron*) lep)->topoEtcone30Corr;
   return ((Muon*) lep)->etcone30;
+}
+//----------------------------------------------------------
+void TightProbability::printLeptonOriginCounters() const {
+    const vector<size_t> &oc = m_leptonOriginCounter;
+    cout<<"TightProbability: leptonOriginCounters"<<endl
+        <<"kReal          : "<<oc[kReal         ]<<endl
+        <<"kHeavyFlavor   : "<<oc[kHeavyFlavor  ]<<endl
+        <<"kLigthFlavor   : "<<oc[kLigthFlavor  ]<<endl
+        <<"kConversion    : "<<oc[kConversion   ]<<endl
+        <<"kMultijet      : "<<oc[kMultijet     ]<<endl
+        <<"kUnknownOrigin : "<<oc[kUnknownOrigin]<<endl
+        <<endl;
 }
 //----------------------------------------------------------
