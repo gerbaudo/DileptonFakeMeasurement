@@ -46,7 +46,7 @@ def buildProbHisto(file, hnameNum, hnameDen) :
     # hNum.Rebin(2)
     # hDen.Rebin(2)
     return buildRatioHisto(hNum, hDen)
-def processFile(filename, outdir, group='') :
+def processFile(filename, outdir, label='') :
     file = r.TFile.Open(filename)
     outfname = (outdir+'/%(histoname)s_'
                 +os.path.basename(filename).replace('.root','.png'))
@@ -58,7 +58,7 @@ def processFile(filename, outdir, group='') :
     for ph in probHistos :
         c.cd()
         c.Clear()
-        if group : ph.SetTitle("%s %s"%(ph.GetTitle(), ", %s"%group if group else ''))
+        if label : ph.SetTitle("%s %s"%(ph.GetTitle(), ", %s"%label if label else ''))
         ph.Draw('ap')
         xAx, yAx = ph.GetXaxis(), ph.GetYaxis()
         yAx.SetRangeUser(0.0, 1.1)
@@ -98,9 +98,12 @@ if not os.path.isdir(outdir) :
     if verbose : print "created directory '%s'"%outdir
 
 allGroups = datasets.allGroups(datasets.datasets)
+allSamples = datasets.allDatasets(datasets.datasets)
 for f in inputs :
-    group = next((g for g in allGroups if g in f), None)
-    processFile(f, outdir, group)
+    group  = next((g for g in allGroups if g in f), None)
+    sample = next((s for s in allSamples if s in f), None)
+    label = "%s %s"%(group if group else '', sample if sample else '')
+    processFile(f, outdir, label)
 
 # allDatasets = [d for d in datasets if not d.placeholder]
 # filenamesByGroup = collections.defaultdict(list)
