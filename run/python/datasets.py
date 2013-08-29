@@ -36,6 +36,7 @@ class Dataset :
     def isToBeMerged(self) : return not self.isNotToBeMerged
 
 def allGroups(datasets=[]) : return list(set(d.group for d in datasets))
+def allDatasets(datasets=[]) : return list(set(d.name for d in datasets))
 
 datasets = []
 sampleType, group, process = None, None, None
