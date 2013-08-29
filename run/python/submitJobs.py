@@ -30,6 +30,8 @@ parser.add_option("-O", "--other-opt", dest="otherOptions", default='',
                   help="other options that will be passed on to the executable; double quotes if necessary")
 parser.add_option("-s", "--sample-regexp", dest="samples", default='.*',
                   help="create filelists only for matching samples (default '.*')")
+parser.add_option("-e", "--exclude-regexp", dest="exclude", default=None,
+                  help="submit jobs excluding matching samples (eg. bkg only: '(period|simplified)')")
 parser.add_option("-S", "--submit", dest="submit", action='store_true', default=False,
                   help="submit jobs (default dry run)")
 parser.add_option("-t", "--tag", dest="tag", default=defaultBatchTag,
@@ -41,6 +43,7 @@ batchTag     = options.tag
 otherOptions = options.otherOptions
 overwrite    = options.overwrite
 regexp       = options.samples
+exclude      = options.exclude
 submit       = options.submit
 susyplot     = options.susyplot
 susysel      = options.susysel
@@ -70,9 +73,10 @@ outScriptTemplate = scriptDir+'/%(sample)s.sh'
 outRootTemplate = "%(outdir)s/%(sample)s_%(tag)s.root"
 outLogTemplate = "%(logdir)s/%(sample)s_%(tag)s.log"
 
-sampleNames = [d.name for d in datasets if not d.placeholder]
-sampleNames = filterWithRegexp(sampleNames, regexp)
-
+sampleNames   = [d.name for d in datasets if not d.placeholder]
+sampleNames   = filterWithRegexp(sampleNames, regexp)
+excludedNames = [] if exclude is None else filterWithRegexp(sampleNames, exclude)
+sampleNames   = [s for s in sampleNames if s not in excludedNames]
 def listExists(dset='', flistDir='./filelist') : return os.path.exists(flistDir+'/'+dset+'.txt')
 def fillInScriptTemplate(sample, input, output, otherOptions, outScript, scriptTemplate) :
     options  = otherOptions
