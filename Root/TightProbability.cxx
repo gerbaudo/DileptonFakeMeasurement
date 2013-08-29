@@ -124,27 +124,33 @@ Bool_t TightProbability::Process(Long64_t entry) {
   m_ET = ET_Unknown;
   bool removeLepsFromIso(false);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
+  const LeptonVector &leps = m_baseLeptons;
+  const JetVector &jets = m_signalJets2Lep;
+  const Met *met = m_met;
+  bool isMc(nt.evt()->isMC);
+  int nVtx(nt.evt()->nVtx);
   bool passEvent(selectEvent());
   //  cout<<(passEvent ? " passEvent " : "!passEvent\n");
   if(!passEvent) return true;
-  m_ET = getDiLepEvtType(m_baseLeptons);
-  bool passSr = passSrSs(m_ET, WH_SRSS1, m_baseLeptons, m_signalTaus, m_signalJets2Lep,
-                         m_met);
-  //  cout<<(passSr ? " passSrSs \n" : "!passSrSs\n");
+  m_ET = getDiLepEvtType(leps);
+  float metRel = getMetRel(met,leps,jets);
+  //bool passSr = passSrSs(m_ET, WH_SRSS1, leps, m_signalTaus, m_signalJets2Lep, met);
+  //bool passSr(40.0 < metRel && metRel < 100.0);
+  bool passMet(met->Et > 20.0), passMetRel(40.0 < metRel && metRel < 100.0);
+  bool pass2l(2==leps.size());
+  bool passSr(passMet && pass2l);
   if(!passSr) return true;
-  //  LeptonVector tags, probes;
-  vector<float> pts(m_baseLeptons.size());
-  for(size_t iL=0; iL<m_baseLeptons.size(); ++iL) {
-    Lepton *l = m_baseLeptons[iL];
-    bool fillNum = isSignalLepton(l, m_baseElectrons, m_baseMuons,
-                                  nt.evt()->nVtx,nt.evt()->isMC);
-    bool fn(fillNum);
-    float weight(1.0), w(weight); // assume ~uniform weight; we're using a ratio...
+  float weight(1.0); // assume ~uniform weight; we're using a ratio...
+  vector<float> pts(leps.size());
+  for(size_t iL=0; iL<leps.size(); ++iL) {
+    Lepton *l = leps[iL];
+    bool isEl(l->isEle()), isMu(l->isMu());
+    bool fillNum(isSignalLepton(l, m_baseElectrons, m_baseMuons, nVtx, isMc));
     float pt(l->Pt());
     LeptonOrigin lo(getLeptonOrigin(l));
-    if     (l->isEle()) m_h_el_pt_any.Fill(fillNum, weight, pt);
-    else if(l->isMu() ) m_h_mu_pt_any.Fill(fillNum, weight, pt);
-    if(NumDenHisto *h = histoForLepForOrigin(l, lo)) h->Fill(fn, w, pt);
+    if     (isEl) m_h_el_pt_any.Fill(fillNum, weight, pt);
+    else if(isMu) m_h_mu_pt_any.Fill(fillNum, weight, pt);
+    if(NumDenHisto *h = histoForLepForOrigin(l, lo)) h->Fill(fillNum, weight, pt);
     incrementLeptonOriginCounter(lo);
     pts[iL] = pt;
   } // end for(iL)
