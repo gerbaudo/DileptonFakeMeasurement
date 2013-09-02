@@ -140,7 +140,8 @@ Bool_t TightProbability::Process(Long64_t entry) {
   bool pass2l(2==leps.size());
   bool passSr(passMet && pass2l);
   if(!passSr) return true;
-  float weight(1.0); // assume ~uniform weight; we're using a ratio...
+  bool includeBtag(false), includeTrig(true); // not sure btag works properly
+  float weight = isMc ? getEvtWeight(leps, includeBtag, includeTrig) : 1.0;
   vector<float> pts(leps.size());
   for(size_t iL=0; iL<leps.size(); ++iL) {
     Lepton *l = leps[iL];
