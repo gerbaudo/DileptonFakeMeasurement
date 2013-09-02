@@ -649,7 +649,7 @@ float SusySelection::getEvtWeight(const LeptonVector& leptons,
   weight *= getLeptonEff2Lep(leptons);
   float trigW = (includeTrig ? getTriggerWeight2Lep(leptons) : 1.0);
   float bTag  = (includeBTag ? getBTagWeight(nt.evt()) : 1.0);
-  cout<<"bTag : "<<bTag<<endl;
+  //cout<<"bTag : "<<bTag<<endl;
   return weight * trigW * bTag;
 }
 //-----------------------------------------
