@@ -111,8 +111,7 @@ datasets += [Dataset(sampleType, d, group, template%{'lv':lv, 'np':np}, process,
              for d, np in rzip(dsids, nps)]
 nps = [0, 1, 2, 3, 4, 5]
 template, process = "AlpgenPythia_P2011C_W%(lv)sNp%(np)d", 'Wlvjets'
-datasets += [Dataset(sampleType, d, group, template%{'lv':lv, 'np':np}, process,
-                     placeholder)
+datasets += [Dataset(sampleType, d, group, template%{'lv':lv, 'np':np}, process)
              for lv, dsids in [('enu',   range(117680, 117685+1)),
                                ('munu',  range(117690, 117695+1)),
                                ('taunu', range(117700, 117705+1))]
@@ -135,8 +134,7 @@ datasets += [Dataset(sampleType, d, group, template%{'qq':qq, 'np':np}, process,
              for d, np in rzip(dsids, nps)]
 npsBase = [0, 1, 2, 3]
 template, process = "AlpgenPythia_P2011C_W%(qq)sNp%(np)d", 'Wqqjets'
-datasets += [Dataset(sampleType, d, group, template%{'qq':qq, 'np':np}, process,
-                     placeholder)
+datasets += [Dataset(sampleType, d, group, template%{'qq':qq, 'np':np}, process)
              for qq, dsids, nps in [('bb', range(110801, 110804+1), npsBase),
                                     ('cc', range(126606, 126609+1), npsBase),
                                     ('c',  range(126601, 126605+1), npsBase+[4])]
