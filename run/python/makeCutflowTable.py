@@ -69,7 +69,6 @@ if len(inputs) < 1 : parser.error("provide at least one input")
 inputFileNames = [f  for i in inputs for f in glob.glob(i if i.endswith(ext) else i+'/*'+ext)]
 assert channel in validChannels,"Invalid channel %s (should be one of %s)" % (channel, str(validChannels))
 inputFiles = [r.TFile.Open(f) for f in inputFileNames]
-assert len(inputFileNames)==len(inputFiles),"Cannot open some of the input files"
 
 if verbose :
     print "Options:\n" \
