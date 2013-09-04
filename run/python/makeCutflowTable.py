@@ -19,7 +19,6 @@ from PickleUtils import dumpToPickle
 # default parameters [begin]
 validChannels   = ['ee', 'em', 'mm', 'all']
 defaultPickle   = 'counts.pkl'
-defaultTag      = 'Jan21_n0115'
 defaultHisto    = 'onebin'
 defaultRefSyst  = 'NOM'
 # default parameters [end]
@@ -36,8 +35,6 @@ parser.add_option("-c", "--channel", dest="channel", default=validChannels[0],
                   help="possible channels : %s" % str(validChannels))
 parser.add_option("-p", "--pickle", dest="pickle", default=defaultPickle,
                   help="save counts to the specified pikle file (default %s)" % defaultPickle)
-parser.add_option("-t", "--tag", dest="tag", default=defaultTag,
-                  help="production tag (default '%s')" % defaultTag)
 parser.add_option("-d", "--data", action='store_true', dest="data", default=False,
                   help="print column with data")
 parser.add_option("-b", "--tot-bkg", action='store_true', dest="totbkg", default=False,
@@ -54,7 +51,6 @@ parser.add_option("-v", "--verbose", action="store_true", dest="verbose", defaul
                   help="print more details about what is going on")
 (options, args) = parser.parse_args()
 channel         = options.channel
-prodTag         = options.tag
 printData       = options.data
 printTotBkg     = options.totbkg
 rawcnt          = options.rawcnt
@@ -73,7 +69,7 @@ inputFiles = [r.TFile.Open(f) for f in inputFileNames]
 if verbose :
     print "Options:\n" \
           + '\n'.join(["%s : %s" % (o, eval(o))
-                       for o in ['channel','prodTag', 'printData', 'printTotBkg',
+                       for o in ['channel', 'printData', 'printTotBkg',
                                  'rawcnt', 'referenceHisto', 'referenceSyst','selRegexp',
                                  'pickleFile']])
     print 'Input files:\n'+'\n'.join(inputFileNames)
