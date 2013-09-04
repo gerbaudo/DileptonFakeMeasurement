@@ -22,7 +22,6 @@ defaultPickle   = 'counts.pkl'
 defaultTag      = 'Jan21_n0115'
 defaultHisto    = 'onebin'
 defaultRefSyst  = 'NOM'
-defaultInputDir = '/export/home/gerbaudo/workarea/Susy2013/SusyTest0/run/anaplots/merged'
 # default parameters [end]
 #########
 
@@ -35,8 +34,6 @@ Examples:
 parser = optparse.OptionParser(usage=usage)
 parser.add_option("-c", "--channel", dest="channel", default=validChannels[0],
                   help="possible channels : %s" % str(validChannels))
-parser.add_option("-i", "--input-dir", dest="inputdir", default=defaultInputDir,
-                  help="input directory (default '%s')" % defaultInputDir)
 parser.add_option("-p", "--pickle", dest="pickle", default=defaultPickle,
                   help="save counts to the specified pikle file (default %s)" % defaultPickle)
 parser.add_option("-t", "--tag", dest="tag", default=defaultTag,
@@ -57,7 +54,6 @@ parser.add_option("-v", "--verbose", action="store_true", dest="verbose", defaul
                   help="print more details about what is going on")
 (options, args) = parser.parse_args()
 channel         = options.channel
-inputDir        = options.inputdir
 prodTag         = options.tag
 printData       = options.data
 printTotBkg     = options.totbkg
@@ -67,15 +63,18 @@ referenceSyst   = options.syst
 selRegexp       = options.sel
 pickleFile      = options.pickle
 verbose         = options.verbose
+
+inputs, ext = args, '.root'
+if len(inputs) < 1 : parser.error("provide at least one input")
+inputFileNames = [f  for i in inputs for f in glob.glob(i if i.endswith(ext) else i+'/*'+ext)]
 assert channel in validChannels,"Invalid channel %s (should be one of %s)" % (channel, str(validChannels))
-inputFileNames = glob.glob(inputDir+'/'+'*'+prodTag+'*.root')
 inputFiles = [r.TFile.Open(f) for f in inputFileNames]
 assert len(inputFileNames)==len(inputFiles),"Cannot open some of the input files"
 
 if verbose :
     print "Options:\n" \
           + '\n'.join(["%s : %s" % (o, eval(o))
-                       for o in ['channel','inputDir','prodTag', 'printData', 'printTotBkg',
+                       for o in ['channel','prodTag', 'printData', 'printTotBkg',
                                  'rawcnt', 'referenceHisto', 'referenceSyst','selRegexp',
                                  'pickleFile']])
     print 'Input files:\n'+'\n'.join(inputFileNames)
