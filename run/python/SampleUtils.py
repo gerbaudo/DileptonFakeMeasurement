@@ -6,6 +6,7 @@
 # Jan 2013
 
 import glob, os, re, unittest
+from datasets import datasets, allGroups, allDatasets
 import ROOT as r
 r.gROOT.SetBatch(1)
 
@@ -18,20 +19,13 @@ colors = {
     'multijet'  : r.kWhite
     }
 
-def guessSampleFromFilename(filename='', verbose=False) :
-    if 'top_' in filename : return 'ttbar'
-    elif 'Zjet_' in filename : return 'zjets'
-    elif 'ZZ_' in filename \
-         or 'WW_' in filename \
-         or 'WZ_' in filename : return 'diboson'
-    elif 'Wjet_' in filename : return 'wjets'
-    elif 'physics_Egamma' in filename or 'physics_Muons' in filename : return 'data'
-    elif 'WH_2Lep' in filename or 'WH_3Lep' in filename :
-        match = re.search('(WH_\dLep_\d+)', filename)
-        assert match, "failed to extract the WH pattern from %s"%filename
-        return match.group()
-    else :
-        if verbose : print "cannot guess samplename for %s" % filename
+allGroups, allDatasets = allGroups(datasets), allDatasets(datasets)
+
+def guessGroupFromFilename(filename='') :
+    "Guess group from filename, either merged or un-merged"
+    group = next((g for g in allGroups if g+'_' in filename), None)
+    group = group if group else next((d.group for d in allDatasets if d.name in filename), None)
+    return group
 
 def isDataSample(samplename) : return 'data' in samplename or 'period' in samplename
 def isSigSample(samplename) : return 'WH_' in samplename
