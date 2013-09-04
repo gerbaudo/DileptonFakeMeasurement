@@ -17,7 +17,7 @@ from PickleUtils import dumpToPickle
 
 #########
 # default parameters [begin]
-validChannels   = ['ee', 'em', 'mm', 'all']
+validChannels   = ['all', 'ee', 'em', 'mm']
 defaultPickle   = 'counts.pkl'
 defaultHisto    = 'onebin'
 defaultRefSyst  = 'NOM'
