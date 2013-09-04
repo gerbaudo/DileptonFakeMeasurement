@@ -12,7 +12,7 @@ r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
 
 from NavUtils import getAllHistoNames, HistoNameClassifier, organizeHistosByType, HistoType, HistoNameClassifier, setHistoType, setHistoSample
-from SampleUtils import guessSampleFromFilename, isBkgSample
+from SampleUtils import guessGroupFromFilename, isBkgSample
 from PickleUtils import dumpToPickle
 
 #########
@@ -81,7 +81,7 @@ histosByType = collections.defaultdict(list)
 classifier = HistoNameClassifier()
 
 for fname, infile in zip(inputFileNames, inputFiles) :
-    samplename = guessSampleFromFilename(fname)
+    samplename = guessGroupFromFilename(fname)
     histoNames = [n for n in getAllHistoNames(infile, onlyTH1=True)
                   if refHistoType.matchAllAvailabeAttrs( histoNameClassifier.histoType( n ) )]
     histos = [infile.Get(hn) for hn in histoNames]
