@@ -18,6 +18,7 @@ from PickleUtils import dumpToPickle
 #########
 # default parameters [begin]
 validChannels   = ['all', 'ee', 'em', 'mm']
+defaultChannel  = validChannels[0]
 defaultPickle   = 'counts.pkl'
 defaultHisto    = 'onebin'
 defaultRefSyst  = 'NOM'
@@ -27,36 +28,27 @@ defaultRefSyst  = 'NOM'
 usage="""Using the histograms produced by SusyPlot, print a latex cutflow table.
 
 Examples:
-> ./python/makeCutflowTable.py -i anaplots/merged/ -t Jun06 -c all -b -d -s '^sr\d$' # background
-> ./python/makeCutflowTable.py -i anaplots/ -t WH_2Lep_*_Jun06 -c all  -s '^sr\d$'   # signals
+> ./python/makeCutflowTable.py anaplots/merged/  -c all -b -d -s '^sr\d$' # background
+> ./python/makeCutflowTable.py anaplots/ -c all  -s '^sr\d$'   # signals
 """
 parser = optparse.OptionParser(usage=usage)
-parser.add_option("-c", "--channel", dest="channel", default=validChannels[0],
-                  help="possible channels : %s" % str(validChannels))
-parser.add_option("-p", "--pickle", dest="pickle", default=defaultPickle,
-                  help="save counts to the specified pikle file (default %s)" % defaultPickle)
-parser.add_option("-d", "--data", action='store_true', dest="data", default=False,
-                  help="print column with data")
-parser.add_option("-b", "--tot-bkg", action='store_true', dest="totbkg", default=False,
-                  help="print column with tot. bkg")
-parser.add_option("-r", "--raw-counts", action='store_true', dest="rawcnt", default=False,
-                  help="print histo raw Nentries rather than integrals")
-parser.add_option("-H", "--histo", dest="histo", default=defaultHisto,
-                  help="histogram to get the counts from (default '%s')" % defaultHisto)
-parser.add_option("-s", "--sel-regexp", dest="sel", default='.*',
-                  help="print only mathing selections (default '.*', any sel); example -s '^sr\d$', see http://www.debuggex.com/r/V82_pzhNDT0ukHMR/1")
-parser.add_option("-S", "--syst", dest="syst", default=defaultRefSyst,
-                  help="systematic (default '%s')" % defaultRefSyst)
-parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
-                  help="print more details about what is going on")
+parser.add_option("-c", "--channel", default=defaultChannel, help="one of : %s"%str(validChannels))
+parser.add_option("-p", "--pickle", default=defaultPickle, help="output (default %s)" % defaultPickle)
+parser.add_option("-d", "--data", action='store_true', default=False, help="print data")
+parser.add_option("-b", "--totbkg", action='store_true', default=False, help="print tot. bkg")
+parser.add_option("-r", "--rawcounts", action='store_true', default=False, help="raw rather than weighted")
+parser.add_option("-H", "--histo", default=defaultHisto, help="histo from which we count (default '%s')" % defaultHisto)
+parser.add_option("-s", "--selregexp", default='.*', help="print only mathing selections (default '.*', any sel); example -s '^sr\d$', see http://www.debuggex.com/r/V82_pzhNDT0ukHMR/1")
+parser.add_option("-S", "--syst", default=defaultRefSyst, help="systematic (default '%s')" % defaultRefSyst)
+parser.add_option("-v", "--verbose", action="store_true", default=False, help="print stuff")
 (options, args) = parser.parse_args()
 channel         = options.channel
 printData       = options.data
 printTotBkg     = options.totbkg
-rawcnt          = options.rawcnt
+rawcnt          = options.rawcounts
 referenceHisto  = options.histo
 referenceSyst   = options.syst
-selRegexp       = options.sel
+selRegexp       = options.selregexp
 pickleFile      = options.pickle
 verbose         = options.verbose
 
