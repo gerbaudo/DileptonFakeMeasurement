@@ -288,7 +288,7 @@ bool SusySelection::passSrSs(const DiLepEvtType eventType,
   bool mc(nt.evt()->isMC), data(!mc);
   const LeptonVector &ls = leptons;
   LeptonVector &ncls = leptons; // non-const leptons: can be modified by qflip
-  Met ncmet(*m_met); // non-const met
+  Met ncmet(*m_met); // non-const met \todo: should modify a non-const input
   const JetVector    &js = jets;
   if(true)                                      increment(n_pass_category [ll], lepSf, bSf); else return false;
   if(passNlepMin   (ls, 2))                     increment(n_pass_nSigLep  [ll], lepSf, bSf); else return false;
