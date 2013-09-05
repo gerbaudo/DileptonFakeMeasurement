@@ -44,6 +44,7 @@ parser.add_option("--pkl", default=None, help="save pickle to file")
 parser.add_option("-v", "--verbose", action="store_true", default=False, help="print stuff")
 (options, args) = parser.parse_args()
 channel         = options.channel
+histoname       = options.histo
 printData       = options.data
 printTotBkg     = options.totbkg
 rawcnt          = options.rawcounts
@@ -73,19 +74,19 @@ if verbose :
     print 'Input files:\n'+'\n'.join(inputFileNames)
 
 # navigate the files and collect the histos
-refHistoType = HistoType(pr='', ch=channel, var=referenceHisto, syst=referenceSyst)
-histoNameClassifier = HistoNameClassifier()
+referenceType = HistoType(pr='', ch=channel, var=referenceHisto, syst=referenceSyst)
 histosByType = collections.defaultdict(list)
 classifier = HistoNameClassifier()
 
 for fname, infile in zip(inputFileNames, inputFiles) :
-    samplename = guessGroupFromFilename(fname)
-    histoNames = [n for n in getAllHistoNames(infile, onlyTH1=True)
-                  if refHistoType.matchAllAvailabeAttrs( histoNameClassifier.histoType( n ) )]
-    histos = [infile.Get(hn) for hn in histoNames]
-    for h in histos :
-        setHistoType(h, classifier.histoType(h.GetName()))
-        setHistoSample(h, samplename)
+    sample = guessGroupFromFilename(fname)
+    setType, setSample = setHistoType, setHistoSample
+    def getType(histoName) : return classifier.histoType(histoName)
+    def isRightType(histo) : return referenceType.matchAllAvailabeAttrs(histo.type)
+    histoNames = getAllHistoNames(infile, onlyTH1=True, nameStem=histoname)
+    histos = filter(isRightType, map(lambda hn :
+                                     setSample(setType(infile.Get(hn), getType(hn)), sample),
+                                     histoNames))
     organizeHistosByType(histosByType, histos)
 refHistos = histosByType # already filtered histonames, all histosByType are refHistos
 allSamples = sorted(list(set([h.sample for histos in refHistos.values() for h in histos])))
