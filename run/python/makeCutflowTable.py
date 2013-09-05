@@ -19,7 +19,6 @@ from PickleUtils import dumpToPickle
 # default parameters [begin]
 validChannels   = ['all', 'ee', 'em', 'mm']
 defaultChannel  = validChannels[0]
-defaultPickle   = 'counts.pkl'
 defaultHisto    = 'onebin'
 defaultRefSyst  = 'NOM'
 # default parameters [end]
@@ -33,13 +32,14 @@ Examples:
 """
 parser = optparse.OptionParser(usage=usage)
 parser.add_option("-c", "--channel", default=defaultChannel, help="one of : %s"%str(validChannels))
-parser.add_option("-p", "--pickle", default=defaultPickle, help="output (default %s)" % defaultPickle)
 parser.add_option("-d", "--data", action='store_true', default=False, help="print data")
 parser.add_option("-b", "--totbkg", action='store_true', default=False, help="print tot. bkg")
 parser.add_option("-r", "--rawcounts", action='store_true', default=False, help="raw rather than weighted")
 parser.add_option("-H", "--histo", default=defaultHisto, help="histo from which we count (default '%s')" % defaultHisto)
 parser.add_option("-s", "--selregexp", default='.*', help="print only mathing selections (default '.*', any sel); example -s '^sr\d$', see http://www.debuggex.com/r/V82_pzhNDT0ukHMR/1")
 parser.add_option("-S", "--syst", default=defaultRefSyst, help="systematic (default '%s')" % defaultRefSyst)
+parser.add_option("--tex", default=None, help="save tex to file")
+parser.add_option("--pkl", default=None, help="save pickle to file")
 parser.add_option("-v", "--verbose", action="store_true", default=False, help="print stuff")
 (options, args) = parser.parse_args()
 channel         = options.channel
@@ -49,11 +49,14 @@ rawcnt          = options.rawcounts
 referenceHisto  = options.histo
 referenceSyst   = options.syst
 selRegexp       = options.selregexp
-pickleFile      = options.pickle
+pklFile         = options.pkl
+texFile         = options.tex
 verbose         = options.verbose
 
 inputs, ext = args, '.root'
 if len(inputs) < 1 : parser.error("provide at least one input")
+if pklFile and not pklFile.endswith('.pkl') : parser.error("pickle file must end with 'pkl'")
+if texFile and not texFile.endswith('.tex') : parser.error("latex file must end with 'tex'")
 inputFileNames = [f  for i in inputs for f in glob.glob(i if i.endswith(ext) else i+'/*'+ext)]
 assert channel in validChannels,"Invalid channel %s (should be one of %s)" % (channel, str(validChannels))
 inputFiles = [r.TFile.Open(f) for f in inputFileNames]
@@ -102,10 +105,10 @@ for t, histos in refHistos.iteritems() :
         if printTotBkg and isBkgSample(sample) :
             countsSampleSel['totbkg'][sel] += cnt
 
-if pickleFile : dumpToPickle(pickleFile, countsSampleSel)
-
-# print the table
 ct = CutflowTable(allSamples, allSelects, countsSampleSel,
                   isRawCount=rawcnt, selectionRegexp=selRegexp)
-print ct.latex()
+print ct.csv()
+if texFile :
+    with open(texFile, 'w') as f : f.write(ct.latex())
+if pklFile : dumpToPickle(pklFile, countsSampleSel)
 
