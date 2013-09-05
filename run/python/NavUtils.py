@@ -44,12 +44,18 @@ class HistoNameClassifier :
             return  HistoType(**kargs)
 
 def getAllHistoNames(inputDir, verbose=False, onlyTH1=False, onlyTH2=False, onlyTH3=False) :
-    "Provide a list of all histograms in the file; search recursively (use FindObjectAny to retrieve from subdirs"
-    assert onlyTH1 + onlyTH2 + onlyTH2 <= 1, "specify onlyTH* one at the time : %s" % ' '.join(["%s=%s"%(o, eval(o)) for o in ['onlyTH1', 'onlyTH2', 'onlyTH3']])
+    """Provide a list of all histograms in the file; search
+    recursively (use FindObjectAny to retrieve from subdirs
+    """
+    univoqueOption = onlyTH1 + onlyTH2 + onlyTH2 <= 1
+    assert univoqueOption, ("one at the time : %s"
+                            %' '.join(["%s=%s"%(o, eval(o))\
+                                       for o in ['onlyTH1', 'onlyTH2', 'onlyTH3']]))
     objectNames = []
     allKeys = [k for k in inputDir.GetListOfKeys()]
-    directoryKeys = [k for k in allKeys if r.TClass(k.GetClassName()).InheritsFrom(r.TDirectory.Class())]
-    directoryNames = [k.GetName() for k in directoryKeys]
+    def isDirKey(key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TDirectory.Class())
+    directoryKeys = filter(isDirKey, allKeys)
+    directoryNames = map(lambda k : k.GetName(), directoryKeys)
     def isTHkey (key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH1.Class())
     def isTH3key(key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH3.Class())
     def isTH2key(key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH2.Class())
