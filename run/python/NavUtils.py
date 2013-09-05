@@ -51,23 +51,19 @@ def getAllHistoNames(inputDir, verbose=False, onlyTH1=False, onlyTH2=False, only
     assert univoqueOption, ("one at the time : %s"
                             %' '.join(["%s=%s"%(o, eval(o))\
                                        for o in ['onlyTH1', 'onlyTH2', 'onlyTH3']]))
-    objectNames = []
-    allKeys = [k for k in inputDir.GetListOfKeys()]
     def isDirKey(key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TDirectory.Class())
-    directoryKeys = filter(isDirKey, allKeys)
-    directoryNames = map(lambda k : k.GetName(), directoryKeys)
     def isTHkey (key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH1.Class())
     def isTH3key(key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH3.Class())
     def isTH2key(key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH2.Class())
     def isTH1key(key) : return isTHkey(key) and not isTH2key(key) and not isTH3key(key)
-    if onlyTH1 : allKeys = filter(isTH1key, allKeys)
-    if onlyTH2 : allKeys = filter(isTH2key, allKeys)
-    if onlyTH3 : allKeys = filter(isTH3key, allKeys)
-    histoNames = [k.GetName() for k in allKeys if isTHkey(k)]
-    if verbose : print histoNames
-    for directory in directoryNames :
-        histoNames += getAllHistoNames(inputDir.Get(directory), verbose, onlyTH1, onlyTH2, onlyTH3)
-    return histoNames
+    isHistKey = isTH1key if onlyTH1 else isTH2key if onlyTH2 else isTH3key if onlyTH3 else isTHkey
+    allKeys = [k for k in inputDir.GetListOfKeys()]
+    histNames = map(lambda k : k.GetName(), filter(isHistKey, allKeys))
+    dirNames  = map(lambda k : k.GetName(), filter(isDirKey, allKeys))
+    if verbose : print '\n'.join("%s : %s"%(l, str(eval(l))) for l in ['histNames', 'dirNames'])
+    for dir in dirNames :
+        histNames += getAllHistoNames(inputDir.Get(dir), verbose, onlyTH1, onlyTH2, onlyTH3)
+    return histNames
 
 def classifyHistoByName(histo, verbose=False) :
     cl = HistoNameClassifier(verbose)
