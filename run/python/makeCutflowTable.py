@@ -78,15 +78,18 @@ referenceType = HistoType(pr='', ch=channel, var=referenceHisto, syst=referenceS
 histosByType = collections.defaultdict(list)
 classifier = HistoNameClassifier()
 
+histoNames = []
 for fname, infile in zip(inputFileNames, inputFiles) :
     sample = guessGroupFromFilename(fname)
     setType, setSample = setHistoType, setHistoSample
     def getType(histoName) : return classifier.histoType(histoName)
     def isRightType(histo) : return referenceType.matchAllAvailabeAttrs(histo.type)
-    histoNames = getAllHistoNames(infile, onlyTH1=True, nameStem=histoname)
+    histonamesCached = len(histoNames)>0
+    if not histonamesCached : histoNames = getAllHistoNames(infile, onlyTH1=True, nameStem=histoname)
     histos = filter(isRightType, map(lambda hn :
                                      setSample(setType(infile.Get(hn), getType(hn)), sample),
                                      histoNames))
+    if not histonamesCached : histoNames = [h.GetName() for h in histos] # after filtering
     organizeHistosByType(histosByType, histos)
 refHistos = histosByType # already filtered histonames, all histosByType are refHistos
 allSamples = sorted(list(set([h.sample for histos in refHistos.values() for h in histos])))
