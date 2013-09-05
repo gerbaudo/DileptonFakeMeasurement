@@ -50,17 +50,14 @@ def getAllHistoNames(inputDir, verbose=False, onlyTH1=False, onlyTH2=False, only
     allKeys = [k for k in inputDir.GetListOfKeys()]
     directoryKeys = [k for k in allKeys if r.TClass(k.GetClassName()).InheritsFrom(r.TDirectory.Class())]
     directoryNames = [k.GetName() for k in directoryKeys]
-    def isTH1key(key) :
-        kc = r.TClass(key.GetClassName())
-        return kc.InheritsFrom(r.TH1.Class()) \
-               and not kc.InheritsFrom(r.TH2.Class()) \
-               and not kc.InheritsFrom(r.TH3.Class())
-    def isTH2key(key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH2.Class())
+    def isTHkey (key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH1.Class())
     def isTH3key(key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH3.Class())
-    if onlyTH1 : allKeys = [k for k in allKeys if isTH1key(k)]
-    if onlyTH2 : allKeys = [k for k in allKeys if isTH2key(k)]
-    if onlyTH3 : allKeys = [k for k in allKeys if isTH3key(k)]
-    histoNames = [k.GetName() for k in allKeys if r.TClass(k.GetClassName()).InheritsFrom(r.TH1.Class())]
+    def isTH2key(key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH2.Class())
+    def isTH1key(key) : return isTHkey(key) and not isTH2key(key) and not isTH3key(key)
+    if onlyTH1 : allKeys = filter(isTH1key, allKeys)
+    if onlyTH2 : allKeys = filter(isTH2key, allKeys)
+    if onlyTH3 : allKeys = filter(isTH3key, allKeys)
+    histoNames = [k.GetName() for k in allKeys if isTHkey(k)]
     if verbose : print histoNames
     for directory in directoryNames :
         histoNames += getAllHistoNames(inputDir.Get(directory), verbose, onlyTH1, onlyTH2, onlyTH3)
