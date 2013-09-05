@@ -1,16 +1,16 @@
 #!/bin/env python
 
-# produce a latex cutflow table from the histograms produced by SusyPlot
+# produce a cutflow table from the histograms produced by SusyPlot
 #
 # davide.gerbaudo@gmail.com
 # Jan 2013
 
 import collections, optparse, sys, glob
-import re
 import ROOT as r
 r.PyConfig.IgnoreCommandLineOptions = True
 r.gROOT.SetBatch(1)
 
+from CutflowTable import CutflowTable
 from NavUtils import getAllHistoNames, HistoNameClassifier, organizeHistosByType, HistoType, HistoNameClassifier, setHistoType, setHistoSample
 from SampleUtils import guessGroupFromFilename, isBkgSample
 from PickleUtils import dumpToPickle
@@ -105,33 +105,7 @@ for t, histos in refHistos.iteritems() :
 if pickleFile : dumpToPickle(pickleFile, countsSampleSel)
 
 # print the table
-endrow = ' \\\\'
-colWidth = 12
-fwidthField = '%'+str(colWidth)+'s'
-tablePreamble = '% \usepackage{booktabs}\n' \
-                +'% \usepackage{placeins}\n' \
-                +'\\begin{table}[htbp] \n' \
-                + '\\begin{center} \n' \
-                + '\\begin{tabular}{l' + 'r'*len(allSamples) + '} \n' \
-                + '\\toprule '
-tableEpilogue = '\\bottomrule \n' \
-                +'\\end{tabular} \n' \
-                +'\\caption{Add a caption here} \n' \
-                +'\\end{center} \n' \
-                +'\\end{table} \n' \
-                +'\\FloatBarrier \n'
-header = ' & '.join([fwidthField % t for t in ['selection']+allSamples]) + endrow
-
-print
-print tablePreamble
-print header
-print '\\midrule'
-for sel in allSelects : # should really use list comprehension
-    if not re.match(selRegexp, sel.strip()) : continue
-    counts = [countsSampleSel[sam][sel]
-              if sam in countsSampleSel and sel in countsSampleSel[sam] else None \
-              for sam in allSamples ]
-    line = ' & '.join([fwidthField % f for f in [sel]+[("%.0f" if rawcnt else "%.1f") % c for c in counts]]) + endrow
-    print line
-print tableEpilogue
+ct = CutflowTable(allSamples, allSelects, countsSampleSel,
+                  isRawCount=rawcnt, selectionRegexp=selRegexp)
+print ct.latex()
 
