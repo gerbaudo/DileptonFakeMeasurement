@@ -64,18 +64,17 @@ def getAllHistoNames(inputDir, verbose=False, onlyTH1=False, onlyTH2=False, only
                             %' '.join(["%s=%s"%(o, eval(o))\
                                        for o in ['onlyTH1', 'onlyTH2', 'onlyTH3']]))
     tdir, th1, th2, th3 = r.TDirectory.Class(), r.TH1.Class(), r.TH2.Class(), r.TH3.Class()
-    def isDirKey((k, c)) : return c.InheritsFrom(tdir)
-    def isTHkey ((k, c)) : return c.InheritsFrom(th1)
-    def isTH3key((k, c)) : return c.InheritsFrom(th2)
-    def isTH2key((k, c)) : return c.InheritsFrom(th3)
-    def isTH1key((k, c)) : return isTHkey((k, c)) and not isTH2key((k, c)) and not isTH3key((k, c))
-    def getClass(classname) : return r.TClass(classname)
-    getClass = Memoize(getClass)
-    isHistKey = isTH1key if onlyTH1 else isTH2key if onlyTH2 else isTH3key if onlyTH3 else isTHkey
-    allKeysClasses = [(k, getClass(k.GetClassName())) for k in inputDir.GetListOfKeys()
-                      if not nameStem or nameStem in k.GetName()]
-    histNames = map(lambda (k,c) : k.GetName(), filter(isHistKey, allKeysClasses))
-    dirNames  = map(lambda (k,c) : k.GetName(), filter(isDirKey, allKeysClasses))
+    def isTDir(classname) : return r.TClass(classname).InheritsFrom(tdir)
+    def isTH(classname) : return r.TClass(classname).InheritsFrom(th1)
+    def isTH2(classname) : return r.TClass(classname).InheritsFrom(th2)
+    def isTH3(classname) : return r.TClass(classname).InheritsFrom(th3)
+    def isTH1(classname) : return isTH(classname) and not isTH2(classname) and not isTH3(classname)
+    isTDir = Memoize(isTDir)
+    isTH, isTH1, isTH2, isTH3 = Memoize(isTH), Memoize(isTH1), Memoize(isTH2), Memoize(isTH3)
+    isHist = isTH1 if onlyTH1 else isTH2 if onlyTH2 else isTH3 if onlyTH3 else isTH
+    allKeys = [k for k in inputDir.GetListOfKeys()]
+    histNames = map(lambda k : k.GetName(), [k for k in allKeys if isHist(k.GetClassName())])
+    dirNames  = map(lambda k : k.GetName(), [k for k in allKeys if isTDir(k.GetClassName())])
     if verbose : print '\n'.join("%s : %s"%(l, str(eval(l))) for l in ['histNames', 'dirNames'])
     for dir in dirNames :
         histNames += getAllHistoNames(inputDir.Get(dir), verbose, onlyTH1, onlyTH2, onlyTH3)
