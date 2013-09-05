@@ -38,6 +38,7 @@ parser.add_option("-r", "--rawcounts", action='store_true', default=False, help=
 parser.add_option("-H", "--histo", default=defaultHisto, help="histo from which we count (default '%s')" % defaultHisto)
 parser.add_option("-s", "--selregexp", default='.*', help="print only mathing selections (default '.*', any sel); example -s '^sr\d$', see http://www.debuggex.com/r/V82_pzhNDT0ukHMR/1")
 parser.add_option("-S", "--syst", default=defaultRefSyst, help="systematic (default '%s')" % defaultRefSyst)
+parser.add_option("--csv", default=None, help="save csv to file (default to screen)")
 parser.add_option("--tex", default=None, help="save tex to file")
 parser.add_option("--pkl", default=None, help="save pickle to file")
 parser.add_option("-v", "--verbose", action="store_true", default=False, help="print stuff")
@@ -49,12 +50,14 @@ rawcnt          = options.rawcounts
 referenceHisto  = options.histo
 referenceSyst   = options.syst
 selRegexp       = options.selregexp
+csvFile         = options.csv
 pklFile         = options.pkl
 texFile         = options.tex
 verbose         = options.verbose
 
 inputs, ext = args, '.root'
 if len(inputs) < 1 : parser.error("provide at least one input")
+if csvFile and not csvFile.endswith('.csv') : parser.error("csv file must end with 'csv'")
 if pklFile and not pklFile.endswith('.pkl') : parser.error("pickle file must end with 'pkl'")
 if texFile and not texFile.endswith('.tex') : parser.error("latex file must end with 'tex'")
 inputFileNames = [f  for i in inputs for f in glob.glob(i if i.endswith(ext) else i+'/*'+ext)]
@@ -107,8 +110,12 @@ for t, histos in refHistos.iteritems() :
 
 ct = CutflowTable(allSamples, allSelects, countsSampleSel,
                   isRawCount=rawcnt, selectionRegexp=selRegexp)
-print ct.csv()
+csv = ct.csv()
+print csv
+if csvFile :
+    with open(csvFile, 'w') as f : f.write(csv)
 if texFile :
     with open(texFile, 'w') as f : f.write(ct.latex())
-if pklFile : dumpToPickle(pklFile, countsSampleSel)
+if pklFile :
+    dumpToPickle(pklFile, countsSampleSel)
 
