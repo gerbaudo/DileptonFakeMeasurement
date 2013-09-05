@@ -15,8 +15,9 @@ class CutflowTable :
         self.countsSampleSel = countsSampleSel
         self.rawcnt          = isRawCount
         self.selRegexp       = selectionRegexp
-    def latex(self, colWidth = 12) :
-        rawcnt = self.rawcnt
+        self.colWidth        = 12
+    def latex(self) :
+        rawcnt, colWidth = self.rawcnt, self.colWidth
         css = self.countsSampleSel
         samples, selections, selRegexp = self.samples, self.selections, self.selRegexp
         endrow = ' \\\\'
@@ -52,3 +53,22 @@ class CutflowTable :
                         +lines
                         +[tableEpilogue])
         return tex
+    def csv(self) :
+        rawcnt, colWidth = self.rawcnt, self.colWidth
+        css = self.countsSampleSel
+        samples, selections, selRegexp = self.samples, self.selections, self.selRegexp
+        fwidthField = '%'+str(colWidth)+'s'
+        ncols = 1+len(self.samples)
+        header = ', '.join(fwidthField % t for t in ['selection']+samples)
+        lines = [', '.join([fwidthField % f
+                            for f in [sel]+[("%.0f" if rawcnt else "%.1f") % c
+                                            for c in [css[s][sel]
+                                                      if s in css and sel in css[s] else None
+                                                      for s in samples ]
+                                                      ]
+                             ])
+                             for sel in selections
+                             if re.match(selRegexp, sel.strip())
+                             ]
+        csv = '\n'.join([header] + lines)
+        return csv
