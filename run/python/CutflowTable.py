@@ -70,5 +70,5 @@ class CutflowTable :
                              for sel in selections
                              if re.match(selRegexp, sel.strip())
                              ]
-        csv = '\n'.join([header] + lines)
+        csv = '\n'.join([header] + lines + [''])
         return csv
