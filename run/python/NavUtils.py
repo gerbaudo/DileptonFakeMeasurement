@@ -19,8 +19,9 @@ class HistoType(object):
     def __str__(self) : return ', '.join(["%s : %s"%(a, getattr(self,a)) for a in HistoType.attributes])
     def __hash__(self) : return hash(self.__str__())
     def matchAllAvailabeAttrs(self, rhs) :
-        return all([ar==al for ar,al in [(getattr(self,a), getattr(rhs,a))
-                                         for a in HistoType.attributes] if ar])
+        "whether all attributes are the same; empty attributes on lhs are skipped"
+        ga, hattrs = getattr, HistoType.attributes
+        return all([ar==al for ar,al in [(ga(self,a), ga(rhs,a)) for a in hattrs] if ar])
 
 def setHistoType(h, type) : setattr(h, 'type', type)
 def setHistoSample(h, sample) : setattr(h, 'sample', sample)
