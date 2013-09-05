@@ -7,6 +7,7 @@
 
 import collections, re, unittest
 import ROOT as r
+from utils import Memoize
 
 class HistoType(object):
     "Type of histogram, defined by plot region, channel, variable, syst"
@@ -48,23 +49,33 @@ class HistoNameClassifier :
             kargs = dict([(g, match.group(g)) for g in ['pr', 'ch', 'var', 'syst']])
             return  HistoType(**kargs)
 
-def getAllHistoNames(inputDir, verbose=False, onlyTH1=False, onlyTH2=False, onlyTH3=False) :
+def getAllHistoNames(inputDir, verbose=False, onlyTH1=False, onlyTH2=False, onlyTH3=False,
+                     nameStem='') :
+
     """Provide a list of all histograms in the file; search
-    recursively (use FindObjectAny to retrieve from subdirs
+    recursively (use FindObjectAny to retrieve from subdirs).
+    This function can become slow where there are many histograms.
+    Caching helps, but the best speedup found so far is specifying a
+    stem for the histogram name. Caveat emptor: this trick can miss
+    subdirectories that do not contain the stem.
     """
     univoqueOption = onlyTH1 + onlyTH2 + onlyTH2 <= 1
     assert univoqueOption, ("one at the time : %s"
                             %' '.join(["%s=%s"%(o, eval(o))\
                                        for o in ['onlyTH1', 'onlyTH2', 'onlyTH3']]))
-    def isDirKey(key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TDirectory.Class())
-    def isTHkey (key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH1.Class())
-    def isTH3key(key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH3.Class())
-    def isTH2key(key) : return r.TClass(key.GetClassName()).InheritsFrom(r.TH2.Class())
-    def isTH1key(key) : return isTHkey(key) and not isTH2key(key) and not isTH3key(key)
+    tdir, th1, th2, th3 = r.TDirectory.Class(), r.TH1.Class(), r.TH2.Class(), r.TH3.Class()
+    def isDirKey((k, c)) : return c.InheritsFrom(tdir)
+    def isTHkey ((k, c)) : return c.InheritsFrom(th1)
+    def isTH3key((k, c)) : return c.InheritsFrom(th2)
+    def isTH2key((k, c)) : return c.InheritsFrom(th3)
+    def isTH1key((k, c)) : return isTHkey((k, c)) and not isTH2key((k, c)) and not isTH3key((k, c))
+    def getClass(classname) : return r.TClass(classname)
+    getClass = Memoize(getClass)
     isHistKey = isTH1key if onlyTH1 else isTH2key if onlyTH2 else isTH3key if onlyTH3 else isTHkey
-    allKeys = [k for k in inputDir.GetListOfKeys()]
-    histNames = map(lambda k : k.GetName(), filter(isHistKey, allKeys))
-    dirNames  = map(lambda k : k.GetName(), filter(isDirKey, allKeys))
+    allKeysClasses = [(k, getClass(k.GetClassName())) for k in inputDir.GetListOfKeys()
+                      if not nameStem or nameStem in k.GetName()]
+    histNames = map(lambda (k,c) : k.GetName(), filter(isHistKey, allKeysClasses))
+    dirNames  = map(lambda (k,c) : k.GetName(), filter(isDirKey, allKeysClasses))
     if verbose : print '\n'.join("%s : %s"%(l, str(eval(l))) for l in ['histNames', 'dirNames'])
     for dir in dirNames :
         histNames += getAllHistoNames(inputDir.Get(dir), verbose, onlyTH1, onlyTH2, onlyTH3)
