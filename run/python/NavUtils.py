@@ -26,7 +26,9 @@ def setHistoType(h, type) : setattr(h, 'type', type)
 def setHistoSample(h, sample) : setattr(h, 'sample', sample)
 
 class HistoNameClassifier :
-    "Extract PR+'_'+chan+'_'+name+'_'+sys from histoname and attach an HistoType attribute"
+    """Extract pieces of information from the histogram name and attach an HistoType attribute
+    See the NEWHIST macro in SusyPlotter::Begin
+    """
     def __init__(self, verbose=False) :
         self.verbose = verbose
         self.rep = re.compile('(?P<pr>.*?)_'   # plot region (non greedy)
