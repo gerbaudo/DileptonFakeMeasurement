@@ -23,8 +23,12 @@ class HistoType(object):
         ga, hattrs = getattr, HistoType.attributes
         return all([ar==al for ar,al in [(ga(self,a), ga(rhs,a)) for a in hattrs] if ar])
 
-def setHistoType(h, type) : setattr(h, 'type', type)
-def setHistoSample(h, sample) : setattr(h, 'sample', sample)
+def setHistoType(h, type) :
+    setattr(h, 'type', type)
+    return h
+def setHistoSample(h, sample) :
+    setattr(h, 'sample', sample)
+    return h
 
 class HistoNameClassifier :
     """Extract pieces of information from the histogram name and attach an HistoType attribute
