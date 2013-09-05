@@ -6,6 +6,7 @@
 # 2013-07-25
 
 import difflib
+from functools import wraps
 import glob
 import os
 import re
@@ -54,6 +55,19 @@ def longestCommonSubstring(s1, s2) :
     m = difflib.SequenceMatcher(None, s1, s2).find_longest_match(0, len(s1), 0, len(s2))
     return s1[m.a : m.a+m.size]
 
+def memo(func) :
+    """Decorator that can cache the call to cpu-intensive functions.
+    Arguments must be hashable.
+    See for example
+    http://technotroph.wordpress.com/2012/04/05/memoize-it-the-python-way/
+    """
+    cache = {}
+    @wraps(func)
+    def wrap(*args) :
+        if args not in cache :
+            cache[args] = func(*args)
+            return cache[args]
+    return wrap
 #
 # testing
 #
