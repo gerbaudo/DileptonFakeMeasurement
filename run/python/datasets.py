@@ -37,6 +37,7 @@ class Dataset :
 
 def allGroups(datasets=[]) : return list(set(d.group for d in datasets))
 def allDatasets(datasets=[]) : return list(set(d.name for d in datasets))
+def activeDatasets(datasets=[]) : return filter(lambda d : not d.placeholder, datasets)
 
 datasets = []
 sampleType, group, process = None, None, None
