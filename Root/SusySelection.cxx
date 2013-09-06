@@ -64,9 +64,7 @@ Bool_t SusySelection::Process(Long64_t entry)
   bool removeLepsFromIso(false);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if(!selectEvent()) return kTRUE;
-
-  m_ET = getDiLepEvtType(m_baseLeptons);
-  passSrSs(m_ET, WH_SRSS1, m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met);
+  passSrSs(WH_SRSS1, m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met);
 
   return kTRUE;
 }
@@ -252,14 +250,13 @@ bool SusySelection::passSrSsBase()
   return false;
 }
 //-----------------------------------------
-bool SusySelection::passSrSs(const DiLepEvtType eventType,
-                             const WH_SR signalRegion,
+bool SusySelection::passSrSs(const WH_SR signalRegion,
                              LeptonVector& leptons,
                              const TauVector& taus,
                              const JetVector& jets,
                              const Met *met)
 {
-  DiLepEvtType ll = eventType;
+  DiLepEvtType ll(getDiLepEvtType(leptons));
   const DiLepEvtType ee(ET_ee), em(ET_em), me(ET_me), mm(ET_mm);
   WH_SR sr = signalRegion;
   float muIsoMax = 0.1;

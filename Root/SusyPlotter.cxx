@@ -225,9 +225,8 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   if(!passNlepMin(l, 2)) return false;
   float weight = SusySelection::getEvtWeight(l, includeBTag, includeTrig);
   fillHistos(l, j, m, weight, PR_NONE);
-  m_ET = getDiLepEvtType(l);
-  const DiLepEvtType ll(m_ET), ee(ET_ee), em(ET_em), me(ET_me), mm(ET_mm);
-  bool passSrSS(SusySelection::passSrSs(m_ET, WH_SRSS1, ncl, t, j, m));
+  const DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), em(ET_em), me(ET_me), mm(ET_mm);
+  bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m));
   //SusySelection::passSrSs(m_ET, WH_SRSS1, l, t, j, m));
 
   if(passSrSS && (ll==ee||ll==mm)) fillHistos(ncl, j, m, weight, PR_SR8);
