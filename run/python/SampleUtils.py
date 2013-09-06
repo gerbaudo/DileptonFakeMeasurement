@@ -6,7 +6,7 @@
 # Jan 2013
 
 import glob, os, re, unittest
-from datasets import datasets, allGroups, allDatasets
+from datasets import datasets, allGroups, activeDatasets
 import ROOT as r
 r.gROOT.SetBatch(1)
 
@@ -19,12 +19,12 @@ colors = {
     'multijet'  : r.kWhite
     }
 
-allGroups, allDatasets = allGroups(datasets), allDatasets(datasets)
+allGroups, datasets = allGroups(datasets), activeDatasets(datasets)
 
 def guessGroupFromFilename(filename='') :
     "Guess group from filename, either merged or un-merged"
     group = next((g for g in allGroups if g+'_' in filename), None)
-    group = group if group else next((d.group for d in allDatasets if d.name in filename), None)
+    group = group if group else next((d.group for d in datasets if d.name in filename), None)
     return group
 
 def isDataSample(samplename) : return 'data' in samplename or 'period' in samplename
