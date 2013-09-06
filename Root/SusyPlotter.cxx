@@ -1,4 +1,5 @@
 #include <cassert>
+#include <ctime>
 #include <iomanip>
 #include <math.h>   // cos
 #include <numeric>  // std::accumulate
@@ -207,16 +208,9 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 //-----------------------------------------
 Bool_t SusyPlotter::Process(Long64_t entry)
 {
-  if(m_dbg) cout<<"SusyPlotter::Process"<<endl;
+  m_printer.countAndPrint(cout);
   GetEntry(entry);
   clearObjects();
-  static Long64_t chainEntry = -1;
-  chainEntry++;
-  if(m_dbg || chainEntry%50000==0) {
-    cout << "**** Processing entry " << setw(6) << chainEntry
-         << " run " << setw(6) << nt.evt()->run
-         << " event " << setw(7) << nt.evt()->event << " ****" << endl;
-  }
   selectObjects();
   if(!selectEvent())    return kTRUE;
 
@@ -498,5 +492,20 @@ float SusyPlotter::mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1,
   float x2 = ( den2 != 0.0  ? (num/den2) : 0.0);
   bool kinematicallyPossible(x1*x2 > 0.0);
   return (kinematicallyPossible ? (l0+l1).M() / std::sqrt(x1*x2) : -1.0);
+}
+//-----------------------------------------
+void SusyPlotter::ProgressPrinter::countAndPrint(std::ostream& oo)
+{
+  m_eventCounter += 1;
+  if(m_eventCounter!=m_intCounter) return;
+  m_intCounter = m_suppressionFactor*m_intCounter;
+  int colWidth(16), stampWidth(48);
+  if(!m_quiet && (m_intCounter==m_suppressionFactor || m_intCounter>m_suppressionOffset)) {
+    std::time_t t(std::time(NULL));
+    oo<<""
+      <<"Entry "<<std::setw(colWidth)<<m_eventCounter
+      <<" "<<std::setw(stampWidth)<<std::asctime(std::localtime(&t))
+      <<std::endl;
+  }
 }
 //-----------------------------------------

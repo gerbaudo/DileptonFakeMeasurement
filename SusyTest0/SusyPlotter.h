@@ -7,6 +7,8 @@
 #include "TH1F.h"
 #include "TH2F.h"
 
+#include <iostream>
+
 /*!
     SusyPlotter - class for making analysis histograms
 */
@@ -72,6 +74,21 @@ class SusyPlotter : public SusySelection
   int getChan(const LeptonVector& leps); // compute lepton channel
   void setSysts(); // get list of systematics to consider; override in SusyMatrixMethod
  public:
+  struct ProgressPrinter {
+    ProgressPrinter(int suppressionFactor=2, int suppressionOffset=300, bool quiet=false):
+      m_suppressionFactor(suppressionFactor),
+      m_suppressionOffset(suppressionOffset),
+      m_eventCounter(0),
+      m_intCounter(1),
+      m_quiet(quiet) {};
+    int m_suppressionFactor;
+    int m_suppressionOffset;
+    Long64_t m_eventCounter;
+    Long64_t m_intCounter;
+    bool m_quiet;
+    void countAndPrint(std::ostream& oo);
+  };
+ public:
   static float transverseMass(const TLorentzVector &lep, const TLorentzVector &met);
   //! redundant? mt with non-zero m_vv? see https://svnweb.cern.ch/trac/atlasinst/browser/Institutes/UCIrvine/ataffard/SusyWeakProdAna/trunk/Root/PhysicsTools.cxx
   static float mtWW(const TLorentzVector &ll, const TLorentzVector &met);
@@ -101,6 +118,7 @@ class SusyPlotter : public SusySelection
   std::string         m_histFileName;       // output histo file name
   TFile*              m_histFile;           // output histo file
   bool                m_doFake;             // do Fake estimate
+  ProgressPrinter     m_printer;
 
   // preprocessor convenience - add more indices later
 #define DEFHIST( name ) h_ ## name[Ch_N][PR_N][40/*Guess for # of sys*/];  
