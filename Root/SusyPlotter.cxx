@@ -211,11 +211,11 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   m_printer.countAndPrint(cout);
   GetEntry(entry);
   clearObjects();
-  selectObjects();
+  increment(n_readin);
+  bool removeLepsFromIso(false);
+  selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if(!selectEvent())    return kTRUE;
-
-  bool count(true);
-  bool includeBTag(true), includeTrig(true);
+  bool count(true), includeBTag(true), includeTrig(true);
   const Met*          m = m_met;
   const JetVector&    j = m_signalJets2Lep;
   const LeptonVector& l = m_signalLeptons;
