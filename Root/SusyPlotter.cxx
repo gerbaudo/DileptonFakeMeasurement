@@ -211,7 +211,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   m_printer.countAndPrint(cout);
   GetEntry(entry);
   clearObjects();
-  increment(n_readin);
+  increment(n_readin, m_weightComponents);
   bool removeLepsFromIso(false);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if(!selectEvent())    return kTRUE;

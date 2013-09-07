@@ -154,7 +154,7 @@ class SusySelection : public SusyNtAna
     void setUseXsReader(bool val){ m_useXsReader = val; };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
     //! increment the counters for the all event weight types
-    void increment(float counters[], bool includeLepSF=false, bool includeBtag=false);
+    void increment(float counters[], const WeightComponents &wc);
     static float computeMt2(const TLorentzVector &l0, const TLorentzVector &l1,
                             const TLorentzVector &met);
     float computeChargeFlipProb(LeptonVector &leptons, Met &met,
