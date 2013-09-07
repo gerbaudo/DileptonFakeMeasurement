@@ -164,7 +164,7 @@ class SusySelection : public SusyNtAna
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
     float computeEventWeightXsFromReader(float lumi);
     float getXsFromReader();     //!< cache xsec from xsreader
-    float getBTagWeight(const Event* evt);
+    float getBTagWeight(cvj_t& jets, const Event* evt);
     float getTriggerWeight2Lep(const LeptonVector &leptons);
     float getLeptonEff2Lep(const LeptonVector &leptons) const;
     void resetAllCounters();
