@@ -222,7 +222,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   LeptonVector&     ncl = m_signalLeptons; // non-const leptons: can be modified by qflip
   Met ncmet(*m_met); // non-const met
   const TauVector&    t = m_signalTaus;
-  computeNonStaticWeightComponents(l, j);
+  if(l.size()>1) computeNonStaticWeightComponents(l, j); else return false;
   bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m));
   if(!passSrSS) return false;
   float weight(m_weightComponents.product());

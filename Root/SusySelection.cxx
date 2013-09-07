@@ -191,6 +191,7 @@ bool SusySelection::passSrSs(const WH_SR signalRegion,
                              const JetVector& jets,
                              const Met *met)
 {
+  if(leptons.size()<2) return false;
   DiLepEvtType ll(getDiLepEvtType(leptons));
   const DiLepEvtType ee(ET_ee), em(ET_em), me(ET_me), mm(ET_mm);
   WH_SR sr = signalRegion;
