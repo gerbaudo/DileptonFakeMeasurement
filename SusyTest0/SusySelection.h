@@ -53,7 +53,14 @@ class SusySelection : public SusyNtAna
   typedef const TauVector    cvt_t;  //!< just to make some decl shorter
   typedef const JetVector    cvj_t;  //!< just to make some decl shorter
   typedef const Met          cmet_t; //!< just to make some decl shorter
-
+  struct WeightComponents {
+    WeightComponents(): susynt(1), gen(1), pileup(1), norm(1),lepSf(1), btag(1), trigger(1) {}
+    float product() const { return susynt * lepSf * btag * trigger; }
+    void reset() { susynt = gen = pileup = norm = lepSf = btag = trigger = 1.0; }
+    float susynt; // from SusyNtTools::getEventWeight: includes gen, pu, xs, lumi, sumw
+    float gen, pileup, norm; // breakdown of the above; norm is xs*lumi/sumw
+    float lepSf, btag, trigger; // factors that we compute, not from upstream
+  };
  public:
     SusySelection();
     virtual ~SusySelection(){};
@@ -181,6 +188,7 @@ class SusySelection : public SusyNtAna
     TLorentzVector      m_unsmeared_lv0; //! cached lepton LV before charge-flip smearing
     TLorentzVector      m_unsmeared_lv1; //! see above
     Met                 m_unsmeared_met; //! cached met before charge-flip smearing
+    WeightComponents    m_weightComponents;
     // Event counters
     float n_readin          [WT_N]; // [weight type]
     float n_pass_Grl        [WT_N];
