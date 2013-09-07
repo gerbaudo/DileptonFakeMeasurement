@@ -165,7 +165,6 @@ class SusySelection : public SusyNtAna
     float computeEventWeightXsFromReader(float lumi);
     float getXsFromReader();     //!< cache xsec from xsreader
     float getBTagWeight(const Event* evt);
-    float getPythiaBbCcScaleFactor(uint datasetId, const LeptonVector &leptons) const;
     float getTriggerWeight2Lep(const LeptonVector &leptons);
     float getLeptonEff2Lep(const LeptonVector &leptons) const;
     void resetAllCounters();
