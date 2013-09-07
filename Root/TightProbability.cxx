@@ -121,6 +121,7 @@ Bool_t TightProbability::Process(Long64_t entry) {
   GetEntry(entry);
   m_chainEntry++;
   clearObjects();
+  cacheStaticWeightComponents();
   m_ET = ET_Unknown;
   bool removeLepsFromIso(false);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
@@ -140,8 +141,8 @@ Bool_t TightProbability::Process(Long64_t entry) {
   bool pass2l(2==leps.size());
   bool passSr(passMet && pass2l);
   if(!passSr) return true;
-  bool includeBtag(false), includeTrig(true); // not sure btag works properly
-  float weight = isMc ? getEvtWeight(leps, includeBtag, includeTrig) : 1.0;
+  computeNonStaticWeightComponents(leps, jets);
+  float weight = isMc ? m_weightComponents.product() : 1.0;
   vector<float> pts(leps.size());
   for(size_t iL=0; iL<leps.size(); ++iL) {
     Lepton *l = leps[iL];

@@ -566,23 +566,27 @@ bool SusySelection::passEleD0S(const LeptonVector &leptons, float maxVal)
   } // end for(i)
   return true;
 }
-
 //-----------------------------------------
-float SusySelection::getEvtWeight(const LeptonVector& leptons,
-                                  bool includeBTag, bool includeTrig)
+
+void SusySelection::cacheStaticWeightComponents()
 {
-  float weight = 1.0;
+  if(!nt.evt()->isMC) {m_weightComponents.reset(); return;}
+  m_weightComponents.gen = nt.evt()->w;
+  m_weightComponents.pileup = nt.evt()->wPileup;
   bool useSumwMap(true);
-  if( !nt.evt()->isMC ) return weight;
-  // lumi, xs, sumw, pileup
-  weight = (m_useXsReader ?
-            computeEventWeightXsFromReader(LUMI_A_L) :
-            SusyNtAna::getEventWeight(LUMI_A_L, useSumwMap));
-  weight *= getLeptonEff2Lep(leptons);
-  float trigW = (includeTrig ? getTriggerWeight2Lep(leptons) : 1.0);
-  float bTag  = (includeBTag ? getBTagWeight(nt.evt()) : 1.0);
-  //cout<<"bTag : "<<bTag<<endl;
-  return weight * trigW * bTag;
+  m_weightComponents.susynt = (m_useXsReader ?
+                               computeEventWeightXsFromReader(LUMI_A_L) :
+                               SusyNtAna::getEventWeight(LUMI_A_L, useSumwMap));
+  float genpu(m_weightComponents.gen*m_weightComponents.pileup);
+  m_weightComponents.norm = (genpu != 0.0 ? m_weightComponents.susynt/genpu : 1.0);
+}
+//-----------------------------------------
+void SusySelection::computeNonStaticWeightComponents(cvl_t& leptons, cvj_t& jets)
+{
+  if(!nt.evt()->isMC) {m_weightComponents.reset(); return;}
+  m_weightComponents.lepSf = getLeptonEff2Lep(leptons);
+  m_weightComponents.trigger = getTriggerWeight2Lep(leptons);
+  m_weightComponents.btag = getBTagWeight(jets, nt.evt());
 }
 //-----------------------------------------
 float SusySelection::getBTagWeight(cvj_t& jets, const Event* evt)

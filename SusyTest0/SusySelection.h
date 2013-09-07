@@ -148,9 +148,6 @@ class SusySelection : public SusyNtAna
     bool isTrueDilepton(const LeptonVector &leptons);
     bool passMuonRelIso(const LeptonVector &leptons, float maxVal);
     bool passEleD0S(const LeptonVector &leptons, float maxVal);
-
-    //! method that should be used to fill the histos
-    float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true);
     void setUseXsReader(bool val){ m_useXsReader = val; };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
     //! increment the counters for the all event weight types
@@ -169,6 +166,8 @@ class SusySelection : public SusyNtAna
     float getLeptonEff2Lep(const LeptonVector &leptons) const;
     void resetAllCounters();
     void initChargeFlipTool();
+    void cacheStaticWeightComponents(); //! cache those weight components that do not depend on sel
+    void computeNonStaticWeightComponents(cvl_t& leptons, cvj_t& jets);
     ClassDef(SusySelection, 1);
 
   protected:

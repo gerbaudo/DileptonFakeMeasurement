@@ -211,6 +211,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   m_printer.countAndPrint(cout);
   GetEntry(entry);
   clearObjects();
+  cacheStaticWeightComponents();
   increment(n_readin, m_weightComponents);
   bool removeLepsFromIso(false);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
@@ -221,10 +222,10 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   LeptonVector&     ncl = m_signalLeptons; // non-const leptons: can be modified by qflip
   Met ncmet(*m_met); // non-const met
   const TauVector&    t = m_signalTaus;
+  computeNonStaticWeightComponents(l, j);
   bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m));
   if(!passSrSS) return false;
-  bool includeBTag(true), includeTrig(true);
-  float weight(SusySelection::getEvtWeight(l, includeBTag, includeTrig));
+  float weight(m_weightComponents.product());
   const DiLepEvtType ll(getDiLepEvtType(l));
   const DiLepEvtType ee(ET_ee), em(ET_em), me(ET_me), mm(ET_mm);
   if(ll==ee||ll==mm) fillHistos(ncl, j, m, weight, PR_SR8);
