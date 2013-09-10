@@ -52,7 +52,8 @@ fakeprob     = options.fakeprob
 fakerate     = options.fakerate
 verbose      = options.verbose
 
-assert [susyplot, susysel, fakeprob, fakerate].count(True)==1,"specify one executable"
+if not [susyplot, susysel, fakeprob, fakerate].count(True)==1 :
+    parser.error("specify one executable")
 scriptDir = 'batchScripts'
 template  = ''
 template += scriptDir+'/templates/susyPlot.sh.template' if susyplot else ''
