@@ -218,11 +218,12 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   if(!selectEvent())    return kTRUE;
   const Met*          m = m_met;
   const JetVector&    j = m_signalJets2Lep;
+  const JetVector&   bj = m_baseJets;     // DG don't know why, but we use these for the btag w
   const LeptonVector& l = m_signalLeptons;
   LeptonVector&     ncl = m_signalLeptons; // non-const leptons: can be modified by qflip
   Met ncmet(*m_met); // non-const met
   const TauVector&    t = m_signalTaus;
-  if(l.size()>1) computeNonStaticWeightComponents(l, j); else return false;
+  if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
   bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m));
   if(!passSrSS) return false;
   float weight(m_weightComponents.product());
