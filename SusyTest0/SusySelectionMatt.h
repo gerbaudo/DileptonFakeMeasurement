@@ -1,5 +1,5 @@
-#ifndef SusySelection_h
-#define SusySelection_h
+#ifndef SUSYSELECTIONMATT_h
+#define SUSYSELECTIONMATT_h
 
 //////////////////////////////////////////////////////////
 // General script to implement basic selection with all //
