@@ -105,9 +105,10 @@ for sample in sampleNames :
     output     = outRootTemplate%{'outdir':outdir, 'sample':sample, 'tag':batchTag}
     outlog     = outLogTemplate%{'logdir':logdir, 'sample':sample, 'tag':batchTag}
     scriptName = outScriptTemplate%{'sample':sample}
-    if overwrite or not os.path.exists(scriptName) :
+    fileExists = os.path.exists(scriptName)
+    if overwrite or not fileExists :
         fillInScriptTemplate(sample, input, output, otherOptions, scriptName, template)
-
+    elif fileExists : print "warning, not overwriting existing script '%s'"%scriptName
     cmd = "qsub " \
           "-j oe -V " \
           "-N %(jobname)s " \
