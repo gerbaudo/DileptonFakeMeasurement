@@ -81,24 +81,6 @@ void SusySelection::Terminate()
 //-----------------------------------------
 void SusySelection::increment(float counters[], const WeightComponents &wc)
 {
-  /* DG 2013-09-06 this should be deleted
-  float eventWeight = nt.evt()->w;
-  float pileup = nt.evt()->wPileup;
-  float lepSf = (includeLepSF ?
-                 m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF
-                 : 1.0);
-  float btag = includeBtag ? getBTagWeight(nt.evt()) : 1.0;
-  bool includeTrig(m_baseLeptons.size() == 2 && nt.evt()->isMC); //DG should be arg?
-  float trig = (includeTrig ?
-                m_trigObj->getTriggerWeight(m_baseLeptons,
-                                            nt.evt()->isMC,
-                                            m_met->Et,
-                                            m_signalJets2Lep.size(),
-                                            nt.evt()->nVtx,
-                                            NtSys_NOM)
-                : 1.0);
-  float all = getEventWeightFixed(nt.evt()->mcChannel,LUMI_A_L) *btag*trig*lepSf;
-  */
   counters[WT_Raw ] += 1.0;
   counters[WT_Evt ] += wc.gen;
   counters[WT_PU  ] += wc.gen * wc.pileup;
