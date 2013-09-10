@@ -81,13 +81,13 @@ void SusySelection::Terminate()
 //-----------------------------------------
 void SusySelection::increment(float counters[], const WeightComponents &wc)
 {
-  counters[WT_Raw ] += 1.0;
-  counters[WT_Evt ] += wc.gen;
-  counters[WT_PU  ] += wc.gen * wc.pileup;
-  counters[WT_LSF ] += wc.gen * wc.lepSf;
-  counters[WT_Btag] += wc.gen * wc.btag;
-  counters[WT_Trig] += wc.gen * wc.trigger;
-  counters[WT_All ] += wc.product();
+  counters[kRaw ] += 1.0;
+  counters[kEvt ] += wc.gen;
+  counters[kPU  ] += wc.gen * wc.pileup;
+  counters[kLSF ] += wc.gen * wc.lepSf;
+  counters[kBtag] += wc.gen * wc.btag;
+  counters[kTrig] += wc.gen * wc.trigger;
+  counters[kAll ] += wc.product();
 }
 //-----------------------------------------
 bool SusySelection::selectEvent()
@@ -640,7 +640,7 @@ std::string lineLabelsPerEventType(const string *labels, int colWidth){
   return oss.str();
 }
 // helper function: for a given weight type, write line with counts for each event type
-std::string lineCountersPerEventType(const float cnt[ET_N][WT_N],
+std::string lineCountersPerEventType(const float cnt[ET_N][kWeightTypesN],
                                      int weightType, int colWidth){
   std::ostringstream oss;
   // bool raw(weightType==WT_Raw);
@@ -664,8 +664,8 @@ void SusySelection::dumpEventCounters()
   string topRule(nCols*colWidth, '*');
   string midRule(nCols*colWidth, '-');
   // define a function reference to shorten lines
-  string (&lcpet)(const float cnt[ET_N][WT_N], int weightType, int colWidth) = lineCountersPerEventType;
-  for(int w=0; w<WT_N; ++w){
+  string (&lcpet)(const float cnt[ET_N][kWeightTypesN], int weightType, int colWidth) = lineCountersPerEventType;
+  for(int w=0; w<kWeightTypesN; ++w){
     cout<<topRule                                                    <<endl;
     cout<<"Event counts for weight: "<< v_WT             [w]         <<endl;
     cout<<midRule                                                    <<endl;
@@ -793,7 +793,7 @@ int SusySelection::pdgIdFromLep(const Lepton *l)
 //-----------------------------------------
 void SusySelection::resetAllCounters()
 {
-  for(int w=0; w<WT_N; ++w){// Loop over weight types
+  for(int w=0; w<kWeightTypesN; ++w){// Loop over weight types
     n_readin          [w] = 0;
     n_pass_Grl        [w] = 0;
     n_pass_LarErr     [w] = 0;

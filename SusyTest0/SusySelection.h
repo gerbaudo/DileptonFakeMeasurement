@@ -23,15 +23,15 @@
 
 #include <fstream>
 
-enum WeightType {
-  WT_Raw = 0,   // raw counts
-  WT_Evt,       // include gen weight (from ntuple or xsreader)
-  WT_PU,        // include pileup weight
-  WT_LSF,       // include lepton scale factor
-  WT_Btag,      // include b-tag scale factor
-  WT_Trig,      // include trigger weight
-  WT_All,       // include all weights above
-  WT_N
+enum WeightTypes {
+  kRaw = 0,   // raw counts
+  kEvt,       // include gen weight (from ntuple or xsreader)
+  kPU,        // include pileup weight
+  kLSF,       // include lepton scale factor
+  kBtag,      // include b-tag scale factor
+  kTrig,      // include trigger weight
+  kAll,       // include all weights above
+  kWeightTypesN
 };
 
 enum WH_SR {
@@ -188,100 +188,100 @@ class SusySelection : public SusyNtAna
     Met                 m_unsmeared_met; //! cached met before charge-flip smearing
     WeightComponents    m_weightComponents;
     // Event counters
-    float n_readin          [WT_N]; // [weight type]
-    float n_pass_Grl        [WT_N];
-    float n_pass_LarErr     [WT_N];
-    float n_pass_TileErr    [WT_N];
-    float n_pass_TTCVeto    [WT_N];
-    float n_pass_GoodVtx    [WT_N];
-    float n_pass_TileTrip   [WT_N];
-    float n_pass_LAr        [WT_N];
-    float n_pass_BadJet     [WT_N];
-    float n_pass_FEBCut     [WT_N];
-    float n_pass_BadMuon    [WT_N];
-    float n_pass_Cosmic     [WT_N];
-    float n_pass_hfor       [WT_N];
-    float n_pass_HttVeto    [WT_N];
-    float n_pass_ge2l       [WT_N];
-    float n_pass_eq2l       [WT_N];
-    float n_pass_mll        [WT_N];
-    float n_pass_signalLep  [WT_N];
+    float n_readin          [kWeightTypesN]; // [weight type]
+    float n_pass_Grl        [kWeightTypesN];
+    float n_pass_LarErr     [kWeightTypesN];
+    float n_pass_TileErr    [kWeightTypesN];
+    float n_pass_TTCVeto    [kWeightTypesN];
+    float n_pass_GoodVtx    [kWeightTypesN];
+    float n_pass_TileTrip   [kWeightTypesN];
+    float n_pass_LAr        [kWeightTypesN];
+    float n_pass_BadJet     [kWeightTypesN];
+    float n_pass_FEBCut     [kWeightTypesN];
+    float n_pass_BadMuon    [kWeightTypesN];
+    float n_pass_Cosmic     [kWeightTypesN];
+    float n_pass_hfor       [kWeightTypesN];
+    float n_pass_HttVeto    [kWeightTypesN];
+    float n_pass_ge2l       [kWeightTypesN];
+    float n_pass_eq2l       [kWeightTypesN];
+    float n_pass_mll        [kWeightTypesN];
+    float n_pass_signalLep  [kWeightTypesN];
 
     // SR6 counts
-    float                n_pass_SR6sign[ET_N][WT_N];
-    float                n_pass_SR6flav[ET_N][WT_N];
-    float                n_pass_SR6eq2j[ET_N][WT_N];
-    float                n_pass_SR6eq2jNfv[ET_N][WT_N];
-    float                n_pass_SR6ge1j[ET_N][WT_N];
-    float                n_pass_SR6ge2j[ET_N][WT_N];
-    float                n_pass_SR6ge2jNfv[ET_N][WT_N];
-    float                n_pass_SR6metr[ET_N][WT_N];
-    float                n_pass_SR6DrllMax     [ET_N][WT_N];
-    float                n_pass_SR6PtllMin     [ET_N][WT_N];
-    float                n_pass_SR6MllMax      [ET_N][WT_N];
-    float                n_pass_SR6METRel      [ET_N][WT_N];
-    float                n_pass_SR6MtLlmetMin  [ET_N][WT_N];
-    float                n_pass_SR6MtMinlmetMin[ET_N][WT_N];
-    float                n_pass_SR6ZtautauVeto [ET_N][WT_N];
-    float                n_pass_SR6            [ET_N][WT_N];
+    float                n_pass_SR6sign[ET_N][kWeightTypesN];
+    float                n_pass_SR6flav[ET_N][kWeightTypesN];
+    float                n_pass_SR6eq2j[ET_N][kWeightTypesN];
+    float                n_pass_SR6eq2jNfv[ET_N][kWeightTypesN];
+    float                n_pass_SR6ge1j[ET_N][kWeightTypesN];
+    float                n_pass_SR6ge2j[ET_N][kWeightTypesN];
+    float                n_pass_SR6ge2jNfv[ET_N][kWeightTypesN];
+    float                n_pass_SR6metr[ET_N][kWeightTypesN];
+    float                n_pass_SR6DrllMax     [ET_N][kWeightTypesN];
+    float                n_pass_SR6PtllMin     [ET_N][kWeightTypesN];
+    float                n_pass_SR6MllMax      [ET_N][kWeightTypesN];
+    float                n_pass_SR6METRel      [ET_N][kWeightTypesN];
+    float                n_pass_SR6MtLlmetMin  [ET_N][kWeightTypesN];
+    float                n_pass_SR6MtMinlmetMin[ET_N][kWeightTypesN];
+    float                n_pass_SR6ZtautauVeto [ET_N][kWeightTypesN];
+    float                n_pass_SR6            [ET_N][kWeightTypesN];
     // SR7 counts
-    float                n_pass_SR7sign[ET_N][WT_N];
-    float                n_pass_SR7flav[ET_N][WT_N];
-    float                n_pass_SR7eq2j[ET_N][WT_N];
-    float                n_pass_SR7eq2jNfv[ET_N][WT_N];
-    float                n_pass_SR7ge1j[ET_N][WT_N];
-    float                n_pass_SR7ge2j[ET_N][WT_N];
-    float                n_pass_SR7ge2jNfv[ET_N][WT_N];
-    float                n_pass_SR7metr[ET_N][WT_N];
-    float                n_pass_SR7DrllMax     [ET_N][WT_N];
-    float                n_pass_SR7PtllMin     [ET_N][WT_N];
-    float                n_pass_SR7MllMax      [ET_N][WT_N];
-    float                n_pass_SR7METRel      [ET_N][WT_N];
-    float                n_pass_SR7MtLlmetMin  [ET_N][WT_N];
-    float                n_pass_SR7MtMinlmetMin[ET_N][WT_N];
-    float                n_pass_SR7ZtautauVeto [ET_N][WT_N];
-    float                n_pass_SR7[ET_N][WT_N];
+    float                n_pass_SR7sign[ET_N][kWeightTypesN];
+    float                n_pass_SR7flav[ET_N][kWeightTypesN];
+    float                n_pass_SR7eq2j[ET_N][kWeightTypesN];
+    float                n_pass_SR7eq2jNfv[ET_N][kWeightTypesN];
+    float                n_pass_SR7ge1j[ET_N][kWeightTypesN];
+    float                n_pass_SR7ge2j[ET_N][kWeightTypesN];
+    float                n_pass_SR7ge2jNfv[ET_N][kWeightTypesN];
+    float                n_pass_SR7metr[ET_N][kWeightTypesN];
+    float                n_pass_SR7DrllMax     [ET_N][kWeightTypesN];
+    float                n_pass_SR7PtllMin     [ET_N][kWeightTypesN];
+    float                n_pass_SR7MllMax      [ET_N][kWeightTypesN];
+    float                n_pass_SR7METRel      [ET_N][kWeightTypesN];
+    float                n_pass_SR7MtLlmetMin  [ET_N][kWeightTypesN];
+    float                n_pass_SR7MtMinlmetMin[ET_N][kWeightTypesN];
+    float                n_pass_SR7ZtautauVeto [ET_N][kWeightTypesN];
+    float                n_pass_SR7[ET_N][kWeightTypesN];
     // SR8 counts
-    float                n_pass_SR8sign[ET_N][WT_N];
-    float                n_pass_SR8flav[ET_N][WT_N];
-    float                n_pass_SR8eq2j[ET_N][WT_N];
-    float                n_pass_SR8eq2jNfv[ET_N][WT_N];
-    float                n_pass_SR8ge1j[ET_N][WT_N];
-    float                n_pass_SR8ge2j[ET_N][WT_N];
-    float                n_pass_SR8ge2jNfv[ET_N][WT_N];
-    float                n_pass_SR8metr[ET_N][WT_N];
-    float                n_pass_SR8[ET_N][WT_N];
+    float                n_pass_SR8sign[ET_N][kWeightTypesN];
+    float                n_pass_SR8flav[ET_N][kWeightTypesN];
+    float                n_pass_SR8eq2j[ET_N][kWeightTypesN];
+    float                n_pass_SR8eq2jNfv[ET_N][kWeightTypesN];
+    float                n_pass_SR8ge1j[ET_N][kWeightTypesN];
+    float                n_pass_SR8ge2j[ET_N][kWeightTypesN];
+    float                n_pass_SR8ge2jNfv[ET_N][kWeightTypesN];
+    float                n_pass_SR8metr[ET_N][kWeightTypesN];
+    float                n_pass_SR8[ET_N][kWeightTypesN];
     // SR9 counts
-    float                n_pass_SR9sign[ET_N][WT_N];
-    float                n_pass_SR9flav[ET_N][WT_N];
-    float                n_pass_SR9eq2j[ET_N][WT_N];
-    float                n_pass_SR9eq2jNfv[ET_N][WT_N];
-    float                n_pass_SR9ge1j[ET_N][WT_N];
-    float                n_pass_SR9ge2j[ET_N][WT_N];
-    float                n_pass_SR9ge2jNfv[ET_N][WT_N];
-    float                n_pass_SR9metr[ET_N][WT_N];
-    float                n_pass_SR9[ET_N][WT_N];
+    float                n_pass_SR9sign[ET_N][kWeightTypesN];
+    float                n_pass_SR9flav[ET_N][kWeightTypesN];
+    float                n_pass_SR9eq2j[ET_N][kWeightTypesN];
+    float                n_pass_SR9eq2jNfv[ET_N][kWeightTypesN];
+    float                n_pass_SR9ge1j[ET_N][kWeightTypesN];
+    float                n_pass_SR9ge2j[ET_N][kWeightTypesN];
+    float                n_pass_SR9ge2jNfv[ET_N][kWeightTypesN];
+    float                n_pass_SR9metr[ET_N][kWeightTypesN];
+    float                n_pass_SR9[ET_N][kWeightTypesN];
     // SS counts
-    float n_pass_flavor     [ET_N][WT_N]; // [event type][weight type]
-    float n_pass_os         [ET_N][WT_N];
-    float n_pass_ss         [ET_N][WT_N];
-    float n_pass_tr2L       [ET_N][WT_N];
-    float n_pass_tr2LMatch  [ET_N][WT_N];
-    float n_pass_mcTrue2l   [ET_N][WT_N];
-    float n_pass_category   [ET_N][WT_N];
-    float n_pass_nSigLep    [ET_N][WT_N];
-    float n_pass_tauVeto    [ET_N][WT_N];
-    float n_pass_mllMin     [ET_N][WT_N];
-    float n_pass_muIso      [ET_N][WT_N];
-    float n_pass_elD0Sig    [ET_N][WT_N];
-    float n_pass_fjVeto     [ET_N][WT_N];
-    float n_pass_bjVeto     [ET_N][WT_N];
-    float n_pass_ge1j       [ET_N][WT_N];
-    float n_pass_lepPt      [ET_N][WT_N];
-    float n_pass_mllZveto   [ET_N][WT_N];
-    float n_pass_mWwt       [ET_N][WT_N];
-    float n_pass_ht         [ET_N][WT_N];
-    float n_pass_metRel     [ET_N][WT_N];
+    float n_pass_flavor     [ET_N][kWeightTypesN]; // [event type][weight type]
+    float n_pass_os         [ET_N][kWeightTypesN];
+    float n_pass_ss         [ET_N][kWeightTypesN];
+    float n_pass_tr2L       [ET_N][kWeightTypesN];
+    float n_pass_tr2LMatch  [ET_N][kWeightTypesN];
+    float n_pass_mcTrue2l   [ET_N][kWeightTypesN];
+    float n_pass_category   [ET_N][kWeightTypesN];
+    float n_pass_nSigLep    [ET_N][kWeightTypesN];
+    float n_pass_tauVeto    [ET_N][kWeightTypesN];
+    float n_pass_mllMin     [ET_N][kWeightTypesN];
+    float n_pass_muIso      [ET_N][kWeightTypesN];
+    float n_pass_elD0Sig    [ET_N][kWeightTypesN];
+    float n_pass_fjVeto     [ET_N][kWeightTypesN];
+    float n_pass_bjVeto     [ET_N][kWeightTypesN];
+    float n_pass_ge1j       [ET_N][kWeightTypesN];
+    float n_pass_lepPt      [ET_N][kWeightTypesN];
+    float n_pass_mllZveto   [ET_N][kWeightTypesN];
+    float n_pass_mWwt       [ET_N][kWeightTypesN];
+    float n_pass_ht         [ET_N][kWeightTypesN];
+    float n_pass_metRel     [ET_N][kWeightTypesN];
 };
 
 #endif // SusySelection_h
