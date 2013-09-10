@@ -225,6 +225,21 @@ bool SusySelection::passSrSs(const WH_SR signalRegion,
   if(passMtLlMetMin(ncls, met, mtwwMin))        increment(n_pass_mWwt     [ll], wc); else return false;
   if(passHtMin     (ncls, js, met, htMin))      increment(n_pass_ht       [ll], wc); else return false;
   if(passMetRelMin (met,ncls,js,metRelMin))     increment(n_pass_metRel   [ll], wc); else return false;
+
+  /*
+  cout<<""
+      <<" ("<<(ll==ee ? "EE" : (ll==mm ? "MM" : "EM"))<<")"
+      <<" event   "<<nt.evt()->event
+      <<" gen     "<<wc.gen
+      <<" pileup  "<<wc.pileup
+      <<" norm    "<<wc.norm
+      <<" lepSf   "<<wc.lepSf
+      <<" btag    "<<wc.btag
+      <<" trigger "<<wc.trigger
+      <<" qflip   "<<wc.qflip
+      <<" all     "<<wc.product()
+      <<endl;
+  */
   return true;
 }
 //-----------------------------------------
@@ -743,8 +758,17 @@ float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
   int sys(NtSys_NOM==systematic ? 0 : 0);
   //(DGSys_BKGMETHOD_UP==systematic ? +1 : // DG todo : implement syst
   // (DGSys_BKGMETHOD_DN==systematic ? -1 : 0)));
-  float flipProb(m_chargeFlip->OS2SS(pdg0, &smearedLv0, pdg1, &smearedLv1,
-                                     &smearedMet, sys));
+  /*
+  cout<<"OS2SS args: "
+      <<" event   "<<nt.evt()->event
+      <<" pdg0 "<<pdg0
+      <<" lv0 px: "<<smearedLv0.Px()<<" py: "<<smearedLv0.Py()<<" pz: "<<smearedLv0.Pz()
+      <<" pdg1 "<<pdg1
+      <<" lv1 px: "<<smearedLv1.Px()<<" py: "<<smearedLv1.Py()<<" pz: "<<smearedLv1.Pz()
+      <<" met px: "<<smearedMet.Px()<<" py: "<<smearedMet.Py()
+      <<endl;
+  */
+  float flipProb(m_chargeFlip->OS2SS(pdg0, &smearedLv0, pdg1, &smearedLv1, &smearedMet, sys));
   float overlapFrac(m_chargeFlip->overlapFrac().first);
   if(update4mom) {
     m_unsmeared_lv0 = (*l0);
