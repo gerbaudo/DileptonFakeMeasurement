@@ -21,7 +21,7 @@
 #include "SusyNtuple/SusyNtTools.h"
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyXSReader/XSReader.h"
-#include "SusyAna2012/SusyAnaDefs.h"
+#include "SusyTest0/SusyAnaDefsMatt.h"
 
 #include "SUSYTools/SUSYObjDef.h"
 
@@ -41,13 +41,13 @@ enum WeightType
   WT_N
 };
 
-class SusySelection : public SusyNtAna
+class SusySelectionMatt : public SusyNtAna
 {
 
   public:
 
-    SusySelection();
-    virtual ~SusySelection(){};
+    SusySelectionMatt();
+    virtual ~SusySelectionMatt(){};
 
     ofstream out;
 
@@ -79,9 +79,6 @@ class SusySelection : public SusyNtAna
     
     // SR-SS
     //bool passSRSS(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false, bool loose=false);
-
-    // Davide's SRSS
-    bool passDavideSR(const LeptonVector& leptons, const JetVector& jets, const Met* met);
 
     // SR-ZJets
     bool passSRZjets(const LeptonVector& leptons, const JetVector& jets, const Met* met, bool count=false, bool loose=false);
@@ -269,7 +266,7 @@ class SusySelection : public SusyNtAna
     bool isMySignalMuon(const Muon* mu);
     bool isMySignalLepton(const Lepton* lep);
 
-    ClassDef(SusySelection, 1);
+    ClassDef(SusySelectionMatt, 1);
 
   protected:
 
