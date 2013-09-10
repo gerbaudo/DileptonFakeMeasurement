@@ -104,7 +104,6 @@ class MeasureFakeRate2 : public SusySelectionMatt
   //
   // Miscellaneous
   //
-  void setIsMC(bool mc){ m_isMC = mc; };
   bool passLFTrig(const LeptonVector &leps);
   void setAltIso(){ m_AltIso = true; };
   LeptonSource getLeptonSource(const Lepton* l){
@@ -241,9 +240,6 @@ class MeasureFakeRate2 : public SusySelectionMatt
  protected:
 
   TFile*       m_outFile;           // Output file
-  
-  bool         m_isMC;              // is MC
-
   LeptonVector m_probes;            // Probe lepton vector
   LeptonVector m_tags;              // Tag Lepton vector
   

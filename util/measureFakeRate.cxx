@@ -31,7 +31,6 @@ void usage(const char *exeName) {
       <<"\t"<<"-i [--input]       (file, list, or dir)"  <<endl
       <<"\t"<<"-o [--output]      samplename"            <<endl
       <<"\t"<<"-s [--sample]      output file"           <<endl
-      <<"\t"<<"--mc               measure MC rates"      <<endl
       <<"\t"<<"--mcTrig           use MC triggers"       <<endl
       <<"\t"<<"--altIso           use 2011 isolation"    <<endl
       <<"\t"<<"--optCut           determine optimum cuts"<<endl
@@ -51,7 +50,6 @@ int main(int argc, char** argv)
   string input;
   string output;
   bool useAltIso = false;
-  bool ismc      = false;
   bool useMCTrig = false;
   bool optCuts   = false;
 
@@ -69,7 +67,6 @@ int main(int argc, char** argv)
     else if(sw=="-i"||sw=="--input"      ) { input = argv[++optind]; }
     else if(sw=="-o"||sw=="--output"     ) { output = argv[++optind]; }
     else if(sw=="-s"||sw=="--sample"     ) { sample = argv[++optind]; }
-    else if(sw=="--mc"                   ) { ismc = true; ++optind; }
     else if(sw=="--mcTrig"               ) { useMCTrig = true; ++optind; }
     else if(sw=="--altIso"               ) { useAltIso = true; ++optind; }
     else if(sw=="--optCut"               ) { optCuts = true; ++optind; }
@@ -85,7 +82,6 @@ int main(int argc, char** argv)
       <<"  dbg     "<<dbg       <<endl
       <<"  input   "<<input     <<endl
       <<"  output  "<<output    <<endl
-      <<"  mc      "<<ismc      <<endl
       <<"  mcTrig  "<<useMCTrig <<endl
       <<"  altIso  "<<useAltIso <<endl
       <<"  optCut  "<<optCuts   <<endl
@@ -116,7 +112,6 @@ int main(int argc, char** argv)
   if(sample.size()) mfr.setSampleName(sample);
   if(output.size()) mfr.setFileName(output);
   mfr.buildSumwMap(chain);
-  mfr.setIsMC(ismc);
   mfr.setUseMCTrig(useMCTrig);
   if(useAltIso) mfr.setAltIso();
   if(optCuts)   mfr.setFindOptCut(optCuts);

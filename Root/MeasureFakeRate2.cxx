@@ -14,7 +14,6 @@ int nHtbins = 4;
 /*--------------------------------------------------------------------------------*/
 MeasureFakeRate2::MeasureFakeRate2() :
   m_outFile(NULL),
-  m_isMC(false),
   m_evtWeight(1.),
   m_AltIso(false),
   m_metRel(0.),
