@@ -982,7 +982,7 @@ bool SusySelectionMatt::passCRTopZjets(const LeptonVector& leptons, const JetVec
   if( !passZVeto(leptons) )                 return false;
   if(count) increment(n_pass_CRTopZjets_zv[m_ET],true);
 
-  int N_L20 = numberOfCLJets(jets);
+  //int N_L20 = numberOfCLJets(jets);
   int N_B20 = numberOfCBJets(jets);
   //if( N_L20 + N_B20 < 2 )                   return false;
   if(count) increment(n_pass_CRTopZjets_2jets[m_ET],true,true);
@@ -2006,7 +2006,7 @@ void SusySelectionMatt::dumpEventCounters()
 {
 
 
-  string v_ET[] = {"ee","mm","em","me"};
+  //string v_ET[] = {"ee","mm","em","me"};
   string v_WT[] = {"Raw","Event","Pileup","Pileup A-B3",
 		   "LeptonSF","btagSF","TrigSF","All A-B3", "All A-E"};
 
@@ -2400,7 +2400,7 @@ void SusySelectionMatt::dumpInterestingEvents(const LeptonVector& leptons,
   float metRel = getMetRel(met,leptons,jets);
   if( metRel < 100 ) return;
 
-  float pt0 = leptons[0]->Pt();
+  //float pt0 = leptons[0]->Pt();
   //if( !(20 < pt0 && pt0 < 30) ) return;
   //if( !(50 < pt0 && pt0 < 60) ) return;
   /*
