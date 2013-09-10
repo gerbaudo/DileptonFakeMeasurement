@@ -1,151 +1,128 @@
-
+#include <cassert>
 #include <cstdlib>
+#include <iostream>
 #include <string>
 
 #include "TChain.h"
 #include "Cintex/Cintex.h"
 
-#include "SusyTest0/MeasureFakeRate2.h"
 #include "SusyNtuple/ChainHelper.h"
-
-using namespace std;
+#include "SusyTest0/MeasureFakeRate2.h"
+#include "SusyTest0/utils.h"
 
 /*
 
 Measure Fake Rate
 
+Imported from Matt's code.
+
 */
 
-void help()
-{
-  cout << "  Options:"                          << endl;
-  cout << "  -n number of events to process"    << endl;
-  cout << "     defaults: -1 (all events)"      << endl;
 
-  cout << "  -k number of events to skip"       << endl;
-  cout << "     defaults: 0"                    << endl;
+using std::cout;
+using std::endl;
+using std::string;
 
-  cout << "  -d debug printout level"           << endl;
-  cout << "     defaults: 0 (quiet) "           << endl;
-
-  cout << "  -f name of input filelist"         << endl;
-  cout << "     defaults: ''"                   << endl;
-
-  cout << "  -s sample name, for naming files"  << endl;
-  cout << "     defaults: ntuple sample name"   << endl;
-
-  cout << "  -mc measure MC rates"              << endl;
-  cout << "      default is off"                << endl;
-
-  cout << "  -mcTrig use MC triggers"           << endl;
-  cout << "      default is off"                << endl;
-
-  cout << "  -altIso to use 2011 isolation"    << endl;
-  cout << "      default is off"                << endl;
-
-  cout << "  --optCut to fill histos useful for"<<endl;
-  cout << "           determining optimum cuts "<<endl;
-
-  cout << "  -h print this help"                << endl;
+void usage(const char *exeName) {
+  cout<<"Usage:"<<endl
+      <<exeName<<" options"<<endl
+      <<"\t"<<"-n [--num-event]   nEvt (default -1, all)"<<endl
+      <<"\t"<<"-k [--num-skip]    nSkip (default 0)"     <<endl
+      <<"\t"<<"-i [--input]       (file, list, or dir)"  <<endl
+      <<"\t"<<"-o [--output]      samplename"            <<endl
+      <<"\t"<<"-s [--sample]      output file"           <<endl
+      <<"\t"<<"--mc               measure MC rates"      <<endl
+      <<"\t"<<"--mcTrig           use MC triggers"       <<endl
+      <<"\t"<<"--altIso           use 2011 isolation"    <<endl
+      <<"\t"<<"--optCut           determine optimum cuts"<<endl
+      <<"\t"<<"-d [--debug]     : debug (>0 print stuff)"<<endl
+      <<"\t"<<"-h [--help]      : print help"            <<endl
+      <<endl;
 }
 
 int main(int argc, char** argv)
 {
-  ROOT::Cintex::Cintex::Enable();
 
+  ROOT::Cintex::Cintex::Enable();
   int nEvt = -1;
   int nSkip = 0;
   int dbg = 0;
-  bool useAltIso = false;
-  bool ismc       = false;
-  bool useMCTrig  = false;
   string sample;
-  string fileList;
-  string output = "";
-  bool optCuts = false;
+  string input;
+  string output;
+  bool useAltIso = false;
+  bool ismc      = false;
+  bool useMCTrig = false;
+  bool optCuts   = false;
 
-  cout << "MeasureFakeRate2" << endl;
-  cout << endl;
-
-  /** Read inputs to program */
-  for(int i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "-n") == 0)
-      nEvt = atoi(argv[++i]);
-    else if (strcmp(argv[i], "-k") == 0)
-      nSkip = atoi(argv[++i]);
-    else if (strcmp(argv[i], "-d") == 0)
-      dbg = atoi(argv[++i]);
-    else if (strcmp(argv[i], "-f") == 0)
-      fileList = argv[++i];
-    else if (strcmp(argv[i], "-o") == 0)
-      output = argv[++i];
-    else if (strcmp(argv[i], "-s") == 0)
-      sample = argv[++i];
-    else if (strcmp(argv[i], "-mc") == 0)
-      ismc = true;
-    else if (strcmp(argv[i], "-altIso") == 0)
-      useAltIso = true;
-    else if (strcmp(argv[i], "-mcTrig") == 0)
-      useMCTrig = true;
-    else if (strcmp(argv[i], "--optCut") == 0)
-      optCuts = true;
-    else
-    {
-      help();
-      return 0;
+  int optind(1);
+  while ((optind < argc)) {
+    if(argv[optind][0]!='-') {
+      if(dbg) cout<<"skip "<<argv[optind]<<endl;
+      optind++;
+      continue;
     }
-  }
+    std::string sw = argv[optind];
+    if     (sw=="-n"||sw=="--num-event"  ) { nEvt = atoi(argv[++optind]); }
+    else if(sw=="-k"||sw=="--num-skip"   ) { nSkip = atoi(argv[++optind]); }
+    else if(sw=="-d"||sw=="--debug"      ) { dbg = atoi(argv[++optind]); }
+    else if(sw=="-i"||sw=="--input"      ) { input = argv[++optind]; }
+    else if(sw=="-o"||sw=="--output"     ) { output = argv[++optind]; }
+    else if(sw=="-s"||sw=="--sample"     ) { sample = argv[++optind]; }
+    else if(sw=="--mc"                   ) { ismc = true; ++optind; }
+    else if(sw=="--mcTrig"               ) { useMCTrig = true; ++optind; }
+    else if(sw=="--altIso"               ) { useAltIso = true; ++optind; }
+    else if(sw=="--optCut"               ) { optCuts = true; ++optind; }
+    else if(sw=="-h"||sw=="--help"       ) { usage(argv[0]); return 0; }
+    else cout<<"Unknown switch "<<sw<<endl;
+    optind++;
+  } // end while(optind<argc)
 
-  // If no input specified except sample name, use a standard fileList
-  if(fileList.empty())
-    return 0;
+  cout<<"flags:"                <<endl
+      <<"  sample  "<<sample    <<endl
+      <<"  nEvt    "<<nEvt      <<endl
+      <<"  nSkip   "<<nSkip     <<endl
+      <<"  dbg     "<<dbg       <<endl
+      <<"  input   "<<input     <<endl
+      <<"  output  "<<output    <<endl
+      <<"  mc      "<<ismc      <<endl
+      <<"  mcTrig  "<<useMCTrig <<endl
+      <<"  altIso  "<<useAltIso <<endl
+      <<"  optCut  "<<optCuts   <<endl
+      <<endl;
 
-  // Save the file name
-  string fname = output;
-  if(output.empty()){
-    int pos0 = fileList.find("/");  
-    int pos1 = fileList.find(".txt");
-    fname = fileList.substr(pos0+1,pos1-pos0-1);
-  }
-  sample = fname;
-
-  cout << "flags:" << endl;
-  cout << "  sample  " << sample   << endl;
-  cout << "  nEvt    " << nEvt     << endl;
-  cout << "  nSkip   " << nSkip    << endl;
-  cout << "  dbg     " << dbg      << endl;
-  cout << "  input   " << fileList << endl;
-  cout << "  output  " << fname    << endl;
-  cout << endl;
-
-  // Build the input chain
   TChain* chain = new TChain("susyNt");
-  ChainHelper::addFileList(chain, fileList);
+  bool inputIsFile(string::npos!=input.find(".root"));
+  bool inputIsList(string::npos!=input.find(".txt"));
+  bool inputIsDir (endswith(input, "/"));
+  bool validInput(inputIsFile||inputIsList||inputIsDir);
+  bool validOutput(endswith(output, ".root"));
+  if(!validInput || !validOutput) {
+    cout<<"invalid "
+        <<(validOutput ? "input" : "output")<<" "
+        <<"'"<<(validOutput ? input : output)<<"'"
+        <<endl;
+    usage(argv[0]); return 1;
+  }
+  if(inputIsFile) ChainHelper::addFile    (chain, input);
+  if(inputIsList) ChainHelper::addFileList(chain, input);
+  if(inputIsDir ) ChainHelper::addFileDir (chain, input);
   Long64_t nEntries = chain->GetEntries();
-  chain->ls();
+  nEvt = (nEvt<0 ? nEntries : nEvt);
+  if(dbg) chain->ls();
 
-  cout << "Chain built" << endl;
-  // Build the TSelector
-  MeasureFakeRate2 *fakeRate = new MeasureFakeRate2();
-  fakeRate->buildSumwMap(chain);
-  fakeRate->setDebug(dbg);
-  fakeRate->setSampleName(sample);
-  fakeRate->setFileName(fname);
-  fakeRate->setIsMC(ismc);
-  fakeRate->setUseMCTrig(useMCTrig);
-  if(useAltIso) fakeRate->setAltIso();
-  fakeRate->setFindOptCut(optCuts);
+  MeasureFakeRate2 mfr;
+  mfr.setDebug(dbg);
+  if(sample.size()) mfr.setSampleName(sample);
+  if(output.size()) mfr.setFileName(output);
+  mfr.buildSumwMap(chain);
+  mfr.setIsMC(ismc);
+  mfr.setUseMCTrig(useMCTrig);
+  if(useAltIso) mfr.setAltIso();
+  if(optCuts)   mfr.setFindOptCut(optCuts);
 
-  // Run the job
-  if(nEvt<0) nEvt = nEntries;
-  cout << endl;
-  cout << "Total entries:   " << nEntries << endl;
-  cout << "Process entries: " << nEvt << endl;
-  if(nEvt>0) chain->Process(fakeRate, sample.c_str(), nEvt, nSkip);
-
-  cout << endl;
-  cout << "MeasureFakeRate job done" << endl;
-
+  mfr.buildSumwMap(chain);
+  chain->Process(&mfr, sample.c_str(), nEvt, nSkip);
   delete chain;
   return 0;
 }
