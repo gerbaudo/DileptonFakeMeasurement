@@ -575,6 +575,7 @@ bool SusySelection::passEleD0S(const LeptonVector &leptons, float maxVal)
 
 void SusySelection::cacheStaticWeightComponents()
 {
+  m_weightComponents.reset();
   if(!nt.evt()->isMC) {m_weightComponents.reset(); return;}
   m_weightComponents.gen = nt.evt()->w;
   m_weightComponents.pileup = nt.evt()->wPileup;
