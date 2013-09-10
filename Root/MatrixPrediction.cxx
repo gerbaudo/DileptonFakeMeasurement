@@ -34,7 +34,12 @@ void MatrixPrediction::Begin(TTree* /*tree*/)
   m_matrix = new SusyMatrixMethod::DiLeptonMatrixMethod();
   string pathRateFile = (string( std::getenv("ROOTCOREDIR"))
                          +"/../SusyMatrixMethod/data/pass6_Apr2_2013.root");
-  m_matrix->configure(pathRateFile, SusyMatrixMethod::PT);
+  m_matrix->configure(pathRateFile,
+                      SusyMatrixMethod::PT,     // Electron Real
+                      SusyMatrixMethod::PT,     // Electron Fake
+                      SusyMatrixMethod::PT,     // Muon Real
+                      SusyMatrixMethod::PT      // Muon Fake
+                      );
   cout<<"Matrix method initialized: "<<endl;
   bookFakeHisto();
   dump.open("fakeDump.txt");
@@ -57,7 +62,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   if( m_baseLeptons.size() != 2 )   return kTRUE;
   if( !passTrig2LwithMatch(m_baseLeptons) ) return kTRUE;
   bool count(true);
-  SusyMatrixMethod::FAKE_REGION reg = SusyMatrixMethod::FR_VRSSbtag;
+  SusyMatrixMethod::FAKE_REGION reg = SusyMatrixMethod::FR_VRSS;
   SusyMatrixMethod::SYSTEMATIC  sys = SusyMatrixMethod::SYS_NONE;
   const Met*          m = m_met;
   const JetVector&    j = m_signalJets2Lep;
