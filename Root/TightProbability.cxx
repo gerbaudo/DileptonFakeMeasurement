@@ -134,10 +134,10 @@ Bool_t TightProbability::Process(Long64_t entry) {
   //  cout<<(passEvent ? " passEvent " : "!passEvent\n");
   if(!passEvent) return true;
   m_ET = getDiLepEvtType(leps);
-  float metRel = getMetRel(met,leps,jets);
+  //float metRel = getMetRel(met,leps,jets);
   //bool passSr = passSrSs(m_ET, WH_SRSS1, leps, m_signalTaus, m_signalJets2Lep, met);
   //bool passSr(40.0 < metRel && metRel < 100.0);
-  bool passMet(met->Et > 20.0), passMetRel(40.0 < metRel && metRel < 100.0);
+  bool passMet(met->Et > 20.0); //, passMetRel(40.0 < metRel && metRel < 100.0);
   bool pass2l(2==leps.size());
   bool passSr(passMet && pass2l);
   if(!passSr) return true;

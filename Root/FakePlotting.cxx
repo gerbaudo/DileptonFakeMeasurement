@@ -1355,9 +1355,9 @@ void FakePlotting::plotSF(TH1F* h[], vector<string> names, TCanvas* c,
   ratio[0]->GetYaxis()->CenterTitle();
   ratio[0]->GetYaxis()->SetNdivisions(510);
 
-  float x0 = ratio[0]->GetBinCenter(1) - ratio[0]->GetBinWidth(1)/2.;
-  int fb   = ratio[0]->GetNbinsX();
-  float x1 = ratio[0]->GetBinCenter(fb) + ratio[0]->GetBinWidth(fb)/2.;
+  //float x0 = ratio[0]->GetBinCenter(1) - ratio[0]->GetBinWidth(1)/2.;
+  //int fb   = ratio[0]->GetNbinsX();
+  //float x1 = ratio[0]->GetBinCenter(fb) + ratio[0]->GetBinWidth(fb)/2.;
   //TLine* line = makeLine(x0, x1, 1.0, 1.0, kBlack);
 
   // set min max
