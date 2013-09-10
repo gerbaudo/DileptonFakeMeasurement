@@ -292,10 +292,12 @@ bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
                                     bool update4mom, bool isMc)
 {
   bool isSS(sameSign(leptons));
+  if(isSS) return true;
   if(!isMc) return isSS;
   bool isOS(!isSS);
   bool canBeQflip(isOS && (eventType==ET_ee || eventType==ET_em || eventType==ET_me));
-  if (!isSS && !canBeQflip) return false;
+  DiLepEvtType ll(eventType), ee(ET_ee), mm(ET_mm);
+  if (!canBeQflip){ return false; }
   if(canBeQflip){
     uint systematic=NtSys_NOM; // DG sys todo
     m_qflipProb = computeChargeFlipProb(leptons, met, systematic, update4mom);
