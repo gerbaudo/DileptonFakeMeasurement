@@ -9,7 +9,7 @@
 #include "SusyNtuple/ChainHelper.h"
 #include "SusyTest0/MatrixPrediction.h"
 #include "SusyTest0/TightProbability.h"
-
+#include "SusyTest0/utils.h"
 
 /*!
   Main executable to determine from MC the following two
@@ -44,12 +44,6 @@ void usage(const char *exeName) {
       <<"\t"<<"-d [--debug]     : debug (>0 print stuff)"<<endl
       <<"\t"<<"-h [--help]      : print help"            <<endl
       <<endl;
-}
-
-bool endswith(const string &s, const string &end) {
-  //http://stackoverflow.com/questions/874134/find-if-string-endswith-another-string-in-c
-  if(s.length()<end.length()) return false;
-  else return (0==s.compare(s.length() - end.length(), end.length(), end));
 }
 
 int main(int argc, char** argv)
