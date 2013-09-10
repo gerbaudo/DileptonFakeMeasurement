@@ -51,6 +51,13 @@ const int   njetbins = 7;
 const float njetmin = -0.5;
 const float njetmax = njetbins - 0.5;
 
+const float Typemin = -0.5;
+const float Typemax = 22.5;
+const int     nType = 23;
+
+const float Originmin = -0.5;
+const float Originmax = 42.5;
+const int     nOrigin = 43;
 //-----------------------------------------
 SusyPlotter::SusyPlotter() :
   SusySelection(),
@@ -58,6 +65,30 @@ SusyPlotter::SusyPlotter() :
   m_histFile(0),
   m_doFake(false)
 {
+  initNames();
+}
+//-----------------------------------------
+void SusyPlotter::initNames()
+{
+  size_t i=0;
+  chanNames[i++] = "all";
+  chanNames[i++] = "ee";
+  chanNames[i++] = "mm";
+  chanNames[i++] = "em";
+  i=0;
+  PRNames[i++] = "srnone";
+  PRNames[i++] = "sr6base";
+  PRNames[i++] = "sr6";
+  PRNames[i++] = "sr7base";
+  PRNames[i++] = "sr7Nj";
+  PRNames[i++] = "sr7NjZttVeto";
+  PRNames[i++] = "sr7NjPtTot";
+  PRNames[i++] = "sr7NjMll";
+  PRNames[i++] = "sr7";
+  PRNames[i++] = "sr8base";
+  PRNames[i++] = "sr8";
+  PRNames[i++] = "sr9base";
+  PRNames[i++] = "sr9";
 }
 //-----------------------------------------
 void SusyPlotter::Begin(TTree* /*tree*/)
@@ -152,6 +183,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(nfjets, "# f jets", njetbins, njetmin, njetmax);
 
 	// Type and origin
+
 	NEWHIST(l_type, "l_type", nType, Typemin, Typemax);
 	NEWHIST(l_origin, "l_origin", nOrigin, Originmin, Originmax);
 
