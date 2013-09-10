@@ -18,7 +18,7 @@
 
 // Susy Packages
 #include "SusyTest0/SusySelectionMatt.h"
-#include "SusyTest0/SusyAnaDefs.h"
+#include "SusyTest0/SusyAnaDefsMatt.h"
 #include "SusyTest0/EffObject.h"
 
 #include <fstream>
