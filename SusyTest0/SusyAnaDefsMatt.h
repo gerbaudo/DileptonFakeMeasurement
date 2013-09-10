@@ -1,5 +1,5 @@
-#ifndef SusyAnaDefs_h
-#define SusyAnaDefs_h
+#ifndef SusyAnaDefsMatt_h
+#define SusyAnaDefsMatt_h
 
 ////////////////////////////////////////////////////////
 // Class to store common enums and binning for all of //
