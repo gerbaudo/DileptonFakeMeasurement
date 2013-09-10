@@ -1,7 +1,7 @@
 // This script will format the fake inputs to be used in 
 // the matrix method.
 
-#include "SusyPlotting/FinalNewFake.h"
+#include "SusyTest0/FinalNewFake.h"
 
 //------------------------------------------------------------//
 // Constructor

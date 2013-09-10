@@ -17,9 +17,9 @@
 #include "TProfile.h"
 
 // Susy Packages
-#include "SusyAna2012/SusySelection.h"
-#include "SusyAna2012/SusyAnaDefs.h"
-#include "SusyAna2012/EffObject.h"
+#include "SusyTest0/SusySelectionMatt.h"
+#include "SusyTest0/SusyAnaDefs.h"
+#include "SusyTest0/EffObject.h"
 
 #include <fstream>
 
@@ -38,7 +38,7 @@ enum CRPLOT
   CRP_N
 };
 
-class MeasureFakeRate2 : public SusySelection
+class MeasureFakeRate2 : public SusySelectionMatt
 {
 
  public:

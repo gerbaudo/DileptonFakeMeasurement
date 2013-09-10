@@ -3,7 +3,7 @@
 // the fake rates used in 2-lep analysis.         //
 ////////////////////////////////////////////////////
 
-#include "SusyAna2012/MeasureFakeRate2.h"
+#include "SusyTest0/MeasureFakeRate2.h"
 
 float Htbins[] = {1,3,6,9,12};
 int nHtbins = 4;
@@ -41,7 +41,7 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
 
   if(m_dbg) cout << "MeasureFakeRate2::Begin" << endl;
 
-  SusySelection::Begin(0);
+  SusySelectionMatt::Begin(0);
 
   // Output file name
   string out = "fakeplots/" + m_fileName + "_rates.root";

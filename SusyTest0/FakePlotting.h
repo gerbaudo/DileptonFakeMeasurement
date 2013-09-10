@@ -16,8 +16,8 @@
 #include <string>
 #include <sstream>
 
-#include "SusyPlotting/myHist.h"
-#include "SusyAna2012/SusyAnaDefs.h"
+#include "SusyTest0/myHist.h"
+#include "SusyTest0/SusyAnaDefsMatt.h"
 #include "SusyMatrixMethod/StatErrorTool.h"
 
 #include "TMath.h"
