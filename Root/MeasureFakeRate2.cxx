@@ -41,11 +41,9 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
   if(m_dbg) cout << "MeasureFakeRate2::Begin" << endl;
 
   SusySelectionMatt::Begin(0);
-
   // Output file name
-  string out = "fakeplots/" + m_fileName + "_rates.root";
   cout<<"Creating: "<<out<<endl;
-  initHistos(out);
+  initHistos(m_fileName);
 
 
 }
