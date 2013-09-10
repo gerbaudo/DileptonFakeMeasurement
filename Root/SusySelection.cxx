@@ -863,8 +863,9 @@ void SusySelection::initChargeFlipTool()
     return;
   }
   string chargeFlipInput(rcdir);
-  chargeFlipInput += "/../ChargeFlip/data/chargeFlip.root";
-  m_chargeFlip = new chargeFlip(chargeFlipInput);
+  chargeFlipInput += "/../ChargeFlip/data/d0_chargeflip_map.root";
+  string mapName("combined_cf_rate");
+  m_chargeFlip = new chargeFlip(chargeFlipInput, mapName);
   if(m_dbg) m_chargeFlip->printSettings();
 }
 //-----------------------------------------
