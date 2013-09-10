@@ -167,26 +167,7 @@ SusySelectionMatt::SusySelectionMatt() :
       
     }
   }// end loop over weight types
-
-  //out.open("event.dump");
-  
-  //setAnaType(Ana_2Lep);
-  //out.open("InterestingEventsWPreTaus.txt");
-  //out.open("InterestingEventsNoJetReq.txt");
-  //out.open("InterestingEvents3Lep.txt");
-  //out.open("InterestingEventsNewSig.txt");
-  //out.open("SSMMInclusive.txt");
-  //out.open("dump_n0123.txt");
-  //out.open("dump.txt");
-  //out.open("dump_n0126.txt");
-  //out.open("dump_VR1_WZCheck_Mu.txt");
-  //out.open("dump_toptagCut");
-  //out.open("dump_117661.txt");
-  out.open("dump.txt");
-  //out.open("dump_n0124.txt");
-
   //m_doMuEtconeCut = true;
-
 
   m_BoundLow = TF1("expo","expo",1.5,4.0);
   m_BoundLow.FixParameter(0, 6.11861);
