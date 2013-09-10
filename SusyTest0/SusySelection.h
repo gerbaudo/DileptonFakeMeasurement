@@ -55,11 +55,11 @@ class SusySelection : public SusyNtAna
   typedef const Met          cmet_t; //!< just to make some decl shorter
   struct WeightComponents {
     WeightComponents(): susynt(1), gen(1), pileup(1), norm(1),lepSf(1), btag(1), trigger(1), qflip(1) {}
-    float product() const { return susynt * lepSf * btag * trigger * qflip; }
+    double product() const { return susynt * lepSf * btag * trigger * qflip; }
     void reset() { susynt = gen = pileup = norm = lepSf = btag = trigger = qflip = 1.0; }
-    float susynt; // from SusyNtTools::getEventWeight: includes gen, pu, xs, lumi, sumw
-    float gen, pileup, norm; // breakdown of the above; norm is xs*lumi/sumw
-    float lepSf, btag, trigger, qflip; // factors that we compute, not from upstream
+    double susynt; // from SusyNtTools::getEventWeight: includes gen, pu, xs, lumi, sumw
+    double gen, pileup, norm; // breakdown of the above; norm is xs*lumi/sumw
+    double lepSf, btag, trigger, qflip; // factors that we compute, not from upstream
   };
  public:
     SusySelection();
