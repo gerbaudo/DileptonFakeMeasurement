@@ -24,6 +24,7 @@ parser = optparse.OptionParser()
 parser.add_option('--susyplot', action='store_true', default=False)
 parser.add_option('--susysel',  action='store_true', default=False)
 parser.add_option('--fakeprob', action='store_true', default=False)
+parser.add_option('--fakerate', action='store_true', default=False, help='fake rate with code from Matt')
 parser.add_option("-o", "--overwrite", action="store_true", dest="overwrite", default=False,
                   help="overwrite existing batch scripts")
 parser.add_option("-O", "--other-opt", dest="otherOptions", default='',
@@ -48,20 +49,23 @@ submit       = options.submit
 susyplot     = options.susyplot
 susysel      = options.susysel
 fakeprob     = options.fakeprob
+fakerate     = options.fakerate
 verbose      = options.verbose
 
-assert [susyplot, susysel, fakeprob].count(True)==1,"specify one executable"
+assert [susyplot, susysel, fakeprob, fakerate].count(True)==1,"specify one executable"
 scriptDir = 'batchScripts'
 template  = ''
 template += scriptDir+'/templates/susyPlot.sh.template' if susyplot else ''
 template += scriptDir+'/templates/susySel.sh.template'  if susysel else ''
 template += scriptDir+'/templates/fakeprob.sh.template' if fakeprob else ''
+template += scriptDir+'/templates/fakerate.sh.template' if fakerate else ''
 outdir = 'out/'
 logdir = 'log/'
 def subdir() :
     if susyplot : return 'susyplot'
     if susysel  : return 'susysel'
     if fakeprob : return 'fakeprob'
+    if fakerate : return 'fakerate'
 def formAndCreateOutdir(basedir, subdir) :
     d = basedir+'/'+subdir
     if not os.path.isdir(d)  : os.makedirs(d)
