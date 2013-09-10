@@ -278,7 +278,6 @@ bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
   if(!isMc) return isSS;
   bool isOS(!isSS);
   bool canBeQflip(isOS && (eventType==ET_ee || eventType==ET_em || eventType==ET_me));
-  DiLepEvtType ll(eventType), ee(ET_ee), mm(ET_mm);
   if (!canBeQflip){ return false; }
   if(canBeQflip){
     uint systematic=NtSys_NOM; // DG sys todo
