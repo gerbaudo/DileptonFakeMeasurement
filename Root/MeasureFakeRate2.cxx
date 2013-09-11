@@ -60,7 +60,7 @@ void MeasureFakeRate2::Terminate()
   m_outFile->Write();
   cout<<"Closing file"<<endl;
   m_outFile->Close();
-
+  dumpEventCounters();
 }
 
 /*--------------------------------------------------------------------------------*/

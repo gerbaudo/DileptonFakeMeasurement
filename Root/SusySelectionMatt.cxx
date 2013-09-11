@@ -164,7 +164,7 @@ SusySelectionMatt::SusySelectionMatt() :
       n_pass_CRZXZjets_dRll[i][w] = 0;
       n_pass_CRZXZjets_metrel[i][w] = 0;
       n_pass_CRZXZjets_lowerbound[i][w] = 0;
-
+      n_pass_CRWHSS[i][w] = 0;
 
 
 
@@ -1290,6 +1290,8 @@ bool SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVector& j
   if(!susy::passMtLlMetMin(leptons, met, mtwwMin))      return false;
   if(!susy::passHtMin     (leptons, jets, met, htMin))  return false;
   if(getMetRel(met,leptons,jets)<metRelMin)             return false;
+
+  increment(n_pass_CRWHSS[m_ET],true,true);
   return true;
 }
 
@@ -2184,6 +2186,8 @@ void SusySelectionMatt::dumpEventCounters()
     printCounter("pass: CRZXZjets dRll window  ", n_pass_CRZXZjets_dRll, w);
     printCounter("pass: CRZXZjets metRel > 80  ", n_pass_CRZXZjets_metrel, w);
     printCounter("pass: CRZXZjets Lower Bound  ", n_pass_CRZXZjets_lowerbound, w);
+    cout << "-----------------------------------------------------"   << endl;
+    printCounter("pass: control region WHSS    ", n_pass_CRWHSS, w);
 
 
   }// end loop over weight type
