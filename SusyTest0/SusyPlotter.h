@@ -56,25 +56,6 @@ class SusyPlotter : public SusySelection
     void countAndPrint(std::ostream& oo);
   };
  public:
-  static float transverseMass(const TLorentzVector &lep, const TLorentzVector &met);
-  //! redundant? mt with non-zero m_vv? see https://svnweb.cern.ch/trac/atlasinst/browser/Institutes/UCIrvine/ataffard/SusyWeakProdAna/trunk/Root/PhysicsTools.cxx
-  static float mtWW(const TLorentzVector &ll, const TLorentzVector &met);
-  //! compute tau-tau mass assuming that v's are collinear with leptons and responsible for all MET
-  static float mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &met);
-  //! \f$ \Sum cos \Delta\phi \f$ used in CERN-PH-EP-2011-097
-  static float sumCosDeltaPhi(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &met);
-  //! \f$ \Sum E_{T} + E_{T}^{miss} \f$ used in CERN-PH-EP-2011-097
-  static float sumEtEtMiss(const TLorentzVector &el, const TLorentzVector &mu,
-                           const JetVector &jets, const TLorentzVector &met);
-  //! compute the number of kinematically allowed neutrino solutions
-  /*! This code is based on hep-ph/0603011. The number of possible
-    solutions ranges from 0 to 4. However, you should consider
-    calling the function twice (swapping the two jets), unless you
-    can tell which one is the b and which one is the bbar.
-  */
-  static int numberOfNeutrinoSolutions(const TLorentzVector &lPos, const TLorentzVector &lNeg,
-                                       const Jet &jet0, const Jet &jet1,
-                                       const TLorentzVector &met);
   SusyPlotter& setOutputFilename(const std::string &name);
   
   ClassDef(SusyPlotter, 1);
