@@ -6,6 +6,8 @@
 
 using Susy::Lepton;
 
+namespace susy
+{
 //-----------------------------------------
 bool isRealLepton(const Lepton* lep)
 {
@@ -56,3 +58,5 @@ bool passEleD0S(const LeptonVector &leptons, float maxVal)
   } // end for(i)
   return true;
 }
+
+} // end namespace susy

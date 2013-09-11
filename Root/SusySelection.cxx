@@ -213,11 +213,11 @@ bool SusySelection::passSrSs(const WH_SR signalRegion,
   if(m_signalTaus.size()==0)                    increment(n_pass_tauVeto  [ll], wc); else return false;
   if(passTrig2L     (ls))                       increment(n_pass_tr2L     [ll], wc); else return false;
   if(passTrig2LMatch(ls))                       increment(n_pass_tr2LMatch[ll], wc); else return false;
-  if(data || isTrueDilepton(ls))                increment(n_pass_mcTrue2l [ll], wc); else return false;
+  if(data || susy::isTrueDilepton(ls))          increment(n_pass_mcTrue2l [ll], wc); else return false;
   if(sameSignOrQflip(ncls, ncmet, ll, u4m, mc)) increment(n_pass_ss       [ll], wc); else return false;
   met = &ncmet; // after qflip, use potentially smeared lep and met
   if(passMuonRelIso(ncls, muIsoMax))            increment(n_pass_muIso    [ll], wc); else return false;
-  if(passEleD0S    (ncls, d0SMax))              increment(n_pass_elD0Sig  [ll], wc); else return false;
+  if(susy::passEleD0S(ncls, d0SMax))            increment(n_pass_elD0Sig  [ll], wc); else return false;
   if(passfJetVeto  (js))                        increment(n_pass_fjVeto   [ll], wc); else return false;
   if(passbJetVeto  (js))                        increment(n_pass_bjVeto   [ll], wc); else return false;
   if(passge1Jet    (js))                        increment(n_pass_ge1j     [ll], wc); else return false;

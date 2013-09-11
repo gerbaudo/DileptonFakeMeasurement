@@ -198,6 +198,7 @@ TightProbability& TightProbability::setOutputFilename(const std::string &s) {
 }
 //----------------------------------------------------------
 TightProbability::LeptonOrigin TightProbability::getLeptonOrigin(const Lepton* l){
+  using namespace susy;
   if( isRealLepton(l) ) return kReal;
   if( isHFLepton(l) )   return kHeavyFlavor;
   if( isLFLepton(l) )   return kLigthFlavor;
