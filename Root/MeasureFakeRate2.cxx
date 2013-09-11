@@ -245,11 +245,15 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
   GetEntry(entry);
   clearObjects();
   m_chainEntry++;
+  increment(n_readin);
   if(m_dbg || m_chainEntry%50000==0) printProgress(nt.evt(), m_chainEntry);
   selectObjects(NtSys_NOM, false, TauID_medium);
   //selectFakeObjects();
-  if( !selectEvent() ) return kTRUE; // Event level cuts
-  if(failMllCheck(m_baseLeptons)) return true;
+  bool doMll(true), count(true);
+  if( !selectEvent(count) ) return kTRUE; // Event level cuts
+  if(!selectBaseEvent(doMll, count)) return true;
+  if(!passNLepCut(m_baseLeptons)) return true;
+  //  if(failMllCheck(m_baseLeptons)) return true;
   // Loop over all regions (regardless of data or mc) and only fill relevant data quantitites.
   for(int cr = 0; cr<CR_N; ++cr){
     ControlRegion CR = (ControlRegion) cr;
