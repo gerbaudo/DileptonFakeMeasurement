@@ -433,9 +433,20 @@ class SusySelectionMatt : public SusyNtAna
     float                n_pass_CRZXZjets_dRll[ET_N][WT_N];
     float                n_pass_CRZXZjets_metrel[ET_N][WT_N];
     float                n_pass_CRZXZjets_lowerbound[ET_N][WT_N];
-    
-    float                n_pass_CRWHSS[ET_N][WT_N];
-    
+
+    float                n_pass_CRWHSS2lss  [ET_N][WT_N];
+    float                n_pass_CRWHSStauv  [ET_N][WT_N];
+    float                n_pass_CRWHSSmuiso [ET_N][WT_N];
+    float                n_pass_CRWHSSeled0 [ET_N][WT_N];
+    float                n_pass_CRWHSSnfj   [ET_N][WT_N];
+    float                n_pass_CRWHSSnbj   [ET_N][WT_N];
+    float                n_pass_CRWHSSnj    [ET_N][WT_N];
+    float                n_pass_CRWHSS2lpt  [ET_N][WT_N];
+    float                n_pass_CRWHSSzveto [ET_N][WT_N];
+    float                n_pass_CRWHSSmwwt  [ET_N][WT_N];
+    float                n_pass_CRWHSShtmin [ET_N][WT_N];
+    float                n_pass_CRWHSSmetrel[ET_N][WT_N];
+    float                n_pass_CRWHSS      [ET_N][WT_N];
 };
 
 #endif
