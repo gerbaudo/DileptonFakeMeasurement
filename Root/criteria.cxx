@@ -2,6 +2,7 @@
 
 
 #include "SusyNtuple/SusyNtTools.h"
+#include "SusyNtuple/WhTruthExtractor.h"
 #include "LeptonTruthTools/RecoTruthMatch.h"
 
 using Susy::Lepton;
@@ -58,5 +59,34 @@ bool passEleD0S(const LeptonVector &leptons, float maxVal)
   } // end for(i)
   return true;
 }
+//-----------------------------------------
+bool sameFlavor(const LeptonVector& leptons)
+{
+  if( leptons.size() < 2 ) return false;
+  return (leptons.at(0)->isMu() == leptons.at(1)->isMu());
+}
+//-----------------------------------------
+bool oppositeFlavor(const LeptonVector& leptons)
+{
+  if( leptons.size() < 2 ) return false;
+  return !(leptons.at(0)->isMu() == leptons.at(1)->isMu());
+}
+//-----------------------------------------
+bool sameSign(const LeptonVector& leptons)
+{
+  if( leptons.size() < 2 ) return false;
+  return leptons.at(0)->q * leptons.at(1)->q > 0;
+}
+//-----------------------------------------
+bool oppositeSign(const LeptonVector& leptons)
+{
+  return !(sameSign(leptons));
+}
+//-----------------------------------------
+bool passHtautauVeto(int hdecay)
+{
+  return (hdecay!=WhTruthExtractor::kPtauAtau);
+}
+
 
 } // end namespace susy

@@ -99,9 +99,6 @@ class SusySelection : public SusyNtAna
     bool passTrig2L(const LeptonVector& leptons);
     bool passTrig2LMatch(const LeptonVector& leptons);
     bool passTrig2LwithMatch(const LeptonVector& leptons);
-    bool sameFlavor(const LeptonVector& leptons);
-    bool oppositeFlavor(const LeptonVector& leptons);
-    bool sameSign(const LeptonVector& leptons);
     //! for the SS selection we want to accept OS events with an el, for Qflip
     /*!  For MC events that are OS, but that we want to consider as SS
       with some charge-flip probability, the 4-mom of the q-flipped
@@ -110,8 +107,6 @@ class SusySelection : public SusyNtAna
     bool sameSignOrQflip(LeptonVector &leptons, Met &met,
                          const DiLepEvtType eventType,
                          bool update4mom, bool isMC);
-    bool oppositeSign(const LeptonVector& leptons);
-    bool passHtautauVeto(int hdecay);
     // Signal Region Cuts
     bool passJetVeto(const JetVector& jets);
     bool passMetRelMin(const Met *met, cvl_t &leptons, cvj_t &jets, float minVal);

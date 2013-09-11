@@ -9,7 +9,6 @@
 
 #include "Mt2/mt2_bisect.h"
 #include "LeptonTruthTools/RecoTruthMatch.h" // provides RecoTruthMatch::
-#include "SusyNtuple/WhTruthExtractor.h"
 #include "ChargeFlip/chargeFlip.h"
 #include "SusyTest0/criteria.h"
 
@@ -126,22 +125,22 @@ bool SusySelection::selectEvent()
 //-----------------------------------------
 bool SusySelection::passSR6base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
-  return oppositeSign(leptons) && sameFlavor(leptons);
+  return susy::oppositeSign(leptons) && susy::sameFlavor(leptons);
 }
 //-----------------------------------------
 bool SusySelection::passSR7base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
-  return oppositeSign(leptons) && oppositeFlavor(leptons);
+  return susy::oppositeSign(leptons) && susy::oppositeFlavor(leptons);
 }
 //-----------------------------------------
 bool SusySelection::passSR8base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
-  return sameSign(leptons) && sameFlavor(leptons);
+  return susy::sameSign(leptons) && susy::sameFlavor(leptons);
 }
 //-----------------------------------------
 bool SusySelection::passSR9base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
 {
-  return sameSign(leptons) && oppositeFlavor(leptons);
+  return susy::sameSign(leptons) && susy::oppositeFlavor(leptons);
 }
 //-----------------------------------------
 bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
@@ -267,29 +266,11 @@ bool SusySelection::passTrig2LwithMatch(const LeptonVector& leptons)
   return (passTrig2L(leptons) && passTrig2LwithMatch(leptons));
 }
 //-----------------------------------------
-bool SusySelection::sameFlavor(const LeptonVector& leptons)
-{
-  if( leptons.size() < 2 ) return false;
-  return (leptons.at(0)->isMu() == leptons.at(1)->isMu());
-}
-//-----------------------------------------
-bool SusySelection::oppositeFlavor(const LeptonVector& leptons)
-{
-  if( leptons.size() < 2 ) return false;
-  return !(leptons.at(0)->isMu() == leptons.at(1)->isMu());
-}
-//-----------------------------------------
-bool SusySelection::sameSign(const LeptonVector& leptons)
-{
-  if( leptons.size() < 2 ) return false;
-  return leptons.at(0)->q * leptons.at(1)->q > 0;
-}
-//-----------------------------------------
 bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
                                     const DiLepEvtType eventType,
                                     bool update4mom, bool isMc)
 {
-  bool isSS(sameSign(leptons));
+  bool isSS(susy::sameSign(leptons));
   if(isSS) return true;
   if(!isMc) return isSS;
   bool isOS(!isSS);
@@ -301,16 +282,6 @@ bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
     m_weightComponents.qflip = m_qflipProb;
   }
   return true;
-}
-//-----------------------------------------
-bool SusySelection::oppositeSign(const LeptonVector& leptons)
-{
-  return !(sameSign(leptons));
-}
-//-----------------------------------------
-bool SusySelection::passHtautauVeto(int hdecay)
-{
-  return (hdecay!=WhTruthExtractor::kPtauAtau);
 }
 //-----------------------------------------
 bool SusySelection::passJetVeto(const JetVector& jets)

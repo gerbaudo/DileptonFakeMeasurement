@@ -21,6 +21,11 @@ bool isHFLepton(const Susy::Lepton* lep);
 bool isLFLepton(const Susy::Lepton* lep);
 bool isTrueDilepton(const LeptonVector &leptons);
 bool passEleD0S(const LeptonVector &leptons, float maxVal);
+ bool sameFlavor(const LeptonVector& leptons);
+ bool oppositeFlavor(const LeptonVector& leptons);
+ bool sameSign(const LeptonVector& leptons);
+ bool oppositeSign(const LeptonVector& leptons);
+ bool passHtautauVeto(int hdecay);
 
 } // end namespace susy
 
