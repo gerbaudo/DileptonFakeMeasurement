@@ -638,6 +638,7 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   else if( CR == CR_CRZXZjets )    passSR = passCRZXZjets(leptons,jets,met,false,true);
 
   else if( CR == CR_PremT2 )       passSR = passCRPremT2(leptons,jets,met);
+  else if( CR == CR_SRWHSS )       passSR = passWhSS(leptons, jets, met);
 
   for(uint i=0; i<leptons.size(); ++i)
     //if( isFakeLepton(leptons[i]) )
