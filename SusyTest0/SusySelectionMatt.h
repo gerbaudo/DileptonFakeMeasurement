@@ -434,6 +434,7 @@ class SusySelectionMatt : public SusyNtAna
     float                n_pass_CRZXZjets_metrel[ET_N][WT_N];
     float                n_pass_CRZXZjets_lowerbound[ET_N][WT_N];
     
+    float                n_pass_CRWHSS[ET_N][WT_N];
     
 };
 
