@@ -83,14 +83,6 @@ class SusySelection : public SusyNtAna
     bool passSR9(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
     // std SR7 has at least 2jets + the requirements below
     // (but no counters, just so that the fit on one line)
-    bool passSR7ge2j     (cvl_t& l, cvj_t& j, const Met* m) { return passSR7base(l,j,m) && passge2Jet(j); }
-    bool passSR7ge3j     (cvl_t& l, cvj_t& j, const Met* m) { return passSR7base(l,j,m) && passge3Jet(j); }
-    bool passSR7eq2jNfv  (cvl_t& l, cvj_t& j, const Met* m) { return passSR7base(l,j,m) && passeq2JetWoutFwVeto(j); }
-    bool passSR7ge2jNfv  (cvl_t& l, cvj_t& j, const Met* m) { return passSR7base(l,j,m) && passge2JetWoutFwVeto(j); }
-    bool passSR7Nj       (cvl_t& l, cvj_t& j, const Met* m) { return passSR7base(l,j,m) && passNj(j); }
-    bool passSR7NjZttVeto(cvl_t& l, cvj_t& j, const Met* m) { return passSR7Nj(l,j,m)   && passZtautauVeto(l,j,m); }
-    bool passSR7NjPtTot  (cvl_t& l, cvj_t& j, const Met* m) { return passSR7Nj(l,j,m)   && passPtTot(l,j,m); }
-    bool passSR7NjMll    (cvl_t& l, cvj_t& j, const Met* m) { return passSR7Nj(l,j,m)   && passMllMax(l); }
     bool passSrSsBase();
     bool passSrSs(const WH_SR signalRegion,
                   vl_t &l, cvt_t &t, cvj_t &j, const Met* m);
@@ -118,38 +110,20 @@ class SusySelection : public SusyNtAna
     bool passeq2Jet(const JetVector& jets);
     bool passge2JetWoutFwVeto(const JetVector& jets);
     bool passeq2JetWoutFwVeto(const JetVector& jets);
-    bool passdPhi(TLorentzVector v0, TLorentzVector v1, float cut);
-    bool passMtLlMetMin(const LeptonVector& leptons, const Met* met, float minVal=50.0);
-    bool passMtMinlmetMin(const LeptonVector& leptons, const Met* met, float minVal=50.0);
-    bool passMT2(const LeptonVector& leptons, const Met* met, float cut);
-    bool passHtMin(const cvl_t& l, cvj_t &j, const Met* met, float minVal);
-    bool passNlepMin(const LeptonVector &leptons, size_t minVal);
     bool passNj(const JetVector& jets, int minNj=2, int maxNj=3);
-    bool passZtautauVeto(cvl_t& l, cvj_t& j, const Met* m, float widthZpeak=40.0);
-    bool passZllVeto(cvl_t& l, float mllLo, float mllHi);
-    bool pass2LepPt(cvl_t& l, float minPt0, float minPt1); //!< assume pt0 > pt1
-    bool passPtllMin(cvl_t& l, float minPt=50.0);
-    bool passPtTot(cvl_t& l, cvj_t& j, const Met* m, float maxPtTot=50.0);
-    bool passMllMax(const LeptonVector& leptons, float maxMll=80.0);
-    bool passMllMin(const LeptonVector& leptons, float minVal);
-    bool passDrllMax(const LeptonVector& leptons, float maxDr=2.0);
     bool passMuonRelIso(const LeptonVector &leptons, float maxVal);
     void setUseXsReader(bool val){ m_useXsReader = val; };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
     //! increment the counters for the all event weight types
     void increment(float counters[], const WeightComponents &wc);
-    static float computeMt2(const TLorentzVector &l0, const TLorentzVector &l1,
-                            const TLorentzVector &met);
     float computeChargeFlipProb(LeptonVector &leptons, Met &met,
                                 uint systematic, bool update4mom);
-    static int pdgIdFromLep(const Lepton *l);
  protected:
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
     float computeEventWeightXsFromReader(float lumi);
     float getXsFromReader();     //!< cache xsec from xsreader
     float getBTagWeight(cvj_t& jets, const Event* evt);
     float getTriggerWeight2Lep(const LeptonVector &leptons);
-    float getLeptonEff2Lep(const LeptonVector &leptons) const;
     void resetAllCounters();
     void initChargeFlipTool();
     void cacheStaticWeightComponents(); //! cache those weight components that do not depend on sel
