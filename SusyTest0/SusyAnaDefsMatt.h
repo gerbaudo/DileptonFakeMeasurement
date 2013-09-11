@@ -57,6 +57,8 @@ enum ControlRegion
 
   CR_PremT2,
 
+  CR_SRWHSS,
+
   CR_N
 };
 
@@ -104,7 +106,8 @@ static string CRNames[] =
   
   "CR_SSInc",
   
-  "CRPremT2"
+  "CRPremT2",
+  "CR_WHSS"
 
 };
 
@@ -150,8 +153,8 @@ static string CRLabels[] =
 
   "SS Inclusive",
 
-  "Pre-mT2 region"
-
+  "Pre-mT2 region",
+  "Control Region WH SS"
 
 };
 
@@ -257,7 +260,7 @@ enum SignalRegion
   CRSSInc,
   
   CRPremT2,
-
+  SR_WHSS,
   SR_N
 };
 
@@ -288,7 +291,8 @@ static string SRNames[] =
   
   "CR_SSInc",
 
-  "CRPremT2"
+  "CRPremT2",
+  "SR_WHSS"
   
 
 };
@@ -319,7 +323,8 @@ static string SRProperNames[] =
 
   "Control Region SS Inclusive",
   
-  "Pre-mT2 Region"
+  "Pre-mT2 Region",
+  "Signal region WH SS"
 };
 
 // Contamination or actual
