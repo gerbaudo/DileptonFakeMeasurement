@@ -164,10 +164,20 @@ SusySelectionMatt::SusySelectionMatt() :
       n_pass_CRZXZjets_dRll[i][w] = 0;
       n_pass_CRZXZjets_metrel[i][w] = 0;
       n_pass_CRZXZjets_lowerbound[i][w] = 0;
-      n_pass_CRWHSS[i][w] = 0;
 
-
-
+      n_pass_CRWHSS2lss  [i][w] = 0;
+      n_pass_CRWHSStauv  [i][w] = 0;
+      n_pass_CRWHSSmuiso [i][w] = 0;
+      n_pass_CRWHSSeled0 [i][w] = 0;
+      n_pass_CRWHSSnfj   [i][w] = 0;
+      n_pass_CRWHSSnbj   [i][w] = 0;
+      n_pass_CRWHSSnj    [i][w] = 0;
+      n_pass_CRWHSS2lpt  [i][w] = 0;
+      n_pass_CRWHSSzveto [i][w] = 0;
+      n_pass_CRWHSSmwwt  [i][w] = 0;
+      n_pass_CRWHSShtmin [i][w] = 0;
+      n_pass_CRWHSSmetrel[i][w] = 0;
+      n_pass_CRWHSS      [i][w] = 0;
     }
   }// end loop over weight types
   //m_doMuEtconeCut = true;
@@ -1258,7 +1268,8 @@ bool SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVector& j
   // - z veto (10GeV) for ee
   // - mww > 150 (ee), > 140 (em), >100 (mm)
   // - metrel > 50 for ee, em
-  if( leptons.size()<2 || !sameSign(leptons) ) return false;
+  bool lsf(false), bsf(false); // compute trigw and btagw only when accepting the event
+  if(sameSign(leptons)) increment(n_pass_CRWHSS2lss  [m_ET], lsf, bsf); else return false;
   DiLepEvtType ll = m_ET = getDiLepEvtType(leptons);
   bool ee(m_ET==ET_ee), em(m_ET==ET_em||m_ET==ET_me), mm(m_ET==ET_mm);
   float ptL0Min  = 30;
@@ -1273,25 +1284,26 @@ bool SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVector& j
   float mtwwMin = (ee ? 150 : (em ? 140 : (mm ? 100 : FLT_MIN))); // todo : for now keep it simple, just one cut
   float metRelMin = (ee ? 50 : (em ? 50 : (mm ? FLT_MIN : FLT_MIN))); // for now simple
 
-  if(m_signalTaus.size()==0)                     return false;
+  if(m_signalTaus.size()==0)               increment(n_pass_CRWHSStauv  [m_ET], lsf, bsf); else return false;
 // later on
 //   if(passTrig2L     (ls))                        return false;
 //   if(passTrig2LMatch(ls))                        return false;
 //   if(data || isTrueDilepton(ls))                 return false;
 //   if(sameSignOrQflip(ncls, ncmet, ll, u4m, mc))  return false;
 //   met = &ncmet; // after qflip, use potentially
-  if(!passMuonRelIso(leptons, muIsoMax))                return false;
-  if(!susy::passEleD0S(leptons, d0SMax))                return false;
-  if(numberOfFJets(jets)!=0)                            return false;
-  if(numberOfCBJets(jets)!=0)                           return false;
-  if(numberOfCLJets(jets)<1)                            return false;
-  if(!susy::pass2LepPt    (leptons, ptL0Min, ptL1Min))  return false;
-  if(!susy::passZllVeto   (leptons, loMllZ, hiMllZ))    return false;
-  if(!susy::passMtLlMetMin(leptons, met, mtwwMin))      return false;
-  if(!susy::passHtMin     (leptons, jets, met, htMin))  return false;
-  if(getMetRel(met,leptons,jets)<metRelMin)             return false;
+  if(passMuonRelIso(leptons, muIsoMax))               increment(n_pass_CRWHSSmuiso [m_ET], lsf, bsf); else  return false;
+  if(susy::passEleD0S(leptons, d0SMax))               increment(n_pass_CRWHSSeled0 [m_ET], lsf, bsf); else  return false;
+  if(numberOfFJets(jets)==0)                          increment(n_pass_CRWHSSnfj   [m_ET], lsf, bsf); else  return false;
+  if(numberOfCBJets(jets)==0)                         increment(n_pass_CRWHSSnbj   [m_ET], lsf, bsf); else  return false;
+  if(numberOfCLJets(jets)>0)                          increment(n_pass_CRWHSSnj    [m_ET], lsf, bsf); else  return false;
+  if(susy::pass2LepPt    (leptons, ptL0Min, ptL1Min)) increment(n_pass_CRWHSS2lpt  [m_ET], lsf, bsf); else  return false;
+  if(susy::passZllVeto   (leptons, loMllZ, hiMllZ))   increment(n_pass_CRWHSSzveto [m_ET], lsf, bsf); else  return false;
+  if(susy::passMtLlMetMin(leptons, met, mtwwMin))     increment(n_pass_CRWHSSmwwt  [m_ET], lsf, bsf); else  return false;
+  if(susy::passHtMin     (leptons, jets, met, htMin)) increment(n_pass_CRWHSShtmin [m_ET], lsf, bsf); else  return false;
+  if(getMetRel(met,leptons,jets)>metRelMin)           increment(n_pass_CRWHSSmetrel[m_ET], lsf, bsf); else  return false;
 
-  increment(n_pass_CRWHSS[m_ET],true,true);
+  lsf = bsf = true;
+  increment(n_pass_CRWHSS[m_ET], lsf, bsf);
   return true;
 }
 
@@ -2078,7 +2090,7 @@ void SusySelectionMatt::dumpEventCounters()
 
     cout << "************************************" << endl;
 
-    cout << "Cut                   \tee\t\tmm\t\tem" << endl;
+     cout << "Cut                   \tee\t\tmm\t\tem" << endl;
     printCounter("pass flavor:     " , n_pass_flavor    , w);
     printCounter("pass evt trig:   " , n_pass_evtTrig   , w);
     printCounter("pass trig match: " , n_pass_trigMatch , w);
@@ -2187,9 +2199,20 @@ void SusySelectionMatt::dumpEventCounters()
     printCounter("pass: CRZXZjets metRel > 80  ", n_pass_CRZXZjets_metrel, w);
     printCounter("pass: CRZXZjets Lower Bound  ", n_pass_CRZXZjets_lowerbound, w);
     cout << "-----------------------------------------------------"   << endl;
-    printCounter("pass: control region WHSS    ", n_pass_CRWHSS, w);
-
-
+    cout << "Cut                   \tee\t\tmm\t\tem" << endl;
+    printCounter("pass: WHSS 2lss    ", n_pass_CRWHSS2lss  , w);
+    printCounter("pass: WHSS tauveto ", n_pass_CRWHSStauv  , w);
+    printCounter("pass: WHSS muiso   ", n_pass_CRWHSSmuiso , w);
+    printCounter("pass: WHSS eld0    ", n_pass_CRWHSSeled0 , w);
+    printCounter("pass: WHSS fjveto  ", n_pass_CRWHSSnfj   , w);
+    printCounter("pass: WHSS bjveto  ", n_pass_CRWHSSnbj   , w);
+    printCounter("pass: WHSS nj      ", n_pass_CRWHSSnj    , w);
+    printCounter("pass: WHSS 2lpt    ", n_pass_CRWHSS2lpt  , w);
+    printCounter("pass: WHSS zveto   ", n_pass_CRWHSSzveto , w);
+    printCounter("pass: WHSS mwwt    ", n_pass_CRWHSSmwwt  , w);
+    printCounter("pass: WHSS htmin   ", n_pass_CRWHSShtmin , w);
+    printCounter("pass: WHSS metrel  ", n_pass_CRWHSSmetrel, w);
+    printCounter("pass: WHSS         ", n_pass_CRWHSS      , w);
   }// end loop over weight type
 
 }
