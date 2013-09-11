@@ -108,6 +108,9 @@ class SusySelectionMatt : public SusyNtAna
     bool passSimpleZ(const LeptonVector& leptons, const JetVector& jets, const Met* met);
     bool passSimpleZ2(const LeptonVector& leptons, const JetVector& jets, const Met* met);
 
+    bool passMuonRelIso(const LeptonVector &leptons, float maxVal);
+    bool passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met);
+
     // Higgs jet counting..
     //int nHiggsSignalJets(const JetVector& jets);
     
