@@ -138,16 +138,7 @@ class SusySelection : public SusyNtAna
     bool passMllMax(const LeptonVector& leptons, float maxMll=80.0);
     bool passMllMin(const LeptonVector& leptons, float minVal);
     bool passDrllMax(const LeptonVector& leptons, float maxDr=2.0);
-
-    // Idendification methods
-    bool isRealLepton(const Lepton* lep);
-    bool isFakeLepton(const Lepton* lep);
-    bool isConvLepton(const Lepton* lep);
-    bool isHFLepton(const Lepton* lep);
-    bool isLFLepton(const Lepton* lep);
-    bool isTrueDilepton(const LeptonVector &leptons);
     bool passMuonRelIso(const LeptonVector &leptons, float maxVal);
-    bool passEleD0S(const LeptonVector &leptons, float maxVal);
     void setUseXsReader(bool val){ m_useXsReader = val; };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
     //! increment the counters for the all event weight types

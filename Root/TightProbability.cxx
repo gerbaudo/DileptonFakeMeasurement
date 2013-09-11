@@ -6,6 +6,8 @@
 #include "TH1F.h"
 #include "TAxis.h"
 
+#include "SusyTest0/criteria.h"
+
 using std::cout;
 using std::endl;
 

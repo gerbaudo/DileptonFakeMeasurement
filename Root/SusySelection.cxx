@@ -11,6 +11,7 @@
 #include "LeptonTruthTools/RecoTruthMatch.h" // provides RecoTruthMatch::
 #include "SusyNtuple/WhTruthExtractor.h"
 #include "ChargeFlip/chargeFlip.h"
+#include "SusyTest0/criteria.h"
 
 using namespace std;
 using namespace Susy;
@@ -501,49 +502,6 @@ bool SusySelection::passDrllMax(const LeptonVector& l, float maxDr)
   return  l[0]->DeltaR(*(static_cast<TLorentzVector*>(l[1]))) < maxDr;
 }
 //-----------------------------------------
-// Check MC Lepton
-//-----------------------------------------
-bool SusySelection::isRealLepton(const Lepton* lep)
-{
-  // Updated way of handling real and fake leptons using LeptonTruthTools
-  return (lep->truthType == RecoTruthMatch::PROMPT);
-}
-//-----------------------------------------
-bool SusySelection::isFakeLepton(const Lepton* lep)
-{
-  return !isRealLepton(lep);
-}
-//-----------------------------------------
-bool SusySelection::isConvLepton(const Lepton* lep)
-{
-  bool isConverted(lep->truthType == RecoTruthMatch::CONV);
-  bool isChargeFlip(lep->isEle() ?
-                    static_cast<const Electron*>(lep)->isChargeFlip : false);
-  return isConverted && !isChargeFlip;
-}
-//-----------------------------------------
-bool SusySelection::isHFLepton(const Lepton* lep)
-{
-  return (lep->truthType == RecoTruthMatch::HF);
-}
-//-----------------------------------------
-bool SusySelection::isLFLepton(const Lepton* lep)
-{
-  return (lep->truthType == RecoTruthMatch::LF);
-}
-//-----------------------------------------
-bool SusySelection::isTrueDilepton(const LeptonVector &leptons)
-{
-  // Maybe not 100% kosher, but I just want to make sure I am not
-  // double counting, so I require dilepton events to be real
-  if( leptons.size() != 2 ) return false;
-  bool l0_real = isRealLepton(leptons[0]);
-  bool l1_real = isRealLepton(leptons[1]);
-  bool l0_cf = leptons[0]->isEle() ? ((Electron*) leptons[0])->isChargeFlip : false;
-  bool l1_cf = leptons[1]->isEle() ? ((Electron*) leptons[1])->isChargeFlip : false;
-  return l0_real && l1_real && !l0_cf && !l1_cf; // ignoring charge flip
-}
-//-----------------------------------------
 bool SusySelection::passMuonRelIso(const LeptonVector &leptons, float maxVal)
 {
   for(size_t i=0; i<leptons.size(); ++i){
@@ -559,16 +517,6 @@ bool SusySelection::passMuonRelIso(const LeptonVector &leptons, float maxVal)
   return true;
 }
 //-----------------------------------------
-bool SusySelection::passEleD0S(const LeptonVector &leptons, float maxVal)
-{
-  for(size_t i=0; i<leptons.size(); ++i){
-      const Susy::Lepton* l = leptons[i];
-      if(l->isEle() && (fabs(l->d0Sig(true)) > maxVal)) return false;
-  } // end for(i)
-  return true;
-}
-//-----------------------------------------
-
 void SusySelection::cacheStaticWeightComponents()
 {
   m_weightComponents.reset();
