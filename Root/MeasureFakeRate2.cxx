@@ -226,47 +226,37 @@ void MeasureFakeRate2::initHistos(string outName)
 /*--------------------------------------------------------------------------------*/
 // Process
 /*--------------------------------------------------------------------------------*/
+void printProgress(const Susy::Event *e, Long64_t counter)
+{
+  cout << "**** Processing entry " <<counter
+       << " run "<<e->run
+       << " event "<<e->event << " ****" << endl;
+}
+bool failMllCheck(const LeptonVector &leps)
+{
+  if( leps.size() == 2 ){ // DG : why ==2 ? check not performed for >2 ?
+    if((*(leps[0]) + *(leps[1])).M() < 20) return kTRUE;
+  }
+  return false;
+}
 Bool_t MeasureFakeRate2::Process(Long64_t entry)
 {
-
   if(m_dbg) cout << "MeasureFakeRate2::Process" << endl;
-
   GetEntry(entry);
   clearObjects();
-  
   m_chainEntry++;
-  if(m_dbg || m_chainEntry%50000==0){
-    cout << "**** Processing entry " << m_chainEntry
-	 << " run " << nt.evt()->run
-	 << " event " << nt.evt()->event << " ****" << endl;
-  }
-
+  if(m_dbg || m_chainEntry%50000==0) printProgress(nt.evt(), m_chainEntry);
   selectObjects(NtSys_NOM, false, TauID_medium);
   //selectFakeObjects();
-  
-  // Event level cuts
-  if( !selectEvent() ) return kTRUE;
-
-  // Do mll check:
-  if( m_baseLeptons.size() == 2 ){
-    if(Mll(m_baseLeptons[0],m_baseLeptons[1]) < 20) return kTRUE;
-  }
-
-
-  // New cleaner approach is to loop over all regions 
-  // regardless of data or mc and only fill relevant
-  // data quantitites.
-  
+  if( !selectEvent() ) return kTRUE; // Event level cuts
+  if(failMllCheck(m_baseLeptons)) return true;
+  // Loop over all regions (regardless of data or mc) and only fill relevant data quantitites.
   for(int cr = 0; cr<CR_N; ++cr){
     ControlRegion CR = (ControlRegion) cr;
-    
     m_ch = Ch_all;
-    m_probes.clear(); 
+    m_probes.clear();
     m_tags.clear();
-    
-    // Check Regions
     bool passCR = false;
-
     // Data Driven CRs
     if( CR == CR_Real )          passCR = passRealCR(m_baseLeptons,m_signalJets2Lep,m_met,CR);
     else if( CR == CR_SideLow )  passCR = passRealCR(m_baseLeptons,m_signalJets2Lep,m_met,CR);
@@ -277,7 +267,6 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     else if( CR == CR_LFWjet )   passCR = passLFWjetCR(m_baseLeptons,m_signalJets2Lep,m_met);
     else if( CR == CR_Conv )     passCR = passConvCR(m_baseLeptons,m_signalJets2Lep,m_met);
     else if( CR == CR_CFlip )    passCR = passCFCR(m_baseLeptons,m_signalJets2Lep,m_met);
-
     // MC Regions
     else if( CR == CR_MCHeavy )  passCR = passMCReg(m_baseLeptons,m_signalJets2Lep,m_met,CR);
     else if( CR == CR_MCLight )  passCR = passMCReg(m_baseLeptons,m_signalJets2Lep,m_met,CR);
@@ -286,31 +275,15 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     else if( CR == CR_MCALL )    passCR = passMCReg(m_baseLeptons,m_signalJets2Lep,m_met,CR);
     else if( CR == CR_MCReal )   passCR = passMCReg(m_baseLeptons,m_signalJets2Lep,m_met,CR);
     else if( CR == CR_MCNone )   passCR = passMCReg(m_baseLeptons,m_signalJets2Lep,m_met,CR);
-
     // Remaining signal and control regions
-    else                         passCR = passSignalRegion(m_baseLeptons,m_signalJets2Lep,m_met,CR);      
-    
-    if( passCR ){
-      
-      // Plot Rates
+    else                         passCR = passSignalRegion(m_baseLeptons,m_signalJets2Lep,m_met,CR);
+    if( passCR ){ // Plot Rates
       for(uint ip=0; ip<m_probes.size(); ++ip){
-	
-	//if( m_probes.at(ip)->isEle() ){
-	//if( !((Electron*) m_probes.at(ip))->tightPP ) continue;
-	//}
-
-	/*
-	Lepton* tag = NULL;
-	if( m_tags.size() >=1 ) tag = m_tags[0];
-	plotRates(tag, m_probes.at(ip), m_signalJets2Lep, m_met, CR);
-	*/
-	if( m_findOptCut ) plotOptimumCuts(m_probes.at(ip), m_signalJets2Lep, m_met, CR);
-	else               plotRates(m_probes.at(ip), m_signalJets2Lep, m_met, CR);
-      }
+        if( m_findOptCut ) plotOptimumCuts(m_probes.at(ip), m_signalJets2Lep, m_met, CR);
+        else               plotRates(m_probes.at(ip), m_signalJets2Lep, m_met, CR);
+      } // end for(ip)
     }// end if Pass Control Region
-    
   }// end loop over Control Regions
-  
   return kTRUE;
 }
  
