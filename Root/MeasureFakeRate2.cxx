@@ -232,13 +232,6 @@ void printProgress(const Susy::Event *e, Long64_t counter)
        << " run "<<e->run
        << " event "<<e->event << " ****" << endl;
 }
-bool failMllCheck(const LeptonVector &leps)
-{
-  if( leps.size() == 2 ){ // DG : why ==2 ? check not performed for >2 ?
-    if((*(leps[0]) + *(leps[1])).M() < 20) return kTRUE;
-  }
-  return false;
-}
 Bool_t MeasureFakeRate2::Process(Long64_t entry)
 {
   if(m_dbg) cout << "MeasureFakeRate2::Process" << endl;
@@ -253,7 +246,6 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
   if( !selectEvent(count) ) return kTRUE; // Event level cuts
   if(!selectBaseEvent(doMll, count)) return true;
   if(!passNLepCut(m_baseLeptons)) return true;
-  //  if(failMllCheck(m_baseLeptons)) return true;
   // Loop over all regions (regardless of data or mc) and only fill relevant data quantitites.
   for(int cr = 0; cr<CR_N; ++cr){
     ControlRegion CR = (ControlRegion) cr;
