@@ -239,13 +239,16 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
   clearObjects();
   m_chainEntry++;
   increment(n_readin);
+  bool isData(!nt.evt()->isMC);
+  bool lepSf(true), btagSf(false); // computing btag can slow down
   if(m_dbg || m_chainEntry%50000==0) printProgress(nt.evt(), m_chainEntry);
   selectObjects(NtSys_NOM, false, TauID_medium);
-  //selectFakeObjects();
-  bool doMll(true), count(true);
-  if( !selectEvent(count) ) return kTRUE; // Event level cuts
-  if(!selectBaseEvent(doMll, count)) return true;
-  if(!passNLepCut(m_baseLeptons)) return true;
+  if(!selectAnaEvent(m_signalLeptons, m_baseLeptons, lepSf)) return kTRUE;
+  if(isData ||
+     isTrueDilepton(m_signalLeptons)) increment(n_pass_truth[m_ET], lepSf, btagSf); else return kTRUE;
+  if(sameSign(m_signalLeptons))       increment(n_pass_ss[m_ET],    lepSf, btagSf);
+  if(oppositeSign(m_signalLeptons))   increment(n_pass_os[m_ET],    lepSf, btagSf);
+
   // Loop over all regions (regardless of data or mc) and only fill relevant data quantitites.
   for(int cr = 0; cr<CR_N; ++cr){
     ControlRegion CR = (ControlRegion) cr;
