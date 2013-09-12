@@ -196,7 +196,7 @@ void SusySelectionMatt::Begin(TTree* /*tree*/)
   if(m_dbg) cout << "SusySelectionMatt::Begin" << endl;
 
   // Specify 2-lep ana type
-  setAnaType(Ana_2Lep);
+  setAnaType(Ana_2LepWH);
   setSelectTaus(true);
 
   string per = "HCP";
