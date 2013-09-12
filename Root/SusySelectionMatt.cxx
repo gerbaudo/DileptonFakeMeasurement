@@ -1271,18 +1271,18 @@ bool SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVector& j
   bool lsf(false), bsf(false); // compute trigw and btagw only when accepting the event
   if(sameSign(leptons)) increment(n_pass_CRWHSS2lss  [m_ET], lsf, bsf); else return false;
   DiLepEvtType ll = m_ET = getDiLepEvtType(leptons);
-  bool ee(m_ET==ET_ee), em(m_ET==ET_em||m_ET==ET_me), mm(m_ET==ET_mm);
+  bool isee(m_ET==ET_ee), isem(m_ET==ET_em||m_ET==ET_me), ismm(m_ET==ET_mm);
   float ptL0Min  = 30;
-  float ptL1Min  = (ll==mm ? 0.0 : 20.0);
+  float ptL1Min  = (ismm ? 0.0 : 20.0);
   float muIsoMax = 0.1;
   float htMin    = 200;
-  float d0SMax   = (ee || em ?   3 : FLT_MAX);
-  bool applyMllZveto(ee);
+  float d0SMax   = (isee || isem ?   3 : FLT_MAX);
+  bool applyMllZveto(isee);
   float mZ0(91.2);
   float loMllZ(applyMllZveto ? mZ0-10. : FLT_MAX);
   float hiMllZ(applyMllZveto ? mZ0+10. : FLT_MIN);
-  float mtwwMin = (ee ? 150 : (em ? 140 : (mm ? 100 : FLT_MIN))); // todo : for now keep it simple, just one cut
-  float metRelMin = (ee ? 50 : (em ? 50 : (mm ? FLT_MIN : FLT_MIN))); // for now simple
+  float mtwwMin = (isee ? 150 : (isem ? 140 : (ismm ? 100 : FLT_MIN))); // todo : for now keep it simple, just one cut
+  float metRelMin = (isee ? 50 : (isem ? 50 : (ismm ? FLT_MIN : FLT_MIN))); // for now simple
 
   if(m_signalTaus.size()==0)               increment(n_pass_CRWHSStauv  [m_ET], lsf, bsf); else return false;
 // later on
