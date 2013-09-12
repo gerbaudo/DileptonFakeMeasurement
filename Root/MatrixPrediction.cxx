@@ -33,7 +33,8 @@ void MatrixPrediction::Begin(TTree* /*tree*/)
   // Load the matrix method package
   m_matrix = new SusyMatrixMethod::DiLeptonMatrixMethod();
   string pathRateFile = (string( std::getenv("ROOTCOREDIR"))
-                         +"/../SusyMatrixMethod/data/pass6_Apr2_2013.root");
+                         // +"/../SusyMatrixMethod/data/pass3_Summer2013.root");
+                         +"/../SusyMatrixMethod/data/forDavide_Sep11_2013.root");
   m_matrix->configure(pathRateFile,
                       SusyMatrixMethod::PT,     // Electron Real
                       SusyMatrixMethod::PT,     // Electron Fake
