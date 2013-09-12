@@ -10,6 +10,8 @@
 # davide.gerbaudo@gmail.com
 # Jan 2013
 
+import unittest
+
 def rzip(*iterables) :
     """rigid zip: ensures input iterables have the same length.
     Used to make sure that the dsid ranges match the dset names."""
@@ -290,6 +292,22 @@ datasets += [Dataset(sampleType, d, groupTemplate%nth, template%nth, process%nth
              for d, nth in rzip(range(176641, 176706+1), range(1, 66+1))]
 
 
+#
+# testing
+#
+
+class CategorizationTest(unittest.TestCase) :
+    def testSignalIsConsistent(self) :
+        for d in datasets :
+            notData = d.type is not 'data'
+            notBkg = d.type is 'mc' and d.isSignal
+            notHf = not d.isHeavyFlavor
+            isSignal = d.isSignal
+            self.assertEqual(isSignal, (notData and notBkg and notHf),
+                             d.name+' : '
+                             +', '.join(["%s : %s"%(k, eval(k))
+                                         for k in ['isSignal', 'notData', 'notBkg', 'notHf']]))
+
 if __name__=='__main__' :
     def filterByGroup(dsets) :
         groups = sorted(d.group for d in dsets)
@@ -330,3 +348,6 @@ if __name__=='__main__' :
     print "    used : %d"%len(usedDsets)
     print '\n'.join("         : %d : %s"%(len(gdsets), g)
                     for g, gdsets in filterByGroup(usedDsets).iteritems())
+    print linebreak
+    print 'Testing...'
+    unittest.main()
