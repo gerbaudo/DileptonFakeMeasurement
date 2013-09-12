@@ -64,8 +64,8 @@ class ModeAWhDbPar :
             line = line.strip()
             words = line.split()
             for a,w in zip(ModeAWhDbPar.fields, words) : setattr(self, a, w)
-        def valid(self) : return all([hasattr(self, a) for a in ModeAWhDbPar.fields]) and self.ds.isdigit()
-
+        def valid(self) :
+            return all([hasattr(self, a) for a in ModeAWhDbPar.fields]) and self.ds.isdigit()
     def __init__(self) :
         filenames = [xsReaderDataDir()+'/'+'modeA_WH_MC1eqMN2.txt',
                      xsReaderDataDir()+'/'+'modeA_WH_notauhad_MC1eqMN2_DiagonalMatrix.txt'
