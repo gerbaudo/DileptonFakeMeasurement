@@ -77,11 +77,19 @@ class ModeAWhDbReqid :
     "Using the filelists, map reqids to samplenames"
     def __init__(self, filenames = []) :
         self.entries = {}
-        if not filenames : filenames = glob.glob(basePathArea() + '/SusyTest0/run/filelist/wA_noslep_WH_*Lep*txt')
+        if not filenames :
+            filenames = glob.glob(basePathArea()
+                                  +'/SusyTest0/run/filelist/'
+                                  +'Herwigpp_simplifiedModel_wA_noslep_WH_*Lep_*.txt')
+        assert len(filenames),"cannot initialize ModeAWhDbReqid without filelists"
         for f in filenames :
             rootfile = open(f).read()
+            if not rootfile :
+                print "warning, emtpy filelist %s"%f
+                continue
             reqid  = guessReqidFromFilename(rootfile)
-            sample = guessSampleFromFilename(rootfile)
+            sample = guessGroupFromFilename(rootfile)
+            if not sample : continue
             assert sample not in self.entries, "Cannot have several reqids with the same signal : %s, %s"%(sample, str([reqid, self.entries[sample]]))
             self.entries[sample] = reqid
     def reqidBySample(self, sample) :
