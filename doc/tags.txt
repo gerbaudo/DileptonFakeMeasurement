@@ -23,7 +23,7 @@ ReweightUtils @ ReweightUtils-00-02-13
 RootCore @ RootCore-00-01-77
 SUSYTools @ SUSYTools-00-03-04
 SignificanceCalculator @ SignificanceCalculator-00-00-02
-SusyMatrixMethod @ SusyMatrixMethod-00-02-04
+SusyMatrixMethod @ 14d71d21e0b8dd4cf1d8715eb5f09c3692ecf979
 SusyNtuple @ SusyNtuple-00-01-04
 SusyXSReader @ 332956
 TauCorrUncert @ TauCorrUncert-00-00-07
