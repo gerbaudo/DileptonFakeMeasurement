@@ -25,7 +25,10 @@ def guessGroupFromFilename(filename='') :
     "Guess group from filename, either merged or un-merged"
     print 'guessGroupFromFilename obsolete, use guessSampleFromFilename'
     group = next((g for g in allGroups if any(e in filename for e in [g+'_', g+'.'])), None)
-    group = group if group else next((d.group for d in datasets if d.name in filename), None)
+    group = group if group else next((d.group
+                                      for d in datasets
+                                      if d.name+'.' in filename
+                                      or d.name+'_' in filename), None)
     return group
 def guessSampleFromFilename(filename='') :
     "Guess sample from filename"
