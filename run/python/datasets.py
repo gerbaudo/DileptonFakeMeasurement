@@ -40,7 +40,7 @@ class Dataset :
     def isHeavyFlavor(self) : return self.group is 'heavyflavor'
     @property
     def isSignal(self) :
-        return self.type is 'mc' and not any(s in self.name for s in ('WH_2Lep', 'WH_2Lep'))
+        return self.type is 'mc' and any(s in self.name for s in ('WH_2Lep', 'WH_2Lep'))
     @property
     def isSignalOrHiggs(self) : return self.isSignal or self.group is 'higgs'
     @property
