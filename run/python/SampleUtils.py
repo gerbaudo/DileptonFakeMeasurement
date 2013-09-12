@@ -58,10 +58,15 @@ class ModeAWhDbPar :
             line = line.strip()
             words = line.split()
             for a,w in zip(ModeAWhDbPar.fields, words) : setattr(self, a, w)
-        def valid(self) : return all([hasattr(self, a) for a in ModeAWhDbPar.fields]) and self.ds.isdigit()
+        def valid(self) :
+            return all([hasattr(self, a) for a in ModeAWhDbPar.fields]) and self.ds.isdigit()
 
     def __init__(self, filename=xsReaderDataDir()+'/modeA_WH_MC1eqMN2.txt') :
-        self.entries = [e for e in [ModeAWhDbPar.Entry(l) for l in open(filename).readlines()] if e.valid()]
+        def isValidLine(l) :
+            return len(l.strip()) and l.split()[0].isdigit()
+        self.entries = [e for e in [ModeAWhDbPar.Entry(l)
+                                    for l in open(filename).readlines() if isValidLine(l)]
+                        if e.valid()]
     def mc1Mn1ByReqid(self, reqid) :
         entry = next(e for e in self.entries if e.ds == reqid)
         return float(entry.mc1), float(entry.mn1)
