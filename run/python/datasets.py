@@ -34,10 +34,24 @@ class Dataset :
     def isNotToBeMerged(self) : return self.group in Dataset.groupsNotToBeMerged
     @property
     def isToBeMerged(self) : return not self.isNotToBeMerged
+    @property
+    def isHeavyFlavor(self) : return self.group is 'heavyflavor'
+    @property
+    def isSignal(self) :
+        return self.type is 'mc' and not any(s in self.name for s in ('WH_2Lep', 'WH_2Lep'))
+    @property
+    def isSignalOrHiggs(self) : return self.isSignal or self.group is 'higgs'
+    @property
+    def isMcBackground(self) :
+        "not written in stone (include higgs?), but that's what we need for the fake estimate"
+        return self.type is 'mc' and not self.isSignalOrHiggs
 
 def allGroups(datasets=[]) : return list(set(d.group for d in datasets))
 def allDatasets(datasets=[]) : return list(set(d.name for d in datasets))
 def activeDatasets(datasets=[]) : return filter(lambda d : not d.placeholder, datasets)
+def setSameGroupForAllData(datasets=[], group='data') :
+    for d in datasets :
+        if d.type is 'data' : d.group = group
 
 datasets = []
 sampleType, group, process = None, None, None
