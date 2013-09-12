@@ -236,9 +236,10 @@ datasets += [Dataset(sampleType, d, group, template%{'lvll':lvll, 'mll':mll}, pr
                                   (129493, 'W15Z13',  '0p4614d0'),
                                   (129494, 'W15Z15',  '3p804d0')]]
 
-#- 160305.Pythia8_AU2CTEQ6L1_ZH125_ZZ4lep
-#- # HF samples
-#- # + ["%(qq)sTo%(l)s15" % {'qq':qq, 'l':l} for qq in ['bb', 'cc'] for l in ['e', 'mu']]
+group = 'heavyflavor'
+template, process = "Pythia8B_AU2_CTEQ6L1_%(qq)sTomu20", 'HF qqbar'
+datasets += [Dataset(sampleType, d, group, template%{'qq':qq}, process)
+             for d, qq in [(129136, 'bb'), (147668, 'cc')]]
 
 group = 'higgs'
 template, process = "PowhegPythia8_AU2CT10_ggH125_%(fs)s", 'ggH125'
