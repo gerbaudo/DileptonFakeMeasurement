@@ -127,7 +127,7 @@ class KnownReqidModeAWhDb(unittest.TestCase) :
 class KnownEntriesModeAWhDbReqid(unittest.TestCase) :
     def testMatchAllAvailabeAttrs(self) :
         knownValues = [ ('176584', 'WH_2Lep_11')
-                       ,('176641', 'WH_3Lep_1')
+                       ,('176581', 'WH_2Lep_8')
                         ]
         db = ModeAWhDbReqid()
         for reqid, sample in knownValues :
