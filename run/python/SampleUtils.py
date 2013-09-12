@@ -24,7 +24,11 @@ allGroups, datasets = allGroups(datasets), activeDatasets(datasets)
 def guessGroupFromFilename(filename='') :
     "Guess group from filename, either merged or un-merged"
     group = next((g for g in allGroups if g+'_' in filename), None)
-    group = group if group else next((d.group for d in datasets if d.name in filename), None)
+    # assume filelists are <...>+<dataset>.txt
+    group = group if group else next((d.group
+                                      for d in datasets
+                                      if d.name+'.' in filename
+                                      or d.name+'_' in filename), None)
     return group
 
 def isDataSample(samplename) : return 'data' in samplename or 'period' in samplename
