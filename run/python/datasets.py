@@ -54,6 +54,7 @@ def activeDatasets(datasets=[]) : return filter(lambda d : not d.placeholder, da
 def setSameGroupForAllData(datasets=[], group='data') :
     for d in datasets :
         if d.type is 'data' : d.group = group
+    return datasets
 
 datasets = []
 sampleType, group, process = None, None, None
