@@ -91,6 +91,9 @@ class ModeAWhDbReqid :
         + glob.glob(filelistDir+'Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_*.txt'))
         for f in filenames :
             rootfile = open(f).read()
+            if not rootfile :
+                print "warning, emtpy filelist %s"%f
+                continue
             reqid  = guessReqidFromFilename(rootfile)
             sample = guessSampleFromFilename(rootfile)
             if not reqid or not sample :
