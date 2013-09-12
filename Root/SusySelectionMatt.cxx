@@ -1285,12 +1285,6 @@ bool SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVector& j
   float metRelMin = (isee ? 50 : (isem ? 50 : (ismm ? FLT_MIN : FLT_MIN))); // for now simple
 
   if(m_signalTaus.size()==0)               increment(n_pass_CRWHSStauv  [m_ET], lsf, bsf); else return false;
-// later on
-//   if(passTrig2L     (ls))                        return false;
-//   if(passTrig2LMatch(ls))                        return false;
-//   if(data || isTrueDilepton(ls))                 return false;
-//   if(sameSignOrQflip(ncls, ncmet, ll, u4m, mc))  return false;
-//   met = &ncmet; // after qflip, use potentially
   if(passMuonRelIso(leptons, muIsoMax))               increment(n_pass_CRWHSSmuiso [m_ET], lsf, bsf); else  return false;
   if(susy::passEleD0S(leptons, d0SMax))               increment(n_pass_CRWHSSeled0 [m_ET], lsf, bsf); else  return false;
   if(numberOfFJets(jets)==0)                          increment(n_pass_CRWHSSnfj   [m_ET], lsf, bsf); else  return false;
@@ -1301,7 +1295,6 @@ bool SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVector& j
   if(susy::passMtLlMetMin(leptons, met, mtwwMin))     increment(n_pass_CRWHSSmwwt  [m_ET], lsf, bsf); else  return false;
   if(susy::passHtMin     (leptons, jets, met, htMin)) increment(n_pass_CRWHSShtmin [m_ET], lsf, bsf); else  return false;
   if(getMetRel(met,leptons,jets)>metRelMin)           increment(n_pass_CRWHSSmetrel[m_ET], lsf, bsf); else  return false;
-
   lsf = bsf = true;
   increment(n_pass_CRWHSS[m_ET], lsf, bsf);
   return true;
