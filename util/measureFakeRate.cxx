@@ -29,8 +29,8 @@ void usage(const char *exeName) {
       <<"\t"<<"-n [--num-event]   nEvt (default -1, all)"<<endl
       <<"\t"<<"-k [--num-skip]    nSkip (default 0)"     <<endl
       <<"\t"<<"-i [--input]       (file, list, or dir)"  <<endl
-      <<"\t"<<"-o [--output]      samplename"            <<endl
-      <<"\t"<<"-s [--sample]      output file"           <<endl
+      <<"\t"<<"-o [--output]      output file"           <<endl
+      <<"\t"<<"-s [--sample]      samplename"            <<endl
       <<"\t"<<"--mcTrig           use MC triggers"       <<endl
       <<"\t"<<"--altIso           use 2011 isolation"    <<endl
       <<"\t"<<"--optCut           determine optimum cuts"<<endl
