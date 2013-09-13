@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 {
   ROOT::Cintex::Cintex::Enable();
 
-  int dbg = 0;
+  int dbg = 10;
   int n   = 8;
   
   cout << "Iterative Fake Rate" << endl;
