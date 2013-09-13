@@ -50,6 +50,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
 {
   GetEntry(entry);
   clearObjects();
+  cacheStaticWeightComponents();
   static Long64_t chainEntry = -1;
   chainEntry++;
   if(m_dbg || chainEntry%50000==0)
@@ -58,31 +59,27 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
          << " run " << setw(6) << nt.evt()->run
          << " event " << setw(7) << nt.evt()->event << " ****" << endl;
   }
-  selectObjects(); // select signal objects
+  bool removeLepsFromIso(false);
+  selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if( !selectEvent() )              return kTRUE;
-  if( m_baseLeptons.size() != 2 )   return kTRUE;
-  if( !passTrig2LwithMatch(m_baseLeptons) ) return kTRUE;
-  bool count(true);
+
+//   if( m_baseLeptons.size() != 2 )   return kTRUE;
+//   if( !passTrig2LwithMatch(m_baseLeptons) ) return kTRUE;
   SusyMatrixMethod::FAKE_REGION reg = SusyMatrixMethod::FR_VRSS;
   SusyMatrixMethod::SYSTEMATIC  sys = SusyMatrixMethod::SYS_NONE;
   const Met*          m = m_met;
   const JetVector&    j = m_signalJets2Lep;
+  const JetVector&   bj = m_baseJets;     // DG don't know why, but we use these for the btag w
   const LeptonVector& l = m_baseLeptons;
+  LeptonVector&     ncl = m_baseLeptons;
+  const TauVector&    t = m_signalTaus;
+  if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
+  bool allowQflip(true);
+  bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
+  if(!passSrSS) return false;
   float metRel = getMetRel(m, l, j);
   float weight = getFakeWeight(l, reg, metRel, sys);
-  // function references to shorten lines
-//   void (&fh)(const LeptonVector &l, const JetVector &j, const Met* m,
-//              const float weight, PlotRegion PR, uint sys) = fillHistos;
-//   void (&ffh)(const LeptonVector &l, const JetVector &j, const Met *m,
-//               float weight, PlotRegion PR, uint sys) = fillFakeHistos
-  if(passSR6(l, j, m, count)) { fillHistos(l, j, m, weight, PR_SR6); fillFakeHistos(l, j, m, weight, PR_SR6, sys); }
-  if(passSR7(l, j, m, count)) { fillHistos(l, j, m, weight, PR_SR7); fillFakeHistos(l, j, m, weight, PR_SR7, sys); }
-  if(passSR8(l, j, m, count)) {
-    cout<<"passSR8"<<endl;
-    fillHistos(l, j, m, weight, PR_SR8); fillFakeHistos(l, j, m, weight, PR_SR8, sys); }
-  if(passSR9(l, j, m, count)) {
-    cout<<"passSR9"<<endl;
-fillHistos(l, j, m, weight, PR_SR9); fillFakeHistos(l, j, m, weight, PR_SR9, sys); }
+
   return kTRUE;
 }
 //----------------------------------------------------------
