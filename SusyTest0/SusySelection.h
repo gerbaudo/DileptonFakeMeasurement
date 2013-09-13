@@ -85,7 +85,7 @@ class SusySelection : public SusyNtAna
     // (but no counters, just so that the fit on one line)
     bool passSrSsBase();
     bool passSrSs(const WH_SR signalRegion,
-                  vl_t &l, cvt_t &t, cvj_t &j, const Met* m);
+                  vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
     // Cut methods
     bool passHfor();
     bool passTrig2L(const LeptonVector& leptons);
