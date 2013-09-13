@@ -6,7 +6,7 @@
 #include <string>
 #include <sstream>
 
-#include "SusyPlotting/myHist.h"
+#include "SusyTest0/myHist.h"
 #include "SusyAna2012/SusyAnaDefs.h"
 
 #include "TMath.h"
