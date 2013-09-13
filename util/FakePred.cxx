@@ -40,8 +40,6 @@ void help()
   cout << "  -s sample name, for naming files"  << endl;
   cout << "     defaults: ntuple sample name"   << endl;
 
-  cout << "  --mcfake to do mc closure test "   << endl;
-
   cout << "  -h print this help"                << endl;
 }
 
@@ -52,7 +50,6 @@ int main(int argc, char** argv)
   int nEvt = -1;
   int nSkip = 0;
   int dbg = 0;
-  bool doMCFake = false;
   string sample;
   string file;
   string fileList;
@@ -77,13 +74,12 @@ int main(int argc, char** argv)
       fileDir = argv[++i];
     else if (strcmp(argv[i], "-s") == 0)
       sample = argv[++i];
-    else if (strcmp(argv[i], "--mcfake") == 0)
-      doMCFake = true;
     //if (strcmp(argv[i], "-h") == 0)
     else
     {
-      help();
-      return 0;
+      cout<<"skipping unknown option '"<<argv[i]<<"'"<<endl;
+      //      help();
+      //return 0;
     }
   }
 
