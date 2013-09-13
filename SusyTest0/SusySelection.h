@@ -54,7 +54,7 @@ class SusySelection : public SusyNtAna
   typedef const JetVector    cvj_t;  //!< just to make some decl shorter
   typedef const Met          cmet_t; //!< just to make some decl shorter
   struct WeightComponents {
-    WeightComponents(): { reset(); }
+    WeightComponents() { reset(); }
     double product() const { return susynt * lepSf * btag * trigger * qflip * fake; }
     void reset() { susynt = gen = pileup = norm = lepSf = btag = trigger = qflip = fake = 1.0; }
     double susynt; // from SusyNtTools::getEventWeight: includes gen, pu, xs, lumi, sumw
