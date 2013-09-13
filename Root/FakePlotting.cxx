@@ -19,7 +19,7 @@ FakePlotting::FakePlotting(RunOption runOpt) :
   string fakefile = "pass6_Apr2_2013";
   //string fakefile = "test_Feb25_FullSep";
   //string path = cd + "/../SusyMatrixMethod/data/" + fakefile + ".root";
-  string path = cd + "/../SusyPlotting/run/finalfake/" + fakefile + ".root";
+  string path = cd + "/../SusyTest0/run/finalfake/" + fakefile + ".root";
   //m_fakeStat = new FakeStatTool::StatErrorTool(path,SusyMatrixMethod::PT);
 
 
