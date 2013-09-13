@@ -111,7 +111,6 @@ int main(int argc, char** argv)
   mfr.setDebug(dbg);
   if(sample.size()) mfr.setSampleName(sample);
   if(output.size()) mfr.setFileName(output);
-  mfr.buildSumwMap(chain);
   mfr.setUseMCTrig(useMCTrig);
   if(useAltIso) mfr.setAltIso();
   if(optCuts)   mfr.setFindOptCut(optCuts);
