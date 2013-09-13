@@ -37,20 +37,27 @@ IterativeFakeCorrection::IterativeFakeCorrection() :
   string dappend = "_Sep11_n0145_forDavide_rates";
   string append = "_Sep11_n0145_forDavide_rates";  
 
+  string inputDataFile = "out/fakerate/merged/data_Sep_11.root";
+  string inputMcFile = "out/fakerate/merged/allBkgButHf_Sep_11.root";
   // Data File
-  m_data.file = new TFile((indir+"data"+dappend+".root").c_str());
+  m_data.file = new TFile(inputDataFile.c_str());
   m_data.name = "Data";
   m_data.sname = "data";
   m_data.color = kBlack;
   m_data.marker = 20;
 
+  cout<<"data file contents:"<<endl;
+  m_data.file->ls();
+
   // MC File
-  m_mc.file = new TFile((indir+"mc"+append+".root").c_str());
+  m_mc.file = new TFile(inputMcFile.c_str());
   //m_mc.file = new TFile((indir+"heavyflavor"+append+".root").c_str());
   m_mc.name = "MC";
   m_mc.sname = "mc";
   m_mc.color = kRed;
   m_mc.marker = 25;
+  cout<<"mc file contents:"<<endl;
+  m_mc.file->ls();
 
 }
 //-----------------------------------------------//
@@ -99,6 +106,10 @@ void IterativeFakeCorrection::iterate()
     // Load Real Efficiency:
     TH1F* temp_num = getHist(m_data.file, lep+"_realCR_all_l_pt_num");
     TH1F* temp_den = getHist(m_data.file, lep+"_realCR_all_l_pt_den");
+    if(!temp_num || !temp_den) {
+      cout<<"missing inputs temp_num:"<<temp_num<<", temp_den:"<<temp_den<<endl;
+      continue;
+    }
     if(m_dbg) cout << "Have Real: "<<temp_num<<" "<<temp_den<<endl;
     m_real = RatioHist(temp_num, temp_den, "");
     m_real->SetName("real_eff");
@@ -109,11 +120,40 @@ void IterativeFakeCorrection::iterate()
     data_high[0] = getHist(m_data.file, lep+"_fakeHF_high_all_l_pt_num");
     data_high[1] = getHist(m_data.file, lep+"_fakeHF_high_all_l_pt_den");
 
+
+    if(!data_low[0]  ||
+       !data_low[1]  ||
+       !data_high[0] ||
+       !data_high[1] ) {
+      cout<<"missing inputs "
+          <<"data_low[0]   :"<<data_low[0]  <<" "
+          <<"data_low[1]   :"<<data_low[1]  <<" "
+          <<"data_high[0]  :"<<data_high[0] <<" "
+          <<"data_high[1]  :"<<data_high[1] <<" "
+          <<endl;
+      continue;
+    }
+
+
+
     // Load MC
     mc_low[0]  = getHist(m_mc.file, lep+"_fakeHF_all_l_pt_num");
     mc_low[1]  = getHist(m_mc.file, lep+"_fakeHF_all_l_pt_den");
     mc_high[0] = getHist(m_mc.file, lep+"_fakeHF_high_all_l_pt_num");
     mc_high[1] = getHist(m_mc.file, lep+"_fakeHF_high_all_l_pt_den");
+
+    if(!mc_low[0]  ||
+       !mc_low[1]  ||
+       !mc_high[0] ||
+       !mc_high[1] ) {
+      cout<<"missing inputs "
+          <<"mc_low[0]   :"<<mc_low[0]  <<" "
+          <<"mc_low[1]   :"<<mc_low[1]  <<" "
+          <<"mc_high[0]  :"<<mc_high[0] <<" "
+          <<"mc_high[1]  :"<<mc_high[1] <<" "
+          <<endl;
+      continue;
+    }
     
     // Set the corrected. This is iteration 0,
     // so the constants are 0.
@@ -260,6 +300,14 @@ TH1F* IterativeFakeCorrection::getHist(TFile* file,
 				       string histname)
 {
 
-  return (TH1F*) file->Get(histname.c_str());
+  TH1F* h=0;
+  h = static_cast<TH1F*>(file->Get(histname.c_str()));
+  if(h)
+    cout<<"from file '"<<file->GetName()<<"'"
+        <<" got histogram '"<<h->GetName()<<"' with "<<h->GetEntries()<<" entries "<<endl;
+  else
+    cout<<"from file '"<<file->GetName()<<"'"
+        <<" cannot get histogram '"<<histname<<"'"<<endl;
+  return h;
 
 }
