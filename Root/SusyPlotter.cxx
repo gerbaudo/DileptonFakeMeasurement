@@ -258,7 +258,8 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   Met ncmet(*m_met); // non-const met
   const TauVector&    t = m_signalTaus;
   if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
-  bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m));
+  bool allowQflip(true);
+  bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
   if(!passSrSS) return false;
   float weight(m_weightComponents.product());
   const DiLepEvtType ll(getDiLepEvtType(l));
