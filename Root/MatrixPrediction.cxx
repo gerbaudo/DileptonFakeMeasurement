@@ -74,12 +74,11 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   LeptonVector&     ncl = m_baseLeptons;
   const TauVector&    t = m_signalTaus;
   if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
-  bool allowQflip(true);
+  float metRel = getMetRel(m, l, j);
+  m_weightComponents.fake = getFakeWeight(l, reg, metRel, sys);
+  bool allowQflip(false);
   bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
   if(!passSrSS) return false;
-  float metRel = getMetRel(m, l, j);
-  float weight = getFakeWeight(l, reg, metRel, sys);
-
   return kTRUE;
 }
 //----------------------------------------------------------
