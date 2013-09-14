@@ -216,8 +216,8 @@ bool SusySelection::passSrSs(const WH_SR signalRegion,
   bool sameSign = allowQflip ? sameSignOrQflip(ncls, ncmet, ll, u4m, mc) : susy::sameSign(ncls);
   if(sameSign)                                  increment(n_pass_ss       [ll], wc); else return false;
   met = &ncmet; // after qflip, use potentially smeared lep and met
-  if(passMuonRelIso(ncls, muIsoMax))            increment(n_pass_muIso    [ll], wc); else return false;
-  if(susy::passEleD0S(ncls, d0SMax))            increment(n_pass_elD0Sig  [ll], wc); else return false;
+                                                increment(n_pass_muIso    [ll], wc);
+                                                increment(n_pass_elD0Sig  [ll], wc);
   if(passfJetVeto  (js))                        increment(n_pass_fjVeto   [ll], wc); else return false;
   if(passbJetVeto  (js))                        increment(n_pass_bjVeto   [ll], wc); else return false;
   if(passge1Jet    (js))                        increment(n_pass_ge1j     [ll], wc); else return false;
