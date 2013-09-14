@@ -244,8 +244,10 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
   if(m_dbg || m_chainEntry%50000==0) printProgress(nt.evt(), m_chainEntry);
   selectObjects(NtSys_NOM, false, TauID_medium);
   if(!selectAnaEvent(m_signalLeptons, m_baseLeptons, lepSf)) return kTRUE;
-  if(isData ||
-     isTrueDilepton(m_signalLeptons)) increment(n_pass_truth[m_ET], lepSf, btagSf); else return kTRUE;
+//   if(isData ||
+//      isTrueDilepton(m_signalLeptons))
+  increment(n_pass_truth[m_ET], lepSf, btagSf);
+  //else return kTRUE;
   if(sameSign(m_signalLeptons))       increment(n_pass_ss[m_ET],    lepSf, btagSf);
   if(oppositeSign(m_signalLeptons))   increment(n_pass_os[m_ET],    lepSf, btagSf);
 
@@ -749,6 +751,7 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
     }
   }// end loop over baseline leptons
 
+  cout<<"passHFCR nTags:"<<nTags<<" nProbes:"<<nProbes<<endl;
   if( nProbes != 1 ) return false;
 
   // Check mll 
