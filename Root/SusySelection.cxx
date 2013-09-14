@@ -26,7 +26,7 @@ SusySelection::SusySelection() :
   m_qflipProb(0.0)
 {
   resetAllCounters();
-  setAnaType(Ana_2Lep);
+  setAnaType(Ana_2LepWH);
   setSelectTaus(true);
   initChargeFlipTool();
 }
