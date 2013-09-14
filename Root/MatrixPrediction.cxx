@@ -65,7 +65,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
 
 //   if( m_baseLeptons.size() != 2 )   return kTRUE;
 //   if( !passTrig2LwithMatch(m_baseLeptons) ) return kTRUE;
-  SusyMatrixMethod::FAKE_REGION reg = SusyMatrixMethod::FR_VRSS;
+  SusyMatrixMethod::FAKE_REGION reg = SusyMatrixMethod::FR_SRDavide;
   SusyMatrixMethod::SYSTEMATIC  sys = SusyMatrixMethod::SYS_NONE;
   const Met*          m = m_met;
   const JetVector&    j = m_signalJets2Lep;
