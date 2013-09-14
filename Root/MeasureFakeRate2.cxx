@@ -4,6 +4,7 @@
 ////////////////////////////////////////////////////
 
 #include "SusyTest0/MeasureFakeRate2.h"
+#include "SusyTest0/criteria.h"
 
 float Htbins[] = {1,3,6,9,12};
 int nHtbins = 4;
@@ -232,6 +233,7 @@ void printProgress(const Susy::Event *e, Long64_t counter)
        << " run "<<e->run
        << " event "<<e->event << " ****" << endl;
 }
+//----------------------------------------------------------
 Bool_t MeasureFakeRate2::Process(Long64_t entry)
 {
   if(m_dbg) cout << "MeasureFakeRate2::Process" << endl;
@@ -239,13 +241,13 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
   clearObjects();
   m_chainEntry++;
   increment(n_readin);
-  bool isData(!nt.evt()->isMC);
   bool lepSf(true), btagSf(false); // computing btag can slow down
   if(m_dbg || m_chainEntry%50000==0) printProgress(nt.evt(), m_chainEntry);
   selectObjects(NtSys_NOM, false, TauID_medium);
-  if(!selectAnaEvent(m_signalLeptons, m_baseLeptons, lepSf)) return kTRUE;
-  increment(n_pass_truth[m_ET], lepSf, btagSf);
-  //else return kTRUE;
+  if( !selectEvent() ) return false;
+  if( m_baseLeptons.size() >= 2 )           increment(n_pass_atleast2Lep); else return false;
+  if( m_baseLeptons.size() == 2 )           increment(n_pass_exactly2Lep); else return false;
+  if(susy::passMllMin(m_baseLeptons, 20.0)) increment(n_pass_mll20);       else return false;
   if(sameSign(m_signalLeptons))       increment(n_pass_ss[m_ET],    lepSf, btagSf);
   if(oppositeSign(m_signalLeptons))   increment(n_pass_os[m_ET],    lepSf, btagSf);
 
