@@ -249,8 +249,6 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
   if( m_baseLeptons.size() == 2 ) increment(n_pass_exactly2Lep);
   bool uniqueLepPair(m_baseLeptons.size() == 2);
   if(uniqueLepPair && !susy::passMllMin(m_baseLeptons, 20.0)) return false;
-  if(sameSign(m_baseLeptons))       increment(n_pass_ss[m_ET],    lepSf, btagSf);
-  if(oppositeSign(m_baseLeptons))   increment(n_pass_os[m_ET],    lepSf, btagSf);
   // Loop over all regions (regardless of data or mc) and only fill relevant data quantitites.
   for(int cr = 0; cr<CR_N; ++cr){
     ControlRegion CR = (ControlRegion) cr;
