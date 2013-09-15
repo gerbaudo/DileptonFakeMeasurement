@@ -37,8 +37,8 @@ IterativeFakeCorrection::IterativeFakeCorrection() :
   string dappend = "_Sep11_n0145_forDavide_rates";
   string append = "_Sep11_n0145_forDavide_rates";  
 
-  string inputDataFile = "out/fakerate/merged/data_Sep_11.root";
-  string inputMcFile = "out/fakerate/merged/allBkgButHf_Sep_11.root";
+  string inputDataFile = "out/fakerate/merged/data_Sep_14.root";
+  string inputMcFile = "out/fakerate/merged/allBkgButHf_Sep_14.root";
   // Data File
   m_data.file = new TFile(inputDataFile.c_str());
   m_data.name = "Data";
