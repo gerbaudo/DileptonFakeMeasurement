@@ -100,31 +100,31 @@ void MeasureFakeRate2::initHistos(string outName)
     do{									\
       prof = new TProfile(name.c_str(),name.c_str(),nbins,xmin,xmax);	\
     }while(0)
-  
+
   #define LABEL(eff, bin, label)			\
     do{							\
       eff->SetXLabel(bin, label);			\
     }while(0)
-  
 
-  
+
+
   // Loop over lepton type
   for(int il=0; il<LT_N; ++il){
     string lName = LTNames[il];
 
-    // For the control regions we need the 
+    // For the control regions we need the
     // plots from both Data and MC
     for(int icr=0; icr<CR_N; ++icr){
       string cName = CRNames[icr];
-      
+
       if(!m_findOptCut){
-	
+
 	// Loop over the channels
 	for(int ich=0; ich<Ch_N; ++ich){
 	  string chan = chanNames[ich];
-	  
+
 	  string base = lName + "_" + cName + "_" + chan + "_";
-	  
+
 	  EFFVAR(h_l_pt[il][icr][ich], (base+"l_pt"),nFakePtbins,FakePtbins);
 	  EFFVAR(h_l_pt_coarse[il][icr][ich], (base+"l_pt_coarse"),nCoarseFakePtbins,coarseFakePtbins);
 	  EFFVAR(h_l_pt_heavy[il][icr][ich], (base+"l_pt_heavy"),nFakePtbins,FakePtbins);
@@ -142,19 +142,19 @@ void MeasureFakeRate2::initHistos(string outName)
 	  EFFVAR(h_nheavyjets[il][icr][ich], (base+"nheavyjets"),nJetbins, Jetbins);
 	  EFFVAR(h_nlightjetsNoB[il][icr][ich], (base+"nlightjetsNoB"),nJetbins, Jetbins);
 	  EFF(h_onebin[il][icr][ich], (base+"onebin"), 1, -0.5, 0.5);
-	  
+
 	  // d0sig
 	  EFF(h_heavy_d0sig[il][icr][ich], (base+"heavy_d0sig"), 50, 0, 5);
 	  EFF(h_light_d0sig[il][icr][ich], (base+"light_d0sig"), 50, 0, 5);
 	  EFF(h_conv_d0sig[il][icr][ich], (base+"conv_d0sig"), 50, 0, 5);
-	  
+
 	  EFF(h_l_type[il][icr][ich], (base+"l_type"), nType, Typemin, Typemax);
 	  EFF(h_l_origin[il][icr][ich], (base+"l_origin"), nOrigin, Originmin, Originmax);
-	  
+
 	  // Flavor counting
 	  EFF(h_flavor[il][icr][ich], (base+"flavor"), LS_N, -0.5, LS_N-0.5);
 	  for(int lbl=0; lbl<LS_N; ++lbl) LABEL(h_flavor[il][icr][ich], lbl+1, LSNames[lbl]);
-	  
+
 	  // 2 D param
 	  EFFVAR2(h_l_pt_bjet[il][icr][ich], (base+"l_pt_bjet"),
 		  nCoarseFakePtbins,coarseFakePtbins,nJetbins,Jetbins);
@@ -167,11 +167,11 @@ void MeasureFakeRate2::initHistos(string outName)
 	  EFFVAR(h_ht_pt_wMet[il][icr][ich], (base+"ht_pt_wMet"), nHtbins, Htbins);
 
 	  EFF(h_with_without_Etcone[il][icr][ich], (base+"with_without_Etcone"),3, -0.5, 2.5);
-	  
+
 	}// end loop over channels
 
       }// end if !find opt cuts
-      
+
       // Find Opt cuts
       else{
 
@@ -200,7 +200,7 @@ void MeasureFakeRate2::initHistos(string outName)
 	PROFILE(p_mu_ptconeElStyle[il][icr], (base+"mu_ptconeElStyle"), nMUbins, MUmin, MUmax);
 
       }// end if find opt cuts
-      
+
 
       // Saving CR plots to look at how
       // cuts affect distribution
@@ -211,11 +211,11 @@ void MeasureFakeRate2::initHistos(string outName)
       EFF(h_ht_cr[il][icr], (base+"ht_cr"), 50, 0, 400);
       EFF(h_mll_cr[il][icr], (base+"mll_cr"), 30, 0, 300);
 
-      
+
     }// end loop over control regions
-    
+
   }// end loop over lepton types
-  
+
   #undef PROFILE
   #undef EFFVAR
   #undef EFFVAR2
@@ -245,12 +245,12 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
   if(m_dbg || m_chainEntry%50000==0) printProgress(nt.evt(), m_chainEntry);
   selectObjects(NtSys_NOM, false, TauID_medium);
   if( !selectEvent() ) return false;
-  if( m_baseLeptons.size() >= 2 )           increment(n_pass_atleast2Lep); else return false;
-  if( m_baseLeptons.size() == 2 )           increment(n_pass_exactly2Lep); else return false;
-  if(susy::passMllMin(m_baseLeptons, 20.0)) increment(n_pass_mll20);       else return false;
-  if(sameSign(m_signalLeptons))       increment(n_pass_ss[m_ET],    lepSf, btagSf);
-  if(oppositeSign(m_signalLeptons))   increment(n_pass_os[m_ET],    lepSf, btagSf);
-
+  if( m_baseLeptons.size() >= 2 ) increment(n_pass_atleast2Lep);
+  if( m_baseLeptons.size() == 2 ) increment(n_pass_exactly2Lep);
+  bool uniqueLepPair(m_baseLeptons.size() == 2);
+  if(uniqueLepPair && !susy::passMllMin(m_baseLeptons, 20.0)) return false;
+  if(sameSign(m_baseLeptons))       increment(n_pass_ss[m_ET],    lepSf, btagSf);
+  if(oppositeSign(m_baseLeptons))   increment(n_pass_os[m_ET],    lepSf, btagSf);
   // Loop over all regions (regardless of data or mc) and only fill relevant data quantitites.
   for(int cr = 0; cr<CR_N; ++cr){
     ControlRegion CR = (ControlRegion) cr;
@@ -287,21 +287,21 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
   }// end loop over Control Regions
   return kTRUE;
 }
- 
+
 /*--------------------------------------------------------------------------------*/
 // Plotting Method
 /*--------------------------------------------------------------------------------*/
 void MeasureFakeRate2::plotRates(const Lepton* lep, const JetVector& jets,
 				 const Met* met, ControlRegion CR)
 {
-  
+
   LeptonType lt = lep->isEle() ? LT_EL : LT_MU;
-  
-  bool pass = m_AltIso ? passAltIso(lep) : 
+
+  bool pass = m_AltIso ? passAltIso(lep) :
     isSignalLepton(lep, m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC);
     //isMySignalLepton(lep);
 
-  
+
   #define FILL(eff, var)							\
     do{									\
       eff[lt][CR][m_ch]->Fill(pass,m_evtWeight,var);			\
@@ -314,12 +314,12 @@ void MeasureFakeRate2::plotRates(const Lepton* lep, const JetVector& jets,
       if(m_ch != Ch_all)						\
 	eff[lt][CR][Ch_all]->Fill(pass,m_evtWeight,varx,vary);		\
     }while(0)
-  
+
   FILL(h_l_pt, lep->Pt());
   FILL(h_l_pt_coarse, lep->Pt());
   FILL(h_l_eta, fabs(lep->Eta()));
   FILL(h_l_eta_coarse, fabs(lep->Eta()));
-  
+
   if(nt.evt()->isMC){
     if( isHFLepton(lep) ) FILL(h_l_pt_heavy, lep->Pt());
     else FILL(h_l_pt_others, lep->Pt());
@@ -336,7 +336,7 @@ void MeasureFakeRate2::plotRates(const Lepton* lep, const JetVector& jets,
   FILL(h_njets, jets.size());
   FILL(h_nlightjets, numberOfCLJets(jets));
   FILL(h_nheavyjets, numberOfCBJets(jets));
-  if( numberOfCBJets(jets) == 0 ) 
+  if( numberOfCBJets(jets) == 0 )
     FILL(h_nlightjetsNoB, numberOfCLJets(jets));
 
   // Single bin
@@ -348,7 +348,7 @@ void MeasureFakeRate2::plotRates(const Lepton* lep, const JetVector& jets,
 
   // If the event is MC, save the flavor
   if( nt.evt()->isMC ){
-    LeptonSource ls = getLeptonSource(lep); 
+    LeptonSource ls = getLeptonSource(lep);
     if(ls == LS_Real){
       FILL(h_l_type, lep->mcType);
       FILL(h_l_origin, lep->mcOrigin);
@@ -391,27 +391,27 @@ void MeasureFakeRate2::plotCR(const Lepton* tag, const Lepton* probe, const JetV
 			      ControlRegion CR, CRPLOT CRP)
 {
 
-  
+
 
   LeptonType lt = probe->isEle() ? LT_EL : LT_MU;
-  
+
   //bool pass = m_AltIso ? passAltIso(probe) : isMySignalLepton(probe);
   bool pass = m_AltIso ? passAltIso(probe) : isSignalLepton(probe,
 							    m_baseElectrons,
 							    m_baseMuons,
 							    nt.evt()->nVtx,
 							    nt.evt()->isMC);
-  
+
   #define FILL(eff, var)							\
     do{									\
       eff[lt][CR]->Fill(pass,m_evtWeight,var);			\
     }while(0)
-  
+
   if(CRP == CRP_mll)       FILL(h_mll_cr, (*tag+*probe).M());
   if(CRP == CRP_met)       FILL(h_met_cr, met->Et);
   if(CRP == CRP_mt_tag)    FILL(h_mt_tag_cr, Mt(tag, met));
   if(CRP == CRP_mt_probe)  FILL(h_mt_probe_cr, Mt(probe, met));
-  
+
   if(CRP == CRP_ht){
     float ht = tag->Pt() + probe->Pt();
     for(uint i=0; i<jets.size(); ++i) ht += jets.at(i)->Pt();
@@ -428,7 +428,7 @@ void MeasureFakeRate2::plotOptimumCuts(const Lepton* lep, const JetVector& jets,
 
   // Set the Lepton Type
   LeptonType lt = lep->isEle() ? LT_EL : LT_MU;
-  
+
   // Define preprocessor command to keep clean
   #define FILL(eff, var, pass)			\
     do{						\
@@ -443,17 +443,17 @@ void MeasureFakeRate2::plotOptimumCuts(const Lepton* lep, const JetVector& jets,
 
   // Common var needed:
   float pt = lep->Pt();
-  
+
   // Need to check everything except PtCone
   bool passOtherIso = isSignalWithoutPtcone(lep);
-  float ptcone      = lep->isEle() ? lep->ptcone30 : ((Muon*) lep)->ptcone30ElStyle;    
+  float ptcone      = lep->isEle() ? lep->ptcone30 : ((Muon*) lep)->ptcone30ElStyle;
   for(float cut = 0.005; cut<OptIsomax; cut+=0.01)
     //FILL(h_ptcone, cut, (passOtherIso && ptcone/pt < cut));
     FILL(h_ptcone, cut, (ptcone/pt < cut));
-  
+
   // Need to check everything except EtCone
   passOtherIso = isSignalWithoutEtcone(lep);
-  float etcone = lep->isEle() ? ((Electron*) lep)->topoEtcone30Corr : ((Muon*) lep)->etcone30;    
+  float etcone = lep->isEle() ? ((Electron*) lep)->topoEtcone30Corr : ((Muon*) lep)->etcone30;
   for(float cut = 0.005; cut<OptIsomax; cut+=0.01)
     //FILL(h_etcone, cut, (passOtherIso && etcone/pt < cut));
     FILL(h_etcone, cut, (etcone/pt < cut));
@@ -487,7 +487,7 @@ void MeasureFakeRate2::plotOptimumCuts(const Lepton* lep, const JetVector& jets,
   //
   // TProfiles to check stability
   //
-  
+
   #define FILLP(prof, varx, vary)		\
     do{							\
       prof[lt][CR]->Fill(varx,vary,m_evtWeight);		\
@@ -516,8 +516,8 @@ void MeasureFakeRate2::plotOptimumCuts(const Lepton* lep, const JetVector& jets,
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 // MC Control region is defined by metrel
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons, 
-				 const JetVector &jets, 
+bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
+				 const JetVector &jets,
 				 const Met* met,
 				 ControlRegion CR)
 {
@@ -527,7 +527,7 @@ bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
   // * 40 < metrel < 100
   // * exactly two leptons
   // * probes are the fake leptons of specific type
-  
+
   if( !nt.evt()->isMC )     return false;
   if( leptons.size() != 2 ) return false;
 
@@ -539,7 +539,7 @@ bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
   //if( !(CR != CR_MCNone && 40 < met->Et  ) ) return false;
 
   for(uint il=0; il<leptons.size(); ++il){
-    
+
     // Heavy
     if( CR == CR_MCHeavy && isHFLepton(leptons[il]) )
       m_probes.push_back( leptons[il] );
@@ -572,19 +572,19 @@ bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
   m_evtWeight = getEvtWeight(leptons);
 
   return true;
-  
+
 }
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 // The signal region checks
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons, 
-					const JetVector &jets, 
+bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
+					const JetVector &jets,
 					const Met* met,
 					ControlRegion CR)
 {
 
-  if( leptons.size() != 2 ) return false;  
+  if( leptons.size() != 2 ) return false;
 
   bool passSR = false;
   if( CR == CR_SRmT2a )          passSR = passSRmT2a(leptons,jets,met,false,true);
@@ -617,7 +617,7 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   for(uint i=0; i<leptons.size(); ++i)
     //if( isFakeLepton(leptons[i]) )
     m_probes.push_back( leptons[i] );
-  
+
   if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(leptons);
   m_ch = getChan(leptons);
   return passSR;
@@ -627,8 +627,8 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 // Real Control Region: Z
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-bool MeasureFakeRate2::passRealCR(const LeptonVector &leptons, 
-				  const JetVector &jets, 
+bool MeasureFakeRate2::passRealCR(const LeptonVector &leptons,
+				  const JetVector &jets,
 				  const Met* met,
 				  ControlRegion CR)
 {
@@ -660,14 +660,14 @@ bool MeasureFakeRate2::passRealCR(const LeptonVector &leptons,
   bool isMC  = nt.evt()->isMC;
   //bool l0sig = m_AltIso ? passAltIso(leptons[0]) : isMySignalLepton(leptons[0]);
   bool l0sig = m_AltIso ? passAltIso(leptons[0]) : isSignalLepton(leptons[0],
-								  m_baseElectrons, 
+								  m_baseElectrons,
 								  m_baseMuons,
-								  nVtx, isMC); 
+								  nVtx, isMC);
   //bool l1sig = m_AltIso ? passAltIso(leptons[1]) : isMySignalLepton(leptons[1]);
   bool l1sig = m_AltIso ? passAltIso(leptons[1]) : isSignalLepton(leptons[1],
-								  m_baseElectrons, 
+								  m_baseElectrons,
 								  m_baseMuons,
-								  nVtx, isMC); 
+								  nVtx, isMC);
   if( !l0sig && !l1sig ) return false;
 
   // Pass trigger
@@ -686,7 +686,7 @@ bool MeasureFakeRate2::passRealCR(const LeptonVector &leptons,
 
   m_metRel = getMetRel(met, leptons, jets);
   if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(leptons);
-  
+
   return true;
 
 }
@@ -694,8 +694,8 @@ bool MeasureFakeRate2::passRealCR(const LeptonVector &leptons,
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 // Heavy Flavor Control region
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons, 
-				const JetVector &jets, 
+bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
+				const JetVector &jets,
 				const Met* met,
 				ControlRegion CR)
 {
@@ -751,10 +751,9 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
     }
   }// end loop over baseline leptons
 
-  cout<<"passHFCR nTags:"<<nTags<<" nProbes:"<<nProbes<<endl;
   if( nProbes != 1 ) return false;
 
-  // Check mll 
+  // Check mll
   plotCR(tag,probe,jets,met,CR_HF,CRP_mll);
   bool isMM = tag->isMu() && probe->isMu();
   if(isMM){
@@ -763,15 +762,15 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
     if( fabs(mll-mZ) < 10 ) return false;
     if( mll < 40 )          return false;
   }
-  
+
   // Check the trigger
   if( tag->Pt() < 20 ) return false;
   uint tagFlag = tag->trigFlags;
-  if( !isMM && !((tagFlag & TRIG_mu18_tight) && (tagFlag & TRIG_mu18_tight_e7_medium1)) ) 
+  if( !isMM && !((tagFlag & TRIG_mu18_tight) && (tagFlag & TRIG_mu18_tight_e7_medium1)) )
     return false;
-  if( isMM && !((tagFlag & TRIG_mu18_tight) && (tagFlag & TRIG_mu18_tight_mu8_EFFS)) ) 
+  if( isMM && !((tagFlag & TRIG_mu18_tight) && (tagFlag & TRIG_mu18_tight_mu8_EFFS)) )
     return false;
-  
+
   // Met and Mt Cut
   plotCR(tag,probe,jets,met,CR_HF,CRP_ht);
   plotCR(tag,probe,jets,met,CR_HF,CRP_met);
@@ -791,20 +790,20 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
 
   m_metRel = getMetRel(met, temp, jets);
   if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(temp, true);
-  
+
   m_probes.push_back( probe );
   m_tags.push_back( tag );
 
   return true;
-  
+
 
 }
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 // Light Flavor Control Region -- Zjet
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-bool MeasureFakeRate2::passLFZjetCR(const LeptonVector &leptons, 
-				    const JetVector &jets, 
+bool MeasureFakeRate2::passLFZjetCR(const LeptonVector &leptons,
+				    const JetVector &jets,
 				    const Met* met)
 {
 
@@ -822,7 +821,7 @@ bool MeasureFakeRate2::passLFZjetCR(const LeptonVector &leptons,
 
   // Reject events with b-jet
   if( numberOfCBJets(jets) != 0 ) return false;
-  
+
   // Use Signal info since it's cleaner
   LeptonVector sigLeps;
   if(m_signalMuons.size() == 2 && m_baseElectrons.size() == 1){
@@ -847,10 +846,10 @@ bool MeasureFakeRate2::passLFZjetCR(const LeptonVector &leptons,
   float mZ   = 91.2;
   float mll  = Mll(sigLeps[0],sigLeps[1]);
   float mlll = Mlll(sigLeps[0],sigLeps[1],m_probes[0]);
-  
+
   if( fabs(mll-mZ) > 10 )  return false;
   if( fabs(mlll-mZ) < 10 ) return false;
-  
+
   // Mt Cut
   if( Mt(m_probes[0],met) > 50 ) return false;
 
@@ -865,8 +864,8 @@ bool MeasureFakeRate2::passLFZjetCR(const LeptonVector &leptons,
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 // Light Flavor Control Region -- Wjet
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-bool MeasureFakeRate2::passLFWjetCR(const LeptonVector &leptons, 
-				    const JetVector &jets, 
+bool MeasureFakeRate2::passLFWjetCR(const LeptonVector &leptons,
+				    const JetVector &jets,
 				    const Met* met)
 {
 
@@ -876,7 +875,7 @@ bool MeasureFakeRate2::passLFWjetCR(const LeptonVector &leptons,
   // * Tag must be signal and match to tight trigger
   // * Veto mll region 70-100 get rid of Zs
   // * Mt(tag,met) > 40
-  // * Met/HT > 0.4 
+  // * Met/HT > 0.4
   // * Met > 20 GeV
   // * No b jets
 
@@ -893,11 +892,11 @@ bool MeasureFakeRate2::passLFWjetCR(const LeptonVector &leptons,
 
   // Require tag to be signal lepton
   //if( !isMySignalLepton(tag) ) return false;
-  if( !isSignalLepton(tag, 
-		      m_baseElectrons, 
+  if( !isSignalLepton(tag,
+		      m_baseElectrons,
 		      m_baseMuons,
 		      nt.evt()->nVtx, nt.evt()->isMC) ) return false;
-  
+
   // Make sure lepton passes single trigger
   if( tag->isEle() ){
     if( !(tag->Pt() > 25 && tag->matchTrig(TRIG_e24vhi_medium1)) ) return false;
@@ -924,7 +923,7 @@ bool MeasureFakeRate2::passLFWjetCR(const LeptonVector &leptons,
   plotCR(tag,probe,jets,met,CR_LFWjet,CRP_ht);
   if( met->Et/Ht < 0.4 ) return false;
 
-  // Fourth Cut: Met > 20 to get rid of region with 
+  // Fourth Cut: Met > 20 to get rid of region with
   // bad agreement..
   plotCR(tag,probe,jets,met,CR_LFWjet,CRP_met);
   if( met-> Et < 20 ) return false;
@@ -947,14 +946,14 @@ bool MeasureFakeRate2::passLFWjetCR(const LeptonVector &leptons,
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 // Conversion Control Region -- Conv
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-bool MeasureFakeRate2::passConvCR(const LeptonVector &leptons, 
-				  const JetVector &jets, 
+bool MeasureFakeRate2::passConvCR(const LeptonVector &leptons,
+				  const JetVector &jets,
 				  const Met* met)
 {
 
   // Conversion control region to get electron conversion rate
   // * Data only from Muon Stream
-  // * Exactly two signal muons of opposite sign 
+  // * Exactly two signal muons of opposite sign
   // * Exactly one baseline electron
   // * M(lll) in enlarged Z window 80-100
   // * Met < 50 GeV
@@ -986,7 +985,7 @@ bool MeasureFakeRate2::passConvCR(const LeptonVector &leptons,
 
   // M(mu,mu) > 20
   if( (*preMuons[0]+*preMuons[1]).M() < 20 ) return false;
-  
+
   // Mt(elec, met) < 40
   if( Mt((Lepton*) preElecs[0], met) > 40)   return false;
 
@@ -1006,7 +1005,7 @@ bool MeasureFakeRate2::passConvCR(const LeptonVector &leptons,
 // Pass Charge flip control region
 /*--------------------------------------------------------------------------------*/
 bool MeasureFakeRate2::passCFCR(const LeptonVector &leptons,
-				const JetVector& jets, 
+				const JetVector& jets,
 				const Met* met)
 {
 
@@ -1031,14 +1030,14 @@ bool MeasureFakeRate2::passCFCR(const LeptonVector &leptons,
   bool isMC  = nt.evt()->isMC;
   //bool l0sig = m_AltIso ? passAltIso(leptons[0]) : isMySignalLepton(leptons[0]);
   bool l0sig = m_AltIso ? passAltIso(leptons[0]) : isSignalLepton(leptons[0],
-  m_baseElectrons, 
+  m_baseElectrons,
   m_baseMuons,
-  nVtx, isMC); 
+  nVtx, isMC);
   //bool l1sig = m_AltIso ? passAltIso(leptons[1]) : isMySignalLepton(leptons[1]);
-  bool l1sig = m_AltIso ? passAltIso(leptons[1]) : isSignalLepton(leptons[1], 
-  m_baseElectrons, 
-  m_baseMuons, 
-  nVtx, isMC); 
+  bool l1sig = m_AltIso ? passAltIso(leptons[1]) : isSignalLepton(leptons[1],
+  m_baseElectrons,
+  m_baseMuons,
+  nVtx, isMC);
   if( !l0sig && !l1sig ) return false;
 
   // Pass trigger
@@ -1057,9 +1056,9 @@ bool MeasureFakeRate2::passCFCR(const LeptonVector &leptons,
 
   m_metRel = getMetRel(met, leptons, jets);
   if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(leptons);
-  
+
   return true;
-  
+
 
 }
 
@@ -1070,7 +1069,7 @@ bool MeasureFakeRate2::passLFTrig(const LeptonVector& leps)
 {
   // Try LF control region with the same trigger scheme
   // that 3-lepton uses
-  
+
   if( leps.size() != 2 ) return false;
   uint ie=0;
   uint im=0;
@@ -1078,18 +1077,18 @@ bool MeasureFakeRate2::passLFTrig(const LeptonVector& leps)
     if(leps[0]->isEle()) ie++;
     else im++;
   }
-	
+
   bool passMuons = false;
   uint n1M = 0;
   uint nSym2M = 0;
   uint nAsym2M = 0;
-  uint nAsym2M_m18 = 0; 
+  uint nAsym2M_m18 = 0;
   // Trigger matching for Muon Stream
   for(uint i=0; i<leps.size(); i++){
     if(leps.at(i)->isEle()) continue;
     const Muon* lep = (Muon*) leps[i];
     float pt = lep->Pt();
-    // Single muon trigger 
+    // Single muon trigger
     if(pt>25 && lep->matchTrig(TRIG_mu24i_tight)) n1M++;
     // 2m symmetric trigger
     if(pt>14 && lep->matchTrig(TRIG_2mu13)) nSym2M++;
@@ -1131,7 +1130,7 @@ bool MeasureFakeRate2::passLFTrig(const LeptonVector& leps)
     if( ie == 2 && stream == Stream_Egamma) return passEgamma;
     //if( im == 2 )  return passMuons;
     //if( ie == 2 )  return passEgamma;
-    
+
     return false;
   }
 
@@ -1147,37 +1146,37 @@ bool MeasureFakeRate2::passAltIso(const Lepton* lepton)
   uint nvtx = nt.evt()->nVtx;
   bool ismc = nt.evt()->isMC;
 
-  // Muons 
+  // Muons
   if( lepton->isMu() ){
     Muon* mu = (Muon*) lepton;
 
     if( mu->ptcone30ElStyle/mu->Pt() > 0.12 ) return false;
     if( fabs(mu->d0Sig()) >= MUON_D0SIG_CUT ) return false;
     if( fabs(mu->z0SinTheta()) >= MUON_Z0_SINTHETA_CUT) return false;
-    
+
     return true;
 
   }
 
   // Electrons
   if( lepton->isEle() ){
-    Electron* el = (Electron*) lepton;    
+    Electron* el = (Electron*) lepton;
     bool passNom = isSignalLepton(lepton, m_baseElectrons, m_baseMuons, nvtx, ismc);
     bool passTightd0Sig = fabs(el->d0Sig()) < 3;
     return passNom && passTightd0Sig;
-    
+
     /*
     Electron* el = (Electron*) lepton;
     if( !el->tightPP ) return false;
 
     float ptiso = 0.08;
     if( el->ptcone30/el->Pt() >= ptiso ) return false;
-    
+
     float etiso = 0.09;
     if( elEtTopoConeCorr(el, m_baseElectrons, m_baseMuons, nvtx, ismc)/el->Pt() >= etiso ) return false;
-    
+
     if( fabs(el->d0Sig()) >= ELECTRON_D0SIG_CUT )            return false;
-    if( fabs(el->z0SinTheta()) >= ELECTRON_Z0_SINTHETA_CUT ) return false;  
+    if( fabs(el->z0SinTheta()) >= ELECTRON_Z0_SINTHETA_CUT ) return false;
 
     return true;
     */
@@ -1192,10 +1191,10 @@ bool MeasureFakeRate2::isSignalWithEtcone(const Lepton* lep)
 {
 
   bool isSignal = isSignalLepton(lep,m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC);
-  
+
   // If Electron, just return
   if( lep->isEle() ) return isSignal;
-  
+
   // Otherwise muon, add etcone cut:
   return isSignal && ((Muon*) lep)->etcone30/lep->Pt() < 0.18;
 
@@ -1212,13 +1211,13 @@ bool MeasureFakeRate2::isSignalWithoutEtcone(const Lepton* lep)
   m_doElEtconeCut = false;
   bool isSignal = isSignalLepton(lep,m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC);
   m_doElEtconeCut = true;
-  
+
   return isSignal;
-  
+
 }
 /*--------------------------------------------------------------------------------*/
 bool MeasureFakeRate2::isSignalWithoutPtcone(const Lepton* lep){
-  
+
   m_doPtconeCut = false;
   bool pass = isSignalLepton(lep,m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC);
   m_doPtconeCut = true;
@@ -1227,7 +1226,7 @@ bool MeasureFakeRate2::isSignalWithoutPtcone(const Lepton* lep){
 }
 /*--------------------------------------------------------------------------------*/
 bool MeasureFakeRate2::isSignalWithoutd0Sig(const Lepton* lep){
-  
+
   m_doIPCut = false;
   bool pass = isSignalLepton(lep,m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC);
   m_doIPCut = true;
@@ -1240,21 +1239,21 @@ bool MeasureFakeRate2::isSignalWithoutd0Sig(const Lepton* lep){
 }
 /*--------------------------------------------------------------------------------*/
 bool MeasureFakeRate2::isSignalWithoutz0Sig(const Lepton* lep){
-  
+
   m_doIPCut = false;
   bool pass = isSignalLepton(lep,m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC);
   m_doIPCut = true;
 
   float cutVal = lep->isEle() ? ELECTRON_D0SIG_CUT : MUON_D0SIG_CUT;
   bool passd0  = fabs( lep->d0Sig(true) ) < cutVal;
-  
+
   return pass && passd0;
 
 }
 
 /*--------------------------------------------------------------------------------*/
 bool MeasureFakeRate2::isSignalWithoutIP(const Lepton* lep){
-  
+
   m_doIPCut = false;
   bool pass = isSignalLepton(lep,m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC);
   m_doIPCut = true;
