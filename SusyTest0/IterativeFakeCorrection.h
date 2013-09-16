@@ -62,7 +62,9 @@ class IterativeFakeCorrection : public myHist
 
   void setDebug(bool dbg){ m_dbg = dbg; };
   void setNIter(int niter){ m_nIter = niter; };
-
+  IterativeFakeCorrection& setInputMc(const std::string &filename);
+  IterativeFakeCorrection& setInputData(const std::string &filename);
+  IterativeFakeCorrection& setOutputFilename(const std::string &filename);
  protected:
   
   bool m_dbg;
@@ -71,7 +73,7 @@ class IterativeFakeCorrection : public myHist
   File m_data;
   File m_mc;
   int m_nIter;
-
+  std::string m_outputFilename;
 };
 
 #endif
