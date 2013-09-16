@@ -4,8 +4,8 @@
 
 #include "Cintex/Cintex.h"
 
-#include "SusyPlotting/FakePlotting.h"
-#include "SusyPlotting/myHist.h"
+#include "SusyTest0/FakePlotting.h"
+#include "SusyTest0/myHist.h"
 
 using namespace std;
 
