@@ -22,6 +22,7 @@ Example:
 """
 parser = optparse.OptionParser(usage=usage)
 parser.add_option('--onedata', action='store_true', help='merge all data (e+mu) together; for fake estimate')
+parser.add_option('--allBkg', action='store_true', help='also merge all bkg; for fake estimate')
 parser.add_option('--allBkgButHf', action='store_true', help='also merge all bkg w/out heavy flavor; for fake estimate')
 parser.add_option('-o', '--output', help='output directory; default <input>/merged/')
 parser.add_option('-O', '--overwrite', action='store_true', help='overwrite output')
@@ -33,6 +34,7 @@ parser.add_option("--dryrun", action='store_true', help='do not actually merge')
 (options, args) = parser.parse_args()
 if len(args) != 1 : parser.error("incorrect number of arguments")
 inputdir      = args[0]
+allBkg        = options.allBkg
 allBkgButHf   = options.allBkgButHf
 group_regexp  = options.groupregexp
 verbose       = options.verbose
@@ -48,6 +50,7 @@ if verbose :
     print "Options:"
     print '\n'.join(["%s : %s" % (o, eval(o))
                      for o in ['inputdir', 'outdir', 'group_regexp', 'tag', 'overwrite',
+                               'allBkg', 'allBkgButHf', 'onedata',
                                'verbose', 'debug',]])
 if not os.path.isdir(outdir) :
     os.mkdir(outdir)
@@ -70,8 +73,10 @@ for rf in rootfiles :
     if not group : print "warning, invalid group '%s' for '%s'"%(group, rf)
     if verbose and group not in filenamesByGroup : print "adding group '%s'"%group
     filenamesByGroup[group].append(rf)
+    if allBkg and dataset.isMcBackground : filenamesByGroup['allBkg'].append(rf)
     if allBkgButHf and dataset.isMcBackground and not dataset.isHeavyFlavor :
         filenamesByGroup['allBkgButHf'].append(rf)
+
 
 nGroupsToMerge = len(filenamesByGroup.keys())
 groupCounter = 0
