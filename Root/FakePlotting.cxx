@@ -32,10 +32,16 @@ void FakePlotting::init()
 {
 
 
-  string append = "_Jul15_n0145_rates";
-  string dataappend = "_Jul15_n0145_rates";
+  string append = "_Sep_14";
+  string dataappend = "_Sep_14";
   string addition = "";
-  string inDir = "fakeplots/";
+  string inDir = "out/fakerate/merged/";
+
+out/fakerate/merged/allBkgButHf_Sep_14.root  out/fakerate/merged/diboson_Sep_14.root
+out/fakerate/merged/higgs_Sep_14.root  out/fakerate/merged/wjets_Sep_14.root
+out/fakerate/merged/data_Sep_14.root         out/fakerate/merged/heavyflavor_Sep_14.root
+out/fakerate/merged/ttbar_Sep_14.root  out/fakerate/merged/zjets_Sep_14.root
+
 
   // Data
   data.file  = new TFile((inDir+"data"+dataappend+".root").c_str());
