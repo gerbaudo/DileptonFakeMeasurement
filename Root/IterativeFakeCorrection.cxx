@@ -285,12 +285,14 @@ TH1F* IterativeFakeCorrection::getHist(TFile* file,
 
   TH1F* h=0;
   h = static_cast<TH1F*>(file->Get(histname.c_str()));
-  if(h)
-    cout<<"from file '"<<file->GetName()<<"'"
-        <<" got histogram '"<<h->GetName()<<"' with "<<h->GetEntries()<<" entries "<<endl;
-  else
-    cout<<"from file '"<<file->GetName()<<"'"
-        <<" cannot get histogram '"<<histname<<"'"<<endl;
+  if(m_dbg) {
+    if(h)
+      cout<<"from file '"<<file->GetName()<<"'"
+          <<" got histogram '"<<h->GetName()<<"' with "<<h->GetEntries()<<" entries "<<endl;
+    else
+      cout<<"from file '"<<file->GetName()<<"'"
+          <<" cannot get histogram '"<<histname<<"'"<<endl;
+  }
   return h;
 
 }
