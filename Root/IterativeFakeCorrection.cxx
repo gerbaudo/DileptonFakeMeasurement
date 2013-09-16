@@ -90,7 +90,7 @@ void IterativeFakeCorrection::iterate()
 
   for(uint il=0; il<leps.size(); ++il){
     string lep = leps.at(il);
-    
+
     // Load Real Efficiency:
     TH1F* temp_num = getHist(m_data.file, lep+"_realCR_all_l_pt_num");
     TH1F* temp_den = getHist(m_data.file, lep+"_realCR_all_l_pt_den");
@@ -101,7 +101,7 @@ void IterativeFakeCorrection::iterate()
     if(m_dbg) cout << "Have Real: "<<temp_num<<" "<<temp_den<<endl;
     m_real = RatioHist(temp_num, temp_den, "");
     m_real->SetName("real_eff");
-  
+
     // Load data
     data_low[0]  = getHist(m_data.file, lep+"_fakeHF_all_l_pt_num");
     data_low[1]  = getHist(m_data.file, lep+"_fakeHF_all_l_pt_den");
@@ -137,47 +137,47 @@ void IterativeFakeCorrection::iterate()
           <<endl;
       continue;
     }
-    
+
     // Set the corrected. This is iteration 0,
     // so the constants are 0.
     corrected[0] = (TH1F*) data_low[0]->Clone("corrected_num");
     corrected[1] = (TH1F*) data_low[1]->Clone("corrected_den");
-    
+
     // Now iterate and update the histogram
     for(int i=0; i<m_nIter; ++i){
       cout<<"--------------------------------"<<endl;
       cout<<"Iteration: "<<i<<endl;
-      
+
       // Dump the rate
       for(int bin=1; bin<=corrected[0]->GetNbinsX(); ++bin){
 	float num = corrected[0]->GetBinContent(bin);
 	float den = corrected[1]->GetBinContent(bin);
 	cout<<"Bin: "<<bin<<" num: "<<num<<" den: "<<den<<" rate: "<<num/den<<endl;
       }
-      
+
       // Make temporary rate
       TH1F* rate = RatioHist(corrected[0], corrected[1], "");
-      
+
       // Get Corrections
       vector<double> C_T = getC(rate, data_high[0], data_high[1], mc_high[0], true);
       vector<double> C_L = getC(rate, data_high[0], data_high[1], mc_high[1], false);
-      
+
       // Correct the rates
       correctRate(corrected[0], data_low[0], mc_low[0], C_T);
       correctRate(corrected[1], data_low[1], mc_low[1], C_L);
-      
+
       delete rate;
-      
+
     }// end iteration
-    
-    
+
+
     TH1F* ratio = RatioHist(corrected[0],corrected[1],"");
     ratio->SetName((lep+"_corHFRate").c_str());
     file->cd();
     ratio->Write();
     m_data.file->cd();
     ratio->Delete();
-    
+
     // Clean up
     data_low[0]->Delete();    data_low[1]->Delete();
     data_high[0]->Delete();   data_high[1]->Delete();
@@ -198,13 +198,13 @@ void IterativeFakeCorrection::iterate()
 //-----------------------------------------------//
 // Correct rate
 //-----------------------------------------------//
-void IterativeFakeCorrection::correctRate(TH1F* &rate, 
-					  TH1F* data, 
-					  TH1F* mc, 
+void IterativeFakeCorrection::correctRate(TH1F* &rate,
+					  TH1F* data,
+					  TH1F* mc,
 					  vector<double> corrections)
 {
 
-  // Loop and correct each bin.  
+  // Loop and correct each bin.
   int nbins = rate->GetNbinsX();
   for(int bin=1; bin<=nbins; ++bin){
     float d_bc = data->GetBinContent(bin);
@@ -241,7 +241,7 @@ vector<double> IterativeFakeCorrection::getC(TH1F* rate,
 
     // Set N loose and tight for 1-D MM
     float nLoose = data_den->GetBinContent(bin);
-    float nTight = data_num->GetBinContent(bin); //tight ? data_num->GetBinContent(bin) : 0.; 
+    float nTight = data_num->GetBinContent(bin); //tight ? data_num->GetBinContent(bin) : 0.;
 
     // Get r and f
     float r = m_real->GetBinContent(bin);
@@ -274,12 +274,12 @@ double IterativeFakeCorrection::getFake(float r,
   cout<<"\t\t\tr: "<<r<<" f: "<<f<<" nL: "<<nL<<" nT: "<<nT<<endl;
   if(tight)
     return f/(r-f) * (nL*r - nT);
-    
+
   return 1/(r-f) * (nL*r -nT);
 }
 
 //-----------------------------------------------//
-TH1F* IterativeFakeCorrection::getHist(TFile* file, 
+TH1F* IterativeFakeCorrection::getHist(TFile* file,
 				       string histname)
 {
 
