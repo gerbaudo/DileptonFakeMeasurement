@@ -7,6 +7,8 @@
 import ROOT as r
 import sys
 
+r.gROOT.SetBatch(1)
+
 class diffROOT(object):
     '''Check for histogram differences in all subdirectories of a pair of files.'''
 
