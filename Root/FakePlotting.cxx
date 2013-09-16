@@ -32,28 +32,9 @@ void FakePlotting::init()
 {
 
 
-  //string dataappend = "_May6_n0139_NewElD0_NewMuIso_rates";
-  //string append = "_Jun25_n0139_MET_rates";
-  //string append = "_Jun26_n0139_MET_rates";
-  //string dataappend = "_Jun25_n0139_MET_rates";
-  //string append = "_Jun25_n0141_MCCutMet_rates";
-  //string dataappend = "_Jun25_n0141_MCCutMet_rates";
-  //string append = "_Jul8_n0144_NoMCMetCut_rates";
-  //string append = "_Jul9_n0144_NoMCMetCut_LooseCRSR_rates";
-  //string dataappend = "_Jul8_n0144_rates";
   string append = "_Jul15_n0145_rates";
   string dataappend = "_Jul15_n0145_rates";
-  
-
-  //string addition = "_oldSamples";
-  //string addition = "_AlpW";
-  //string addition = "_NewWandZ";
   string addition = "";
-  //string addition = "_NewWandZandTtbar";
-  //string addition = "_newZandTtbar";
-  //string addition = "_oldZ";
-  
-  //string inDir = "fakeplots/FakeRates2012/";
   string inDir = "fakeplots/";
 
   // Data
