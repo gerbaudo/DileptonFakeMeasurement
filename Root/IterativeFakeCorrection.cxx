@@ -1,5 +1,10 @@
 
 #include "SusyTest0/IterativeFakeCorrection.h"
+#include "SusyTest0/utils.h"
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 //-----------------------------------------------//
 // Constructor
@@ -10,55 +15,6 @@ IterativeFakeCorrection::IterativeFakeCorrection() :
   m_real(NULL),
   m_nIter(8)
 {
-
-  // Set the files
-  string indir = "fakeplots/";
-  //string append = "_Feb6_n0124_AltIso_rates";
-  //string append = "_Feb12_n0124_rates";
-  //string append = "_Feb18_n0127_altIso_rates";
-  //string dappend = "_Feb18_n0127_rates";
-  //string append = "_Feb17_n0117_rates";
-  //string dappend = "_May2_n0139_rates";
-  //string append = "_May2_n0139_rates";
-  //string dappend = "_May6_n0139_NewElD0_NewMuIso_rates";
-  //string append = "_May6_n0139_NewElD0_NewMuIso_rates";
-  //string dappend = "_May24_n0139_rates";
-  //string append = "_May24_n0139_rates";
-
-  //string dappend = "_Jun25_n0139_MET_rates";
-  //string append = "_Jun25_n0139_MET_rates";
-  //string dappend = "_Jul8_n0144_rates";
-  //string append = "_Jul8_n0144_NoMCMetCut_rates";
-  //string dappend = "_Jul15_n0145_rates";
-  //string append = "_Jul15_n0145_rates";
-  
-  //string dappend = "_Sep10_n0145_forDavide_rates";
-  //string append = "_Sep10_n0145_forDavide_rates";  
-  string dappend = "_Sep11_n0145_forDavide_rates";
-  string append = "_Sep11_n0145_forDavide_rates";  
-
-  string inputDataFile = "out/fakerate/merged/data_Sep_14.root";
-  string inputMcFile = "out/fakerate/merged/allBkgButHf_Sep_14.root";
-  // Data File
-  m_data.file = new TFile(inputDataFile.c_str());
-  m_data.name = "Data";
-  m_data.sname = "data";
-  m_data.color = kBlack;
-  m_data.marker = 20;
-
-  cout<<"data file contents:"<<endl;
-  m_data.file->ls();
-
-  // MC File
-  m_mc.file = new TFile(inputMcFile.c_str());
-  //m_mc.file = new TFile((indir+"heavyflavor"+append+".root").c_str());
-  m_mc.name = "MC";
-  m_mc.sname = "mc";
-  m_mc.color = kRed;
-  m_mc.marker = 25;
-  cout<<"mc file contents:"<<endl;
-  m_mc.file->ls();
-
 }
 //-----------------------------------------------//
 // Destructor
@@ -67,24 +23,52 @@ IterativeFakeCorrection::~IterativeFakeCorrection()
 {
 
 }
-
+//----------------------------------------------------------
+IterativeFakeCorrection& IterativeFakeCorrection::setInputData(const std::string &filename)
+{
+  if(!fileExists(filename)) {
+    cout<<"invalid mc input '"<<filename<<endl;
+  } else {
+    m_data.file = new TFile(filename.c_str());
+    m_data.name = "Data";
+    m_data.sname = "data";
+    m_data.color = kBlack;
+    m_data.marker = 20;
+    if(m_dbg) { cout<<"data file contents:"<<endl; m_data.file->ls(); }
+  }
+  return *this;
+}
+//----------------------------------------------------------
+IterativeFakeCorrection& IterativeFakeCorrection::setInputMc(const std::string &filename)
+{
+  if(!fileExists(filename)) {
+    cout<<"invalid mc input '"<<filename<<endl;
+  } else {
+    m_mc.file = new TFile(filename.c_str());
+    m_mc.name = "MC";
+    m_mc.sname = "mc";
+    m_mc.color = kRed;
+    m_mc.marker = 25;
+    if(m_dbg) { cout<<"mc file contents:"<<endl; m_mc.file->ls(); }
+  }
+  return *this;
+}
+//----------------------------------------------------------
+IterativeFakeCorrection& IterativeFakeCorrection::setOutputFilename(const std::string &filename)
+{
+  m_outputFilename = filename;
+  if(fileExists(filename))
+    cout<<"IterativeFakeCorrection::setOutputFilename :"
+        <<" warning, output '"<<filename<<"' will be overwritten"<<endl;
+  return *this;
+}
+//----------------------------------------------------------
 //-----------------------------------------------//
 // Method to iterate
 //-----------------------------------------------//
 void IterativeFakeCorrection::iterate()
 {
-
-  // File
-  //TFile* file = new TFile("corFake_altIso_2013.root","RECREATE");
-  //TFile* file = new TFile("temp.root","RECREATE");
-  //TFile* file = new TFile("corFake_altMuIso_May2_2013.root","RECREATE");
-  //TFile* file = new TFile("corFake_May6_2013.root","RECREATE");
-  //TFile* file = new TFile("corFake_May24_2013.root","RECREATE");
-  //TFile* file = new TFile("corFake_Jun25_2013.root","RECREATE");
-  //TFile* file = new TFile("corFake_Jul8_2013.root","RECREATE");
-  //TFile* file = new TFile("corFake_Jul15_2013.root","RECREATE");
-  //TFile* file = new TFile("corFake_Sep10_2013_forDavide.root","RECREATE");
-  TFile* file = new TFile("corFake_Sep11_2013_forDavide.root","RECREATE");
+  TFile* file = new TFile(m_outputFilename.c_str(),"RECREATE");
   m_data.file->cd();
 
   // Place holders for histograms
@@ -119,8 +103,6 @@ void IterativeFakeCorrection::iterate()
     data_low[1]  = getHist(m_data.file, lep+"_fakeHF_all_l_pt_den");
     data_high[0] = getHist(m_data.file, lep+"_fakeHF_high_all_l_pt_num");
     data_high[1] = getHist(m_data.file, lep+"_fakeHF_high_all_l_pt_den");
-
-
     if(!data_low[0]  ||
        !data_low[1]  ||
        !data_high[0] ||
@@ -133,9 +115,6 @@ void IterativeFakeCorrection::iterate()
           <<endl;
       continue;
     }
-
-
-
     // Load MC
     mc_low[0]  = getHist(m_mc.file, lep+"_fakeHF_all_l_pt_num");
     mc_low[1]  = getHist(m_mc.file, lep+"_fakeHF_all_l_pt_den");

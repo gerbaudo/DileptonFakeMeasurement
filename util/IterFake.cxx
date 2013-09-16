@@ -53,11 +53,16 @@ int main(int argc, char** argv)
   cout << "  dbg                      " << dbg         << endl;
   cout << endl;
   
-
+  string inputMcFile = "out/fakerate/merged/allBkgButHf_Sep_14.root";
+  string inputDataFile = "out/fakerate/merged/data_Sep_14.root";
+  string ouputFile = "corFake_Sep11_2013_forDavide.root";
   // Create instance of the class:
   IterativeFakeCorrection* iter = new IterativeFakeCorrection();
   iter->setDebug(dbg);
   iter->setNIter(n);
+  iter->setInputMc(inputMcFile);
+  iter->setInputData(inputDataFile);
+  iter->setOutputFilename(ouputFile);
   iter->iterate();
 
   cout << endl;
