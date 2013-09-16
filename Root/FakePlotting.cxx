@@ -120,20 +120,7 @@ void FakePlotting::init()
   //gjet.marker = 27;
 
   // Fake Prediction
-  //fakePred.file   = new TFile("anaplots/data_Oct2_SideBandElecRealData.FakeHists.root");
-  //fakePred.file   = new TFile("anaplots/data_Nov1_n0111_UpdateHFSFMuon.FakeHists.root");
-  //fakePred.file   = new TFile("anaplots/data_Nov2_n0111_ErrFix.FakeHists.root");
-  //fakePred.file   = new TFile("anaplots/data_Dec6_v3_n0111.FakeHists.root");
-  //fakePred.file   = new TFile("anaplots/data_Feb14_n0124_pass0_attempt2.FakeHists.root");
-  //fakePred.file   = new TFile("anaplots/data_Feb17_n0127_pass1.FakeHists.root");
-  //fakePred.file   = new TFile("anaplots/data_Feb18_n0127_altIso.FakeHists.root");
-  //fakePred.file   = new TFile("anaplots/data_Feb22_n0127_pass2.FakeHists.root");
-  //fakePred.file   = new TFile("anaplots/data_Feb25_n0127_test.FakeHists.root");
-  //fakePred.file   = new TFile("anaplots/data_Feb27_n0127_WjetOnly.FakeHists.root");
-  //fakePred.file   = new TFile("anaplots/data_Feb28_n0127_newVR3.FakeHists.root");
-  //fakePred.file   = new TFile("anaplots/data_Apr1_n0135_pass5_full.FakeHists.root");
   fakePred.file   = new TFile("anaplots/data_Apr2_n0135_pass6.FakeHists.root");
-  //fakePred.file   = new TFile("anaplots/data_Apr10_n0135_withBBbar_Sherpa.FakeHists.root");
   fakePred.name   = "Fake";
   fakePred.sname  = "fake";
   fakePred.color  = kBlack;
@@ -189,24 +176,6 @@ void FakePlotting::MCFakeRate()
 {
   if(m_dbg) cout << "MCFakeRate" << endl;
 
-  //string savedir = "formattedFakePlots/mcRate2013_Jan22_tightPP/";
-  //string savedir = "formattedFakePlots/mcRate2013_Jan23_tightPP/";
-  //string savedir = "formattedFakePlots/mcRate2013_Feb6_AltElIso/";
-  //string savedir = "formattedFakePlots/mcRate2013_Feb6/";
-  //string savedir = "formattedFakePlots/mcRate2013_Feb6_AltElIso_tightPP/";
-  //string savedir = "formattedFakePlots/mcRate2013_Feb6_tightPP/";
-  //string savedir = "formattedFakePlots/mcRate2013_Feb6_AltIso/";
-  //string savedir = "formattedFakePlots/mcRate2013_Feb12/";
-  //string savedir = "formattedFakePlots/mcRate2013_Feb14/";
-  //string savedir = "formattedFakePlots/mcRate2013_Feb18/";
-  //string savedir = "formattedFakePlots/mcRate2013_Feb22/";
-  //string savedir = "formattedFakePlots/AltMCRate2013_Mar4/";
-  //string savedir = "formattedFakePlots/mcRate2013_Apr1/";
-  //string savedir = "formattedFakePlots/mcRate2013_Apr2/";
-  //string savedir = "formattedFakePlots/mcRate2013_Apr5_MET/";
-  //string savedir = "formattedFakePlots/mcRate2013_Jun25_MET/";
-  //string savedir = "formattedFakePlots/mcRate2013_Jun26_MET/";
-  //string savedir = "formattedFakePlots/mcRate2013_Jul9/";
   string savedir = "formattedFakePlots/mcRate2013_Jul15/";
 
   vector<string> plots;      vector<string> labels;
