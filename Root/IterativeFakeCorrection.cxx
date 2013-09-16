@@ -68,6 +68,10 @@ IterativeFakeCorrection& IterativeFakeCorrection::setOutputFilename(const std::s
 //-----------------------------------------------//
 void IterativeFakeCorrection::iterate()
 {
+  if(!m_data.file || !m_mc.file) {
+    cout<<"missing one of the inputs (mc="<<m_mc.file<<", data="<<m_data.file<<"), cannot iterate"<<endl;
+    return;
+  }
   TFile* file = new TFile(m_outputFilename.c_str(),"RECREATE");
   m_data.file->cd();
 
