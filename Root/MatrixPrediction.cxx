@@ -63,8 +63,6 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if( !selectEvent() )              return kTRUE;
 
-//   if( m_baseLeptons.size() != 2 )   return kTRUE;
-//   if( !passTrig2LwithMatch(m_baseLeptons) ) return kTRUE;
   SusyMatrixMethod::FAKE_REGION reg = SusyMatrixMethod::FR_SRDavide;
   SusyMatrixMethod::SYSTEMATIC  sys = SusyMatrixMethod::SYS_NONE;
   const Met*          m = m_met;
@@ -78,6 +76,17 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   m_weightComponents.fake = getFakeWeight(l, reg, metRel, sys);
   bool allowQflip(false);
   bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
+  if(m_dbg>3) {
+    DiLepEvtType ll(getDiLepEvtType(l));
+    bool ee(ll==ET_ee), mm(ll==ET_mm);
+    if(passSrSS)
+      cout<<"MatrixPrediction passSrSS("<<(passSrSS?"true":"false")<<")"
+          <<" run "<<nt.evt()->run<<" evt "<<nt.evt()->event<<" "<<(ee?"ee":(mm?"mm":"em"))
+          <<" l0: pt="<<l[0]->Pt()<<" eta="<<l[0]->Eta()
+          <<" l1: pt="<<l[1]->Pt()<<" eta="<<l[1]->Eta()
+          <<" weight="<<m_weightComponents.fake
+          <<endl;
+  }
   if(!passSrSS) return false;
   return kTRUE;
 }
