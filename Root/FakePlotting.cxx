@@ -1242,19 +1242,32 @@ TH1F* FakePlotting::buildLFWjetRate(string lepton, string variable)
 TH1F* FakePlotting::buildRate(TFile* file, string name, string sname, string xtitle, 
 			      string ytitle, int color, int mark)
 {
-  
-  if(m_dbg){
-    cout<<"Num: "<< name + "_num" << endl;
-    cout<<"Den: "<< name + "_den" << endl;
-    cout<<"File Address: "<<file<<endl;
+  TH1F* ratio=0;
+  if(!file || !file->IsOpen()) {
+    cout<<"buildRate: invalid input file"
+        <<" ("<<file
+        <<" : "<<(file ? file->GetName() : "")
+        <<" "<<(file && file->IsOpen() ? "open":"not open")
+        <<"), bailing out"<<endl;
+    return ratio;
+  }
+  string hnameNum(name + "_num"), hnameDen(name + "_den");
+  TH1F* num = Get(file, hnameNum, color, xtitle.c_str(), ytitle.c_str(), mark);
+  TH1F* den = Get(file, hnameDen, color, xtitle.c_str(), ytitle.c_str(), mark);
+  if(!num || !den) {
+    cout<<"buildRate: invalid input histos"
+        <<" "<<hnameNum<<"="<<num<<", "<<hnameDen<<"="<<den<<", bailing out"<<endl;
+    return ratio;
+  }  else if(m_dbg){
+    cout<<"File ("<<file<<") : "<<file->GetName()<<endl;
+    cout<<"Num: "<< hnameNum << endl;
+    cout<<"Den: "<< hnameDen << endl;
   }
 
-  TH1F* num = Get(file, name + "_num", color, xtitle.c_str(), ytitle.c_str(), mark);
-  TH1F* den = Get(file, name + "_den", color, xtitle.c_str(), ytitle.c_str(), mark);
   //cout<<"\tnum: "<<num->GetMinimum()<<" den "<<den->GetMinimum()<<endl;
   //for(int bin=1; bin<=num->GetNbinsX(); ++bin)
   //cout<<"\t\tbin: "<<bin<<" "<<num->GetBinContent(bin)<<" "<<den->GetBinContent(bin)<<endl;
-  TH1F* ratio = (TH1F*) num->Clone( (name + "_rat").c_str() );
+  ratio = (TH1F*) num->Clone( (name + "_rat").c_str() );
   ratio->Reset();
   ratio->Divide(num,den,1,1,"B");
   return ratio;
