@@ -192,7 +192,16 @@ class myHist{
   // Functions to retrieve Histograms
   //-----------------------------------//
   TH1F* Get(TFile* file, string name, int color=kBlack, const char* title ="",const char* ytitle="",int marker=20){
-    TH1F* h = (TH1F*) file->Get(name.c_str());
+    TH1F *h=0;
+    if(!file) {
+      cout<<"Get: invalid input file "<<file<<endl;
+      return h;
+    }
+    h = (TH1F*) file->Get(name.c_str());
+    if(!h) {
+      cout<<"cannot get histo '"<<name<<"' from '"<<file->GetName()<<"'"<<endl;
+      return h;
+    }
     if(sizeof(title) != 0)  h->GetXaxis()->SetTitle(title);
     h->GetYaxis()->SetTitle(ytitle);
     //h->SetTitle(title);
