@@ -1488,6 +1488,8 @@ void FakePlotting::checkPercentages()
 	  TH1F* temp = (TH1F*) file.file->Get(pname.c_str());
       if(!temp) {
         cout<<"cannot get '"<<pname<<"' from '"<<file.file->GetName()<<"'...skip"<<endl;
+        yields.push_back(0.0);
+        errs.push_back(0.0);
         continue;
       }
 	  yields.push_back(temp->GetBinContent(iS+1));
