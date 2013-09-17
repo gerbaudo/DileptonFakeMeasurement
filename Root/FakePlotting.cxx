@@ -1486,6 +1486,10 @@ void FakePlotting::checkPercentages()
 	for(uint f = 0; f<m_files.size(); ++f){
 	  File file = m_files.at(f);
 	  TH1F* temp = (TH1F*) file.file->Get(pname.c_str());
+      if(!temp) {
+        cout<<"cannot get '"<<pname<<"' from '"<<file.file->GetName()<<"'...skip"<<endl;
+        continue;
+      }
 	  yields.push_back(temp->GetBinContent(iS+1));
 	  errs.push_back(temp->GetBinError(iS+1));
 	  total += yields.back();
