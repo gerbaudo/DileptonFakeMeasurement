@@ -13,57 +13,13 @@ FinalNewFake::FinalNewFake(string outputname) :
   string append = "_Sep_14";
   string addition = "";
   string inDir = "out/fakerate/merged/";
-
-  // Monte Carlo
-  m_mc.file = new TFile((inDir+"allBkg"+append+addition+".root").c_str());
-  m_mc.name  = "Combined MC";
-  m_mc.sname = "mc";
-  m_mc.color = kBlack;
-  m_mc.marker = 25;
-
-  // ttbar
-  m_ttbar.file = new TFile((inDir+"ttbar"+append+addition+".root").c_str());
-  m_ttbar.name  = "Ttbar";
-  m_ttbar.sname = "ttbar";
-  m_ttbar.color = kBlue;
-  m_ttbar.marker = 25;
-
-  // Wjet
-  m_Wjet.file = new TFile((inDir+"wjets"+append+addition+".root").c_str());
-  m_Wjet.name  = "W+jet";
-  m_Wjet.sname = "wjet";
-  m_Wjet.color = kMagenta;
-  m_Wjet.marker = 25;
-
-  // Zjet
-  m_Zjet.file = new TFile((inDir+"zjets"+append+addition+".root").c_str());
-  m_Zjet.name  = "Z+jet";
-  m_Zjet.sname = "Zjet";
-  m_Zjet.color = kRed;
-  m_Zjet.marker = 25;
-
-  // Diboson
-  m_diboson.file = new TFile((inDir+"diboson"+append+addition+".root").c_str());
-  m_diboson.name  = "Diboson";
-  m_diboson.sname = "diboson";
-  m_diboson.color = kOrange;
-  m_diboson.marker = 22;
-
-  // Top
-  m_top.file = new TFile((inDir+"singletop"+append+addition+".root").c_str());
-  m_top.name  = "Single Top";
-  m_top.sname = "top";
-  m_top.color = kBlue;
-  m_top.marker = 25;
-
-  // bbbar
-  m_bbbar.file = new TFile((inDir+"heavyflavor"+append+addition+".root").c_str());
-  m_bbbar.name  = "b-bbar";
-  m_bbbar.sname = "bbbar";
-  m_bbbar.color = kBlue;
-  m_bbbar.marker = 23;
-  
-
+  string aa(append+addition);
+  initInputFile(m_mc,      inDir+"allBkg"+aa+".root",      "Combined MC", "mc",      kBlack,   25);
+  initInputFile(m_ttbar,   inDir+"ttbar"+aa+".root",       "Ttbar",       "ttbar",   kBlue,    25);
+  initInputFile(m_Wjet,    inDir+"wjets"+aa+".root",       "W+jet",       "wjet",    kMagenta, 25);
+  initInputFile(m_Zjet,    inDir+"zjets"+aa+".root",       "Z+jet",       "Zjet",    kRed,     25);
+  initInputFile(m_diboson, inDir+"diboson"+aa+".root",     "Diboson",     "diboson", kOrange,  22);
+  initInputFile(m_bbbar,   inDir+"heavyflavor"+aa+".root", "b-bbar",      "bbbar",   kBlue,    23);
   m_files[FP_ttbar] = m_ttbar;
   m_files[FP_Wjet]  = m_Wjet;
   m_files[FP_Zjet]  = m_Zjet;
@@ -71,13 +27,8 @@ FinalNewFake::FinalNewFake(string outputname) :
   m_files[FP_stop]  = m_top;
   m_files[FP_bbbar] = m_bbbar;
 
-  // Where to save the formatted rates
-  m_outfile = new TFile(("finalfake/" + outputname + ".root").c_str(), "recreate");
-  
-  // Output statement
-  cout << "Final Fake Rate being formatted"                << endl;
-  cout << "\tSaving in: finalfake/" + outputname + ".root" <<endl;
-
+  m_outfile = new TFile((inDir+outputname+".root").c_str(), "recreate");
+  cout<<"FinalNewFake: saving output to: '"<<m_outfile->GetName()<<"'"<<endl;
 }
 
 //------------------------------------------------------------//
