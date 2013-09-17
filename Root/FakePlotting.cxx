@@ -708,6 +708,10 @@ void FakePlotting::dumpSRTable()
       if(m_dbg) cout << "Grabbing: " << pname << endl;
       
       TH1F* temp = Get(totMC.file, pname);
+      if(!temp) {
+        cout<<"dumpSRTable: missing histo '"<<pname<<"' ...skip"<<endl;
+        continue;
+      }
       //TH1F* temp = Get(Wjets.file, pname);
       
       //float qcd   = temp->GetBinContent(1) + temp->GetBinContent(2);
