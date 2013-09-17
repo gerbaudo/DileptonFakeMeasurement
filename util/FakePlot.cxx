@@ -1,11 +1,16 @@
 
+#include <algorithm> // std::find
 #include <cstdlib>
+#include <iomanip> // std::setw
+#include <iterator>  // std::distance
 #include <string>
+#include <vector>
 
 #include "Cintex/Cintex.h"
 
 #include "SusyTest0/FakePlotting.h"
 #include "SusyTest0/myHist.h"
+#include "SusyTest0/utils.h"
 
 using namespace std;
 
@@ -15,26 +20,28 @@ Plotting Macro
 
 */
 
-void help()
+void help(const vector<string> &opts)
 {
+  size_t i=0;
   cout << "  Options:"                            << endl;
 
   cout << "  -n number of events to process"      << endl;
   cout << "     defaults: -1 (all events)"        << endl;
 
   cout << "  -r run option number"                << endl;
-  cout << "     0 Data (default)"                 << endl;
-  cout << "     1 MC"                             << endl;
-  cout << "     2 Data and MC"                    << endl;
-  cout << "     3 Data - MC Rate"                 << endl;
-  cout << "     4 Photon + jet"                   << endl;
-  cout << "     5 Data/MC scale factors"          << endl;
-  cout << "     6 MC Signal Regions rates"        << endl;
-  cout << "     7 MC Composition in SR"           << endl;
-  cout << "     8 TT/TL/LT/LL Matrix Pred Plots"  << endl;
-  cout << "     9 dump Matrix Pred in SR"         << endl;
-  cout << "     10 HF normalization"              << endl;
-  cout << "     11 Dump Percentages"              << endl;
+  size_t width(24);
+  cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : Data (default)"                 << endl; i++;
+  cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : MC"                             << endl; i++;
+  cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : Data and MC"                    << endl; i++;
+  cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : Data - MC Rate"                 << endl; i++;
+  cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : Photon + jet"                   << endl; i++;
+  cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : Data/MC scale factors"          << endl; i++;
+  cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : MC Signal Regions rates"        << endl; i++;
+  cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : MC Composition in SR"           << endl; i++;
+  cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : TT/TL/LT/LL Matrix Pred Plots"  << endl; i++;
+  cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : dump Matrix Pred in SR"         << endl; i++;
+  cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : HF normalization"               << endl; i++;
+  cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : Dump Percentages"               << endl; i++;
 
   cout << "  -h print this help"                << endl;
 }
@@ -46,35 +53,45 @@ int main(int argc, char** argv)
 
   int dbg = 0;
   RunOption ro = RO_Data;
-  
+
+  vector<string> txtOptions; // ugly duplication, but allows for mnemonic...fixme
+  txtOptions.push_back("data"            );
+  txtOptions.push_back("mc"              );
+  txtOptions.push_back("data-and-mc"     );
+  txtOptions.push_back("data-mc-rate"    );
+  txtOptions.push_back("photon-jet"      );
+  txtOptions.push_back("datamc-sf"       );
+  txtOptions.push_back("mc-sr-rates"     );
+  txtOptions.push_back("mc-sr-comp"      );
+  txtOptions.push_back("matrix-pred-plot");
+  txtOptions.push_back("matrix-pred-dump");
+  txtOptions.push_back("hf-norm"         );
+  txtOptions.push_back("percent-dump"    );
+
   cout << "FakePlot" << endl;
   cout << endl;
 
   /** Read inputs to program */
   for(int i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "-d") == 0)
-      dbg = atoi(argv[++i]);
-    else if (strcmp(argv[i], "-r") == 0)
-      ro = (RunOption) atoi(argv[++i]);
-    //if (strcmp(argv[i], "-h") == 0)
-    else
-      {
-	help();
-	return 0;
+    if      (strcmp(argv[i], "-d") == 0) { dbg = atoi(argv[++i]); }
+    else if (strcmp(argv[i], "-r") == 0) {
+      string sw(argv[++i]);
+      if(isInt(sw)) ro = (RunOption) atoi(sw.c_str());
+      else {
+        vector<string>::iterator it = std::find(txtOptions.begin(), txtOptions.end(), sw);
+        bool isValidOpt(it != txtOptions.end());
+        if(isValidOpt) { ro = (RunOption)distance(txtOptions.begin(), it); }
+        else { cout<<"invalid text option '"<<sw<<"'"<<endl; help(txtOptions); return 0; }
       }
-  }
+    } // end if('-r')
+    else { cout<<"invalid option '"<<argv[i]<<"'"<<endl; help(txtOptions); return 0; }
+  } // end for(i)
   
-  // Figure out which run option was chosen
-
-  string runOption = "Data";
-  if(ro == RO_MC)     runOption = "MC";
-  if(ro == RO_DataMC) runOption = "Data and MC";
-  
-  cout << "flags:" << endl;
-  cout << "  dbg                      " << dbg         << endl;
-  cout << "  Run Option               " << runOption   << endl;
+  cout <<"flags:" << endl;
+  cout <<"  dbg                      " << dbg         << endl;
+  cout <<"  Run Option               "
+       <<" "<<txtOptions[ro]<<" ("<<ro<<") "<< endl;
   cout << endl;
-  
 
   // Create instance of the class:
   FakePlotting* plot = new FakePlotting(ro);
