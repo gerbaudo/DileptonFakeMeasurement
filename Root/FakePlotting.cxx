@@ -247,11 +247,11 @@ void FakePlotting::DataFakeRate()
 	
 	cout << "Grabbing: " << pname << endl;
 	
-	File F = m_files.at(0);
-	rates[nplots] = buildRate(F.file, pname, F.sname, xlabel, "Rate", colors.at(nplots));
-	h_names.push_back(crtitle);
-	nplots++;
-	
+    File F = m_files.at(0);
+    TH1F *rate = buildRate(F.file, pname, F.sname, xlabel, "Rate", colors.at(nplots));
+    if(rate) { rates[nplots] = rate; h_names.push_back(crtitle); nplots++; }
+    else { cout<<"cannot build rate histo, skipping"<<endl; continue; }
+
 	vector<Label> lbls;
 	//lbls.push_back( makeLabel(CRLabels[cr],  0.5, 0.9) );
 	
