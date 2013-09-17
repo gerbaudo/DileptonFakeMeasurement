@@ -10,44 +10,18 @@ FinalNewFake::FinalNewFake(string outputname) :
   FakePlotting(RO_N),
   m_outfile(NULL)
 {
-
-  // What to append and where files located
-  //string append = "_Mar25_n0127_rates";
-  //string append = "_Apr2_n0138_rates";
-  //string append = "_Apr3_n0138_altIso16_rates";
-  //string append = "_Apr4_n0138_MET_rates";
-  //string append = "_Apr5_n0138_rates";
-  //string append = "_Apr10_n0138_rates";
-  //string append = "_Apr30_n0139_d0_rates";
-  //string append = "_May3_n0139_newIso_rates";
-  //string append = "_May6_n0139_NewElD0_NewMuIso_rates";
-  //string append = "_May8_n0139_MuEtconeCut_rates";
-  //string append = "_May24_n0139_rates";
-  //string append = "_May29_n0139_d0z0Baseline_rates";
-  //string append = "_May30_n0139_d0z0Baseline_tightBaseline_rates";
-  //string append = "_Jun18_n0139_LooserDR_rates";
-  //string append = "_Jun25_n0139_MET_rates";
-  //string append = "_Jun26_n0139_MET_UpdatedRegions_rates";
-  //string append = "_Jul8_n0144_NoMCMetCut_rates";
-  //string append = "_Jul9_n0144_NoMCMetCut_LooseCRSR_rates";
-  //string append = "_Jul9_n0144_NoMCMetCut_LooseCRSR_AddedSSInc_rates";
-  //string append = "_Jul11_n0144_UpdateTopZjets_rates";
-  string append = "_Jul15_n0145_rates";
-  
-
+  string append = "_Sep_14";
   string addition = "";
-
-  string inDir = "fakeplots/";
+  string inDir = "out/fakerate/merged/";
 
   // Monte Carlo
-  m_mc.file = new TFile((inDir+"mc"+append+addition+".root").c_str());
+  m_mc.file = new TFile((inDir+"allBkg"+append+addition+".root").c_str());
   m_mc.name  = "Combined MC";
   m_mc.sname = "mc";
   m_mc.color = kBlack;
   m_mc.marker = 25;
 
   // ttbar
-  //m_ttbar.file = new TFile((inDir+"top"+append+addition+".root").c_str());
   m_ttbar.file = new TFile((inDir+"ttbar"+append+addition+".root").c_str());
   m_ttbar.name  = "Ttbar";
   m_ttbar.sname = "ttbar";
@@ -55,17 +29,14 @@ FinalNewFake::FinalNewFake(string outputname) :
   m_ttbar.marker = 25;
 
   // Wjet
-  //m_Wjet.file = new TFile((inDir+"Wjets"+append+addition+"_SherpaWjet.root").c_str());
-  m_Wjet.file = new TFile((inDir+"Wjets"+append+addition+".root").c_str());
-  //m_Wjet.file = new TFile((inDir+"Vjets"+append+addition+".root").c_str());
-  //m_Wjet.file = new TFile((inDir+"Vjets"+append+addition+"_SherpaWjet.root").c_str());
+  m_Wjet.file = new TFile((inDir+"wjets"+append+addition+".root").c_str());
   m_Wjet.name  = "W+jet";
   m_Wjet.sname = "wjet";
   m_Wjet.color = kMagenta;
   m_Wjet.marker = 25;
 
   // Zjet
-  m_Zjet.file = new TFile((inDir+"Zjets"+append+addition+".root").c_str());
+  m_Zjet.file = new TFile((inDir+"zjets"+append+addition+".root").c_str());
   m_Zjet.name  = "Z+jet";
   m_Zjet.sname = "Zjet";
   m_Zjet.color = kRed;
@@ -92,12 +63,6 @@ FinalNewFake::FinalNewFake(string outputname) :
   m_bbbar.color = kBlue;
   m_bbbar.marker = 23;
   
-
-  // Vector of files for convenience
-  /*m_files[FP_top] = m_ttbar;
-  m_files[FP_Vjet]  = m_Wjet;
-  m_files[FP_dib]  = m_diboson;
-  m_files[FP_bbbar] = m_bbbar;*/
 
   m_files[FP_ttbar] = m_ttbar;
   m_files[FP_Wjet]  = m_Wjet;
