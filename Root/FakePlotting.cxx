@@ -51,14 +51,14 @@ void FakePlotting::init()
   string dataappend = "_Sep_14";
   string addition = "";
   string inDir = "out/fakerate/merged/";
-
-  initInputFile(data,    inDir+"data"+dataappend+".root", "Data A-B12", "data", kBlack, 20);
-  initInputFile(totMC,   inDir+"allBkg"+append+addition+".root", "MC Combined", "mc", kRed, 25);
-  initInputFile(ttbar,   inDir+"ttbar"+append+addition+".root", "t#bar{t}",    "ttbar", kRed, 21);
-  initInputFile(Zjets,   inDir+"zjets"+append+addition+".root", "Z+jets", "Zjets", kOrange, 23);
-  initInputFile(Wjets,   inDir+"wjets"+append+addition+".root", "W+jets", "Wjets", kViolet+2, 22);
-  initInputFile(diboson, inDir+"diboson"+append+addition+".root", "Diboson", "dib", kMagenta, 34);
-  initInputFile(HF,      inDir+"heavyflavor"+append+addition+".root", "HF", "HF", kBlue, 26);
+  string aa(append+addition);
+  initInputFile(data,    inDir+"data"+dataappend+".root", "Data A-B12",  "data",  kBlack,    20);
+  initInputFile(totMC,   inDir+"allBkg"+aa+".root",       "MC Combined", "mc",    kRed,      25);
+  initInputFile(ttbar,   inDir+"ttbar"+aa+".root",        "t#bar{t}",    "ttbar", kRed,      21);
+  initInputFile(Zjets,   inDir+"zjets"+aa+".root",        "Z+jets",      "Zjets", kOrange,   23);
+  initInputFile(Wjets,   inDir+"wjets"+aa+".root",        "W+jets",      "Wjets", kViolet+2, 22);
+  initInputFile(diboson, inDir+"diboson"+aa+".root",      "Diboson",     "dib",   kMagenta,  34);
+  initInputFile(HF,      inDir+"heavyflavor"+aa+".root",  "HF",          "HF",    kBlue,     26);
 
   if(m_runopt == RO_Data){
     m_files.push_back(data);
