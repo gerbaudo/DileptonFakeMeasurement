@@ -1498,18 +1498,18 @@ void FakePlotting::checkPercentages()
 	  //cout<<"\t"<<file.name<<" = "<<temp->GetBinContent(iS+1)<<" +/- "<<temp->GetBinError(iS+1)<<endl;	 
 	  
 	}// end loop over files
-
 	float totalErr = 0;
 	for(uint f = 0; f<m_files.size(); ++f){
 	  string name = m_files.at(f).name;
 	  float yield = yields.at(f);
-	  float weight = yield/total;
-	  cout<<"\t"<<name<<" Total: "<<yields.at(f)<<" +/- "<<errs.at(f)<<" weighted error: "<<weight*errs.at(f)<<endl;
+	  float weight = (total!=0.0 ? yield/total : 0.0);
+	  cout<<"\t"<<name
+          <<" Total: "<<yields.at(f)<<" +/- "<<errs.at(f)
+          <<" weighted error: "<<weight*errs.at(f)<<endl;
 	  float err = weight * (yield == 0 ? 0 : errs.at(f)/yield);
 	  totalErr += err*err; 
 	}// end loop over errs
 	cout<<"\t\tTotal Error: "<<sqrt(totalErr)<<endl;
-
       }// end loop over SR
       
     }// end loop over Lepton Sources
