@@ -111,14 +111,14 @@ void FakePlotting::MCFakeRate()
   string savedir = mkdirIfNeeded("out/fakeplot/");
 
   vector<string> plots;      vector<string> labels;
-  //plots.push_back("l_pt");   labels.push_back("P_{T}");
+  plots.push_back("l_pt");   labels.push_back("P_{T}");
   //plots.push_back("l_pt_coarse");   labels.push_back("P_{T}");
   //plots.push_back("njets");   labels.push_back("# jets");
   //plots.push_back("nlightjets");   labels.push_back("# light jets");
   //plots.push_back("nheavyjets");   labels.push_back("# heavy jets");
   //plots.push_back("nlightjetsNoB");   labels.push_back("# light jets (B-Veto)");
   //plots.push_back("l_eta");  labels.push_back("|#eta|");
-  plots.push_back("l_eta_coarse");  labels.push_back("|#eta|");
+  //plots.push_back("l_eta_coarse");  labels.push_back("|#eta|");
   //plots.push_back("onebin"); labels.push_back("Single Bin");
   //plots.push_back("met");    labels.push_back("#slash{E}_{T}");
   //plots.push_back("metrel");    labels.push_back("#slash{E}^{Rel}_{T}");
