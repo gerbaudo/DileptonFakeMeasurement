@@ -14,6 +14,8 @@
 #pragma link off all functions;
 #pragma link C++ nestedclass;
 
+#pragma link C++ class map<string,string>;
+
 #pragma link C++ class MatrixPrediction;
 #pragma link C++ class SusySelection;
 #pragma link C++ class SusyPlotter;
