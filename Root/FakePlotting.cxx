@@ -701,6 +701,8 @@ void FakePlotting::dumpSRTable()
     for(int sr=0; sr<SR_N; ++sr){
       //for(int sr=0; sr<4; ++sr){
       string srname = SRNames[sr];
+      // DG 2013-09-16 this is really an ugly hack! to be removed ASAP.
+      if(SR_WHSS==sr) srname = CRNames[CR_SRWHSS];
 
       string pname = lep + "_" + srname + "_all_flavor_den";
       //string pname = lep + "_VR2_flavor_den";
