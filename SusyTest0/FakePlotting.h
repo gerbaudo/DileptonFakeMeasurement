@@ -69,6 +69,10 @@ class FakePlotting : public myHist
   FakePlotting(RunOption);
   virtual ~FakePlotting();
   void init();
+  // initialize the File attributes; return false if input file is not there
+  static bool initInputFile(File &out,
+                            const string &fname, const string &name, const string &sname,
+                            int color, int marker);
 
   // The various looping functions
   void MCFakeRate();
