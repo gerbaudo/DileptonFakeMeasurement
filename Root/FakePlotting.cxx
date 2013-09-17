@@ -1473,6 +1473,8 @@ void FakePlotting::checkPercentages()
       for(int iSR=0; iSR<SR_N; ++iSR){
 	//if(iSR > VRSS) continue;
 	string srname = SRNames[iSR];
+    // DG 2013-09-16 this is really an ugly hack! to be removed ASAP.
+    if(SR_WHSS==iSR) srname = CRNames[CR_SRWHSS];
 	cout<<"--------------------------------------"<<endl;
 	cout<<srname<<" for "<<LSNames[iS]<<endl;
       
