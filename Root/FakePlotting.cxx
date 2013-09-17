@@ -1,5 +1,5 @@
-
 #include "SusyTest0/FakePlotting.h"
+#include "SusyTest0/utils.h"
 
 //--------------------------------------------------------//
 // Constructor
@@ -37,12 +37,6 @@ void FakePlotting::init()
   string addition = "";
   string inDir = "out/fakerate/merged/";
 
-out/fakerate/merged/allBkgButHf_Sep_14.root  out/fakerate/merged/diboson_Sep_14.root
-out/fakerate/merged/higgs_Sep_14.root  out/fakerate/merged/wjets_Sep_14.root
-out/fakerate/merged/data_Sep_14.root         out/fakerate/merged/heavyflavor_Sep_14.root
-out/fakerate/merged/ttbar_Sep_14.root  out/fakerate/merged/zjets_Sep_14.root
-
-
   // Data
   data.file  = new TFile((inDir+"data"+dataappend+".root").c_str());
   data.name  = "Data A-B12";
@@ -51,7 +45,7 @@ out/fakerate/merged/ttbar_Sep_14.root  out/fakerate/merged/zjets_Sep_14.root
   data.marker = 20;
 
   // Total MC (sum of below)
-  totMC.file  = new TFile((inDir+"mc"+append+addition+".root").c_str());
+  totMC.file  = new TFile((inDir+"allBkg"+append+addition+".root").c_str());
   totMC.name  = "MC Combined";
   totMC.sname = "mc";
   totMC.color = kRed;
@@ -65,14 +59,14 @@ out/fakerate/merged/ttbar_Sep_14.root  out/fakerate/merged/zjets_Sep_14.root
   ttbar.marker = 21; 
 
   // Z+jets
-  Zjets.file  = new TFile((inDir+"Zjets"+append+addition+".root").c_str());
+  Zjets.file  = new TFile((inDir+"zjets"+append+addition+".root").c_str());
   Zjets.name  = "Z+jets";
   Zjets.sname = "Zjets";
   Zjets.color = kOrange; //kViolet-9;
   Zjets.marker = 23;
 
   // W+jets
-  Wjets.file  = new TFile((inDir+"Wjets"+append+addition+".root").c_str());
+  Wjets.file  = new TFile((inDir+"wjets"+append+addition+".root").c_str());
   Wjets.name  = "W+jets";
   Wjets.sname = "Wjets";
   Wjets.color = kViolet+2; //kViolet-7;
@@ -107,7 +101,7 @@ out/fakerate/merged/ttbar_Sep_14.root  out/fakerate/merged/zjets_Sep_14.root
   //gjet.marker = 27;
 
   // Fake Prediction
-  fakePred.file   = new TFile("anaplots/data_Apr2_n0135_pass6.FakeHists.root");
+  fakePred.file   = new TFile("out/data_Apr2_n0135_pass6.FakeHists.root");
   fakePred.name   = "Fake";
   fakePred.sname  = "fake";
   fakePred.color  = kBlack;
@@ -163,7 +157,7 @@ void FakePlotting::MCFakeRate()
 {
   if(m_dbg) cout << "MCFakeRate" << endl;
 
-  string savedir = "formattedFakePlots/mcRate2013_Jul15/";
+  string savedir = mkdirIfNeeded("out/fakeplot/");
 
   vector<string> plots;      vector<string> labels;
   //plots.push_back("l_pt");   labels.push_back("P_{T}");
@@ -260,7 +254,7 @@ void FakePlotting::DataFakeRate()
 {
   if(m_dbg) cout << "DataFakeRate" << endl;
 
-  string savedir = "formattedFakePlots/dataRate/";
+  string savedir = mkdirIfNeeded("out/fakeplot/dataRate/");
 
   vector<string> plots;      vector<string> labels;
   plots.push_back("l_pt");   labels.push_back("P_{T}");
@@ -326,7 +320,7 @@ void FakePlotting::GammaJetCRRates()
 {
   if(m_dbg) cout << "GammaJetCRRates" << endl;
 
-  string savedir = "formattedFakePlots/gammajetCR/";
+  string savedir = mkdirIfNeeded("out/fakeplot/gammajetCR/");
 
   vector<string> plots;      vector<string> labels;
   plots.push_back("l_pt");   labels.push_back("P_{T}");
@@ -386,7 +380,7 @@ void FakePlotting::DataRateMCSub()
     return;
   }
 
-  string savedir = "formattedFakePlots/corDataRate/";
+  string savedir = mkdirIfNeeded("out/fakeplot/corDataRate/");
   
   File f_data = m_files[0];
   File f_mc   = m_files[1];
@@ -453,18 +447,10 @@ void FakePlotting::DataMCSF(RunOption ro)
     cout << "Not enough files to data/mc sf" << endl;
     return;
   }
-  
-  //string savedir = "formattedFakePlots/sfPlots2013_Feb14/";
-  //string savedir = "formattedFakePlots/sfPlots2013_Feb18/";
-  //string savedir = "formattedFakePlots/sfPlots2013_May2_AltMuIso/";
-  //string savedir = "formattedFakePlots/sfPlots2013_May6/";
-  //string savedir = "formattedFakePlots/sfPlots2013_May24/";
-  //string savedir = "formattedFakePlots/sfPlots2013_Jun25/";
-  //string savedir = "formattedFakePlots/sfPlots2013_Jun26/";
-  //string savedir = "formattedFakePlots/sfPlots2013_Jul8/";
-  string savedir = "formattedFakePlots/sfPlots2013_Jul15/";
+  string savedir = (ro == RO_DataMC
+                    ? mkdirIfNeeded("out/fakeplot/dataMCRates/")
+                    : mkdirIfNeeded("out/fakeplot/sfPlots2013_Jul15/"));
 
-  if(ro == RO_DataMC) savedir = "formattedFakePlots/dataMCRates/";
 
   //File f_data = m_files[0];
   //File f_mc   = m_files[1];
@@ -625,7 +611,7 @@ void FakePlotting::MCSRRates()
 
   if(m_dbg) cout << "MCSRRates" << endl;
 
-  string savedir = "formattedFakePlots/mcSRRates/";
+  string savedir = mkdirIfNeeded("out/fakeplot/mcSRRates/");
 
   vector<string> plots;      vector<string> labels;
   plots.push_back("l_pt");   labels.push_back("P_{T}");
@@ -697,7 +683,7 @@ void FakePlotting::Composition()
   // Plot the composition (HF/LF/Conversion) in the various
   // signal regions.
   
-  string savedir = "formattedFakePlots/Composition2012_Sep25/";
+  string savedir = mkdirIfNeeded("out/fakeplot/Composition2012_Sep25/");
 
   TH1F* hists[6];
   TCanvas* c = makeCanvas("c");
@@ -861,7 +847,7 @@ void FakePlotting::TLPlots()
   //string savedir = "formattedFakePlots/TLPlots_Feb14/";
   //string savedir = "formattedFakePlots/TLPlots_Feb18/";
   //string savedir = "formattedFakePlots/TLPlots_Feb28/";
-  string savedir = "formattedFakePlots/TLPlots_Apr10/";
+  string savedir = mkdirIfNeeded("out/fakeplot/TLPlots_Apr10/");
 
   vector<string> h_names;
   string u = "_";
