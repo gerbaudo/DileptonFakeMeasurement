@@ -28,6 +28,20 @@ FakePlotting::FakePlotting(RunOption runOpt) :
 //--------------------------------------------------------//
 // Initialize all files
 //--------------------------------------------------------//
+bool initInputFile(File &out,
+                   const string &fname, const string &name, const string &sname,
+                   int color, int marker)
+{
+  out.file  = new TFile(fname.c_str());
+  out.name  = name;
+  out.sname = sname;
+  out.color = color;
+  out.marker = marker;
+  bool inputIsValid(out.file && out.file->IsOpen());
+  if(!inputIsValid)
+    cout<<"invalid input '"<<fname<<"'"<<" ("<<out.file<<")"<<endl;
+  return inputIsValid;
+}
 void FakePlotting::init()
 {
 
@@ -37,68 +51,13 @@ void FakePlotting::init()
   string addition = "";
   string inDir = "out/fakerate/merged/";
 
-  // Data
-  data.file  = new TFile((inDir+"data"+dataappend+".root").c_str());
-  data.name  = "Data A-B12";
-  data.sname = "data";
-  data.color = kBlack;
-  data.marker = 20;
-
-  // Total MC (sum of below)
-  totMC.file  = new TFile((inDir+"allBkg"+append+addition+".root").c_str());
-  totMC.name  = "MC Combined";
-  totMC.sname = "mc";
-  totMC.color = kRed;
-  totMC.marker = 25;
-  
-  // ttbar
-  ttbar.file  = new TFile((inDir+"ttbar"+append+addition+".root").c_str());
-  ttbar.name  = "t#bar{t}";
-  ttbar.sname = "ttbar";
-  ttbar.color = kRed; //kCyan-1;
-  ttbar.marker = 21; 
-
-  // Z+jets
-  Zjets.file  = new TFile((inDir+"zjets"+append+addition+".root").c_str());
-  Zjets.name  = "Z+jets";
-  Zjets.sname = "Zjets";
-  Zjets.color = kOrange; //kViolet-9;
-  Zjets.marker = 23;
-
-  // W+jets
-  Wjets.file  = new TFile((inDir+"wjets"+append+addition+".root").c_str());
-  Wjets.name  = "W+jets";
-  Wjets.sname = "Wjets";
-  Wjets.color = kViolet+2; //kViolet-7;
-  Wjets.marker = 22;
-
-  // Diboson
-  diboson.file  = new TFile((inDir+"diboson"+append+addition+".root").c_str());
-  diboson.name  = "Diboson";
-  diboson.sname = "dib";
-  diboson.color = kMagenta;
-  diboson.marker = 34;
-  
-  // HF samples
-  HF.file  = new TFile((inDir+"heavyflavor"+append+addition+".root").c_str());
-  HF.name  = "HF";
-  HF.sname = "HF";
-  HF.color = kBlue;
-  HF.marker = 26;
-
-  // Gamma+jet
-  //gjet.file  = new TFile((inDir+"gammajet"+append+addition+".root").c_str());
-  //gjet.name  = "#gamma+jet";
-  //gjet.sname = "gjet";
-  //gjet.color = kCyan;
-  //gjet.marker = 27;
-
-  // Fake Prediction
-  fakePred.file   = new TFile("out/data_Apr2_n0135_pass6.FakeHists.root");
-  fakePred.name   = "Fake";
-  fakePred.sname  = "fake";
-  fakePred.color  = kBlack;
-  fakePred.marker = 20;
+  initInputFile(data,    inDir+"data"+dataappend+".root", "Data A-B12", "data", kBlack, 20);
+  initInputFile(totMC,   inDir+"allBkg"+append+addition+".root", "MC Combined", "mc", kRed, 25);
+  initInputFile(ttbar,   inDir+"ttbar"+append+addition+".root", "t#bar{t}",    "ttbar", kRed, 21);
+  initInputFile(Zjets,   inDir+"zjets"+append+addition+".root", "Z+jets", "Zjets", kOrange, 23);
+  initInputFile(Wjets,   inDir+"wjets"+append+addition+".root", "W+jets", "Wjets", kViolet+2, 22);
+  initInputFile(diboson, inDir+"diboson"+append+addition+".root", "Diboson", "dib", kMagenta, 34);
+  initInputFile(HF,      inDir+"heavyflavor"+append+addition+".root", "HF", "HF", kBlue, 26);
 
   if(m_runopt == RO_Data){
     m_files.push_back(data);
