@@ -72,13 +72,6 @@ void FakePlotting::init()
   Wjets.color = kViolet+2; //kViolet-7;
   Wjets.marker = 22;
 
-  // Single Top
-  stop.file  = new TFile((inDir+"singletop"+append+addition+".root").c_str());
-  stop.name  = "Single Top";
-  stop.sname = "stop";
-  stop.color = kAzure-2;
-  stop.marker = 34;
-
   // Diboson
   diboson.file  = new TFile((inDir+"diboson"+append+addition+".root").c_str());
   diboson.name  = "Diboson";
@@ -117,7 +110,6 @@ void FakePlotting::init()
     m_files.push_back(ttbar);
     m_files.push_back(Wjets);
     m_files.push_back(Zjets);
-    m_files.push_back(stop);
     m_files.push_back(diboson);
     totMC.color = kBlack;
     //if(m_runopt != RO_SRComp) m_files.push_back(totMC);
@@ -1139,7 +1131,6 @@ void FakePlotting::GetHFNorm()
     
     float n_wjet   = ((TH1F*) Wjets.file->Get(plot.c_str()))->Integral();
     float n_zjet   = ((TH1F*) Zjets.file->Get(plot.c_str()))->Integral();
-    float n_stop   = ((TH1F*) stop.file->Get(plot.c_str()))->Integral();
     float n_ttbar  = ((TH1F*) ttbar.file->Get(plot.c_str()))->Integral();
     float n_dib    = ((TH1F*) diboson.file->Get(plot.c_str()))->Integral();
     float n_heavy  = ((TH1F*) HF.file->Get(plot.c_str()))->Integral();
@@ -1148,13 +1139,12 @@ void FakePlotting::GetHFNorm()
     cout<<leptons.at(l)<<endl;
     cout<<"W+jet:      "<<n_wjet<<endl;	
     cout<<"Z+jet:      "<<n_zjet<<endl;
-    cout<<"Single Top: "<<n_stop<<endl;
     cout<<"ttbar:      "<<n_ttbar<<endl;
     cout<<"diboson:    "<<n_dib<<endl;
     cout<<"HF:         "<<n_heavy<<endl;
     cout<<"data:       "<<n_data<<endl;
 
-    float norm = (n_data-n_wjet-n_zjet-n_stop-n_ttbar-n_dib)/n_heavy;
+    float norm = (n_data-n_wjet-n_zjet-n_ttbar-n_dib)/n_heavy;
     cout<<"Norm:       "<<norm<<endl;
   }
     
@@ -1543,9 +1533,6 @@ TH1F* FakePlotting::buildLFWjetRate(string lepton, string variable)
   TH1F* zjetnum  = Get(Zjets.file, mcname+"_num", kBlack, "", "Rate", 20);
   TH1F* zjetden  = Get(Zjets.file, mcname+"_den", kBlack, "", "Rate", 20);
   cout<<"Have zjets"<<endl;
-  TH1F* topnum   = Get(stop.file, mcname+"_num", kBlack, "", "Rate", 20);
-  TH1F* topden   = Get(stop.file, mcname+"_den", kBlack, "", "Rate", 20);
-  cout<<"Have top"<<endl;
 
   TH1F* correctedRate = (TH1F*) dtnum->Clone( (dataname+"_rat").c_str() );
   correctedRate->Reset();
@@ -1555,8 +1542,6 @@ TH1F* FakePlotting::buildLFWjetRate(string lepton, string variable)
   dtden->Add(ttbarden, -1);
   dtnum->Add(zjetnum, -1);
   dtden->Add(zjetden, -1);
-  dtnum->Add(topnum, -1);
-  dtden->Add(topden, -1);
 
   for(int bin=1; bin<=dtnum->GetNbinsX(); ++bin){
     if(dtnum->GetBinContent(bin) < 0) dtnum->SetBinContent(bin,0);
