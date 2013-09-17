@@ -28,9 +28,9 @@ FakePlotting::FakePlotting(RunOption runOpt) :
 //--------------------------------------------------------//
 // Initialize all files
 //--------------------------------------------------------//
-bool initInputFile(File &out,
-                   const string &fname, const string &name, const string &sname,
-                   int color, int marker)
+bool FakePlotting::initInputFile(File &out,
+                                 const string &fname, const string &name, const string &sname,
+                                 int color, int marker)
 {
   out.file  = new TFile(fname.c_str());
   out.name  = name;
@@ -42,6 +42,7 @@ bool initInputFile(File &out,
     cout<<"invalid input '"<<fname<<"'"<<" ("<<out.file<<")"<<endl;
   return inputIsValid;
 }
+//----------------------------------------------------------
 void FakePlotting::init()
 {
 
