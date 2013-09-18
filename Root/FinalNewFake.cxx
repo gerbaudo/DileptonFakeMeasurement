@@ -4,6 +4,8 @@
 #include "SusyTest0/FinalNewFake.h"
 #include "SusyTest0/utils.h"
 
+// same old ugly hack, to be removed ASAP. (DG 2013-09-17)
+string getSrName(int sr) { return (SR_WHSS!=sr ? SRNames[sr] : CRNames[CR_SRWHSS]); }
 //------------------------------------------------------------//
 // Constructor
 //------------------------------------------------------------//
@@ -80,7 +82,7 @@ void FinalNewFake::buildElectronRateSR()
   }
   // Create and Save Fake Rate
   for(int sr = 0; sr<SR_N; ++sr){
-    string srname = SRNames[sr];
+    string srname = getSrName(sr);
     cout<<"Getting for sr: "<<srname<<endl;
     el_percent_qcd.clear();
     el_percent_conv.clear();    
@@ -101,7 +103,7 @@ void FinalNewFake::buildElectronRateSR()
   for(uint i=0; i<el_contrib_conv.size(); ++i) if(TH1 *h = el_contrib_conv.at(i)) h->Delete();
   // Real Efficiency
   for(int sr = 0; sr<SR_N; ++sr){
-    string srname = SRNames[sr];
+    string srname = getSrName(sr);
     el_percent_real.clear();
     getPercentages(lepton, el_percent_real,  srname);
     cout<<"Getting for sr: "<<srname<<endl;
@@ -145,7 +147,7 @@ void FinalNewFake::buildMuonRateSR()
   }
   // Create and Save Fake Rate
   for(int sr = 0; sr<SR_N; ++sr){
-    string srname = SRNames[sr];
+    string srname = getSrName(sr);
     cout<<"Getting for sr: "<<srname<<endl;
     mu_percent_qcd.clear();
     mu_percent_conv.clear();    
@@ -170,7 +172,7 @@ void FinalNewFake::buildMuonRateSR()
 
   // Real Efficiency
   for(int sr = 0; sr<SR_N; ++sr){
-    string srname = SRNames[sr];    
+    string srname = getSrName(sr);
     mu_percent_real.clear();
     getPercentages(lepton, mu_percent_real,  srname);
     cout<<"Getting for sr: "<<srname<<endl;
