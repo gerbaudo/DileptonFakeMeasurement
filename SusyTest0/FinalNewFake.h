@@ -54,11 +54,8 @@ const float mu_real_dn = 0.02;
 enum FakeProcess
 {
   FP_ttbar=0,
-  //FP_top=0,
   FP_Wjet,
   FP_Zjet,
-  //FP_Vjet,
-  FP_stop,
   FP_dib,
   FP_bbbar,
   FP_N
