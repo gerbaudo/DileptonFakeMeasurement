@@ -2,6 +2,7 @@
 // the matrix method.
 
 #include "SusyTest0/FinalNewFake.h"
+#include "SusyTest0/utils.h"
 
 //------------------------------------------------------------//
 // Constructor
@@ -710,8 +711,8 @@ void FinalNewFake::dumpPlot(TH1* hist)//, string save)
   leg->Draw("same");
   
   string name = hist->GetName();
-  c->SaveAs(("finalfake/rateplots_Jul9/" + name + ".eps").c_str());
-  //c->SaveAs(("finalfake/rateplots_Jul9/" + name + ".pdf").c_str());
+  string dir = basedir(m_outfile->GetName());
+  c->SaveAs((dir + name + ".eps").c_str());
   delete c;
   
 }
