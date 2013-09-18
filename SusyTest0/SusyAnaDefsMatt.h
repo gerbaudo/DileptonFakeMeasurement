@@ -12,6 +12,7 @@
 
 enum ControlRegion 
 {
+  // DG These are needed to compute the SF and the rates (pseudo t&p)
   CR_Real = 0,       // Real Z window
   CR_SideLow,        // Real Side band Lower
   CR_SideHigh,       // Real Side band higher
@@ -29,6 +30,7 @@ enum ControlRegion
   CR_MCReal,         // MC cr Real
   CR_MCNone,         // MC cr with no metrel cuts
   
+  // DG These are the SR, which we need b/c we want to compute the compositions.
   CR_SRmT2a,
   CR_SRmT2b,
   CR_SRmT2c,
@@ -232,6 +234,11 @@ static string DSNames[] =
 };
 
 // Signal regions
+
+// DG These are the ones where you actually want to compute the fake
+// prediction (i.e. your signal regions of the analysis, including the
+// ones where you want to plot stuff to make checks.)
+
 enum SignalRegion
 {
   SRmT2a = 0,
