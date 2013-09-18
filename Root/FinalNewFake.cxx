@@ -6,6 +6,7 @@
 
 // same old ugly hack, to be removed ASAP. (DG 2013-09-17)
 string getSrName(int sr) { return (SR_WHSS!=sr ? SRNames[sr] : CRNames[CR_SRWHSS]); }
+
 //------------------------------------------------------------//
 // Constructor
 //------------------------------------------------------------//
@@ -83,10 +84,14 @@ void FinalNewFake::buildElectronRateSR()
   // Create and Save Fake Rate
   for(int sr = 0; sr<SR_N; ++sr){
     string srname = getSrName(sr);
-    if(m_bg) cout<<"Getting for sr: "<<srname<<endl;
+    if(m_dbg) cout<<"Getting for sr: "<<srname<<endl;
     el_percent_qcd.clear();
     el_percent_conv.clear();    
     getPercentages(lepton, el_percent_qcd, el_percent_conv,  srname);
+    cout<<"Fake rate: percentages for sr '"<<srname<<"', electron"<<endl
+        <<"el_percent_qcd: "<<vdouble2str(el_percent_qcd)<<endl
+        <<"el_percent_conv: "<<vdouble2str(el_percent_conv)<<endl
+        <<endl;
     if((el_fr = getFinalRate(el_contrib_qcd, el_contrib_conv, el_percent_qcd, el_percent_conv))) {
       el_fr->SetName(("el_fake_rate_"+srname).c_str());
       el_fr->SetTitle(("Electron Fake Rate: " + SRProperNames[sr]).c_str());
@@ -106,7 +111,10 @@ void FinalNewFake::buildElectronRateSR()
     string srname = getSrName(sr);
     el_percent_real.clear();
     getPercentages(lepton, el_percent_real,  srname);
-    if(m_bg) cout<<"Getting for sr: "<<srname<<endl;
+    cout<<"Real eff: percentages for sr '"<<srname<<"', electron"<<endl
+        <<"el_percent_real: "<<vdouble2str(el_percent_real)<<endl
+        <<endl;
+    if(m_dbg) cout<<"Getting for sr: "<<srname<<endl;
     if((el_re = getFinalRate(el_contrib_real,el_percent_real))) {
       el_re->SetName(("el_real_eff_"+srname).c_str());
       el_re->SetTitle(("Electron Real Eff: " + SRProperNames[sr]).c_str());
@@ -152,6 +160,10 @@ void FinalNewFake::buildMuonRateSR()
     mu_percent_qcd.clear();
     mu_percent_conv.clear();    
     getPercentages(lepton, mu_percent_qcd, mu_percent_conv,  srname);
+    cout<<"Fake rate: percentages for sr '"<<srname<<"', muon"<<endl
+        <<"mu_percent_qcd: "<<vdouble2str(mu_percent_qcd)<<endl
+        <<"mu_percent_conv: "<<vdouble2str(mu_percent_conv)<<endl
+        <<endl;
     mu_fr = getFinalRate(mu_contrib_qcd, mu_contrib_conv, mu_percent_qcd, mu_percent_conv);
     if(mu_fr) {
       mu_fr->SetName(("mu_fake_rate_"+srname).c_str());
@@ -173,6 +185,9 @@ void FinalNewFake::buildMuonRateSR()
     string srname = getSrName(sr);
     mu_percent_real.clear();
     getPercentages(lepton, mu_percent_real,  srname);
+    cout<<"Real eff: percentages for sr '"<<srname<<"', muon"<<endl
+        <<"mu_percent_real: "<<vdouble2str(mu_percent_real)<<endl
+        <<endl;
     if(m_dbg) cout<<"Getting for sr: "<<srname<<endl;
     mu_re = getFinalRate(mu_contrib_real,mu_percent_real);
     if(mu_re) {
