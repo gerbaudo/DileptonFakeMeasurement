@@ -695,6 +695,7 @@ void FinalNewFake::dumpPlot(TH1* hist)//, string save)
   string name = hist->GetName();
   string dir = basedir(m_outfile->GetName());
   c->SaveAs((dir + name + ".eps").c_str());
+  c->SaveAs((dir + name + ".png").c_str());
   delete c;
   
 }
