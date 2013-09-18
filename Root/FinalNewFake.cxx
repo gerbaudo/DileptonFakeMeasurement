@@ -83,7 +83,7 @@ void FinalNewFake::buildElectronRateSR()
   // Create and Save Fake Rate
   for(int sr = 0; sr<SR_N; ++sr){
     string srname = getSrName(sr);
-    cout<<"Getting for sr: "<<srname<<endl;
+    if(m_bg) cout<<"Getting for sr: "<<srname<<endl;
     el_percent_qcd.clear();
     el_percent_conv.clear();    
     getPercentages(lepton, el_percent_qcd, el_percent_conv,  srname);
@@ -106,7 +106,7 @@ void FinalNewFake::buildElectronRateSR()
     string srname = getSrName(sr);
     el_percent_real.clear();
     getPercentages(lepton, el_percent_real,  srname);
-    cout<<"Getting for sr: "<<srname<<endl;
+    if(m_bg) cout<<"Getting for sr: "<<srname<<endl;
     if((el_re = getFinalRate(el_contrib_real,el_percent_real))) {
       el_re->SetName(("el_real_eff_"+srname).c_str());
       el_re->SetTitle(("Electron Real Eff: " + SRProperNames[sr]).c_str());
@@ -365,8 +365,6 @@ TH1* FinalNewFake::getFinalRate(vector<TH1*> rates, vector<TH1*> percentages)
   // It is assumed that the ith component of rates corresponds
   // to the ith component of percentages.
   TH1* final = 0;
-  cout<<"in getFinalRate"<<endl;
-  cout<<"rates["<<rates.size()<<endl;
   if(!rates.back()) { cout<<"FinalNewFake::getFinalRate: invalid last histo"<<endl; return final; }
   if((final = static_cast<TH1*>(rates.back()->Clone("final_rate")))) {
     final->Reset();
