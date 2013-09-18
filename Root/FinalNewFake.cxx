@@ -6,7 +6,7 @@
 
 // same old ugly hack, to be removed ASAP. (DG 2013-09-17)
 string getSrName(int sr) { return (SR_WHSS!=sr ? SRNames[sr] : CRNames[CR_SRWHSS]); }
-
+string samplesHeader("\t\tttbar\t Wjet\t Zjet\t dib\t bbbar");
 //------------------------------------------------------------//
 // Constructor
 //------------------------------------------------------------//
@@ -89,6 +89,7 @@ void FinalNewFake::buildElectronRateSR()
     el_percent_conv.clear();    
     getPercentages(lepton, el_percent_qcd, el_percent_conv,  srname);
     cout<<"Fake rate: percentages for sr '"<<srname<<"', electron"<<endl
+        <<samplesHeader<<endl
         <<"el_percent_qcd: "<<vdouble2str(el_percent_qcd)<<endl
         <<"el_percent_conv: "<<vdouble2str(el_percent_conv)<<endl
         <<endl;
@@ -112,6 +113,7 @@ void FinalNewFake::buildElectronRateSR()
     el_percent_real.clear();
     getPercentages(lepton, el_percent_real,  srname);
     cout<<"Real eff: percentages for sr '"<<srname<<"', electron"<<endl
+        <<samplesHeader<<endl
         <<"el_percent_real: "<<vdouble2str(el_percent_real)<<endl
         <<endl;
     if(m_dbg) cout<<"Getting for sr: "<<srname<<endl;
@@ -161,6 +163,7 @@ void FinalNewFake::buildMuonRateSR()
     mu_percent_conv.clear();    
     getPercentages(lepton, mu_percent_qcd, mu_percent_conv,  srname);
     cout<<"Fake rate: percentages for sr '"<<srname<<"', muon"<<endl
+        <<samplesHeader<<endl
         <<"mu_percent_qcd: "<<vdouble2str(mu_percent_qcd)<<endl
         <<"mu_percent_conv: "<<vdouble2str(mu_percent_conv)<<endl
         <<endl;
@@ -186,6 +189,7 @@ void FinalNewFake::buildMuonRateSR()
     mu_percent_real.clear();
     getPercentages(lepton, mu_percent_real,  srname);
     cout<<"Real eff: percentages for sr '"<<srname<<"', muon"<<endl
+        <<samplesHeader<<endl
         <<"mu_percent_real: "<<vdouble2str(mu_percent_real)<<endl
         <<endl;
     if(m_dbg) cout<<"Getting for sr: "<<srname<<endl;
