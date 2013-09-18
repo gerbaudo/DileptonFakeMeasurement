@@ -148,13 +148,11 @@ void FinalNewFake::buildMuonRateSR()
   // Create and Save Fake Rate
   for(int sr = 0; sr<SR_N; ++sr){
     string srname = getSrName(sr);
-    cout<<"Getting for sr: "<<srname<<endl;
+    if(m_dbg) cout<<"Getting for sr: "<<srname<<endl;
     mu_percent_qcd.clear();
     mu_percent_conv.clear();    
     getPercentages(lepton, mu_percent_qcd, mu_percent_conv,  srname);
-    cout<<"after getPercentages"<<endl;
     mu_fr = getFinalRate(mu_contrib_qcd, mu_contrib_conv, mu_percent_qcd, mu_percent_conv);
-    cout<<"after getFinalRate"<<endl;
     if(mu_fr) {
       mu_fr->SetName(("mu_fake_rate_"+srname).c_str());
       mu_fr->SetTitle(("Muon Fake Rate: " + SRProperNames[sr]).c_str());
@@ -175,7 +173,7 @@ void FinalNewFake::buildMuonRateSR()
     string srname = getSrName(sr);
     mu_percent_real.clear();
     getPercentages(lepton, mu_percent_real,  srname);
-    cout<<"Getting for sr: "<<srname<<endl;
+    if(m_dbg) cout<<"Getting for sr: "<<srname<<endl;
     mu_re = getFinalRate(mu_contrib_real,mu_percent_real);
     if(mu_re) {
       mu_re->SetName(("mu_real_eff_"+srname).c_str());
@@ -370,9 +368,7 @@ TH1* FinalNewFake::getFinalRate(vector<TH1*> rates, vector<TH1*> percentages)
   cout<<"in getFinalRate"<<endl;
   cout<<"rates["<<rates.size()<<endl;
   if(!rates.back()) { cout<<"FinalNewFake::getFinalRate: invalid last histo"<<endl; return final; }
-  cout<<"rates.back() : "<<rates.back()<<endl;
   if((final = static_cast<TH1*>(rates.back()->Clone("final_rate")))) {
-    cout<<"final : "<<final<<endl;
     final->Reset();
     int nbins = final->GetNbinsX();
     for(int bin=1; bin<=nbins; ++bin){ // Loop over the bins and weight
@@ -461,10 +457,8 @@ TH1* FinalNewFake::getFinalRate(vector<TH1*> rates,
   // Here combine the rates based on their relative percentages.
   // It is assumed that the ith component of rates corresponds
   // to the ith component of percentages.
-
   TH1* final = 0;
   if(!rates.back()) { cout<<"FinalNewFake::getFinalRate: invalid last histo"<<endl; return final; }
-  cout<<"rates.back() : "<<rates.back()<<endl;
   if((final = static_cast<TH1*>(rates.back()->Clone("final_rate")))) {
     final->Reset();
     int nbins = final->GetNbinsX();
