@@ -125,7 +125,6 @@ class FinalNewFake : public FakePlotting
  protected:
   
   File m_mc;            // Average rate
-  File m_top;           // File for top
   File m_Wjet;          // File for Wjet
   File m_Zjet;         // File for Zjet
   File m_diboson;       // File for diboson
