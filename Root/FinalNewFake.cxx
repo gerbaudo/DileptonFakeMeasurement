@@ -24,7 +24,6 @@ FinalNewFake::FinalNewFake(string outputname) :
   m_files[FP_Wjet]  = m_Wjet;
   m_files[FP_Zjet]  = m_Zjet;
   m_files[FP_dib]   = m_diboson;
-  m_files[FP_stop]  = m_top;
   m_files[FP_bbbar] = m_bbbar;
 
   m_outfile = new TFile((inDir+outputname+".root").c_str(), "recreate");
@@ -40,9 +39,7 @@ FinalNewFake::~FinalNewFake()
   m_ttbar.file->Close();
   m_Wjet.file->Close();
   m_Zjet.file->Close();
-  m_top.file->Close();
   m_diboson.file->Close();
-
 }
 
 //------------------------------------------------------------//
