@@ -240,7 +240,7 @@ def plotHistos(histos1=[], histos2=[], histosRatio=[], label1='Davide', label2='
         yAx.SetLabelSize(1.0/(1.0-splitFraction)*yAx.GetLabelSize())
         h.SetTitle('')
         h.SetStats(0)
-    print 'fh: ',firstHisto(histos1).GetName(),' nratios :',len(histosRatio)
+    #print 'fh: ',firstHisto(histos1).GetName(),' nratios :',len(histosRatio) # debug
     def bc(h) : return ["%.2f"%h.GetBinContent(b) for b in xrange(1, h.GetNbinsX()+1)]
     # print '\n'.join(["%s : %s"%(s, bc(h)) for s,h in histosRatio.iteritems()]) # debug 
     draw(padTop, histosRatio, colors, markersr, asFirst=True)
@@ -269,9 +269,9 @@ def plotHistos(histos1=[], histos2=[], histosRatio=[], label1='Davide', label2='
 #___________________________________________________________
         
 if __name__=='__main__' :
-    
-    fnameDavide = 'percentages.txt'
-    fnameMatt = 'dumpPercentages_ttbarTopCombined.txt'
+    ioDir = 'out/fakerate/'
+    fnameDavide = ioDir+'percentages_davide.txt'
+    fnameMatt   = ioDir+'percentages_matt.txt'
     entriesD = parseFile(fnameDavide)
     entriesM = parseFile(fnameMatt)
     indent = 0*'  '
@@ -304,5 +304,4 @@ if __name__=='__main__' :
                                  histosRatio=hRs[vt], scaleXlabelsBot=1.5,
                                  label1='Davide', label2='Matt', canPrefix=hprefix,
                                  colors=colors, markers=markers, lineStyle1=1, lineStyle2=2)
-                can.SaveAs(hprefix+'_'+vt+'.png')
-            
+                can.SaveAs(ioDir+hprefix+'_'+vt+'.png')

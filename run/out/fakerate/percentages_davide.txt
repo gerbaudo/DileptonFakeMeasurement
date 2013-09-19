@@ -1,0 +1,405 @@
+Final Fake Rate
+
+flags:
+  dbg                      0
+  output file:             fakeout
+
+FinalNewFake: saving output to: 'out/fakerate/merged/fakeout.root'
+Fake rate: percentages for sr 'SRmT2a', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.000606924, 0.0915346, 0.00646265, 0.000635465, 0.90076, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'SRmT2b', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.000606924, 0.0915346, 0.00646265, 0.000635465, 0.90076, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'SRmT2c', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.000606924, 0.0915346, 0.00646265, 0.000635465, 0.90076, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'SRWWa', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.000753032, 0.0974999, 0.00801844, 0.000726692, 0.893002, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'SRWWb', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.000670587, 0.0979925, 0.00714055, 0.000694116, 0.893502, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'SRWWc', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.000606924, 0.0915346, 0.00646265, 0.000635465, 0.90076, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'SRZjets', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 1, 0, 0, 0, 0, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'VRSS', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.132146, 0.192774, 0.00622229, 0.00498822, 0.663869, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'CRWWMet', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.0221546, 0.968198, 0.00689738, 0.0027501, 0, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'CRWWmT2', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.000663577, 0.0615249, 0.004243, 0.000248559, 0.93332, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'CRTopMet', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.96553, 0, 0.0344696, 0, 0, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'CRTopmT2', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.0722907, 0.0139454, 0.000648305, 0.00829181, 0.904824, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'CRZVMet', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.0131274, 0.872993, 0.0180483, 0.0122397, 5.36118e-05, 
+mu_percent_conv: 0, 0, 0.083533, 5.17688e-06, 0, 
+
+Fake rate: percentages for sr 'CRZVmT2_90', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.0131274, 0.872993, 0.0180483, 0.0122397, 5.36118e-05, 
+mu_percent_conv: 0, 0, 0.083533, 5.17688e-06, 0, 
+
+Fake rate: percentages for sr 'CRZVmT2_120', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.0131274, 0.872993, 0.0180483, 0.0122397, 5.36118e-05, 
+mu_percent_conv: 0, 0, 0.083533, 5.17688e-06, 0, 
+
+Fake rate: percentages for sr 'CRZVmT2_150', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.0131274, 0.872993, 0.0180483, 0.0122397, 5.36118e-05, 
+mu_percent_conv: 0, 0, 0.083533, 5.17688e-06, 0, 
+
+Fake rate: percentages for sr 'CRZVmT2_100', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.0131274, 0.872993, 0.0180483, 0.0122397, 5.36118e-05, 
+mu_percent_conv: 0, 0, 0.083533, 5.17688e-06, 0, 
+
+Fake rate: percentages for sr 'CRTopZjets', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.873217, 0.126783, 0, 0, 0, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'CRZXZjets', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.614523, 0.385477, 0, 0, 0, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'CR_SSInc', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.0210449, 0.0348528, 0.00725132, 0.00154235, 0.935309, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'CRPremT2', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.000606924, 0.0915346, 0.00646265, 0.000635465, 0.90076, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Fake rate: percentages for sr 'CR_WHSS', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd: 0.619881, 0.315774, 0.0186659, 0.0456788, 0, 
+mu_percent_conv: 0, 0, 0, 0, 0, 
+
+Real eff: percentages for sr 'SRmT2a', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.000957607, 0.00385725, 0.899834, 0.0953508, 0, 
+
+Real eff: percentages for sr 'SRmT2b', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.000957607, 0.00385725, 0.899834, 0.0953508, 0, 
+
+Real eff: percentages for sr 'SRmT2c', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.000957607, 0.00385725, 0.899834, 0.0953508, 0, 
+
+Real eff: percentages for sr 'SRWWa', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.000521438, 0.00334312, 0.89761, 0.0985251, 0, 
+
+Real eff: percentages for sr 'SRWWb', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.000727633, 0.00349424, 0.901786, 0.0939926, 0, 
+
+Real eff: percentages for sr 'SRWWc', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.000957607, 0.00385725, 0.899834, 0.0953508, 0, 
+
+Real eff: percentages for sr 'SRZjets', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.00111754, 0, 0.979982, 0.0189001, 0, 
+
+Real eff: percentages for sr 'VRSS', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.140883, 0.592338, 0.0408671, 0.225912, 0, 
+
+Real eff: percentages for sr 'CRWWMet', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.0397905, 0.254334, 0.0280049, 0.677871, 0, 
+
+Real eff: percentages for sr 'CRWWmT2', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.0214195, 0.158768, 0.349193, 0.470619, 0, 
+
+Real eff: percentages for sr 'CRTopMet', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.972687, 0.000138251, 0.00422938, 0.0229456, 0, 
+
+Real eff: percentages for sr 'CRTopmT2', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.941658, 0.00999717, 0.0139338, 0.0344113, 0, 
+
+Real eff: percentages for sr 'CRZVMet', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 1.05575e-05, 9.26295e-06, 0.995617, 0.00436286, 0, 
+
+Real eff: percentages for sr 'CRZVmT2_90', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 1.05575e-05, 9.26295e-06, 0.995617, 0.00436286, 0, 
+
+Real eff: percentages for sr 'CRZVmT2_120', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 1.05575e-05, 9.26295e-06, 0.995617, 0.00436286, 0, 
+
+Real eff: percentages for sr 'CRZVmT2_150', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 1.05575e-05, 9.26295e-06, 0.995617, 0.00436286, 0, 
+
+Real eff: percentages for sr 'CRZVmT2_100', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 1.05575e-05, 9.26295e-06, 0.995617, 0.00436286, 0, 
+
+Real eff: percentages for sr 'CRTopZjets', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.511098, 0.000283247, 0.436564, 0.0520551, 0, 
+
+Real eff: percentages for sr 'CRZXZjets', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.000895878, 1.87652e-05, 0.984486, 0.0145989, 0, 
+
+Real eff: percentages for sr 'CR_SSInc', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.121296, 0.511226, 0.135623, 0.231855, 0, 
+
+Real eff: percentages for sr 'CRPremT2', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.000957607, 0.00385725, 0.899834, 0.0953508, 0, 
+
+Real eff: percentages for sr 'CR_WHSS', muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real: 0.0841109, 0.242546, 0.00153759, 0.671805, 0, 
+
+Fake rate: percentages for sr 'SRmT2a', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.0010603, 0.243916, 0.0267805, 0.00770416, 0.3119, 
+el_percent_conv: 7.27001e-05, 0.191, 0.0867708, 0.101583, 0.0292131, 
+
+Fake rate: percentages for sr 'SRmT2b', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.0010603, 0.243916, 0.0267805, 0.00770416, 0.3119, 
+el_percent_conv: 7.27001e-05, 0.191, 0.0867708, 0.101583, 0.0292131, 
+
+Fake rate: percentages for sr 'SRmT2c', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.0010603, 0.243916, 0.0267805, 0.00770416, 0.3119, 
+el_percent_conv: 7.27001e-05, 0.191, 0.0867708, 0.101583, 0.0292131, 
+
+Fake rate: percentages for sr 'SRWWa', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.00118923, 0.21368, 0.0298463, 0.00567962, 0.331917, 
+el_percent_conv: 8.30545e-05, 0.207252, 0.103485, 0.0897352, 0.0171323, 
+
+Fake rate: percentages for sr 'SRWWb', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.00100995, 0.236015, 0.028266, 0.00619047, 0.320574, 
+el_percent_conv: 7.09028e-05, 0.202864, 0.0950423, 0.0953409, 0.0146257, 
+
+Fake rate: percentages for sr 'SRWWc', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.0010603, 0.243916, 0.0267805, 0.00770416, 0.3119, 
+el_percent_conv: 7.27001e-05, 0.191, 0.0867708, 0.101583, 0.0292131, 
+
+Fake rate: percentages for sr 'SRZjets', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.3217, 0.117298, 0.00363831, 0.00411056, 0, 
+el_percent_conv: 0.031428, 0.225851, 0.204502, 0.0914716, 0, 
+
+Fake rate: percentages for sr 'VRSS', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.139514, 0.272992, 0.0120813, 0.00865826, 0.0441279, 
+el_percent_conv: 0.0193652, 0.352609, 0.0186944, 0.112717, 0.0192403, 
+
+Fake rate: percentages for sr 'CRWWMet', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.00495065, 0.388714, 0.012379, 0.00937556, 0, 
+el_percent_conv: 0.000254474, 0.458298, 0.024644, 0.101384, 0, 
+
+Fake rate: percentages for sr 'CRWWmT2', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.000811793, 0.179926, 0.0202128, 0.00521687, 0.461111, 
+el_percent_conv: 3.19958e-05, 0.152116, 0.0715158, 0.06587, 0.0431884, 
+
+Fake rate: percentages for sr 'CRTopMet', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.659021, 0, 0, 0.0178213, 0, 
+el_percent_conv: 0.118792, 0.00994714, 0, 0.194418, 0, 
+
+Fake rate: percentages for sr 'CRTopmT2', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.18757, 0.148052, 0.00453709, 0.00868451, 0.286466, 
+el_percent_conv: 0.0429187, 0.0641211, 0.0350325, 0.0766681, 0.14595, 
+
+Fake rate: percentages for sr 'CRZVMet', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.00191677, 0.336784, 0.0527395, 0.011855, 0, 
+el_percent_conv: 0.00072709, 0.310712, 0.195472, 0.0897937, 0, 
+
+Fake rate: percentages for sr 'CRZVmT2_90', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.00191677, 0.336784, 0.0527395, 0.011855, 0, 
+el_percent_conv: 0.00072709, 0.310712, 0.195472, 0.0897937, 0, 
+
+Fake rate: percentages for sr 'CRZVmT2_120', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.00191677, 0.336784, 0.0527395, 0.011855, 0, 
+el_percent_conv: 0.00072709, 0.310712, 0.195472, 0.0897937, 0, 
+
+Fake rate: percentages for sr 'CRZVmT2_150', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.00191677, 0.336784, 0.0527395, 0.011855, 0, 
+el_percent_conv: 0.00072709, 0.310712, 0.195472, 0.0897937, 0, 
+
+Fake rate: percentages for sr 'CRZVmT2_100', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.00191677, 0.336784, 0.0527395, 0.011855, 0, 
+el_percent_conv: 0.00072709, 0.310712, 0.195472, 0.0897937, 0, 
+
+Fake rate: percentages for sr 'CRTopZjets', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.660238, 0.0821368, 0.0153243, 0.00785948, 0, 
+el_percent_conv: 0.086297, 0.0507598, 0.00563773, 0.091747, 0, 
+
+Fake rate: percentages for sr 'CRZXZjets', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.30246, 0.189816, 0.0500965, 0.0404058, 0, 
+el_percent_conv: 0.0189099, 0.216752, 0.0523407, 0.129219, 0, 
+
+Fake rate: percentages for sr 'CR_SSInc', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.0642869, 0.11463, 0.0222461, 0.00521686, 0.356196, 
+el_percent_conv: 0.0090765, 0.151572, 0.0519463, 0.0677675, 0.157062, 
+
+Fake rate: percentages for sr 'CRPremT2', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.0010603, 0.243916, 0.0267805, 0.00770416, 0.3119, 
+el_percent_conv: 7.27001e-05, 0.191, 0.0867708, 0.101583, 0.0292131, 
+
+Fake rate: percentages for sr 'CR_WHSS', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd: 0.0583292, 0.167757, 0, 0.027185, 0, 
+el_percent_conv: 0.0234623, 0.530564, 0.0374673, 0.155236, 0, 
+
+Real eff: percentages for sr 'SRmT2a', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.000950403, 0.00317599, 0.871861, 0.124012, 0, 
+
+Real eff: percentages for sr 'SRmT2b', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.000950403, 0.00317599, 0.871861, 0.124012, 0, 
+
+Real eff: percentages for sr 'SRmT2c', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.000950403, 0.00317599, 0.871861, 0.124012, 0, 
+
+Real eff: percentages for sr 'SRWWa', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.000513114, 0.00264149, 0.867083, 0.129762, 0, 
+
+Real eff: percentages for sr 'SRWWb', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.000732165, 0.00301806, 0.872679, 0.123571, 0, 
+
+Real eff: percentages for sr 'SRWWc', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.000950403, 0.00317599, 0.871861, 0.124012, 0, 
+
+Real eff: percentages for sr 'SRZjets', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.00131185, 0.000233162, 0.975716, 0.0227387, 0, 
+
+Real eff: percentages for sr 'VRSS', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.165796, 0.514728, 0.116341, 0.203135, 0, 
+
+Real eff: percentages for sr 'CRWWMet', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.0536663, 0.0290843, 0.0248599, 0.892389, 0, 
+
+Real eff: percentages for sr 'CRWWmT2', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.0270521, 0.0176142, 0.396127, 0.559207, 0, 
+
+Real eff: percentages for sr 'CRTopMet', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.975424, 0, 0.00435576, 0.0202207, 0, 
+
+Real eff: percentages for sr 'CRTopmT2', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.95596, 0.000307822, 0.0124673, 0.0312651, 0, 
+
+Real eff: percentages for sr 'CRZVMet', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 1.24911e-05, 0.00011659, 0.994956, 0.00491526, 0, 
+
+Real eff: percentages for sr 'CRZVmT2_90', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 1.24911e-05, 0.00011659, 0.994956, 0.00491526, 0, 
+
+Real eff: percentages for sr 'CRZVmT2_120', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 1.24911e-05, 0.00011659, 0.994956, 0.00491526, 0, 
+
+Real eff: percentages for sr 'CRZVmT2_150', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 1.24911e-05, 0.00011659, 0.994956, 0.00491526, 0, 
+
+Real eff: percentages for sr 'CRZVmT2_100', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 1.24911e-05, 0.00011659, 0.994956, 0.00491526, 0, 
+
+Real eff: percentages for sr 'CRTopZjets', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.520664, 0.00347559, 0.387316, 0.0885444, 0, 
+
+Real eff: percentages for sr 'CRZXZjets', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.00107726, 0.000189257, 0.982873, 0.0158601, 0, 
+
+Real eff: percentages for sr 'CR_SSInc', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.0200364, 0.0678815, 0.862029, 0.0500531, 0, 
+
+Real eff: percentages for sr 'CRPremT2', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.000950403, 0.00317599, 0.871861, 0.124012, 0, 
+
+Real eff: percentages for sr 'CR_WHSS', electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real: 0.0841804, 0.26202, 0.0398227, 0.613977, 0, 
+
+
+Plotting job done
