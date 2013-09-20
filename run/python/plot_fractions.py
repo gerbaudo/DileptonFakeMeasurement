@@ -220,7 +220,7 @@ def drawLegendWithDictKeys(pad, histosDict, legWidth=0.325, legHeight=0.225) :
     leg.Draw()
     pad.Update()
 
-def plotHistos(histos1=[], histos2=[], histosRatio=[], label1='Davide', label2='Matt',
+def plotHistos(histos1=[], histos2=[], histosRatio=[], label1='label1', label2='label2',
                canvas=None, canPrefix='', scaleXlabelsBot=1.0,
                colors={}, markers={},lineStyle1=1, lineStyle2=2, splitFraction=0.80) :
     "Assume again that the histos are in dict[sample]"
@@ -245,9 +245,10 @@ def plotHistos(histos1=[], histos2=[], histosRatio=[], label1='Davide', label2='
     # print '\n'.join(["%s : %s"%(s, bc(h)) for s,h in histosRatio.iteritems()]) # debug 
     draw(padTop, histosRatio, colors, markersr, asFirst=True)
     drawUnitLine(padTop, histosRatio)
-    drawLegendWithDictKeys(padTop, {'Davide'    : firstHisto(histos1),
-                                    'Matt'      : firstHisto(histos2),
-                                    'D/M ratio' : firstHisto(histosRatio)
+    labelR = "%s/%s ratio"%(label1[0], label2[0])
+    drawLegendWithDictKeys(padTop, {label1 : firstHisto(histos1),
+                                    label2 : firstHisto(histos2),
+                                    labelR : firstHisto(histosRatio)
                                     },
                             legWidth=0.225, legHeight=0.75)
     # bot pad with histos
