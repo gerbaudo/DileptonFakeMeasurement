@@ -16,3 +16,11 @@ def referenceLine(xmin=0., xmax=100.0) :
     l1.SetLineStyle(3)
     l1.SetLineColor(r.kGray+1)
     return l1
+def firstHisto(histos) :
+    return (histos.itervalues().next() if type(histos) is dict
+            else histos[0] if type(histos) is list
+            else None)
+def unitLineFromFirstHisto(histos) :
+    fH = firstHisto(histos)
+    xAx = fH.GetXaxis()
+    return referenceLine(xAx.GetXmin(), xAx.GetXmax())
