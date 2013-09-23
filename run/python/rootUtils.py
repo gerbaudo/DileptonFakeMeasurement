@@ -39,3 +39,4 @@ def drawLegendWithDictKeys(pad, histosDict, legWidth=0.325, legHeight=0.225) :
         leg.AddEntry(h, s, 'p')
     leg.Draw()
     pad.Update()
+    return leg
