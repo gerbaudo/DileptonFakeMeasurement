@@ -27,7 +27,10 @@ r.gStyle.SetPadTickX(1)
 r.gStyle.SetPadTickY(1)
 
 from utils import commonPrefix, commonSuffix
-from rootUtils import unitLineFromFirstHisto, firstHisto
+from rootUtils import (unitLineFromFirstHisto,
+                       firstHisto,
+                       drawLegendWithDictKeys
+                       )
 #___________________________________________________________  
 class Entry :
     """
@@ -191,20 +194,6 @@ def draw(pad, histos={}, colors={}, markers={}, lineStyle=1, asFirst=True) :
         h.SetMarkerStyle(m)
         h.Draw(opt)
         opt = opt if 'same' in opt else opt+' same'
-    pad.Update()
-def topRightLegend(pad,  legWidth, legHeight) :
-    rMarg, lMarg, tMarg = pad.GetRightMargin(), pad.GetLeftMargin(), pad.GetTopMargin()        
-    leg = r.TLegend(1.0 - rMarg - legWidth, 1.0 - tMarg - legHeight, 1.0 - rMarg, 1.0 - tMarg)
-    leg.SetBorderSize(1)
-    leg.SetFillColor(0)
-    leg.SetFillStyle(0)
-    pad._leg = leg
-    return leg
-def drawLegendWithDictKeys(pad, histosDict, legWidth=0.325, legHeight=0.225) :
-    leg = topRightLegend(pad, legWidth, legHeight)
-    for s,h in histosDict.iteritems() :
-        leg.AddEntry(h, s, 'p')
-    leg.Draw()
     pad.Update()
 
 def plotHistos(histos1=[], histos2=[], histosRatio=[], label1='label1', label2='label2',
