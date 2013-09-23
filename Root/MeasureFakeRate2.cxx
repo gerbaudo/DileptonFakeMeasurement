@@ -245,7 +245,7 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
   if(m_dbg || m_chainEntry%50000==0) printProgress(nt.evt(), m_chainEntry);
   selectObjects(NtSys_NOM, false, TauID_medium);
   if( !selectEvent() ) return false;
-  if(m_signalTaus.size()==0)      increment(n_pass_CRWHSStauv  [m_ET], lsf, bsf); else return false;
+  if(m_signalTaus.size()==0)      /*increment(n_pass_CRWHSStauv  [m_ET]);*/ else return false;
   if( m_baseLeptons.size() >= 2 ) increment(n_pass_atleast2Lep);
   if( m_baseLeptons.size() == 2 ) increment(n_pass_exactly2Lep);
   bool uniqueLepPair(m_baseLeptons.size() == 2);
