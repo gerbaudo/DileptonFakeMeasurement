@@ -26,8 +26,8 @@ r.gErrorIgnoreLevel=r.kError # disable root warnings
 r.gStyle.SetPadTickX(1)
 r.gStyle.SetPadTickY(1)
 
-def commonPrefix(aList) : return os.path.commonprefix(aList)
-def commonSuffix(aList) : return os.path.commonprefix([l[::-1] for l in aList])[::-1]
+from utils import commonPrefix, commonSuffix
+
 #___________________________________________________________  
 class Entry :
     """
