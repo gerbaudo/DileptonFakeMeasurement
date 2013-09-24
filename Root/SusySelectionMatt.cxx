@@ -1285,8 +1285,6 @@ bool SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVector& j
   float metRelMin = (isee ? 50 : (isem ? 50 : (ismm ? FLT_MIN : FLT_MIN))); // for now simple
 
   if(m_signalTaus.size()==0)               increment(n_pass_CRWHSStauv  [m_ET], lsf, bsf); else return false;
-  if(passMuonRelIso(leptons, muIsoMax))               increment(n_pass_CRWHSSmuiso [m_ET], lsf, bsf); else  return false;
-  if(susy::passEleD0S(leptons, d0SMax))               increment(n_pass_CRWHSSeled0 [m_ET], lsf, bsf); else  return false;
   if(numberOfFJets(jets)==0)                          increment(n_pass_CRWHSSnfj   [m_ET], lsf, bsf); else  return false;
   if(numberOfCBJets(jets)==0)                         increment(n_pass_CRWHSSnbj   [m_ET], lsf, bsf); else  return false;
   if(numberOfCLJets(jets)>0)                          increment(n_pass_CRWHSSnj    [m_ET], lsf, bsf); else  return false;
