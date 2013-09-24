@@ -56,11 +56,13 @@ def plotComparison(histo1, histo2, canvas, outname, label1, label2, verbose) :
     h1.SetMarkerColor(r.kBlack)
     h2.SetMarkerColor(r.kRed)
     h1.SetMaximum(1.1*max([h.GetMaximum() for h in [h1, h2]]))
+    h1.SetStats(0)
+    h1.SetStats(0)
     h1.Draw()
     h2.Draw('same')
     ks = h1.KolmogorovTest(h2) if h2.Integral() and h1.Integral() else 0.0
     leg = drawLegendWithDictKeys(canvas, {label1 : h1, label2 : h2, },
-                                 legWidth=0.225, legHeight=0.35)
+                                 legWidth=0.35, legHeight=0.275)
     header = "%s : KS=%.3f"%(h1.GetName(), ks)
     leg.SetHeader(header)
     if ks<0.05 : print header
