@@ -22,6 +22,9 @@ from rootUtils import drawLegendWithDictKeys
 from utils import filterWithRegexp
 
 def main(filename1, filename2, outdir, regexp, verbose) :
+    # there are too many histos; compare only a subset of them, the ones vs. pt for some selection
+    relevantHistograms = ['l_pt_den','l_pt_num']
+    relevantSelections = ['CRPremT2','CR_SSInc','CR_WHSS','CRPremT2','CR_SSInc','CR_WHSS']
     outdir = outdir if outdir else guessOutdirFromInputs(filename1, filename2)
     if verbose : print "saving output plots to '%s'"%outdir
     file1, file2 = r.TFile.Open(filename1), r.TFile.Open(filename2)
@@ -39,7 +42,10 @@ def main(filename1, filename2, outdir, regexp, verbose) :
                                                (filename2, filename1, histonames2, histonames1)]))
         label1, label2 = labelFromFilename(filename1), labelFromFilename(filename2)
     commonHistos = filterWithRegexp(commonHistos, regexp)
-    print commonHistos
+    commonHistos = filter(lambda h:
+                          any(s in h for s in relevantHistograms) and
+                          any(s in h for s in relevantSelections),
+                          commonHistos)
     canvas = r.TCanvas('diff_fakeMatrix','diff_fakeMatrix')
     for h in commonHistos :
         outname = outdir+'/'+h
