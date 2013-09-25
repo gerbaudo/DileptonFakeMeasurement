@@ -1337,6 +1337,9 @@ TH1F* FakePlotting::buildSideBandSubRate(TFile* file, string lep, string var,
   numC->Delete();
   denC->Delete();
 
+  cout<<"FakePlotting::buildSideBandSubRate :"
+      <<" ratio histogram for '"<<lep+"_"+var<<"'"<<endl;
+  ratio->Print("all");
   return ratio;
   
 }
