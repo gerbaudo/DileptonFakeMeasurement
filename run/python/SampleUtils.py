@@ -32,7 +32,7 @@ def isSigSample(samplename) : return 'WH_' in samplename
 def isBkgSample(samplename) : return not isDataSample(samplename) and not isSigSample(samplename)
 def guessReqidFromFilename(filename='', verbose=False) :
     match = re.search('mc12\_8TeV\.(\d+)\.', filename)
-    return match.group(1)
+    return match.group(1) if match else None
 
 
 def basePathArea() :
