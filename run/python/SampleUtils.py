@@ -23,7 +23,7 @@ allGroups, datasets = allGroups(datasets), activeDatasets(datasets)
 
 def guessGroupFromFilename(filename='') :
     "Guess group from filename, either merged or un-merged"
-    group = next((g for g in allGroups if g+'_' in filename), None)
+    group = next((g for g in allGroups if any(e in filename for e in [g+'_', g+'.'])), None)
     group = group if group else next((d.group for d in datasets if d.name in filename), None)
     return group
 
