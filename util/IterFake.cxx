@@ -37,18 +37,18 @@ int main(int argc, char** argv)
   string inputDataFile = "out/fakerate/merged/data_Sep_14.root";
   string outputFile = "corFake_Sep11_2013_forDavide.root";
 
-  cout << "Iterative Fake Rate" << endl;
-  cout << endl;
-
-  /** Read inputs to program */
   for(int i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "-d") == 0) dbg = atoi(argv[++i]);
-    if (strcmp(argv[i], "-n") == 0) n = atoi(argv[++i]);
-    if(strcmp(argv[i],"--input-mc")  ==0) inputMcFile   = argv[++i];
-    if(strcmp(argv[i],"--input-data")==0) inputDataFile = argv[++i];
-    if(strcmp(argv[i],"--output")    ==0) outputFile    = argv[++i];
-
-    else { help(); return 0; }
+    string opt(argv[i]);
+    if     (opt== "-d"         )           dbg = atoi(argv[++i]);
+    else if(opt== "-n"         )             n = atoi(argv[++i]);
+    else if(opt=="--input-mc"  ) inputMcFile   = argv[++i];
+    else if(opt=="--input-data") inputDataFile = argv[++i];
+    else if(opt=="--output"    ) outputFile    = argv[++i];
+    else {
+      cout<<"invalid option '"<<argv[i]<<"'"<<endl;
+      help();
+      return 0;
+    }
   }
 
   cout<<"options:"<<endl
