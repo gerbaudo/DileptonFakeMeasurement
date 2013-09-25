@@ -51,10 +51,13 @@ def labelFromFilename(filename) :
     return fname
 def plotComparison(histo1, histo2, canvas, outname, label1, label2, verbose) :
     h1, h2 = histo1, histo2
+    if not h1.Integral() and not h2.Integral() : return
     canvas.cd()
     canvas.Clear()
     h1.SetMarkerColor(r.kBlack)
     h2.SetMarkerColor(r.kRed)
+    h1.SetMarkerStyle(r.kFullCircle)
+    h2.SetMarkerStyle(r.kOpenCircle)
     h1.SetMaximum(1.1*max([h.GetMaximum() for h in [h1, h2]]))
     h1.SetStats(0)
     h1.SetStats(0)
