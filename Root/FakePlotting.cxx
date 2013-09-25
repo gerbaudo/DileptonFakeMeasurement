@@ -1050,6 +1050,8 @@ void FakePlotting::plotSF(TH1F* h[], vector<string> names, TCanvas* c,
   }
 
   c->SaveAs(save.c_str());
+  replace(save, ".pdf", ".png");
+  c->SaveAs(save.c_str());
 
   for(uint i=0; i<names.size()-1; ++i)
     ratio[i]->Delete();
