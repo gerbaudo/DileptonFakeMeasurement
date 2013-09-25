@@ -47,8 +47,8 @@ void FakePlotting::init()
 {
 
 
-  string append = "_Sep_14";
-  string dataappend = "_Sep_14";
+  string append = "_Sep_23";
+  string dataappend = "_Sep_23";
   string addition = "";
   string inDir = "out/fakerate/merged/";
   string aa(append+addition);
@@ -393,7 +393,6 @@ void FakePlotting::DataMCSF(RunOption ro)
 {
   
   if(m_dbg) cout << "DataFakeRate" << endl;
-  
   // Only need Data and MC files (so 2 total!)
   if( m_files.size() != 2 ){
     cout << "Not enough files to data/mc sf" << endl;
@@ -401,7 +400,7 @@ void FakePlotting::DataMCSF(RunOption ro)
   }
   string savedir = (ro == RO_DataMC
                     ? mkdirIfNeeded("out/fakeplot/dataMCRates/")
-                    : mkdirIfNeeded("out/fakeplot/sfPlots2013_Jul15/"));
+                    : mkdirIfNeeded("out/fakeplot/sfPlots2013_Sep_24/"));
 
 
   //File f_data = m_files[0];
