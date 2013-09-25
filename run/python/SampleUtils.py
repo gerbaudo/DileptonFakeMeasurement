@@ -71,8 +71,8 @@ class ModeAWhDbReqid :
         for f in filenames :
             rootfile = open(f).read()
             reqid  = guessReqidFromFilename(rootfile)
-            sample = guessSampleFromFilename(rootfile)
-            assert sample not in self.entries, "Cannot have several reqids with the same signal : %s, %s"%(sample, str([reqid, self.entries[sample]]))
+            sample = guessGroupFromFilename(rootfile) # signal groups are really sample names
+            assert sample not in self.entries, "Multiple reqids for one sample : %s, %s"%(sample, str([reqid, self.entries[sample]]))
             self.entries[sample] = reqid
     def reqidBySample(self, sample) :
         return self.entries[sample]
