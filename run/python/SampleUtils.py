@@ -55,8 +55,13 @@ class ModeAWhDbPar :
             for a,w in zip(ModeAWhDbPar.fields, words) : setattr(self, a, w)
         def valid(self) : return all([hasattr(self, a) for a in ModeAWhDbPar.fields]) and self.ds.isdigit()
 
-    def __init__(self, filename=xsReaderDataDir()+'/modeA_WH_MC1eqMN2.txt') :
-        self.entries = [e for e in [ModeAWhDbPar.Entry(l) for l in open(filename).readlines()] if e.valid()]
+    def __init__(self) :
+        filenames = [xsReaderDataDir()+'/'+'modeA_WH_MC1eqMN2.txt',
+                     xsReaderDataDir()+'/'+'modeA_WH_notauhad_MC1eqMN2_DiagonalMatrix.txt']
+        self.entries = [e for e in [ModeAWhDbPar.Entry(l)
+                                    for fn in filenames
+                                    for l in open(fn).readlines()]
+                        if e.valid()]
     def mc1Mn1ByReqid(self, reqid) :
         entry = next(e for e in self.entries if e.ds == reqid)
         return float(entry.mc1), float(entry.mn1)
