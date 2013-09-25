@@ -72,7 +72,9 @@ class ModeAWhDbReqid :
     "Using the filelists, map reqids to samplenames"
     def __init__(self, filenames = []) :
         self.entries = {}
-        if not filenames : filenames = glob.glob(basePathArea() + '/SusyTest0/run/filelist/wA_noslep_WH_*Lep*txt')
+        filenames = (filenames if filenames
+                     else glob.glob(basePathArea()+'/SusyTest0/run/filelist/'
+                                    +'Herwigpp_simplifiedModel_wA_noslep_WH_*Lep_*.txt'))
         for f in filenames :
             rootfile = open(f).read()
             reqid  = guessReqidFromFilename(rootfile)
