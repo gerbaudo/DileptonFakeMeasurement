@@ -37,6 +37,10 @@ histo2l = r.TH2F('mc1mn1_2lep_reqids',
                  'ReqIds for the WH 2lep grid ;mc_{1};mn_{1}',
                  50, float(mc1Range['min']), float(mc1Range['max']),
                  50, float(mn1Range['min']), float(mn1Range['max']))
+histo2lnth = r.TH2F('mc1mn1_2lep_notauhad_reqids',
+                    'ReqIds for the WH notauhad 2lep grid ;mc_{1};mn_{1}',
+                    50, float(mc1Range['min']), float(mc1Range['max']),
+                    50, float(mn1Range['min']), float(mn1Range['max']))
 histo3l = r.TH2F('mc1mn1_3lep_reqids',
                  'ReqIds for the WH 3lep grid ;mc_{1};mn_{1}',
                  50, float(mc1Range['min']), float(mc1Range['max']),
@@ -51,7 +55,9 @@ for entry in parDb.entries :
     if not sample :
         print "missing %s, (%.1f, %.1f)"%(reqid, mc1, mn1)
         continue
-    h = histo2l if '2Lep' in sample else histo3l if '3Lep' in sample else None
+    h = (histo2lnth if '2Lep' in sample and 'notauhad' in sample
+         else histo2l if '2Lep' in sample
+         else histo3l if '3Lep' in sample else None )
     assert h,"%s is not 2l nor 3l"%sample
     h.Fill(mc1, mn1, float(reqid))
 
