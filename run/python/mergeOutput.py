@@ -6,6 +6,7 @@
 # Aug 2013
 
 import collections
+import datetime
 import glob
 import optparse
 import os
@@ -80,6 +81,8 @@ for rf in rootfiles :
 
 nGroupsToMerge = len(filenamesByGroup.keys())
 groupCounter = 0
+logFilename = outdir+"merge_%s.log"%datetime.date.today().strftime('%Y-%m-%d')
+logFile     = open(logFilename, 'w')
 for group, files in filenamesByGroup.iteritems() :
     groupCounter += 1
     if verbose :
@@ -90,5 +93,8 @@ for group, files in filenamesByGroup.iteritems() :
     cmd = "hadd %s %s" % (outfile, ' '.join(files))
     out = 0 if dryrun else getCommandOutput(cmd)
     success = dryrun or out['returncode']==0
+    logFile.write(out['stdout'])
     if not success : print "'%s' failed..."%group
     if debug : print out['stderr']+'\n'+out['stdout']
+logFile.close()
+if verbose : print "hadd commands logged to '%s'"%logFilename
