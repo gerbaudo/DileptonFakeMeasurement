@@ -64,11 +64,12 @@ class ModeAWhDbPar :
 
     def __init__(self) :
         filenames = [xsReaderDataDir()+'/'+'modeA_WH_MC1eqMN2.txt',
-                     xsReaderDataDir()+'/'+'modeA_WH_notauhad_MC1eqMN2_DiagonalMatrix.txt']
+                     xsReaderDataDir()+'/'+'modeA_WH_notauhad_MC1eqMN2_DiagonalMatrix.txt'
+                     ]
         self.entries = [e for e in [ModeAWhDbPar.Entry(l)
                                     for fn in filenames
-                                    for l in open(fn).readlines()]
-                        if e.valid()]
+                                    for l in open(fn).readlines()]]
+        self.entries = filter(lambda e: e.valid(), self.entries)
     def mc1Mn1ByReqid(self, reqid) :
         entry = next(e for e in self.entries if e.ds == reqid)
         return float(entry.mc1), float(entry.mn1)
@@ -79,13 +80,18 @@ class ModeAWhDbReqid :
     "Using the filelists, map reqids to samplenames"
     def __init__(self, filenames = []) :
         self.entries = {}
+        filelistDir = basePathArea()+'/SusyTest0/run/filelist/'
         filenames = (filenames if filenames
-                     else glob.glob(basePathArea()+'/SusyTest0/run/filelist/'
-                                    +'Herwigpp_simplifiedModel_wA_noslep_WH_*Lep_*.txt'))
+                     else
+        glob.glob(filelistDir+'Herwigpp_simplifiedModel_wA_noslep_WH_*Lep_*.txt')
+        + glob.glob(filelistDir+'Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_*.txt'))
         for f in filenames :
             rootfile = open(f).read()
             reqid  = guessReqidFromFilename(rootfile)
-            sample = guessGroupFromFilename(rootfile) # signal groups are really sample names
+            sample = guessSampleFromFilename(rootfile)
+            if not reqid or not sample :
+                print "skipping invalid entry reqid='%s', sample='%s' from '%s'"%(reqid, sample, f)
+                continue
             assert sample not in self.entries, "Multiple reqids for one sample : %s, %s"%(sample, str([reqid, self.entries[sample]]))
             self.entries[sample] = reqid
     def reqidBySample(self, sample) :
