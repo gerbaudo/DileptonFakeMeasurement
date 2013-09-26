@@ -53,6 +53,7 @@ if verbose :
                      for o in ['inputdir', 'outdir', 'group_regexp', 'tag', 'overwrite',
                                'allBkg', 'allBkgButHf', 'onedata',
                                'verbose', 'debug',]])
+if not isMonthDayTag(tag) : print "warning, non-standard tag might lead to bugs '%s'"%tag
 if not os.path.isdir(outdir) :
     os.mkdir(outdir)
     if verbose : print "created directory '%s'"%outdir
