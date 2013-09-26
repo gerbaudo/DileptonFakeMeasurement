@@ -89,11 +89,11 @@ class ModeAWhDbReqid :
             rootfile = open(f).read()
             reqid  = guessReqidFromFilename(rootfile)
             sample = guessSampleFromFilename(rootfile)
-            if not reqid or not sample :
+            if reqid and sample :
+                assert sample not in self.entries, "Multiple reqids for one sample : %s, %s"%(sample, str([reqid, self.entries[sample]]))
+                self.entries[sample] = reqid
+            else :
                 print "skipping invalid entry reqid='%s', sample='%s' from '%s'"%(reqid, sample, f)
-                continue
-            assert sample not in self.entries, "Multiple reqids for one sample : %s, %s"%(sample, str([reqid, self.entries[sample]]))
-            self.entries[sample] = reqid
     def reqidBySample(self, sample) :
         return self.entries[sample]
     def sampleByReqid(self, reqid) :
