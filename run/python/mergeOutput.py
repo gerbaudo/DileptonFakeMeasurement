@@ -13,7 +13,11 @@ import os
 import re
 import subprocess
 from datasets import datasets, setSameGroupForAllData
-from utils import getCommandOutput, guessLatestTagFromLatestRootFiles, guessMonthDayTagFromLastRootFile
+from utils import (getCommandOutput,
+                   guessLatestTagFromLatestRootFiles,
+                   guessMonthDayTagFromLastRootFile,
+                   isMonthDayTag
+                   )
 
 usage="""%prog [options] dir
 Merge root files from samples belonging to the same group.
