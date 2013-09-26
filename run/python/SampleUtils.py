@@ -6,7 +6,7 @@
 # Jan 2013
 
 import glob, os, re, unittest
-from datasets import datasets, allGroups, activeDatasets
+from datasets import datasets, allGroups, allDatasets, activeDatasets
 import ROOT as r
 r.gROOT.SetBatch(1)
 
@@ -19,13 +19,20 @@ colors = {
     'multijet'  : r.kWhite
     }
 
-allGroups, datasets = allGroups(datasets), activeDatasets(datasets)
+allGroups, allDatasets, datasets = allGroups(datasets), allDatasets(datasets), activeDatasets(datasets)
 
 def guessGroupFromFilename(filename='') :
     "Guess group from filename, either merged or un-merged"
+    print 'guessGroupFromFilename obsolete, use guessSampleFromFilename'
     group = next((g for g in allGroups if any(e in filename for e in [g+'_', g+'.'])), None)
     group = group if group else next((d.group for d in datasets if d.name in filename), None)
     return group
+def guessSampleFromFilename(filename='') :
+    "Guess sample from filename"
+    def longest(lst=[]) : return max(lst, key=len) if lst else None
+    def filenameMatchesSample(fn, smp) : return re.search('([_.])'+smp+'([_.])', fn)
+    return longest([s for s in allDatasets if filenameMatchesSample(filename, s)])
+
 
 def isDataSample(samplename) : return 'data' in samplename or 'period' in samplename
 def isSigSample(samplename) : return 'WH_' in samplename
