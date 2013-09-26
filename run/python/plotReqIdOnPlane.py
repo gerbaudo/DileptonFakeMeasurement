@@ -76,13 +76,15 @@ def buildMergedHisto(histo) :
 r.gStyle.SetPaintTextFormat('.0f')
 c = r.TCanvas('c_reqids', 'WH reqids', 800, 600)
 c.cd()
-for h in [histo2l, histo3l] :
+for h in [histo2l, histo2lnth, histo3l] :
     c.Clear()
     h.SetTitle(h.GetTitle()+" (%d points)"%h.GetEntries())
     h.SetStats(0)
     h.SetMarkerSize(1.25*h.GetMarkerSize())
-    hMerge = buildMergedHisto(h)
-    hMerge.Draw('col')
-    h.Draw('text20 same')
+    drawMerged = h==histo2l
+    if drawMerged :
+        hMerge = buildMergedHisto(h)
+        hMerge.Draw('col')
+    h.Draw('text20' + (' same' if drawMerged else ''))
     c.Update()
     c.SaveAs('c_'+h.GetName()+'.png')
