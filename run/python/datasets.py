@@ -273,7 +273,7 @@ groupTemplate = 'WH_3Lep_%d'
 template, process = "Herwigpp_simplifiedModel_wA_noslep_WH_3Lep_%d", "wA_noslep_WH_3Lep_%d"
 datasets += [Dataset(sampleType, d, groupTemplate%nth, template%nth, process%nth, placeholder)
              for d, nth in rzip(range(176641, 176706+1), range(1, 66+1))]
-groupTemplate = 'WH_2Lep_notauhad_%d'
+groupTemplate = 'notauhad_WH_2Lep_%d'
 template, process = "Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_%d", "wA_noslep_notauhad_WH_2Lep_%d"
 datasets += [Dataset(sampleType, d, groupTemplate%nth, template%nth, process%nth)
              for d, nth in rzip(range(177501, 177528+1), range(1, 28+1))]
