@@ -36,11 +36,14 @@ def main(filename1, filename2, outdir, regexp, verbose) :
     commonHistos = [h for h in histonames1 if h in histonames2]
     def diff(a, b) : return list(set(a)-set(b))
     if len(commonHistos)!=len(histonames2) :
-        print ('the following histograms are not in common:\n'
-               +'\n'.join("not in %s :%s"%(f2, '\n\t'.join(diff(a, b)))
-                          for f1, f2, a, b in [(filename1, filename2, histonames1, histonames2),
-                                               (filename2, filename1, histonames2, histonames1)]))
-        label1, label2 = labelFromFilename(filename1), labelFromFilename(filename2)
+        missFrom1, missFrom2 = diff(histonames2, histonames1), diff(histonames1, histonames2)
+        print ('histograms not in common:\n'
+               +"%d missing from %s\n"%(len(missFrom1), filename1)
+               #+'\n\t'.join(missFrom1)
+               +"%d missing from %s\n"%(len(missFrom2), filename2)
+               #+'\n\t'.join(missFrom2)
+               )
+    label1, label2 = labelFromFilename(filename1), labelFromFilename(filename2)
     commonHistos = filterWithRegexp(commonHistos, regexp)
     commonHistos = filter(lambda h:
                           any(s in h for s in relevantHistograms) and
