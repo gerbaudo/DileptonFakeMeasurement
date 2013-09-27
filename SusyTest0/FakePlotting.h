@@ -74,6 +74,7 @@ class FakePlotting : public myHist
                             const string &fname, const string &name, const string &sname,
                             int color, int marker);
   FakePlotting& setOuputDir(const std::string &dir);
+  FakePlotting& setOuputFile(const std::string &name);
   // The various looping functions
   void MCFakeRate();
   void DataFakeRate();
@@ -177,6 +178,7 @@ class FakePlotting : public myHist
 
   FakeStatTool::StatErrorTool* m_fakeStat;
   std::string m_outputdir;
+  std::string m_outputfile;
 
 };
 
