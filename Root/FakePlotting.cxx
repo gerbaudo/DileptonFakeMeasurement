@@ -122,7 +122,7 @@ void FakePlotting::MCFakeRate()
 {
   if(m_dbg) cout << "MCFakeRate" << endl;
 
-  string savedir = mkdirIfNeeded("out/fakeplot/");
+  string savedir = m_outputdir;
 
   vector<string> plots;      vector<string> labels;
   plots.push_back("l_pt");   labels.push_back("P_{T}");
