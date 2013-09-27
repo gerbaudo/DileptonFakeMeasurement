@@ -892,6 +892,7 @@ void FakePlotting::plotSF(TH1F* h[], vector<string> names, TCanvas* c,
       l->DrawLatex(0.15 + i*0.25, 0.32, Form("#color[%i]{#chi^{2}/#dof = %4.2f/%i}",color,chi2.at(i),ndf.at(i)));
     }
   }
+  if(isCanvasWithNeededSf(save)) cout<<"SF for '"<<save<<"' : "<<vfloat2str(fitval)<<endl;
   c->SaveAs(save.c_str());
   replace(save, ".pdf", ".png");
   c->SaveAs(save.c_str());
