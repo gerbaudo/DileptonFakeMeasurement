@@ -121,97 +121,47 @@ FakePlotting::~FakePlotting()
 void FakePlotting::MCFakeRate()
 {
   if(m_dbg) cout << "MCFakeRate" << endl;
-
   string savedir = m_outputdir;
-
-  vector<string> plots;      vector<string> labels;
+  vector<string> plots, labels;
   plots.push_back("l_pt");   labels.push_back("P_{T}");
-  //plots.push_back("l_pt_coarse");   labels.push_back("P_{T}");
-  //plots.push_back("njets");   labels.push_back("# jets");
-  //plots.push_back("nlightjets");   labels.push_back("# light jets");
-  //plots.push_back("nheavyjets");   labels.push_back("# heavy jets");
-  //plots.push_back("nlightjetsNoB");   labels.push_back("# light jets (B-Veto)");
-  //plots.push_back("l_eta");  labels.push_back("|#eta|");
-  //plots.push_back("l_eta_coarse");  labels.push_back("|#eta|");
-  //plots.push_back("onebin"); labels.push_back("Single Bin");
-  //plots.push_back("met");    labels.push_back("#slash{E}_{T}");
-  //plots.push_back("metrel");    labels.push_back("#slash{E}^{Rel}_{T}");
-  //plots.push_back("npv");    labels.push_back("NPV");
-  //plots.push_back("ht");    labels.push_back("H_{T}");
-  //plots.push_back("ht_pt");    labels.push_back("H_{T}/P_{T}");
-  //plots.push_back("ht_wMet");    labels.push_back("H_{T} (w/Met)");
-  //plots.push_back("ht_pt_wMet");    labels.push_back("H_{T}/P_{T} (w/Met)");
-  
   TH1F* rates[6];
   TCanvas* c = makeCanvas("c");
-  
   float x[] = {0.15, 0.3};
   float y[] = {0.90 - m_files.size()/20., 0.90};
-
   float Min_Max[] = {0,1.1};
-
   float fakeMinMax[] = {0,1.1};
   float realMinMax[] = {0.5, 1.3};
-
   for(int il=0; il<LT_N; ++il){
     string lepname = LTNames[il];
-
     for(uint ip=0; ip<plots.size(); ++ip){
       string var    = plots.at(ip);
-      
       for(int cr =0; cr<CR_N; ++cr){
-	//if( !(cr == CR_MCHeavy || cr == CR_MCLight || 
-	//cr == CR_MCConv || cr == CR_MCReal || cr == CR_MCQCD) ) continue;
-	if( !(cr == CR_MCConv || cr == CR_MCReal || cr == CR_MCQCD) ) continue;
-
-	
-	if( cr == CR_MCReal ){ Min_Max[0] = realMinMax[0]; Min_Max[1] = realMinMax[1];}
-	else{ Min_Max[0] = fakeMinMax[0]; Min_Max[1] = fakeMinMax[1];}
-	
-	string crname = CRNames[cr];
-	string xlabel = (il == LT_EL ? "Electron " : "Muon " )+labels.at(ip);
-	
-	string pname = lepname + "_" + crname + "_all_" + var;
-	
-	if(m_dbg) cout << "Grabbing: " << pname << endl;
-	
-	vector<string> h_names;
-	
-	for(uint f=0; f<m_files.size(); ++f){
-	  File F = m_files.at(f);
-	  rates[f] = buildRate(F.file, pname, F.sname, xlabel,"Rate", F.color, F.marker);
-	  h_names.push_back(F.name);
-	  //cout<<F.name<<" Minium: "<<rates[f]->GetMinimum()<<endl;
-	}
-	
-	vector<float> frac = buildFraction(m_files, pname);
-	//for(uint f=0; f<frac.size(); ++f)
-	//cout<<"\t"<<f<<" "<<m_files.at(f).name<<"\t"<<frac.at(f)<<endl;
-	
-	cout<<"Pushing back the labels"<<endl;
-	vector<Label> lbls;
-	lbls.push_back( makeLabel(CRLabels[cr]     , 0.6, 0.87) );
-	//lbls.push_back( makeLabel("Flavor: " + lsname, 0.6, 0.82) );
-	cout<<"building fractions"<<endl;
-	//for(uint f=0; f<frac.size(); ++f){
-	//stringstream ss; ss << m_files.at(f).name<<"   "<< Form("%4.2f",frac.at(f))<<"%";
-	//lbls.push_back( makeLabel( ss.str(), 0.6, 0.77-f*0.05) );
-	//}
-	cout<<"plotting"<<endl;
-	//string save = savedir + pname + ".eps";
-	string save = savedir + pname + ".pdf";
-	
-	plotFake(rates, h_names, c, Min_Max, x, y, lbls, save);
-	
-	for(uint f=0; f<m_files.size(); ++f)
-	  rates[f]->Delete();
-	
+        if(!(cr == CR_MCConv || cr == CR_MCReal || cr == CR_MCQCD) ) continue;
+        if( cr == CR_MCReal ){ Min_Max[0] = realMinMax[0]; Min_Max[1] = realMinMax[1];}
+        else{ Min_Max[0] = fakeMinMax[0]; Min_Max[1] = fakeMinMax[1];}
+        string crname = CRNames[cr];
+        string xlabel = (il == LT_EL ? "Electron " : "Muon " )+labels.at(ip);
+        string pname = lepname + "_" + crname + "_all_" + var;
+        if(m_dbg) cout << "Grabbing: " << pname << endl;
+        vector<string> h_names;
+        for(uint f=0; f<m_files.size(); ++f){
+          File F = m_files.at(f);
+          rates[f] = buildRate(F.file, pname, F.sname, xlabel,"Rate", F.color, F.marker);
+          h_names.push_back(F.name);
+        }
+        vector<float> frac = buildFraction(m_files, pname);
+        cout<<"Pushing back the labels"<<endl;
+        vector<Label> lbls;
+        lbls.push_back( makeLabel(CRLabels[cr]     , 0.6, 0.87) );
+        cout<<"building fractions"<<endl;
+        cout<<"plotting"<<endl;
+        string save = savedir + pname + ".pdf";
+        plotFake(rates, h_names, c, Min_Max, x, y, lbls, save);
+        for(uint f=0; f<m_files.size(); ++f) rates[f]->Delete();
       }// end loop over control region
     }// end loop over plots
   }// end loop over lepton types
-  
 }
-
 //--------------------------------------------------------//
 // Loop over and plot fake rate vs. various variables
 //--------------------------------------------------------//
@@ -404,160 +354,84 @@ void FakePlotting::DataRateMCSub()
 //--------------------------------------------------------//
 void FakePlotting::DataMCSF(RunOption ro /*DG: 'ro' now unused? try to drop it*/)
 {
-  
   if(m_dbg) cout << "DataFakeRate" << endl;
-  // Only need Data and MC files (so 2 total!)
-  if( m_files.size() != 2 ){
+  if( m_files.size() != 2 ){ // Only need Data and MC files (so 2 total!)
     cout << "Not enough files to data/mc sf" << endl;
     return;
   }
   string savedir = m_outputdir;
-  //File f_data = m_files[0];
-  //File f_mc   = m_files[1];
-  
-  vector<string> plots;      vector<string> labels;
-  //plots.push_back("all_l_pt_coarse");   labels.push_back("P_{T}");
-  plots.push_back("all_l_pt");   labels.push_back("P_{T}");
-  plots.push_back("all_l_eta");  labels.push_back("|#eta|");
-  plots.push_back("all_l_eta_coarse");  labels.push_back("|#eta|");
-  plots.push_back("all_onebin");  labels.push_back("Single Bin");
-  //plots.push_back("npv");    labels.push_back("NPV");
-  
+  vector<string> plots, labels;
+  plots.push_back("all_l_pt"        ); labels.push_back("P_{T}"     );
+  plots.push_back("all_l_eta"       ); labels.push_back("|#eta|"    );
+  plots.push_back("all_l_eta_coarse"); labels.push_back("|#eta|"    );
+  plots.push_back("all_onebin"      ); labels.push_back("Single Bin");
   TH1F* rates[3];
   TCanvas* c = makeCanvas("c");
-  
   float x[] = {0.15, 0.3};
   float y[] = {0.90 - 2/20., 0.90};
-
   float Min_Max[] = {0,1.1};
-
-  // For All
   vector<Label> lbls;
   vector<string> names;
-
-  //TFile* f_temp = new TFile("corFake_altMuIso_May2_2013.root");
-  //TFile* f_temp = new TFile("corFake_May6_2013.root");
-  //TFile* f_temp = new TFile("corFake_May24_2013.root");
-  //TFile* f_temp = new TFile("corFake_Jun25_2013.root");
-  //TFile* f_temp = new TFile("corFake_Jul8_2013.root");
-  //TFile* f_temp = new TFile("corFake_Jul15_2013.root");
   TFile* f_temp = new TFile("corFake_Sep11_2013_forDavide.root"); // DG should be on cmd-line
-
   for(int il=0; il<LT_N; ++il){
-    //if( il == LT_EL ) continue;
     string lepname = LTNames[il];
     string lepton  = il == LT_EL ? "Electron" : "Muon";
-
     for(uint ip=0; ip<plots.size(); ++ip){
       string var    = plots.at(ip);
       string xlabel = lepton + " " + labels.at(ip);
       string ylabel = "Fake Rate";
-
-      // For this I decided to opt out of a loop
-      // since each CR needs different things.
-
+      // For this I decided to opt out of a loop, since each CR needs different things.
       lbls.clear();
       names.clear();
-
-
       // Z tag and probe
       if(m_dbg) cout << "\tTrying Real T and P" << endl;
       string realZ = lepname + "_realCR_" + var;
-      //rates[0] = buildRate(data.file, realZ, data.sname, xlabel, "Real eff", data.color, data.marker);
-      //rates[1] = buildRate(totMC.file, realZ, totMC.sname, xlabel, "Real eff", totMC.color, totMC.marker);
       rates[0] = buildSideBandSubRate(data.file, lepname, var, xlabel, "Real eff", data.color, data.marker);
       rates[1] = buildSideBandSubRate(totMC.file, lepname, var, xlabel, "Real eff", totMC.color, totMC.marker);
-      //rates[0] = buildCorrectedRealRate(data.file, lepname, var, xlabel, "Real eff", data.color, data.marker);
-      //rates[1] = buildCorrectedRealRate(totMC.file, lepname, var, xlabel, "Real eff", totMC.color, totMC.marker);
       names.push_back("Data: Z Tag and Probe");
-      names.push_back("MC Comb: Z Tag and Probe");      
+      names.push_back("MC Comb: Z Tag and Probe");
       plotSF(rates, names, c, Min_Max, x, y, lbls, savedir + "sf_" + realZ + ".pdf");
-      //plotSF(rates, names, c, Min_Max, x, y, lbls, savedir + "sf_" + realZ + ".eps");
-      //plotFake(rates, names, c, Min_Max, x, y, lbls, savedir + "rate_" + realZ + ".pdf");
       names.clear();
       rates[0]->Delete();
       rates[1]->Delete();
-
-      // HF tag and probe
-      // In this case I need to subract out the contamination
+      // HF tag and probe; in this case I need to subract out the contamination
       if(m_dbg) cout << "\tTrying HF" << endl;
       string tpHF     = lepname + "_fakeHF_" + var;
-      string trueHF   = lepname + "_fakeHF_" + var + "_heavy"; 
-      string contamHF   = lepname + "_fakeHF_" + var + "_others"; 
+      string trueHF   = lepname + "_fakeHF_" + var + "_heavy";
+      string contamHF   = lepname + "_fakeHF_" + var + "_others";
       cout<<"Getting: "<<tpHF<<" and for mc: "<<trueHF<<endl;
       // In this case totMC doesn't contain bb/cc
-      //rates[0] = getCorrectedRate(data.file, totMC.file, tpHF, tpHF, xlabel, data.color, data.marker);
       rates[0] = (TH1F*) f_temp->Get((lepname+"_corHFRate").c_str());
       rates[0]->SetLineColor(data.color);
       rates[0]->SetMarkerColor(data.color);
       rates[0]->SetMarkerStyle(data.marker);
-
-      //rates[1] = buildRate(HF.file, trueHF, HF.sname, xlabel, ylabel, HF.color, HF.marker);
-      //rates[0] = buildRate(Sdata.file, tpHF, data.sname, xlabel, ylabel, data.color, data.marker);
       rates[1] = buildRate(HF.file, tpHF, HF.sname, xlabel, ylabel, HF.color, HF.marker);
-
       names.push_back("Data: HF Tag and Probe (Iterative Subtraction)");
       names.push_back("b#bar{b}/c#bar{c} MC: HF Tag and Probe");
-      //names.push_back("MC Comb: True QCD (40<#slash{E}_{T}<100)");
-      //names.push_back("MC Comb: True QCD (#slash{E}_{T}<30)");
       cout<<"Going to plot HF sf: "<<endl;
       dumpHisto(rates[0]);
       dumpHisto(rates[1]);
       plotSF(rates, names, c, Min_Max, x, y, lbls, savedir + "sf_" + tpHF + ".pdf");
-      //plotSF(rates, names, c, Min_Max, x, y, lbls, savedir + "sf_" + tpHF + ".eps");
       names.clear();
       rates[0]->Delete();
       rates[1]->Delete();
-
-
-      // Conversion:
-      if(lepname == "elec"){
-	if(m_dbg) cout << "\tTrying Conv" << endl;
-	string conv = lepname + "_fakeConv_" + var;
-	string convTrue = lepname + "_fakeConv_" + var;
-	rates[0] = buildRate(data.file, conv, data.sname, xlabel, ylabel, data.color, data.marker);
-	rates[1] = buildRate(totMC.file, conv, totMC.sname, xlabel, ylabel, totMC.color, totMC.marker);
-	//rates[2] = buildRate(totMC.file, convTrue, totMC.sname, xlabel, ylabel, kBlue, 34);
-	names.push_back("Data: Conv CR");
-	names.push_back("MC Comb: Conv CR");
-	//names.push_back("MC Comb: Conv CR (True)");
-	plotSF(rates, names, c, Min_Max, x, y, lbls, savedir + "sf_" + conv + ".pdf");
-	//plotSF(rates, names, c, Min_Max, x, y, lbls, savedir + "sf_" + conv + ".eps");
-	//plotFake(rates, names, c, Min_Max, x, y, lbls, savedir + "rate_" + conv + ".pdf");
-	names.clear();
-	rates[0]->Delete();
-	rates[1]->Delete();
+      if(lepname == "elec"){ // Conversion
+        if(m_dbg) cout << "\tTrying Conv" << endl;
+        string conv = lepname + "_fakeConv_" + var;
+        string convTrue = lepname + "_fakeConv_" + var;
+        rates[0] = buildRate(data.file, conv, data.sname, xlabel, ylabel, data.color, data.marker);
+        rates[1] = buildRate(totMC.file, conv, totMC.sname, xlabel, ylabel, totMC.color, totMC.marker);
+        names.push_back("Data: Conv CR");
+        names.push_back("MC Comb: Conv CR");
+        plotSF(rates, names, c, Min_Max, x, y, lbls, savedir + "sf_" + conv + ".pdf");
+        names.clear();
+        rates[0]->Delete();
+        rates[1]->Delete();
       }
-      //rates[2]->Delete();
-      /*
-      // LF
-      if(m_dbg) cout << "\tTrying LF" << endl;
-      string LF = lepname + "_fakeLFWjet_" + var;
-      string LFContam = lepname + "_fakeLFWjet_" + var + "_others";
-      string LFTrue = lepname + "_fakeLFWjet_" + var + "_heavy";
-      //rates[0] = getCorrectedRate(data.file, totMC.file, LF, LFContam, xlabel, data.color, data.marker);
-      //rates[0] = buildRate(data.file, LF, data.sname, xlabel, ylabel, data.color, data.marker);
-      //rates[1] = buildRate(totMC.file, LFTrue, totMC.sname, xlabel, ylabel, totMC.color, totMC.marker);
-      rates[0] = buildLFWjetRate(lepname, var);
-      rates[1] = buildRate(Wjets.file, LF, Wjets.sname, xlabel, ylabel, totMC.color, totMC.marker);
-      //rates[2] = buildRate(totMC.file, LFTrue, totMC.sname, xlabel, ylabel, kBlue, 34);
-      names.push_back("Data: HF CR");
-      names.push_back("MC Comb: HF CR");
-      //names.push_back("MC Comb: Conv CR (True)");
-      plotSF(rates, names, c, Min_Max, x, y, lbls, savedir + "sf_" + LF + ".pdf");
-      //plotFake(rates, names, c, Min_Max, x, y, lbls, savedir + "rate_" + LF + ".pdf");
-      names.clear();
-      rates[0]->Delete();
-      rates[1]->Delete();
-      //rates[2]->Delete();
-      */
     }// end loop over plots
   }// end loop over lepton types
-
-f_temp->Close();
-
+  f_temp->Close();
 }
-
 //--------------------------------------------------------//
 // Get true MC rates in signal regions
 //--------------------------------------------------------//
