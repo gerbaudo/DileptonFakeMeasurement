@@ -76,7 +76,7 @@ class FakePlotting : public myHist
   FakePlotting& setTag(const std::string &name);
   FakePlotting& setInputDir(const std::string &dir);
   FakePlotting& setOuputDir(const std::string &dir);
-  FakePlotting& setOuputFile(const std::string &name);
+  FakePlotting& setInputItercorrFile(const std::string &name);
   // The various looping functions
   void MCFakeRate();
   void DataFakeRate();
@@ -182,7 +182,7 @@ class FakePlotting : public myHist
   std::string m_tag;
   std::string m_inputdir;
   std::string m_outputdir;
-  std::string m_outputfile;
+  std::string m_inputItercorrFile;
 
 };
 

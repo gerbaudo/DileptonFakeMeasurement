@@ -69,9 +69,9 @@ FakePlotting& FakePlotting::setOuputDir(const std::string &dir)
   return *this;
 }
 //----------------------------------------------------------
-FakePlotting& FakePlotting::setOuputFile(const std::string &name)
+FakePlotting& FakePlotting::setInputItercorrFile(const std::string &name)
 {
-  m_outputfile = name;
+  m_inputItercorrFile = name;
   return *this;
 }
 //----------------------------------------------------------
@@ -386,7 +386,7 @@ void FakePlotting::DataMCSF(RunOption ro /*DG: 'ro' now unused? try to drop it*/
   float Min_Max[] = {0,1.1};
   vector<Label> lbls;
   vector<string> names;
-  TFile* f_temp = new TFile(m_outputfile.c_str());
+  TFile* f_temp = new TFile(m_inputItercorrFile.c_str());
   for(int il=0; il<LT_N; ++il){
     string lepname = LTNames[il];
     string lepton  = il == LT_EL ? "Electron" : "Muon";
