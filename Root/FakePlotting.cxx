@@ -1,6 +1,8 @@
 #include "SusyTest0/FakePlotting.h"
 #include "SusyTest0/utils.h"
+
 #include <cassert>
+#include <iterator>
 
 //--------------------------------------------------------//
 // Constructor
@@ -1368,9 +1370,18 @@ void FakePlotting::checkPercentages()
     }// end loop over Lepton Sources
 
   }// end loop over lepton types
-    
-    
-
-
 }
-
+//----------------------------------------------------------
+bool FakePlotting::isCanvasWithNeededSf(const std::string &canvasName)
+{
+  vector<string> interestingCnames;
+  interestingCnames.push_back("sf_elec_fakeConv_all_l_pt");
+  interestingCnames.push_back("sf_elec_fakeHF_all_l_pt");
+  interestingCnames.push_back("sf_elec_realCR_all_l_pt");
+  interestingCnames.push_back("sf_muon_fakeHF_all_l_pt");
+  interestingCnames.push_back("sf_muon_realCR_all_l_pt");
+  vector<string>::const_iterator it=interestingCnames.begin(), end=interestingCnames.end();
+  for(; it!=end; ++it) if(contains(canvasName, *it)) return true;
+  return false;
+}
+//----------------------------------------------------------

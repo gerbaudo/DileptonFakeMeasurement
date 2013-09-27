@@ -157,7 +157,7 @@ class FakePlotting : public myHist
 
   // Dump contents of a histogram
   void dumpHisto(TH1F* h);
-
+  static bool isCanvasWithNeededSf(const std::string &canvasName);
  protected:
   
   vector<File> m_files;
