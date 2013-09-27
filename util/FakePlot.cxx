@@ -24,10 +24,7 @@ void help(const vector<string> &opts)
 {
   size_t i=0;
   cout << "  Options:"                            << endl;
-
-  cout << "  -n number of events to process"      << endl;
-  cout << "     defaults: -1 (all events)"        << endl;
-
+  cout << "  -o outputdir (required)"             << endl;
   cout << "  -r run option number"                << endl;
   size_t width(24);
   cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : Data (default)"                 << endl; i++;
@@ -52,6 +49,7 @@ int main(int argc, char** argv)
   ROOT::Cintex::Cintex::Enable();
 
   int dbg = 0;
+  string outputdir;
   RunOption ro = RO_Data;
 
   vector<string> txtOptions; // ugly duplication, but allows for mnemonic...fixme
@@ -74,6 +72,7 @@ int main(int argc, char** argv)
   /** Read inputs to program */
   for(int i = 1; i < argc; i++) {
     if      (strcmp(argv[i], "-d") == 0) { dbg = atoi(argv[++i]); }
+    else if (strcmp(argv[i], "-o") == 0) { outputdir = argv[++i]; }
     else if (strcmp(argv[i], "-r") == 0) {
       string sw(argv[++i]);
       if(isInt(sw)) ro = (RunOption) atoi(sw.c_str());
@@ -86,9 +85,12 @@ int main(int argc, char** argv)
     } // end if('-r')
     else { cout<<"invalid option '"<<argv[i]<<"'"<<endl; help(txtOptions); return 0; }
   } // end for(i)
-  
+  bool unspecifiedOutdir(outputdir.size()==0);
+  if(unspecifiedOutdir) { cout<<"outputdir required."<<endl; help(txtOptions); return 0; }
+
   cout <<"flags:" << endl;
   cout <<"  dbg                      " << dbg         << endl;
+  cout <<"  outputdir                " << outputdir   << endl;
   cout <<"  Run Option               "
        <<" "<<txtOptions[ro]<<" ("<<ro<<") "<< endl;
   cout << endl;
@@ -97,6 +99,7 @@ int main(int argc, char** argv)
   FakePlotting* plot = new FakePlotting(ro);
   plot->init();
   plot->setDebug(dbg);
+  plot->setOuputDir(outputdir);
 
   if(ro == RO_MC)        plot->MCFakeRate();
   if(ro == RO_Data)      plot->DataFakeRate();
