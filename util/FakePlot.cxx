@@ -42,8 +42,13 @@ void help(const vector<string> &opts)
   cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : dump Matrix Pred in SR"         << endl; i++;
   cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : HF normalization"               << endl; i++;
   cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : Dump Percentages"               << endl; i++;
-
   cout << "  -h print this help"                << endl;
+  cout<<endl
+      <<"Example:"<<endl
+      <<" FakePlot -r datamc-sf -t _Sep_23 "
+      <<" -i out/fakerate/merged/ -o out/fakerate/merged/"
+      <<" -c out/fakerate/merged/iterative_out_Sep23.root"
+      <<endl;
 }
 
 
