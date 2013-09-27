@@ -807,66 +807,39 @@ void FakePlotting::plotSF(TH1F* h[], vector<string> names, TCanvas* c,
 			  vector<Label> lbls, string save, bool doFit, 
 			  bool topBot, string topLabel, string ratLabel)
 {
-  
-  // It is assumed here that h[0] is data and
-  // h[1] is mc and the ratio will be Data/MC
-  // Consider changing this later so we can have
-  // more plots on one canvas
-
+  // It is assumed here that h[0] is data and  h[1] is mc and the ratio will be Data/MC
+  // Consider changing this later so we can have more plots on one canvas
   if( names.size() > 4 ){
-    cout<<"Error in plotSF"<<endl;
-    cout<<"nHisto = "<<names.size()<<endl;
-    cout<<"Require <= 4, returning"<<endl;
+    cout<<"Error in plotSF"<<endl<<"nHisto = "<<names.size()<<endl<<"Require <= 4, returning"<<endl;
     return;
   }
-
-  // Legend
   TLegend* leg = makeLegend(xLeg,yLeg);
-  for(uint i = 0; i<names.size(); ++i)
-    leg->AddEntry(h[i],names.at(i).c_str(),"P");
-  
-  // Pads
-  TPad* pTop;
-  TPad* pBot;
+  for(uint i = 0; i<names.size(); ++i) leg->AddEntry(h[i],names.at(i).c_str(),"P");
+  TPad *pTop, *pBot;
   TVirtualPad* tv = CreatePad(c,pTop,pBot,0.4);
-  
-  // Latex object
   TLatex* lat = makeLatex();
-  
   // Take care of drawing top first
   pTop->Draw();
   pTop->cd();
   h[0]->GetYaxis()->SetTitleSize(0.065);
   h[0]->GetYaxis()->SetTitleOffset(0.85);
   h[0]->SetLabelSize(0.06,"Y");
-  //setMinMax(h, names.size());
   vector<float> min_max = getMinMax(h, names.size());
   h[0]->SetMaximum(min_max[1] * 1.4);
   h[0]->SetMinimum(min_max[0] * 0.6);
   h[0]->GetYaxis()->SetTitle( topLabel.c_str() );
   h[0]->Draw("ep");
-  for(uint i=1; i<names.size(); ++i)
-    h[i]->Draw("same ep");
-  for(uint i=0; i<lbls.size(); ++i){
-    Label l = lbls.at(i);
-    lat->DrawLatex(l.x,l.y,l.lbl.c_str());
-  }
+  for(uint i=1; i<names.size(); ++i) h[i]->Draw("same ep");
+  for(uint i=0; i<lbls.size(); ++i){ Label l = lbls.at(i); lat->DrawLatex(l.x,l.y,l.lbl.c_str()); }
   leg->Draw("same");
   pTop->Update();
-
-  // Bottom objects are the ratio with respect to the
-  // first plot. It is assumed there is atleast 2
-  TH1F* ratio[4]; //int colors[4] = {kRed, kBlue, kViolet, kGreen};
+  // Bottom objects are the ratio with respect to the first plot. It is assumed there is atleast 2
+  TH1F* ratio[4];
   for(uint i =0; i<names.size()-1; ++i){
     int color = h[i+1]->GetLineColor();
-    if(topBot) ratio[i] = RatioHist(h[0],h[1],ratLabel.c_str(),color); 
-    else ratio[i] = RatioHist(h[i+1],h[0],ratLabel.c_str(),color); 
-    //cout<<"Name: "<<names.at(i+1)<<endl;
-    //for(int bin=1; bin<=ratio[i]->GetNbinsX(); ++bin)
-      //cout<<"\tbin: "<<bin<<" "<<ratio[i]->GetBinContent(bin) - 1<<endl;
+    if(topBot) ratio[i] = RatioHist(h[0],  h[1],ratLabel.c_str(),color);
+    else       ratio[i] = RatioHist(h[i+1],h[0],ratLabel.c_str(),color);
   }
-
-  //ratio[0] = RatioHist(h[0],h[1],ratLabel.c_str(),kBlack);
   ratio[0]->GetXaxis()->SetTitleSize(0.12);
   ratio[0]->GetXaxis()->SetTitleOffset(0.8);
   ratio[0]->SetLabelSize(0.09, "X");
@@ -876,26 +849,12 @@ void FakePlotting::plotSF(TH1F* h[], vector<string> names, TCanvas* c,
   ratio[0]->GetYaxis()->CenterTitle();
   ratio[0]->GetYaxis()->SetNdivisions(510);
 
-  //float x0 = ratio[0]->GetBinCenter(1) - ratio[0]->GetBinWidth(1)/2.;
-  //int fb   = ratio[0]->GetNbinsX();
-  //float x1 = ratio[0]->GetBinCenter(fb) + ratio[0]->GetBinWidth(fb)/2.;
-  //TLine* line = makeLine(x0, x1, 1.0, 1.0, kBlack);
-
-  // set min max
-  TH1F* temp[1]; temp[0] = ratio[0];
+  TH1F* temp[1]; temp[0] = ratio[0]; // set min max
   min_max = getMinMax(temp,1);
-  //cout<<"Min: "<<min_max[0]<<" Max: "<<min_max[1]<<endl;
-  //ratio->SetMinimum(min_max[0] * .90);
-  //ratio->SetMaximum(min_max[1] * 1.1);  
-  //ratio[0]->SetMinimum(0.30);
-  //ratio[0]->SetMaximum(1.70);
   float MIN = getMinimum(ratio, names.size()-1);
   float MAX = getMaximum(ratio, names.size()-1);
-  ratio[0]->SetMinimum( (1-MIN) < 0.1 ? 0.9 : MIN * 0.5 ); 
+  ratio[0]->SetMinimum( (1-MIN) < 0.1 ? 0.9 : MIN * 0.5 );
   ratio[0]->SetMaximum( (MAX-1) < 0.1 ? 1.1 : MAX * 1.2 );
-  
-
-
   // Take care of drawing bottom
   tv->cd();
   pBot->Draw();
@@ -903,17 +862,11 @@ void FakePlotting::plotSF(TH1F* h[], vector<string> names, TCanvas* c,
   // Fit the ratio by a constant function
   float fitmin = ratio[0]->GetXaxis()->GetXmin();
   float fitmax = ratio[0]->GetXaxis()->GetXmax();
-  //float fitmax = 35;
   TF1 f = TF1("func","[0]",fitmin,fitmax);
   f.SetParameter(0,1.);
-  //TF1 f = TF1("func","[0]+[1]*x",ratio[0]->GetXaxis()->GetXmin(), ratio[0]->GetXaxis()->GetXmax());
-  //f.SetParameter(0,1.);
-  //f.SetParameter(1,0.001);
   f.SetLineWidth(0);
   vector<float> fitval;
-  //vector<float> fitval2;
   vector<float> fiterr;
-  //vector<float> fiterr2;
   vector<float> chi2;
   vector<int> ndf;
   if(doFit){
@@ -921,38 +874,26 @@ void FakePlotting::plotSF(TH1F* h[], vector<string> names, TCanvas* c,
       ratio[i]->Fit("func","RQ");
       ratio[i]->Draw();
       fitval.push_back(f.GetParameter(0));
-      //fitval2.push_back(f.GetParameter(1));
       fiterr.push_back(f.GetParError(0));
-      //fiterr2.push_back(f.GetParError(1));
       chi2.push_back(f.GetChisquare());
       ndf.push_back(f.GetNDF());
     }
   }
-  //line->Draw("same");
   ratio[0]->Draw("ep");
-  for(uint i=1; i<names.size(); ++i)
-    ratio[i-1]->Draw("same ep");
-
+  for(uint i=1; i<names.size(); ++i) ratio[i-1]->Draw("same ep");
   if(doFit){
     TLatex* l = makeLatex();
     for(uint i = 0; i<names.size()-1; ++i){
-      //l->DrawLatex(0.7, 0.52 - i*0.16, Form("Fit =  %4.4f +/- %4.4f",fitval.at(i), fiterr.at(i)));
-      //l->DrawLatex(0.7, 0.44 - i*0.16, Form("#chi^{2}/#dof = %4.2f/%i",chi2.at(i),ndf.at(i)));
       int color = ratio[i]->GetLineColor();
       l->DrawLatex(0.15 + i*0.25, 0.40, Form("#color[%i]{Fit =  %4.4f +/- %4.4f}",color,fitval.at(i), fiterr.at(i)));
-      //l->DrawLatex(0.5 +  i*0.25, 0.40, Form("#color[%i]{b =  %4.4f +/- %4.4f}",color,fitval2.at(i), fiterr2.at(i)));
       l->DrawLatex(0.15 + i*0.25, 0.32, Form("#color[%i]{#chi^{2}/#dof = %4.2f/%i}",color,chi2.at(i),ndf.at(i)));
     }
   }
-
   c->SaveAs(save.c_str());
   replace(save, ".pdf", ".png");
   c->SaveAs(save.c_str());
-
-  for(uint i=0; i<names.size()-1; ++i)
-    ratio[i]->Delete();
+  for(uint i=0; i<names.size()-1; ++i) ratio[i]->Delete();
 }
-
 //--------------------------------------------------------//
 // Plot Stack
 //--------------------------------------------------------//
