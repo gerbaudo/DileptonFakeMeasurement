@@ -1,5 +1,6 @@
 #include "SusyTest0/FakePlotting.h"
 #include "SusyTest0/utils.h"
+#include <cassert>
 
 //--------------------------------------------------------//
 // Constructor
@@ -803,9 +804,9 @@ void FakePlotting::plotFake(TH1F* h[], vector<string> names, TCanvas* c,
 // Plot SF
 //--------------------------------------------------------//
 void FakePlotting::plotSF(TH1F* h[], vector<string> names, TCanvas* c,
-			  float* MinMax, float* xLeg, float* yLeg,
-			  vector<Label> lbls, string save, bool doFit, 
-			  bool topBot, string topLabel, string ratLabel)
+                          float* MinMax, float* xLeg, float* yLeg,
+                          vector<Label> lbls, string save, bool doFit,
+                          bool topBot, string topLabel, string ratLabel)
 {
   // It is assumed here that h[0] is data and  h[1] is mc and the ratio will be Data/MC
   // Consider changing this later so we can have more plots on one canvas
@@ -837,8 +838,8 @@ void FakePlotting::plotSF(TH1F* h[], vector<string> names, TCanvas* c,
   TH1F* ratio[4];
   for(uint i =0; i<names.size()-1; ++i){
     int color = h[i+1]->GetLineColor();
-    if(topBot) ratio[i] = RatioHist(h[0],  h[1],ratLabel.c_str(),color);
-    else       ratio[i] = RatioHist(h[i+1],h[0],ratLabel.c_str(),color);
+    assert(topBot); // othewise obsolete (DG 2013-09-26)
+    ratio[i] = RatioHist(h[0],  h[1],ratLabel.c_str(),color);
   }
   ratio[0]->GetXaxis()->SetTitleSize(0.12);
   ratio[0]->GetXaxis()->SetTitleOffset(0.8);
