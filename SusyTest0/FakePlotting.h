@@ -73,6 +73,8 @@ class FakePlotting : public myHist
   static bool initInputFile(File &out,
                             const string &fname, const string &name, const string &sname,
                             int color, int marker);
+  FakePlotting& setTag(const std::string &name);
+  FakePlotting& setInputDir(const std::string &dir);
   FakePlotting& setOuputDir(const std::string &dir);
   FakePlotting& setOuputFile(const std::string &name);
   // The various looping functions
@@ -177,6 +179,8 @@ class FakePlotting : public myHist
   RunOption m_runopt;
 
   FakeStatTool::StatErrorTool* m_fakeStat;
+  std::string m_tag;
+  std::string m_inputdir;
   std::string m_outputdir;
   std::string m_outputfile;
 

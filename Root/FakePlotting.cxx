@@ -43,6 +43,19 @@ bool FakePlotting::initInputFile(File &out,
   return inputIsValid;
 }
 //----------------------------------------------------------
+FakePlotting& FakePlotting::setTag(const std::string &name)
+{
+  m_tag = name;
+  return *this;
+}
+//----------------------------------------------------------
+FakePlotting& FakePlotting::setInputDir(const std::string &dir)
+{
+  if(!dirExists(dir)) cout<<"Warning, invalid input dir '"<<dir<<"'"<<endl;
+  m_inputdir = dir;
+  return *this;
+}
+//----------------------------------------------------------
 FakePlotting& FakePlotting::setOuputDir(const std::string &dir)
 {
   m_outputdir = mkdirIfNeeded(dir);
@@ -65,19 +78,14 @@ FakePlotting& FakePlotting::setOuputFile(const std::string &name)
 void FakePlotting::init()
 {
 
-
-  string append = "_Sep_23";
-  string dataappend = "_Sep_23";
-  string addition = "";
-  string inDir = "out/fakerate/merged/";
-  string aa(append+addition);
-  initInputFile(data,    inDir+"data"+dataappend+".root", "Data A-B12",  "data",  kBlack,    20);
-  initInputFile(totMC,   inDir+"allBkg"+aa+".root",       "MC Combined", "mc",    kRed,      25);
-  initInputFile(ttbar,   inDir+"ttbar"+aa+".root",        "t#bar{t}",    "ttbar", kRed,      21);
-  initInputFile(Zjets,   inDir+"zjets"+aa+".root",        "Z+jets",      "Zjets", kOrange,   23);
-  initInputFile(Wjets,   inDir+"wjets"+aa+".root",        "W+jets",      "Wjets", kViolet+2, 22);
-  initInputFile(diboson, inDir+"diboson"+aa+".root",      "Diboson",     "dib",   kMagenta,  34);
-  initInputFile(HF,      inDir+"heavyflavor"+aa+".root",  "HF",          "HF",    kBlue,     26);
+  string inDir = m_inputdir+"/";
+  initInputFile(data,    inDir+"data"       +m_tag+".root", "Data",        "data",  kBlack,    20);
+  initInputFile(totMC,   inDir+"allBkg"     +m_tag+".root", "MC Combined", "mc",    kRed,      25);
+  initInputFile(ttbar,   inDir+"ttbar"      +m_tag+".root", "t#bar{t}",    "ttbar", kRed,      21);
+  initInputFile(Zjets,   inDir+"zjets"      +m_tag+".root", "Z+jets",      "Zjets", kOrange,   23);
+  initInputFile(Wjets,   inDir+"wjets"      +m_tag+".root", "W+jets",      "Wjets", kViolet+2, 22);
+  initInputFile(diboson, inDir+"diboson"    +m_tag+".root", "Diboson",     "dib",   kMagenta,  34);
+  initInputFile(HF,      inDir+"heavyflavor"+m_tag+".root", "HF",          "HF",    kBlue,     26);
 
   if(m_runopt == RO_Data){
     m_files.push_back(data);
