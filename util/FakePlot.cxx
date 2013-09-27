@@ -116,12 +116,12 @@ int main(int argc, char** argv)
 
   // Create instance of the class:
   FakePlotting* plot = new FakePlotting(ro);
-  plot->init();
   plot->setDebug(dbg);
   plot->setTag(tag);
   plot->setInputDir(inputdir);
   plot->setOuputDir(outputdir);
   plot->setOuputFile(outputfile);
+  plot->init();
 
   if(ro == RO_MC)        plot->MCFakeRate();
   if(ro == RO_Data)      plot->DataFakeRate();
