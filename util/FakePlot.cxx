@@ -26,8 +26,8 @@ void help(const vector<string> &opts)
   cout << "  Options:"                             << endl;
   cout << "  -i inputdir (required)"               << endl;
   cout << "  -t tag (required, e.g. '_Sep_23')"    << endl;
-  cout << "  -o outputfile(required for some mode)"<< endl;
-  cout << "  -O outputdir (required)"              << endl;
+  cout << "  -c itecorrfile(required for some mode)"<< endl;
+  cout << "  -o outputdir (required)"              << endl;
   cout << "  -r run option number"                 << endl;
   size_t width(24);
   cout<<"  "<<setw(3)<<i<<" "<<setw(width)<<opts[i]<<" : Data (default)"                 << endl; i++;
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
   ROOT::Cintex::Cintex::Enable();
 
   int dbg = 0;
-  string inputdir, outputdir, outputfile, tag;
+  string inputdir, inputItecorrfile, outputdir, tag;
   RunOption ro = RO_Data;
 
   vector<string> txtOptions; // ugly duplication, but allows for mnemonic...fixme
@@ -74,11 +74,11 @@ int main(int argc, char** argv)
 
   /** Read inputs to program */
   for(int i = 1; i < argc; i++) {
-    if      (strcmp(argv[i], "-d") == 0) { dbg = atoi(argv[++i]); }
-    else if (strcmp(argv[i], "-t") == 0) { tag        = argv[++i]; }
-    else if (strcmp(argv[i], "-i") == 0) { inputdir   = argv[++i]; }
-    else if (strcmp(argv[i], "-o") == 0) { outputfile = argv[++i]; }
-    else if (strcmp(argv[i], "-O") == 0) { outputdir  = argv[++i]; }
+    if      (strcmp(argv[i], "-d") == 0) { dbg = atoi(argv[++i]);        }
+    else if (strcmp(argv[i], "-t") == 0) { tag              = argv[++i]; }
+    else if (strcmp(argv[i], "-i") == 0) { inputdir         = argv[++i]; }
+    else if (strcmp(argv[i], "-c") == 0) { inputItecorrfile = argv[++i]; }
+    else if (strcmp(argv[i], "-o") == 0) { outputdir        = argv[++i]; }
     else if (strcmp(argv[i], "-r") == 0) {
       string sw(argv[++i]);
       if(isInt(sw)) ro = (RunOption) atoi(sw.c_str());
@@ -91,25 +91,25 @@ int main(int argc, char** argv)
     } // end if('-r')
     else { cout<<"invalid option '"<<argv[i]<<"'"<<endl; help(txtOptions); return 0; }
   } // end for(i)
-  bool unspecifiedOutdir(outputdir.size()==0), unspecifiedOutfile(outputfile.size()==0);
+  bool unspecifiedOutdir(outputdir.size()==0), unspecifiedCorr(inputItecorrfile.size()==0);
   bool unspecifiedInputdir(inputdir.size()==0), unspecifiedTag(tag.size()==0);
   if(unspecifiedTag)      { cout<<"tag required."      <<endl; help(txtOptions); return 0; }
   if(unspecifiedInputdir) { cout<<"inputdir required." <<endl; help(txtOptions); return 0; }
   if(unspecifiedOutdir)   { cout<<"outputdir required."<<endl; help(txtOptions); return 0; }
 
-  bool outFileIsRequired(ro==RO_DataMCSF || ro==RO_DataMC);
-  if(outFileIsRequired && unspecifiedOutfile) {
-    cout<<"outputfile required. (example 'corFake_Sep11_2013_forDavide.root')"<<endl;
+  bool corrFileIsRequired(ro==RO_DataMCSF || ro==RO_DataMC);
+  if(corrFileIsRequired && unspecifiedCorr) {
+    cout<<"inputItecorrfile required. (example 'corFake_Sep11_2013_forDavide.root')"<<endl;
     help(txtOptions);
     return 0;
   }
 
   cout <<"flags:" << endl;
-  cout <<"  dbg                      " << dbg         << endl;
-  cout <<"  tag                      " << tag         << endl;
-  cout <<"  inputdir                 " << inputdir    << endl;
-  cout <<"  outputdir                " << outputdir   << endl;
-  cout <<"  outputfile               " << outputfile  << endl;
+  cout <<"  dbg                      " << dbg              << endl;
+  cout <<"  tag                      " << tag              << endl;
+  cout <<"  inputdir                 " << inputdir         << endl;
+  cout <<"  outputdir                " << outputdir        << endl;
+  cout <<"  inputItecorrfile         " << inputItecorrfile << endl;
   cout <<"  Run Option               "
        <<" "<<txtOptions[ro]<<" ("<<ro<<") "<< endl;
   cout << endl;
@@ -120,7 +120,7 @@ int main(int argc, char** argv)
   plot->setTag(tag);
   plot->setInputDir(inputdir);
   plot->setOuputDir(outputdir);
-  plot->setOuputFile(outputfile);
+  plot->setInputItercorrFile(inputItecorrfile);
   plot->init();
 
   if(ro == RO_MC)        plot->MCFakeRate();
