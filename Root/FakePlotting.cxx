@@ -402,7 +402,7 @@ void FakePlotting::DataRateMCSub()
 //--------------------------------------------------------//
 // Get SF for Data and MC
 //--------------------------------------------------------//
-void FakePlotting::DataMCSF(RunOption ro)
+void FakePlotting::DataMCSF(RunOption ro /*DG: 'ro' now unused? try to drop it*/)
 {
   
   if(m_dbg) cout << "DataFakeRate" << endl;
@@ -411,11 +411,7 @@ void FakePlotting::DataMCSF(RunOption ro)
     cout << "Not enough files to data/mc sf" << endl;
     return;
   }
-  string savedir = (ro == RO_DataMC
-                    ? mkdirIfNeeded("out/fakeplot/dataMCRates/")
-                    : mkdirIfNeeded("out/fakeplot/sfPlots2013_Sep_24/"));
-
-
+  string savedir = m_outputdir;
   //File f_data = m_files[0];
   //File f_mc   = m_files[1];
   
