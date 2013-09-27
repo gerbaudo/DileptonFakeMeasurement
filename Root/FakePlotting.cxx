@@ -43,6 +43,19 @@ bool FakePlotting::initInputFile(File &out,
   return inputIsValid;
 }
 //----------------------------------------------------------
+FakePlotting& FakePlotting::setOuputDir(const std::string &dir)
+{
+  m_outputdir = mkdirIfNeeded(dir);
+  bool dirIsInvalid(m_outputdir.size()==0);
+  if(dirIsInvalid) {
+    string fallbackOutdir("./");
+    cout<<"FakePlotting::setOuputDir('"<<dir<<"') : failed to create the output directory"<<endl
+        <<"output files will be in '"<<fallbackOutdir<<"'"<<endl;
+    m_outputdir = fallbackOutdir;
+  }
+  return *this;
+}
+//----------------------------------------------------------
 void FakePlotting::init()
 {
 
