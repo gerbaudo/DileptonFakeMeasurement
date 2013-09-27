@@ -16,11 +16,11 @@
 #include <string>
 
 // --------- Scale Factors -----------//
-const float el_qcdSF = 0.71; //1; //0.8421; //0.7383; //1.0;
-const float mu_qcdSF = 0.88; //1; //0.8082; //0.8689; //1.0;
-const float el_convSF = 1.23; //0.90; //0.9938; //1.7185;
-const float el_realSF = 1.00;
-const float mu_realSF = 0.9966;
+const float el_qcdSF  = 0.73345;
+const float mu_qcdSF  = 0.79059;
+const float el_convSF = 1.24359;
+const float el_realSF = 0.99729;
+const float mu_realSF = 0.99719;
 
 
 // --------- Systematic Errors -----------//
