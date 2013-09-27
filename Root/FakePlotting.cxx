@@ -56,6 +56,12 @@ FakePlotting& FakePlotting::setOuputDir(const std::string &dir)
   return *this;
 }
 //----------------------------------------------------------
+FakePlotting& FakePlotting::setOuputFile(const std::string &name)
+{
+  m_outputfile = name;
+  return *this;
+}
+//----------------------------------------------------------
 void FakePlotting::init()
 {
 
@@ -372,7 +378,7 @@ void FakePlotting::DataMCSF(RunOption ro /*DG: 'ro' now unused? try to drop it*/
   float Min_Max[] = {0,1.1};
   vector<Label> lbls;
   vector<string> names;
-  TFile* f_temp = new TFile("corFake_Sep11_2013_forDavide.root"); // DG should be on cmd-line
+  TFile* f_temp = new TFile(m_outputfile.c_str());
   for(int il=0; il<LT_N; ++il){
     string lepname = LTNames[il];
     string lepton  = il == LT_EL ? "Electron" : "Muon";
