@@ -14,23 +14,25 @@ FinalNewFake::FinalNewFake(string outputname) :
   FakePlotting(RO_N),
   m_outfile(NULL)
 {
-  string append = "_Sep_14";
-  string addition = "";
-  string inDir = "out/fakerate/merged/";
-  string aa(append+addition);
-  initInputFile(m_mc,      inDir+"allBkg"+aa+".root",      "Combined MC", "mc",      kBlack,   25);
-  initInputFile(m_ttbar,   inDir+"ttbar"+aa+".root",       "Ttbar",       "ttbar",   kBlue,    25);
-  initInputFile(m_Wjet,    inDir+"wjets"+aa+".root",       "W+jet",       "wjet",    kMagenta, 25);
-  initInputFile(m_Zjet,    inDir+"zjets"+aa+".root",       "Z+jet",       "Zjet",    kRed,     25);
-  initInputFile(m_diboson, inDir+"diboson"+aa+".root",     "Diboson",     "diboson", kOrange,  22);
-  initInputFile(m_bbbar,   inDir+"heavyflavor"+aa+".root", "b-bbar",      "bbbar",   kBlue,    23);
+}
+//----------------------------------------------------------
+void FinalNewFake::initIoFiles()
+{
+  string tag = m_tag;
+  string inDir = m_inputdir+"/";
+  initInputFile(m_mc,      inDir+"allBkg"     +tag+".root", "Combined MC", "mc",      kBlack,   25);
+  initInputFile(m_ttbar,   inDir+"ttbar"      +tag+".root", "Ttbar",       "ttbar",   kBlue,    25);
+  initInputFile(m_Wjet,    inDir+"wjets"      +tag+".root", "W+jet",       "wjet",    kMagenta, 25);
+  initInputFile(m_Zjet,    inDir+"zjets"      +tag+".root", "Z+jet",       "Zjet",    kRed,     25);
+  initInputFile(m_diboson, inDir+"diboson"    +tag+".root", "Diboson",     "diboson", kOrange,  22);
+  initInputFile(m_bbbar,   inDir+"heavyflavor"+tag+".root", "b-bbar",      "bbbar",   kBlue,    23);
   m_files[FP_ttbar] = m_ttbar;
   m_files[FP_Wjet]  = m_Wjet;
   m_files[FP_Zjet]  = m_Zjet;
   m_files[FP_dib]   = m_diboson;
   m_files[FP_bbbar] = m_bbbar;
 
-  m_outfile = new TFile((inDir+outputname+".root").c_str(), "recreate");
+  m_outfile = new TFile(m_outputfname.c_str(), "recreate");
   cout<<"FinalNewFake: saving output to: '"<<m_outfile->GetName()<<"'"<<endl;
 }
 
@@ -648,6 +650,36 @@ TH1* FinalNewFake::getEtaSys(string lep)
   }
   return rate;
 }
+//----------------------------------------------------------
+FinalNewFake& FinalNewFake::setTag(const std::string &name)
+{
+  m_tag = name;
+  return *this;
+}
+//----------------------------------------------------------
+FinalNewFake& FinalNewFake::setInputDir(const std::string &dir)
+{
+  if(!dirExists(dir)) cout<<"Warning, invalid input dir '"<<dir<<"'"<<endl;
+  m_inputdir = dir;
+  return *this;
+}
+//----------------------------------------------------------
+FinalNewFake& FinalNewFake::setOuputFilename(const std::string &name)
+{
+  const string dir(basedir(name));
+  if(dirExists(dir)) m_outputfname = name;
+  else {
+    const bool dirWasCreated(mkdirIfNeeded(dir).size()>0);
+    if(dirWasCreated) m_outputfname = name;
+    else {
+      const string fallbackDir("./");
+      m_outputfname = name;
+      replace(m_outputfname, dir, fallbackDir);
+      cout<<"output path '"<<name<<"', output stored to '"<<m_outputfname<<"'"<<endl;
+    }
+  }
+  return *this;
+}
 //------------------------------------------------------------//
 // Write to file
 //------------------------------------------------------------//
@@ -706,7 +738,7 @@ void FinalNewFake::dumpPlot(TH1* hist)//, string save)
   leg->Draw("same");
   
   string name = hist->GetName();
-  string dir = basedir(m_outfile->GetName());
+  string dir = basedir(m_outputfname);
   c->SaveAs((dir + name + ".eps").c_str());
   c->SaveAs((dir + name + ".png").c_str());
   delete c;

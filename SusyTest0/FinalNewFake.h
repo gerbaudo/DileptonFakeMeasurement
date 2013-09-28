@@ -67,9 +67,9 @@ class FinalNewFake : public FakePlotting
  public:
 
   // Constructor - Destructor
-  FinalNewFake(string outputname);
+  FinalNewFake(string outputname="FinalNewFake_out.root");
   ~FinalNewFake();
-
+  void initIoFiles();
   // 
   // Methods to contstruct the rates
   //
@@ -114,6 +114,9 @@ class FinalNewFake : public FakePlotting
   // Miscellaneous
   //
 
+  FinalNewFake& setTag(const std::string &name);
+  FinalNewFake& setInputDir(const std::string &dir);
+  FinalNewFake& setOuputFilename(const std::string &name);
   void save(TH1* h);
   void save(TParameter<double>  param);
   void write();
@@ -132,8 +135,9 @@ class FinalNewFake : public FakePlotting
 
   TFile* m_outfile;     // file for the output
 
-
-
+  std::string m_tag;
+  std::string m_inputdir;
+  std::string m_outputfname;
 };
 
 #endif
