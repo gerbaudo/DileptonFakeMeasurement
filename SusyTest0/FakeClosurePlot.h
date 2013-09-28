@@ -7,9 +7,9 @@
 //////////////////////////////////////////////
 
 // Mine
-#include "SusyPlotting/myHist.h"
+#include "SusyTest0/myHist.h"
 #include "SusyAna2012/SusyPlotter.h"
-#include "SusyPlotting/SusyPlotting.h"
+#include "SusyTest0/SusyPlotting.h"
 
 // Root
 #include "TF1.h"
