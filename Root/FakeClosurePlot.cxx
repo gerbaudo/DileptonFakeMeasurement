@@ -35,7 +35,7 @@ void initInputFile(File &out,
 void FakeClosurePlot::init(FPRunOption opt)
 {
   m_opt = opt;
-  File data, top, Zjets, Wjets, dib, hf, qcd,;
+  File data, top, Zjets, Wjets, dib, hf, qcd;
   string inDir = "out/fakerate/merged/";
   string tag = "_Sep_23";
   string tagg(tag+".AnaHists.root"), tagf(tag+".FakeHists.root");
