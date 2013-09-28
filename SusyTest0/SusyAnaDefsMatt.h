@@ -334,6 +334,63 @@ static string SRProperNames[] =
   "Signal region WH SS"
 };
 
+// Plotting regions
+enum PlotRegion{
+
+  PR_SRmT2a = 0,
+  PR_SRmT2b,
+  PR_SRmT2c,
+  PR_SRWWa,
+  PR_SRWWb,
+  PR_SRWWc,
+  PR_SRZjets,
+
+  PR_VRSS,
+  PR_CRWWMet,
+  PR_CRWWmT2,
+
+  PR_CRTopMet,
+  PR_CRTopmT2a,
+  PR_CRTopmT2b,
+  PR_CRTopmT2c,
+  PR_CRTopZjets,
+  PR_CRZVMet,
+  PR_CRZVmT2,
+
+  PR_PreSRZjets,
+  PR_CRZjets,
+
+  PR_SRDavide,
+
+  PR_N
+};
+
+static string PRNames[] = {
+  "SRmT2a",
+  "SRmT2b",
+  "SRmT2c",
+  "SRWWa",
+  "SRWWb",
+  "SRWWc",
+  "SRZjets",
+
+  "VRSS",
+  "CRWWMet",
+  "CRWWmT2",
+  "CRTopMet",
+  "CRTopmT2a",
+  "CRTopmT2b",
+  "CRTopmT2c",
+  "CRTopZjets",
+  "CRZVMet",
+  "CRZVmT2",
+
+  "PreSRZjets",
+  "CRZjets",
+
+  "SRDavide"
+};
+
 // Contamination or actual
 enum RateInformation 
 {

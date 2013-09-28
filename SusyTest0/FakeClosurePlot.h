@@ -9,7 +9,7 @@
 // Mine
 #include "SusyTest0/myHist.h"
 #include "SusyTest0/SusyPlotter.h"
-#include "SusyTest0/SusyPlotting.h"
+#include "SusyTest0/SusyAnaDefsMatt.h"
 
 // Root
 #include "TF1.h"
@@ -45,6 +45,24 @@ enum FPRunOption {
   RO_VRTL,
   RO_NONE,
   N_FPRunOption
+};
+
+// Some generic structs to help with plotting
+struct Label {
+  string lbl;
+  float x;
+  float y;
+};
+
+struct File {
+  TFile* file;  // Pointer to file
+  string name;  // Name for plots, "Data 2012" "Pythia"
+  string sname; // short name, like py, or dt11
+  int color;    // color for the histogram
+  bool ismc;    // true if mc, false if data
+  bool isfake;  // true if fake, false if not
+  bool xsLumi;  // this is to be used if the stat error is zero
+  bool isZ;     // to be used for Z+Met QCD
 };
 
 class FakeClosurePlot : public myHist {
