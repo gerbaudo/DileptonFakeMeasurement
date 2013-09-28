@@ -108,9 +108,6 @@ class FakeClosurePlot : public myHist {
   void plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> errs,
 	       string save, TLegend* leg, int ch, bool logy=false, bool logx=false);
 
-  // Make latex table
-  void dumpTable(PlotRegion reg);
-
   // Clear Hists
   void clear(){
     for(uint i=0; i<m_hists.size(); ++i)

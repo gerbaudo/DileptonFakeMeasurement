@@ -422,11 +422,6 @@ void FakeClosurePlot::DataMCAnaPlots()
     PlotRegion pr = m_PRs.at(ipr);
     string region = PRNames[pr];
 
-    if(m_makeTable){
-      dumpTable(pr);
-      continue;
-    }
-
     for(int ich=0; ich<Ch_N; ++ich){
       //if(ich != Ch_mm) continue;
       if(ich == Ch_all) continue;
@@ -967,105 +962,5 @@ float FakeClosurePlot::getMax(TH1F* h[], int n)
   }
   
   return max;
-
-}
- 
-//-----------------------------------------------------//
-// Add-on -- Dumping to a table
-//-----------------------------------------------------//
-void FakeClosurePlot::dumpTable(PlotRegion reg)
-{
-
-  // So this is kind of last minute, but need to be 
-  // able to dump the validation region plots
-  // We will need to get the fake error
-
-  cout<<"Table for: "<<PRNames[reg]<<endl;
-
-  
-  // Header for table
-  //------------------------------------//
-  cout<<"Process & ee & (stat) & (sys) &";
-  cout<<"$\\mu\\mu$ & (stat) & (sys) &";
-  cout<<"e$\\mu$ & (stat) & (sys)\\\\";
-  cout<<endl;
-  //------------------------------------//
-
-  vector<string> channels; 
-  channels.push_back("ee");
-  channels.push_back("mm");
-  channels.push_back("em");
-
-  float total[3]={0,0,0};
-  float totstat[3]={0,0,0};
-  float totsysup[3]={0,0,0};
-  float totsysdn[3]={0,0,0};
-
-  float low = 100;
-  float high = 108;
-
-  for(uint f=0; f<m_files.size(); ++f){
-    File file = m_files.at(f);
-    if( !file.ismc && !file.isfake ) cout<<"Observed ";
-    else cout<<file.name;
-
-    for(uint i=0; i<channels.size(); ++i){    
-      cout<<" & ";
-
-      //string plot = PRNames[reg] + "_" + channels[i] + "_ll_M_optimal3";
-      string plot = PRNames[reg] + "_" + channels[i] + "_onebin";
-
-      /*
-      string plot = PRNames[reg] + "_" + channels[i] + "_onebin";
-      if(reg == PR_VR1 && i == 0) // ee with Z veto
-	plot = PRNames[PR_VR4] + "_" + channels[i] + "_onebin";
-      if(reg == PR_VR2 && i == 0) // ee with Z veto
-	plot = PRNames[PR_VR3] + "_" + channels[i] + "_onebin";
-      */
-
-      TH1F* nominal = NULL;
-      if(file.isfake)
-	nominal = (TH1F*) file.file->Get((plot+"_NONE").c_str());
-      else
-	nominal = (TH1F*) file.file->Get((plot+"_NOM").c_str());
-
-      float nom  = nominal->GetBinContent(1);
-      float stat = nominal->GetBinError(1);
-
-      //float binl = nominal->FindBin(low);
-      //float binh = nominal->FindBin(high);
-      //float nom  = nominal->Integral(binl, binh);
-      //float stat = getStat(nominal, low, high);
-
-      float sysup = 0;
-      float sysdn = 0;
-      if(file.isfake) getFakeSys(nominal, file.file, plot, sysup, sysdn);
-
-      if(file.ismc || file.isfake){
-	total[i] += nom;
-	totstat[i] += stat*stat;
-	totsysup[i] += sysup*sysup;
-	totsysdn[i] += sysdn*sysdn;
-      }
-      cout<<Form("%4.2f",nom)<<" & "
-	  <<Form("%4.2f",stat)<<" & ";
-      if(file.isfake) cout<<"$^{+"<<Form("%4.2f",sysup)<<"}_{-"<<Form("%4.2f",sysdn)<<"}$ ";
-      else cout<<" $--$ ";
-    }// end loop over channels
-    cout<<" \\\\"<<endl;
-    cout<<"\\hline"<<endl;
-  }// end loop over files
-  
-  cout<<"Total SM ";
-  for(uint i=0; i<channels.size(); ++i){
-    cout<<" & "<<Form("%4.2f",total[i])
-	<<" & "<<Form("%4.2f",sqrt(totstat[i]))
-	<<" & $^{+"<<Form("%4.2f",sqrt(totsysup[i]))
-	<<"}_{-"<<Form("%4.2f",sqrt(totsysdn[i]))<<"}$ ";
-  }
-  cout<<" \\\\"<<endl;
-  cout<<"\\hline"<<endl;
-		      
-
 
 }

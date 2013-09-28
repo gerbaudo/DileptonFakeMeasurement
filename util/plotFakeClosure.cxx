@@ -50,7 +50,6 @@ int main(int argc, char** argv)
   int dbg = 0;
   FPRunOption option = RO_ALL;
   bool integral = false;
-  bool makeTable = false;
   
   cout << "FancyPlot" << endl;
   cout << endl;
@@ -63,8 +62,6 @@ int main(int argc, char** argv)
       integral = true;
     else if (strcmp(argv[i], "-r") == 0)
       option = (FPRunOption) atoi(argv[++i]);
-    else if (strcmp(argv[i], "-tab") == 0)
-      makeTable = true;
     else
       {
 	help();
@@ -96,7 +93,6 @@ int main(int argc, char** argv)
   plot->init(option);
   plot->setDebug(dbg);
   if(integral) plot->addIntegral();
-  if(makeTable) plot->makeTable();
   plot->DataMCAnaPlots();
 
   
