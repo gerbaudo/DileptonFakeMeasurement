@@ -35,25 +35,25 @@ void initInputFile(File &out,
 void FakeClosurePlot::init(FPRunOption opt)
 {
   m_opt = opt;
-  File data, top, ZX, Ztautau, WW, WZ, ZZ, qcd, WJet;
-  File Zjet, Zdib; // For testing
-  string inDir = "anaplots/";
-  string tag = "_Jul17_n0145";
-  string tagg(tag+".AnaHists"), tagf(tag+".FakeHists");
-  initInputFile(data, inDir+"data" +tagg+".root", "Data",   "dt",   kBlack,     false, false);
-  initInputFile(top,  inDir+"top"  +tagg+".root", "Top",    "top",  kRed+1,     true,  false);
-  initInputFile(ZX,   inDir+"ZX"   +tagg+".root", "Z+X",    "ZX",   kOrange-2,  true,  false);
-  initInputFile(WW,   inDir+"WW"   +tagg+".root", "WW",     "WW",   kAzure + 4, true,  false);
-  initInputFile(qcd,  inDir+"data" +tagf+".root", "Fake",   "fake", kGray,      true,  true );
-  initInputFile(Zjet, inDir+"Zjet" +tagg+".root", "Z+jets", "Zjet", kOrange-2,  true,  false);
-  initInputFile(WZ,   inDir+"WZ"   +tagg+".root", "WZ",     "WZ",   kSpring+1,  true,  false);
-  initInputFile(ZZ,   inDir+"ZZ"   +tagg+".root", "ZZ",     "ZZ",   kOrange+8,  true,  false);
+  File data, top, Zjets, Wjets, dib, hf, qcd,;
+  string inDir = "out/fakerate/merged/";
+  string tag = "_Sep_23";
+  string tagg(tag+".AnaHists.root"), tagf(tag+".FakeHists.root");
+  initInputFile(data,  inDir+"data"       +tagg, "Data",    "data",    kBlack,     false, false);
+  initInputFile(top,   inDir+"ttbar"      +tagg, "Ttbar",   "ttbar",   kBlue,      true,  false);
+  initInputFile(Zjets, inDir+"zjets"      +tagg, "Z+jet",   "Zjet",    kRed,       true,  false);
+  initInputFile(Wjets, inDir+"wjets"      +tagg, "W+jet",   "Wjet",    kMagenta,   true,  false);
+  initInputFile(dib,   inDir+"diboson"    +tagg, "Diboson", "diboson", kOrange,    true,  false);
+  initInputFile(hf,    inDir+"heavyflavor"+tagg, "b-bbar",  "bbbar",   kSpring+1,  true,  false);
+  initInputFile(qcd,   inDir+"data"       +tagf, "Fake",    "fake",    kGray,      true,  true );
   m_files.clear();
 
   m_files.push_back(data);
-  m_files.push_back(ZX);
   m_files.push_back(top);
-  m_files.push_back(WW);
+  m_files.push_back(Zjets);
+  m_files.push_back(Wjets);
+  m_files.push_back(dib);
+  m_files.push_back(hf);
   m_files.push_back(qcd);
 
   if(opt == RO_ALL){ m_PRs.push_back(PR_VRSS); }
