@@ -1,12 +1,12 @@
 // This plotting script will grow and be used to format
 // histograms that can be shown in talks
 
-#include "SusyTest0/FancyPlotting.h"
+#include "SusyTest0/FakeClosurePlot.h"
 
 //---------------------------------------------------------------------//
 // Constructor
 //---------------------------------------------------------------------//
-FancyPlotting::FancyPlotting(/*FPRunOption opt*/) : 
+FakeClosurePlot::FakeClosurePlot(/*FPRunOption opt*/) : 
   myHist(),
   m_opt(RO_ALL),
   m_dbg(0),
@@ -24,7 +24,7 @@ FancyPlotting::FancyPlotting(/*FPRunOption opt*/) :
 //---------------------------------------------------------------------//
 // Initialize all files and things
 //---------------------------------------------------------------------//
-void FancyPlotting::init(FPRunOption opt)
+void FakeClosurePlot::init(FPRunOption opt)
 {
 
   // Option, for checking later
@@ -235,7 +235,7 @@ void FancyPlotting::init(FPRunOption opt)
 //---------------------------------------------------------------------//
 // Destructor
 //---------------------------------------------------------------------//
-FancyPlotting::~FancyPlotting()
+FakeClosurePlot::~FakeClosurePlot()
 {
 
 }
@@ -243,7 +243,7 @@ FancyPlotting::~FancyPlotting()
 //---------------------------------------------------------------------//
 // Initialize vectors
 //---------------------------------------------------------------------//
-void FancyPlotting::setPlots()
+void FakeClosurePlot::setPlots()
 {
 
   // Set any and all plots that are needed
@@ -394,7 +394,7 @@ void FancyPlotting::setPlots()
 //---------------------------------------------------------------------//
 // Loop to make histograms
 //---------------------------------------------------------------------//
-void FancyPlotting::DataMCAnaPlots()
+void FakeClosurePlot::DataMCAnaPlots()
 {
 
   // Here Loop over the channels and the signal regions that are set 
@@ -468,10 +468,10 @@ void FancyPlotting::DataMCAnaPlots()
 //---------------------------------------------------------------------//
 // Set Histograms 
 //---------------------------------------------------------------------//
-void FancyPlotting::buildHists(vector<TH1F*> &hists, vector<TH1F*> &sys, string var, 
+void FakeClosurePlot::buildHists(vector<TH1F*> &hists, vector<TH1F*> &sys, string var, 
 			       string xtitle, Chan ch, PlotRegion PR)			       
 {
-  if(m_dbg) cout << "FancyPlotting::buildHists from PR = " << PR << endl;
+  if(m_dbg) cout << "FakeClosurePlot::buildHists from PR = " << PR << endl;
 
   //hists.clear();
   //sys.clear();
@@ -531,7 +531,7 @@ void FancyPlotting::buildHists(vector<TH1F*> &hists, vector<TH1F*> &sys, string 
 //---------------------------------------------------------------------//
 // Build legend
 //---------------------------------------------------------------------//
-TLegend* FancyPlotting::buildLegend(vector<TH1F*> hists, TGraphAsymmErrors* errs,
+TLegend* FakeClosurePlot::buildLegend(vector<TH1F*> hists, TGraphAsymmErrors* errs,
 				    float* x, float* y)
 {
   
@@ -573,9 +573,9 @@ TLegend* FancyPlotting::buildLegend(vector<TH1F*> hists, TGraphAsymmErrors* errs
 //---------------------------------------------------------------------//
 // Build Ratio
 //---------------------------------------------------------------------//
-TH1F* FancyPlotting::buildRatio(TH1F* data, TH1F* SM)
+TH1F* FakeClosurePlot::buildRatio(TH1F* data, TH1F* SM)
 {
-  if(m_dbg) cout << "FancyPlotting::buildRatio" << endl;
+  if(m_dbg) cout << "FakeClosurePlot::buildRatio" << endl;
 
   TH1F* ratio = RatioHist(data, SM, "Data/SM");
   return ratio;
@@ -585,9 +585,9 @@ TH1F* FancyPlotting::buildRatio(TH1F* data, TH1F* SM)
 //---------------------------------------------------------------------//
 // Build the THStack from a set of histograms
 //---------------------------------------------------------------------//
-THStack* FancyPlotting::buildStack(vector<TH1F*> hists)
+THStack* FakeClosurePlot::buildStack(vector<TH1F*> hists)
 {
-  if(m_dbg) cout << "FancyPlotting::buildStack" << endl;
+  if(m_dbg) cout << "FakeClosurePlot::buildStack" << endl;
 
   uint begin = hists.size() - 2; // Don't include total MC in the stack
   uint end   = 1;                // Don't include data in the stack
@@ -602,7 +602,7 @@ THStack* FancyPlotting::buildStack(vector<TH1F*> hists)
 //---------------------------------------------------------------------//
 // Create and add error bars
 //---------------------------------------------------------------------//
-TGraphAsymmErrors* FancyPlotting::buildErrors(TH1F* summary, vector<TH1F*> sys)
+TGraphAsymmErrors* FakeClosurePlot::buildErrors(TH1F* summary, vector<TH1F*> sys)
 {
 
   // Pass the summary histogram so we can get both the nominal 
@@ -639,7 +639,7 @@ TGraphAsymmErrors* FancyPlotting::buildErrors(TH1F* summary, vector<TH1F*> sys)
   
 }
 //---------------------------------------------------------------------//
-TGraphAsymmErrors* FancyPlotting::buildRatioErrors(TH1F* nominal, TGraphAsymmErrors* tg_errs)
+TGraphAsymmErrors* FakeClosurePlot::buildRatioErrors(TH1F* nominal, TGraphAsymmErrors* tg_errs)
 {
 
   // Pass the summary histogram so we can get both the nominal 
@@ -683,7 +683,7 @@ TGraphAsymmErrors* FancyPlotting::buildRatioErrors(TH1F* nominal, TGraphAsymmErr
   
 }
 //---------------------------------------------------------------------//
-void FancyPlotting::addFakeSys(TH1F* nominal, TFile* file, string plot, 
+void FakeClosurePlot::addFakeSys(TH1F* nominal, TFile* file, string plot, 
 			       vector<TH1F*> &sys)
 {
 
@@ -726,7 +726,7 @@ void FancyPlotting::addFakeSys(TH1F* nominal, TFile* file, string plot,
   
 }
 //---------------------------------------------------------------------//
-void FancyPlotting::getFakeSys(TH1F* nominal, TFile* file, string plot, 
+void FakeClosurePlot::getFakeSys(TH1F* nominal, TFile* file, string plot, 
 			       float &sysup, float &sysdn)
 {
 
@@ -781,7 +781,7 @@ void FancyPlotting::getFakeSys(TH1F* nominal, TFile* file, string plot,
   
 }
 //---------------------------------------------------------------------//
-void FancyPlotting::addSysError(TH1F* nominal, TFile* file, string plot,
+void FakeClosurePlot::addSysError(TH1F* nominal, TFile* file, string plot,
 				vector<TH1F*> &sys)
 {
 
@@ -807,7 +807,7 @@ void FancyPlotting::addSysError(TH1F* nominal, TFile* file, string plot,
 //---------------------------------------------------------------------//
 // General tools
 //---------------------------------------------------------------------//
-void FancyPlotting::plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> errs,
+void FakeClosurePlot::plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> errs,
 			    string save, TLegend* leg, int ch, bool logy, bool logx)			    
 {
 
@@ -923,12 +923,12 @@ void FancyPlotting::plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> errs
 
 }
 //----------------------------------------------------//
-float FancyPlotting::getNorm(TH1* h)
+float FakeClosurePlot::getNorm(TH1* h)
 {
   return h->Integral(0,-1);
 }
 //-----------------------------------------------------//
-float FancyPlotting::getStat(TH1* h, float low, float high)
+float FakeClosurePlot::getStat(TH1* h, float low, float high)
 {
 
   int nbins = h->GetNbinsX();
@@ -943,13 +943,13 @@ float FancyPlotting::getStat(TH1* h, float low, float high)
 
 }
 //-----------------------------------------------------//
-void FancyPlotting::setMinMax(TH1* &h, float min, float max)
+void FakeClosurePlot::setMinMax(TH1* &h, float min, float max)
 {
   h->SetMinimum(min);
   h->SetMaximum(max);
 }
 //-----------------------------------------------------//
-TLine* FancyPlotting::getLine(TH1* h, float y, int color, int style)
+TLine* FakeClosurePlot::getLine(TH1* h, float y, int color, int style)
 {
   float x0     = h->GetBinCenter(1) - h->GetBinWidth(1)/2.;
   int finalBin = h->GetNbinsX();
@@ -958,7 +958,7 @@ TLine* FancyPlotting::getLine(TH1* h, float y, int color, int style)
   return line;
 }
 //-----------------------------------------------------//
-float FancyPlotting::getMax(TH1F* h[], int n)
+float FakeClosurePlot::getMax(TH1F* h[], int n)
 {
   float max = -999;
   for(int i=0; i<n; ++i){
@@ -973,7 +973,7 @@ float FancyPlotting::getMax(TH1F* h[], int n)
 //-----------------------------------------------------//
 // Add-on -- Dumping to a table
 //-----------------------------------------------------//
-void FancyPlotting::dumpTable(PlotRegion reg)
+void FakeClosurePlot::dumpTable(PlotRegion reg)
 {
 
   // So this is kind of last minute, but need to be 

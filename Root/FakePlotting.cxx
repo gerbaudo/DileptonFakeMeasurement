@@ -966,7 +966,7 @@ void FakePlotting::plotStack(TH1F* h[], vector<string> names, TCanvas* c,
 //---------------------------------------------------------------------//
 THStack* FakePlotting::buildStack(TH1F* h[], int nhists)
 {
-  if(m_dbg) cout << "FancyPlotting::buildStack" << endl;
+  if(m_dbg) cout << "FakeClosurePlot::buildStack" << endl;
 
   int begin = nhists - 1; // Don't include total MC in the stack
   int end   = 0;                // Don't include data in the stack
