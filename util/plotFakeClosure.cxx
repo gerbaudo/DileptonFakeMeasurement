@@ -13,7 +13,9 @@ void help()
 {
   cout << "  Options:"                            << endl;
   cout << "  -d sets the debug level"             << endl;
-  cout << "     default is 0 (off)"               << endl;
+  cout << "  -i inputdir"                         << endl;
+  cout << "  -t inputtag"                         << endl;
+  cout << "  -o outputdir"                        << endl;
   cout << "  -r determine what Region to plot"    << endl;
   cout << "     0 -- All (default)"               << endl;
   cout << "     1 -- SR1"                         << endl;
@@ -39,14 +41,20 @@ int main(int argc, char** argv)
   int dbg = 0;
   FPRunOption option = RO_ALL;
   bool integral = false;
+  string inputdir, outputdir, tag;
 
   for(int i = 1; i < argc; i++) {
     const string opt(argv[i]);
-    if      (opt=="-d"   )      dbg = atoi(argv[++i]);
-    else if (opt=="--int") integral = true;
-    else if (opt=="-r"   )   option = (FPRunOption) atoi(argv[++i]);
+    if      (opt=="-d"   )       dbg = atoi(argv[++i]);
+    else if (opt=="-i"   )  inputdir = argv[++i];
+    else if (opt=="-o"   ) outputdir = argv[++i];
+    else if (opt=="-t"   )       tag = argv[++i];
+    else if (opt=="--int")  integral = true;
+    else if (opt=="-r"   )    option = (FPRunOption) atoi(argv[++i]);
     else { help(); return 0; }
   }
+  bool missingReqOpt(inputdir.size()==0 || tag.size()==0 || outputdir.size()==0);
+  if(missingReqOpt) { cout<<"missing required option"<<endl; help(); return 0; }
   string s_option = "ALL";
   if( option == RO_SR1 )          s_option = "SR1";
   else if( option == RO_SR2 )     s_option = "SR2";
@@ -57,15 +65,22 @@ int main(int argc, char** argv)
   else if( option == RO_VR1 )     s_option = "VR1";
   else if( option == RO_VR2 )     s_option = "VR2";
 
-  cout << "flags:" << endl;
-  cout << "  dbg                      " << dbg      << endl;
-  cout << "  Region to plot:          " << s_option << endl;
-  cout << endl;
+  cout<<"options:" << endl;
+  cout<<"  dbg                      "<<dbg      <<endl;
+  cout<<"  tag                      "<<tag      <<endl;
+  cout<<"  inputdir                 "<<inputdir <<endl;
+  cout<<"  outputdir                "<<outputdir<<endl;
+  cout<<"  Region to plot:          "<<s_option<<endl;
+  cout<<endl;
 
   FakeClosurePlot plot;
-  plot.init(option);
+  plot.setTag(tag);
+  plot.setInputDir(inputdir);
+  plot.setOuputDir(outputdir);
   plot.setDebug(dbg);
-  if(integral) plot.addIntegral();
+  plot.setIntegralOption(integral);
+  plot.init(option);
+
   plot.DataMCAnaPlots();
   return 0;
 }

@@ -111,7 +111,11 @@ class FakeClosurePlot : public myHist {
   TLine* getLine(TH1D* h, float y, int color, int style){return getLine((TH1*)h,y,color,style);};
   Label makeLabel(string l, float posx, float posy){Label l0; l0.lbl=l; l0.x=posx; l0.y=posy; return l0;};
   void setDebug(int d){ m_dbg = d; };
-  void addIntegral(){ m_addIntegral = true; }; // Add the integral to the legend
+  void setIntegralOption(bool val){ m_addIntegral = val; };
+
+  FakeClosurePlot& setTag(const std::string &name);
+  FakeClosurePlot& setInputDir(const std::string &dir);
+  FakeClosurePlot& setOuputDir(const std::string &dir);
 
  private:
   vector<File> m_files;                  // Vector for holding File objects
@@ -124,6 +128,9 @@ class FakeClosurePlot : public myHist {
   int m_dbg;                             // Debug flag
   bool m_addIntegral;                    // Add integral to legend
   int m_MCColor;                         // Color for the total MC -- kRed
+  string m_tag;                          // tag of the input files
+  string m_inputdir;                     // dir of the input files
+  string m_outputdir;
 };
 
 #endif
