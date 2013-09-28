@@ -22,7 +22,7 @@ from rootUtils import drawLegendWithDictKeys
 from utils import filterWithRegexp
 
 def main(filename1, filename2, outdir, regexp, verbose) :
-    # there are too many histos; compare only a subset of them, the ones vs. pt for some selection
+    # there are too many histos; by default compare only the ones vs. pt for few selections
     relevantHistograms = ['l_pt_den','l_pt_num']
     relevantSelections = ['CRPremT2','CR_SSInc','CR_WHSS','CRPremT2','CR_SSInc','CR_WHSS']
     outdir = outdir if outdir else guessOutdirFromInputs(filename1, filename2)
@@ -44,11 +44,11 @@ def main(filename1, filename2, outdir, regexp, verbose) :
                #+'\n\t'.join(missFrom2)
                )
     label1, label2 = labelFromFilename(filename1), labelFromFilename(filename2)
-    commonHistos = filterWithRegexp(commonHistos, regexp)
-    commonHistos = filter(lambda h:
-                          any(s in h for s in relevantHistograms) and
-                          any(s in h for s in relevantSelections),
-                          commonHistos)
+    commonHistos = (filterWithRegexp(commonHistos, regexp) if regexp is not None
+                    else filter(lambda h:
+                                any(s in h for s in relevantHistograms) and
+                                any(s in h for s in relevantSelections),
+                                commonHistos))
     canvas = r.TCanvas('diff_fakeMatrix','diff_fakeMatrix')
     for h in commonHistos :
         outname = outdir+'/'+h
@@ -95,9 +95,9 @@ if __name__=='__main__' :
     """
     parser = optparse.OptionParser(usage=usage)
     parser.add_option('-o', '--outdir', help=('output directory; default <input>/plots/'))
-    parser.add_option('-r', '--regexp', default='.*',
+    parser.add_option('-r', '--regexp', default=None,
                       help=('only consider histo with names matching re, eg. \'pt\'.'
-                            +'Default: any'))
+                            +'Default: only a subset of pt histos for few signal regions'))
     parser.add_option('-v', '--verbose', action='store_true', help='print details')
     (options, args) = parser.parse_args()
     inputs = args
