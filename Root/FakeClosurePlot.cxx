@@ -2,6 +2,7 @@
 // histograms that can be shown in talks
 
 #include "SusyTest0/FakeClosurePlot.h"
+#include "SusyTest0/utils.h"
 
 //---------------------------------------------------------------------//
 // Constructor
@@ -36,9 +37,8 @@ void FakeClosurePlot::init(FPRunOption opt)
 {
   m_opt = opt;
   File data, top, Zjets, Wjets, dib, hf, qcd;
-  string inDir = "out/fakerate/merged/";
-  string tag = "_Sep_23";
-  string tagg(tag+".AnaHists.root"), tagf(tag+".FakeHists.root");
+  const string inDir(m_inputdir), tag(m_tag);
+  const string tagg(tag+".AnaHists.root"), tagf(tag+".FakeHists.root");
   initInputFile(data,  inDir+"data"       +tagg, "Data",    "data",    kBlack,     false, false);
   initInputFile(top,   inDir+"ttbar"      +tagg, "Ttbar",   "ttbar",   kBlue,      true,  false);
   initInputFile(Zjets, inDir+"zjets"      +tagg, "Z+jet",   "Zjet",    kRed,       true,  false);
@@ -89,11 +89,10 @@ void FakeClosurePlot::DataMCAnaPlots()
 {
   // Here Loop over the channels and the signal regions that are set
   // via the run options.  Right now we loop over all and save all.
-  string savedir = "formattedplots/Jul17_n0145/";
+  string savedir(m_outputdir);
   for(uint ipr=0; ipr<m_PRs.size(); ++ipr){
     PlotRegion pr = m_PRs.at(ipr);
     string region = PRNames[pr];
-
     for(int ich=0; ich<Ch_N; ++ich){
       if(ich == Ch_all) continue;
       Chan ch        = (Chan) ich;
@@ -459,3 +458,28 @@ float FakeClosurePlot::getMax(TH1F* h[], int n)
   for(int i=0; i<n; ++i){ if( max < h[i]->GetMaximum() ) max = h[i]->GetMaximum(); }
   return max;
 }
+//----------------------------------------------------------
+FakeClosurePlot& FakeClosurePlot::setTag(const std::string &name)
+{
+  m_tag = name;
+  return *this;
+}
+//----------------------------------------------------------
+FakeClosurePlot& FakeClosurePlot::setInputDir(const std::string &dir)
+{
+  if(!dirExists(dir)) cout<<"Warning, invalid input dir '"<<dir<<"'"<<endl;
+  m_inputdir = dir;
+  return *this;
+}
+//----------------------------------------------------------
+FakeClosurePlot& FakeClosurePlot::setOuputDir(const std::string &dir)
+{
+  if(dirExists(dir)) m_outputdir = dir;
+  else {
+    const bool dirWasCreated(mkdirIfNeeded(dir).size()>0);
+    if(dirWasCreated) m_outputdir = dir;
+    else              m_outputdir = "./";
+  }
+  return *this;
+}
+//----------------------------------------------------------
