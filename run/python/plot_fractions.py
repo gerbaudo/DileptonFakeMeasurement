@@ -270,7 +270,7 @@ if __name__=='__main__' :
                                        for s in e.valsPerVar.itervalues().next().keys()])))
             print indent+'samples : ',samples
             colors = colors if colors else dict(zip(samples,
-                                                    [r.kBlack,r.kRed,r.kBlue,r.kViolet,r.kAzure]))
+                                                    [r.kBlack,r.kRed,r.kBlue,r.kViolet,r.kGreen]))
             markers = markers if markers else dict(zip(samples, [24, 25, 26, 27, 28]))
             hprefix = pType.replace(' ','_')+'_'+l
             hDs = buildHistos(edlp, regions, hprefix+'_d')
@@ -282,3 +282,4 @@ if __name__=='__main__' :
                                  label1='Davide', label2='Matt', canPrefix=hprefix,
                                  colors=colors, markers=markers, lineStyle1=1, lineStyle2=2)
                 can.SaveAs(ioDir+hprefix+'_'+vt+'.png')
+                print ioDir+hprefix+'_'+vt+'.png'
