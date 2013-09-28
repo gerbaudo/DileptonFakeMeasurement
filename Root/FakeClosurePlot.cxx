@@ -1,7 +1,7 @@
 // This plotting script will grow and be used to format
 // histograms that can be shown in talks
 
-#include "SusyPlotting/FancyPlotting.h"
+#include "SusyTest0/FancyPlotting.h"
 
 //---------------------------------------------------------------------//
 // Constructor
