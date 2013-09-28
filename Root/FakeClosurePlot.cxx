@@ -18,96 +18,38 @@ FakeClosurePlot::FakeClosurePlot(/*FPRunOption opt*/) :
 //---------------------------------------------------------------------//
 // Initialize all files and things
 //---------------------------------------------------------------------//
+void initInputFile(File &out,
+                   const string &fname, const string &name, const string &sname,
+                   int color, bool ismc, bool isfake)
+{
+  out.file  = new TFile(fname.c_str());
+  out.name  = name;
+  out.sname = sname;
+  out.color = color;
+  out.ismc  = ismc;
+  out.isfake = isfake;
+  bool inputIsValid(out.file && out.file->IsOpen());
+  if(!inputIsValid) cout<<"invalid input '"<<fname<<"'"<<" ("<<out.file<<")"<<endl;
+}
+//----------------------------------------------------------
 void FakeClosurePlot::init(FPRunOption opt)
 {
   m_opt = opt;
-  File data;
-  File top;
-  File ZX;
-  File Ztautau;
-  File WW;
-  File WZ;
-  File ZZ;
-  File qcd;
-  File WJet;
-  //File Wgam;
-
-  // For testing
-  File Zjet;
-  File Zdib;
-
+  File data, top, ZX, Ztautau, WW, WZ, ZZ, qcd, WJet;
+  File Zjet, Zdib; // For testing
   string inDir = "anaplots/";
-  string append     = "_Jul17_n0145.AnaHists";
-  string dataappend = "_Jul17_n0145.AnaHists";
-  string fakeappend = "_Jul17_n0145.FakeHists";
-  // Data
-  data.file  = new TFile((inDir+"data"+dataappend+".root").c_str());
-  data.name  = "Data";
-  data.sname = "dt";
-  data.color = kBlack;
-  data.ismc  = false;
-  data.isfake = false;
-
-  // top
-  top.file  = new TFile((inDir+"top"+append+".root").c_str());
-  top.name  = "Top";
-  top.sname = "top";
-  top.color = kRed+1;
-  top.ismc  = true;
-  top.isfake = false;
-
-  // Z+X
-  ZX.file  = new TFile((inDir+"ZX"+append+".root").c_str());
-  ZX.name  = "Z+X";
-  ZX.sname = "ZX";
-  ZX.color = kOrange-2;
-  ZX.ismc  = true;
-  ZX.isfake = false;
-
-  // Diboson
-  WW.file  = new TFile((inDir+"WW"+append+".root").c_str());
-  WW.name  = "WW";
-  WW.sname = "WW";
-  WW.color = kAzure + 4;
-  WW.ismc  = true;
-  WW.isfake = false;
-
-  // QCD -- Matrix prediction
-  qcd.file  = new TFile((inDir+"data"+fakeappend+".root").c_str());
-  qcd.name  = "Fake";
-  qcd.sname = "fake";
-  qcd.color = kGray;
-  qcd.ismc  = true;
-  qcd.isfake = true; //false;
-
-  // Z+jet
-  Zjet.file  = new TFile((inDir+"Zjet"+append+".root").c_str());
-  Zjet.name  = "Z+jets";
-  Zjet.sname = "Zjet";
-  Zjet.color = kOrange-2;
-  Zjet.ismc  = true;
-  Zjet.isfake = false;
-
-
-  // WZ
-  WZ.file  = new TFile((inDir+"WZ"+append+".root").c_str());
-  WZ.name  = "WZ";
-  WZ.sname = "WZ";
-  WZ.color = kSpring+1;
-  WZ.ismc  = true;
-  WZ.isfake = false;
-
-  // ZZ
-  ZZ.file  = new TFile((inDir+"ZZ"+append+".root").c_str());
-  ZZ.name  = "ZZ";
-  ZZ.sname = "ZZ";
-  ZZ.color = kOrange+8;
-  ZZ.ismc  = true;
-  ZZ.isfake = false;
-
+  string tag = "_Jul17_n0145";
+  string tagg(tag+".AnaHists"), tagf(tag+".FakeHists");
+  initInputFile(data, inDir+"data" +tagg+".root", "Data",   "dt",   kBlack,     false, false);
+  initInputFile(top,  inDir+"top"  +tagg+".root", "Top",    "top",  kRed+1,     true,  false);
+  initInputFile(ZX,   inDir+"ZX"   +tagg+".root", "Z+X",    "ZX",   kOrange-2,  true,  false);
+  initInputFile(WW,   inDir+"WW"   +tagg+".root", "WW",     "WW",   kAzure + 4, true,  false);
+  initInputFile(qcd,  inDir+"data" +tagf+".root", "Fake",   "fake", kGray,      true,  true );
+  initInputFile(Zjet, inDir+"Zjet" +tagg+".root", "Z+jets", "Zjet", kOrange-2,  true,  false);
+  initInputFile(WZ,   inDir+"WZ"   +tagg+".root", "WZ",     "WZ",   kSpring+1,  true,  false);
+  initInputFile(ZZ,   inDir+"ZZ"   +tagg+".root", "ZZ",     "ZZ",   kOrange+8,  true,  false);
   m_files.clear();
 
-  // Normal:
   m_files.push_back(data);
   m_files.push_back(ZX);
   m_files.push_back(top);
@@ -116,10 +58,8 @@ void FakeClosurePlot::init(FPRunOption opt)
 
   if(opt == RO_ALL){ m_PRs.push_back(PR_VRSS); }
   else return;
-
   setPlots();
 }
-
 //---------------------------------------------------------------------//
 // Destructor
 //---------------------------------------------------------------------//
@@ -127,17 +67,12 @@ FakeClosurePlot::~FakeClosurePlot()
 {
 
 }
-
 //---------------------------------------------------------------------//
 // Initialize vectors
 //---------------------------------------------------------------------//
 void FakeClosurePlot::setPlots()
 {
-
-  // Set any and all plots that are needed
-  // and the functions will loop over this
-  // list
-
+  // Set any and all plots that are needed and the functions will loop over this list
   m_plots.push_back( pair<string,string> ("l0_pt", "l_{0} P_{T} [GeV]") );
   m_plots.push_back( pair<string,string> ("l1_pt", "l_{1} P_{T} [GeV]") );
   m_plots.push_back( pair<string,string> ("ll_M", "m(ll) [GeV]") );
@@ -147,13 +82,11 @@ void FakeClosurePlot::setPlots()
   m_plots.push_back( pair<string,string> ("nbjets", "# b jets") );
   clear();
 }
-
 //---------------------------------------------------------------------//
 // Loop to make histograms
 //---------------------------------------------------------------------//
 void FakeClosurePlot::DataMCAnaPlots()
 {
-
   // Here Loop over the channels and the signal regions that are set
   // via the run options.  Right now we loop over all and save all.
   string savedir = "formattedplots/Jul17_n0145/";
