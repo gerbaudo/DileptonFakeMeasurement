@@ -4,7 +4,7 @@
 
 #include "Cintex/Cintex.h"
 
-#include "SusyTest0/FancyPlotting.h"
+#include "SusyTest0/FakeClosurePlot.h"
 #include "SusyTest0/myHist.h"
 
 using namespace std;
@@ -92,7 +92,7 @@ int main(int argc, char** argv)
   
 
   // Create instance of the class:
-  FancyPlotting* plot = new FancyPlotting();
+  FakeClosurePlot* plot = new FakeClosurePlot();
   plot->init(option);
   plot->setDebug(dbg);
   if(integral) plot->addIntegral();

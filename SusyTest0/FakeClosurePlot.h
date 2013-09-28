@@ -47,13 +47,13 @@ enum FPRunOption {
   N_FPRunOption
 };
 
-class FancyPlotting : public myHist {
+class FakeClosurePlot : public myHist {
 
  public:
 
   // Constructor and Destructor
-  FancyPlotting(/*FPRunOption opt = RO_ALL*/);
-  ~FancyPlotting();
+  FakeClosurePlot(/*FPRunOption opt = RO_ALL*/);
+  ~FakeClosurePlot();
 
   // Initialize all the file objects
   void init(FPRunOption opt = RO_ALL);
