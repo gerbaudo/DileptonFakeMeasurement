@@ -9,19 +9,11 @@
 
 using namespace std;
 
-/*
-
-Plotting Macro
-
-*/
-
 void help()
 {
   cout << "  Options:"                            << endl;
-
   cout << "  -d sets the debug level"             << endl;
   cout << "     default is 0 (off)"               << endl;
-
   cout << "  -r determine what Region to plot"    << endl;
   cout << "     0 -- All (default)"               << endl;
   cout << "     1 -- SR1"                         << endl;
@@ -38,38 +30,23 @@ void help()
   cout << "    12 -- VR4"                         << endl;
   cout << "    13 -- VRTL"                        << endl;
   cout << "  --int display integral in legend"    << endl;
-
   cout << "  -h print this help"                << endl;
 }
-
 
 int main(int argc, char** argv)
 {
   ROOT::Cintex::Cintex::Enable();
-
   int dbg = 0;
   FPRunOption option = RO_ALL;
   bool integral = false;
-  
-  cout << "FancyPlot" << endl;
-  cout << endl;
 
-  /** Read inputs to program */
   for(int i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "-d") == 0)
-      dbg = atoi(argv[++i]);
-    else if (strcmp(argv[i], "--int") == 0)
-      integral = true;
-    else if (strcmp(argv[i], "-r") == 0)
-      option = (FPRunOption) atoi(argv[++i]);
-    else
-      {
-	help();
-	return 0;
-      }
+    const string opt(argv[i]);
+    if      (opt=="-d"   )      dbg = atoi(argv[++i]);
+    else if (opt=="--int") integral = true;
+    else if (opt=="-r"   )   option = (FPRunOption) atoi(argv[++i]);
+    else { help(); return 0; }
   }
-  
-  // Figure out which run option was chosen
   string s_option = "ALL";
   if( option == RO_SR1 )          s_option = "SR1";
   else if( option == RO_SR2 )     s_option = "SR2";
@@ -79,25 +56,16 @@ int main(int argc, char** argv)
   else if( option == RO_ZWindow ) s_option = "Z Window";
   else if( option == RO_VR1 )     s_option = "VR1";
   else if( option == RO_VR2 )     s_option = "VR2";
-  
 
-  
   cout << "flags:" << endl;
   cout << "  dbg                      " << dbg      << endl;
   cout << "  Region to plot:          " << s_option << endl;
   cout << endl;
-  
 
-  // Create instance of the class:
-  FakeClosurePlot* plot = new FakeClosurePlot();
-  plot->init(option);
-  plot->setDebug(dbg);
-  if(integral) plot->addIntegral();
-  plot->DataMCAnaPlots();
-
-  
-  cout << endl;
-  cout << "Plotting job done" << endl;
-
+  FakeClosurePlot plot;
+  plot.init(option);
+  plot.setDebug(dbg);
+  if(integral) plot.addIntegral();
+  plot.DataMCAnaPlots();
   return 0;
 }

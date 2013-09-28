@@ -68,48 +68,21 @@ struct File {
 class FakeClosurePlot : public myHist {
 
  public:
-
-  // Constructor and Destructor
-  FakeClosurePlot(/*FPRunOption opt = RO_ALL*/);
+  FakeClosurePlot();
   ~FakeClosurePlot();
-
-  // Initialize all the file objects
-  void init(FPRunOption opt = RO_ALL);
-
-  // Useful methods
+  void init(FPRunOption opt = RO_ALL); // Initialize all the file objects
   void setPlots();
   string u(){ return "_"; };
-
-  //-------------------------//
-  // Analysis plots
-  //-------------------------//
-
-  // Plotting function that will format the control region
-  // plots that are spit out of PhotonPlotter.
   void DataMCAnaPlots();
 
-  //-------------------------//
-  // Methods to build objects
-  //-------------------------//
-
-  // Build all histograms
-  void buildHists(vector<TH1F*> &hists, vector<TH1F*> &sys, string var, 
-		  string xtitle, Chan ch, PlotRegion PR);		  
-  // Build legend
+  void buildHists(vector<TH1F*> &hists, vector<TH1F*> &sys, string var,
+                  string xtitle, Chan ch, PlotRegion PR);
   TLegend* buildLegend(vector<TH1F*> hists, TGraphAsymmErrors* errs, float* x, float* y);
-
-  // Make Ratio histogram
   TH1F* buildRatio(TH1F* data, TH1F* SM);
-
-  // Create stack
   THStack* buildStack(vector<TH1F*> hists);
-
-  // Plotting function
   void plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> errs,
-	       string save, TLegend* leg, int ch, bool logy=false, bool logx=false);
-
-  // Clear Hists
-  void clear(){
+               string save, TLegend* leg, int ch, bool logy=false, bool logx=false);
+  void clear(){  // Clear Hists
     for(uint i=0; i<m_hists.size(); ++i)
       if(m_hists.at(i)) m_hists.at(i)->Delete();
     m_hists.clear();
@@ -121,85 +94,36 @@ class FakeClosurePlot : public myHist {
     m_errs.clear();
 
   }
-
-  // Handle errors
   TGraphAsymmErrors* buildErrors(TH1F* summary, vector<TH1F*> sys);
   TGraphAsymmErrors* buildRatioErrors(TH1F* nominal, TGraphAsymmErrors* tg_errs);
   void addSysError(TH1F* nominal, TFile* file, string plot, vector<TH1F*> &sys);
   void addFakeSys(TH1F* nominal, TFile* file, string plot, vector<TH1F*> &sys);
   void getFakeSys(TH1F* nominal, TFile* file, string plot, float &sysup, float &sysdn);
-
-
-  //-------------------------//
   // Miscellaneous
-  //-------------------------//
-  
-  // Grab normalization quickly
   float getNorm(TH1* h);
-
-  // Get stat error from histogram
   float getStat(TH1* h, float low, float high);
-  
-  // Set Min Max of histo
   void setMinMax(TH1* &h, float min, float max);
-  void setMinMax(TH1F* &h, float min, float max){ 
-    setMinMax( (TH1*&) h, min, max );
-  };
-  void setMinMax(TH1D* &h, float min, float max){
-    setMinMax( (TH1*&) h, min, max );
-  };
-
-  // Get max from histo
+  void setMinMax(TH1F* &h, float min, float max){ setMinMax( (TH1*&) h, min, max ); };
+  void setMinMax(TH1D* &h, float min, float max){ setMinMax( (TH1*&) h, min, max ); };
   float getMax(TH1F* h[], int n);
-  
-  // Make line from histo
   TLine* getLine(TH1* h, float y, int color, int style);
-  TLine* getLine(TH1F* h, float y, int color, int style){
-    return getLine((TH1*) h, y, color, style);
-  };
-  TLine* getLine(TH1D* h, float y, int color, int style){
-    return getLine((TH1*) h, y, color, style);
-  };
-
-  // Make a Label struct
-  Label makeLabel(string l, float posx, float posy){
-    Label l0; l0.lbl = l; l0.x = posx; l0.y = posy;
-    return l0;
-  };
-
-  // Flag to make the table
-  void makeTable(){ m_makeTable = true; };
-
-  // Set debug
+  TLine* getLine(TH1F* h, float y, int color, int style){return getLine((TH1*)h,y,color,style);};
+  TLine* getLine(TH1D* h, float y, int color, int style){return getLine((TH1*)h,y,color,style);};
+  Label makeLabel(string l, float posx, float posy){Label l0; l0.lbl=l; l0.x=posx; l0.y=posy; return l0;};
   void setDebug(int d){ m_dbg = d; };
-
-  // Add the integral to the legend
-  void addIntegral(){ m_addIntegral = true; };
+  void addIntegral(){ m_addIntegral = true; }; // Add the integral to the legend
 
  private:
-  
   vector<File> m_files;                  // Vector for holding File objects
-
   vector< pair<string,string> > m_plots; // vector of plots
-
   vector<PlotRegion> m_PRs;              // Plot regions to plot
-
-  //TLegend* m_legend;                   // Legend for the plots
- 
   vector<TH1F*> m_hists;                 // vector of histograms
   vector<TH1F*> m_sys;                   // vector for sys histograms -- 2 entries
   vector<TGraphAsymmErrors*> m_errs;     // Error objects
-
   FPRunOption m_opt;                     // Store run option
-
   int m_dbg;                             // Debug flag
-
   bool m_addIntegral;                    // Add integral to legend
-
   int m_MCColor;                         // Color for the total MC -- kRed
-
-  bool m_makeTable;
-
 };
 
 #endif
