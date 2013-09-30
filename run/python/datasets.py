@@ -319,6 +319,22 @@ class CategorizationTest(unittest.TestCase) :
                              +', '.join(["%s : %s"%(k, eval(k))
                                          for k in ['isSignal', 'notData', 'notBkg', 'notHf']]))
 
+#
+# testing
+#
+
+class CategorizationTest(unittest.TestCase) :
+    def testSignalIsConsistent(self) :
+        for d in datasets :
+            notData = d.type is not 'data'
+            notBkg = d.type is 'mc' and d.isSignal
+            notHf = not d.isHeavyFlavor
+            isSignal = d.isSignal
+            self.assertEqual(isSignal, (notData and notBkg and notHf),
+                             d.name+' : '
+                             +', '.join(["%s : %s"%(k, eval(k))
+                                         for k in ['isSignal', 'notData', 'notBkg', 'notHf']]))
+
 if __name__=='__main__' :
     def filterByGroup(dsets) :
         groups = sorted(d.group for d in dsets)
