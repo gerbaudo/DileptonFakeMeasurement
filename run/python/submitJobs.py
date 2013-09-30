@@ -24,6 +24,8 @@ parser = optparse.OptionParser()
 parser.add_option('--susyplot', action='store_true', default=False)
 parser.add_option('--susysel',  action='store_true', default=False)
 parser.add_option('--fakeprob', action='store_true', default=False)
+parser.add_option('--fakerate', action='store_true', default=False, help='fake rate with code from Matt')
+parser.add_option('--fakepred', action='store_true', default=False, help='run FakePred by Matt')
 parser.add_option("-o", "--overwrite", action="store_true", dest="overwrite", default=False,
                   help="overwrite existing batch scripts")
 parser.add_option("-O", "--other-opt", dest="otherOptions", default='',
@@ -47,21 +49,28 @@ exclude      = options.exclude
 submit       = options.submit
 susyplot     = options.susyplot
 susysel      = options.susysel
+fakepred     = options.fakepred
 fakeprob     = options.fakeprob
+fakerate     = options.fakerate
 verbose      = options.verbose
 
-assert [susyplot, susysel, fakeprob].count(True)==1,"specify one executable"
+if not [susyplot, susysel, fakeprob, fakerate, fakepred].count(True)==1 :
+    parser.error("specify one executable")
 scriptDir = 'batchScripts'
 template  = ''
 template += scriptDir+'/templates/susyPlot.sh.template' if susyplot else ''
 template += scriptDir+'/templates/susySel.sh.template'  if susysel else ''
 template += scriptDir+'/templates/fakeprob.sh.template' if fakeprob else ''
+template += scriptDir+'/templates/fakerate.sh.template' if fakerate else ''
+template += scriptDir+'/templates/fakepred.sh.template' if fakepred else ''
 outdir = 'out/'
 logdir = 'log/'
 def subdir() :
     if susyplot : return 'susyplot'
     if susysel  : return 'susysel'
     if fakeprob : return 'fakeprob'
+    if fakerate : return 'fakerate'
+    if fakepred : return 'fakepred'
 def formAndCreateOutdir(basedir, subdir) :
     d = basedir+'/'+subdir
     if not os.path.isdir(d)  : os.makedirs(d)
@@ -100,9 +109,10 @@ for sample in sampleNames :
     output     = outRootTemplate%{'outdir':outdir, 'sample':sample, 'tag':batchTag}
     outlog     = outLogTemplate%{'logdir':logdir, 'sample':sample, 'tag':batchTag}
     scriptName = outScriptTemplate%{'sample':sample}
-    if overwrite or not os.path.exists(scriptName) :
+    fileExists = os.path.exists(scriptName)
+    if overwrite or not fileExists :
         fillInScriptTemplate(sample, input, output, otherOptions, scriptName, template)
-
+    elif fileExists : print "warning, not overwriting existing script '%s'"%scriptName
     cmd = "qsub " \
           "-j oe -V " \
           "-N %(jobname)s " \

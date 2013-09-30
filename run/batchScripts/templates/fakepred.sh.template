@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#PBS -q atlas
+#PBS -l nodes=1:ppn=1
+
+cd $PBS_O_WORKDIR
+FakePred -i ${inp} -o ${out} -s ${sample} ${opt}
+

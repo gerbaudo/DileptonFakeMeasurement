@@ -1,11 +1,13 @@
 #include <cassert>
 #include <ctime>
 #include <iomanip>
-#include <math.h>   // cos
-#include <numeric>  // std::accumulate
-#include "SusyNtuple/SusyDefs.h"
+
 #include "SusyTest0/SusyPlotter.h"
-#include "SusyTest0/DileptonAnalyticalSolver.h"
+
+#include "TLorentzVector.h"
+
+#include "SusyNtuple/SusyDefs.h"
+#include "SusyTest0/criteria.h"
 #include "SusyMatrixMethod/DiLeptonMatrixMethod.h"
 
 using namespace std;
@@ -51,6 +53,13 @@ const int   njetbins = 7;
 const float njetmin = -0.5;
 const float njetmax = njetbins - 0.5;
 
+const float Typemin = -0.5;
+const float Typemax = 22.5;
+const int     nType = 23;
+
+const float Originmin = -0.5;
+const float Originmax = 42.5;
+const int     nOrigin = 43;
 //-----------------------------------------
 SusyPlotter::SusyPlotter() :
   SusySelection(),
@@ -58,6 +67,30 @@ SusyPlotter::SusyPlotter() :
   m_histFile(0),
   m_doFake(false)
 {
+  initNames();
+}
+//-----------------------------------------
+void SusyPlotter::initNames()
+{
+  size_t i=0;
+  chanNames[i++] = "all";
+  chanNames[i++] = "ee";
+  chanNames[i++] = "mm";
+  chanNames[i++] = "em";
+  i=0;
+  PRNames[i++] = "srnone";
+  PRNames[i++] = "sr6base";
+  PRNames[i++] = "sr6";
+  PRNames[i++] = "sr7base";
+  PRNames[i++] = "sr7Nj";
+  PRNames[i++] = "sr7NjZttVeto";
+  PRNames[i++] = "sr7NjPtTot";
+  PRNames[i++] = "sr7NjMll";
+  PRNames[i++] = "sr7";
+  PRNames[i++] = "sr8base";
+  PRNames[i++] = "sr8";
+  PRNames[i++] = "sr9base";
+  PRNames[i++] = "sr9";
 }
 //-----------------------------------------
 void SusyPlotter::Begin(TTree* /*tree*/)
@@ -152,6 +185,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 	NEWHIST(nfjets, "# f jets", njetbins, njetmin, njetmax);
 
 	// Type and origin
+
 	NEWHIST(l_type, "l_type", nType, Typemin, Typemax);
 	NEWHIST(l_origin, "l_origin", nOrigin, Originmin, Originmax);
 
@@ -224,7 +258,8 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   Met ncmet(*m_met); // non-const met
   const TauVector&    t = m_signalTaus;
   if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
-  bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m));
+  bool allowQflip(true);
+  bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
   if(!passSrSS) return false;
   float weight(m_weightComponents.product());
   const DiLepEvtType ll(getDiLepEvtType(l));
@@ -340,13 +375,13 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
   FILL(h_l_origin, l1->mcOrigin);
 
   FILL(h_sumQ, l0->q + l1->q);
-  float mt_met_ll = SusyPlotter::transverseMass(ll, mlv);
-  float mt2 = SusySelection::computeMt2(*l0, *l1, mlv);
+  float mt_met_ll = susy::transverseMass(ll, mlv);
+  float mt2 = susy::computeMt2(*l0, *l1, mlv);
 
   FILL(h_met_ll_M, (*l0 + *l1 + mlv).M());
   FILL(h_met_ll_Mt, mt_met_ll);
-  FILL(h_mtautau_l0l1met, SusyPlotter::mZTauTau(*l0, *l1, mlv));
-  FILL(h_mt_ll_met, SusyPlotter::transverseMass(ll, mlv));
+  FILL(h_mtautau_l0l1met, susy::mZTauTau(*l0, *l1, mlv));
+  FILL(h_mt_ll_met, susy::transverseMass(ll, mlv));
   FILL(h_met_ll_Mt2, mt2);
 
   FILL(h_dR_l0_l1, fabs(l0->DeltaR(*l1)));
@@ -387,8 +422,8 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
       const TLorentzVector &lPos = (l0->q > 0. ? *l0 : *l1);
       const TLorentzVector &lNeg = (l1->q < 0. ? *l1 : *l0);
       int numNeutrinoSol = 0;
-      numNeutrinoSol += SusyPlotter::numberOfNeutrinoSolutions(lPos, lNeg, j0, j1, mlv);
-      numNeutrinoSol += SusyPlotter::numberOfNeutrinoSolutions(lPos, lNeg, j1, j0, mlv);
+      numNeutrinoSol += susy::numberOfNeutrinoSolutions(lPos, lNeg, j0, j1, mlv);
+      numNeutrinoSol += susy::numberOfNeutrinoSolutions(lPos, lNeg, j1, j0, mlv);
       // DG Mar13: should also we consider the combinations with the third jet?
       FILL(h_numNeutrinoSol, numNeutrinoSol);
     } // end if(oppositeCharge)
@@ -422,75 +457,6 @@ void SusyPlotter::setSysts()
   } else {
     cout<<"SusyPlotter::setSysts() : not implemented (DG Jan2013)"<<endl;
   }
-}
-//-----------------------------------------
-float SusyPlotter::transverseMass(const TLorentzVector &lep, const TLorentzVector &met)
-{
-  return std::sqrt(2.0 * lep.Pt() * met.Et() *(1-cos(lep.DeltaPhi(met))) );
-}
-//-----------------------------------------
-float SusyPlotter::mtWW(const TLorentzVector &ll, const TLorentzVector &met)
-{
-  using std::sqrt;
-  float dphi = acos(cos(ll.Phi() - met.Phi()));
-  float mll(ll.M()), ptll(ll.Pt()), ptvv(met.Pt());
-  float mvv = (/*mvvTrue*/ true ? mll : 0.0);
-  return sqrt(mll*mll + mvv*mvv + 2.0*(sqrt  (ptll*ptll + mll*mll)
-                                       * sqrt(ptvv*ptvv + mvv*mvv)
-                                       - ptll * ptvv * cos(dphi)));
-}
-//-----------------------------------------
-float SusyPlotter::sumCosDeltaPhi(const TLorentzVector &l0, const TLorentzVector &l1,
-				  const TLorentzVector &met)
-{
-  return cos(l0.Phi() - met.Phi()) + cos(l1.Phi() - met.Phi());
-}
-//-----------------------------------------
-float addJetPt(float totPt, const Susy::Jet *j) { return totPt + j->Pt(); }
-float SusyPlotter::sumEtEtMiss(const TLorentzVector &el, const TLorentzVector &mu,
-			       const JetVector &jets, const TLorentzVector &met)
-{
-  return
-    el.Et()
-    + mu.Pt()
-    + met.Et()
-    + std::accumulate(jets.begin(), jets.end(), float(0.0), addJetPt);
-}
-
-int SusyPlotter::numberOfNeutrinoSolutions(const TLorentzVector &lPos, const TLorentzVector &lNeg,
-					   const Jet &jet0, const Jet &jet1,
-					   const TLorentzVector &met)
-{
-    double mWp=80.41, mWm=80.41;
-    double mnu=0.0,   mnub=0.0;
-    double mt=172.9,  mtb=172.9;
-    double ETmiss[2] = {met.Px(), met.Py()};
-    double b[4]  = {jet0.E(), jet0.Px(), jet0.Py(), jet0.Pz()};
-    double bb[4] = {jet1.E(), jet1.Px(), jet1.Py(), jet1.Pz()};
-    double lp[4] = {lPos.E(), lPos.Px(), lPos.Py(), lPos.Pz()};
-    double lm[4] = {lNeg.E(), lNeg.Px(), lNeg.Py(), lNeg.Pz()};
-    std::vector<double> pnux, pnuy, pnuz, pnubx, pnuby, pnubz, cd_diff;
-    int cubic_single_root_cmplx;
-    llsolver::DileptonAnalyticalSolver slv;
-    slv.solve(ETmiss, b, bb, lp, lm, mWp, mWm, mt, mtb, mnu, mnub,
-	      &pnux, &pnuy, &pnuz, &pnubx, &pnuby, &pnubz,
-	      &cd_diff, cubic_single_root_cmplx);
-    return pnubx.size();
-}
-//-----------------------------------------
-float SusyPlotter::mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1,
-                            const TLorentzVector &met)
-{ // re-written based on HWWlvlvCode::calculate_METBasedVariables
-  float px0(l0.Px()), py0(l0.Py());
-  float px1(l1.Px()), py1(l1.Py());
-  float pxm(met.Px()), pym(met.Py());
-  float num( px0*py1 - py0*px1 );
-  float den1( py1*pxm - px1*pym + px0*py1 - py0*px1 );
-  float den2( px0*pym - py0*pxm + px0*py1 - py0*px1 );
-  float x1 = ( den1 != 0.0  ? (num/den1) : 0.0);
-  float x2 = ( den2 != 0.0  ? (num/den2) : 0.0);
-  bool kinematicallyPossible(x1*x2 > 0.0);
-  return (kinematicallyPossible ? (l0+l1).M() / std::sqrt(x1*x2) : -1.0);
 }
 //-----------------------------------------
 void SusyPlotter::ProgressPrinter::countAndPrint(std::ostream& oo)

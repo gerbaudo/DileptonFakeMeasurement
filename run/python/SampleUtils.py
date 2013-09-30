@@ -25,7 +25,10 @@ def guessGroupFromFilename(filename='') :
     "Guess group from filename, either merged or un-merged"
     print 'guessGroupFromFilename obsolete, use guessSampleFromFilename'
     group = next((g for g in allGroups if any(e in filename for e in [g+'_', g+'.'])), None)
-    group = group if group else next((d.group for d in datasets if d.name in filename), None)
+    group = group if group else next((d.group
+                                      for d in datasets
+                                      if d.name+'.' in filename
+                                      or d.name+'_' in filename), None)
     return group
 def guessSampleFromFilename(filename='') :
     "Guess sample from filename"
@@ -39,7 +42,8 @@ def isSigSample(samplename) : return 'WH_' in samplename
 def isBkgSample(samplename) : return not isDataSample(samplename) and not isSigSample(samplename)
 def guessReqidFromFilename(filename='', verbose=False) :
     match = re.search('mc12\_8TeV\.(\d+)\.', filename)
-    return match.group(1) if match else None
+    if verbose and not match : print "'%s' does not contain mc12\_8TeV\.(\d+)\."%filename
+    return match.group(1) if match else None 
 
 
 def basePathArea() :
@@ -60,8 +64,8 @@ class ModeAWhDbPar :
             line = line.strip()
             words = line.split()
             for a,w in zip(ModeAWhDbPar.fields, words) : setattr(self, a, w)
-        def valid(self) : return all([hasattr(self, a) for a in ModeAWhDbPar.fields]) and self.ds.isdigit()
-
+        def valid(self) :
+            return all([hasattr(self, a) for a in ModeAWhDbPar.fields]) and self.ds.isdigit()
     def __init__(self) :
         filenames = [xsReaderDataDir()+'/'+'modeA_WH_MC1eqMN2.txt',
                      xsReaderDataDir()+'/'+'modeA_WH_notauhad_MC1eqMN2_DiagonalMatrix.txt'
@@ -87,6 +91,9 @@ class ModeAWhDbReqid :
         + glob.glob(filelistDir+'Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_*.txt'))
         for f in filenames :
             rootfile = open(f).read()
+            if not rootfile :
+                print "warning, emtpy filelist %s"%f
+                continue
             reqid  = guessReqidFromFilename(rootfile)
             sample = guessSampleFromFilename(rootfile)
             if not reqid or not sample :
@@ -129,7 +136,7 @@ class KnownReqidModeAWhDb(unittest.TestCase) :
 class KnownEntriesModeAWhDbReqid(unittest.TestCase) :
     def testMatchAllAvailabeAttrs(self) :
         knownValues = [ ('176584', 'WH_2Lep_11')
-                       ,('176641', 'WH_3Lep_1')
+                       ,('176581', 'WH_2Lep_8')
                         ]
         db = ModeAWhDbReqid()
         for reqid, sample in knownValues :

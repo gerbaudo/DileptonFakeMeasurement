@@ -2,7 +2,7 @@
 #define SusyAna_SusyPlotter_h
 
 #include "SusyTest0/SusySelection.h"
-#include "SusyTest0/SusyAnaDefs.h"
+//#include "SusyTest0/SusyAnaDefs.h"
 
 #include "TH1F.h"
 #include "TH2F.h"
@@ -13,53 +13,19 @@
     SusyPlotter - class for making analysis histograms
 */
 
-enum Chan {
-  Ch_all = 0,
-  Ch_ee,
-  Ch_mm,
-  Ch_em,
-  Ch_N
-};
-static string chanNames[] = {
-  "all",
-  "ee",
-  "mm",
-  "em"
-};
-enum PlotRegion{
-  PR_NONE,
-  PR_SR6base,
-  PR_SR6,
-  PR_SR7base,
-  PR_SR7Nj,
-  PR_SR7NjZttVeto,
-  PR_SR7NjPtTot,
-  PR_SR7NjMll,
-  PR_SR7,
-  PR_SR8base,
-  PR_SR8,
-  PR_SR9base,
-  PR_SR9,
-  PR_N
-};
-static string PRNames[] = {
-  "srnone",
-  "sr6base",
-  "sr6",
-  "sr7base",
-  "sr7Nj",
-  "sr7NjZttVeto",
-  "sr7NjPtTot",
-  "sr7NjMll",
-  "sr7",
-  "sr8base",
-  "sr8",
-  "sr9base",
-  "sr9"
-};
-
 class SusyPlotter : public SusySelection
 {
+ public:
+  enum Chan { Ch_all = 0, Ch_ee, Ch_mm, Ch_em, Ch_N };
+  string chanNames[Ch_N];
+  enum PlotRegion{
+    PR_NONE, PR_SR6base, PR_SR6,
+    PR_SR7base, PR_SR7Nj, PR_SR7NjZttVeto, PR_SR7NjPtTot, PR_SR7NjMll, PR_SR7,
+    PR_SR8base, PR_SR8, PR_SR9base, PR_SR9,
+    PR_N
+  };
+  string PRNames[PR_N] ;
+
   public:
   SusyPlotter();
   virtual ~SusyPlotter(){};
@@ -73,6 +39,7 @@ class SusyPlotter : public SusySelection
   };
   int getChan(const LeptonVector& leps); // compute lepton channel
   void setSysts(); // get list of systematics to consider; override in SusyMatrixMethod
+  void initNames(); // initialize enum literals; should be static, but rootcint cannot deal with it
  public:
   struct ProgressPrinter {
     ProgressPrinter(int suppressionFactor=2, int suppressionOffset=300, bool quiet=false):
@@ -89,25 +56,6 @@ class SusyPlotter : public SusySelection
     void countAndPrint(std::ostream& oo);
   };
  public:
-  static float transverseMass(const TLorentzVector &lep, const TLorentzVector &met);
-  //! redundant? mt with non-zero m_vv? see https://svnweb.cern.ch/trac/atlasinst/browser/Institutes/UCIrvine/ataffard/SusyWeakProdAna/trunk/Root/PhysicsTools.cxx
-  static float mtWW(const TLorentzVector &ll, const TLorentzVector &met);
-  //! compute tau-tau mass assuming that v's are collinear with leptons and responsible for all MET
-  static float mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &met);
-  //! \f$ \Sum cos \Delta\phi \f$ used in CERN-PH-EP-2011-097
-  static float sumCosDeltaPhi(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &met);
-  //! \f$ \Sum E_{T} + E_{T}^{miss} \f$ used in CERN-PH-EP-2011-097
-  static float sumEtEtMiss(const TLorentzVector &el, const TLorentzVector &mu,
-                           const JetVector &jets, const TLorentzVector &met);
-  //! compute the number of kinematically allowed neutrino solutions
-  /*! This code is based on hep-ph/0603011. The number of possible
-    solutions ranges from 0 to 4. However, you should consider
-    calling the function twice (swapping the two jets), unless you
-    can tell which one is the b and which one is the bbar.
-  */
-  static int numberOfNeutrinoSolutions(const TLorentzVector &lPos, const TLorentzVector &lNeg,
-                                       const Jet &jet0, const Jet &jet1,
-                                       const TLorentzVector &met);
   SusyPlotter& setOutputFilename(const std::string &name);
   
   ClassDef(SusyPlotter, 1);
