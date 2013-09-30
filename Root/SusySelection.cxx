@@ -61,10 +61,10 @@ Bool_t SusySelection::Process(Long64_t entry)
         <<" event "           <<setw(7)<<nt.evt()->event
         <<" ****"<<endl;
   }
-  bool removeLepsFromIso(false);
+  bool removeLepsFromIso(false), allowQflip(true);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if(!selectEvent()) return kTRUE;
-  passSrSs(WH_SRSS1, m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met);
+  passSrSs(WH_SRSS1, m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip);
 
   return kTRUE;
 }
@@ -171,7 +171,8 @@ bool SusySelection::passSrSs(const WH_SR signalRegion,
                              LeptonVector& leptons,
                              const TauVector& taus,
                              const JetVector& jets,
-                             const Met *met)
+                             const Met *met,
+                             bool allowQflip)
 {
   if(leptons.size()<2) return false;
   DiLepEvtType ll(getDiLepEvtType(leptons));
@@ -212,10 +213,11 @@ bool SusySelection::passSrSs(const WH_SR signalRegion,
   if(passTrig2L     (ls))                       increment(n_pass_tr2L     [ll], wc); else return false;
   if(passTrig2LMatch(ls))                       increment(n_pass_tr2LMatch[ll], wc); else return false;
   if(data || susy::isTrueDilepton(ls))          increment(n_pass_mcTrue2l [ll], wc); else return false;
-  if(sameSignOrQflip(ncls, ncmet, ll, u4m, mc)) increment(n_pass_ss       [ll], wc); else return false;
+  bool sameSign = allowQflip ? sameSignOrQflip(ncls, ncmet, ll, u4m, mc) : susy::sameSign(ncls);
+  if(sameSign)                                  increment(n_pass_ss       [ll], wc); else return false;
   met = &ncmet; // after qflip, use potentially smeared lep and met
-  if(passMuonRelIso(ncls, muIsoMax))            increment(n_pass_muIso    [ll], wc); else return false;
-  if(susy::passEleD0S(ncls, d0SMax))            increment(n_pass_elD0Sig  [ll], wc); else return false;
+                                                increment(n_pass_muIso    [ll], wc);
+                                                increment(n_pass_elD0Sig  [ll], wc);
   if(passfJetVeto  (js))                        increment(n_pass_fjVeto   [ll], wc); else return false;
   if(passbJetVeto  (js))                        increment(n_pass_bjVeto   [ll], wc); else return false;
   if(passge1Jet    (js))                        increment(n_pass_ge1j     [ll], wc); else return false;

@@ -197,7 +197,7 @@ bool passHtMin(const LeptonVector& leptons,
   float meff = 0;
   for(uint i=0; i<leptons.size(); i++) meff += leptons[i]->Pt();
   for(uint i=0; i<jets.size(); i++){
-    if(jets[i]->Pt() > 40) meff += jets[i]->Pt();
+    if(jets[i]->Pt() > 20.0) meff += jets[i]->Pt();
   }
   meff += met->Et;
   return (minVal < meff);
