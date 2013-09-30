@@ -241,7 +241,6 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
   clearObjects();
   m_chainEntry++;
   increment(n_readin);
-  bool lepSf(true), btagSf(false); // computing btag can slow down
   if(m_dbg || m_chainEntry%50000==0) printProgress(nt.evt(), m_chainEntry);
   selectObjects(NtSys_NOM, false, TauID_medium);
   if( !selectEvent() ) return false;

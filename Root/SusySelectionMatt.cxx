@@ -1271,12 +1271,10 @@ bool SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVector& j
   bool lsf(false), bsf(false); // compute trigw and btagw only when accepting the event
   if(sameSign(leptons)) increment(n_pass_CRWHSS2lss  [m_ET], lsf, bsf); else return false;
   DiLepEvtType ll = m_ET = getDiLepEvtType(leptons);
-  bool isee(m_ET==ET_ee), isem(m_ET==ET_em||m_ET==ET_me), ismm(m_ET==ET_mm);
+  bool isee(ll==ET_ee), isem(ll==ET_em||ll==ET_me), ismm(ll==ET_mm);
   float ptL0Min  = 30;
   float ptL1Min  = (ismm ? 0.0 : 20.0);
-  float muIsoMax = 0.1;
   float htMin    = 200;
-  float d0SMax   = (isee || isem ?   3 : FLT_MAX);
   bool applyMllZveto(isee);
   float mZ0(91.2);
   float loMllZ(applyMllZveto ? mZ0-10. : FLT_MAX);

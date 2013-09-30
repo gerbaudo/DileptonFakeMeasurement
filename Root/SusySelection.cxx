@@ -178,11 +178,9 @@ bool SusySelection::passSrSs(const WH_SR signalRegion,
   DiLepEvtType ll(getDiLepEvtType(leptons));
   const DiLepEvtType ee(ET_ee), em(ET_em), me(ET_me), mm(ET_mm);
   WH_SR sr = signalRegion;
-  float muIsoMax = 0.1;
   float ptL0Min  = 30;
   float ptL1Min  = (ll==mm ? 0.0 : 20.0);
   float htMin    = 200;
-  float d0SMax   = (ll==ee || ll==em || ll==me ?   3 : FLT_MAX);
   bool applyMllZveto(ll==ee);
   float mZ0(91.2);
   float loMllZ(applyMllZveto ? mZ0-10. : FLT_MAX);
