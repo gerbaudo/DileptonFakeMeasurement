@@ -7,124 +7,93 @@
 
 #include "SusyTest0/MatrixPrediction.h"
 #include "SusyNtuple/ChainHelper.h"
+#include "SusyTest0/utils.h"
 
 using namespace std;
 
 /*
 
-SusyPlotter - perform selection and dump cutflows 
+SusyPlotter - perform selection and dump cutflows
 
 */
 
-void help()
-{
-  cout << "  Options:"                          << endl;
-  cout << "  -n number of events to process"    << endl;
-  cout << "     defaults: -1 (all events)"      << endl;
-
-  cout << "  -k number of events to skip"       << endl;
-  cout << "     defaults: 0"                    << endl;
-
-  cout << "  -d debug printout level"           << endl;
-  cout << "     defaults: 0 (quiet) "           << endl;
-
-  cout << "  -F name of single input file"      << endl;
-  cout << "     defaults: ''"                   << endl;
-
-  cout << "  -f name of input filelist"         << endl;
-  cout << "     defaults: ''"                   << endl;
-
-  cout << "  -D name of input file dir"         << endl;
-  cout << "     defaults: ''"                   << endl;
-
-  cout << "  -s sample name, for naming files"  << endl;
-  cout << "     defaults: ntuple sample name"   << endl;
-
-  cout << "  --mcfake to do mc closure test "   << endl;
-
-  cout << "  -h print this help"                << endl;
+void usage(const char *exeName) {
+  cout<<"Usage:"<<endl
+      <<exeName<<" options"<<endl
+      <<"\t"<<"-n [--num-event]   nEvt (default -1, all)"<<endl
+      <<"\t"<<"-k [--num-skip]    nSkip (default 0)"     <<endl
+      <<"\t"<<"-i [--input]       (file, list, or dir)"  <<endl
+      <<"\t"<<"-o [--output]      samplename"            <<endl
+      <<"\t"<<"-s [--sample]      output file"           <<endl
+      <<"\t"<<"-d [--debug]     : debug (>0 print stuff)"<<endl
+      <<"\t"<<"-h [--help]      : print help"            <<endl
+      <<endl;
 }
 
 int main(int argc, char** argv)
 {
   ROOT::Cintex::Cintex::Enable();
-
   int nEvt = -1;
   int nSkip = 0;
   int dbg = 0;
-  bool doMCFake = false;
   string sample;
-  string file;
-  string fileList;
-  string fileDir;
-  
-  cout << "FakePrediction" << endl;
-  cout << endl;
-
-  /** Read inputs to program */
-  for(int i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "-n") == 0)
-      nEvt = atoi(argv[++i]);
-    else if (strcmp(argv[i], "-k") == 0)
-      nSkip = atoi(argv[++i]);
-    else if (strcmp(argv[i], "-d") == 0)
-      dbg = atoi(argv[++i]);
-    else if (strcmp(argv[i], "-F") == 0)
-      file = argv[++i];
-    else if (strcmp(argv[i], "-f") == 0)
-      fileList = argv[++i];
-    else if (strcmp(argv[i], "-D") == 0)
-      fileDir = argv[++i];
-    else if (strcmp(argv[i], "-s") == 0)
-      sample = argv[++i];
-    else if (strcmp(argv[i], "--mcfake") == 0)
-      doMCFake = true;
-    //if (strcmp(argv[i], "-h") == 0)
-    else
-    {
-      help();
-      return 0;
+  string input;
+  string output;
+  int optind(1);
+  while ((optind < argc)) {
+    if(argv[optind][0]!='-') {
+      if(dbg) cout<<"skip "<<argv[optind]<<endl;
+      optind++;
+      continue;
     }
-  }
+    std::string sw = argv[optind];
+    if     (sw=="-n"||sw=="--num-event"  ) { nEvt = atoi(argv[++optind]); }
+    else if(sw=="-k"||sw=="--num-skip"   ) { nSkip = atoi(argv[++optind]); }
+    else if(sw=="-d"||sw=="--debug"      ) { dbg = atoi(argv[++optind]); }
+    else if(sw=="-i"||sw=="--input"      ) { input = argv[++optind]; }
+    else if(sw=="-o"||sw=="--output"     ) { output = argv[++optind]; }
+    else if(sw=="-s"||sw=="--sample"     ) { sample = argv[++optind]; }
+    else if(sw=="-h"||sw=="--help"       ) { usage(argv[0]); return 0; }
+    else cout<<"Unknown switch "<<sw<<endl;
+    optind++;
+  } // end while(optind<argc)
+  cout<<"flags:"                <<endl
+      <<"  sample  "<<sample    <<endl
+      <<"  nEvt    "<<nEvt      <<endl
+      <<"  nSkip   "<<nSkip     <<endl
+      <<"  dbg     "<<dbg       <<endl
+      <<"  input   "<<input     <<endl
+      <<"  output  "<<output    <<endl
+      <<endl;
 
-  // If no input specified except sample name, use a standard fileList
-  if(file.empty() && fileList.empty() && fileDir.empty() && !sample.empty())
-    fileList = "files/" + sample + ".txt";
-
-  cout << "flags:" << endl;
-  cout << "  sample  " << sample   << endl;
-  cout << "  nEvt    " << nEvt     << endl;
-  cout << "  nSkip   " << nSkip    << endl;
-  cout << "  dbg     " << dbg      << endl;
-  if(!file.empty())     cout << "  input   " << file     << endl;
-  if(!fileList.empty()) cout << "  input   " << fileList << endl;
-  if(!fileDir.empty())  cout << "  input   " << fileDir  << endl;
-  cout << endl;
-
-  // Build the input chain
   TChain* chain = new TChain("susyNt");
-  ChainHelper::addFile(chain, file);
-  ChainHelper::addFileList(chain, fileList);
-  ChainHelper::addFileDir(chain, fileDir);
+  bool inputIsFile(string::npos!=input.find(".root"));
+  bool inputIsList(string::npos!=input.find(".txt"));
+  bool inputIsDir (endswith(input, "/"));
+  bool validInput(inputIsFile||inputIsList||inputIsDir);
+  bool validOutput(endswith(output, ".root"));
+  if(!validInput || !validOutput) {
+    cout<<"invalid "
+        <<(validOutput ? "input" : "output")<<" "
+        <<"'"<<(validOutput ? input : output)<<"'"
+        <<endl;
+    usage(argv[0]); return 1;
+  }
+  if(inputIsFile) ChainHelper::addFile    (chain, input);
+  if(inputIsList) ChainHelper::addFileList(chain, input);
+  if(inputIsDir ) ChainHelper::addFileDir (chain, input);
   Long64_t nEntries = chain->GetEntries();
-  chain->ls();
+  nEvt = (nEvt<0 ? nEntries : nEvt);
+  if(dbg) chain->ls();
 
-  // Build the TSelector
-  MatrixPrediction* fakePred = new MatrixPrediction();
-  fakePred->buildSumwMap(chain);
-  fakePred->setDebug(dbg);
-  fakePred->setSampleName(sample);
-  // Run the job
-  if(nEvt<0) nEvt = nEntries;
-  cout << endl;
-  cout << "Total entries:   " << nEntries << endl;
-  cout << "Process entries: " << nEvt << endl;
-  if(nEvt>0) chain->Process(fakePred, sample.c_str(), nEvt, nSkip);
+  MatrixPrediction fakePred;
+  fakePred.setDebug(dbg);
+  if(sample.size()) fakePred.setSampleName(sample);
+  if(output.size()) fakePred.setOutputFilename(output);
 
-  cout << endl;
-  cout << "SusyPlotter job done" << endl;
+  fakePred.buildSumwMap(chain);
+  chain->Process(&fakePred, sample.c_str(), nEvt, nSkip);
 
   delete chain;
-  delete fakePred;
   return 0;
 }

@@ -1,0 +1,406 @@
+Final Fake Rate
+
+flags:
+  dbg                      0
+  output file:             temp
+
+Final Fake Rate being formatted
+	Saving in: finalfake/temp.root
+--------------------------------------
+Fake rate: percentages for sr SRmT2a, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.000425829 0.0915684 0.00646507 0.000451178 0.901089
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr SRmT2b, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.000425829 0.0915684 0.00646507 0.000451178 0.901089
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr SRmT2c, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.000425829 0.0915684 0.00646507 0.000451178 0.901089
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr SRWWa, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.000528381 0.0975434 0.00802204 0.000505179 0.893401
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr SRWWb, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.000470509 0.0980313 0.00714341 0.000496852 0.893858
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr SRWWc, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.000425829 0.0915684 0.00646507 0.000451178 0.901089
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr SRZjets, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  1 0 0 0 0
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr VRSS, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.124411 0.194689 0.0062841 0.00415979 0.670455
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr CRWWMet, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.0193425 0.973485 0.00693451 0.000238348 0
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr CRWWmT2, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.000471922 0.0615472 0.00424457 7.84386e-05 0.933658
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr CRTopMet, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.962837 0 0.0371634 0 0
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr CRTopmT2, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.0634082 0.0140801 0.000654576 0.00832619 0.913531
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr CRZVMet, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.00394734 0.881688 0.018228 0.0117117 5.41457e-05
+mu_percent_conv:  0 0 0.0843654 5.22847e-06 0
+--------------------------------------
+Fake rate: percentages for sr CRZVmT2_90, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.00394734 0.881688 0.018228 0.0117117 5.41457e-05
+mu_percent_conv:  0 0 0.0843654 5.22847e-06 0
+--------------------------------------
+Fake rate: percentages for sr CRZVmT2_120, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.00394734 0.881688 0.018228 0.0117117 5.41457e-05
+mu_percent_conv:  0 0 0.0843654 5.22847e-06 0
+--------------------------------------
+Fake rate: percentages for sr CRZVmT2_150, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.00394734 0.881688 0.018228 0.0117117 5.41457e-05
+mu_percent_conv:  0 0 0.0843654 5.22847e-06 0
+--------------------------------------
+Fake rate: percentages for sr CRZVmT2_100, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.00394734 0.881688 0.018228 0.0117117 5.41457e-05
+mu_percent_conv:  0 0 0.0843654 5.22847e-06 0
+--------------------------------------
+Fake rate: percentages for sr CRTopZjets, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.871202 0.128798 0 0 0
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr CRZXZjets, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.570374 0.429626 0 0 0
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr CR_SSInc, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.0196777 0.0349128 0.00726229 0.00124112 0.936906
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr CRPremT2, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.000425829 0.0915684 0.00646507 0.000451178 0.901089
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Fake rate: percentages for sr SRDavide, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_qcd:  0.989328 0.00100026 0 0.00967192 0
+mu_percent_conv:  0 0 0 0 0
+--------------------------------------
+Real eff: percentages for sr SRmT2a, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.000568096 0.00421123 0.982427 0.0127941 0
+--------------------------------------
+Real eff: percentages for sr SRmT2b, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.000568096 0.00421123 0.982427 0.0127941 0
+--------------------------------------
+Real eff: percentages for sr SRmT2c, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.000568096 0.00421123 0.982427 0.0127941 0
+--------------------------------------
+Real eff: percentages for sr SRWWa, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.000277523 0.00367542 0.986844 0.00920304 0
+--------------------------------------
+Real eff: percentages for sr SRWWb, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.00040521 0.00381601 0.98484 0.0109384 0
+--------------------------------------
+Real eff: percentages for sr SRWWc, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.000568096 0.00421123 0.982427 0.0127941 0
+--------------------------------------
+Real eff: percentages for sr SRZjets, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.00100679 0 0.986518 0.012475 0
+--------------------------------------
+Real eff: percentages for sr VRSS, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.145512 0.652807 0.0450074 0.156673 0
+--------------------------------------
+Real eff: percentages for sr CRWWMet, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.0306019 0.380911 0.0419425 0.546544 0
+--------------------------------------
+Real eff: percentages for sr CRWWmT2, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.0148419 0.206633 0.454468 0.324057 0
+--------------------------------------
+Real eff: percentages for sr CRTopMet, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.982402 0.00016192 0.00495398 0.0124817 0
+--------------------------------------
+Real eff: percentages for sr CRTopmT2, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.953152 0.0115729 0.0161302 0.0191446 0
+--------------------------------------
+Real eff: percentages for sr CRZVMet, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  4.9525e-06 9.29991e-06 0.99959 0.000396112 0
+--------------------------------------
+Real eff: percentages for sr CRZVmT2_90, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  4.9525e-06 9.29991e-06 0.99959 0.000396112 0
+--------------------------------------
+Real eff: percentages for sr CRZVmT2_120, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  4.9525e-06 9.29991e-06 0.99959 0.000396112 0
+--------------------------------------
+Real eff: percentages for sr CRZVmT2_150, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  4.9525e-06 9.29991e-06 0.99959 0.000396112 0
+--------------------------------------
+Real eff: percentages for sr CRZVmT2_100, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  4.9525e-06 9.29991e-06 0.99959 0.000396112 0
+--------------------------------------
+Real eff: percentages for sr CRTopZjets, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.512267 0.000310944 0.474158 0.0132647 0
+--------------------------------------
+Real eff: percentages for sr CRZXZjets, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.00082917 1.8918e-05 0.992533 0.00661846 0
+--------------------------------------
+Real eff: percentages for sr CR_SSInc, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.127821 0.573804 0.152063 0.146312 0
+--------------------------------------
+Real eff: percentages for sr CRPremT2, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.000568096 0.00421123 0.982427 0.0127941 0
+--------------------------------------
+Real eff: percentages for sr SRDavide, muon
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+mu_percent_real:  0.158083 0.446559 0.00296436 0.392394 0
+--------------------------------------
+Fake rate: percentages for sr SRmT2a, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.00073524 0.252782 0.0277541 0.00603759 0.323238
+el_percent_conv:  2.6154e-05 0.197943 0.0899245 0.0712834 0.0302751
+--------------------------------------
+Fake rate: percentages for sr SRmT2b, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.00073524 0.252782 0.0277541 0.00603759 0.323238
+el_percent_conv:  2.6154e-05 0.197943 0.0899245 0.0712834 0.0302751
+--------------------------------------
+Fake rate: percentages for sr SRmT2c, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.00073524 0.252782 0.0277541 0.00603759 0.323238
+el_percent_conv:  2.6154e-05 0.197943 0.0899245 0.0712834 0.0302751
+--------------------------------------
+Fake rate: percentages for sr SRWWa, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.000875047 0.222782 0.0311177 0.00424958 0.346058
+el_percent_conv:  3.38179e-05 0.21608 0.107892 0.0530496 0.0178622
+--------------------------------------
+Fake rate: percentages for sr SRWWb, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.000769547 0.245039 0.0293469 0.00466219 0.332834
+el_percent_conv:  2.87493e-05 0.210621 0.0986757 0.0628377 0.015185
+--------------------------------------
+Fake rate: percentages for sr SRWWc, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.00073524 0.252782 0.0277541 0.00603759 0.323238
+el_percent_conv:  2.6154e-05 0.197943 0.0899245 0.0712834 0.0302751
+--------------------------------------
+Fake rate: percentages for sr SRZjets, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.323332 0.120637 0.00374195 0.00422765 0
+el_percent_conv:  0.0238687 0.232288 0.210326 0.0815791 0
+--------------------------------------
+Fake rate: percentages for sr VRSS, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.134579 0.279768 0.0123679 0.00779775 0.0452219
+el_percent_conv:  0.0182832 0.361361 0.0191466 0.10176 0.0197158
+--------------------------------------
+Fake rate: percentages for sr CRWWMet, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.00449587 0.395572 0.0125975 0.00767386 0
+el_percent_conv:  0.00017293 0.466389 0.0250783 0.0880205 0
+--------------------------------------
+Fake rate: percentages for sr CRWWmT2, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.000668539 0.184294 0.0207035 0.00414414 0.472308
+el_percent_conv:  2.20331e-05 0.155809 0.0732512 0.0445624 0.0442374
+--------------------------------------
+Fake rate: percentages for sr CRTopMet, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.686411 0 0 0.00977775 0
+el_percent_conv:  0.111685 0.0103596 0 0.181766 0
+--------------------------------------
+Fake rate: percentages for sr CRTopmT2, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.181829 0.152111 0.00466158 0.00649559 0.294316
+el_percent_conv:  0.0428926 0.0658778 0.0359927 0.065875 0.149949
+--------------------------------------
+Fake rate: percentages for sr CRZVMet, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.00158106 0.344466 0.0539427 0.0104777 0
+el_percent_conv:  0.000743669 0.317799 0.199931 0.0710594 0
+--------------------------------------
+Fake rate: percentages for sr CRZVmT2_90, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.00158106 0.344466 0.0539427 0.0104777 0
+el_percent_conv:  0.000743669 0.317799 0.199931 0.0710594 0
+--------------------------------------
+Fake rate: percentages for sr CRZVmT2_120, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.00158106 0.344466 0.0539427 0.0104777 0
+el_percent_conv:  0.000743669 0.317799 0.199931 0.0710594 0
+--------------------------------------
+Fake rate: percentages for sr CRZVmT2_150, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.00158106 0.344466 0.0539427 0.0104777 0
+el_percent_conv:  0.000743669 0.317799 0.199931 0.0710594 0
+--------------------------------------
+Fake rate: percentages for sr CRZVmT2_100, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.00158106 0.344466 0.0539427 0.0104777 0
+el_percent_conv:  0.000743669 0.317799 0.199931 0.0710594 0
+--------------------------------------
+Fake rate: percentages for sr CRTopZjets, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.667123 0.0851246 0.0158819 0.0105492 0
+el_percent_conv:  0.0815629 0.0526076 0.00401747 0.0831335 0
+--------------------------------------
+Fake rate: percentages for sr CRZXZjets, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.294654 0.199187 0.0525706 0.039739 0
+el_percent_conv:  0.0158214 0.227454 0.0544588 0.116115 0
+--------------------------------------
+Fake rate: percentages for sr CR_SSInc, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.0619281 0.117538 0.0227296 0.004169 0.365233
+el_percent_conv:  0.00858384 0.155417 0.053213 0.0501471 0.161041
+--------------------------------------
+Fake rate: percentages for sr CRPremT2, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.00073524 0.252782 0.0277541 0.00603759 0.323238
+el_percent_conv:  2.6154e-05 0.197943 0.0899245 0.0712834 0.0302751
+--------------------------------------
+Fake rate: percentages for sr SRDavide, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_qcd:  0.182333 0.301795 0.00725547 0.0107396 0
+el_percent_conv:  0.0189034 0.353905 0.00706546 0.118003 0
+--------------------------------------
+Real eff: percentages for sr SRmT2a, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.000595906 0.00358503 0.984153 0.0116662 0
+--------------------------------------
+Real eff: percentages for sr SRmT2b, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.000595906 0.00358503 0.984153 0.0116662 0
+--------------------------------------
+Real eff: percentages for sr SRmT2c, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.000595906 0.00358503 0.984153 0.0116662 0
+--------------------------------------
+Real eff: percentages for sr SRWWa, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.000292492 0.00301178 0.988638 0.00805809 0
+--------------------------------------
+Real eff: percentages for sr SRWWb, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.000436811 0.00341088 0.986267 0.00988544 0
+--------------------------------------
+Real eff: percentages for sr SRWWc, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.000595906 0.00358503 0.984153 0.0116662 0
+--------------------------------------
+Real eff: percentages for sr SRZjets, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.00123656 0.000235239 0.984409 0.0141195 0
+--------------------------------------
+Real eff: percentages for sr VRSS, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.169379 0.567886 0.128316 0.134419 0
+--------------------------------------
+Real eff: percentages for sr CRWWMet, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.049463 0.052977 0.0452823 0.852278 0
+--------------------------------------
+Real eff: percentages for sr CRWWmT2, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.0199352 0.0245255 0.551555 0.403984 0
+--------------------------------------
+Real eff: percentages for sr CRTopMet, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.985273 0 0.00511004 0.00961705 0
+--------------------------------------
+Real eff: percentages for sr CRTopmT2, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.969265 0.000357294 0.0144708 0.0159071 0
+--------------------------------------
+Real eff: percentages for sr CRZVMet, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  7.28611e-06 0.000117116 0.999455 0.000420557 0
+--------------------------------------
+Real eff: percentages for sr CRZVmT2_90, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  7.28611e-06 0.000117116 0.999455 0.000420557 0
+--------------------------------------
+Real eff: percentages for sr CRZVmT2_120, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  7.28611e-06 0.000117116 0.999455 0.000420557 0
+--------------------------------------
+Real eff: percentages for sr CRZVmT2_150, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  7.28611e-06 0.000117116 0.999455 0.000420557 0
+--------------------------------------
+Real eff: percentages for sr CRZVmT2_100, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  7.28611e-06 0.000117116 0.999455 0.000420557 0
+--------------------------------------
+Real eff: percentages for sr CRTopZjets, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.54621 0.0039555 0.434097 0.015738 0
+--------------------------------------
+Real eff: percentages for sr CRZXZjets, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.000994845 0.000190961 0.991722 0.007092 0
+--------------------------------------
+Real eff: percentages for sr CR_SSInc, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.0192982 0.0702592 0.892139 0.0183032 0
+--------------------------------------
+Real eff: percentages for sr CRPremT2, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.000595906 0.00358503 0.984153 0.0116662 0
+--------------------------------------
+Real eff: percentages for sr SRDavide, electron
+		ttbar	 Wjet	 Zjet	 dib	 bbbar
+el_percent_real:  0.211445 0.51908 0.0438904 0.225585 0
+
+Plotting job done

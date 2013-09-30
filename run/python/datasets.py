@@ -10,6 +10,8 @@
 # davide.gerbaudo@gmail.com
 # Jan 2013
 
+import unittest
+
 def rzip(*iterables) :
     """rigid zip: ensures input iterables have the same length.
     Used to make sure that the dsid ranges match the dset names."""
@@ -21,7 +23,6 @@ def rzip(*iterables) :
 class Dataset :
     """Container to uniquely specify a dataset (through a dsid), and
     specify additional user-friendly attributes"""
-    groupsNotToBeMerged = ['WH_2Lep', 'WH_3Lep']
     def __init__(self, sampleType, dsid=None, group=None, name=None, process=None, placeholder=False) :
         assert sampleType in ['data','mc'], "sampleType: %s for %s"%(sampleType, name)
         self.type = sampleType # data or mc
@@ -31,13 +32,28 @@ class Dataset :
         self.process = process # physical process, for example 'Zbb + jets' (short, generic, usually appears as the common root of the name)
         self.placeholder = placeholder # just a placeholder, its job won't be submitted
     @property
-    def isNotToBeMerged(self) : return self.group in Dataset.groupsNotToBeMerged
+    def isNotToBeMerged(self) : return self.isSignal
     @property
     def isToBeMerged(self) : return not self.isNotToBeMerged
+    @property
+    def isHeavyFlavor(self) : return self.group is 'heavyflavor'
+    @property
+    def isSignal(self) :
+        return self.type is 'mc' and any(s in self.name for s in ('WH_2Lep', 'WH_2Lep'))
+    @property
+    def isSignalOrHiggs(self) : return self.isSignal or self.group is 'higgs'
+    @property
+    def isMcBackground(self) :
+        "not written in stone (include higgs?), but that's what we need for the fake estimate"
+        return self.type is 'mc' and not self.isSignalOrHiggs
 
 def allGroups(datasets=[]) : return list(set(d.group for d in datasets))
 def allDatasets(datasets=[]) : return list(set(d.name for d in datasets))
 def activeDatasets(datasets=[]) : return filter(lambda d : not d.placeholder, datasets)
+def setSameGroupForAllData(datasets=[], group='data') :
+    for d in datasets :
+        if d.type is 'data' : d.group = group
+    return datasets
 
 datasets = []
 sampleType, group, process = None, None, None
@@ -151,8 +167,14 @@ datasets += [Dataset(sampleType, d, group, template%{'qq':qq, 'np':np}, process,
              for d, np in rzip(dsids, nps)]
 
 group = 'ttbar'
+template, process = 'McAtNloJimmy_AUET2CT10_SingleTopSChanW%(lv)s', 'singletop'
+datasets += [Dataset(sampleType, d, group, template%{'lv':lv}, process)
+             for d, lv in [(108343, 'enu'), (108344, 'munu'), (108345, 'taunu')]]
 name, process = 'McAtNloJimmy_AUET2CT10_SingleTopWtChanIncl', 'singletop'
 datasets += [Dataset(sampleType, 108346, group, name, process)]
+template, process = 'AcerMCPythia_AUET2BCTEQ6L1_singletop_tchan_%(l)s', 'singletop'
+datasets += [Dataset(sampleType, d, group, template%{'l':l}, process)
+             for d, l in [(117360, 'e'), (117361, 'mu'), (117362, 'tau')]]
 name, process = 'McAtNloJimmy_CT10_ttbar_LeptonFilter', 'ttbar'
 datasets += [Dataset(sampleType, 105200, group, name, process)]
 template, process = "MadGraphPythia_AUET2BCTEQ6L1_ttbar%(ttX)s", 'ttbarV'
@@ -186,14 +208,15 @@ datasets += [Dataset(sampleType, d, group, template%{'l4':l4}, process)
                            (116602, '4mu'),
                            (116603, '2e2mu')]]
 template, process = "Sherpa_CT10_%(lepVV)s", 'Sherpa_VV_lep'
-datasets += [Dataset(sampleType, d, group, template%{'lepVV':lepVV}, process)
-             for d, lepVV in [(174834, 'llll_ZZ'),   (161963, 'llnunu_ZZ'),
-                              (126892, 'llnunu_WW'), (126893, 'lllnu_WZ')]]
+datasets += [Dataset(sampleType, d, group, template%{'lepVV':lepVV}, process, placeholder)
+             for d, lepVV in [(126892, 'llnunu_WW'), (126893, 'lllnu_WZ'),
+                              (161963, 'llnunu_ZZ'), (174834, 'llll_ZZ')]]
+template, process = "Sherpa_CT10_%(lv)sgammaPt10", 'Sherpa_Vgamma'
+datasets += [Dataset(sampleType, d, group, template%{'lv':lv}, process)
+             for d, lv in [(126739, 'enu'),   (126742, 'munu'), (126856, 'taunu')]]
 template, process = "Sherpa_CT10_%(ll)sgammaPt10", 'Sherpa_Vgamma'
-datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process)
-             for d, ll in [(145161, 'ee'),    (145162, 'mumu'),
-                           (126739, 'enu'),   (126742, 'munu'),
-                           (126856, 'taunu'), (126854, 'tautau')]]
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process, placeholder)
+             for d, ll in [(145161, 'ee'),    (145162, 'mumu'), (126854, 'tautau')]]
 template, process = "Sherpa_CT10_%(llss)s", 'Sherpa_llnunu'
 datasets += [Dataset(sampleType, d, group, template%{'llss':llss}, process)
              for d, llss in [(126988, 'llnunu_SS_EW6'), (126989, 'llnunujj_SS')]]
@@ -201,8 +224,8 @@ template, process = "Sherpa_CT10_VVto%(l)snuqq", 'Sherpa_VVtolnuqq'
 datasets += [Dataset(sampleType, d, group, template%{'l':l}, process)
              for d, l in [(157817, 'e'), (157818, 'mu'), (157819, 'tau')]]
 template, process = "Sherpa_CT10_VVto%(ll)sqq", 'Sherpa_VVtollqq'
-datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process, placeholder)
-             for d, l in [(157814, 'ee'), (157815, 'mumu'), (157816, 'tautau')]]
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process)
+             for d, ll in [(157814, 'ee'), (157815, 'mumu'), (157816, 'tautau')]]
 template, process = "MadGraphPythia_AUET2BCTEQ6L1_%(VVV)sStar_%(fs)s", 'Triboson'
 datasets += [Dataset(sampleType, d, group, template%{'VVV':VVV, 'fs':fs}, process)
              for d, VVV, fs in [(167006, 'WWW', 'lnulnulnu'),
@@ -214,7 +237,7 @@ datasets += [Dataset(sampleType, d, group, template%{'l4':l4}, process)
                            (126940, '4mu'), (126941, '2mu2tau'), (126942, '4tau'),]]
 template, process = "PowhegPythia8_AU2CT10_ZZllnunu_%(ll)s_mll4", 'PowhegPythia8_ZZ'
 datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process)
-             for d, l4 in [(126949, 'ee'), (126950, 'mm'), (126951, 'tt')]]
+             for d, ll in [(126949, 'ee'), (126950, 'mm'), (126951, 'tt')]]
 template, process = "PowhegPythia8_AU2CT10_WZ_%(lvll)s_mll%(mll)s_2L5", 'PowhegPythia8_WZ'
 datasets += [Dataset(sampleType, d, group, template%{'lvll':lvll, 'mll':mll}, process)
              for d, lvll, mll in [(129477, 'Wm11Z11', '0p250d0'),
@@ -236,9 +259,10 @@ datasets += [Dataset(sampleType, d, group, template%{'lvll':lvll, 'mll':mll}, pr
                                   (129493, 'W15Z13',  '0p4614d0'),
                                   (129494, 'W15Z15',  '3p804d0')]]
 
-#- 160305.Pythia8_AU2CTEQ6L1_ZH125_ZZ4lep
-#- # HF samples
-#- # + ["%(qq)sTo%(l)s15" % {'qq':qq, 'l':l} for qq in ['bb', 'cc'] for l in ['e', 'mu']]
+group = 'heavyflavor'
+template, process = "Pythia8B_AU2_CTEQ6L1_%(qq)sTomu20", 'HF qqbar'
+datasets += [Dataset(sampleType, d, group, template%{'qq':qq}, process)
+             for d, qq in [(129136, 'bb'), (147668, 'cc')]]
 
 group = 'higgs'
 template, process = "PowhegPythia8_AU2CT10_ggH125_%(fs)s", 'ggH125'
@@ -278,6 +302,38 @@ template, process = "Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_%d", "wA_noslep_nota
 datasets += [Dataset(sampleType, d, groupTemplate%nth, template%nth, process%nth)
              for d, nth in rzip(range(177501, 177528+1), range(1, 28+1))]
 
+
+#
+# testing
+#
+
+class CategorizationTest(unittest.TestCase) :
+    def testSignalIsConsistent(self) :
+        for d in datasets :
+            notData = d.type is not 'data'
+            notBkg = d.type is 'mc' and d.isSignal
+            notHf = not d.isHeavyFlavor
+            isSignal = d.isSignal
+            self.assertEqual(isSignal, (notData and notBkg and notHf),
+                             d.name+' : '
+                             +', '.join(["%s : %s"%(k, eval(k))
+                                         for k in ['isSignal', 'notData', 'notBkg', 'notHf']]))
+
+#
+# testing
+#
+
+class CategorizationTest(unittest.TestCase) :
+    def testSignalIsConsistent(self) :
+        for d in datasets :
+            notData = d.type is not 'data'
+            notBkg = d.type is 'mc' and d.isSignal
+            notHf = not d.isHeavyFlavor
+            isSignal = d.isSignal
+            self.assertEqual(isSignal, (notData and notBkg and notHf),
+                             d.name+' : '
+                             +', '.join(["%s : %s"%(k, eval(k))
+                                         for k in ['isSignal', 'notData', 'notBkg', 'notHf']]))
 
 if __name__=='__main__' :
     def filterByGroup(dsets) :
@@ -319,3 +375,6 @@ if __name__=='__main__' :
     print "    used : %d"%len(usedDsets)
     print '\n'.join("         : %d : %s"%(len(gdsets), g)
                     for g, gdsets in filterByGroup(usedDsets).iteritems())
+    print linebreak
+    print 'Testing...'
+    unittest.main()

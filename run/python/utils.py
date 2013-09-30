@@ -49,6 +49,7 @@ def guessMonthDayTagFromLastRootFile(dir, debug) :
     lastFile = findLastRootFile(dir)
     if lastFile : return guessMonthDayTag(lastFile)
     elif debug : print "guessMonthDayTagFromLastRootFile: no root files"
+def isMonthDayTag(tag) : return guessMonthDayTag(tag)
 def commonPrefix(list) : return os.path.commonprefix(list)
 def commonSuffix(list) : return os.path.commonprefix([l[::-1] for l in list])[::-1]
 def longestCommonSubstring(s1, s2) :

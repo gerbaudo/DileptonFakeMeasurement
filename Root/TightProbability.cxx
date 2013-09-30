@@ -6,6 +6,8 @@
 #include "TH1F.h"
 #include "TAxis.h"
 
+#include "SusyTest0/criteria.h"
+
 using std::cout;
 using std::endl;
 
@@ -134,10 +136,10 @@ Bool_t TightProbability::Process(Long64_t entry) {
   //  cout<<(passEvent ? " passEvent " : "!passEvent\n");
   if(!passEvent) return true;
   m_ET = getDiLepEvtType(leps);
-  float metRel = getMetRel(met,leps,jets);
+  //float metRel = getMetRel(met,leps,jets);
   //bool passSr = passSrSs(m_ET, WH_SRSS1, leps, m_signalTaus, m_signalJets2Lep, met);
   //bool passSr(40.0 < metRel && metRel < 100.0);
-  bool passMet(met->Et > 20.0), passMetRel(40.0 < metRel && metRel < 100.0);
+  bool passMet(met->Et > 20.0); //, passMetRel(40.0 < metRel && metRel < 100.0);
   bool pass2l(2==leps.size());
   bool passSr(passMet && pass2l);
   if(!passSr) return true;
@@ -196,6 +198,7 @@ TightProbability& TightProbability::setOutputFilename(const std::string &s) {
 }
 //----------------------------------------------------------
 TightProbability::LeptonOrigin TightProbability::getLeptonOrigin(const Lepton* l){
+  using namespace susy;
   if( isRealLepton(l) ) return kReal;
   if( isHFLepton(l) )   return kHeavyFlavor;
   if( isLFLepton(l) )   return kLigthFlavor;

@@ -33,8 +33,14 @@ void MatrixPrediction::Begin(TTree* /*tree*/)
   // Load the matrix method package
   m_matrix = new SusyMatrixMethod::DiLeptonMatrixMethod();
   string pathRateFile = (string( std::getenv("ROOTCOREDIR"))
-                         +"/../SusyMatrixMethod/data/pass6_Apr2_2013.root");
-  m_matrix->configure(pathRateFile, SusyMatrixMethod::PT);
+                         // +"/../SusyMatrixMethod/data/pass3_Summer2013.root");
+                         +"/../SusyMatrixMethod/data/forDavide_Sep11_2013.root");
+  m_matrix->configure(pathRateFile,
+                      SusyMatrixMethod::PT,     // Electron Real
+                      SusyMatrixMethod::PT,     // Electron Fake
+                      SusyMatrixMethod::PT,     // Muon Real
+                      SusyMatrixMethod::PT      // Muon Fake
+                      );
   cout<<"Matrix method initialized: "<<endl;
   bookFakeHisto();
   dump.open("fakeDump.txt");
@@ -44,6 +50,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
 {
   GetEntry(entry);
   clearObjects();
+  cacheStaticWeightComponents();
   static Long64_t chainEntry = -1;
   chainEntry++;
   if(m_dbg || chainEntry%50000==0)
@@ -52,31 +59,35 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
          << " run " << setw(6) << nt.evt()->run
          << " event " << setw(7) << nt.evt()->event << " ****" << endl;
   }
-  selectObjects(); // select signal objects
+  bool removeLepsFromIso(false);
+  selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if( !selectEvent() )              return kTRUE;
-  if( m_baseLeptons.size() != 2 )   return kTRUE;
-  if( !passTrig2LwithMatch(m_baseLeptons) ) return kTRUE;
-  bool count(true);
-  SusyMatrixMethod::FAKE_REGION reg = SusyMatrixMethod::FR_VRSSbtag;
+
+  SusyMatrixMethod::FAKE_REGION reg = SusyMatrixMethod::FR_SRDavide;
   SusyMatrixMethod::SYSTEMATIC  sys = SusyMatrixMethod::SYS_NONE;
   const Met*          m = m_met;
   const JetVector&    j = m_signalJets2Lep;
+  const JetVector&   bj = m_baseJets;     // DG don't know why, but we use these for the btag w
   const LeptonVector& l = m_baseLeptons;
+  LeptonVector&     ncl = m_baseLeptons;
+  const TauVector&    t = m_signalTaus;
+  if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
   float metRel = getMetRel(m, l, j);
-  float weight = getFakeWeight(l, reg, metRel, sys);
-  // function references to shorten lines
-//   void (&fh)(const LeptonVector &l, const JetVector &j, const Met* m,
-//              const float weight, PlotRegion PR, uint sys) = fillHistos;
-//   void (&ffh)(const LeptonVector &l, const JetVector &j, const Met *m,
-//               float weight, PlotRegion PR, uint sys) = fillFakeHistos
-  if(passSR6(l, j, m, count)) { fillHistos(l, j, m, weight, PR_SR6); fillFakeHistos(l, j, m, weight, PR_SR6, sys); }
-  if(passSR7(l, j, m, count)) { fillHistos(l, j, m, weight, PR_SR7); fillFakeHistos(l, j, m, weight, PR_SR7, sys); }
-  if(passSR8(l, j, m, count)) {
-    cout<<"passSR8"<<endl;
-    fillHistos(l, j, m, weight, PR_SR8); fillFakeHistos(l, j, m, weight, PR_SR8, sys); }
-  if(passSR9(l, j, m, count)) {
-    cout<<"passSR9"<<endl;
-fillHistos(l, j, m, weight, PR_SR9); fillFakeHistos(l, j, m, weight, PR_SR9, sys); }
+  m_weightComponents.fake = getFakeWeight(l, reg, metRel, sys);
+  bool allowQflip(false);
+  bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
+  if(m_dbg>3) {
+    DiLepEvtType ll(getDiLepEvtType(l));
+    bool ee(ll==ET_ee), mm(ll==ET_mm);
+    if(passSrSS)
+      cout<<"MatrixPrediction passSrSS("<<(passSrSS?"true":"false")<<")"
+          <<" run "<<nt.evt()->run<<" evt "<<nt.evt()->event<<" "<<(ee?"ee":(mm?"mm":"em"))
+          <<" l0: pt="<<l[0]->Pt()<<" eta="<<l[0]->Eta()
+          <<" l1: pt="<<l[1]->Pt()<<" eta="<<l[1]->Eta()
+          <<" weight="<<m_weightComponents.fake
+          <<endl;
+  }
+  if(!passSrSS) return false;
   return kTRUE;
 }
 //----------------------------------------------------------
