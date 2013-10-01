@@ -50,12 +50,14 @@ class diffROOT(object):
         return obj
     
     @staticmethod
-    def compareListsOfKeys(i1,i2):
+    def compareListsOfKeys(i1,i2, onlyHisto=True):
         '''Intersection and differences of key lists.'''
+        th1 = r.TH1.Class()
+        def isHisto(k) : return r.TClass(k.GetClassName()).InheritsFrom(th1)
         KL1 = i1.GetListOfKeys()
         KL2 = i2.GetListOfKeys()
-        ks1 = set(k.GetName() for k in KL1)
-        ks2 = set(k.GetName() for k in KL2)
+        ks1 = set(k.GetName() for k in KL1 if not onlyHisto or isHisto(k))
+        ks2 = set(k.GetName() for k in KL2 if not onlyHisto or isHisto(k))
         return ( set.intersection(ks1,ks2), 
                  (ks1 & ks2) - ks1, 
                  (ks1 & ks2) - ks2 )
