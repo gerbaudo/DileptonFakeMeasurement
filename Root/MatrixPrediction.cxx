@@ -1,6 +1,7 @@
 #include <iomanip>
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyTest0/MatrixPrediction.h"
+#include "SusyTest0/utils.h"
 
 using namespace std;
 using namespace Susy;
@@ -27,23 +28,10 @@ MatrixPrediction::MatrixPrediction() :
 void MatrixPrediction::Begin(TTree* /*tree*/)
 {
   m_doFake = true;
-
   SusyPlotter::Begin(0);
   if(m_dbg) cout << "MatrixPrediction::Begin" << endl;
-  // Load the matrix method package
-  m_matrix = new SusyMatrixMethod::DiLeptonMatrixMethod();
-  string pathRateFile = (string( std::getenv("ROOTCOREDIR"))
-                         // +"/../SusyMatrixMethod/data/pass3_Summer2013.root");
-                         +"/../SusyMatrixMethod/data/forDavide_Sep11_2013.root");
-  m_matrix->configure(pathRateFile,
-                      SusyMatrixMethod::PT,     // Electron Real
-                      SusyMatrixMethod::PT,     // Electron Fake
-                      SusyMatrixMethod::PT,     // Muon Real
-                      SusyMatrixMethod::PT      // Muon Fake
-                      );
-  cout<<"Matrix method initialized: "<<endl;
+  initMatrixTool();
   bookFakeHisto();
-  dump.open("fakeDump.txt");
 }
 //----------------------------------------------------------
 Bool_t MatrixPrediction::Process(Long64_t entry)
@@ -275,5 +263,26 @@ MatrixPair MatrixPrediction::getMatrixPair(const LeptonVector &baseLeps)
   if(!l0_tight && l1_tight)  return MP_LT;
   if(!l0_tight && !l1_tight) return MP_LL;
   return MP_N;
+}
+//----------------------------------------------------------
+MatrixPrediction& MatrixPrediction::setMatrixFilename(const std::string filename)
+{
+  if(!fileExists(filename))
+    cout<<"MatrixPrediction::setMatrixFilename: invalid file '"<<filename<<"'"<<endl
+        <<"\t"<<"something will go wrong"<<endl;
+  m_matrixFilename = filename;
+  return *this;
+}
+//----------------------------------------------------------
+bool MatrixPrediction::initMatrixTool()
+{
+  // Load the matrix method package
+  m_matrix = new SusyMatrixMethod::DiLeptonMatrixMethod();
+  return m_matrix->configure(m_matrixFilename,
+                             SusyMatrixMethod::PT,     // Electron Real
+                             SusyMatrixMethod::PT,     // Electron Fake
+                             SusyMatrixMethod::PT,     // Muon Real
+                             SusyMatrixMethod::PT      // Muon Fake
+                             );
 }
 //----------------------------------------------------------

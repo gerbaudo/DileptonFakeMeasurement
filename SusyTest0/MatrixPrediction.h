@@ -63,12 +63,14 @@ class MatrixPrediction : public SusyPlotter
     float getFakeWeight(const LeptonVector &baseLeps, SusyMatrixMethod::FAKE_REGION region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NONE);
     float getRFWeight(const LeptonVector &baseLeps, SusyMatrixMethod::FAKE_REGION region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NONE);
     MatrixPair getMatrixPair(const LeptonVector &baseLeps); //!< Get the Matrix Pair type
-    ofstream dump;
-    ClassDef(MatrixPrediction, 1);
+    MatrixPrediction& setMatrixFilename(const std::string filename); // to be called before Begin
+    ClassDef(MatrixPrediction, 2);
 
   protected:
     std::vector<uint> m_matrixSys;      // systematics to process
     SusyMatrixMethod::DiLeptonMatrixMethod* m_matrix;
+    std::string m_matrixFilename;
+    bool initMatrixTool();
     // Histograms
 #define FAKEHIST( name ) hf_ ## name[Ch_N][PR_N][MP_N][WTog_N][SusyMatrixMethod::SYS_N_USER];
     TH1F* FAKEHIST( ll_M );
