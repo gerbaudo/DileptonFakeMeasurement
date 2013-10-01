@@ -296,10 +296,11 @@ void SusyPlotter::Terminate()
 //----------------------------------------------------------
 SusyPlotter& SusyPlotter::setOutputFilename(const std::string &name)
 {
-  if(string::npos==name.find(".root"))
-    cout<<"SusyPlotter::setOutputFilename('"<<name<<"')"
-        <<" Warning! not a root file."<<endl;
-  m_histFileName = name;
+  bool invalidFilename(name.size()<1 || string::npos==name.find(".root"));
+  if(invalidFilename)
+    cout<<"Warning! SusyPlotter::setOutputFilename('"<<name<<"')"<<" invalid filename."<<endl
+        <<"\t using default value '"<<m_histFile<<"'"<<endl;
+  else m_histFileName = name;
   return *this;
 }
 //-----------------------------------------
