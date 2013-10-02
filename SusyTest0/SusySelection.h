@@ -60,6 +60,7 @@ class SusySelection : public SusyNtAna
     double susynt; // from SusyNtTools::getEventWeight: includes gen, pu, xs, lumi, sumw
     double gen, pileup, norm; // breakdown of the above; norm is xs*lumi/sumw
     double lepSf, btag, trigger, qflip, fake; // factors that we compute, not from upstream
+    std::string str() const;
   };
  public:
     SusySelection();

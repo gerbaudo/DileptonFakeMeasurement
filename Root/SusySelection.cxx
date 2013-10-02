@@ -2,7 +2,7 @@
 #include <cmath> // isnan
 #include <cfloat> // FLT_MAX, FLT_MIN
 #include <iomanip> // setw, setprecision
-#include <sstream>
+#include <sstream>      // std::ostringstream
 #include "TCanvas.h"
 #include "SusyTest0/SusySelection.h"
 #include "SusyTest0/SusyPlotter.h"
@@ -14,6 +14,18 @@
 using namespace std;
 using namespace Susy;
 
+std::string SusySelection::WeightComponents::str() const
+{
+  std::ostringstream oss;
+  oss<<" susynt: "<<susynt
+     <<" lepSf: "<<lepSf
+     <<" btag: "<<btag
+     <<" trigger: "<<trigger
+     <<" qflip: "<<qflip
+     <<" fake: "<<fake;
+  return oss.str();
+}
+//-----------------------------------------
 SusySelection::SusySelection() :
   m_susyObj(NULL),
   m_xsReader(NULL),
