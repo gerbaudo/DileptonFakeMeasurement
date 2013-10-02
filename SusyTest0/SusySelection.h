@@ -18,8 +18,8 @@
 #include "SusyNtuple/SusyDefs.h"
 
 #include "SUSYTools/SUSYObjDef.h"
-
 #include "SusyXSReader/XSReader.h"
+#include "SusyTest0/ProgressPrinter.h"
 
 #include <fstream>
 
@@ -147,6 +147,7 @@ class SusySelection : public SusyNtAna
     TLorentzVector      m_unsmeared_lv1; //! see above
     Met                 m_unsmeared_met; //! cached met before charge-flip smearing
     WeightComponents    m_weightComponents;
+    susy::ProgressPrinter m_printer;
     // Event counters
     float n_readin          [kWeightTypesN]; // [weight type]
     float n_pass_Grl        [kWeightTypesN];
