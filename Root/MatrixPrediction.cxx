@@ -1,7 +1,10 @@
-#include <iomanip>
-#include "SusyNtuple/SusyDefs.h"
 #include "SusyTest0/MatrixPrediction.h"
+
+#include "SusyNtuple/SusyDefs.h"
 #include "SusyTest0/utils.h"
+
+#include <iomanip>
+#include <sstream>      // std::ostringstream
 
 using namespace std;
 using namespace Susy;
@@ -57,17 +60,8 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   m_weightComponents.fake = getFakeWeight(l, reg, metRel, sys);
   bool allowQflip(false);
   bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
-  if(m_dbg>3) {
-    DiLepEvtType ll(getDiLepEvtType(l));
-    bool ee(ll==ET_ee), mm(ll==ET_mm);
-    if(passSrSS)
-      cout<<"MatrixPrediction passSrSS("<<(passSrSS?"true":"false")<<")"
-          <<" run "<<nt.evt()->run<<" evt "<<nt.evt()->event<<" "<<(ee?"ee":(mm?"mm":"em"))
-          <<" l0: pt="<<l[0]->Pt()<<" eta="<<l[0]->Eta()
-          <<" l1: pt="<<l[1]->Pt()<<" eta="<<l[1]->Eta()
-          <<" weight="<<m_weightComponents.fake
-          <<endl;
-  }
+  DiLepEvtType ll(getDiLepEvtType(l));
+  if(m_dbg>3) cout<<eventDetails(passSrSS, *nt.evt(), ll, l)<<endl;
   if(!passSrSS) return false;
   return kTRUE;
 }
@@ -277,5 +271,33 @@ bool MatrixPrediction::initMatrixTool()
                              SusyMatrixMethod::PT,     // Muon Real
                              SusyMatrixMethod::PT      // Muon Fake
                              );
+}
+//----------------------------------------------------------
+std::string MatrixPrediction::dilepDetails(const Susy::Event &event,
+                                           const DiLepEvtType &ll,
+                                           const LeptonVector &ls)
+{
+  bool ee(ll==ET_ee), mm(ll==ET_mm);
+  const Lepton *l0(ls.size()>0 ? ls[0] : NULL), *l1(ls.size()>1 ? ls[1] : NULL);
+  float l0pt(l0 ? l0->Pt() : 0.0), l0eta(l0 ? l1->Eta() : 0.0);
+  float l1pt(l1 ? l1->Pt() : 0.0), l1eta(l1 ? l1->Eta() : 0.0);
+  std::ostringstream oss;
+  oss<<"run "<<event.run
+     <<" evt "<<event.event
+     <<" "<<(ee?"ee":(mm?"mm":"em"))
+     <<" l0: pt="<<l0pt<<" eta="<<l0eta
+     <<" l1: pt="<<l1pt<<" eta="<<l1eta;
+  return oss.str();
+}
+//----------------------------------------------------------
+std::string MatrixPrediction::eventDetails(bool passSrSs, const Susy::Event &event,
+                                           const DiLepEvtType &ll,
+                                           const LeptonVector &ls)
+{
+  std::ostringstream oss;
+  oss<<"MatrixPrediction passSrSs("<<(passSrSs?"true":"false")<<")"
+     <<" "<<dilepDetails(event, ll, ls)
+     <<" weight="<<m_weightComponents.fake;
+  return oss.str();
 }
 //----------------------------------------------------------
