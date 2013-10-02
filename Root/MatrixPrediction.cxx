@@ -76,66 +76,44 @@ void MatrixPrediction::Terminate()
 void MatrixPrediction::bookFakeHisto()
 {
   m_histFile->cd();  // Histogram file from SusyPlotter
-  for(uint iPR=0; iPR<PR_N; ++iPR){ // Plot Region names
+  for(uint iPR=0; iPR<PR_N; ++iPR){ // Plot Region
     string PR = PRNames[iPR];
     //if( !(iPR == PR_VR1 || iPR == PR_VR3) ) continue;
-    for(uint iCh=0; iCh<Ch_N; ++iCh){ // lepton channel loop
+    for(uint iCh=0; iCh<Ch_N; ++iCh){ // lepton channel
       string chan = chanNames[iCh];
-      for(uint iMP=0; iMP<MP_N; ++iMP){
+      for(uint iMP=0; iMP<MP_N; ++iMP){  // matrix pairs
         string MP = MPNames[iMP];
-        for(uint iWT=0; iWT<WTog_N; ++iWT){
+        for(uint iWT=0; iWT<WTog_N; ++iWT){ // weight toggle
           string WT = WTNames[iWT];
           for(uint iSYS=0; iSYS<m_systs.size(); ++iSYS){
             string SYS = m_systNames.at(iSYS);
             string base = PR+"_"+chan+"_"+MP+"_"+WT+"_"+SYS;
-            // Preprocessor convenience: make a histogram by name (leave off the "h_") and binning
-            #define NEWHIST(name, xLbl, nbin, min, max)			\
-	      do{							\
-		hf_ ## name[iCh][iPR][iMP][iWT][iSYS] = new TH1F((base+"_"+#name).c_str(), #name ";" xLbl, nbin, min, max); \
-		hf_ ## name[iCh][iPR][iMP][iWT][iSYS]->Sumw2();		\
-	      }while(0)
+// Preprocessor convenience: make a histogram by name (leave off the "h_") and binning
+#define NEWHIST(name, xLbl, nbin, min, max)                               \
+do{                                                                       \
+  hf_ ## name[iCh][iPR][iMP][iWT][iSYS]                                   \
+    = new TH1F((base+"_"+#name).c_str(), #name ";" xLbl, nbin, min, max); \
+  hf_ ## name[iCh][iPR][iMP][iWT][iSYS]->Sumw2();                         \
+ }while(0)
 
-            #define NEWHIST2(name, xLbl, nbin, min, max)			\
-	      do{							\
-		hf_ ## name[iCh][iPR][iMP][iWT][iSYS] = new TH2F((base+"_"+#name).c_str(), #name ";" xLbl, nbin, min, max,nbin,min,max); \
-		hf_ ## name[iCh][iPR][iMP][iWT][iSYS]->Sumw2();		\
-	      }while(0)
-
-            #define NEWVARHIST(name, xLbl, nbin, bins)				\
-	      do{							\
-		hf_ ## name[iCh][iPR][iMP][iWT][iSYS] = new TH1F((base+"_"+#name).c_str(), #name ";" xLbl, nbin, bins); \
-		hf_ ## name[iCh][iPR][iMP][iWT][iSYS]->Sumw2();		\
-	      }while(0)
-
-            // Lepton Kin
-            NEWHIST(l0_pt, "Lepton P_{T}", nptbins, ptmin, ptmax);
-            NEWHIST(l1_pt, "Lepton P_{T}", nptbins, ptmin, ptmax);
-            // Mass
-            NEWHIST(ll_M, "m(ll)", nmassbins, massmin, massmax);
-            // Met
-            NEWHIST(met, "#slash{E}_{T}", nptbins, ptmin, ptmax);
-            NEWHIST(metrel, "#slash{E}^{rel}_{T}", nptbins, ptmin, ptmax);
-            // One bin
-            NEWHIST(onebin, "onebin", 1, -0.5, 0.5);
-            // event weight
-            NEWHIST(evt_weight, "evt_weight", 5000, -5, 5);
-            // l0 Pt vs l1 Pt
-            NEWHIST2(pt0vspt1, "pt0vspt1", nptbins, ptmin, ptmax);
-            // Mt plots
-            NEWHIST(met_l0_Mt, "met_l0_Mt", nmassbins, massmin, massmax);
-            NEWHIST(met_l1_Mt, "met_l1_Mt", nmassbins, massmin, massmax);
-            // Jet plots
-            NEWHIST(njets, "njets", 5, -0.5, 4.5);
-            NEWHIST(bjet_pt, "bjet_pt", nptbins, ptmin, ptmax);
-            NEWHIST(ljet_pt, "ljet_pt", nptbins, ptmin, ptmax);
-           #undef NEWHIST
-           #undef NEWHIST2
-           #undef NEWVARHIST
-          }// end loop over systemaitcs
-        }// end loop over weight toggle
-      }// end loop over Matrix Pairs
-    }// end loop over Channel
-  }// end loop over plot regions
+            NEWHIST(l0_pt,      "Lepton P_{T}",        nptbins,   ptmin,   ptmax); // Lepton Kin
+            NEWHIST(l1_pt,      "Lepton P_{T}",        nptbins,   ptmin,   ptmax);
+            NEWHIST(ll_M,       "m(ll)",               nmassbins, massmin, massmax); // Mass
+            NEWHIST(met,        "#slash{E}_{T}",       nptbins,   ptmin,   ptmax);  // Met
+            NEWHIST(metrel,     "#slash{E}^{rel}_{T}", nptbins,   ptmin,   ptmax);
+            NEWHIST(onebin,     "onebin",              1,         -0.5,    0.5);
+            NEWHIST(evt_weight, "evt_weight",          5000,      -5,      5);
+            NEWHIST(met_l0_Mt,  "met_l0_Mt",           nmassbins, massmin, massmax); // Mt plots
+            NEWHIST(met_l1_Mt,  "met_l1_Mt",           nmassbins, massmin, massmax);
+            NEWHIST(njets,      "njets",               5,         -0.5,    4.5); // Jet plots
+            NEWHIST(bjet_pt,    "bjet_pt",             nptbins,   ptmin,   ptmax);
+            NEWHIST(ljet_pt,    "ljet_pt",             nptbins,   ptmin,   ptmax);
+#undef NEWHIST
+          }// end for(iSYS)
+        }// end for(iWT)
+      }// end for(iMP)
+    }// end for(iCh)
+  }// end for(iPR
 }
 //----------------------------------------------------------
 void MatrixPrediction::fillFakeHistos(const LeptonVector &baseLeps, const JetVector &jets,
@@ -148,36 +126,19 @@ void MatrixPrediction::fillFakeHistos(const LeptonVector &baseLeps, const JetVec
   int mp = getMatrixPair(baseLeps);
   const Lepton* l0 = baseLeps[0];
   const Lepton* l1 = baseLeps[1];
-
-  #define FILL(h, var)					\
-    do{							\
-      float max   = h[ch][PR][mp][WT_ON][sys]->GetXaxis()->GetXmax();	\
-      float xfill = var > max ? max - 1e-4 : var;			\
-      h[ch][PR][mp][WT_ON][sys]->Fill(xfill,weight);			\
-      h[Ch_all][PR][mp][WT_ON][sys]->Fill(xfill,weight);		\
-      h[ch][PR][mp][WT_OFF][sys]->Fill(xfill,1.0);			\
-      h[Ch_all][PR][mp][WT_OFF][sys]->Fill(xfill,1.0);			\
-      h[ch][PR][MP_ALL][WT_ON][sys]->Fill(xfill,weight);		\
-      h[Ch_all][PR][MP_ALL][WT_ON][sys]->Fill(xfill,weight);		\
-      h[ch][PR][MP_ALL][WT_OFF][sys]->Fill(xfill,1.0);			\
-      h[Ch_all][PR][MP_ALL][WT_OFF][sys]->Fill(xfill,1.0);		\
-    }while(0)
-
-  #define FILL2(h, varx, vary)				\
-    do{									\
-      float maxx   = h[ch][PR][mp][WT_ON][sys]->GetXaxis()->GetXmax();	\
-      float xfill  = varx > maxx ? maxx - 1e-4 : varx;			\
-      float maxy   = h[ch][PR][mp][WT_ON][sys]->GetYaxis()->GetXmax();	\
-      float yfill  = vary > maxy ? maxy - 1e-4 : vary;			\
-      h[ch][PR][mp][WT_ON][sys]->Fill(xfill,yfill,weight);			\
-      h[Ch_all][PR][mp][WT_ON][sys]->Fill(xfill,yfill,weight);		\
-      h[ch][PR][mp][WT_OFF][sys]->Fill(xfill,yfill,1.0);			\
-      h[Ch_all][PR][mp][WT_OFF][sys]->Fill(xfill,yfill,1.0);			\
-      h[ch][PR][MP_ALL][WT_ON][sys]->Fill(xfill,yfill,weight);		\
-      h[Ch_all][PR][MP_ALL][WT_ON][sys]->Fill(xfill,yfill,weight);		\
-      h[ch][PR][MP_ALL][WT_OFF][sys]->Fill(xfill,yfill,1.0);			\
-      h[Ch_all][PR][MP_ALL][WT_OFF][sys]->Fill(xfill,yfill,1.0);		\
-    }while(0)
+#define FILL(h, var)            \
+do{                                                                   \
+  float max   = h[ch][PR][mp][WT_ON][sys]->GetXaxis()->GetXmax();       \
+  float xfill = var > max ? max - 1e-4 : var;                           \
+  h[ch][PR][mp][WT_ON][sys]->Fill(xfill,weight);                        \
+  h[Ch_all][PR][mp][WT_ON][sys]->Fill(xfill,weight);                    \
+  h[ch][PR][mp][WT_OFF][sys]->Fill(xfill,1.0);                          \
+  h[Ch_all][PR][mp][WT_OFF][sys]->Fill(xfill,1.0);                      \
+  h[ch][PR][MP_ALL][WT_ON][sys]->Fill(xfill,weight);                    \
+  h[Ch_all][PR][MP_ALL][WT_ON][sys]->Fill(xfill,weight);                \
+  h[ch][PR][MP_ALL][WT_OFF][sys]->Fill(xfill,1.0);                      \
+  h[Ch_all][PR][MP_ALL][WT_OFF][sys]->Fill(xfill,1.0);                  \
+ }while(0)
 
   float metrel = getMetRel(met, baseLeps, jets);
   FILL( hf_l0_pt, l0->Pt() );
@@ -187,7 +148,6 @@ void MatrixPrediction::fillFakeHistos(const LeptonVector &baseLeps, const JetVec
   FILL( hf_metrel, metrel);
   FILL( hf_onebin, 0. );
   FILL( hf_evt_weight, weight);
-  FILL2( hf_pt0vspt1, l0->Pt(), l1->Pt() );
   FILL( hf_njets, jets.size() );
   for(uint ij=0; ij<jets.size(); ++ij){
     Jet* jet = jets.at(ij);
@@ -195,7 +155,6 @@ void MatrixPrediction::fillFakeHistos(const LeptonVector &baseLeps, const JetVec
     if( isCentralLightJet(jet) ) FILL(hf_ljet_pt, jet->Pt());
   }
   #undef FILL
-  #undef FILL2
 }
 //----------------------------------------------------------
 float MatrixPrediction::getFakeWeight(const LeptonVector &baseLeps,
