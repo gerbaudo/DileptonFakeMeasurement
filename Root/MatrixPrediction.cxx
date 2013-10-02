@@ -36,21 +36,14 @@ void MatrixPrediction::Begin(TTree* /*tree*/)
 //----------------------------------------------------------
 Bool_t MatrixPrediction::Process(Long64_t entry)
 {
+  m_printer.countAndPrint(cout);
   GetEntry(entry);
   clearObjects();
   cacheStaticWeightComponents();
-  static Long64_t chainEntry = -1;
-  chainEntry++;
-  if(m_dbg || chainEntry%50000==0)
-  {
-    cout << "**** Processing entry " << setw(6) << chainEntry
-         << " run " << setw(6) << nt.evt()->run
-         << " event " << setw(7) << nt.evt()->event << " ****" << endl;
-  }
+  increment(n_readin, m_weightComponents);
   bool removeLepsFromIso(false);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if( !selectEvent() )              return kTRUE;
-
   SusyMatrixMethod::FAKE_REGION reg = SusyMatrixMethod::FR_SRDavide;
   SusyMatrixMethod::SYSTEMATIC  sys = SusyMatrixMethod::SYS_NONE;
   const Met*          m = m_met;
