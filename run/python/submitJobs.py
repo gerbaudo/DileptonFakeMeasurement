@@ -38,6 +38,8 @@ parser.add_option("-S", "--submit", dest="submit", action='store_true', default=
                   help="submit jobs (default dry run)")
 parser.add_option("-t", "--tag", dest="tag", default=defaultBatchTag,
                   help="batch tag (default '%s')" % defaultBatchTag)
+parser.add_option("--alsoplaceholders", action="store_true", default=False,
+                  help="consider dummy samples as well (skip them by default)")
 parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
                   help="print more details about what is going on")
 (options, args) = parser.parse_args()
@@ -52,6 +54,7 @@ susysel      = options.susysel
 fakepred     = options.fakepred
 fakeprob     = options.fakeprob
 fakerate     = options.fakerate
+alsoph       = options.alsoplaceholders
 verbose      = options.verbose
 
 if not [susyplot, susysel, fakeprob, fakerate, fakepred].count(True)==1 :
@@ -82,7 +85,7 @@ outScriptTemplate = scriptDir+'/%(sample)s.sh'
 outRootTemplate = "%(outdir)s/%(sample)s_%(tag)s.root"
 outLogTemplate = "%(logdir)s/%(sample)s_%(tag)s.log"
 
-sampleNames   = [d.name for d in datasets if not d.placeholder]
+sampleNames   = [d.name for d in datasets if not d.placeholder or alsoph]
 sampleNames   = filterWithRegexp(sampleNames, regexp)
 excludedNames = [] if exclude is None else filterWithRegexp(sampleNames, exclude)
 sampleNames   = [s for s in sampleNames if s not in excludedNames]
