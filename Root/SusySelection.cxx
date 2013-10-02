@@ -47,20 +47,12 @@ void SusySelection::Begin(TTree* /*tree*/)
 //-----------------------------------------
 Bool_t SusySelection::Process(Long64_t entry)
 {
+  m_printer.countAndPrint(cout);
   GetEntry(entry);
   clearObjects();
   m_ET = ET_Unknown;
-  m_chainEntry++;
   m_weightComponents.reset();
   increment(n_readin, m_weightComponents);
-  if(m_dbg || m_chainEntry%50000==0)
-  {
-    cout<<"****"
-        <<" Processing entry "<<setw(6)<<m_chainEntry
-        <<" run "             <<setw(6)<<nt.evt()->run
-        <<" event "           <<setw(7)<<nt.evt()->event
-        <<" ****"<<endl;
-  }
   bool removeLepsFromIso(false), allowQflip(true);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if(!selectEvent()) return kTRUE;
