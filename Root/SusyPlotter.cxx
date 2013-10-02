@@ -96,146 +96,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
   SusySelection::Begin(0);
   if(m_dbg) cout << "SusyPlotter::Begin" << endl;
   setSysts();
-  m_histFile = new TFile(m_histFileName.c_str(), "recreate");
-  TH1::SetDefaultSumw2(true);
-  m_histFile->cd();
-  //m_histFile->mkdir( sysNames[sys].c_str() ) -> cd();
-  for(uint iPR=0; iPR<PR_N; ++iPR){   // for(Plot Region)
-    string PR = PRNames[iPR];
-    for(uint iCh=0; iCh<Ch_N; ++iCh){ // for(lepton channel)
-      string chan = chanNames[iCh];
-      for(uint iSys=0; iSys<m_systs.size(); ++iSys){
-        string sys = m_systNames.at(iSys);
-
-	// Preprocessor convenience
-	// make a histogram by name (leave off the "h_") and binning
-        #define NEWHIST(name, xLbl, nbin, min, max)				\
-	  do{								\
-	    h_ ## name[iCh][iPR][iSys] = new TH1F((PR+"_"+chan+"_"+#name+"_"+sys).c_str(), #name ";" xLbl, nbin, min, max); \
-	    h_ ## name[iCh][iPR][iSys]->Sumw2();				\
-	  }while(0)
-        #define NEWHIST2(name, xLbl, nbin, min, max)				\
-	  do{								\
-	    h_ ## name[iCh][iPR][iSys] = new TH2F((PR+"_"+chan+"_"+#name+"_"+sys).c_str(), #name ";" xLbl, nbin, min, max, nbin, min, max); \
-	    h_ ## name[iCh][iPR][iSys]->Sumw2();				\
-	  }while(0)
-
-        #define NEWVARHIST(name, xLbl, nbin, bins)				\
-	  do{								\
-	    h_ ## name[iCh][iPR][iSys] = new TH1F((PR+"_"+chan+"_"+#name+"_"+sys).c_str(), #name ";" xLbl, nbin, bins); \
-	    h_ ## name[iCh][iPR][iSys]->Sumw2();				\
-	  }while(0)
-
-         // Pt Plots
-	NEWHIST(l0_pt, "l_{0} P_{T}", nptbins, ptmin, ptmax);
-	NEWHIST(j0_pt, "j_{0} P_{T}", nptbins, ptmin, ptmax);
-	NEWHIST(l1_pt, "l_{1} P_{T}", nptbins, ptmin, ptmax);
-	NEWHIST(j1_pt, "j_{1} P_{T}", nptbins, ptmin, ptmax);
-	NEWHIST(e_pt, "Electron P_{T}", nptbins, ptmin, ptmax);
-	NEWHIST(m_pt, "Muon P_{T}", nptbins, ptmin, ptmax);
-	NEWHIST(ll_pt, "ll P_{T}", nptbins, ptmin, ptmax);
-	NEWHIST(tot_pt, "ll+jj+met P_{T}", nptbins, ptmin, ptmax);
-
-
-	// Eta Plots
-	NEWHIST(l0_eta, "l_{0} #eta", netabins, etamin, etamax);
-	NEWHIST(j0_eta, "j_{0} #eta", netabins, etamin, etamax);
-	NEWHIST(l1_eta, "l_{1} #eta", netabins, etamin, etamax);
-	NEWHIST(j1_eta, "j_{1} #eta", netabins, etamin, etamax);
-	NEWHIST(jj_deta,"#Delta #eta (j,j)", netabins, etamin, etamax);
-	NEWHIST(jj_drap,"#Delta y (j,j)", netabins, etamin, etamax);
-
-	NEWHIST(e_eta, "Electron #eta", netabins, etamin, etamax);
-	NEWHIST(m_eta, "Muon #eta", netabins, etamin, etamax);
-
-	// Mass plots
-	NEWHIST(ll_M,        "m(ll)",           nmassbins, massmin, massmax);
-	NEWHIST(llj_M,       "m(llj)",          nmassbins, massmin, massmax);
-	NEWHIST(met_j_M,     "m(met,j)",        nmassbins, massmin, massmax);
-	NEWHIST(met_ll_M,    "m(met,ll)",       nmassbins, massmin, massmax);
-	NEWHIST(met_j_ll_M,  "m(met,j,ll)",     nmassbins, massmin, massmax);
-	NEWHIST(met_j_Mt,    "m_{T}(met,j)",    nmassbins, massmin, massmax);
-	NEWHIST(met_ll_Mt,   "m_{T}(met,ll)",   nmassbins, massmin, massmax);
-	NEWHIST(met_j_ll_Mt, "m_{T}(met,j,ll)", nmassbins, massmin, massmax);
-	NEWHIST(met_ll_Mt2,  "m_{T2}(met,l,l)", nmassbins, massmin, massmax);
-	NEWHIST(jj_M,        "m(jj)",           nmassbins, massmin, massmax);
-
-	NEWHIST(mt_ll_met,       "m_{T}(ll,met)", nmassbins, massmin, massmax);
-	NEWHIST(mt_l0_met,       "m_{T}(l_{0}, met)", nmassbins, massmin, massmax);
-	NEWHIST(mt_l1_met,       "m_{T}(l_{1}, met)", nmassbins, massmin, massmax);
-	NEWHIST(mt_l_met_min,    "m_{T}^{min}(l, met)", nmassbins, massmin, massmax);
-	NEWHIST(mtautau_l0l1met, "m_{#tau#tau}(l0,l1,met)", nmassbins+1, massmin-((massmax-massmin)/nmassbins), massmax); // need a negative bin
-	NEWHIST(mct_top_tag,     "m_{CT} top tag", 2, -0.5, +1.5);
-	NEWHIST(sumJ0J1_mv1tag,  "MV1(j0) + MV1(j1)", 50, +0.0, +0.5);
-	NEWHIST(numNeutrinoSol,  "Number of neutrino solutions (2l+2j)", 9, -0.5, +8.5);
-
-
-	// Met plots
-	NEWHIST(met, "#slash{E}_{T}", nptbins, ptmin, ptmax);
-	NEWHIST(metrel, "#slash{E}^{rel}_{T}", nptbins, ptmin, ptmax);
-
-	// njet plots
-	NEWHIST(njets, "# jets", njetbins, njetmin, njetmax);
-	NEWHIST(nbasejets, "# base jets", njetbins, njetmin, njetmax);
-	NEWHIST(njets_pos, "# jets leading pos", njetbins, njetmin, njetmax);
-	NEWHIST(njets_neg, "# jets leading neg", njetbins, njetmin, njetmax);
-	NEWHIST(nbjets, "# b jets", njetbins, njetmin, njetmax);
-	NEWHIST(nfjets, "# f jets", njetbins, njetmin, njetmax);
-
-	// Type and origin
-
-	NEWHIST(l_type, "l_type", nType, Typemin, Typemax);
-	NEWHIST(l_origin, "l_origin", nOrigin, Originmin, Originmax);
-
-	// One bin for counting
-	NEWHIST(onebin, "onebin", 1, -0.5, 0.5);
-
-	// Sum charge
-	NEWHIST(sumQ, "SumQ", 5, -2.5, 2.5);
-
-	NEWHIST(dPhi_llmet_j, "dPhi(llmet,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dR_llmet_j,   "dR(llmet,j)", ndrbins,drmin, drmax);
-
-	NEWHIST(dPhi_met_l0, "dPhi(met,l0)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_met_l1, "dPhi(met,l1)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_met_ll, "dPhi(met,ll)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_met_j,  "dPhi(met,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_ll_j,   "dPhi(ll,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_l0_j,   "dPhi(l0,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_l1_j,   "dPhi(l1,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_l0_l1,  "dPhi(l0,l1)", ndphibins, dphimin, dphimax);
-
-	NEWHIST(dPhi_woSig_llmet_j, "dPhi(llmet,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_woSig_met_l0,  "dPhi(met,l0)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_woSig_met_l1,  "dPhi(met,l1)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_woSig_met_ll,  "dPhi(met,ll)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_woSig_met_j,   "dPhi(met,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_woSig_ll_j,    "dPhi(ll,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_woSig_l0_j,    "dPhi(l0,j)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_woSig_l1_j,    "dPhi(l1,j)", ndphibins, dphimin, dphimax);
-
-	NEWHIST(dPhi_woSig_l0_l1, "dPhi(l0,l1)", ndphibins, dphimin, dphimax);
-
-	NEWHIST(dPhi_ll_jj, "dPhi(ll,jj)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_l0_jj, "dPhi(l0,jj)", ndphibins, dphimin, dphimax);
-	NEWHIST(dPhi_l1_jj, "dPhi(l1,jj)", ndphibins, dphimin, dphimax);
-
-	NEWHIST(dR_l0_l1, "dR(l,l)", ndrbins,drmin, drmax);
-	NEWHIST(dR_ll_jj, "dR(ll,jj)", ndrbins,drmin, drmax);
-
-	NEWHIST(l0_qeta, "l_{0} sign(q) #eta", 2*netabins, -etamax, etamax);
-	NEWHIST(l1_qeta, "l_{1} sign(q) #eta", 2*netabins, -etamax, etamax);
-
-
-	NEWHIST2(l0_l1_pt, "l0 vs l1 pt", nptbins, ptmin, ptmax);
-
-        #undef NEWHIST
-        #undef NEWHIST2
-        #undef NEWVARHIST
-
-      }// end loop over systematics
-    }// end loop over channels
-  }// end loop over Plot regions
+  initHistos();
 }
 //-----------------------------------------
 Bool_t SusyPlotter::Process(Long64_t entry)
@@ -456,5 +317,149 @@ void SusyPlotter::setSysts()
   } else {
     cout<<"SusyPlotter::setSysts() : not implemented (DG Jan2013)"<<endl;
   }
+}
+//-----------------------------------------
+void SusyPlotter::initHistos()
+{
+  m_histFile = new TFile(m_histFileName.c_str(), "recreate");
+  TH1::SetDefaultSumw2(true);
+  m_histFile->cd();
+  //m_histFile->mkdir( sysNames[sys].c_str() ) -> cd();
+  for(uint iPR=0; iPR<PR_N; ++iPR){   // for(Plot Region)
+    string PR = PRNames[iPR];
+    for(uint iCh=0; iCh<Ch_N; ++iCh){ // for(lepton channel)
+      string chan = chanNames[iCh];
+      for(uint iSys=0; iSys<m_systs.size(); ++iSys){
+        string sys = m_systNames.at(iSys);
+
+	// Preprocessor convenience
+	// make a histogram by name (leave off the "h_") and binning
+        #define NEWHIST(name, xLbl, nbin, min, max)				\
+	  do{								\
+	    h_ ## name[iCh][iPR][iSys] = new TH1F((PR+"_"+chan+"_"+#name+"_"+sys).c_str(), #name ";" xLbl, nbin, min, max); \
+	    h_ ## name[iCh][iPR][iSys]->Sumw2();				\
+	  }while(0)
+        #define NEWHIST2(name, xLbl, nbin, min, max)				\
+	  do{								\
+	    h_ ## name[iCh][iPR][iSys] = new TH2F((PR+"_"+chan+"_"+#name+"_"+sys).c_str(), #name ";" xLbl, nbin, min, max, nbin, min, max); \
+	    h_ ## name[iCh][iPR][iSys]->Sumw2();				\
+	  }while(0)
+
+        #define NEWVARHIST(name, xLbl, nbin, bins)				\
+	  do{								\
+	    h_ ## name[iCh][iPR][iSys] = new TH1F((PR+"_"+chan+"_"+#name+"_"+sys).c_str(), #name ";" xLbl, nbin, bins); \
+	    h_ ## name[iCh][iPR][iSys]->Sumw2();				\
+	  }while(0)
+
+         // Pt Plots
+	NEWHIST(l0_pt, "l_{0} P_{T}", nptbins, ptmin, ptmax);
+	NEWHIST(j0_pt, "j_{0} P_{T}", nptbins, ptmin, ptmax);
+	NEWHIST(l1_pt, "l_{1} P_{T}", nptbins, ptmin, ptmax);
+	NEWHIST(j1_pt, "j_{1} P_{T}", nptbins, ptmin, ptmax);
+	NEWHIST(e_pt, "Electron P_{T}", nptbins, ptmin, ptmax);
+	NEWHIST(m_pt, "Muon P_{T}", nptbins, ptmin, ptmax);
+	NEWHIST(ll_pt, "ll P_{T}", nptbins, ptmin, ptmax);
+	NEWHIST(tot_pt, "ll+jj+met P_{T}", nptbins, ptmin, ptmax);
+
+
+	// Eta Plots
+	NEWHIST(l0_eta, "l_{0} #eta", netabins, etamin, etamax);
+	NEWHIST(j0_eta, "j_{0} #eta", netabins, etamin, etamax);
+	NEWHIST(l1_eta, "l_{1} #eta", netabins, etamin, etamax);
+	NEWHIST(j1_eta, "j_{1} #eta", netabins, etamin, etamax);
+	NEWHIST(jj_deta,"#Delta #eta (j,j)", netabins, etamin, etamax);
+	NEWHIST(jj_drap,"#Delta y (j,j)", netabins, etamin, etamax);
+
+	NEWHIST(e_eta, "Electron #eta", netabins, etamin, etamax);
+	NEWHIST(m_eta, "Muon #eta", netabins, etamin, etamax);
+
+	// Mass plots
+	NEWHIST(ll_M,        "m(ll)",           nmassbins, massmin, massmax);
+	NEWHIST(llj_M,       "m(llj)",          nmassbins, massmin, massmax);
+	NEWHIST(met_j_M,     "m(met,j)",        nmassbins, massmin, massmax);
+	NEWHIST(met_ll_M,    "m(met,ll)",       nmassbins, massmin, massmax);
+	NEWHIST(met_j_ll_M,  "m(met,j,ll)",     nmassbins, massmin, massmax);
+	NEWHIST(met_j_Mt,    "m_{T}(met,j)",    nmassbins, massmin, massmax);
+	NEWHIST(met_ll_Mt,   "m_{T}(met,ll)",   nmassbins, massmin, massmax);
+	NEWHIST(met_j_ll_Mt, "m_{T}(met,j,ll)", nmassbins, massmin, massmax);
+	NEWHIST(met_ll_Mt2,  "m_{T2}(met,l,l)", nmassbins, massmin, massmax);
+	NEWHIST(jj_M,        "m(jj)",           nmassbins, massmin, massmax);
+
+	NEWHIST(mt_ll_met,       "m_{T}(ll,met)", nmassbins, massmin, massmax);
+	NEWHIST(mt_l0_met,       "m_{T}(l_{0}, met)", nmassbins, massmin, massmax);
+	NEWHIST(mt_l1_met,       "m_{T}(l_{1}, met)", nmassbins, massmin, massmax);
+	NEWHIST(mt_l_met_min,    "m_{T}^{min}(l, met)", nmassbins, massmin, massmax);
+	NEWHIST(mtautau_l0l1met, "m_{#tau#tau}(l0,l1,met)", nmassbins+1, massmin-((massmax-massmin)/nmassbins), massmax); // need a negative bin
+	NEWHIST(mct_top_tag,     "m_{CT} top tag", 2, -0.5, +1.5);
+	NEWHIST(sumJ0J1_mv1tag,  "MV1(j0) + MV1(j1)", 50, +0.0, +0.5);
+	NEWHIST(numNeutrinoSol,  "Number of neutrino solutions (2l+2j)", 9, -0.5, +8.5);
+
+
+	// Met plots
+	NEWHIST(met, "#slash{E}_{T}", nptbins, ptmin, ptmax);
+	NEWHIST(metrel, "#slash{E}^{rel}_{T}", nptbins, ptmin, ptmax);
+
+	// njet plots
+	NEWHIST(njets, "# jets", njetbins, njetmin, njetmax);
+	NEWHIST(nbasejets, "# base jets", njetbins, njetmin, njetmax);
+	NEWHIST(njets_pos, "# jets leading pos", njetbins, njetmin, njetmax);
+	NEWHIST(njets_neg, "# jets leading neg", njetbins, njetmin, njetmax);
+	NEWHIST(nbjets, "# b jets", njetbins, njetmin, njetmax);
+	NEWHIST(nfjets, "# f jets", njetbins, njetmin, njetmax);
+
+	// Type and origin
+
+	NEWHIST(l_type, "l_type", nType, Typemin, Typemax);
+	NEWHIST(l_origin, "l_origin", nOrigin, Originmin, Originmax);
+
+	// One bin for counting
+	NEWHIST(onebin, "onebin", 1, -0.5, 0.5);
+
+	// Sum charge
+	NEWHIST(sumQ, "SumQ", 5, -2.5, 2.5);
+
+	NEWHIST(dPhi_llmet_j, "dPhi(llmet,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dR_llmet_j,   "dR(llmet,j)", ndrbins,drmin, drmax);
+
+	NEWHIST(dPhi_met_l0, "dPhi(met,l0)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_met_l1, "dPhi(met,l1)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_met_ll, "dPhi(met,ll)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_met_j,  "dPhi(met,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_ll_j,   "dPhi(ll,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_l0_j,   "dPhi(l0,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_l1_j,   "dPhi(l1,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_l0_l1,  "dPhi(l0,l1)", ndphibins, dphimin, dphimax);
+
+	NEWHIST(dPhi_woSig_llmet_j, "dPhi(llmet,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_woSig_met_l0,  "dPhi(met,l0)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_woSig_met_l1,  "dPhi(met,l1)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_woSig_met_ll,  "dPhi(met,ll)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_woSig_met_j,   "dPhi(met,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_woSig_ll_j,    "dPhi(ll,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_woSig_l0_j,    "dPhi(l0,j)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_woSig_l1_j,    "dPhi(l1,j)", ndphibins, dphimin, dphimax);
+
+	NEWHIST(dPhi_woSig_l0_l1, "dPhi(l0,l1)", ndphibins, dphimin, dphimax);
+
+	NEWHIST(dPhi_ll_jj, "dPhi(ll,jj)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_l0_jj, "dPhi(l0,jj)", ndphibins, dphimin, dphimax);
+	NEWHIST(dPhi_l1_jj, "dPhi(l1,jj)", ndphibins, dphimin, dphimax);
+
+	NEWHIST(dR_l0_l1, "dR(l,l)", ndrbins,drmin, drmax);
+	NEWHIST(dR_ll_jj, "dR(ll,jj)", ndrbins,drmin, drmax);
+
+	NEWHIST(l0_qeta, "l_{0} sign(q) #eta", 2*netabins, -etamax, etamax);
+	NEWHIST(l1_qeta, "l_{1} sign(q) #eta", 2*netabins, -etamax, etamax);
+
+
+	NEWHIST2(l0_l1_pt, "l0 vs l1 pt", nptbins, ptmin, ptmax);
+
+        #undef NEWHIST
+        #undef NEWHIST2
+        #undef NEWVARHIST
+
+      }// end loop over systematics
+    }// end loop over channels
+  }// end loop over Plot regions
 }
 //-----------------------------------------

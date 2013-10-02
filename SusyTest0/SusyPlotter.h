@@ -38,6 +38,7 @@ class SusyPlotter : public SusySelection
   int getChan(const LeptonVector& leps); // compute lepton channel
   void setSysts(); // get list of systematics to consider; override in SusyMatrixMethod
   void initNames(); // initialize enum literals; should be static, but rootcint cannot deal with it
+  void initHistos();
  public:
   SusyPlotter& setOutputFilename(const std::string &name);
   
