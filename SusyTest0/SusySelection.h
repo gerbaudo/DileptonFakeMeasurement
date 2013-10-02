@@ -141,7 +141,6 @@ class SusySelection : public SusyNtAna
     float               m_w;            // mc weight
     bool                m_useXsReader;  // use SusyXSReader to get the xsec for normalization
     float               m_xsFromReader; // cached xsec from reader
-    DiLepEvtType        m_ET;           // Dilepton event type to store cf
     float               m_qflipProb;     //! charge flip probability
     TLorentzVector      m_unsmeared_lv0; //! cached lepton LV before charge-flip smearing
     TLorentzVector      m_unsmeared_lv1; //! see above

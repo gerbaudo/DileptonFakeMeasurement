@@ -124,7 +124,6 @@ Bool_t TightProbability::Process(Long64_t entry) {
   m_chainEntry++;
   clearObjects();
   cacheStaticWeightComponents();
-  m_ET = ET_Unknown;
   bool removeLepsFromIso(false);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   const LeptonVector &leps = m_baseLeptons;
@@ -135,7 +134,6 @@ Bool_t TightProbability::Process(Long64_t entry) {
   bool passEvent(selectEvent());
   //  cout<<(passEvent ? " passEvent " : "!passEvent\n");
   if(!passEvent) return true;
-  m_ET = getDiLepEvtType(leps);
   //float metRel = getMetRel(met,leps,jets);
   //bool passSr = passSrSs(m_ET, WH_SRSS1, leps, m_signalTaus, m_signalJets2Lep, met);
   //bool passSr(40.0 < metRel && metRel < 100.0);

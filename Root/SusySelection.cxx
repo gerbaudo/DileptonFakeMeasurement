@@ -22,7 +22,6 @@ SusySelection::SusySelection() :
   m_w(1.0),
   m_useXsReader(false),
   m_xsFromReader(-1.0),
-  m_ET(ET_Unknown),
   m_qflipProb(0.0)
 {
   resetAllCounters();
@@ -50,7 +49,6 @@ Bool_t SusySelection::Process(Long64_t entry)
   m_printer.countAndPrint(cout);
   GetEntry(entry);
   clearObjects();
-  m_ET = ET_Unknown;
   cacheStaticWeightComponents();
   increment(n_readin, m_weightComponents);
   bool removeLepsFromIso(false), allowQflip(true);
