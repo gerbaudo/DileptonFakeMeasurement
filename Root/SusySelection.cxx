@@ -51,7 +51,7 @@ Bool_t SusySelection::Process(Long64_t entry)
   GetEntry(entry);
   clearObjects();
   m_ET = ET_Unknown;
-  m_weightComponents.reset();
+  cacheStaticWeightComponents();
   increment(n_readin, m_weightComponents);
   bool removeLepsFromIso(false), allowQflip(true);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
