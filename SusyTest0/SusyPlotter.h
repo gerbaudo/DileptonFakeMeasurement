@@ -7,8 +7,6 @@
 #include "TH1F.h"
 #include "TH2F.h"
 
-#include <iostream>
-
 /*!
     SusyPlotter - class for making analysis histograms
 */
@@ -41,21 +39,6 @@ class SusyPlotter : public SusySelection
   void setSysts(); // get list of systematics to consider; override in SusyMatrixMethod
   void initNames(); // initialize enum literals; should be static, but rootcint cannot deal with it
  public:
-  struct ProgressPrinter {
-    ProgressPrinter(int suppressionFactor=2, int suppressionOffset=300, bool quiet=false):
-      m_suppressionFactor(suppressionFactor),
-      m_suppressionOffset(suppressionOffset),
-      m_eventCounter(0),
-      m_intCounter(1),
-      m_quiet(quiet) {};
-    int m_suppressionFactor;
-    int m_suppressionOffset;
-    Long64_t m_eventCounter;
-    Long64_t m_intCounter;
-    bool m_quiet;
-    void countAndPrint(std::ostream& oo);
-  };
- public:
   SusyPlotter& setOutputFilename(const std::string &name);
   
   ClassDef(SusyPlotter, 1);
@@ -66,7 +49,6 @@ class SusyPlotter : public SusySelection
   std::string         m_histFileName;       // output histo file name
   TFile*              m_histFile;           // output histo file
   bool                m_doFake;             // do Fake estimate
-  ProgressPrinter     m_printer;
 
   // preprocessor convenience - add more indices later
 #define DEFHIST( name ) h_ ## name[Ch_N][PR_N][40/*Guess for # of sys*/];  

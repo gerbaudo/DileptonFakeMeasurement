@@ -18,8 +18,8 @@
 #include "SusyNtuple/SusyDefs.h"
 
 #include "SUSYTools/SUSYObjDef.h"
-
 #include "SusyXSReader/XSReader.h"
+#include "SusyTest0/ProgressPrinter.h"
 
 #include <fstream>
 
@@ -141,12 +141,12 @@ class SusySelection : public SusyNtAna
     float               m_w;            // mc weight
     bool                m_useXsReader;  // use SusyXSReader to get the xsec for normalization
     float               m_xsFromReader; // cached xsec from reader
-    DiLepEvtType        m_ET;           // Dilepton event type to store cf
     float               m_qflipProb;     //! charge flip probability
     TLorentzVector      m_unsmeared_lv0; //! cached lepton LV before charge-flip smearing
     TLorentzVector      m_unsmeared_lv1; //! see above
     Met                 m_unsmeared_met; //! cached met before charge-flip smearing
     WeightComponents    m_weightComponents;
+    susy::ProgressPrinter m_printer;
     // Event counters
     float n_readin          [kWeightTypesN]; // [weight type]
     float n_pass_Grl        [kWeightTypesN];

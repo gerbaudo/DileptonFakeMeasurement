@@ -22,7 +22,6 @@ SusySelection::SusySelection() :
   m_w(1.0),
   m_useXsReader(false),
   m_xsFromReader(-1.0),
-  m_ET(ET_Unknown),
   m_qflipProb(0.0)
 {
   resetAllCounters();
@@ -47,23 +46,17 @@ void SusySelection::Begin(TTree* /*tree*/)
 //-----------------------------------------
 Bool_t SusySelection::Process(Long64_t entry)
 {
+  m_printer.countAndPrint(cout);
   GetEntry(entry);
   clearObjects();
-  m_ET = ET_Unknown;
-  m_chainEntry++;
-  m_weightComponents.reset();
+  cacheStaticWeightComponents();
   increment(n_readin, m_weightComponents);
-  if(m_dbg || m_chainEntry%50000==0)
-  {
-    cout<<"****"
-        <<" Processing entry "<<setw(6)<<m_chainEntry
-        <<" run "             <<setw(6)<<nt.evt()->run
-        <<" event "           <<setw(7)<<nt.evt()->event
-        <<" ****"<<endl;
-  }
   bool removeLepsFromIso(false), allowQflip(true);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if(!selectEvent()) return kTRUE;
+  const JetVector&   bj = m_baseJets;
+  const LeptonVector& l = m_signalLeptons;
+  if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
   passSrSs(WH_SRSS1, m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip);
 
   return kTRUE;

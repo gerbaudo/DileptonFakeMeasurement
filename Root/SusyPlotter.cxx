@@ -1,6 +1,4 @@
 #include <cassert>
-#include <ctime>
-#include <iomanip>
 
 #include "SusyTest0/SusyPlotter.h"
 
@@ -457,21 +455,6 @@ void SusyPlotter::setSysts()
     m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_NONE]);
   } else {
     cout<<"SusyPlotter::setSysts() : not implemented (DG Jan2013)"<<endl;
-  }
-}
-//-----------------------------------------
-void SusyPlotter::ProgressPrinter::countAndPrint(std::ostream& oo)
-{
-  m_eventCounter += 1;
-  if(m_eventCounter!=m_intCounter) return;
-  m_intCounter = m_suppressionFactor*m_intCounter;
-  int colWidth(16), stampWidth(48);
-  if(!m_quiet && (m_intCounter==m_suppressionFactor || m_intCounter>m_suppressionOffset)) {
-    std::time_t t(std::time(NULL));
-    oo<<""
-      <<"Entry "<<std::setw(colWidth)<<m_eventCounter
-      <<" "<<std::setw(stampWidth)<<std::asctime(std::localtime(&t))
-      <<std::endl;
   }
 }
 //-----------------------------------------
