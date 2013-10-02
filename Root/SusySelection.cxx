@@ -54,6 +54,9 @@ Bool_t SusySelection::Process(Long64_t entry)
   bool removeLepsFromIso(false), allowQflip(true);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if(!selectEvent()) return kTRUE;
+  const JetVector&   bj = m_baseJets;
+  const LeptonVector& l = m_signalLeptons;
+  if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
   passSrSs(WH_SRSS1, m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip);
 
   return kTRUE;
