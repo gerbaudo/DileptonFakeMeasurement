@@ -309,13 +309,20 @@ int SusyPlotter::getChan(const LeptonVector& leps)
 //-----------------------------------------
 void SusyPlotter::setSysts()
 {
-  if(true) { // (!m_doFake) { // DG cleanup
+  if(!m_doFake) {
     m_systs.push_back(NtSys_NOM);  m_systNames.push_back(SusyNtSystNames[NtSys_NOM]);
-  } else if(m_doFake) {
-    m_systs.push_back(SusyMatrixMethod::SYS_NONE);
-    m_systNames.push_back(SusyMatrixMethod::systematic_names[SusyMatrixMethod::SYS_NONE]);
   } else {
-    cout<<"SusyPlotter::setSysts() : not implemented (DG Jan2013)"<<endl;
+    namespace smm = SusyMatrixMethod;
+    const std::string *sns = smm::systematic_names;
+    m_systs.push_back(smm::SYS_NONE);        m_systNames.push_back(sns[smm::SYS_NONE]);
+    m_systs.push_back(smm::SYS_EL_RE_UP);    m_systNames.push_back(sns[smm::SYS_EL_RE_UP]);
+    m_systs.push_back(smm::SYS_EL_RE_DOWN);  m_systNames.push_back(sns[smm::SYS_EL_RE_DOWN]);
+    m_systs.push_back(smm::SYS_MU_RE_UP);    m_systNames.push_back(sns[smm::SYS_MU_RE_UP]);
+    m_systs.push_back(smm::SYS_MU_RE_DOWN);  m_systNames.push_back(sns[smm::SYS_MU_RE_DOWN]);
+    m_systs.push_back(smm::SYS_EL_FR_UP);    m_systNames.push_back(sns[smm::SYS_EL_FR_UP]);
+    m_systs.push_back(smm::SYS_EL_FR_DOWN);  m_systNames.push_back(sns[smm::SYS_EL_FR_DOWN]);
+    m_systs.push_back(smm::SYS_MU_FR_UP);    m_systNames.push_back(sns[smm::SYS_MU_FR_UP]);
+    m_systs.push_back(smm::SYS_MU_FR_DOWN);  m_systNames.push_back(sns[smm::SYS_MU_FR_DOWN]);
   }
 }
 //-----------------------------------------
