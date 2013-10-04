@@ -58,7 +58,7 @@ class MatrixPrediction : public SusyPlotter
     //! Extra histograms and plotting function specific to matrix method
     void bookFakeHisto();
     void fillFakeHistos(const LeptonVector &baseLeps, const JetVector &jets, 
-                        const Met* met,float weight, PlotRegion PR, uint sys = 0);
+                        const Met* met,float weight, PlotRegion PR, uint sys);
     // Get the fake event weight given a signal region
     float getFakeWeight(const LeptonVector &baseLeps, SusyMatrixMethod::FAKE_REGION region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NONE);
     float getRFWeight(const LeptonVector &baseLeps, SusyMatrixMethod::FAKE_REGION region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NONE);
