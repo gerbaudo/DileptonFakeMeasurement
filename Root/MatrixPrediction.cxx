@@ -64,7 +64,16 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
   if(m_dbg>3) cout<<eventDetails(passSrSS, *nt.evt(), ll, l)<<endl;
   PlotRegion pr = (ll==ee||ll==mm) ? PR_SR8 : PR_SR9;
-  if(passSrSS) SusyPlotter::fillHistos(ncl, j, m, m_weightComponents.fake, pr);
+  if(passSrSS) {
+    for(uint s = 0; s<m_systs.size(); ++s){
+      SusyMatrixMethod::SYSTEMATIC sys = (SusyMatrixMethod::SYSTEMATIC) m_systs.at(s);
+      float weight = (sys==SusyMatrixMethod::SYS_NONE
+                      ? m_weightComponents.fake :
+                      getFakeWeight(l,reg, metRel, sys));
+      SusyPlotter::fillHistos(ncl, j, m, weight, pr, sys);
+      fillFakeHistos(ncl, j, m, weight, pr, sys);
+    }
+  }
   return passSrSS;
 }
 //----------------------------------------------------------
