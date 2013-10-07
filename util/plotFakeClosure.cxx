@@ -41,19 +41,23 @@ int main(int argc, char** argv)
   int dbg = 0;
   FPRunOption option = RO_ALL;
   bool integral = false;
-  string inputdir, outputdir, tag;
+  string inputdir, inputfake, outputdir, tag;
 
   for(int i = 1; i < argc; i++) {
     const string opt(argv[i]);
     if      (opt=="-d"   )       dbg = atoi(argv[++i]);
     else if (opt=="-i"   )  inputdir = argv[++i];
+    else if (opt=="-f"   ) inputfake = argv[++i];
     else if (opt=="-o"   ) outputdir = argv[++i];
     else if (opt=="-t"   )       tag = argv[++i];
     else if (opt=="--int")  integral = true;
     else if (opt=="-r"   )    option = (FPRunOption) atoi(argv[++i]);
     else { help(); return 0; }
   }
-  bool missingReqOpt(inputdir.size()==0 || tag.size()==0 || outputdir.size()==0);
+  struct emptyStringFunctor {
+    bool operator()(const std::string &s) { return s.size()==0; }
+  } isEmpty;
+  bool missingReqOpt(isEmpty(inputdir)||isEmpty(tag)||isEmpty(outputdir));
   if(missingReqOpt) { cout<<"missing required option"<<endl; help(); return 0; }
   string s_option = "ALL";
   if( option == RO_SR1 )          s_option = "SR1";
