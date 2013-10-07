@@ -37,15 +37,17 @@ void FakeClosurePlot::init(FPRunOption opt)
 {
   m_opt = opt;
   File data, top, Zjets, Wjets, dib, hf, qcd;
-  const string inDir(m_inputdir), tag(m_tag);
-  const string tagg(tag+".AnaHists.root"), tagf(tag+".FakeHists.root");
-  initInputFile(data,  inDir+"data"       +tagg, "Data",    "data",    kBlack,     false, false);
-  initInputFile(top,   inDir+"ttbar"      +tagg, "Ttbar",   "ttbar",   kBlue,      true,  false);
-  initInputFile(Zjets, inDir+"zjets"      +tagg, "Z+jet",   "Zjet",    kRed,       true,  false);
-  initInputFile(Wjets, inDir+"wjets"      +tagg, "W+jet",   "Wjet",    kMagenta,   true,  false);
-  initInputFile(dib,   inDir+"diboson"    +tagg, "Diboson", "diboson", kOrange,    true,  false);
-  initInputFile(hf,    inDir+"heavyflavor"+tagg, "b-bbar",  "bbbar",   kSpring+1,  true,  false);
-  initInputFile(qcd,   inDir+"data"       +tagf, "Fake",    "fake",    kGray,      true,  true );
+  const string inDir(m_inputdir), tagExt(m_tag+".root");
+  if(m_dbg)
+    cout<<"looking for input files in '"<<inDir<<"'/*"<<tagExt<<"*.root"<<endl
+        <<"    and '"<<m_inputfake<<"'"<<endl;;
+  initInputFile(data,  inDir+"data"       +tagExt, "Data",    "data",    kBlack,     false, false);
+  initInputFile(top,   inDir+"ttbar"      +tagExt, "Ttbar",   "ttbar",   kBlue,      true,  false);
+  initInputFile(Zjets, inDir+"zjets"      +tagExt, "Z+jet",   "Zjet",    kRed,       true,  false);
+  initInputFile(Wjets, inDir+"wjets"      +tagExt, "W+jet",   "Wjet",    kMagenta,   true,  false);
+  initInputFile(dib,   inDir+"diboson"    +tagExt, "Diboson", "diboson", kOrange,    true,  false);
+  initInputFile(hf,    inDir+"heavyflavor"+tagExt, "b-bbar",  "bbbar",   kSpring+1,  true,  false);
+  initInputFile(qcd,   m_inputfake               , "Fake",    "fake",    kGray,      true,  true );
   m_files.clear();
 
   m_files.push_back(data);

@@ -14,6 +14,7 @@ void help()
   cout << "  Options:"                            << endl;
   cout << "  -d sets the debug level"             << endl;
   cout << "  -i inputdir"                         << endl;
+  cout << "  -f inputfake.root"                   << endl;
   cout << "  -t inputtag"                         << endl;
   cout << "  -o outputdir"                        << endl;
   cout << "  -r determine what Region to plot"    << endl;
@@ -57,7 +58,7 @@ int main(int argc, char** argv)
   struct emptyStringFunctor {
     bool operator()(const std::string &s) { return s.size()==0; }
   } isEmpty;
-  bool missingReqOpt(isEmpty(inputdir)||isEmpty(tag)||isEmpty(outputdir));
+  bool missingReqOpt(isEmpty(inputdir)||isEmpty(inputfake)||isEmpty(tag)||isEmpty(outputdir));
   if(missingReqOpt) { cout<<"missing required option"<<endl; help(); return 0; }
   string s_option = "ALL";
   if( option == RO_SR1 )          s_option = "SR1";
@@ -73,6 +74,7 @@ int main(int argc, char** argv)
   cout<<"  dbg                      "<<dbg      <<endl;
   cout<<"  tag                      "<<tag      <<endl;
   cout<<"  inputdir                 "<<inputdir <<endl;
+  cout<<"  inputfake                "<<inputfake<<endl;
   cout<<"  outputdir                "<<outputdir<<endl;
   cout<<"  Region to plot:          "<<s_option<<endl;
   cout<<endl;
@@ -80,6 +82,7 @@ int main(int argc, char** argv)
   FakeClosurePlot plot;
   plot.setTag(tag);
   plot.setInputDir(inputdir);
+  plot.setInputFakeFile(inputfake);
   plot.setOuputDir(outputdir);
   plot.setDebug(dbg);
   plot.setIntegralOption(integral);
