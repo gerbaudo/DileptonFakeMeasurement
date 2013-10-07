@@ -472,6 +472,14 @@ FakeClosurePlot& FakeClosurePlot::setInputDir(const std::string &dir)
   return *this;
 }
 //----------------------------------------------------------
+FakeClosurePlot& FakeClosurePlot::setInputFakeFile(const std::string &name)
+{
+  if(!fileExists(name) || !endswith(name, ".root"))
+    cout<<"Warning: invalid input fake file '"<<name<<"'"<<endl;
+  m_inputfake = name;
+  return *this;
+}
+//----------------------------------------------------------
 FakeClosurePlot& FakeClosurePlot::setOuputDir(const std::string &dir)
 {
   if(dirExists(dir)) m_outputdir = dir;

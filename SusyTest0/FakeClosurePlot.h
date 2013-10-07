@@ -115,6 +115,7 @@ class FakeClosurePlot : public myHist {
 
   FakeClosurePlot& setTag(const std::string &name);
   FakeClosurePlot& setInputDir(const std::string &dir);
+  FakeClosurePlot& setInputFakeFile(const std::string &name);
   FakeClosurePlot& setOuputDir(const std::string &dir);
 
  private:
@@ -129,7 +130,8 @@ class FakeClosurePlot : public myHist {
   bool m_addIntegral;                    // Add integral to legend
   int m_MCColor;                         // Color for the total MC -- kRed
   string m_tag;                          // tag of the input files
-  string m_inputdir;                     // dir of the input files
+  string m_inputdir;                     // dir of the input files (all except the fake one)
+  string m_inputfake;                    // file containing the fake histograms
   string m_outputdir;
 };
 
