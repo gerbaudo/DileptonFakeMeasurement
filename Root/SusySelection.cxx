@@ -172,14 +172,15 @@ bool SusySelection::passSrSsBase()
   return false;
 }
 //-----------------------------------------
-bool SusySelection::passSrSs(const WH_SR signalRegion,
-                             LeptonVector& leptons,
-                             const TauVector& taus,
-                             const JetVector& jets,
-                             const Met *met,
-                             bool allowQflip)
+SusySelection::SsPassFlags SusySelection::passSrSs(const WH_SR signalRegion,
+                                                   LeptonVector& leptons,
+                                                   const TauVector& taus,
+                                                   const JetVector& jets,
+                                                   const Met *met,
+                                                   bool allowQflip)
 {
-  if(leptons.size()<2) return false;
+  SsPassFlags f;
+  if(leptons.size()<2) return f;
   DiLepEvtType ll(getDiLepEvtType(leptons));
   const DiLepEvtType ee(ET_ee), em(ET_em), me(ET_me), mm(ET_mm);
   WH_SR sr = signalRegion;
@@ -210,41 +211,26 @@ bool SusySelection::passSrSs(const WH_SR signalRegion,
   const JetVector    &js = jets;
   WeightComponents &wc = m_weightComponents;
 
-  if(true)                                      increment(n_pass_category [ll], wc); else return false;
-  if(susy::passNlepMin(ls, 2))                  increment(n_pass_nSigLep  [ll], wc); else return false;
-  if(m_signalTaus.size()==0)                    increment(n_pass_tauVeto  [ll], wc); else return false;
-  if(passTrig2L     (ls))                       increment(n_pass_tr2L     [ll], wc); else return false;
-  if(passTrig2LMatch(ls))                       increment(n_pass_tr2LMatch[ll], wc); else return false;
-  if(data || susy::isTrueDilepton(ls))          increment(n_pass_mcTrue2l [ll], wc); else return false;
+  increment(n_pass_category[ll], wc);
+  if(susy::passNlepMin(ls, 2))                  { increment(n_pass_nSigLep  [ll], wc); f.eq2l       =true;} else return f;
+  if(m_signalTaus.size()==0)                    { increment(n_pass_tauVeto  [ll], wc); f.tauVeto    =true;} else return f;
+  if(passTrig2L     (ls))                       { increment(n_pass_tr2L     [ll], wc); f.trig2l     =true;} else return f;
+  if(passTrig2LMatch(ls))                       { increment(n_pass_tr2LMatch[ll], wc); f.trig2lmatch=true;} else return f;
+  if(data || susy::isTrueDilepton(ls))          { increment(n_pass_mcTrue2l [ll], wc); f.true2l     =true;} else return f;
   bool sameSign = allowQflip ? sameSignOrQflip(ncls, ncmet, ll, u4m, mc) : susy::sameSign(ncls);
-  if(sameSign)                                  increment(n_pass_ss       [ll], wc); else return false;
+  if(sameSign)                                  { increment(n_pass_ss       [ll], wc); f.sameSign   =true;} else return f;
   met = &ncmet; // after qflip, use potentially smeared lep and met
                                                 increment(n_pass_muIso    [ll], wc);
                                                 increment(n_pass_elD0Sig  [ll], wc);
-  if(passfJetVeto  (js))                        increment(n_pass_fjVeto   [ll], wc); else return false;
-  if(passbJetVeto  (js))                        increment(n_pass_bjVeto   [ll], wc); else return false;
-  if(passge1Jet    (js))                        increment(n_pass_ge1j     [ll], wc); else return false;
-  if(susy::pass2LepPt(ncls, ptL0Min, ptL1Min))  increment(n_pass_lepPt    [ll], wc); else return false;
-  if(susy::passZllVeto(ncls, loMllZ, hiMllZ))   increment(n_pass_mllZveto [ll], wc); else return false;
-  if(susy::passMtLlMetMin(ncls, met, mtwwMin))  increment(n_pass_mWwt     [ll], wc); else return false;
-  if(susy::passHtMin(ncls, js, met, htMin))     increment(n_pass_ht       [ll], wc); else return false;
-  if(passMetRelMin (met,ncls,js,metRelMin))     increment(n_pass_metRel   [ll], wc); else return false;
-
-  /*
-  cout<<""
-      <<" ("<<(ll==ee ? "EE" : (ll==mm ? "MM" : "EM"))<<")"
-      <<" event   "<<nt.evt()->event
-      <<" gen     "<<wc.gen
-      <<" pileup  "<<wc.pileup
-      <<" norm    "<<wc.norm
-      <<" lepSf   "<<wc.lepSf
-      <<" btag    "<<wc.btag
-      <<" trigger "<<wc.trigger
-      <<" qflip   "<<wc.qflip
-      <<" all     "<<wc.product()
-      <<endl;
-  */
-  return true;
+  if(passfJetVeto  (js))                        { increment(n_pass_fjVeto   [ll], wc); f.fjveto     =true;} else return f;
+  if(passbJetVeto  (js))                        { increment(n_pass_bjVeto   [ll], wc); f.bjveto     =true;} else return f;
+  if(passge1Jet    (js))                        { increment(n_pass_ge1j     [ll], wc); f.ge1j       =true;} else return f;
+  if(susy::pass2LepPt(ncls, ptL0Min, ptL1Min))  { increment(n_pass_lepPt    [ll], wc); f.lepPt      =true;} else return f;
+  if(susy::passZllVeto(ncls, loMllZ, hiMllZ))   { increment(n_pass_mllZveto [ll], wc); f.zllVeto    =true;} else return f;
+  if(susy::passMtLlMetMin(ncls, met, mtwwMin))  { increment(n_pass_mWwt     [ll], wc); f.mtllmet    =true;} else return f;
+  if(susy::passHtMin(ncls, js, met, htMin))     { increment(n_pass_ht       [ll], wc); f.ht         =true;} else return f;
+  if(passMetRelMin (met,ncls,js,metRelMin))     { increment(n_pass_metRel   [ll], wc); f.metrel     =true;} else return f;
+  return f;
 }
 //-----------------------------------------
 bool SusySelection::passHfor()

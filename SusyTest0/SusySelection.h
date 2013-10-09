@@ -62,6 +62,19 @@ class SusySelection : public SusyNtAna
     double lepSf, btag, trigger, qflip, fake; // factors that we compute, not from upstream
     std::string str() const;
   };
+  struct SsPassFlags {
+    SsPassFlags() { reset(); }
+    void reset() {
+      eq2l = tauVeto = trig2l = trig2lmatch = true2l = sameSign = fjveto = bjveto = ge1j = false;
+      lepPt = zllVeto = mtllmet = ht = metrel = false;
+    }
+    bool passAll() const {
+      return (eq2l & tauVeto & trig2l & trig2lmatch & true2l & sameSign & fjveto & bjveto & ge1j
+              & lepPt & zllVeto & mtllmet & ht & metrel);
+    }
+    bool eq2l, tauVeto, trig2l, trig2lmatch, true2l, sameSign, fjveto, bjveto, ge1j;
+    bool lepPt, zllVeto, mtllmet, ht, metrel;
+  };
  public:
     SusySelection();
     virtual ~SusySelection(){};
@@ -85,8 +98,8 @@ class SusySelection : public SusyNtAna
     // std SR7 has at least 2jets + the requirements below
     // (but no counters, just so that the fit on one line)
     bool passSrSsBase();
-    bool passSrSs(const WH_SR signalRegion,
-                  vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
+    SsPassFlags passSrSs(const WH_SR signalRegion,
+                         vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
     // Cut methods
     bool passHfor();
     bool passTrig2L(const LeptonVector& leptons);

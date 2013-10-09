@@ -61,7 +61,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   m_weightComponents.fake = getFakeWeight(l, reg, metRel, sys);
   bool allowQflip(false);
   DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
-  bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
+  bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip).passAll());
   if(m_dbg>3) cout<<eventDetails(passSrSS, *nt.evt(), ll, l)<<endl;
   PlotRegion pr = (ll==ee||ll==mm) ? PR_SR8 : PR_SR9;
   if(passSrSS) {

@@ -118,28 +118,14 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   const TauVector&    t = m_signalTaus;
   if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
   bool allowQflip(true);
-  bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
+  SsPassFlags f(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
+  bool passSrSS(f.passAll());
   if(!passSrSS) return false;
   float weight(m_weightComponents.product());
   const DiLepEvtType ll(getDiLepEvtType(l));
   const DiLepEvtType ee(ET_ee), em(ET_em), me(ET_me), mm(ET_mm);
   if(ll==ee||ll==mm) fillHistos(ncl, j, m, weight, PR_SR8);
   if(ll==em||ll==me) fillHistos(ncl, j, m, weight, PR_SR9);
-  /*
-  if( passSR6base     (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR6base);
-  if( passSR6         (l, j, m, count)) fillHistos(l, j, m, weight, PR_SR6);
-  if( passSR8base     (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR8base);
-  if( passSR8         (l, j, m, count)) fillHistos(l, j, m, weight, PR_SR8);
-  if( passSR9base     (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR9base);
-  if( passSR9         (l, j, m, count)) fillHistos(l, j, m, weight, PR_SR9);
-
-  if( passSR7base     (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR7base);
-  if( passSR7Nj       (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR7Nj);
-  if( passSR7NjZttVeto(l, j, m)       ) fillHistos(l, j, m, weight, PR_SR7NjZttVeto);
-  if( passSR7NjPtTot  (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR7NjPtTot);
-  if( passSR7NjMll    (l, j, m)       ) fillHistos(l, j, m, weight, PR_SR7NjMll);
-  if( passSR7         (l, j, m, count)) fillHistos(l, j, m, weight, PR_SR7);
-  */
   return kTRUE;
 }
 //-----------------------------------------
