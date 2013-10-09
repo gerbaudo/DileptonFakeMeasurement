@@ -86,8 +86,8 @@ void SusyPlotter::initNames()
   PRNames[i++] = "sr7NjMll";
   PRNames[i++] = "sr7";
   PRNames[i++] = "sr8base";
-  PRNames[i++] = "sr8";
   PRNames[i++] = "sr8lpt";
+  PRNames[i++] = "sr8";
   PRNames[i++] = "sr9base";
   PRNames[i++] = "sr9lpt";
   PRNames[i++] = "sr9";
