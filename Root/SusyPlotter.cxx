@@ -87,7 +87,9 @@ void SusyPlotter::initNames()
   PRNames[i++] = "sr7";
   PRNames[i++] = "sr8base";
   PRNames[i++] = "sr8";
+  PRNames[i++] = "sr8lpt";
   PRNames[i++] = "sr9base";
+  PRNames[i++] = "sr9lpt";
   PRNames[i++] = "sr9";
 }
 //-----------------------------------------
@@ -118,14 +120,19 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   const TauVector&    t = m_signalTaus;
   if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
   bool allowQflip(true);
-  SsPassFlags f(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
-  bool passSrSS(f.passAll());
-  if(!passSrSS) return false;
+  SsPassFlags ssf(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
+  if(!ssf.passLpt()) return false;
   float weight(m_weightComponents.product());
-  const DiLepEvtType ll(getDiLepEvtType(l));
-  const DiLepEvtType ee(ET_ee), em(ET_em), me(ET_me), mm(ET_mm);
-  if(ll==ee||ll==mm) fillHistos(ncl, j, m, weight, PR_SR8);
-  if(ll==em||ll==me) fillHistos(ncl, j, m, weight, PR_SR9);
+  const DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
+  bool sameFlav(ll==ee||ll==mm);
+  if(ssf.passLpt()) {
+    PlotRegion pr = (sameFlav ? PR_SR8lpt : PR_SR9lpt);
+    fillHistos(ncl, j, m, weight, pr);
+  }
+  if(ssf.passAll()) {
+    PlotRegion pr = (sameFlav ? PR_SR8    : PR_SR9);
+    fillHistos(ncl, j, m, weight, pr);
+  }
   return kTRUE;
 }
 //-----------------------------------------

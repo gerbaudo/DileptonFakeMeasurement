@@ -61,20 +61,27 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   m_weightComponents.fake = getFakeWeight(l, reg, metRel, sys);
   bool allowQflip(false);
   DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
-  bool passSrSS(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip).passAll());
-  if(m_dbg>3) cout<<eventDetails(passSrSS, *nt.evt(), ll, l)<<endl;
-  PlotRegion pr = (ll==ee||ll==mm) ? PR_SR8 : PR_SR9;
-  if(passSrSS) {
-    for(uint s = 0; s<m_systs.size(); ++s){
-      SusyMatrixMethod::SYSTEMATIC sys = (SusyMatrixMethod::SYSTEMATIC) m_systs.at(s);
-      float weight = (sys==SusyMatrixMethod::SYS_NONE
-                      ? m_weightComponents.fake :
-                      getFakeWeight(l,reg, metRel, sys));
+  bool sameFlav(ll==ee||ll==mm);
+  SsPassFlags ssf(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
+  if(m_dbg>3) cout<<eventDetails(ssf.passAll(), *nt.evt(), ll, l)<<endl;
+  if(!ssf.passLpt()) return false;
+  for(uint s = 0; s<m_systs.size(); ++s){
+    SusyMatrixMethod::SYSTEMATIC sys = (SusyMatrixMethod::SYSTEMATIC) m_systs.at(s);
+    float weight = (sys==SusyMatrixMethod::SYS_NONE
+                    ? m_weightComponents.fake :
+                    getFakeWeight(l,reg, metRel, sys));
+    if(ssf.passLpt()) {
+      PlotRegion pr = (sameFlav ? PR_SR8lpt : PR_SR9lpt);
       SusyPlotter::fillHistos(ncl, j, m, weight, pr, sys);
       fillFakeHistos(ncl, j, m, weight, pr, sys);
     }
-  }
-  return passSrSS;
+    if(ssf.passAll()) {
+      PlotRegion pr = (sameFlav ? PR_SR8    : PR_SR9);
+      SusyPlotter::fillHistos(ncl, j, m, weight, pr, sys);
+      fillFakeHistos(ncl, j, m, weight, pr, sys);
+    }
+  } // end for(s)
+  return ssf.passAll();
 }
 //----------------------------------------------------------
 void MatrixPrediction::Terminate()

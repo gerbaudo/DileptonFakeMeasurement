@@ -19,7 +19,9 @@ class SusyPlotter : public SusySelection
   enum PlotRegion{
     PR_NONE, PR_SR6base, PR_SR6,
     PR_SR7base, PR_SR7Nj, PR_SR7NjZttVeto, PR_SR7NjPtTot, PR_SR7NjMll, PR_SR7,
-    PR_SR8base, PR_SR8, PR_SR9base, PR_SR9,
+    PR_SR8base,
+    PR_SR8lpt,  // looser pr for fake control plots, same for SR9lpt
+    PR_SR8, PR_SR9base, PR_SR9lpt, PR_SR9,
     PR_N
   };
   string PRNames[PR_N] ;
