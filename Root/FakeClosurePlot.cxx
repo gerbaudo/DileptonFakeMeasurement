@@ -59,7 +59,9 @@ void FakeClosurePlot::init(FPRunOption opt)
   m_files.push_back(hf);
   m_files.push_back(qcd);
 
+  m_PRs.push_back(PR_SR8lpt);
   m_PRs.push_back(PR_SR8);
+  m_PRs.push_back(PR_SR9lpt);
   m_PRs.push_back(PR_SR9);
 //   if(opt == RO_ALL){ m_PRs.push_back(PR_VRSS); }
 //   else return;
