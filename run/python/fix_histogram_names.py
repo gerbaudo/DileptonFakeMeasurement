@@ -17,14 +17,15 @@ def main(filenameOrig, filenameDest, substr1, substr2) :
     s1, s2 = substr1, substr2
     input = r.TFile.Open(filenameOrig)
     histonames = getAllHistoNames(input)
-    print histonames
     output = r.TFile.Open(filenameDest, 'recreate')
     output.cd()
+    nhFixed = 0
     for hn in histonames :
         h = input.Get(hn)
         hnn = hn.replace(s1,s2) if s1 in hn else hn.replace(s2,s1) # avoid swapping twice s1->s2->s1
         h.Write(hnn)
-        if hn!=hnn : print "'%s' -> '%s'"%(hn, hnn)
+        if hn!=hnn : nhFixed += 1
+    print "renamed %d histograms"%nhFixed
     output.Close()
     input.Close()
 
