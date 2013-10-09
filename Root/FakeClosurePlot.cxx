@@ -31,6 +31,7 @@ void initInputFile(File &out,
   out.isfake = isfake;
   bool inputIsValid(out.file && out.file->IsOpen());
   if(!inputIsValid) cout<<"invalid input '"<<fname<<"'"<<" ("<<out.file<<")"<<endl;
+  else cout<<"openinig '"<<fname<<"'"<<endl;
 }
 //----------------------------------------------------------
 void FakeClosurePlot::init(FPRunOption opt)
@@ -39,7 +40,7 @@ void FakeClosurePlot::init(FPRunOption opt)
   File data, top, Zjets, Wjets, dib, hf, qcd;
   const string inDir(m_inputdir), tagExt(m_tag+".root");
   if(m_dbg)
-    cout<<"looking for input files in '"<<inDir<<"'/*"<<tagExt<<"*.root"<<endl
+    cout<<"looking for input files in '"<<inDir<<"'/*"<<tagExt<<endl
         <<"    and '"<<m_inputfake<<"'"<<endl;;
   initInputFile(data,  inDir+"data"       +tagExt, "Data",    "data",    kBlack,     false, false);
   initInputFile(top,   inDir+"ttbar"      +tagExt, "Ttbar",   "ttbar",   kBlue,      true,  false);
@@ -58,8 +59,10 @@ void FakeClosurePlot::init(FPRunOption opt)
   m_files.push_back(hf);
   m_files.push_back(qcd);
 
-  if(opt == RO_ALL){ m_PRs.push_back(PR_VRSS); }
-  else return;
+  m_PRs.push_back(PR_SR8);
+  m_PRs.push_back(PR_SR9);
+//   if(opt == RO_ALL){ m_PRs.push_back(PR_VRSS); }
+//   else return;
   setPlots();
 }
 //---------------------------------------------------------------------//
@@ -89,26 +92,32 @@ void FakeClosurePlot::setPlots()
 //---------------------------------------------------------------------//
 void FakeClosurePlot::DataMCAnaPlots()
 {
+  cout<<"DataMCAnaPlots"<<endl;
   // Here Loop over the channels and the signal regions that are set
   // via the run options.  Right now we loop over all and save all.
   string savedir(m_outputdir);
+  cout<<"m_PRs["<<m_PRs.size()<<"]"<<endl;
   for(uint ipr=0; ipr<m_PRs.size(); ++ipr){
     PlotRegion pr = m_PRs.at(ipr);
     string region = PRNames[pr];
+    cout<<"region "<<region<<endl;
     for(int ich=0; ich<Ch_N; ++ich){
       if(ich == Ch_all) continue;
       Chan ch        = (Chan) ich;
       string ch_name = chanNames[ch];
+      cout<<"ch_name "<<ch_name<<endl;
+      cout<<"m_plots["<<m_plots.size()<<"]"<<endl;
       for(uint ip=0; ip<m_plots.size(); ++ip){
         string var    = m_plots.at(ip).first;
         string xtitle = m_plots.at(ip).second;
+        cout<<"var "<<var<<" xtitle "<<xtitle<<endl;
         buildHists(m_hists, m_sys, var, xtitle, ch, pr);
         m_errs.push_back(buildErrors(m_hists.back(), m_sys));
         m_errs.push_back(buildRatioErrors(m_hists.back(), m_errs.back()));
         float xleg[] = {0.65,0.9};
         float yleg[] = {0.5,0.89};
         TLegend* leg = buildLegend(m_hists, m_errs[0], xleg, yleg);
-        string save = savedir + region + "_" + ch_name + "_" + var + ".pdf";
+        string save = savedir+"/"+ region + "_" + ch_name + "_" + var + ".png";
         plotAll(m_hists, m_errs, save, leg, ich, false); //true);
         clear();
       }// end loop over plots
@@ -358,6 +367,7 @@ void FakeClosurePlot::addSysError(TH1F* nominal, TFile* file, string plot,
 void FakeClosurePlot::plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> errs,
 			    string save, TLegend* leg, int ch, bool logy, bool logx)
 {
+  cout<<"m_dbg "<<m_dbg<<endl;
   if(m_dbg) cout << "plotAll" << endl;
   TCanvas* c = makeCanvas("c");
   TPad* _pTop;
