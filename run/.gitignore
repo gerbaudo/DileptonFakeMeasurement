@@ -1,6 +1,6 @@
 AutoDict*
 log/*
-batc/*
+batch/*
 out/*
 *.png
 *.eps
