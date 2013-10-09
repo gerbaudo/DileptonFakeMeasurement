@@ -81,7 +81,8 @@ class FakeClosurePlot : public myHist {
   TH1F* buildRatio(TH1F* data, TH1F* SM);
   THStack* buildStack(vector<TH1F*> hists);
   void plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> errs,
-               string save, TLegend* leg, int ch, bool logy=false, bool logx=false);
+               string save, TLegend* leg, string channel, string selection,
+               bool logy=false, bool logx=false);
   void clear(){  // Clear Hists
     for(uint i=0; i<m_hists.size(); ++i)
       if(m_hists.at(i)) m_hists.at(i)->Delete();

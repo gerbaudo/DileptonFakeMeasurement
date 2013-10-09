@@ -120,7 +120,7 @@ void FakeClosurePlot::DataMCAnaPlots()
         float yleg[] = {0.5,0.89};
         TLegend* leg = buildLegend(m_hists, m_errs[0], xleg, yleg);
         string save = savedir+"/"+ region + "_" + ch_name + "_" + var + ".png";
-        plotAll(m_hists, m_errs, save, leg, ich, false); //true);
+        plotAll(m_hists, m_errs, save, leg, ch_name, region, false); //true);
         clear();
       }// end loop over plots
     }// end loop over channels
@@ -367,7 +367,8 @@ void FakeClosurePlot::addSysError(TH1F* nominal, TFile* file, string plot,
 // General tools
 //---------------------------------------------------------------------//
 void FakeClosurePlot::plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> errs,
-			    string save, TLegend* leg, int ch, bool logy, bool logx)
+                              string save, TLegend* leg, string channel, string selection,
+                              bool logy, bool logx)
 {
   cout<<"m_dbg "<<m_dbg<<endl;
   if(m_dbg) cout << "plotAll" << endl;
@@ -407,10 +408,7 @@ void FakeClosurePlot::plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> er
   lat->SetTextSize(0.055);
   lat->DrawLatex(0.4, 0.85, "#intLdt=21fb^{-1}");
   string chname = "";
-  if( ch == Ch_ee) chname = "ee";
-  if( ch == Ch_mm) chname = "#mu#mu";
-  if( ch == Ch_em) chname = "e#mu";
-  lat->DrawLatex(0.45, 0.75, chname.c_str());
+  lat->DrawLatex(0.45, 0.75, ("#splitline{"+chname+"}{"+selection+"}").c_str());
   _pTop->Update();
 
   ratio->SetMaximum(2.0);  // Fix ratio plots to show +/- 100%
