@@ -59,7 +59,7 @@ verbose      = options.verbose
 
 if not [susyplot, susysel, fakeprob, fakerate, fakepred].count(True)==1 :
     parser.error("specify one executable")
-scriptDir = 'batchScripts'
+scriptDir = 'batch'
 template  = ''
 template += scriptDir+'/templates/susyPlot.sh.template' if susyplot else ''
 template += scriptDir+'/templates/susySel.sh.template'  if susysel else ''
@@ -80,10 +80,11 @@ def formAndCreateOutdir(basedir, subdir) :
     return d
 outdir = formAndCreateOutdir('out/', subdir())
 logdir = formAndCreateOutdir('log/', subdir())
+batdir = formAndCreateOutdir(scriptDir, subdir())
 inputTemplate = "filelist/%(sample)s.txt"
-outScriptTemplate = scriptDir+'/%(sample)s.sh'
-outRootTemplate = "%(outdir)s/%(sample)s_%(tag)s.root"
-outLogTemplate = "%(logdir)s/%(sample)s_%(tag)s.log"
+outScriptTemplate = "%(batdir)s/%(sample)s.sh"
+outRootTemplate   = "%(outdir)s/%(sample)s_%(tag)s.root"
+outLogTemplate    = "%(logdir)s/%(sample)s_%(tag)s.log"
 
 sampleNames   = [d.name for d in datasets if not d.placeholder or alsoph]
 sampleNames   = filterWithRegexp(sampleNames, regexp)
@@ -109,20 +110,20 @@ for sample in sampleNames :
         print msg
         continue
     input      = inputTemplate%{'sample':sample}
-    output     = outRootTemplate%{'outdir':outdir, 'sample':sample, 'tag':batchTag}
-    outlog     = outLogTemplate%{'logdir':logdir, 'sample':sample, 'tag':batchTag}
-    scriptName = outScriptTemplate%{'sample':sample}
-    fileExists = os.path.exists(scriptName)
+    output     = outRootTemplate  %{'outdir':outdir, 'sample':sample, 'tag':batchTag}
+    outlog     = outLogTemplate   %{'logdir':logdir, 'sample':sample, 'tag':batchTag}
+    script = outScriptTemplate%{'batdir':batdir, 'sample':sample}
+    fileExists = os.path.exists(script)
     if overwrite or not fileExists :
-        fillInScriptTemplate(sample, input, output, otherOptions, scriptName, template)
-    elif fileExists : print "warning, not overwriting existing script '%s'"%scriptName
+        fillInScriptTemplate(sample, input, output, otherOptions, script, template)
+    elif fileExists : print "warning, not overwriting existing script '%s'"%script
     cmd = "qsub " \
           "-j oe -V " \
           "-N %(jobname)s " \
           "-o %(outlog)s " \
           " %(scripname)s" \
           % \
-          {'jobname':"%s%s"%(sample, batchTag), 'outlog':outlog, 'scripname':scriptName}
+          {'jobname':"%s%s"%(sample, batchTag), 'outlog':outlog, 'scripname':script}
     print cmd
     if submit :
         out = getCommandOutput(cmd)
