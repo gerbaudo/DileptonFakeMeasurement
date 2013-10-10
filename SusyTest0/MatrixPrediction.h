@@ -56,7 +56,7 @@ class MatrixPrediction : public SusyPlotter
     virtual void    Terminate(); //!< called after looping is finished
     virtual Bool_t  Process(Long64_t entry);
     //! Extra histograms and plotting function specific to matrix method
-    void bookFakeHisto();
+    bool bookFakeHisto();
     void fillFakeHistos(const LeptonVector &baseLeps, const JetVector &jets, 
                         const Met* met,float weight, PlotRegion PR, uint sys);
     // Get the fake event weight given a signal region
@@ -74,6 +74,7 @@ class MatrixPrediction : public SusyPlotter
     std::vector<uint> m_matrixSys;      // systematics to process
     SusyMatrixMethod::DiLeptonMatrixMethod* m_matrix;
     std::string m_matrixFilename;
+    bool m_allconfigured;
     bool initMatrixTool();
     // Histograms
 #define FAKEHIST( name ) hf_ ## name[Ch_N][PR_N][MP_N][WTog_N][SusyMatrixMethod::SYS_N_USER];

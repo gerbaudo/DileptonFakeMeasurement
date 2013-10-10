@@ -24,7 +24,9 @@ const int  nmassbins = 30;
 
 //----------------------------------------------------------
 MatrixPrediction::MatrixPrediction() :
-  SusyPlotter()
+  SusyPlotter(),
+  m_matrix(0),
+  m_allconfigured(false)
 {
 }
 //----------------------------------------------------------
@@ -33,12 +35,12 @@ void MatrixPrediction::Begin(TTree* /*tree*/)
   m_doFake = true;
   SusyPlotter::Begin(0);
   if(m_dbg) cout << "MatrixPrediction::Begin" << endl;
-  initMatrixTool();
-  bookFakeHisto();
+  m_allconfigured = (initMatrixTool() && bookFakeHisto());
 }
 //----------------------------------------------------------
 Bool_t MatrixPrediction::Process(Long64_t entry)
 {
+  if(!m_allconfigured) return false;
   m_printer.countAndPrint(cout);
   GetEntry(entry);
   clearObjects();
@@ -91,8 +93,12 @@ void MatrixPrediction::Terminate()
   delete m_matrix;
 }
 //----------------------------------------------------------
-void MatrixPrediction::bookFakeHisto()
+bool MatrixPrediction::bookFakeHisto()
 {
+  if(!m_histFile) {
+    cout<<"MatrixPrediction::bookFakeHisto() invalid hist file"<<endl;
+    return false;
+  }
   m_histFile->cd();  // Histogram file from SusyPlotter
   for(uint iPR=0; iPR<PR_N; ++iPR){ // Plot Region
     string PR = PRNames[iPR];
@@ -131,7 +137,8 @@ do{                                                                       \
         }// end for(iWT)
       }// end for(iMP)
     }// end for(iCh)
-  }// end for(iPR
+  }// end for(iPR)
+  return true;
 }
 //----------------------------------------------------------
 void MatrixPrediction::fillFakeHistos(const LeptonVector &baseLeps, const JetVector &jets,
