@@ -49,7 +49,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   bool removeLepsFromIso(false);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if( !selectEvent() )              return kTRUE;
-  SusyMatrixMethod::FAKE_REGION reg = SusyMatrixMethod::FR_SRDavide;
+  SusyMatrixMethod::FAKE_REGION reg = SusyMatrixMethod::FR_SR_WHSS; //FR_SRDavide;
   SusyMatrixMethod::SYSTEMATIC  sys = SusyMatrixMethod::SYS_NONE;
   const Met*          m = m_met;
   const JetVector&    j = m_signalJets2Lep;
