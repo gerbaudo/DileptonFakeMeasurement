@@ -1,0 +1,9 @@
+Directory contents:
+
+anaplots       : output root files (obsolete, see out)
+batch          : qsubs scripts; for each executable, templates and actual scripts
+estimatedYield : yields for the group-average efficiencies (input to plotZnEstYield.py)
+filelist       : output from makeList.py
+log            : log files from queue jobs
+out            : root files
+python         : code
