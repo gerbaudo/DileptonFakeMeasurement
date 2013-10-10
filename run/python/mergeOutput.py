@@ -29,6 +29,7 @@ parser = optparse.OptionParser(usage=usage)
 parser.add_option('--onedata', action='store_true', help='merge all data (e+mu) together; for fake estimate')
 parser.add_option('--allBkg', action='store_true', help='also merge all bkg; for fake estimate')
 parser.add_option('--allBkgButHf', action='store_true', help='also merge all bkg w/out heavy flavor; for fake estimate')
+parser.add_option("--alsoplaceholders", action="store_true", default=False, help="placeholder samples might be needed for the fake; otherwise they should be excluded")
 parser.add_option('-o', '--output', help='output directory; default <input>/merged/')
 parser.add_option('-O', '--overwrite', action='store_true', help='overwrite output')
 parser.add_option('-g', '--groupregexp', default='.*', help='only matching groups')
@@ -41,6 +42,7 @@ if len(args) != 1 : parser.error("incorrect number of arguments")
 inputdir      = args[0]
 allBkg        = options.allBkg
 allBkgButHf   = options.allBkgButHf
+alsoph        = options.alsoplaceholders
 group_regexp  = options.groupregexp
 verbose       = options.verbose
 debug         = options.debug
@@ -61,17 +63,19 @@ if not isMonthDayTag(tag) : print "warning, non-standard tag might lead to bugs 
 if not os.path.isdir(outdir) :
     os.mkdir(outdir)
     if verbose : print "created directory '%s'"%outdir
-allDatasets = [d for d in datasets if not d.placeholder]
+allDatasets = [d for d in datasets if alsoph or not d.placeholder]
 if onedata : allDatasets = setSameGroupForAllData(allDatasets)
 filenamesByGroup = collections.defaultdict(list)
 rootfiles = filter(os.path.isfile, glob.glob(inputdir + "*.root"))
 rootfiles = [rf for rf in rootfiles if tag in rf]
+print '\n'.join([n for n in [d.name for d in allDatasets] if 'PowhegPythia8_AU2CT10_WZ' in n])
 for rf in rootfiles :
     dsname = os.path.basename(rf).replace('.root','').replace(tag,'')
     if debug : print "'%s' -> dataset '%s'"%(rf, dsname)
     dataset = next((d for d in allDatasets if d.name==dsname), None)
     if not dataset :
         print "warning, cannot identify dataset for '%s'"%rf
+        print "using tag '%s'; if it does not look right, specify it with '-t'"%tag
         continue
     group = dataset.group
     if dataset.isNotToBeMerged : continue
