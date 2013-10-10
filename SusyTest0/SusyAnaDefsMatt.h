@@ -361,6 +361,7 @@ enum PlotRegion{
   PR_CRZjets,
 
   PR_SRDavide,
+  PR_SR_WHSS,
   PR_SR8lpt,
   PR_SR8,
   PR_SR9lpt,
@@ -393,6 +394,7 @@ static string PRNames[] = {
   "CRZjets",
 
   "SRDavide",
+  "SR_WHSS",
   "sr8lpt",
   "sr8",
   "sr9lpt",
