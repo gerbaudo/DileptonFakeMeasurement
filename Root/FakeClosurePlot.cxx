@@ -385,6 +385,7 @@ bool FakeClosurePlot::plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> er
   TH1F* data     = hists.at(0);   // Plotting three basic objects:
   TH1F* SM       = hists.at(hists.size()-1);
   if(!data || !SM) { cout<<"plotAll: missing data("<<data<<") SM("<<SM<<")"<<endl; return false; }
+  if(!data->Integral() && !SM->Integral()) { cout<<"skip empty plot '"<<save<<"'"<<endl; return false; }
   THStack* stack = buildStack(hists);
   TH1F*    ratio = buildRatio(data, SM);
   TLine* nom = getLine(data, 1.00, kBlack, 1); // Create lines for ratio plot
