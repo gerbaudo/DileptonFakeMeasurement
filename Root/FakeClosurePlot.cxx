@@ -139,11 +139,13 @@ bool FakeClosurePlot::buildHists(vector<TH1F*> &hists, vector<TH1F*> &sys, strin
   string plot = PRNames[PR] + u() + chanNames[ch] + u() + var;
   if(m_dbg) cout << "Getting... " << plot <<endl;
   TH1F* SM = Get(m_files.at(0).file, plot + "_NOM", m_MCColor);
-  TH1F* sys_up = Get(m_files.at(0).file, plot + "_NOM", kBlack);
-  TH1F* sys_dn = Get(m_files.at(0).file, plot + "_NOM", kBlack);
-  if(!SM || !sys_up || !sys_dn) { cout<<"skipping "<<plot<<endl; return false; }
+  if(!SM) { cout<<"missing SM, skipping "<<plot<<endl; return false; }
   SM->Reset();     SM->SetName("SM");
+  TH1F* sys_up = Get(m_files.at(0).file, plot + "_NOM", kBlack);
+  if(!sys_up) { cout<<"missing sys_up, skipping "<<plot<<endl; return false; }
   sys_up->Reset(); sys_up->SetName("sys_up");
+  TH1F* sys_dn = Get(m_files.at(0).file, plot + "_NOM", kBlack);
+  if(!sys_dn) { cout<<"missing sys_dn, skipping "<<plot<<endl; return false; }
   sys_dn->Reset(); sys_dn->SetName("sys_dn");
   sys.push_back(sys_up);
   sys.push_back(sys_dn);
