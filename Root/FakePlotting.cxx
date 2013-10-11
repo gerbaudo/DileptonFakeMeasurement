@@ -61,7 +61,7 @@ FakePlotting& FakePlotting::setInputDir(const std::string &dir)
 //----------------------------------------------------------
 FakePlotting& FakePlotting::setOuputDir(const std::string &dir)
 {
-  m_outputdir = mkdirIfNeeded(dir);
+  m_outputdir = mkdirIfNeeded(endswith(dir,"/") ? dir : dir+"/");
   bool dirIsInvalid(m_outputdir.size()==0);
   if(dirIsInvalid) {
     string fallbackOutdir("./");
