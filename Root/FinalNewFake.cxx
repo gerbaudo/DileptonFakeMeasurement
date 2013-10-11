@@ -680,6 +680,18 @@ FinalNewFake& FinalNewFake::setOuputFilename(const std::string &name)
   }
   return *this;
 }
+FinalNewFake& FinalNewFake::setOuputPlotdir(const std::string &name)
+{
+  m_outputplotdir = mkdirIfNeeded(name);
+  bool invalidDir(m_outputplotdir.size()==0);
+  if(invalidDir) {
+    cout<<"invalid outputplotdir '"<<name<<"' trying to guess something reasonable..."<<endl;
+    m_outputplotdir = basedir(m_outputfname);
+    invalidDir = m_outputplotdir.size()==0;
+    if(invalidDir) m_outputplotdir = "./";
+  }
+  return *this;
+}
 //------------------------------------------------------------//
 // Write to file
 //------------------------------------------------------------//

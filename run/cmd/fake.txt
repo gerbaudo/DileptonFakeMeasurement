@@ -37,6 +37,7 @@ FinalFakeHist \
  -t ${TAG} \
  -i out/fakerate/merged/ \
  -o out/fakerate/merged/FinalFakeHist_${TAG}.root \
+ -p out/fakerate/merged/FinalFakeHist_plots_${TAG} \
  >& log/fakerate/FinalFakeHist_${TAG}.log
 
 # copy the matrix file and modify the batch template

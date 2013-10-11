@@ -117,6 +117,7 @@ class FinalNewFake : public FakePlotting
   FinalNewFake& setTag(const std::string &name);
   FinalNewFake& setInputDir(const std::string &dir);
   FinalNewFake& setOuputFilename(const std::string &name);
+  FinalNewFake& setOuputPlotdir(const std::string &name);
   void save(TH1* h);
   void save(TParameter<double>  param);
   void write();
@@ -138,6 +139,7 @@ class FinalNewFake : public FakePlotting
   std::string m_tag;
   std::string m_inputdir;
   std::string m_outputfname;
+  std::string m_outputplotdir;
 };
 
 #endif
