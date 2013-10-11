@@ -1,0 +1,41 @@
+TAG="Oct_10"
+
+# Jobs to get the input histos to compute the probabilities
+# Exclude signals and Sherpa WZ (126893); include Powheg WZ [129477--129494]
+# (see re at https://www.debuggex.com/r/MOYoxD1a_-HNnZu9)
+./python/submitJobs.py --fakerate -o --tag=${TAG} -e '(Sherpa_CT10_lllnu_WZ|noslep.*_WH)'
+./python/submitJobs.py --fakerate -o --tag=${TAG} -s 'PowhegPythia8_AU2CT10_WZ_W' --alsoplaceholders
+
+# When the jobs are done, merge the outputs as needed
+# By default, mergeOutput picks up the files with the latest tag.
+./python/mergeOutput.py -v --onedata --allBkg --allBkgButHf out/fakerate/
+
+# Determine the contamination from prompt leptons to the HF estimate
+# in the high-pt tail
+IterFake \
+ --input-data out/fakerate/merged/data_${TAG}.root \       
+ --input-mc   out/fakerate/merged/allBkgButHf_${TAG}.root \
+ --output     out/fakerate/merged/iterative_out_${TAG}.root \
+ >& log/fakerate/IterFake_${TAG}.log
+
+# Determine the scale factors (p_T dep flat fit).
+# Here, for the real-lepton efficiencies (tag-and-probe),
+# the Z-peak sideband subtraction is also applied.
+# The SF are printed out to screen; copy them to FinalNewFake.h
+FakePlot \
+ -r datamc-sf 
+ -t ${TAG} \
+ -i out/fakerate/merged/ \
+ -o out/fakerate/merged/plot_${TAG} \
+ -c out/fakerate/merged/iterative_out_${TAG}.root \
+ >& log/fakerate/FakePlot_${TAG}.log
+
+grep "SF for" log/fakerate/FakePlot_${TAG}.log
+
+# produce the weighted matrix with FinalNewFake
+FinalFakeHist \
+ -t ${TAG} \
+ -i out/fakerate/merged/ \
+ -o out/fakerate/merged/FinalFakeHist_${TAG}.root \
+ >& log/fakerate/FinalFakeHist_${TAG}.log
+
