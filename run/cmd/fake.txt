@@ -50,3 +50,12 @@ enw batch/templates/fakepred.sh.template
 
 # When the jobs are done, merge the outputs as needed
 ./python/mergeOutput.py -v out/fakepred/
+
+# Make the closure plots using the new prediction
+plotFakeClosure \
+ -d 10 \
+ -r 1 \
+ -t ${TAG}  \
+ -i out/susyplot/merged/ \
+ -f out/fakepred/merged/data_${TAG}.root \
+ -o out/fakepred/merged/fake_closure_plots_${TAG}
