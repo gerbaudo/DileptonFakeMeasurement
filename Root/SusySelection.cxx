@@ -191,14 +191,18 @@ SusySelection::SsPassFlags SusySelection::passSrSs(const WH_SR signalRegion,
   float mZ0(91.2);
   float loMllZ(applyMllZveto ? mZ0-10. : FLT_MAX);
   float hiMllZ(applyMllZveto ? mZ0+10. : FLT_MIN);
-  float mtwwMin = (ll==ee ? 150 : (ll==em || ll==me ? 140 :
-                                   (ll==mm ? (sr==WH_SRSS1 ? 100 :
-                                              (sr==WH_SRSS2 ? 150 :
-                                               (sr==WH_SRSS3 ? 200 :
-                                                FLT_MIN))) : FLT_MIN)));
-  float metRelMin = (ll==ee ? 50 : (ll==em || ll==me ? 50 :
-                                    (ll==mm ? (sr==WH_SRSS4 ? 50 :
-                                               FLT_MIN) : FLT_MIN)));
+  float mtwwMin = (ll==ee                  ? 150 :
+                   ll==em || ll==me        ? 140 :
+                   ll==mm ?  (sr==WH_SRSS1 ? 100 :
+                              sr==WH_SRSS2 ? 150 :
+                              sr==WH_SRSS3 ? 200 :
+                              FLT_MIN) :
+                   FLT_MIN);
+  float metRelMin = (ll==ee                 ? 50 :
+                     ll==em || ll==me       ? 50 :
+                     ll==mm ? (sr==WH_SRSS4 ? 50 :
+                               FLT_MIN) :
+                     FLT_MIN);
   bool update4mom(true); // charge flip
   bool u4m=update4mom;
   // if(!passEventCleaning()){ return false; }
