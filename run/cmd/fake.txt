@@ -39,3 +39,13 @@ FinalFakeHist \
  -o out/fakerate/merged/FinalFakeHist_${TAG}.root \
  >& log/fakerate/FinalFakeHist_${TAG}.log
 
+# copy the matrix file and modify the batch template
+# (fakepred.sh.template) to use it; submit fake prediction jobs.
+cp -p \
+   out/fakerate/merged/FinalFakeHist_${TAG}.root \
+   ${ROOTCOREDIR}/../SusyMatrixMethod/data/
+enw batch/templates/fakepred.sh.template
+./python/submitJobs.py --fakepred -o  -t ${TAG} -s 'period'
+
+# When the jobs are done, merge the outputs as needed
+./python/mergeOutput.py -v out/fakepred/
