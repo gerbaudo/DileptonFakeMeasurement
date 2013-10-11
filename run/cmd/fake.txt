@@ -32,13 +32,17 @@ FakePlot \
 
 grep "SF for" log/fakerate/FakePlot_${TAG}.log
 
-# produce the weighted matrix with FinalNewFake
+# Produce the weighted matrix with FinalNewFake.
+# This is also where the fractions are computed and printed to screen.
+# See https://www.debuggex.com/r/z_r35QPrxtMFIoIC for capturing re.
+
 FinalFakeHist \
  -t ${TAG} \
  -i out/fakerate/merged/ \
  -o out/fakerate/merged/FinalFakeHist_${TAG}.root \
  -p out/fakerate/merged/FinalFakeHist_plots_${TAG} \
  >& log/fakerate/FinalFakeHist_${TAG}.log
+egrep "((mu_percent_(real|qcd))|(el_percent_(real|conv|qcd)))" log/fakerate/FinalFakeHist_${TAG}.log
 
 # copy the matrix file and modify the batch template
 # (fakepred.sh.template) to use it; submit fake prediction jobs.
