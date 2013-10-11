@@ -99,8 +99,10 @@ void FakeClosurePlot::DataMCAnaPlots()
   // via the run options.  Right now we loop over all and save all.
   string savedir(m_outputdir);
   cout<<"m_PRs["<<m_PRs.size()<<"]"<<endl;
-  for(uint ipr=0; ipr<m_PRs.size(); ++ipr){
-    PlotRegion pr = m_PRs.at(ipr);
+  PlotRegion const prToPlot[] = { PR_SR8, PR_SR8lpt, PR_SR9, PR_SR9lpt };
+  const size_t nPrToPlot = sizeof(prToPlot) / sizeof(int);
+  for(uint ipr=0; ipr<nPrToPlot; ++ipr){
+    PlotRegion pr(prToPlot[ipr]);
     string region = PRNames[pr];
     cout<<"region "<<region<<endl;
     for(int ich=0; ich<Ch_N; ++ich){
