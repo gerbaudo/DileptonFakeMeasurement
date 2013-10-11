@@ -409,8 +409,7 @@ bool FakeClosurePlot::plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> er
   TLatex* lat = makeLatex();
   lat->SetTextSize(0.055);
   lat->DrawLatex(0.4, 0.85, "#intLdt=21fb^{-1}");
-  string chname = "";
-  lat->DrawLatex(0.45, 0.75, ("#splitline{"+chname+"}{"+selection+"}").c_str());
+  lat->DrawLatex(0.45, 0.75, ("#splitline{"+channel+"}{"+selection+"}").c_str());
   _pTop->Update();
 
   ratio->SetMaximum(2.0);  // Fix ratio plots to show +/- 100%
