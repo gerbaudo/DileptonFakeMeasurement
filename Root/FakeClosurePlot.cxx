@@ -38,7 +38,7 @@ void FakeClosurePlot::init(FPRunOption opt)
 {
   m_opt = opt;
   File data, top, Zjets, Wjets, dib, hf, qcd;
-  const string inDir(m_inputdir), tagExt(m_tag+".root");
+  const string inDir(m_inputdir), tagExt("_"+m_tag+".root");
   if(m_dbg)
     cout<<"looking for input files in '"<<inDir<<"'/*"<<tagExt<<endl
         <<"    and '"<<m_inputfake<<"'"<<endl;;
