@@ -18,7 +18,7 @@ FinalNewFake::FinalNewFake(string outputname) :
 //----------------------------------------------------------
 void FinalNewFake::initIoFiles()
 {
-  string tag = m_tag;
+  string tag = "_"+m_tag;
   string inDir = m_inputdir+"/";
   initInputFile(m_mc,      inDir+"allBkg"     +tag+".root", "Combined MC", "mc",      kBlack,   25);
   initInputFile(m_ttbar,   inDir+"ttbar"      +tag+".root", "Ttbar",       "ttbar",   kBlue,    25);
