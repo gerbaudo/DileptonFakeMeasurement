@@ -68,7 +68,6 @@ if onedata : allDatasets = setSameGroupForAllData(allDatasets)
 filenamesByGroup = collections.defaultdict(list)
 rootfiles = filter(os.path.isfile, glob.glob(inputdir + "*.root"))
 rootfiles = [rf for rf in rootfiles if tag in rf]
-print '\n'.join([n for n in [d.name for d in allDatasets] if 'PowhegPythia8_AU2CT10_WZ' in n])
 for rf in rootfiles :
     dsname = os.path.basename(rf).replace('.root','').replace(tag,'')
     if debug : print "'%s' -> dataset '%s'"%(rf, dsname)
