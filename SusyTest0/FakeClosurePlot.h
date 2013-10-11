@@ -75,25 +75,26 @@ class FakeClosurePlot : public myHist {
   string u(){ return "_"; };
   void DataMCAnaPlots();
 
-  void buildHists(vector<TH1F*> &hists, vector<TH1F*> &sys, string var,
+  bool buildHists(vector<TH1F*> &hists, vector<TH1F*> &sys, string var,
                   string xtitle, Chan ch, PlotRegion PR);
   TLegend* buildLegend(vector<TH1F*> hists, TGraphAsymmErrors* errs, float* x, float* y);
   TH1F* buildRatio(TH1F* data, TH1F* SM);
   THStack* buildStack(vector<TH1F*> hists);
-  void plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> errs,
+  bool plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> errs,
                string save, TLegend* leg, string channel, string selection,
                bool logy=false, bool logx=false);
   void clear(){  // Clear Hists
-    for(uint i=0; i<m_hists.size(); ++i)
-      if(m_hists.at(i)) m_hists.at(i)->Delete();
+    /*
+    // DG Oct2013: root crashing on cleanup when missing histos.
+    // I will rewrite this code in python, so for now I just skip the
+    // memory cleanup...
+    for(uint i=0; i<m_hists.size(); ++i) if(m_hists.at(i)) m_hists.at(i)->Delete();
+    for(uint i=0; i<m_sys.size();   ++i) if(m_sys.at(i))   m_sys.at(i)->Delete();
+    for(uint i=0; i<m_errs.size();  ++i) if(m_errs.at(i))  m_errs.at(i)->Delete();
+    */
     m_hists.clear();
-    for(uint i=0; i<m_sys.size(); ++i)
-      if(m_sys.at(i)) m_sys.at(i)->Delete();
     m_sys.clear();
-    for(uint i=0; i<m_errs.size(); ++i)
-      if(m_errs.at(i)) m_errs.at(i)->Delete();
     m_errs.clear();
-
   }
   TGraphAsymmErrors* buildErrors(TH1F* summary, vector<TH1F*> sys);
   TGraphAsymmErrors* buildRatioErrors(TH1F* nominal, TGraphAsymmErrors* tg_errs);

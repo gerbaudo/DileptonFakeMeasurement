@@ -115,14 +115,14 @@ void FakeClosurePlot::DataMCAnaPlots()
         string var    = m_plots.at(ip).first;
         string xtitle = m_plots.at(ip).second;
         cout<<"var "<<var<<" xtitle "<<xtitle<<endl;
-        buildHists(m_hists, m_sys, var, xtitle, ch, pr);
+        if(!buildHists(m_hists, m_sys, var, xtitle, ch, pr)) continue;
         m_errs.push_back(buildErrors(m_hists.back(), m_sys));
         m_errs.push_back(buildRatioErrors(m_hists.back(), m_errs.back()));
         float xleg[] = {0.65,0.9};
         float yleg[] = {0.5,0.89};
         TLegend* leg = buildLegend(m_hists, m_errs[0], xleg, yleg);
         string save = savedir+"/"+ region + "_" + ch_name + "_" + var + ".png";
-        plotAll(m_hists, m_errs, save, leg, ch_name, region, false); //true);
+        plotAll(m_hists, m_errs, save, leg, ch_name, region, false);
         clear();
       }// end loop over plots
     }// end loop over channels
@@ -132,21 +132,19 @@ void FakeClosurePlot::DataMCAnaPlots()
 //---------------------------------------------------------------------//
 // Set Histograms
 //---------------------------------------------------------------------//
-void FakeClosurePlot::buildHists(vector<TH1F*> &hists, vector<TH1F*> &sys, string var,
-			       string xtitle, Chan ch, PlotRegion PR)
+bool FakeClosurePlot::buildHists(vector<TH1F*> &hists, vector<TH1F*> &sys, string var,
+                                 string xtitle, Chan ch, PlotRegion PR)
 {
   if(m_dbg) cout << "FakeClosurePlot::buildHists from PR = " << PR << endl;
   string plot = PRNames[PR] + u() + chanNames[ch] + u() + var;
   if(m_dbg) cout << "Getting... " << plot <<endl;
   TH1F* SM = Get(m_files.at(0).file, plot + "_NOM", m_MCColor);
-  SM->Reset();
-  SM->SetName("SM");
   TH1F* sys_up = Get(m_files.at(0).file, plot + "_NOM", kBlack);
-  sys_up->Reset();
-  sys_up->SetName("sys_up");
   TH1F* sys_dn = Get(m_files.at(0).file, plot + "_NOM", kBlack);
-  sys_dn->Reset();
-  sys_dn->SetName("sys_dn");
+  if(!SM || !sys_up || !sys_dn) { cout<<"skipping "<<plot<<endl; return false; }
+  SM->Reset();     SM->SetName("SM");
+  sys_up->Reset(); sys_up->SetName("sys_up");
+  sys_dn->Reset(); sys_dn->SetName("sys_dn");
   sys.push_back(sys_up);
   sys.push_back(sys_dn);
   // Loop over files and build histograms
@@ -162,6 +160,7 @@ void FakeClosurePlot::buildHists(vector<TH1F*> &hists, vector<TH1F*> &sys, strin
     if( F.ismc ) SM->Add(h, 1.); // Add to SM
   }
   hists.push_back(SM);
+  return true;
 }
 //---------------------------------------------------------------------//
 // Build legend
@@ -368,7 +367,7 @@ void FakeClosurePlot::addSysError(TH1F* nominal, TFile* file, string plot,
 //---------------------------------------------------------------------//
 // General tools
 //---------------------------------------------------------------------//
-void FakeClosurePlot::plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> errs,
+bool FakeClosurePlot::plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> errs,
                               string save, TLegend* leg, string channel, string selection,
                               bool logy, bool logx)
 {
@@ -382,9 +381,10 @@ void FakeClosurePlot::plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> er
   _pBot->SetTopMargin(0.015);
   if(logx){ _pTop->SetLogx(); _pBot->SetLogx(); }
   TH1F* data     = hists.at(0);   // Plotting three basic objects:
-  THStack* stack = buildStack(hists);
   TH1F* SM       = hists.at(hists.size()-1);
-  TH1F* ratio    = buildRatio(data, SM);
+  if(!data || !SM) { cout<<"plotAll: missing data("<<data<<") SM("<<SM<<")"<<endl; return false; }
+  THStack* stack = buildStack(hists);
+  TH1F*    ratio = buildRatio(data, SM);
   TLine* nom = getLine(data, 1.00, kBlack, 1); // Create lines for ratio plot
   TLine* up50 = getLine(data, 1.5, kBlack, 2);
   TLine* dn50 = getLine(data, 0.5, kBlack, 2);
@@ -435,6 +435,7 @@ void FakeClosurePlot::plotAll(vector<TH1F*> hists, vector<TGraphAsymmErrors*> er
   c->SaveAs( save.c_str() );
   delete c;
   delete lat;
+  return true;
 }
 //----------------------------------------------------//
 float FakeClosurePlot::getNorm(TH1* h)
