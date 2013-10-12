@@ -522,9 +522,8 @@ TH1* FinalNewFake::getEtaSys(string lep)
   rate->SetName(outname.c_str());
   norm->Delete();
   for(int bin=1; bin<=rate->GetNbinsX(); ++bin)
-    (isElec ?
-     rate->AddBinContent(bin, -1.0) :
-     rate->SetBinContent(bin,  0.0)); // mu consistent with 0
+    if(isElec) rate->AddBinContent(bin, -1.0);
+    else       rate->SetBinContent(bin,  0.0); // mu consistent with 0
   return rate;
 }
 //----------------------------------------------------------
