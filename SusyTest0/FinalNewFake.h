@@ -76,8 +76,8 @@ class FinalNewFake : public FakePlotting
   
   // Build Rates
   void buildRates();
-  void buildMuonRateSR();
-  void buildElectronRateSR();
+  void buildMuonRateSR();     //!< build muon SR rate
+  void buildElectronRateSR(); //!< build electron rate using signal region composition
   void buildSystematics();
 
   // Grab rates from files
@@ -92,24 +92,37 @@ class FinalNewFake : public FakePlotting
   TH1* getMetRelSys(string lep);
   TH1* getEtaSys(string lep);
 
-  // Percentages for relevant fake rates
-  void getPercentages(string lep, vector<double> &frac_qcd, vector<double> &frac_conv,
-		      string cr);
-  void getPercentages(string lep, vector<double> &frac, string cr);		      
+  void getFakePercentages(string lep, vector<double> &frac_qcd, vector<double> &frac_conv, string cr);
+  void getRealPercentages(string lep, vector<double> &frac, string cr);		      
 
   // Kept in case we go back to scaling
   void scale(TH1* &h, float sf);
 
   //Get final rates given the percentages and the corresponding rates
-  TH1* getFinalRate(vector<TH1*> rates, vector<TH1*> percentages);
   TH1* getFinalRate(vector<TH1*> rates_qcd, vector<TH1*> rates_conv,
-		     vector<double> percent_qcd, vector<double> percent_conv);
+                    vector<double> percent_qcd, vector<double> percent_conv);
   TH1* getFinalRate(vector<TH1*> rates, vector<double> percent);   
-
   // Dump the rates to plots for the note
   void dumpPlot(TH1* hist);
-  void dumpStat(TH1* hist);
-
+  void dumpStat(TH1* hist); //!< dump histoname and max error deviation
+  struct RegionLeptonFakeorreal { //!< configuration at each step
+    SignalRegion reg;
+    bool isEle, isFake;
+    RegionLeptonFakeorreal(SignalRegion r, bool ele, bool fake) :
+      reg(r), isEle(ele), isFake(fake) {}
+    string str() {
+      return string(SRNames[reg] + (isEle ? " el":" mu") + (isFake ? " fake_rate":" real_eff"));
+    }
+  };
+  typedef RegionLeptonFakeorreal rlf_t;
+  typedef const vector<TH1*> cvecth1p_t;
+  typedef const vector<double> cvecd_t;
+  bool combineWriteAndPlot(rlf_t cfg, cvecth1p_t &histos, cvecd_t &weights);
+  //! expanded version of combineWriteAndPlot, used to combine qcd and conv for electrons
+  bool combineWriteAndPlot(rlf_t cfg,
+                           cvecth1p_t &histos1, cvecth1p_t &histos2,
+                           cvecd_t &weights1, cvecd_t &weights2);
+    
   //
   // Miscellaneous
   //
@@ -118,9 +131,9 @@ class FinalNewFake : public FakePlotting
   FinalNewFake& setInputDir(const std::string &dir);
   FinalNewFake& setOuputFilename(const std::string &name);
   FinalNewFake& setOuputPlotdir(const std::string &name);
-  void save(TH1* h);
-  void save(TParameter<double>  param);
-  void write();
+  void writeToOutputFile(TH1* h);
+  void writeToOutputFile(TParameter<double>  param);
+  void writeFileAndClose();
   
 
  protected:
