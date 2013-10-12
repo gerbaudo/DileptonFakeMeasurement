@@ -48,7 +48,7 @@ int main(int argc, char** argv)
   format.setTag(tag);
   format.setInputDir(inputdir);
   format.setOuputFilename(outputfile);
-  format.setOuputPlotdir(outputfile);
+  format.setOuputPlotdir(plotdir);
   format.setDebug(dbg);
   format.initIoFiles();
   format.buildRates();
