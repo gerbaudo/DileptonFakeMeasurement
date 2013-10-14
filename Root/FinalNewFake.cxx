@@ -59,7 +59,7 @@ void clearTh1Vec(const vector<TH1*> &v)
 //----------------------------------------------------------
 string combinedHistoName(SignalRegion region, bool isEle, bool fake)
 {
-  string reg(SRNames[region]);
+  string reg(getSrName(region));
   string lep(isEle ? "el":"mu");
   string var(fake ? "fake_rate":"real_eff");
   return lep+"_"+var+"_"+reg;
@@ -77,7 +77,7 @@ void printPercentages(const FinalNewFake::rlf_t config,
                       const vector<double> &v, const string &lab)
 {
   cout<<(config.isFake?"Fake rate":"Real eff")
-      <<": percentages for sr '"<<SRNames[config.reg]<<"'"
+      <<": percentages for sr '"<<getSrName(config.reg)<<"'"
       <<", "<<(config.isEle?"electron":"muon")<<endl
       <<samplesHeader<<endl
       <<(config.isEle?"el":"mu")<<"_percent_"<<lab<<": "<<vdouble2str(v)<<endl
@@ -89,7 +89,7 @@ void printPercentages(const FinalNewFake::rlf_t config,
                       const vector<double> &v2, const string &lab2)
 {
   cout<<(config.isFake?"Fake rate":"Real eff")
-      <<": percentages for sr '"<<SRNames[config.reg]<<"'"
+      <<": percentages for sr '"<<getSrName(config.reg)<<"'"
       <<", "<<(config.isEle?"electron":"muon")<<endl
       <<samplesHeader<<endl
       <<(config.isEle?"el":"mu")<<"_percent_"<<lab1<<": "<<vdouble2str(v1)<<endl
