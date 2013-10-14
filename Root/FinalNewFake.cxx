@@ -4,8 +4,6 @@
 #include "SusyTest0/FinalNewFake.h"
 #include "SusyTest0/utils.h"
 
-#include<numeric> // accumulate
-
 // same old ugly hack, to be removed ASAP. (DG 2013-09-17)
 string getSrName(int sr) { return (SR_WHSS!=sr ? SRNames[sr] : CRNames[CR_SRWHSS]); }
 string samplesHeader("\t\tttbar\t Wjet\t Zjet\t dib\t bbbar");
@@ -312,8 +310,6 @@ void FinalNewFake::getFakePercentages(string lep,
     }
   }
   // -- DG you are here
-  // -- float total(std::accumulate(temp_qcd.begin(), temp_qcd.end(), 0.0)
-  // --             + std::accumulate(temp_conv.begin(), temp_conv.end(), 0.0));
   if(total == 0) cout << "In region: " << cr << " don't have any fakes!!! " << endl;
   // Set the percentage
   for(uint i=0; i<temp_qcd.size();  ++i) frac_qcd.push_back (total>0 ? temp_qcd .at(i)/total:0.);
@@ -344,8 +340,6 @@ void FinalNewFake::getRealPercentages(string lep,
       temp.push_back(0.0);
     }
   } // end for(fp)
-  // -- DG you are here
-  // -- float total(std::accumulate(temp.begin(), temp.end(), 0.0));
   if(total == 0) cout << "In region: " << cr << " don't have any reals!!! " << endl;
   for(uint i = 0; i<temp.size(); ++i) frac.push_back( total > 0 ? temp.at(i) / total : 0. );
 }
