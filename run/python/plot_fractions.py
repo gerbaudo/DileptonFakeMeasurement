@@ -101,19 +101,17 @@ def parseFile(filename='') :
             if entry is not None : entries.append(entry)
             pType, sr, lep = start
             entry = Entry(pType, sr, lep)
-        elif labels :
-            lastLabels = labels
+        elif labels : lastLabels = labels
         elif values :
             vname, values = values
             entry.addLine(lastLabels, values, vname)
-        else :
-            print "line not parsed '%s'"%l
+        else : print "line not parsed '%s'"%l
     return entries
 #___________________________________________________________
 def resetErrors(h) :
     for b in range(1, h.GetNbinsX()+1) : h.SetBinError(b, 0.0)
 def sortLabels(h) : h.LabelsOption('av') # alpha-sorted, vertical
-def getLabels(h) : return [h.GetXaxis().GetBinLabel(b) for b in range(1, h.GetNbinsX())]    
+def getLabels(h) : return [h.GetXaxis().GetBinLabel(b) for b in range(1, h.GetNbinsX())]
 
 def buildHistos(entries=[], regions=[], hprefix='') :
     "assumes entries are all from the same lep and percentageType (and same user)"
