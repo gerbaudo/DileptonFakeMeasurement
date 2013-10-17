@@ -87,8 +87,8 @@ void SusyPlotter::initNames()
   PRNames[i++] = "sr7";
   PRNames[i++] = "sr8base";
   PRNames[i++] = "cr8lpt";
-  PRNames[i++] = "cr8lee";
-  PRNames[i++] = "cr8lmm";
+  PRNames[i++] = "cr8lptee";
+  PRNames[i++] = "cr8lptmm";
   PRNames[i++] = "sr8";
   PRNames[i++] = "sr9base";
   PRNames[i++] = "cr9lpt";
@@ -130,6 +130,9 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   if(ssf.passLpt()) {
     PlotRegion pr = (sameFlav ? PR_CR8lpt : PR_CR9lpt);
     fillHistos(ncl, j, m, weight, pr);
+    const float mZ0(91.2), mZlo(mZ0-10.0), mZhi(mZ0+10.0);
+    if     (ll==ee && susy::passZllVeto(ncl, mZlo, mZhi)) fillHistos(ncl, j, m, weight, PR_CR8ee);
+    else if(ll==mm && m->Et > 40.0)                       fillHistos(ncl, j, m, weight, PR_CR8mm);
   } // end passLpt
   if(ssf.passAll()) {
     PlotRegion pr = (sameFlav ? PR_SR8    : PR_SR9);
