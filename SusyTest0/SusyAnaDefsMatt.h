@@ -362,9 +362,11 @@ enum PlotRegion{
 
   PR_SRDavide,
   PR_SR_WHSS,
-  PR_SR8lpt,
+  PR_CR8lpt, // control region after lepton pt cut
+  PR_CR8ee,  // as above but with m_Z veto, for ee
+  PR_CR8mm,  // as above but with met>40 veto, for ee
   PR_SR8,
-  PR_SR9lpt,
+  PR_CR9lpt,
   PR_SR9,
 
   PR_N
@@ -395,9 +397,11 @@ static string PRNames[] = {
 
   "SRDavide",
   "SR_WHSS",
-  "sr8lpt",
+  "cr8lpt",
+  "cr8ee",
+  "cr8mm",
   "sr8",
-  "sr9lpt",
+  "cr9lpt",
   "sr9",
 
 };

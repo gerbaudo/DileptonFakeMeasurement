@@ -59,9 +59,9 @@ void FakeClosurePlot::init(FPRunOption opt)
   m_files.push_back(hf);
   m_files.push_back(qcd);
 
-  m_PRs.push_back(PR_SR8lpt);
+  m_PRs.push_back(PR_CR8lpt);
   m_PRs.push_back(PR_SR8);
-  m_PRs.push_back(PR_SR9lpt);
+  m_PRs.push_back(PR_CR9lpt);
   m_PRs.push_back(PR_SR9);
 //   if(opt == RO_ALL){ m_PRs.push_back(PR_VRSS); }
 //   else return;
@@ -99,7 +99,7 @@ void FakeClosurePlot::DataMCAnaPlots()
   // via the run options.  Right now we loop over all and save all.
   string savedir(m_outputdir);
   cout<<"m_PRs["<<m_PRs.size()<<"]"<<endl;
-  PlotRegion const prToPlot[] = { PR_SR8, PR_SR8lpt, PR_SR9, PR_SR9lpt };
+  PlotRegion const prToPlot[] = { PR_SR8, PR_CR8lpt, PR_SR9, PR_CR9lpt };
   const size_t nPrToPlot = sizeof(prToPlot) / sizeof(int);
   for(uint ipr=0; ipr<nPrToPlot; ++ipr){
     PlotRegion pr(prToPlot[ipr]);

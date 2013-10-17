@@ -73,7 +73,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
                     ? m_weightComponents.fake :
                     getFakeWeight(l,reg, metRel, sys));
     if(ssf.passLpt()) {
-      PlotRegion pr = (sameFlav ? PR_SR8lpt : PR_SR9lpt);
+      PlotRegion pr = (sameFlav ? PR_CR8lpt : PR_CR9lpt);
       SusyPlotter::fillHistos(ncl, j, m, weight, pr, sys);
       fillFakeHistos(ncl, j, m, weight, pr, sys);
     }

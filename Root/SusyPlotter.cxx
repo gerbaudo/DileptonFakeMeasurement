@@ -86,10 +86,12 @@ void SusyPlotter::initNames()
   PRNames[i++] = "sr7NjMll";
   PRNames[i++] = "sr7";
   PRNames[i++] = "sr8base";
-  PRNames[i++] = "sr8lpt";
+  PRNames[i++] = "cr8lpt";
+  PRNames[i++] = "cr8lee";
+  PRNames[i++] = "cr8lmm";
   PRNames[i++] = "sr8";
   PRNames[i++] = "sr9base";
-  PRNames[i++] = "sr9lpt";
+  PRNames[i++] = "cr9lpt";
   PRNames[i++] = "sr9";
 }
 //-----------------------------------------
@@ -126,9 +128,9 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   const DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
   bool sameFlav(ll==ee||ll==mm);
   if(ssf.passLpt()) {
-    PlotRegion pr = (sameFlav ? PR_SR8lpt : PR_SR9lpt);
+    PlotRegion pr = (sameFlav ? PR_CR8lpt : PR_CR9lpt);
     fillHistos(ncl, j, m, weight, pr);
-  }
+  } // end passLpt
   if(ssf.passAll()) {
     PlotRegion pr = (sameFlav ? PR_SR8    : PR_SR9);
     fillHistos(ncl, j, m, weight, pr);
