@@ -70,6 +70,7 @@ rootfiles = filter(os.path.isfile, glob.glob(inputdir + "*.root"))
 rootfiles = [rf for rf in rootfiles if tag in rf]
 for rf in rootfiles :
     dsname = os.path.basename(rf).replace('.root','').replace(tag,'')
+    dsname = dsname.rstrip('_') # depending on the specified tag there might be a leftover '_'
     if debug : print "'%s' -> dataset '%s'"%(rf, dsname)
     dataset = next((d for d in allDatasets if d.name==dsname), None)
     if not dataset :
