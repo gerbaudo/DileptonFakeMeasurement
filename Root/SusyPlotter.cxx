@@ -111,7 +111,8 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   cacheStaticWeightComponents();
   increment(n_readin, m_weightComponents);
   bool removeLepsFromIso(false);
-  selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
+  const SusyNtSys sys = NtSys_NOM; // for now we don't do any sys loop; see also setSysts
+  selectObjects(sys, removeLepsFromIso, TauID_medium);
   if(!selectEvent())    return kTRUE;
   const Met*          m = m_met;
   const JetVector&    j = m_signalJets2Lep;
@@ -129,14 +130,15 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   bool sameFlav(ll==ee||ll==mm);
   if(ssf.passLpt()) {
     PlotRegion pr = (sameFlav ? PR_CR8lpt : PR_CR9lpt);
-    fillHistos(ncl, j, m, weight, pr);
+    fillHistos(ncl, j, m, weight, pr, sys);
     const float mZ0(91.2), mZlo(mZ0-10.0), mZhi(mZ0+10.0);
-    if     (ll==ee && susy::passZllVeto(ncl, mZlo, mZhi)) fillHistos(ncl, j, m, weight, PR_CR8ee);
-    else if(ll==mm && m->Et > 40.0)                       fillHistos(ncl, j, m, weight, PR_CR8mm);
+    bool passZveto(susy::passZllVeto(ncl, mZlo, mZhi)), passMinMet(m->Et > 40.0);
+    if     (ll==ee && passZveto ) fillHistos(ncl, j, m, weight, PR_CR8ee, sys);
+    else if(ll==mm && passMinMet) fillHistos(ncl, j, m, weight, PR_CR8mm, sys);
   } // end passLpt
   if(ssf.passAll()) {
     PlotRegion pr = (sameFlav ? PR_SR8    : PR_SR9);
-    fillHistos(ncl, j, m, weight, pr);
+    fillHistos(ncl, j, m, weight, pr, sys);
   }
   return kTRUE;
 }
@@ -310,6 +312,14 @@ void SusyPlotter::setSysts()
   if(!m_doFake) {
     m_systs.push_back(NtSys_NOM);  m_systNames.push_back(SusyNtSystNames[NtSys_NOM]);
   } else {
+    // DG 2013-10-18: for now we are not doing any syst loop. However,
+    // we need to book the histograms for the systematic variations
+    // used to determine the uncertainty on the fake estimate (-> m_doFake toggle).
+    // This implementation is really confusing and not safe because
+    // here we are potentially mixing two enums
+    // (SusyMatrixMethod::SYSTEMATIC and SusyNtSys from
+    // SusyNtuple/SusyDefs.h). This will be fixed when I move to the
+    // 'single-enum' implementation.
     namespace smm = SusyMatrixMethod;
     const std::string *sns = smm::systematic_names;
     m_systs.push_back(smm::SYS_NONE);        m_systNames.push_back(sns[smm::SYS_NONE]);

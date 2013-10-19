@@ -33,7 +33,7 @@ class SusyPlotter : public SusySelection
   virtual void    Terminate(); // called after looping is finished
   virtual Bool_t  Process(Long64_t entry); // main event loop function
   void fillHistos(const LeptonVector& leps, const JetVector &jets, const Met* met,
-                  const float weight, PlotRegion PR = PR_NONE, uint sys = 0);
+                  const float weight, PlotRegion, uint sys);
   float Mt(TLorentzVector p1, TLorentzVector met) {
     return sqrt(2*p1.Pt()*met.Et()*(1-cos(p1.DeltaPhi(met))));
   };
