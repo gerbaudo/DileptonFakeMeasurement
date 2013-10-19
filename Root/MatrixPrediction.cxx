@@ -2,6 +2,7 @@
 
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyTest0/utils.h"
+#include "SusyTest0/criteria.h"
 
 #include <iomanip>
 #include <sstream>      // std::ostringstream
@@ -76,6 +77,10 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
       PlotRegion pr = (sameFlav ? PR_CR8lpt : PR_CR9lpt);
       SusyPlotter::fillHistos(ncl, j, m, weight, pr, sys);
       fillFakeHistos(ncl, j, m, weight, pr, sys);
+      const float mZ0(91.2), mZlo(mZ0-10.0), mZhi(mZ0+10.0);
+      bool passZveto(susy::passZllVeto(ncl, mZlo, mZhi)), passMinMet(m->Et > 40.0);
+      if     (ll==ee && passZveto ) fillHistos(ncl, j, m, weight, PR_CR8ee, sys);
+      else if(ll==mm && passMinMet) fillHistos(ncl, j, m, weight, PR_CR8mm, sys);
     }
     if(ssf.passAll()) {
       PlotRegion pr = (sameFlav ? PR_SR8    : PR_SR9);
