@@ -32,7 +32,7 @@ def main() :
         nChecksDone += 1
     message = message+("\n(after %(nchk)d checks every %(nsec)d sec)"
                        %{'nchk' : nChecksDone, 'nsec' : everyNsec})
-    mailCmd = ("echo \"%(msg)s\" | mail -s \"%(sbj)\" %(dest)s"
+    mailCmd = ("echo \"%(msg)s\" | mail -s \"%(sbj)s\" %(dest)s"
                % {'dest' : receiver, 'msg' : message, 'sbj':subject})
     getCommandOutput(mailCmd)
 
