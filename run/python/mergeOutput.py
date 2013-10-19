@@ -96,7 +96,7 @@ for group, files in filenamesByGroup.iteritems() :
     groupCounter += 1
     if verbose :
         print "[%d/%d] %s (%d files)"%(groupCounter, nGroupsToMerge, group, len(files))
-    outfile = outdir+'/'+group+tag+'.root'
+    outfile = outdir+'/'+group+'_'+tag+'.root'
     if overwrite and os.path.isfile(outfile) : os.remove(outfile)
     if debug : print "hadd %s\n\t%s"%(outfile, '\n\t'.join(files))
     cmd = "hadd %s %s" % (outfile, ' '.join(files))
