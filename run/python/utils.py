@@ -40,9 +40,9 @@ def guessLatestTagFromLatestRootFiles(dir, debug) :
     if debug : print "guessLatestTagFromLatestRootFiles: cleanup '%s'"%suffix
     return cleanupSampleName(suffix) if len(suffix) else suffix
 def guessMonthDayTag(name) :
-    "extract a '_Xxx_yy' tag with a 3-char month and a day"
+    "extract a 'Xxx_yy' tag with a 3-char month and a day"
     match = re.search('(?P<tag>'
-                      '_(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)_\d+)',
+                      '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)_\d+)',
                       name)
     if match : return match.group('tag')
 def guessMonthDayTagFromLastRootFile(dir, debug) :
