@@ -244,8 +244,8 @@ SusySelection::SsPassFlags SusySelection::passSrSs(const WH_SR signalRegion,
   bool sameSign = allowQflip ? sameSignOrQflip(ncls, ncmet, ll, u4m, mc) : susy::sameSign(ncls);
   if(sameSign)                                  { increment(n_pass_ss       [ll], wc); f.sameSign   =true;} else return f;
   met = &ncmet; // after qflip, use potentially smeared lep and met
-                                                increment(n_pass_muIso    [ll], wc);
-                                                increment(n_pass_elD0Sig  [ll], wc);
+                                                  increment(n_pass_muIso    [ll], wc);
+                                                  increment(n_pass_elD0Sig  [ll], wc);
   if(passfJetVeto  (js))                        { increment(n_pass_fjVeto   [ll], wc); f.fjveto     =true;} else return f;
   if(passbJetVeto  (js))                        { increment(n_pass_bjVeto   [ll], wc); f.bjveto     =true;} else return f;
   if(passge1Jet    (js))                        { increment(n_pass_ge1j     [ll], wc); f.ge1j       =true;} else return f;
