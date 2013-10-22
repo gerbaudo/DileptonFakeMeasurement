@@ -75,6 +75,7 @@ class SusySelection : public SusyNtAna
     bool passAll() const { return (passLpt() & zllVeto & mtllmet & ht & metrel); }
     bool eq2l, tauVeto, trig2l, trig2lmatch, true2l, sameSign, fjveto, bjveto, ge1j;
     bool lepPt, zllVeto, mtllmet, ht, metrel;
+    std::string str() const;
   };
  public:
     SusySelection();
