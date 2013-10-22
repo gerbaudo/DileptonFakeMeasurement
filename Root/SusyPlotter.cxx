@@ -89,6 +89,8 @@ void SusyPlotter::initNames()
   PRNames[i++] = "cr8lpt";
   PRNames[i++] = "cr8lptee";
   PRNames[i++] = "cr8lptmm";
+  PRNames[i++] = "cr8lptmmMtww";
+  PRNames[i++] = "cr8lptmmHt";
   PRNames[i++] = "sr8";
   PRNames[i++] = "sr9base";
   PRNames[i++] = "cr9lpt";
@@ -131,10 +133,13 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   if(ssf.passLpt()) {
     PlotRegion pr = (sameFlav ? PR_CR8lpt : PR_CR9lpt);
     fillHistos(ncl, j, m, weight, pr, sys);
-    const float mZ0(91.2), mZlo(mZ0-10.0), mZhi(mZ0+10.0);
-    bool passZveto(susy::passZllVeto(ncl, mZlo, mZhi)), passMinMet(m->Et > 40.0);
-    if     (ll==ee && passZveto ) fillHistos(ncl, j, m, weight, PR_CR8ee, sys);
-    else if(ll==mm && passMinMet) fillHistos(ncl, j, m, weight, PR_CR8mm, sys);
+    if     (ll==ee && ssf.zllVeto) fillHistos(ncl, j, m, weight, PR_CR8ee, sys);
+    else if(ll==mm) {
+      bool passMinMet(m->Et > 40.0);
+      if(passMinMet ) fillHistos(ncl, j, m, weight, PR_CR8mm,     sys);
+      if(ssf.mtllmet) fillHistos(ncl, j, m, weight, PR_CR8mmMtww, sys);
+      if(ssf.ht     ) fillHistos(ncl, j, m, weight, PR_CR8mmHt,   sys);
+    } // end if(mm)
   } // end passLpt
   if(ssf.passAll()) {
     PlotRegion pr = (sameFlav ? PR_SR8    : PR_SR9);

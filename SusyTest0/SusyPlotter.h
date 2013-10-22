@@ -20,7 +20,8 @@ class SusyPlotter : public SusySelection
     PR_NONE, PR_SR6base, PR_SR6,
     PR_SR7base, PR_SR7Nj, PR_SR7NjZttVeto, PR_SR7NjPtTot, PR_SR7NjMll, PR_SR7,
     PR_SR8base,
-    PR_CR8lpt, PR_CR8ee, PR_CR8mm, // looser regions for fake control plots, same for SR9lpt
+    PR_CR8lpt, PR_CR8ee, // looser regions for fake control plots, same for SR9lpt
+    PR_CR8mm, PR_CR8mmMtww, PR_CR8mmHt,
     PR_SR8, PR_SR9base, PR_CR9lpt, PR_SR9,
     PR_N
   };
