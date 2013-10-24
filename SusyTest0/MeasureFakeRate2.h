@@ -40,121 +40,43 @@ enum CRPLOT
 
 class MeasureFakeRate2 : public SusySelectionMatt
 {
-
  public:
-
   MeasureFakeRate2();
   virtual ~MeasureFakeRate2();
-
-  // Begin is called before looping on entries
   virtual void    Begin(TTree *tree);
-  // Terminate is called after looping is finished
   virtual void    Terminate();
-  
-  // Main event loop function
   virtual Bool_t  Process(Long64_t entry);
-
   // Initialize Histograms
   void initHistos(string outName);
-
-  // Alternative isolation
-  bool passAltIso(const Lepton* lepton);
-
-  //
   // Data Control Regions
-  //
   bool passRealCR(const LeptonVector &leptons, const JetVector& jets, const Met* met,
-		  ControlRegion CR);
+                  ControlRegion CR);
   bool passHFCR(const LeptonVector &leptons, const JetVector& jets, const Met* met,
-		ControlRegion CR);
+                ControlRegion CR);
   bool passLFZjetCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
   bool passLFWjetCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
   bool passConvCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
   bool passSignalRegion(const LeptonVector &leptons, const JetVector& jets, const Met* met,
-			ControlRegion CR);
+                        ControlRegion CR);
   bool passCFCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
-
-  //
   // Monte Carlo Regions
-  //
-  bool passMCReg(const LeptonVector &leptons, const JetVector& jets, 
-		 const Met* met, ControlRegion CR);
-
-  //
-  // Alternative Signal Regions, with loosened cuts
-  //
-  // TODO: Code these up to increase stats!
-  //bool passAltSR1(const LeptonVector& leptons, const JetVector& jets, const Met *met);
-  //bool passAltSR2(const LeptonVector& leptons, const JetVector& jets, const Met *met);
-  //bool passAltSR3(const LeptonVector& leptons, const JetVector& jets, const Met *met);
-  //bool passAltSR4(const LeptonVector& leptons, const JetVector& jets, const Met *met);
-  //bool passAltSR5(const LeptonVector& leptons, const JetVector& jets, const Met *met);
-
-  //
-  // Plotting Methods
-  //
-  //void plotRates(const Lepton* lep, ControlRegion CR);
-  void plotRates(const Lepton* lep, const JetVector& jets, 
-		 const Met* met, ControlRegion CR);
-  void plotCR(const Lepton* tag, const Lepton* probe, const JetVector& jets, const Met* met,
-	      ControlRegion CR, CRPLOT CRP);
-  void plotOptimumCuts(const Lepton* lep, const JetVector& jets, const Met* met,
-		       ControlRegion CR);
-
-  //
+  bool passMCReg(const LeptonVector &leptons, const JetVector& jets,
+                 const Met* met, ControlRegion CR);
+  void fillRatesHistos(const Lepton* lep, const JetVector& jets,
+                       const Met* met, ControlRegion CR);
+  void fillCrHistos(const Lepton* tag, const Lepton* probe, const JetVector& jets, const Met* met,
+                    ControlRegion CR, CRPLOT CRP);
   // Miscellaneous
-  //
   bool passLFTrig(const LeptonVector &leps);
-  void setAltIso(){ m_AltIso = true; };
-  LeptonSource getLeptonSource(const Lepton* l){
-    if( isRealLepton(l) ) return LS_Real;
-    if( isHFLepton(l) )   return LS_HF;
-    if( isLFLepton(l) )   return LS_LF;
-    if( isConvLepton(l) ) return LS_Conv;
-    return LS_Unk;
-  };
-
+  LeptonSource getLeptonSource(const Lepton* l);
   bool isSignalWithEtcone(const Lepton* lep);
   bool isSignalWithoutEtcone(const Lepton* lep);
   bool isSignalWithoutPtcone(const Lepton* lep);
   bool isSignalWithoutd0Sig(const Lepton* lep);
   bool isSignalWithoutz0Sig(const Lepton* lep);
   bool isSignalWithoutIP(const Lepton* lep);
-
-  // Additional run options
-  void setFindOptCut(bool findOpt){ m_findOptCut = findOpt; };
-
-  DiLepPair getDilepPair(const Lepton* tag, const Lepton* probe){
-    if( !tag ) return DL_LL; // no tag
-    int nvtx  = nt.evt()->nVtx;
-    bool isMC = nt.evt()->isMC;
-    bool lead = tag->Pt() >= probe->Pt() ? 
-      isSignalLepton(tag,m_baseElectrons,m_baseMuons,nvtx,isMC) :
-      isSignalLepton(probe,m_baseElectrons,m_baseMuons,nvtx,isMC);
-    bool sublead = tag->Pt() < probe->Pt() ? 
-      isSignalLepton(tag,m_baseElectrons,m_baseMuons,nvtx,isMC) :
-      isSignalLepton(probe,m_baseElectrons,m_baseMuons,nvtx,isMC);
-    
-    if( lead && sublead )  return DL_TT;
-    if( lead && !sublead ) return DL_TL;
-    if( !lead && sublead ) return DL_LT;
-    return DL_LL;
-  };
-
-  // Get isolation variables
-  float getPtcone(const Lepton* lep, bool elStyle=false){
-    if( lep->isEle() )  return lep->ptcone30;
-    else if( !elStyle ) return lep->ptcone30;
-    else  return ((Muon*) lep)->ptcone30ElStyle;
-  };
-  float getEtcone(const Lepton* lep){
-    if( lep->isEle() ) return ((Electron*) lep)->topoEtcone30Corr;
-    return ((Muon*) lep)->etcone30;
-  };
-
-  //
+  DiLepPair getDilepPair(const Lepton* tag, const Lepton* probe);
   // Histograms for variables
-  //
   const int CR_N;
   static const int kNmaxControlRegions=32;
   //  static const int getNcontrolRegions()
@@ -185,7 +107,7 @@ class MeasureFakeRate2 : public SusySelectionMatt
   EffObject* NEW(h_flavor);
   EffObject* NEW(h_l_type);
   EffObject* NEW(h_l_origin);
-  
+
   EffObject* NEW(h_onebin);
 
   EffObject* NEW(h_heavy_d0sig);
@@ -239,27 +161,15 @@ class MeasureFakeRate2 : public SusySelectionMatt
   TProfile* NEWCUT(p_mu_ptcone);
   TProfile* NEWCUT(p_mu_ptconeElStyle);
 
-
   #undef NEWCUT
-  
- protected:
 
+ protected:
   TFile*       m_outFile;           // Output file
   LeptonVector m_probes;            // Probe lepton vector
   LeptonVector m_tags;              // Tag Lepton vector
-  
   float        m_evtWeight;         // Event Weight
-
-  bool         m_AltIso;            // If true, use Alt isolation
-
   float        m_metRel;            // Met Rel to be plotted
-
   int          m_ch;                // Set the channel
-
-  bool         m_findOptCut;        // Toggle to only make quick plots
-
-
-  
 
 };
 #endif

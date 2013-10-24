@@ -32,8 +32,6 @@ void usage(const char *exeName) {
       <<"\t"<<"-o [--output]      output file"           <<endl
       <<"\t"<<"-s [--sample]      samplename"            <<endl
       <<"\t"<<"--mcTrig           use MC triggers"       <<endl
-      <<"\t"<<"--altIso           use 2011 isolation"    <<endl
-      <<"\t"<<"--optCut           determine optimum cuts"<<endl
       <<"\t"<<"-d [--debug]     : debug (>0 print stuff)"<<endl
       <<"\t"<<"-h [--help]      : print help"            <<endl
       <<endl;
@@ -49,9 +47,6 @@ int main(int argc, char** argv)
   string sample;
   string input;
   string output;
-  bool useAltIso = false;
-  bool useMCTrig = false;
-  bool optCuts   = false;
 
   int optind(1);
   while ((optind < argc)) {
@@ -67,9 +62,6 @@ int main(int argc, char** argv)
     else if(sw=="-i"||sw=="--input"      ) { input = argv[++optind]; }
     else if(sw=="-o"||sw=="--output"     ) { output = argv[++optind]; }
     else if(sw=="-s"||sw=="--sample"     ) { sample = argv[++optind]; }
-    else if(sw=="--mcTrig"               ) { useMCTrig = true; ++optind; }
-    else if(sw=="--altIso"               ) { useAltIso = true; ++optind; }
-    else if(sw=="--optCut"               ) { optCuts = true; ++optind; }
     else if(sw=="-h"||sw=="--help"       ) { usage(argv[0]); return 0; }
     else cout<<"Unknown switch "<<sw<<endl;
     optind++;
@@ -82,9 +74,6 @@ int main(int argc, char** argv)
       <<"  dbg     "<<dbg       <<endl
       <<"  input   "<<input     <<endl
       <<"  output  "<<output    <<endl
-      <<"  mcTrig  "<<useMCTrig <<endl
-      <<"  altIso  "<<useAltIso <<endl
-      <<"  optCut  "<<optCuts   <<endl
       <<endl;
 
   TChain* chain = new TChain("susyNt");
@@ -111,9 +100,6 @@ int main(int argc, char** argv)
   mfr.setDebug(dbg);
   if(sample.size()) mfr.setSampleName(sample);
   if(output.size()) mfr.setFileName(output);
-  mfr.setUseMCTrig(useMCTrig);
-  if(useAltIso) mfr.setAltIso();
-  if(optCuts)   mfr.setFindOptCut(optCuts);
 
   mfr.buildSumwMap(chain);
   chain->Process(&mfr, sample.c_str(), nEvt, nSkip);
