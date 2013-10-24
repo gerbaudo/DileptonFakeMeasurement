@@ -4,16 +4,54 @@
 ////////////////////////////////////////////////////
 
 #include "SusyTest0/MeasureFakeRate2.h"
+#include "SusyTest0/SelectionRegions.h"
 #include "SusyTest0/criteria.h"
 
 float Htbins[] = {1,3,6,9,12};
 int nHtbins = 4;
 
 
+using namespace susywh; // pull in SelectionRegions
+const int controlRegions[] = {
+  kCR_Real, kCR_SideLow, kCR_SideHigh, kCR_HF, kCR_HF_high,
+  kCR_LFZjet, kCR_LFWjet, kCR_Conv, kCR_CFlip,
+  kCR_MCHeavy, kCR_MCLight, kCR_MCConv, kCR_MCQCD,
+  kCR_MCALL, kCR_MCReal, kCR_MCNone
+};
+const size_t nControlRegions = sizeof(controlRegions)/sizeof(int);
+const int signalRegions[] = {
+  kCR_SRmT2a,
+  kCR_SRmT2b,
+  kCR_SRmT2c,
+  kCR_SRWWa,
+  kCR_SRWWb,
+  kCR_SRWWc,
+  kCR_SRZjets,
+  kCR_VRSS,
+  kCR_CRWWMet,
+  kCR_CRWWmT2,
+  kCR_CRTopMet,
+  kCR_CRTopmT2,
+  kCR_CRZVMet,
+  kCR_CRZVmT2_90,
+  kCR_CRZVmT2_120,
+  kCR_CRZVmT2_150,
+  kCR_CRZVmT2_100,
+  kCR_CRTopZjets,
+  kCR_CRZXZjets,
+  kCR_SSInc,
+  kCR_PremT2,
+  kCR_SRWHSS,
+};
+const size_t nSignalRegions = sizeof(signalRegions)/sizeof(int);
+
 /*--------------------------------------------------------------------------------*/
 // Fake Rate Constructor
 /*--------------------------------------------------------------------------------*/
 MeasureFakeRate2::MeasureFakeRate2() :
+  CR_N(nControlRegions + nSignalRegions + 1),
+  m_controlRegions(controlRegions, controlRegions + nControlRegions),
+  m_signalRegions (signalRegions,  signalRegions  + nSignalRegions),
   m_outFile(NULL),
   m_evtWeight(1.),
   m_AltIso(false),
@@ -69,7 +107,15 @@ void MeasureFakeRate2::Terminate()
 /*--------------------------------------------------------------------------------*/
 void MeasureFakeRate2::initHistos(string outName)
 {
-
+  // DG : here we will switch to a loop over m_controlRegions and m_signalRegions
+  // const int CR_N(getNumControlRegions());
+  if(CR_N >= kNmaxControlRegions)
+    cout<<"MeasureFakeRate2::initHistos:"
+        <<" "<<kNmaxControlRegions<<" histos reserved"
+        <<" trying to book "<<CR_N<<endl
+        <<" Exiting."
+        <<endl;
+  assert(CR_N<kNmaxControlRegions);
   cout<<"Creating file: "<<outName<<endl;
   m_outFile = new TFile((outName).c_str(),"recreate");
   m_outFile->cd();

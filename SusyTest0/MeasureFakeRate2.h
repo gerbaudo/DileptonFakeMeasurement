@@ -20,8 +20,8 @@
 #include "SusyTest0/SusySelectionMatt.h"
 #include "SusyTest0/SusyAnaDefsMatt.h"
 #include "SusyTest0/EffObject.h"
-
 #include <fstream>
+#include <vector>
 
 using namespace std;
 using namespace Susy;
@@ -155,9 +155,14 @@ class MeasureFakeRate2 : public SusySelectionMatt
   //
   // Histograms for variables
   //
+  const int CR_N;
+  static const int kNmaxControlRegions=32;
+  //  static const int getNcontrolRegions()
+  const std::vector<int> m_controlRegions; // where we compute SF and rates (pseudo t&p)
+  const std::vector<int> m_signalRegions;  // where we compute fractions to make the weighted avg
 
-  #define NEW(name) name[LT_N][CR_N][Ch_N]
-  #define NEWCR(name) name[LT_N][CR_N]
+  #define NEW(name)   name[LT_N][kNmaxControlRegions][Ch_N]
+  #define NEWCR(name) name[LT_N][kNmaxControlRegions]
 
   EffObject* NEW(h_l_pt);
   EffObject* NEW(h_l_pt_coarse);
@@ -212,7 +217,7 @@ class MeasureFakeRate2 : public SusySelectionMatt
   #undef NEWCR
 
   // Histos to determine cuts
-  #define NEWCUT(name) name[LT_N][CR_N]
+  #define NEWCUT(name) name[LT_N][kNmaxControlRegions]
 
   EffObject* NEWCUT(h_ptcone);
   EffObject* NEWCUT(h_etcone);

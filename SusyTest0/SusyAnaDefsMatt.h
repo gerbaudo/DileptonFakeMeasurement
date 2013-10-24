@@ -61,7 +61,7 @@ enum ControlRegion
 
   CR_SRWHSS,
 
-  CR_N
+  //  CR_N
 };
 
 static string CRNames[] = 

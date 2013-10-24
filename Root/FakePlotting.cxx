@@ -138,6 +138,7 @@ FakePlotting::~FakePlotting()
 //--------------------------------------------------------//
 void FakePlotting::MCFakeRate()
 {
+  /*
   if(m_dbg) cout << "MCFakeRate" << endl;
   string savedir = m_outputdir;
   vector<string> plots, labels;
@@ -179,12 +180,14 @@ void FakePlotting::MCFakeRate()
       }// end loop over control region
     }// end loop over plots
   }// end loop over lepton types
+  */
 }
 //--------------------------------------------------------//
 // Loop over and plot fake rate vs. various variables
 //--------------------------------------------------------//
 void FakePlotting::DataFakeRate()
 {
+  /*
   if(m_dbg) cout << "DataFakeRate" << endl;
 
   string savedir = mkdirIfNeeded("out/fakeplot/dataRate/");
@@ -244,7 +247,7 @@ void FakePlotting::DataFakeRate()
 
     }// end loop over plots
   }// end loop over lepton types
-  
+  */  
 }
 //--------------------------------------------------------//
 // Data and Photon rates
@@ -303,6 +306,7 @@ void FakePlotting::GammaJetCRRates()
 //--------------------------------------------------------//
 void FakePlotting::DataRateMCSub()
 {
+  /*
   cout<<"Needs fixed!!!!"<<endl;
   return;
   if(m_dbg) cout << "DataFakeRate" << endl;
@@ -365,7 +369,7 @@ void FakePlotting::DataRateMCSub()
 
     }// end loop over plots
   }// end loop over lepton types
-
+  */
 }
 //--------------------------------------------------------//
 // Get SF for Data and MC

@@ -31,7 +31,7 @@ namespace susywh
   VALS( kCR_SideLow      ,)  /* Real Side band Lower */    \
   VALS( kCR_SideHigh     ,)  /* Real Side band higher */   \
   VALS( kCR_HF           ,)  /* HF b-bbar tag and probe */ \
-  VALS( kCR_HF_lowMet    ,)  /* HF b-bbar t&p w/ met<80 */ \
+  VALS( kCR_HF_high      ,)  /* HF b-bbar t&p w/ met<80 */ \
   VALS( kCR_LFZjet       ,)  /* LF Z+jet tag and probe */  \
   VALS( kCR_LFWjet       ,)  /* LF W+jet tag and probe */  \
   VALS( kCR_Conv         ,)  /* Zmumu tag and probe */     \
