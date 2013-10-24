@@ -6,6 +6,7 @@
 #include "SusyTest0/MeasureFakeRate2.h"
 #include "SusyTest0/myHist.h"
 #include "SusyTest0/EffObject.h"
+#include "SusyTest0/SelectionRegions.h" 
 
 #ifdef __CINT__
 
@@ -25,4 +26,6 @@
 #pragma link C++ class myHist;
 #pragma link C++ class EffObject;
 #pragma link C++ class EffObject2;
+#pragma link C++ namespace susywh;
+#pragma link C++ enum susywh::SelectionRegions;
 #endif
