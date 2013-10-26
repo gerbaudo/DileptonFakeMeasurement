@@ -150,9 +150,9 @@ void IterativeFakeCorrection::iterate()
 
       // Dump the rate
       for(int bin=1; bin<=corrected[0]->GetNbinsX(); ++bin){
-	float num = corrected[0]->GetBinContent(bin);
-	float den = corrected[1]->GetBinContent(bin);
-	cout<<"Bin: "<<bin<<" num: "<<num<<" den: "<<den<<" rate: "<<num/den<<endl;
+        float num = corrected[0]->GetBinContent(bin);
+        float den = corrected[1]->GetBinContent(bin);
+        cout<<"Bin: "<<bin<<" num: "<<num<<" den: "<<den<<" rate: "<<num/den<<endl;
       }
 
       // Make temporary rate
@@ -272,10 +272,8 @@ double IterativeFakeCorrection::getFake(float r,
 {
 
   cout<<"\t\t\tr: "<<r<<" f: "<<f<<" nL: "<<nL<<" nT: "<<nT<<endl;
-  if(tight)
-    return f/(r-f) * (nL*r - nT);
-
-  return 1/(r-f) * (nL*r -nT);
+  if(tight) return f/(r-f) * (nL*r -nT);
+  else      return 1/(r-f) * (nL*r -nT);
 }
 
 //-----------------------------------------------//
