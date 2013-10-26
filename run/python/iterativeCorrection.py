@@ -87,14 +87,11 @@ def main() :
                 corr = correctRate(corr, dataLow, mcLow, corrFact)
         ratio = ratioHistogram(corrected['num'], corrected['den'], lep+'_corHFRate')
         correctionHistos[lep] = ratio
-    if verbose :
-        print "saving output to ",fnameOutput
+    if verbose : print "saving output to ",fnameOutput
     fileOut = r.TFile.Open(fnameOutput, 'recreate')
     fileOut.cd()
     for l,h in correctionHistos.iteritems() :
-        if verbose :
-            print "%s : writing %s"%(l,h.GetName())
-            print histo1dToTxt(h)
+        if verbose : print "%s : writing %s\n%s"%(l, h.GetName(),histo1dToTxt(h))
         h.Write()
     fileOut.Close()
 
