@@ -35,16 +35,15 @@ def main() :
     parser.add_option('-v','--verbose', action='store_true', default=False)
     (opts, args) = parser.parse_args()
     requiredOptions = ['n_iter', 'input_mc', 'input_data', 'output']
-    if any(not hasattr(opts, o) or getattr(opts,o) is None for o in requiredOptions) :
-        parser.error('Missing required option')
+    def optIsNotSpecified(o) : return not hasattr(opts, o) or getattr(opts,o) is None
+    if any(optIsNotSpecified(o) for o in requiredOptions) : parser.error('Missing required option')
     nIter        = opts.n_iter
     fnameInputMc = opts.input_mc
     fnameInputDa = opts.input_data
     fnameOutput  = opts.output
     verbose      = opts.verbose
-    if verbose :
-        print ('\nUsing the following options:\n'
-               +'\n'.join("%s : %s"%(o, str(getattr(opts, o))) for o in requiredOptions))
+    if verbose : print ('\nUsing the following options:\n'
+                        +'\n'.join("%s : %s"%(o, str(getattr(opts, o))) for o in requiredOptions))
     fileData = r.TFile.Open(fnameInputDa)
     fileMc   = r.TFile.Open(fnameInputMc)
     assert fileData and fileMc, "Missing input files: data %s, mc %s"%(str(fileData), str(fileMc))
@@ -70,12 +69,6 @@ def main() :
                    +'\n'.join(["%s: num %s den %s"%(k, v['num'], v['den'])
                                for k,v in missingHistos.iteritems()]))
             continue
-        def ratioHistogram(num, den, name='ratio') :
-            r = num.Clone(name)
-            r.SetDirectory(0) # we usually don't care about the ownership of these temporary objects
-            r.Reset()
-            r.Divide(num, den, 1, 1)
-            return r
         hRealEff = ratioHistogram(hRealDataCr['num'], hRealDataCr['den'], 'real_eff')
         corrected = dict([(nd, hFakeDataLo[nd].Clone('corrected_'+nd)) for nd in ['num', 'den']])
         for iteration in range(nIter) :
@@ -154,6 +147,12 @@ def histo1dToTxt(h) :
     return '\n'.join(["%s : %s"%(n,v)
                       for n,v in [('hisName',hisName)] + [(l, lf2s(eval(l)))
                                                           for l in ['binEdge', 'binCont', 'binErr']]])
+def ratioHistogram(num, den, name='ratio') :
+    r = num.Clone(name)
+    r.SetDirectory(0) # we usually don't care about the ownership of these temporary objects
+    r.Reset()
+    r.Divide(num, den, 1, 1)
+    return r
 
 if __name__=='__main__' :
     main()
