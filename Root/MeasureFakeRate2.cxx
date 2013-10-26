@@ -203,23 +203,23 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     const JetVector& jets = m_signalJets2Lep;
     switch(CR) {
       // Data Driven CRs
-    case CR_Real     : passCR = passRealCR  (leptons, jets,m_met, CR); break;
-    case CR_SideLow  : passCR = passRealCR  (leptons, jets,m_met, CR); break;
-    case CR_SideHigh : passCR = passRealCR  (leptons, jets,m_met, CR); break;
-    case CR_HF       : passCR = passHFCR    (leptons, jets,m_met, CR); break;
-    case CR_HF_high  : passCR = passHFCR    (leptons, jets,m_met, CR); break;
-    case CR_LFZjet   : passCR = passLFZjetCR(leptons, jets,m_met    ); break;
-    case CR_LFWjet   : passCR = passLFWjetCR(leptons, jets,m_met    ); break;
-    case CR_Conv     : passCR = passConvCR  (leptons, jets,m_met    ); break;
-    case CR_CFlip    : passCR = passCFCR    (leptons, jets,m_met    ); break;
+    case CR_Real     : passCR = passRealCR  (leptons, jets, m_met, CR); break;
+    case CR_SideLow  : passCR = passRealCR  (leptons, jets, m_met, CR); break;
+    case CR_SideHigh : passCR = passRealCR  (leptons, jets, m_met, CR); break;
+    case CR_HF       : passCR = passHFCR    (leptons, jets, m_met, CR); break;
+    case CR_HF_high  : passCR = passHFCR    (leptons, jets, m_met, CR); break;
+    case CR_LFZjet   : passCR = passLFZjetCR(leptons, jets, m_met    ); break;
+    case CR_LFWjet   : passCR = passLFWjetCR(leptons, jets, m_met    ); break;
+    case CR_Conv     : passCR = passConvCR  (leptons, jets, m_met    ); break;
+    case CR_CFlip    : passCR = passCFCR    (leptons, jets, m_met    ); break;
       // MC Regions
-    case CR_MCHeavy  : passCR = passMCReg(leptons,jets,m_met,CR); break;
-    case CR_MCLight  : passCR = passMCReg(leptons,jets,m_met,CR); break;
-    case CR_MCConv   : passCR = passMCReg(leptons,jets,m_met,CR); break;
-    case CR_MCQCD    : passCR = passMCReg(leptons,jets,m_met,CR); break;
-    case CR_MCALL    : passCR = passMCReg(leptons,jets,m_met,CR); break;
-    case CR_MCReal   : passCR = passMCReg(leptons,jets,m_met,CR); break;
-    case CR_MCNone   : passCR = passMCReg(leptons,jets,m_met,CR); break;
+    case CR_MCHeavy  : passCR = passMCReg   (leptons, jets, m_met, CR); break;
+    case CR_MCLight  : passCR = passMCReg   (leptons, jets, m_met, CR); break;
+    case CR_MCConv   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
+    case CR_MCQCD    : passCR = passMCReg   (leptons, jets, m_met, CR); break;
+    case CR_MCALL    : passCR = passMCReg   (leptons, jets, m_met, CR); break;
+    case CR_MCReal   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
+    case CR_MCNone   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
       // Remaining signal and control regions
     default          : passCR = passSignalRegion(leptons,jets,m_met,CR); break;
     } // end switch(CR)
