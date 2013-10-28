@@ -7,6 +7,20 @@
 # ATL-COM-PHYS-2011-768.
 # This python implementation is based on the c++ implementation by
 # Matt (mrelich6@gmail.com), originally in IterativeFakeCorrection.cxx
+#
+# Here is a brief description of the idea:
+
+# - For the matrix method we need to compute p(T|R) and p(T|F); we
+#   compute them as N_T/N_L in each one of the different cases (R or F)
+#   as a function of p_T
+
+
+
+# - N_T and N_L are taken from data. For fake leptons from heavy-flavor decays we compute p(T|F) in for
+# - heavy-flavor electron and muons, however, in the  xo
+
+
+# - leptons in these two categories is non-negligible, then the resulting p(T|R) and p(T|F)
 
 # davide.gerbaudo@gmail.com
 # October 2013
@@ -32,18 +46,22 @@ def main() :
     parser.add_option('-m', '--input_mc')
     parser.add_option('-d', '--input_data')
     parser.add_option('-o', '--output')
+    parser.add_option('-p', '--plot', help='plot inputs') # todo: implement sanity plot vs. n_iter
     parser.add_option('-v','--verbose', action='store_true', default=False)
     (opts, args) = parser.parse_args()
     requiredOptions = ['n_iter', 'input_mc', 'input_data', 'output']
+    otherOptions = ['plot', 'verbose']
+    allOptions = requiredOptions + otherOptions
     def optIsNotSpecified(o) : return not hasattr(opts, o) or getattr(opts,o) is None
     if any(optIsNotSpecified(o) for o in requiredOptions) : parser.error('Missing required option')
     nIter        = opts.n_iter
     fnameInputMc = opts.input_mc
     fnameInputDa = opts.input_data
     fnameOutput  = opts.output
+    plot         = opts.plot
     verbose      = opts.verbose
     if verbose : print ('\nUsing the following options:\n'
-                        +'\n'.join("%s : %s"%(o, str(getattr(opts, o))) for o in requiredOptions))
+                        +'\n'.join("%s : %s"%(o, str(getattr(opts, o))) for o in allOptions))
     fileData = r.TFile.Open(fnameInputDa)
     fileMc   = r.TFile.Open(fnameInputMc)
     assert fileData and fileMc, "Missing input files: data %s, mc %s"%(str(fileData), str(fileMc))
@@ -59,7 +77,11 @@ def main() :
         hFakeDataLo = getNumDenHistos(fileData, lep+'_fakeHF_all_l_pt') # bug? shouldnt be 'low'?
         hFakeDataHi = getNumDenHistos(fileData, lep+'_fakeHF_high_all_l_pt')
         hFakeMcLo   = getNumDenHistos(fileMc,   lep+'_fakeHF_all_l_pt') # bug? shouldnt be 'low'?
-        hFakeMcHi   = getNumDenHistos(fileMc,   lep+'_fakeHF_high_all_l_pt')        
+        hFakeMcHi   = getNumDenHistos(fileMc,   lep+'_fakeHF_high_all_l_pt')
+        if plot :
+            hNumDen = [hFakeDataLo, hFakeDataHi, hFakeMcLo, hFakeMcHi]
+            for nd in ['num','den'] : plotHistos([h[nd] for h in hNumDen], 'c_'+lep+'_'+nd)
+            plotHistosRatio(hNumDen, 'c_'+lep+'_ratio')
         def missingInputHisto(ndHistos) : return any(not h for h in ndHistos.values())
         histoCollToBeChecked = ['hRealDataCr','hFakeDataLo','hFakeDataHi','hFakeMcLo','hFakeMcHi']
         missingHistos = dict([(nhc,hp) for nhc,hp in [(hc, eval(hc)) for hc in histoCollToBeChecked]
@@ -150,6 +172,30 @@ def ratioHistogram(num, den, name='ratio') :
     r.Reset()
     r.Divide(num, den, 1, 1)
     return r
+
+def plotHistos(histos=[], canvasName='c1') :
+    c = r.TCanvas(canvasName)
+    c.cd()
+    maximum = max([h.GetMaximum() for h in histos])
+    padMaster = None
+    colors = [r.kBlack, r.kRed, r.kBlue, r.kGreen, r.kViolet]
+    markers = [r.kOpenCircle, r.kOpenSquare, r.kOpenTriangleUp, r.kOpenDiamond, r.kOpenCross]
+    for h,col,m in zip(histos, colors, markers) :
+        h.SetLineColor(col)
+        h.SetMarkerColor(col)
+        h.SetMarkerStyle(m)
+        h.Draw('same' if padMaster else '')
+        padMaster = padMaster if padMaster else h
+    padMaster.SetMaximum(1.1*maximum)
+    leg = c.BuildLegend()
+    leg.SetFillColor(0)
+    leg.SetFillStyle(0)
+    c.Update()
+    c.SaveAs(canvasName+'.png')
+
+def plotHistosRatio(histosPairs=[], canvasName='') :
+    histosRatio = [ratioHistogram(hh['num'], hh['den']) for hh in histosPairs]
+    plotHistos(histosRatio, canvasName)
 
 if __name__=='__main__' :
     main()
