@@ -18,7 +18,7 @@ const int controlRegions[] = {
   kCR_MCHeavy, kCR_MCLight, kCR_MCConv, kCR_MCQCD,
   kCR_MCALL, kCR_MCReal, kCR_MCNone
 };
-const size_t nControlRegions = sizeof(controlRegions)/sizeof(int);
+const size_t nControlRegions = sizeof(controlRegions)/sizeof(controlRegions[0]);
 const int signalRegions[] = {
   kCR_SRmT2a,
   kCR_SRmT2b,
@@ -116,55 +116,53 @@ void MeasureFakeRate2::initHistos(string outName)
 
   for(int il=0; il<LT_N; ++il){ // Loop over lepton type
     string lName = LTNames[il];
-    // For the control regions we need the plots from both Data and MC
-    for(int icr=0; icr<CR_N; ++icr){
+    for(int icr=0; icr<CR_N; ++icr){ // Loop over control regions (need both Data and MC)
       string cName = CRNames[icr];
-      // Loop over the channels
-      for(int ich=0; ich<Ch_N; ++ich){
+      for(int ich=0; ich<Ch_N; ++ich){ // Loop over the channels
         string chan = chanNames[ich];
         string base = lName + "_" + cName + "_" + chan + "_";
-        EFFVAR(h_l_pt[il][icr][ich], (base+"l_pt"),nFakePtbins,FakePtbins);
-        EFFVAR(h_l_pt_coarse[il][icr][ich], (base+"l_pt_coarse"),nCoarseFakePtbins,coarseFakePtbins);
-        EFFVAR(h_l_pt_heavy[il][icr][ich], (base+"l_pt_heavy"),nFakePtbins,FakePtbins);
-        EFFVAR(h_l_pt_others[il][icr][ich], (base+"l_pt_others"),nFakePtbins,FakePtbins);
-        EFFVAR(h_l_eta[il][icr][ich], (base+"l_eta"),nEtabins,Etabins);
-        EFFVAR(h_l_eta_coarse[il][icr][ich], (base+"l_eta_coarse"),nCoarseEtabins,CoarseEtabins);
-        EFFVAR(h_metrel[il][icr][ich], (base+"metrel"),nMetbins, Metbins);
-        EFFVAR(h_met[il][icr][ich], (base+"met"),nMetbins, Metbins);
-        EFF(h_metrel_fine[il][icr][ich], (base+"metrel_fine"),40,0,200);
-        EFF(h_met_fine[il][icr][ich], (base+"met_fine"),40,0,200);
+        EFFVAR(h_l_pt         [il][icr][ich], (base+"l_pt"),         nFakePtbins,FakePtbins);
+        EFFVAR(h_l_pt_coarse  [il][icr][ich], (base+"l_pt_coarse"),  nCoarseFakePtbins,coarseFakePtbins);
+        EFFVAR(h_l_pt_heavy   [il][icr][ich], (base+"l_pt_heavy"),   nFakePtbins,FakePtbins);
+        EFFVAR(h_l_pt_others  [il][icr][ich], (base+"l_pt_others"),  nFakePtbins,FakePtbins);
+        EFFVAR(h_l_eta        [il][icr][ich], (base+"l_eta"),        nEtabins,Etabins);
+        EFFVAR(h_l_eta_coarse [il][icr][ich], (base+"l_eta_coarse"), nCoarseEtabins,CoarseEtabins);
+        EFFVAR(h_metrel       [il][icr][ich], (base+"metrel"),       nMetbins, Metbins);
+        EFFVAR(h_met          [il][icr][ich], (base+"met"),          nMetbins, Metbins);
+        EFF   (h_metrel_fine  [il][icr][ich], (base+"metrel_fine"),  40,0,200);
+        EFF   (h_met_fine     [il][icr][ich], (base+"met_fine"),     40,0,200);
         EFFVAR(h_metrel_coarse[il][icr][ich], (base+"metrel_coarse"),nCoarseMetbins, coarseMetbins);
-        EFFVAR(h_met_coarse[il][icr][ich], (base+"met_coarse"),nCoarseMetbins, coarseMetbins);
-        EFFVAR(h_njets[il][icr][ich], (base+"njets"),nJetbins, Jetbins);
-        EFFVAR(h_nlightjets[il][icr][ich], (base+"nlightjets"),nJetbins, Jetbins);
-        EFFVAR(h_nheavyjets[il][icr][ich], (base+"nheavyjets"),nJetbins, Jetbins);
+        EFFVAR(h_met_coarse   [il][icr][ich], (base+"met_coarse"),   nCoarseMetbins, coarseMetbins);
+        EFFVAR(h_njets        [il][icr][ich], (base+"njets"),        nJetbins, Jetbins);
+        EFFVAR(h_nlightjets   [il][icr][ich], (base+"nlightjets"),   nJetbins, Jetbins);
+        EFFVAR(h_nheavyjets   [il][icr][ich], (base+"nheavyjets"),   nJetbins, Jetbins);
         EFFVAR(h_nlightjetsNoB[il][icr][ich], (base+"nlightjetsNoB"),nJetbins, Jetbins);
-        EFF(h_onebin[il][icr][ich], (base+"onebin"), 1, -0.5, 0.5);
+        EFF   (h_onebin       [il][icr][ich], (base+"onebin"),       1, -0.5, 0.5);
         // d0sig
-        EFF(h_heavy_d0sig[il][icr][ich], (base+"heavy_d0sig"), 50, 0, 5);
-        EFF(h_light_d0sig[il][icr][ich], (base+"light_d0sig"), 50, 0, 5);
-        EFF(h_conv_d0sig[il][icr][ich], (base+"conv_d0sig"), 50, 0, 5);
-        EFF(h_l_type[il][icr][ich], (base+"l_type"), nType, Typemin, Typemax);
-        EFF(h_l_origin[il][icr][ich], (base+"l_origin"), nOrigin, Originmin, Originmax);
+        EFF(h_heavy_d0sig     [il][icr][ich], (base+"heavy_d0sig"),  50, 0, 5);
+        EFF(h_light_d0sig     [il][icr][ich], (base+"light_d0sig"),  50, 0, 5);
+        EFF(h_conv_d0sig      [il][icr][ich], (base+"conv_d0sig"),   50, 0, 5);
+        EFF(h_l_type          [il][icr][ich], (base+"l_type"),       nType, Typemin, Typemax);
+        EFF(h_l_origin        [il][icr][ich], (base+"l_origin"),     nOrigin, Originmin, Originmax);
         // Flavor counting
-        EFF(h_flavor[il][icr][ich], (base+"flavor"), LS_N, -0.5, LS_N-0.5);
-        for(int lbl=0; lbl<LS_N; ++lbl) LABEL(h_flavor[il][icr][ich], lbl+1, LSNames[lbl]);
-
-        EFF(h_ht[il][icr][ich], (base+"ht"), 20, 0, 400);
-        EFFVAR(h_ht_pt[il][icr][ich], (base+"ht_pt"), nHtbins, Htbins);
-        EFF(h_ht_wMet[il][icr][ich], (base+"ht_wMet"), 20, 0, 400);
-        EFFVAR(h_ht_pt_wMet[il][icr][ich], (base+"ht_pt_wMet"), nHtbins, Htbins);
+        EFF(h_flavor          [il][icr][ich], (base+"flavor"),       LS_N, -0.5, LS_N-0.5);
+        EFF(h_ht              [il][icr][ich], (base+"ht"),           20, 0, 400);
+        EFFVAR(h_ht_pt        [il][icr][ich], (base+"ht_pt"),        nHtbins, Htbins);
+        EFF(h_ht_wMet         [il][icr][ich], (base+"ht_wMet"),      20, 0, 400);
+        EFFVAR(h_ht_pt_wMet   [il][icr][ich], (base+"ht_pt_wMet"),   nHtbins, Htbins);
         EFF(h_with_without_Etcone[il][icr][ich], (base+"with_without_Etcone"),3, -0.5, 2.5);
-        }// end loop over channels
+
+        for(int lbl=0; lbl<LS_N; ++lbl) LABEL(h_flavor[il][icr][ich], lbl+1, LSNames[lbl]);
+      } // end for(ich)
       // Saving CR plots to look at how cuts affect distribution
       string base = lName + "_" + cName + "_all_";
-      EFF(h_met_cr[il][icr], (base+"met_cr"), 50, 0, 200);
-      EFF(h_mt_tag_cr[il][icr], (base+"mt_tag_cr"), 50, 0, 200);
+      EFF(h_met_cr     [il][icr], (base+"met_cr"),      50, 0, 200);
+      EFF(h_mt_tag_cr  [il][icr], (base+"mt_tag_cr"),   50, 0, 200);
       EFF(h_mt_probe_cr[il][icr], (base+"mt_probe_cr"), 50, 0, 200);
-      EFF(h_ht_cr[il][icr], (base+"ht_cr"), 50, 0, 400);
-      EFF(h_mll_cr[il][icr], (base+"mll_cr"), 30, 0, 300);
-    }// end loop over control regions
-  }// end loop over lepton types
+      EFF(h_ht_cr      [il][icr], (base+"ht_cr"),       50, 0, 400);
+      EFF(h_mll_cr     [il][icr], (base+"mll_cr"),      30, 0, 300);
+    } // end for(icr)
+  } // end for(il)
   #undef EFFVAR
   #undef EFF
   #undef LABEL
@@ -246,22 +244,22 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
       if(m_ch != Ch_all) eff[lt][CR][Ch_all]->Fill(pass,m_evtWeight,var); \
     }while(0)
 
-  FILL(h_l_pt, lep->Pt());
-  FILL(h_l_pt_coarse, lep->Pt());
-  FILL(h_l_eta, fabs(lep->Eta()));
+  FILL(h_l_pt,         lep->Pt());
+  FILL(h_l_pt_coarse,  lep->Pt());
+  FILL(h_l_eta,        fabs(lep->Eta()));
   FILL(h_l_eta_coarse, fabs(lep->Eta()));
   if(nt.evt()->isMC){
     if( isHFLepton(lep) ) FILL(h_l_pt_heavy, lep->Pt());
     else                  FILL(h_l_pt_others, lep->Pt());
   }
-  FILL(h_metrel, m_metRel);
-  FILL(h_met, met->Et);
+  FILL(h_metrel,        m_metRel);
+  FILL(h_met,           met->Et);
   FILL(h_metrel_coarse, m_metRel);
-  FILL(h_met_coarse, met->Et);
-  FILL(h_metrel_fine, m_metRel);
-  FILL(h_met_fine, met->Et);
+  FILL(h_met_coarse,    met->Et);
+  FILL(h_metrel_fine,   m_metRel);
+  FILL(h_met_fine,      met->Et);
   // Number of jets
-  FILL(h_njets, jets.size());
+  FILL(h_njets,      jets.size());
   FILL(h_nlightjets, numberOfCLJets(jets));
   FILL(h_nheavyjets, numberOfCBJets(jets));
   if( numberOfCBJets(jets) == 0 ) FILL(h_nlightjetsNoB, numberOfCLJets(jets));
@@ -269,30 +267,28 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
   FILL(h_onebin, 0);
   // If the event is MC, save the flavor
   if( nt.evt()->isMC ){
-    LeptonSource ls = getLeptonSource(lep);
+    LeptonSource ls(getLeptonSource(lep));
     if(ls == LS_Real){
-      FILL(h_l_type, lep->mcType);
+      FILL(h_l_type,   lep->mcType);
       FILL(h_l_origin, lep->mcOrigin);
     }
     FILL(h_flavor, ls);
-    if(ls==LS_HF||ls==LS_LF) FILL(h_flavor, LS_QCD);
-    if(ls == LS_HF)   FILL(h_heavy_d0sig, lep->d0Sig(true));
-    if(ls == LS_LF)   FILL(h_light_d0sig, lep->d0Sig(true));
-    if(ls == LS_Conv) FILL(h_conv_d0sig, lep->d0Sig(true));
-  }
-  else{
+    if(ls==LS_HF||ls==LS_LF) FILL(h_flavor,      LS_QCD);
+    if(ls == LS_HF)          FILL(h_heavy_d0sig, lep->d0Sig(true));
+    if(ls == LS_LF)          FILL(h_light_d0sig, lep->d0Sig(true));
+    if(ls == LS_Conv)        FILL(h_conv_d0sig,  lep->d0Sig(true));
+  } else {
     float d0sig = lep->d0Sig(true);
     FILL(h_heavy_d0sig, d0sig);
     FILL(h_light_d0sig, d0sig);
-    FILL(h_conv_d0sig, d0sig);
+    FILL(h_conv_d0sig,  d0sig);
   }
-
   // Ht Plots
   float ht = lep->Pt();
   for(uint ij=0; ij<jets.size(); ++ij) ht += jets.at(ij)->Pt();
-  FILL(h_ht, ht);
-  FILL(h_ht_pt, ht/lep->Pt());
-  FILL(h_ht_wMet, ht+met->Et);
+  FILL(h_ht,         ht);
+  FILL(h_ht_pt,      ht/lep->Pt());
+  FILL(h_ht_wMet,    ht+met->Et);
   FILL(h_ht_pt_wMet, (ht+met->Et)/lep->Pt());
 
   bool with = isSignalWithEtcone(lep);
@@ -301,7 +297,6 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
   if(with)    FILL(h_with_without_Etcone, 1);
   if(without) FILL(h_with_without_Etcone, 2);
   #undef FILL
-
 }
 /*--------------------------------------------------------------------------------*/
 void MeasureFakeRate2::fillCrHistos(const Lepton* tag, const Lepton* probe, const JetVector& jets, const Met* met,
