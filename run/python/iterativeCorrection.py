@@ -9,18 +9,26 @@
 # Matt (mrelich6@gmail.com), originally in IterativeFakeCorrection.cxx
 #
 # Here is a brief description of the idea:
-
 # - For the matrix method we need to compute p(T|R) and p(T|F); we
-#   compute them as N_T/N_L in each one of the different cases (R or F)
+#   compute them as N_T/N_L in each one of two cases (R or F)
 #   as a function of p_T
-
-
-
-# - N_T and N_L are taken from data. For fake leptons from heavy-flavor decays we compute p(T|F) in for
-# - heavy-flavor electron and muons, however, in the  xo
-
-
-# - leptons in these two categories is non-negligible, then the resulting p(T|R) and p(T|F)
+# - N_T and N_L are taken from data. For the HF fakes, we do a
+#   tag-and-probe in a ccbar/bbar region (see
+#   MeasureFakeRate2::passHFCR)
+# - However, N_T and N_L are contaminated by real, prompt leptons from
+#   ewk production. So what we do is to subtract the real
+#   contribution. This is done by identifying two regions in m_T:
+#   CR_HF with m_T<40 (mostly fake), and CR_HF_high with m_T<100
+#   (where there is more contamination from real leptons).
+# - 0^th iteration: p(T|F) = (  N_T(CR_HF)
+#                             / N_L(CR_HF))
+# - 1^st iteration: p(T|F) = (  (N_T(CR_HF) - c^1_T * N_T(CR_HF, MC))
+#                             / (N_L(CR_HF) - c^1_L * N_L(CR_HF, MC)))
+#   where c^1_T = (  (data(CR_HF_high) - fake(pred, CR_HF_high))
+#                  / mc(pred. all-mc-except-hf, CR_HF_high))
+# - at the following iterations, you update the fake estimate in the
+#   numerator of the correction factor c with the fake prediction that
+#   you can now compute with the one-lepton matrix method.
 
 # davide.gerbaudo@gmail.com
 # October 2013
@@ -74,9 +82,9 @@ def main() :
     for lep in ['muon', 'elec'] :
         if verbose : print "Lepton: %s"%lep
         hRealDataCr = getNumDenHistos(fileData, lep+'_realCR_all_l_pt')
-        hFakeDataLo = getNumDenHistos(fileData, lep+'_fakeHF_all_l_pt') # bug? shouldnt be 'low'?
+        hFakeDataLo = getNumDenHistos(fileData, lep+'_fakeHF_all_l_pt')
         hFakeDataHi = getNumDenHistos(fileData, lep+'_fakeHF_high_all_l_pt')
-        hFakeMcLo   = getNumDenHistos(fileMc,   lep+'_fakeHF_all_l_pt') # bug? shouldnt be 'low'?
+        hFakeMcLo   = getNumDenHistos(fileMc,   lep+'_fakeHF_all_l_pt')
         hFakeMcHi   = getNumDenHistos(fileMc,   lep+'_fakeHF_high_all_l_pt')
         if plot :
             hNumDen = [hFakeDataLo, hFakeDataHi, hFakeMcLo, hFakeMcHi]
