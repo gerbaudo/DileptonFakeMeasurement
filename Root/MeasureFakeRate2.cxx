@@ -309,8 +309,7 @@ void MeasureFakeRate2::fillCrHistos(const Lepton* tag, const Lepton* probe, cons
 {
   LeptonType lt = probe->isEle() ? LT_EL : LT_MU;
   bool pass(isSignalLepton(probe, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC));
-  #define FILL(eff, var)							\
-    do{ eff[lt][CR]->Fill(pass,m_evtWeight,var); } while(0)
+  #define FILL(eff, var) do{ eff[lt][CR]->Fill(pass,m_evtWeight,var); } while(0)
 
   if(CRP == CRP_mll)       FILL(h_mll_cr, (*tag+*probe).M());
   if(CRP == CRP_met)       FILL(h_met_cr, met->Et);
