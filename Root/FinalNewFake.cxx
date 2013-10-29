@@ -136,9 +136,10 @@ void FinalNewFake::buildElectronRateSR()
   const string lepton("elec");
   vector<TH1*>   el_contrib_real, el_contrib_qcd, el_contrib_conv;
   for(int ic = 0; ic < FP_N; ++ic){ // Load the various rates from MC
-    el_contrib_qcd .push_back(getFakeRate(lepton, (FakeProcess)ic, false));
-    el_contrib_conv.push_back(getFakeRate(lepton, (FakeProcess)ic, true ));
-    el_contrib_real.push_back(getRealEff (lepton, (FakeProcess)ic       ));
+    bool isConv;
+    el_contrib_qcd .push_back(getFakeRate(lepton, (FakeProcess)ic, isConv=false));
+    el_contrib_conv.push_back(getFakeRate(lepton, (FakeProcess)ic, isConv=true ));
+    el_contrib_real.push_back(getRealEff (lepton, (FakeProcess)ic              ));
   }
   for(int sr = 0; sr<SR_N; ++sr){ // Fake Rate
     const bool isFake(true);

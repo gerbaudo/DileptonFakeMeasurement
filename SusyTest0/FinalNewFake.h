@@ -82,7 +82,7 @@ class FinalNewFake : public FakePlotting
 
   // Grab rates from files
   TH1* getRealEff(string lep, FakeProcess process);
-  TH1* getFakeRate(string lep, FakeProcess process, bool isConv=false);
+  TH1* getFakeRate(string lep, FakeProcess process, bool isConv);
 
   // Construct systematic shifts
   pair< TParameter<double>, TParameter<double> > getRealSys(string lep);
