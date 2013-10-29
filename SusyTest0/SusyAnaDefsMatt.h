@@ -65,6 +65,11 @@ enum ControlRegion // these are the regions used in MeasureFakeRate2
   CR_SSInc,
   CR_PremT2,
   CR_SRWHSS,
+  CR_CR8lpt,
+  CR_CR8ee,
+  CR_CR8mm,
+  CR_CR8mmMtww,
+  CR_CR8mmHt,
   //  CR_N
 };
 
@@ -113,9 +118,15 @@ static string CRNames[] =
   "CR_SSInc",
 
   "CRPremT2",
-  "CR_WHSS"
+  "CR_WHSS",
+  "CR_CR8lpt",
+  "CR_CR8ee",
+  "CR_CR8mm",
+  "CR_CR8mmMtww",
+  "CR_CR8mmHt",
+
 };
-// Signal regions
+// Signal regions; these are used in FinalNewFake
 // DG These are the ones where you actually want to compute the fake
 // prediction (i.e. your signal regions of the analysis, including the
 // ones where you want to plot stuff to make checks.)
@@ -148,6 +159,11 @@ enum SignalRegion
 
   CRPremT2,
   SR_WHSS,
+  CR8lpt,
+  CR8ee,
+  CR8mm,
+  CR8mmMtww,
+  CR8mmHt,
 
   SR_N
 };
@@ -181,6 +197,11 @@ static string SRNames[] =
 
   "CRPremT2",
   "SR_WHSS"
+  "CR8lpt",
+  "CR8ee",
+  "CR8mm",
+  "CR8mmMtww",
+  "CR8mmHt",
 
 
 };
@@ -212,7 +233,13 @@ static string SRProperNames[] =
   "Control Region SS Inclusive",
 
   "Pre-mT2 Region",
-  "Signal region WH SS"
+  "Signal region WH SS",
+  "CR8lpt",
+  "CR8ee",
+  "CR8mm",
+  "CR8mmMtww",
+  "CR8mmHt",
+
 };
 
 // Plotting regions
