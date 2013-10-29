@@ -41,7 +41,7 @@ r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line o
 
 usage="""
 Example usage:
-IterFake \\
+%prog \\
  --input_data out/fakerate/merged/data_${TAG}.root \\
  --input_mc   out/fakerate/merged/allBkgButHf_${TAG}.root \\
  --output     out/fakerate/merged/iterative_out_${TAG}.root \\
