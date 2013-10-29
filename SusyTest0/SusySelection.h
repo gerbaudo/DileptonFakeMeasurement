@@ -20,6 +20,7 @@
 #include "SUSYTools/SUSYObjDef.h"
 #include "SusyXSReader/XSReader.h"
 #include "SusyTest0/ProgressPrinter.h"
+#include "SusyTest0/SsPassFlags.h"
 
 #include <fstream>
 
@@ -60,21 +61,6 @@ class SusySelection : public SusyNtAna
     double susynt; // from SusyNtTools::getEventWeight: includes gen, pu, xs, lumi, sumw
     double gen, pileup, norm; // breakdown of the above; norm is xs*lumi/sumw
     double lepSf, btag, trigger, qflip, fake; // factors that we compute, not from upstream
-    std::string str() const;
-  };
-  struct SsPassFlags {
-    SsPassFlags() { reset(); }
-    void reset() {
-      eq2l = tauVeto = trig2l = trig2lmatch = true2l = sameSign = fjveto = bjveto = ge1j = false;
-      lepPt = zllVeto = mtllmet = ht = metrel = false;
-    }
-    bool passLpt() const {
-      return (eq2l & tauVeto & trig2l & trig2lmatch & true2l & sameSign
-              & fjveto & bjveto & ge1j & lepPt);
-    }
-    bool passAll() const { return (passLpt() & zllVeto & mtllmet & ht & metrel); }
-    bool eq2l, tauVeto, trig2l, trig2lmatch, true2l, sameSign, fjveto, bjveto, ge1j;
-    bool lepPt, zllVeto, mtllmet, ht, metrel;
     std::string str() const;
   };
  public:
