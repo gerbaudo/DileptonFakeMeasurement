@@ -7,10 +7,6 @@
 #include "SusyTest0/SelectionRegions.h"
 #include "SusyTest0/criteria.h"
 
-float Htbins[] = {1,3,6,9,12};
-int nHtbins = 4;
-
-
 using namespace susywh; // pull in SelectionRegions
 const int controlRegions[] = {
   kCR_Real, kCR_SideLow, kCR_SideHigh, kCR_HF, kCR_HF_high,
