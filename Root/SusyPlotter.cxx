@@ -76,15 +76,6 @@ void SusyPlotter::initNames()
   chanNames[i++] = "mm";
   chanNames[i++] = "em";
   i=0;
-  PRNames[i++] = "srnone";
-  PRNames[i++] = "sr6base";
-  PRNames[i++] = "sr6";
-  PRNames[i++] = "sr7base";
-  PRNames[i++] = "sr7Nj";
-  PRNames[i++] = "sr7NjZttVeto";
-  PRNames[i++] = "sr7NjPtTot";
-  PRNames[i++] = "sr7NjMll";
-  PRNames[i++] = "sr7";
   PRNames[i++] = "sr8base";
   PRNames[i++] = "cr8lpt";
   PRNames[i++] = "cr8lptee";
