@@ -1282,7 +1282,7 @@ bool SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVector& j
   float mtwwMin = (isee ? 150 : (isem ? 140 : (ismm ? 100 : FLT_MIN))); // todo : for now keep it simple, just one cut
   float metRelMin = (isee ? 50 : (isem ? 50 : (ismm ? FLT_MIN : FLT_MIN))); // for now simple
 
-  if(m_signalTaus.size()==0)               increment(n_pass_CRWHSStauv  [m_ET], lsf, bsf); else return false;
+  if(m_signalTaus.size()==0)                          increment(n_pass_CRWHSStauv  [m_ET], lsf, bsf); else  return false;
   if(numberOfFJets(jets)==0)                          increment(n_pass_CRWHSSnfj   [m_ET], lsf, bsf); else  return false;
   if(numberOfCBJets(jets)==0)                         increment(n_pass_CRWHSSnbj   [m_ET], lsf, bsf); else  return false;
   if(numberOfCLJets(jets)>0)                          increment(n_pass_CRWHSSnj    [m_ET], lsf, bsf); else  return false;
