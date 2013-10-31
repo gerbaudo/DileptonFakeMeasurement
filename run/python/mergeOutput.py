@@ -53,6 +53,7 @@ outdir        = options.output if options.output else inputdir+'/merged/'
 tag           = (options.tag if options.tag
                  else guessLatestTagFromLatestRootFiles(inputdir, debug))
 tag           = tag if tag else guessMonthDayTagFromLastRootFile(inputdir, debug)
+tag           = tag.strip('_') # leading/trailing separators are not part of the tag
 if verbose :
     print "Options:"
     print '\n'.join(["%s : %s" % (o, eval(o))
@@ -86,7 +87,6 @@ for rf in rootfiles :
     if allBkg and dataset.isMcBackground : filenamesByGroup['allBkg'].append(rf)
     if allBkgButHf and dataset.isMcBackground and not dataset.isHeavyFlavor :
         filenamesByGroup['allBkgButHf'].append(rf)
-
 
 nGroupsToMerge = len(filenamesByGroup.keys())
 groupCounter = 0
