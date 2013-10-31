@@ -103,10 +103,10 @@ def enumFromHeader(filename, enumName) :
 #
 class testGuessMdTag(unittest.TestCase) :
     def testKnownValues(self) :
-        knownValues = [('out/foo/ttbar_Aug_23.root',     '_Aug_23'),
-                       ('foo/baz_Aug/ttbar_Aug_23.root', '_Aug_23'),
-                       ('out/foo/ttbar_Aug_2.root',      '_Aug_2'),
-                       ('out/foo/ttbar_August_2.root',      None),
+        knownValues = [('out/foo/ttbar_Aug_23.root',     'Aug_23'),
+                       ('foo/baz_Aug/ttbar_Aug_23.root', 'Aug_23'),
+                       ('out/foo/ttbar_Aug_2.root',      'Aug_2'),
+                       ('out/foo/ttbar_August_2.root',    None),
                        ]
         for s, tag in  knownValues :
             gTag = guessMonthDayTag(s)
