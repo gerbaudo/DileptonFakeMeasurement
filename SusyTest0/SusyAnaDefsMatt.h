@@ -61,7 +61,6 @@ enum ControlRegion // these are the regions used in MeasureFakeRate2
   CR_CRZVmT2_100,
   CR_CRTopZjets,
   CR_CRZXZjets,
-  // Added
   CR_SSInc,
   CR_PremT2,
   CR_SRWHSS,
@@ -91,7 +90,6 @@ static string CRNames[] =
   "allMC",
   "realMC",
   "noneMC",
-
   "SRmT2a",
   "SRmT2b",
   "SRmT2c",
@@ -99,11 +97,9 @@ static string CRNames[] =
   "SRWWb",
   "SRWWc",
   "SRZjets",
-
   "VRSS",
   "CRWWMet",
   "CRWWmT2",
-
   "CRTopMet",
   "CRTopmT2",
   "CRZVMet",
@@ -111,12 +107,9 @@ static string CRNames[] =
   "CRZVmT2_120",
   "CRZVmT2_150",
   "CRZVmT2_100",
-
   "CRTopZjets",
   "CRZXZjets",
-
   "CR_SSInc",
-
   "CRPremT2",
   "CR_WHSS",
   "CR_CR8lpt",
