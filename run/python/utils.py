@@ -27,18 +27,6 @@ def findLatestOneOrTwoRootFiles(dir) :
     files.sort(key=lambda x: os.path.getmtime(x))
     return files[-2:] if len(files)>=2 else files
 def findLastRootFile(dir) : return findLatestOneOrTwoRootFiles(dir)[-1]
-def guessLatestTagFromLatestRootFiles(dir, debug) :
-    "Latest tag if there are at least 2 root files; otherwise empty string"
-    files = [f.replace('.root','').rstrip() for f in findLatestOneOrTwoRootFiles(dir)]
-    def commonSuffix(ll) : return os.path.commonprefix([l[::-1] for l in ll])[::-1]
-    suffix = commonSuffix(files)
-    if not len(suffix) : return ''
-    def cleanupSampleName(suff) :
-        "if the suffix includes part of a sample name, it can be isolated by the '.'"
-        lastDot = max(0, suffix.rfind('.'))
-        return suffix[suffix.find('_', lastDot):]
-    if debug : print "guessLatestTagFromLatestRootFiles: cleanup '%s'"%suffix
-    return cleanupSampleName(suffix) if len(suffix) else suffix
 def guessMonthDayTag(name) :
     "extract a 'Xxx_yy' tag with a 3-char month and a day"
     match = re.search('(?P<tag>'
@@ -49,6 +37,21 @@ def guessMonthDayTagFromLastRootFile(dir, debug) :
     lastFile = findLastRootFile(dir)
     if lastFile : return guessMonthDayTag(lastFile)
     elif debug : print "guessMonthDayTagFromLastRootFile: no root files"
+def guessLatestTagFromLatestRootFiles(dir, debug) :
+    """
+    Latest tag if there are at least 2 root files; otherwise empty string.
+    The tag does not have to be Mmm_dd.
+    """
+    files = [f.replace('.root','').rstrip() for f in findLatestOneOrTwoRootFiles(dir)]
+    def commonSuffix(ll) : return os.path.commonprefix([l[::-1] for l in ll])[::-1]
+    suffix = commonSuffix(files)
+    if not len(suffix) : return ''
+    def cleanupSampleName(suff) :
+        "if the suffix includes part of a sample name, it can be isolated by the '.'"
+        lastDot = max(0, suffix.rfind('.'))
+        return suffix[suffix.find('_', lastDot):]
+    if debug : print "guessLatestTagFromLatestRootFiles: cleanup '%s'"%suffix
+    return cleanupSampleName(suffix) if len(suffix) else suffix
 def isMonthDayTag(tag) : return guessMonthDayTag(tag)
 def commonPrefix(list) : return os.path.commonprefix(list)
 def commonSuffix(list) : return os.path.commonprefix([l[::-1] for l in list])[::-1]
