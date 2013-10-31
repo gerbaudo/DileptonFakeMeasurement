@@ -239,10 +239,11 @@ def buildEtaSyst(inputFileTotMc, inputHistoBaseName='(elec|muon)_qcdMC_all', out
 def buildSystematics(inputFileTotMc, outputfile) :
     "Hardcoded values from FinalNewFake.h; might not be used at all...ask Matt"
     print "build syst might be droppped...check this with Matt"
+    print "rename *_down to *_do"
     el_real_up = r.TParameter('double')('el_real_up', 0.01)
-    el_real_dn = r.TParameter('double')('el_real_dn', 0.02)
+    el_real_dn = r.TParameter('double')('el_real_down', 0.02)
     mu_real_up = r.TParameter('double')('mu_real_up', 0.00)
-    mu_real_dn = r.TParameter('double')('mu_real_dn', 0.02)
+    mu_real_dn = r.TParameter('double')('mu_real_down', 0.02)
     el_HFLFerr = r.TParameter('double')('el_HFLFerr', 0.05)
     mu_HFLFerr = r.TParameter('double')('mu_HFLFerr', 0.00)
     el_datamc  = r.TParameter('double')('el_datamc',  0.20) #datamc are effectively the sf error.
