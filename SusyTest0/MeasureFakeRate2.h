@@ -78,7 +78,7 @@ class MeasureFakeRate2 : public SusySelectionMatt
   DiLepPair getDilepPair(const Lepton* tag, const Lepton* probe);
   // Histograms for variables
   const int CR_N;
-  static const int kNmaxControlRegions=32;
+  static const int kNmaxControlRegions=64;
   //  static const int getNcontrolRegions()
   const std::vector<int> m_controlRegions; // where we compute SF and rates (pseudo t&p)
   const std::vector<int> m_signalRegions;  // where we compute fractions to make the weighted avg

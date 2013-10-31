@@ -38,14 +38,19 @@ const int signalRegions[] = {
   kCR_SSInc,
   kCR_PremT2,
   kCR_SRWHSS,
+  kPR_CR8lpt   ,
+  kPR_CR8ee    ,
+  kPR_CR8mm    ,
+  kPR_CR8mmMtww,
+  kPR_CR8mmHt
 };
-const size_t nSignalRegions = sizeof(signalRegions)/sizeof(int);
+const size_t nSignalRegions = sizeof(signalRegions)/sizeof(signalRegions[0]);
 
 /*--------------------------------------------------------------------------------*/
 // Fake Rate Constructor
 /*--------------------------------------------------------------------------------*/
 MeasureFakeRate2::MeasureFakeRate2() :
-  CR_N(nControlRegions + nSignalRegions + 1),
+  CR_N(nControlRegions + nSignalRegions),
   m_controlRegions(controlRegions, controlRegions + nControlRegions),
   m_signalRegions (signalRegions,  signalRegions  + nSignalRegions),
   m_outFile(NULL),
@@ -101,20 +106,16 @@ void MeasureFakeRate2::initHistos(string outName)
   m_outFile->cd();
   cout<<"File created: "<<m_outFile<<endl;
 
-  // All of the rates will be stored in efficiency objects.
-  // These are much more convenient for handling the errors.
-  #define EFFVAR(eff,name,nbins,bins) \
-    do{ eff = new EffObject(name,nbins,bins); } while(0)
-  #define EFF(eff,name,nbins,xmin,xmax) \
-    do{ eff = new EffObject(name,nbins,xmin,xmax); } while(0)
-  #define LABEL(eff, bin, label) \
-    do{ eff->SetXLabel(bin, label); }while(0)
+  // All the rates will be stored in efficiency objects.
+  #define EFFVAR(eff,name,nbins,bins) do{ eff = new EffObject(name,nbins,bins); } while(0)
+  #define EFF(eff,name,nbins,xmin,xmax) do{ eff = new EffObject(name,nbins,xmin,xmax); } while(0)
+  #define LABEL(eff, bin, label) do{ eff->SetXLabel(bin, label); }while(0)
 
-  for(int il=0; il<LT_N; ++il){ // Loop over lepton type
+  for(int il=0; il<LT_N; ++il){ // for lName in [elec, muon]
     string lName = LTNames[il];
-    for(int icr=0; icr<CR_N; ++icr){ // Loop over control regions (need both Data and MC)
+    for(int icr=0; icr<CR_N; ++icr){ // see CRNames in SusyAnaDefsMatt.h for complete list
       string cName = CRNames[icr];
-      for(int ich=0; ich<Ch_N; ++ich){ // Loop over the channels
+      for(int ich=0; ich<Ch_N; ++ich){ // for chan in [all, ee, mm, em]
         string chan = chanNames[ich];
         string base = lName + "_" + cName + "_" + chan + "_";
         EFFVAR(h_l_pt         [il][icr][ich], (base+"l_pt"),         nFakePtbins,FakePtbins);
@@ -188,7 +189,7 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
   if(uniqueLepPair && !susy::passMllMin(m_baseLeptons, 20.0)) return false;
   // Loop over all regions (regardless of data or mc) and only fill relevant data quantitites.
   for(int cr = 0; cr<CR_N; ++cr){
-    ControlRegion CR = (ControlRegion) cr;
+    ControlRegion CR = static_cast<ControlRegion>(cr);
     m_ch = Ch_all;
     m_probes.clear();
     m_tags.clear();
@@ -196,7 +197,6 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     const LeptonVector& leptons = m_baseLeptons;
     const JetVector& jets = m_signalJets2Lep;
     switch(CR) {
-      // Data Driven CRs
     case CR_Real     : passCR = passRealCR  (leptons, jets, m_met, CR); break;
     case CR_SideLow  : passCR = passRealCR  (leptons, jets, m_met, CR); break;
     case CR_SideHigh : passCR = passRealCR  (leptons, jets, m_met, CR); break;
@@ -206,7 +206,6 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     case CR_LFWjet   : passCR = passLFWjetCR(leptons, jets, m_met    ); break;
     case CR_Conv     : passCR = passConvCR  (leptons, jets, m_met    ); break;
     case CR_CFlip    : passCR = passCFCR    (leptons, jets, m_met    ); break;
-      // MC Regions
     case CR_MCHeavy  : passCR = passMCReg   (leptons, jets, m_met, CR); break;
     case CR_MCLight  : passCR = passMCReg   (leptons, jets, m_met, CR); break;
     case CR_MCConv   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
@@ -218,10 +217,9 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     default          : passCR = passSignalRegion(leptons,jets,m_met,CR); break;
     } // end switch(CR)
     if( passCR ){
-      for(uint ip=0; ip<m_probes.size(); ++ip)
-        fillRatesHistos(m_probes.at(ip), jets, m_met, CR);
-    }// end if Pass Control Region
-  }// end loop over Control Regions
+      for(size_t ip=0; ip<m_probes.size(); ++ip) fillRatesHistos(m_probes.at(ip), jets, m_met, CR);
+    } // if(passCR)
+  } // for(cr)
   return kTRUE;
 }
 
@@ -358,6 +356,10 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
 {
   if( leptons.size() != 2 ) return false;
   bool passSR = false;
+  bool computeWhssPass(CR==CR_SRWHSS || CR==CR_CR8lpt || CR==CR_CR8ee || CR==CR_CR8mm
+                       ||CR==CR_CR8mmMtww||CR==CR_CR8mmHt);
+  SsPassFlags whssFlags(computeWhssPass ? passWhSS(leptons,jets,met) : SsPassFlags());
+  bool isEe(Ch_ee==getChan(leptons)), isMm(Ch_mm==getChan(leptons));
   switch(CR) {
   case CR_SRmT2a       : passSR = passSRmT2a    (leptons,jets,met,false,true); break;
   case CR_SRmT2b       : passSR = passSRmT2b    (leptons,jets,met,false,true); break;
@@ -380,7 +382,12 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   case CR_CRTopZjets   : passSR = passCRTopZjets(leptons,jets,met,false,true); break;
   case CR_CRZXZjets    : passSR = passCRZXZjets (leptons,jets,met,false,true); break;
   case CR_PremT2       : passSR = passCRPremT2  (leptons,jets,met);            break;
-  case CR_SRWHSS       : passSR = passWhSS      (leptons,jets,met);            break;
+  case CR_SRWHSS       : passSR =  whssFlags.metrel;                           break;
+  case CR_CR8lpt       : passSR =  whssFlags.lepPt;                            break;
+  case CR_CR8ee        : passSR = (whssFlags.lepPt   && isEe);                 break;
+  case CR_CR8mm        : passSR = (whssFlags.lepPt   && isMm);                 break;
+  case CR_CR8mmMtww    : passSR = (whssFlags.mtllmet && isMm);                 break;
+  case CR_CR8mmHt      : passSR = (whssFlags.ht      && isMm);                 break;
   default: cout<<"invalid ControlRegion "<<CR<<endl;
   }
   for(uint i=0; i<leptons.size(); ++i) m_probes.push_back( leptons[i]);
