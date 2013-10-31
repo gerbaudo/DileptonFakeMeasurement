@@ -1257,7 +1257,7 @@ bool SusySelectionMatt::passMuonRelIso(const LeptonVector &leptons, float maxVal
   return true;
 }
 /*--------------------------------------------------------------------------------*/
-bool SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met)
+SsPassFlags SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met)
 {
   // for now keep it simple:
   // - 2lep ss (I assume we don't need qFlip here)
@@ -1268,8 +1268,14 @@ bool SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVector& j
   // - z veto (10GeV) for ee
   // - mww > 150 (ee), > 140 (em), >100 (mm)
   // - metrel > 50 for ee, em
+  //
+  // DG: be careful, this is slightly different from SusySelection::passSrSs.
+  // In particular, here we don't require the trigger match and some
+  // of the criteria are in a different order (e.g. same-sign).
+  // At some point try to unify SusySelection with SusySelectionMatt.
+  SsPassFlags f;
   bool lsf(false), bsf(false); // compute trigw and btagw only when accepting the event
-  if(sameSign(leptons)) increment(n_pass_CRWHSS2lss  [m_ET], lsf, bsf); else return false;
+  if(sameSign(leptons)) { increment(n_pass_CRWHSS2lss  [m_ET], lsf, bsf); f.sameSign=true;} else return f;
   DiLepEvtType ll = m_ET = getDiLepEvtType(leptons);
   bool isee(ll==ET_ee), isem(ll==ET_em||ll==ET_me), ismm(ll==ET_mm);
   float ptL0Min  = 30;
@@ -1282,18 +1288,18 @@ bool SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVector& j
   float mtwwMin = (isee ? 150 : (isem ? 140 : (ismm ? 100 : FLT_MIN))); // todo : for now keep it simple, just one cut
   float metRelMin = (isee ? 50 : (isem ? 50 : (ismm ? FLT_MIN : FLT_MIN))); // for now simple
 
-  if(m_signalTaus.size()==0)                          increment(n_pass_CRWHSStauv  [m_ET], lsf, bsf); else  return false;
-  if(numberOfFJets(jets)==0)                          increment(n_pass_CRWHSSnfj   [m_ET], lsf, bsf); else  return false;
-  if(numberOfCBJets(jets)==0)                         increment(n_pass_CRWHSSnbj   [m_ET], lsf, bsf); else  return false;
-  if(numberOfCLJets(jets)>0)                          increment(n_pass_CRWHSSnj    [m_ET], lsf, bsf); else  return false;
-  if(susy::pass2LepPt    (leptons, ptL0Min, ptL1Min)) increment(n_pass_CRWHSS2lpt  [m_ET], lsf, bsf); else  return false;
-  if(susy::passZllVeto   (leptons, loMllZ, hiMllZ))   increment(n_pass_CRWHSSzveto [m_ET], lsf, bsf); else  return false;
-  if(susy::passMtLlMetMin(leptons, met, mtwwMin))     increment(n_pass_CRWHSSmwwt  [m_ET], lsf, bsf); else  return false;
-  if(susy::passHtMin     (leptons, jets, met, htMin)) increment(n_pass_CRWHSShtmin [m_ET], lsf, bsf); else  return false;
-  if(getMetRel(met,leptons,jets)>metRelMin)           increment(n_pass_CRWHSSmetrel[m_ET], lsf, bsf); else  return false;
+  if(m_signalTaus.size()==0)                          { increment(n_pass_CRWHSStauv  [m_ET], lsf, bsf); f.tauVeto=true;} else  return f;
+  if(numberOfFJets(jets)==0)                          { increment(n_pass_CRWHSSnfj   [m_ET], lsf, bsf); f.fjveto =true;} else  return f;
+  if(numberOfCBJets(jets)==0)                         { increment(n_pass_CRWHSSnbj   [m_ET], lsf, bsf); f.bjveto =true;} else  return f;
+  if(numberOfCLJets(jets)>0)                          { increment(n_pass_CRWHSSnj    [m_ET], lsf, bsf); f.ge1j   =true;} else  return f;
+  if(susy::pass2LepPt    (leptons, ptL0Min, ptL1Min)) { increment(n_pass_CRWHSS2lpt  [m_ET], lsf, bsf); f.lepPt  =true;} else  return f;
+  if(susy::passZllVeto   (leptons, loMllZ, hiMllZ))   { increment(n_pass_CRWHSSzveto [m_ET], lsf, bsf); f.zllVeto=true;} else  return f;
+  if(susy::passMtLlMetMin(leptons, met, mtwwMin))     { increment(n_pass_CRWHSSmwwt  [m_ET], lsf, bsf); f.mtllmet=true;} else  return f;
+  if(susy::passHtMin     (leptons, jets, met, htMin)) { increment(n_pass_CRWHSShtmin [m_ET], lsf, bsf); f.ht     =true;} else  return f;
+  if(getMetRel(met,leptons,jets)>metRelMin)           { increment(n_pass_CRWHSSmetrel[m_ET], lsf, bsf); f.metrel =true;} else  return f;
   lsf = bsf = true;
   increment(n_pass_CRWHSS[m_ET], lsf, bsf);
-  return true;
+  return f;
 }
 
 /*--------------------------------------------------------------------------------*/
