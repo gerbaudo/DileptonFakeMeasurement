@@ -31,7 +31,13 @@ import os
 import ROOT as r
 r.gROOT.SetBatch(True)                     # no windows popping up
 r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
-from utils import enumFromHeader
+from utils import (enumFromHeader
+                   ,json_write
+                   )
+import matplotlib as mpl
+mpl.use('Agg') # render plots without X
+import matplotlib.pyplot as plt
+import numpy as np
 
 usage="""
 Example usage:
@@ -68,11 +74,11 @@ def main() :
     outputFile = r.TFile.Open(outputFname, 'recreate')
     inputFiles = dict((k, v) for k, v in allInputFiles.iteritems() if k in fakeProcesses())
 
-    buildMuonRates    (inputFiles, outputFile, verbose)
-    buildElectronRates(inputFiles, outputFile, verbose)
+    buildMuonRates    (inputFiles, outputFile, outputPlotDir, verbose)
+    buildElectronRates(inputFiles, outputFile, outputPlotDir, verbose)
     buildSystematics  (allInputFiles['allBkg'], outputFile)
     outputFile.Close()
-    if verbose : print "output saved to %s"%outputFname
+    if verbose : print "output saved to \n%s"%'\n'.join([outputFname, outFractionsMu, outFractionsEl])
 
 def samples() : return ['allBkg', 'ttbar', 'wjets', 'zjets', 'diboson', 'heavyflavor']
 def fakeProcesses() : return ['ttbar', 'wjets', 'zjets', 'diboson', 'heavyflavor']
@@ -178,7 +184,7 @@ def buildWeightedHistoTwice(histosA={}, fractionsA={}, histosB={}, fractionsB={}
         hout.SetBinContent(b, totA + totB)
         hout.SetBinError(b, sqrt(errA2 + errB2))
     return hout
-def buildMuonRates(inputFiles, outputfile, verbose=False) :
+def buildMuonRates(inputFiles, outputfile, outplotdir, verbose=False) :
     """
     For each selection region, build the real eff and fake rate
     histo as a weighted sum of the corresponding fractions.
@@ -189,6 +195,7 @@ def buildMuonRates(inputFiles, outputfile, verbose=False) :
     print "buildMuonRates: values to be fixed: ",' '.join(["%s: %s"%(v, eval(v)) for v in ['mu_qcdSF', 'mu_realSF']])
     eff_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_coarse',  iF[p], mu_qcdSF))  for p in processes)
     eff_real = dict((p, brsit('muon_realMC_all_l_pt_coarse', iF[p], mu_realSF)) for p in processes)
+    mu_frac = dict()
     for sr in selectionRegions() :
         frac_qcd  = buildPercentages(inputFiles, 'muon_'+sr+'_all_flavor_den', 'qcd')
         frac_real = buildPercentages(inputFiles, 'muon_'+sr+'_all_flavor_den', 'real')
@@ -199,7 +206,10 @@ def buildMuonRates(inputFiles, outputfile, verbose=False) :
         outputfile.cd()
         fake.Write()
         real.Write()
-def buildElectronRates(inputFiles, outputfile, verbose=False) :
+        mu_frac[sr] = {'qcd' : frac_qcd, 'real' : frac_real}
+    #json_write(mu_frac, outplotdir+/outFracFilename)
+    plotFractions(mu_frac, outplotdir, 'mu')
+def buildElectronRates(inputFiles, outputfile, outplotdir, verbose=False) :
     """
     For each selection region, build the real eff and fake rate
     histo as a weighted sum of the corresponding fractions.
@@ -212,6 +222,7 @@ def buildElectronRates(inputFiles, outputfile, verbose=False) :
     eff_conv = dict((p, brsit('elec_convMC_all_l_pt_coarse', iF[p], el_convSF)) for p in processes)
     eff_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_coarse',  iF[p], el_qcdSF))  for p in processes)
     eff_real = dict((p, brsit('elec_realMC_all_l_pt_coarse', iF[p], el_realSF)) for p in processes)
+    el_frac = dict()
     for sr in selectionRegions() :
         frac_conv, frac_qcd= buildPercentagesTwice(inputFiles, 'elec_'+sr+'_all_flavor_den',
                                                    'conv', 'qcd')
@@ -224,6 +235,9 @@ def buildElectronRates(inputFiles, outputfile, verbose=False) :
         outputfile.cd()
         fake.Write()
         real.Write()
+        el_frac[sr] = {'conv' : frac_conv, 'qcd' : frac_qcd, 'real' : frac_real}
+    #json_write(el_frac, outFracFilename)
+    plotFractions(el_frac, outplotdir, 'el')
 def buildEtaSyst(inputFileTotMc, inputHistoBaseName='(elec|muon)_qcdMC_all', outputHistoName='') :
     """
     Take the eta distribution and normalize it to the average fake
@@ -257,6 +271,35 @@ def buildSystematics(inputFileTotMc, outputfile) :
               el_region, mu_region, el_eta, mu_eta ]
     outputfile.cd()
     for o in  allSys : o.Write()
+def plotFractions(fractDict={}, outplotdir='./', prefix='') :
+    """
+    input : fractDict[sr][lep_type][sample] = float
+    """
+    outplotdir = outplotdir if outplotdir.endswith('/') else outplotdir+'/'
+    regions  = selectionRegions() # we want them in some logic order; fractDict.keys()
+    leptypes = sorted(first(fractDict).keys())
+    samples  = sorted(first(first(fractDict)).keys())
+    ind = np.arange(len(regions))
+    width = 0.5
+    colors = dict(zip(samples, ['b','g','r','c','m','y']))
+    for lt in leptypes :
+        fracPerSample = dict((s, np.array([fractDict[r][lt][s] for r in regions]))
+                             for s in samples)
+        below = np.zeros(len(regions))
+        plots = []
+        fig, ax = plt.subplots()
+        for s, frac in fracPerSample.iteritems() :
+            plots.append(plt.bar(ind, frac, width, color=colors[s], bottom=below))
+            below = below + frac
+        plt.ylabel('fractions')
+        plt.title(prefix+' '+lt+' compositions')
+        plt.xticks(ind+width/2., regions)
+        plt.ylim((0.0, 1.0))
+        plt.grid(True)
+        plt.yticks(np.arange(0.0, 1.0, 0.2))
+        plt.legend([p[0] for p in plots], samples, bbox_to_anchor=(1.2, 1.05))
+        fig.autofmt_xdate(bottom=0.25, rotation=90)
+        plt.savefig(outplotdir+prefix+'_'+lt+'.png')
 
 if __name__=='__main__' :
     main()
