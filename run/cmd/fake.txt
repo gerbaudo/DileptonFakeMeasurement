@@ -44,6 +44,16 @@ FinalFakeHist \
  >& log/fakerate/FinalFakeHist_${TAG}.log
 egrep "((mu_percent_(real|qcd))|(el_percent_(real|conv|qcd)))" log/fakerate/FinalFakeHist_${TAG}.log
 
+# same as above, using new python implementation
+./python/buildWeightedMatrix.py \
+ -t ${TAG} \
+ -i out/fakerate/merged/ \
+ -o out/fakerate/merged/FinalFakeHist_${TAG}.root \
+ -p out/fakerate/merged/FinalFakeHist_plots_${TAG} \
+ -v \
+ >& log/fakerate/FinalFakeHist_${TAG}.log
+
+
 # copy the matrix file and modify the batch template
 # (fakepred.sh.template) to use it; submit fake prediction jobs.
 cp -p \
