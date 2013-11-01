@@ -8,6 +8,7 @@
 import difflib
 from functools import wraps
 import glob
+import json
 import os
 import re
 import subprocess
@@ -101,6 +102,12 @@ def enumFromHeader(filename, enumName) :
             if verbose : print '%s = %d' % (key_name, key_value)
         if verbose : print
     return enum
+def json_write(obj, fname) :
+    with open(fname, 'w') as out :
+        json.dump(obj, out)
+def json_read(fname) :
+    with open(fname) as inp :
+        return json.load(inp)
 #
 # testing
 #
