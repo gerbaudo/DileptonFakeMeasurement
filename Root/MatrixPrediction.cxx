@@ -41,6 +41,8 @@ void MatrixPrediction::Begin(TTree* /*tree*/)
 //----------------------------------------------------------
 Bool_t MatrixPrediction::Process(Long64_t entry)
 {
+  namespace smm = SusyMatrixMethod;
+
   if(!m_allconfigured) return false;
   m_printer.countAndPrint(cout);
   GetEntry(entry);
@@ -50,8 +52,6 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   bool removeLepsFromIso(false);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
   if( !selectEvent() )              return kTRUE;
-  SusyMatrixMethod::FAKE_REGION reg = SusyMatrixMethod::FR_SR_WHSS; //FR_SRDavide;
-  SusyMatrixMethod::SYSTEMATIC  sys = SusyMatrixMethod::SYS_NONE;
   const Met*          m = m_met;
   const JetVector&    j = m_signalJets2Lep;
   const JetVector&   bj = m_baseJets;     // DG don't know why, but we use these for the btag w
@@ -61,35 +61,24 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   if(l.size()>1) computeNonStaticWeightComponents(l, bj);  // DG is this needed? just use the fake w
   else return false;
   float metRel = getMetRel(m, l, j);
-  m_weightComponents.fake = getFakeWeight(l, reg, metRel, sys);
-  bool allowQflip(false);
   DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
-  bool sameFlav(ll==ee||ll==mm);
+  bool allowQflip(false), passMinMet(m->Et > 40.0);
+  bool isEe(ll==ee), isMm(ll==mm), isSf(isEe||isMm), isOf(!isEe && !isMm);
   SsPassFlags ssf(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
   if(m_dbg>3) cout<<eventDetails(ssf.passAll(), *nt.evt(), ll, l)<<endl;
   if(!ssf.passLpt()) return false;
   for(uint s = 0; s<m_systs.size(); ++s){
-    SusyMatrixMethod::SYSTEMATIC sys = (SusyMatrixMethod::SYSTEMATIC) m_systs.at(s);
-    float weight = (sys==SusyMatrixMethod::SYS_NONE
-                    ? m_weightComponents.fake :
-                    getFakeWeight(l,reg, metRel, sys));
-    if(ssf.passLpt()) {
-      PlotRegion pr = (sameFlav ? PR_CR8lpt : PR_CR9lpt);
-      SusyPlotter::fillHistos(ncl, j, m, weight, pr, sys);
-      fillFakeHistos(ncl, j, m, weight, pr, sys);
-      if     (ll==ee && ssf.zllVeto) fillHistos(ncl, j, m, weight, PR_CR8ee, sys);
-      else if(ll==mm) {
-        bool passMinMet(m->Et > 40.0);
-        if(passMinMet ) fillHistos(ncl, j, m, weight, PR_CR8mm,     sys);
-        if(ssf.mtllmet) fillHistos(ncl, j, m, weight, PR_CR8mmMtww, sys);
-        if(ssf.ht     ) fillHistos(ncl, j, m, weight, PR_CR8mmHt,   sys);
-      }
-    }
-    if(ssf.passAll()) {
-      PlotRegion pr = (sameFlav ? PR_SR8    : PR_SR9);
-      SusyPlotter::fillHistos(ncl, j, m, weight, pr, sys);
-      fillFakeHistos(ncl, j, m, weight, pr, sys);
-    }
+    smm::SYSTEMATIC sys = static_cast<smm::SYSTEMATIC>(m_systs.at(s));
+    if(        ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
+    if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8ee,     metRel,sys), PR_CR8ee,     sys);
+    if(isMm && ssf.lepPt
+            && passMinMet   ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8mm,     metRel,sys), PR_CR8mm,     sys);
+    if(isMm && ssf.mtllmet  ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8mmMtww, metRel,sys), PR_CR8mmMtww, sys);
+    if(isMm && ssf.ht       ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8mmHt,   metRel,sys), PR_CR8mmHt,   sys);
+    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_SR_WHSS,   metRel,sys), PR_CR8lpt,    sys);
+    if(isOf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_SR_WHSS,   metRel,sys), PR_CR9lpt,    sys);
+    if(isSf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_SR_WHSS,   metRel,sys), PR_SR8,       sys);
+    if(isOf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_SR_WHSS,   metRel,sys), PR_SR9,       sys);
   } // end for(s)
   return ssf.passAll();
 }
