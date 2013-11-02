@@ -276,7 +276,8 @@ def plotFractions(fractDict={}, outplotdir='./', prefix='') :
     input : fractDict[sr][lep_type][sample] = float
     """
     outplotdir = outplotdir if outplotdir.endswith('/') else outplotdir+'/'
-    regions  = selectionRegions() # we want them in some logic order; fractDict.keys()
+    def isInterestingRegion(r) : return any(k in r for k in ['CR8', 'WHSS', 'SSInc'])
+    regions  = [r for r in selectionRegions() if isInterestingRegion(r)]
     leptypes = sorted(first(fractDict).keys())
     samples  = sorted(first(first(fractDict)).keys())
     ind = np.arange(len(regions))
