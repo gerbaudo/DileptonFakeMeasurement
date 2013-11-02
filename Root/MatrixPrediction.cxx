@@ -69,7 +69,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   if(!ssf.passLpt()) return false;
   for(uint s = 0; s<m_systs.size(); ++s){
     smm::SYSTEMATIC sys = static_cast<smm::SYSTEMATIC>(m_systs.at(s));
-    if(        ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
+    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
     if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8ee,     metRel,sys), PR_CR8ee,     sys);
     if(isMm && ssf.lepPt
             && passMinMet   ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8mm,     metRel,sys), PR_CR8mm,     sys);
