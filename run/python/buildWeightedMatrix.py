@@ -298,7 +298,7 @@ def plotFractions(fractDict={}, outplotdir='./', prefix='') :
         plt.grid(True)
         plt.yticks(np.arange(0.0, 1.0, 0.2))
         plt.legend([p[0] for p in plots], samples, bbox_to_anchor=(1.2, 1.05))
-        fig.autofmt_xdate(bottom=0.25, rotation=90)
+        fig.autofmt_xdate(bottom=0.25, rotation=90, ha='center')
         plt.savefig(outplotdir+prefix+'_'+lt+'.png')
 
 if __name__=='__main__' :
