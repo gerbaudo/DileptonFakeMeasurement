@@ -63,7 +63,7 @@ enw batch/templates/fakepred.sh.template
 ./python/submitJobs.py --fakepred -o  -t ${TAG} -s 'period'
 
 # When the jobs are done, merge the outputs as needed
-./python/mergeOutput.py -v out/fakepred/
+./python/mergeOutput.py -v --onedata out/fakepred/
 
 # Make the closure plots using the new prediction
 plotFakeClosure \
