@@ -284,8 +284,7 @@ def plotFractions(fractDict={}, outplotdir='./', prefix='') :
     width = 0.5
     colors = dict(zip(samples, ['b','g','r','c','m','y']))
     for lt in leptypes :
-        fracPerSample = dict((s, np.array([fractDict[r][lt][s] for r in regions]))
-                             for s in samples)
+        fracPerSample = dict((s, np.array([fractDict[r][lt][s] for r in regions])) for s in samples)
         below = np.zeros(len(regions))
         plots = []
         fig, ax = plt.subplots()
