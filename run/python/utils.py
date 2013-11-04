@@ -102,6 +102,9 @@ def enumFromHeader(filename, enumName) :
             if verbose : print '%s = %d' % (key_name, key_value)
         if verbose : print
     return enum
+def first(listOrDict) :
+    lod = listOrDict
+    return lod.itervalues().next() if type(lod) is dict else lod[0] if lod else None
 def json_write(obj, fname) :
     with open(fname, 'w') as out :
         json.dump(obj, out)

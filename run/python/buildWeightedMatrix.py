@@ -32,6 +32,7 @@ import ROOT as r
 r.gROOT.SetBatch(True)                     # no windows popping up
 r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
 from utils import (enumFromHeader
+                   ,first
                    ,json_write
                    )
 import matplotlib as mpl
@@ -123,9 +124,6 @@ def buildRatioAndScaleIt(histoPrefix='', inputFile=None, scaleFactor=1.0) :
     ratioHisto = buildRatio(inputFile, histoPrefix)
     ratioHisto.Scale(scaleFactor)
     return ratioHisto
-def first(listOrDict) :
-    lod = listOrDict
-    return lod.itervalues().next() if type(lod) is dict else lod[0] if lod else None
 def buildPercentages(inputFiles, histoName, binLabel) :
     "build a dictionary (process, fraction of counts) for a given bin"
     histos = dict((p, f.Get(histoName)) for p, f in inputFiles.iteritems())
