@@ -320,38 +320,6 @@ void FakeClosurePlot::addFakeSys(TH1F* nominal, TFile* file, string plot,
   shifts.clear();
 }
 //---------------------------------------------------------------------//
-void FakeClosurePlot::getFakeSys(TH1F* nominal, TFile* file, string plot,
-			       float &sysup, float &sysdn)
-{
-  // There are 8 total sys shifts that have the following names:
-  // * {EL,MU}_RE_{UP,DOWN} = 4 shifts
-  // * {EL,MU}_FR_{UP,DOWN} = 4 shifts
-  // * Also statistical error
-
-  vector<TH1F*> shifts; // Load Fake systematic shifts
-  shifts.push_back((TH1F*) file->Get((plot + "_EL_RE_UP").c_str()));
-  shifts.push_back((TH1F*) file->Get((plot + "_EL_RE_DOWN").c_str()));
-  shifts.push_back((TH1F*) file->Get((plot + "_MU_RE_UP").c_str()));
-  shifts.push_back((TH1F*) file->Get((plot + "_MU_RE_DOWN").c_str()));
-  shifts.push_back((TH1F*) file->Get((plot + "_EL_FR_UP").c_str()));
-  shifts.push_back((TH1F*) file->Get((plot + "_EL_FR_DOWN").c_str()));
-  shifts.push_back((TH1F*) file->Get((plot + "_MU_FR_UP").c_str()));
-  shifts.push_back((TH1F*) file->Get((plot + "_MU_FR_DOWN").c_str()));
-  int nbins = nominal->GetNbinsX();
-  for(int bin=0; bin<=nbins; ++bin){
-    float bc = nominal->GetBinContent(bin);
-    for(uint s=0; s<shifts.size(); ++s){
-      float shift = shifts.at(s)->GetBinContent(bin);
-      if(shift > bc) sysup += pow(shift-bc,2);
-      else           sysdn += pow(shift-bc,2);
-    }// end loop over sys
-  }// end loop over bins
-  sysup = sqrt(sysup);
-  sysdn = sqrt(sysdn);
-  for(uint i=0; i<shifts.size(); ++i) shifts.at(i)->Delete();
-  shifts.clear();
-}
-//---------------------------------------------------------------------//
 void FakeClosurePlot::addSysError(TH1F* nominal, TFile* file, string plot,
 				vector<TH1F*> &sys)
 {

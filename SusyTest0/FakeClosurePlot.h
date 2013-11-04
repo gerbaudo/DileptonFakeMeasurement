@@ -100,7 +100,6 @@ class FakeClosurePlot : public myHist {
   TGraphAsymmErrors* buildRatioErrors(TH1F* nominal, TGraphAsymmErrors* tg_errs);
   void addSysError(TH1F* nominal, TFile* file, string plot, vector<TH1F*> &sys);
   void addFakeSys(TH1F* nominal, TFile* file, string plot, vector<TH1F*> &sys);
-  void getFakeSys(TH1F* nominal, TFile* file, string plot, float &sysup, float &sysdn);
   // Miscellaneous
   float getNorm(TH1* h);
   float getStat(TH1* h, float low, float high);
