@@ -11,12 +11,14 @@ import ROOT as r
 r.gROOT.SetBatch(1)
 
 colors = {
-    'ttbar'     : r.kRed+1,
-    'zjets'     : r.kOrange-2,
-    'wjets'     : r.kBlue-2,
-    'diboson'   : r.kSpring+1,
-    'singletop' : r.kAzure-4,
-    'multijet'  : r.kWhite
+    'ttbar'       : r.kRed+1,
+    'zjets'       : r.kOrange-2,
+    'wjets'       : r.kBlue-2,
+    'diboson'     : r.kSpring+1,
+    'singletop'   : r.kAzure-4,
+    'multijet'    : r.kGray,
+    'fake'        : r.kGray, # just another name for the same thing
+    'heavyflavor' : r.kViolet+1
     }
 
 allGroups, allDatasets, datasets = allGroups(datasets), allDatasets(datasets), activeDatasets(datasets)
