@@ -100,10 +100,10 @@ def main() :
                    +'\n'.join(["%s: num %s den %s"%(k, v['num'], v['den'])
                                for k,v in missingHistos.iteritems()]))
             continue
-        hRealEff = ratioHistogram(hRealDataCr['num'], hRealDataCr['den'], 'real_eff')
+        hRealEff = buildRatioHistogram(hRealDataCr['num'], hRealDataCr['den'], 'real_eff')
         corrected = dict([(nd, hFakeDataLo[nd].Clone('corrected_'+nd)) for nd in ['num', 'den']])
         for iteration in range(nIter) :
-            rate = ratioHistogram(corrected['num'], corrected['den']) # temporary rate (?)
+            rate = buildRatioHistogram(corrected['num'], corrected['den']) # temporary rate (?)
             if verbose :
                 def lf2s(l) : return ', '.join(["%.3f"%e for e in l])
                 print "Iteration %d, corrected values:"%iteration
@@ -116,7 +116,7 @@ def main() :
                 mcLow, mcHi = hFakeMcLo[nd], hFakeMcHi[nd]
                 corrFact = getCorrFactors(hRealEff, rate, dataNum, dataDen, mcHi, tl)
                 corr = correctRate(corr, dataLow, mcLow, corrFact)
-        ratio = ratioHistogram(corrected['num'], corrected['den'], lep+'_corHFRate')
+        ratio = buildRatioHistogram(corrected['num'], corrected['den'], lep+'_corHFRate')
         correctionHistos[lep] = ratio
     if verbose : print "saving output to ",fnameOutput
     fileOut = r.TFile.Open(fnameOutput, 'recreate')
