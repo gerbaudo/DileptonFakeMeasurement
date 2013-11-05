@@ -302,7 +302,7 @@ void FakeClosurePlot::addFakeSys(TH1F* nominal, TFile* file, string plot,
   shifts.push_back((TH1F*) file->Get((plot + "_MU_FR_UP").c_str()));
   shifts.push_back((TH1F*) file->Get((plot + "_MU_FR_DOWN").c_str()));
   int nbins = nominal->GetNbinsX();
-  for(int bin=0; bin<=nbins; ++bin){
+  for(int bin=0; bin<=nbins; ++bin){ // this is a bug (start from 1)
     float stat = pow(nominal->GetBinError(bin),2);
     float err_up = stat;
     float err_dn = stat;
