@@ -20,6 +20,7 @@ r.gStyle.SetPadTickX(1)
 r.gStyle.SetPadTickY(1)
 from rootUtils import (referenceLine
                        ,topRightLegend
+                       ,getMinMax
                        )
 from utils import (enumFromHeader
                    ,json_write
@@ -244,6 +245,8 @@ def drawTop(pad, hists, err_band, label=('','')) :
     tex.DrawLatex(0.45, 0.75, label)
     pad.Update() # force stack to create padMaster
     padMaster = stack.GetHistogram()
+    pMin, pMax = getMinMax([h_bkg, h_data, err_band])
+    stack.SetMaximum(pMax)
     xAx, yAx = padMaster.GetXaxis(), padMaster.GetYaxis()
     xAx.SetTitle('')
     xAx.SetLabelSize(0)
