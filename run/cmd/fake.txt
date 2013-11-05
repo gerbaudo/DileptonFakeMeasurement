@@ -66,10 +66,8 @@ enw batch/templates/fakepred.sh.template
 ./python/mergeOutput.py -v --onedata out/fakepred/
 
 # Make the closure plots using the new prediction
-plotFakeClosure \
- -d 10 \
- -r 1 \
- -t ${TAG}  \
- -i out/susyplot/merged/ \
- -f out/fakepred/merged/data_${TAG}.root \
- -o out/fakepred/merged/fake_closure_plots_${TAG}
+python/plotFakeClosure.py \
+ --tag ${TAG} \
+ --input_dir  out/susyplot/merged/ \
+ --input_fake out/fakepred/merged/data_${TAG}.root \
+ --output_dir out/fakepred/merged/fake_closure_plots_${TAG}
