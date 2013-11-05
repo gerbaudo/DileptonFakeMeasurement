@@ -21,6 +21,7 @@ r.gStyle.SetPadTickY(1)
 from rootUtils import (referenceLine
                        ,topRightLegend
                        ,getMinMax
+                       ,buildRatioHistogram
                        )
 from utils import (enumFromHeader
                    ,json_write
@@ -242,7 +243,7 @@ def drawTop(pad, hists, err_band, label=('','')) :
     tex = r.TLatex()
     tex.SetNDC(True)
     label = "#splitline{%s}{%s}"%(label[0], label[1]) if len(label)==2 else label
-    tex.DrawLatex(0.45, 0.75, label)
+    tex.DrawLatex(0.50, 0.85, label)
     pad.Update() # force stack to create padMaster
     padMaster = stack.GetHistogram()
     pMin, pMax = getMinMax([h_bkg, h_data, err_band])
@@ -255,13 +256,6 @@ def drawTop(pad, hists, err_band, label=('','')) :
     pad._graphical_objects = [stack, h_data, h_bkg, err_band, leg, tex] + [h for h in stack.GetStack()]
     pad.Update()
 
-def buildRatioHistogram(num, den) :
-    print "buildRatioHistogram: move to utils"
-    ratio = num.Clone(num.GetName()+'_over_'+den.GetName())
-    ratio.SetDirectory(0) # we usually don't care about the ownership of these temporary objects
-    ratio.Reset()
-    ratio.Divide(num, den, 1, 1, 'B')
-    return ratio
 def getXrange(h) :
     nbins = h.GetNbinsX()
     x_lo = h.GetBinCenter(1) - 0.5*h.GetBinWidth(1)

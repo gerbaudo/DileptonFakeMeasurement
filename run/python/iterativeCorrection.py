@@ -38,6 +38,7 @@ import optparse
 import ROOT as r
 r.gROOT.SetBatch(True)                     # no windows popping up
 r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
+from rootUtils import buildRatioHistogram
 
 usage="""
 Example usage:
@@ -174,12 +175,6 @@ def histo1dToTxt(h) :
     return '\n'.join(["%s : %s"%(n,v)
                       for n,v in [('hisName',hisName)] + [(l, lf2s(eval(l)))
                                                           for l in ['binEdge', 'binCont', 'binErr']]])
-def ratioHistogram(num, den, name='ratio') :
-    r = num.Clone(name)
-    r.SetDirectory(0) # we usually don't care about the ownership of these temporary objects
-    r.Reset()
-    r.Divide(num, den, 1, 1)
-    return r
 
 def plotHistos(histos=[], canvasName='c1') :
     c = r.TCanvas(canvasName)
@@ -202,7 +197,7 @@ def plotHistos(histos=[], canvasName='c1') :
     c.SaveAs(canvasName+'.png')
 
 def plotHistosRatio(histosPairs=[], canvasName='') :
-    histosRatio = [ratioHistogram(hh['num'], hh['den']) for hh in histosPairs]
+    histosRatio = [buildRatioHistogram(hh['num'], hh['den']) for hh in histosPairs]
     plotHistos(histosRatio, canvasName)
 
 if __name__=='__main__' :

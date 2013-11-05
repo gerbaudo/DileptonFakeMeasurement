@@ -31,6 +31,7 @@ import os
 import ROOT as r
 r.gROOT.SetBatch(True)                     # no windows popping up
 r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
+from rootUtils import buildRatioHistogram
 from utils import (enumFromHeader
                    ,first
                    ,json_write
@@ -110,11 +111,7 @@ def getInputFiles(inputDirname, tag, verbose=False) :
     return files
 def buildRatio(inputFile=None, histoBaseName='') :
     num, den = inputFile.Get(histoBaseName+'_num'), inputFile.Get(histoBaseName+'_den')
-    ratio = num.Clone(histoBaseName +'_rat')
-    ratio.SetDirectory(0) # we usually don't care about the ownership of these temporary objects
-    ratio.Reset()
-    ratio.Divide(num, den, 1, 1, 'B')
-    return ratio
+    return buildRatioHistogram(num, den, histoBaseName +'_rat')
 def getRealEff(lepton='electron|muon', inputFile=None, scaleFactor=1.0) :
     histoName = lepton+'_realMC_all_l_pt_coarse'
     effHisto = buildRatio(inputFile, histoName)

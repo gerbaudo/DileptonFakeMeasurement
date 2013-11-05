@@ -67,3 +67,9 @@ def getMinMax(histosOrGraphs=[]) :
         elif cname.startswith('TGraph') :            return getMinMaxFromTGraph(obj)
     ms, Ms = verticalSlice([mM(o) for o in histosOrGraphs])
     return min(ms), max(Ms)
+def buildRatioHistogram(num, den, name='') :
+    ratio = num.Clone(name if name else num.GetName()+'_over_'+den.GetName())
+    ratio.SetDirectory(0) # we usually don't care about the ownership of these temporary objects
+    ratio.Reset()
+    ratio.Divide(num, den, 1, 1, 'B')
+    return ratio

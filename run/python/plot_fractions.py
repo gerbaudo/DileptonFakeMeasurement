@@ -29,7 +29,8 @@ r.gStyle.SetPadTickY(1)
 from utils import commonPrefix, commonSuffix
 from rootUtils import (unitLineFromFirstHisto,
                        firstHisto,
-                       drawLegendWithDictKeys
+                       drawLegendWithDictKeys,
+                       buildRatioHistogram
                        )
 #___________________________________________________________  
 class Entry :
@@ -155,8 +156,7 @@ def buildRatioHistos(histosNum={}, histosDen={}) :
             hNames = [h.GetName() for h in hnum, hden]
             pre, suf = commonPrefix(hNames), commonSuffix(hNames)
             hName = pre+'_ratio_'+suf if len(pre) and len(suf) else '_over_'.join(hNames)
-            h = hnum.Clone(hName)
-            h.Divide(hnum, hden) # root already checks that the histos have the same bin labels
+            h = buildRatioHistogram(hnum, hden, hName)
             resetErrors(h)
             resultPerSample[s] = h
         result[vt] = resultPerSample
