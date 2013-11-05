@@ -65,9 +65,9 @@ def main() :
     for region in ['cr8lptee', 'cr8lptmm', 'cr9lpt', 'cr8lptmmMtww', 'cr8lptmmHt'] :
         for channel in ['ee', 'em', 'mm'] :
             for varname in ['l0_pt', 'l1_pt', 'll_M', 'metrel', 'met', 'njets', 'nbjets'] :
-                xlabel = xaxisLabel(varname)
                 histo_basename = region+'_'+channel+'_'+varname
                 hists, err2s = buildHists(inputFiles, histo_basename)
+                if not hists[dataSample()].GetEntries() : continue
                 err_band     = buildErrBandGraph(hists['sm'], err2s)
                 err_band_r   = buildErrBandRatioGraph(err_band)
                 can = r.TCanvas('can_'+histo_basename, histo_basename, 800, 600)
@@ -77,7 +77,7 @@ def main() :
                 drawTop(topPad, hists, err_band, (channel, region))
                 can.cd()
                 botPad.Draw()
-                drawBot(botPad, hists[dataSample()], hists['sm'], err_band_r)
+                drawBot(botPad, hists[dataSample()], hists['sm'], err_band_r, xaxisLabel(varname))
                 can.Update()
                 outFilename = outputDir+histo_basename+'.png'
                 rmIfExists(outFilename) # avoid root warnings
@@ -267,7 +267,7 @@ def getXrange(h) :
     x_lo = h.GetBinCenter(1) - 0.5*h.GetBinWidth(1)
     x_hi = h.GetBinCenter(nbins) + 0.5*h.GetBinWidth(nbins)
     return x_lo, x_hi
-def drawBot(pad, histo_data, histo_mc, err_band_r) :
+def drawBot(pad, histo_data, histo_mc, err_band_r, xaxis_title='') :
     pad.Draw()
     pad.cd()
     ratio = buildRatioHistogram(histo_data, histo_mc)
@@ -283,6 +283,7 @@ def drawBot(pad, histo_data, histo_mc, err_band_r) :
     ratio.Draw('ep same')
     xA, yA = ratio.GetXaxis(), ratio.GetYaxis()
     textScaleUp = 1.0/pad.GetHNDC()
+    if xaxis_title : xA.SetTitle(xaxis_title)
     yA.SetNdivisions(-104)
     yA.SetTitle('Data/SM')
     yA.CenterTitle()
