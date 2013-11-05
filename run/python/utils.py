@@ -113,6 +113,9 @@ def json_read(fname) :
         return json.load(inp)
 def rmIfExists(filename) :
     if os.path.exists(filename) : os.remove(filename)
+def verticalSlice(list2d) :
+    "http://stackoverflow.com/questions/6253586/python-vertical-array-slicing"
+    return zip(*list2d)
 #
 # testing
 #
