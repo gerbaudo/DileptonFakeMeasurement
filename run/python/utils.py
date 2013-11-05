@@ -111,6 +111,8 @@ def json_write(obj, fname) :
 def json_read(fname) :
     with open(fname) as inp :
         return json.load(inp)
+def rmIfExists(filename) :
+    if os.path.exists(filename) : os.remove(filename)
 #
 # testing
 #
