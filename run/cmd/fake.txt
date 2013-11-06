@@ -12,9 +12,9 @@ TAG="Oct_10"
 
 # Determine the contamination from prompt leptons to the HF estimate
 # in the high-pt tail
-IterFake \
- --input-data out/fakerate/merged/data_${TAG}.root \       
- --input-mc   out/fakerate/merged/allBkgButHf_${TAG}.root \
+./python/iterativeCorrection.py \
+ --input_data out/fakerate/merged/data_${TAG}.root \
+ --input_mc   out/fakerate/merged/allBkgButHf_${TAG}.root \
  --output     out/fakerate/merged/iterative_out_${TAG}.root \
  >& log/fakerate/IterFake_${TAG}.log
 
@@ -22,29 +22,15 @@ IterFake \
 # Here, for the real-lepton efficiencies (tag-and-probe),
 # the Z-peak sideband subtraction is also applied.
 # The SF are printed out to screen; copy them to FinalNewFake.h
-FakePlot \
- -r datamc-sf 
- -t ${TAG} \
- -i out/fakerate/merged/ \
- -o out/fakerate/merged/plot_${TAG} \
- -c out/fakerate/merged/iterative_out_${TAG}.root \
+./python/determineFakeScaleFactor.py \\
+ --tag ${TAG} \
+ --input_dir  out/fakerate/merged/ \
+ --input_iter out/fakerate/merged/iterative_out_${TAG}.root \
+ --output_dir out/fakerate/merged/plot_${TAG} \
  >& log/fakerate/FakePlot_${TAG}.log
 
-grep "SF for" log/fakerate/FakePlot_${TAG}.log
-
 # Produce the weighted matrix with FinalNewFake.
-# This is also where the fractions are computed and printed to screen.
-# See https://www.debuggex.com/r/z_r35QPrxtMFIoIC for capturing re.
-
-FinalFakeHist \
- -t ${TAG} \
- -i out/fakerate/merged/ \
- -o out/fakerate/merged/FinalFakeHist_${TAG}.root \
- -p out/fakerate/merged/FinalFakeHist_plots_${TAG} \
- >& log/fakerate/FinalFakeHist_${TAG}.log
-egrep "((mu_percent_(real|qcd))|(el_percent_(real|conv|qcd)))" log/fakerate/FinalFakeHist_${TAG}.log
-
-# same as above, using new python implementation
+# This is also where the fractions are computed and plotted.
 ./python/buildWeightedMatrix.py \
  -t ${TAG} \
  -i out/fakerate/merged/ \
