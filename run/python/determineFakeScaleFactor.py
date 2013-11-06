@@ -31,9 +31,9 @@ from utils import (first
 usage="""
 Example usage:
 %prog \\
- -- tag ${TAG}
+ --tag ${TAG} \\
  --input_dir  out/fakerate/merged/ \\
- --input_iter out/fakerate/merged/iterative_out_${TAG}.root\\
+ --input_iter out/fakerate/merged/iterative_out_${TAG}.root \\
  --output_dir out/fakerate/merged/plot_${TAG} \\
  >& log/fakerate/FakePlot_${TAG}.log
 """
