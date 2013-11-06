@@ -73,22 +73,22 @@ def main() :
     computeAndPlotRealSf(fileData, fileMc, 'elec', 'all_l_pt', outputDirname)
     computeAndPlotRealSf(fileData, fileMc, 'muon', 'all_l_pt', outputDirname)
 
-def computeAndPlotRealSf(file_data, file_mc, lepton, variable_name, outdir) :
-    "Scale factor from the real control region, Z tag and probe"
-    eff_da = buildSideBandSubRate(file_data, lepton, variable_name)
-    eff_mc = buildSideBandSubRate(file_mc,   lepton, variable_name)
-    ratio = buildRatioHistogram(eff_da, eff_mc)
+def computeAndPlotConvSf(fileData, fileMc, lepton, variable_name, outdir) :
+    "Electron conversion: simplest case, just data/mc"
+    eff_da = buildRate(fileData, lepton+'_fakeConv_'+variable_name)
+    eff_mc = buildRate(fileMc,   lepton+'_fakeConv_'+variable_name)
+    ratio  = buildRatioHistogram(eff_da, eff_mc)
     fitFunc = fitWithConst(ratio)
     p0, p0Err, chi2, ndf = fitResults(fitFunc)
     p0, p0Err = pdgRound(p0, p0Err)
-    print "SF for %s real : %s +/- %s"%(lepton, p0, p0Err)
+    print "SF for %s fake conv : %s +/- %s"%(lepton, p0, p0Err)
     graphics = {'xtitle' : xTitle(lepton, variable_name),
-                'ytitle' : lepton+' p(tight | real)',
+                'ytitle' : lepton+' p(tight | fake conv)',
                 'colors' : {'data' : r.kBlack, 'mc' : mcColor(lepton)},
                 'markers': {'data' : r.kFullCircle, 'mc' : mcMarker(lepton)},
-                'labels' : {'data' : 'Data: Z Tag and Probe',
-                            'mc'   : 'MC Comb: Z Tag and Probe'}}
-    plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_real',
+                'labels' : {'data' : 'Data: Conversion CR',
+                            'mc'   : 'MC Comb: Conv CR'}}
+    plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_fakeconv',
                         graphics)
 def computeAndPlotHfSf(fileIter, fileHf, lepton, variable_name, outdir) :
     "HF tag and probe; in this case we need to subract out the contamination"
@@ -107,22 +107,22 @@ def computeAndPlotHfSf(fileIter, fileHf, lepton, variable_name, outdir) :
                             'mc'   : 'b#bar{b}/c#bar{c} MC: HF Tag and Probe'}}
     plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_fakehf',
                         graphics)
-def computeAndPlotConvSf(fileData, fileMc, lepton, variable_name, outdir) :
-    "Electron conversion: simplest case"
-    eff_da = buildRate(fileData, lepton+'_fakeConv_'+variable_name)
-    eff_mc = buildRate(fileMc,   lepton+'_fakeConv_'+variable_name)
-    ratio  = buildRatioHistogram(eff_da, eff_mc)
+def computeAndPlotRealSf(file_data, file_mc, lepton, variable_name, outdir) :
+    "Scale factor from the real control region, Z tag and probe"
+    eff_da = buildSideBandSubRate(file_data, lepton, variable_name)
+    eff_mc = buildSideBandSubRate(file_mc,   lepton, variable_name)
+    ratio = buildRatioHistogram(eff_da, eff_mc)
     fitFunc = fitWithConst(ratio)
     p0, p0Err, chi2, ndf = fitResults(fitFunc)
     p0, p0Err = pdgRound(p0, p0Err)
-    print "SF for %s fake conv : %s +/- %s"%(lepton, p0, p0Err)
+    print "SF for %s real : %s +/- %s"%(lepton, p0, p0Err)
     graphics = {'xtitle' : xTitle(lepton, variable_name),
-                'ytitle' : lepton+' p(tight | fake conv)',
+                'ytitle' : lepton+' p(tight | real)',
                 'colors' : {'data' : r.kBlack, 'mc' : mcColor(lepton)},
                 'markers': {'data' : r.kFullCircle, 'mc' : mcMarker(lepton)},
-                'labels' : {'data' : 'Data: Conversion CR',
-                            'mc'   : 'MC Comb: Conv CR'}}
-    plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_fakeconv',
+                'labels' : {'data' : 'Data: Z Tag and Probe',
+                            'mc'   : 'MC Comb: Z Tag and Probe'}}
+    plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_real',
                         graphics)
 def buildRate(file, histo_basename) :
     hs = getNumDenHistos(file, histo_basename)
@@ -172,7 +172,6 @@ def plotHistRatioAndFit(histos, ratio, fitfunc, outfname, graphics_attributes={}
     yAx.SetRangeUser(0.0, 1.2)
     yAx.SetNdivisions(505) # for some reason some of the inputs are already ratios with -201
     textScaleUp = 1.0/topPad.GetHNDC()
-    print first(histos).GetName(),' : label size ',yAx.GetLabelSize()
     yAx.SetLabelSize(textScaleUp*0.04)
     yAx.SetTitleSize(textScaleUp*0.04)
     yAx.SetTitle(graphics_attributes['ytitle'])
