@@ -67,9 +67,31 @@ def getMinMax(histosOrGraphs=[]) :
         elif cname.startswith('TGraph') :            return getMinMaxFromTGraph(obj)
     ms, Ms = verticalSlice([mM(o) for o in histosOrGraphs])
     return min(ms), max(Ms)
-def buildRatioHistogram(num, den, name='') :
+def buildRatioHistogram(num, den, name='', divide_opt='B') :
     ratio = num.Clone(name if name else num.GetName()+'_over_'+den.GetName())
     ratio.SetDirectory(0) # we usually don't care about the ownership of these temporary objects
     ratio.Reset()
-    ratio.Divide(num, den, 1, 1, 'B')
+    ratio.Divide(num, den, 1, 1, divide_opt)
     return ratio
+def getNumDenHistos(f, baseHname='base_histo_name', suffNum='_num', suffDen='_den') :
+    "baseHname is something like 'lep_controlreg_chan_var', see MeasureFakeRate2::initHistos()"
+    num = f.Get(baseHname+suffNum)
+    den = f.Get(baseHname+suffDen)
+    return {'num':num, 'den':den}
+def buildBotTopPads(canvas, splitFraction=0.275) :
+    canvas.cd()
+    botPad = r.TPad(canvas.GetName()+'_bot', 'bot pad', 0.0, 0.0, 1.0, splitFraction, 0, 0, 0)
+    interPadMargin = 0.5*0.05
+    botPad.SetTopMargin(interPadMargin)
+    botPad.SetBottomMargin(botPad.GetBottomMargin()/splitFraction)
+    botPad.SetRightMargin(0.20*botPad.GetRightMargin())
+    r.SetOwnership(botPad, False)
+    canvas.cd()
+    canvas.Update()
+    topPad = r.TPad(canvas.GetName()+'_top', 'top pad', 0.0, splitFraction, 1.0, 1.0, 0, 0)
+    topPad.SetBottomMargin(interPadMargin)
+    topPad.SetTopMargin(0.20*topPad.GetTopMargin())
+    topPad.SetRightMargin(0.20*topPad.GetRightMargin())
+    r.SetOwnership(topPad, False)
+    canvas._pads = [topPad, botPad]
+    return botPad, topPad

@@ -38,7 +38,8 @@ import optparse
 import ROOT as r
 r.gROOT.SetBatch(True)                     # no windows popping up
 r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
-from rootUtils import buildRatioHistogram
+from rootUtils import (buildRatioHistogram,
+                       getNumDenHistos)
 
 usage="""
 Example usage:
@@ -74,11 +75,6 @@ def main() :
     fileData = r.TFile.Open(fnameInputDa)
     fileMc   = r.TFile.Open(fnameInputMc)
     assert fileData and fileMc, "Missing input files: data %s, mc %s"%(str(fileData), str(fileMc))
-    def getNumDenHistos(f, baseHname='base_histo_name', suffNum='_num', suffDen='_den') :
-        "baseHname is something like 'lep_controlreg_chan_var', see MeasureFakeRate2::initHistos()"
-        num = f.Get(baseHname+suffNum)
-        den = f.Get(baseHname+suffDen)
-        return {'num':num, 'den':den}
     correctionHistos = {}
     for lep in ['muon', 'elec'] :
         if verbose : print "Lepton: %s"%lep

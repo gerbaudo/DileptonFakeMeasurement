@@ -22,6 +22,7 @@ from rootUtils import (referenceLine
                        ,topRightLegend
                        ,getMinMax
                        ,buildRatioHistogram
+                       ,buildBotTopPads
                        )
 from utils import (enumFromHeader
                    ,json_write
@@ -197,23 +198,6 @@ def buildErrBandRatioGraph(errband_graph) :
         gr.SetPointEYlow (p, ey_lo)
         gr.SetPointEYhigh(p, ey_hi)
     return gr
-def buildBotTopPads(canvas, splitFraction=0.275) :
-    canvas.cd()
-    botPad = r.TPad(canvas.GetName()+'_bot', 'bot pad', 0.0, 0.0, 1.0, splitFraction, 0, 0, 0)
-    interPadMargin = 0.5*0.05
-    botPad.SetTopMargin(interPadMargin)
-    botPad.SetBottomMargin(botPad.GetBottomMargin()/splitFraction)
-    botPad.SetRightMargin(0.20*botPad.GetRightMargin())
-    r.SetOwnership(botPad, False)
-    canvas.cd()
-    canvas.Update()
-    topPad = r.TPad(canvas.GetName()+'_top', 'top pad', 0.0, splitFraction, 1.0, 1.0, 0, 0)
-    topPad.SetBottomMargin(interPadMargin)
-    topPad.SetTopMargin(0.20*topPad.GetTopMargin())
-    topPad.SetRightMargin(0.20*topPad.GetRightMargin())
-    r.SetOwnership(topPad, False)
-    canvas._pads = [topPad, botPad]
-    return botPad, topPad
 
 def drawTop(pad, hists, err_band, label=('','')) :
     pad.Draw()
