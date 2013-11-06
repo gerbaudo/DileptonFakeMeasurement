@@ -12,9 +12,9 @@ TAG="Oct_10"
 
 # Determine the contamination from prompt leptons to the HF estimate
 # in the high-pt tail
-IterFake \
- --input-data out/fakerate/merged/data_${TAG}.root \       
- --input-mc   out/fakerate/merged/allBkgButHf_${TAG}.root \
+./python/iterativeCorrection.py \
+ --input_data out/fakerate/merged/data_${TAG}.root \
+ --input_mc   out/fakerate/merged/allBkgButHf_${TAG}.root \
  --output     out/fakerate/merged/iterative_out_${TAG}.root \
  >& log/fakerate/IterFake_${TAG}.log
 
@@ -22,27 +22,23 @@ IterFake \
 # Here, for the real-lepton efficiencies (tag-and-probe),
 # the Z-peak sideband subtraction is also applied.
 # The SF are printed out to screen; copy them to FinalNewFake.h
-FakePlot \
- -r datamc-sf 
- -t ${TAG} \
- -i out/fakerate/merged/ \
- -o out/fakerate/merged/plot_${TAG} \
- -c out/fakerate/merged/iterative_out_${TAG}.root \
+./python/determineFakeScaleFactor.py \\
+ --tag ${TAG} \
+ --input_dir  out/fakerate/merged/ \
+ --input_iter out/fakerate/merged/iterative_out_${TAG}.root \
+ --output_dir out/fakerate/merged/plot_${TAG} \
  >& log/fakerate/FakePlot_${TAG}.log
 
-grep "SF for" log/fakerate/FakePlot_${TAG}.log
-
 # Produce the weighted matrix with FinalNewFake.
-# This is also where the fractions are computed and printed to screen.
-# See https://www.debuggex.com/r/z_r35QPrxtMFIoIC for capturing re.
-
-FinalFakeHist \
+# This is also where the fractions are computed and plotted.
+./python/buildWeightedMatrix.py \
  -t ${TAG} \
  -i out/fakerate/merged/ \
  -o out/fakerate/merged/FinalFakeHist_${TAG}.root \
  -p out/fakerate/merged/FinalFakeHist_plots_${TAG} \
+ -v \
  >& log/fakerate/FinalFakeHist_${TAG}.log
-egrep "((mu_percent_(real|qcd))|(el_percent_(real|conv|qcd)))" log/fakerate/FinalFakeHist_${TAG}.log
+
 
 # copy the matrix file and modify the batch template
 # (fakepred.sh.template) to use it; submit fake prediction jobs.
@@ -53,13 +49,11 @@ enw batch/templates/fakepred.sh.template
 ./python/submitJobs.py --fakepred -o  -t ${TAG} -s 'period'
 
 # When the jobs are done, merge the outputs as needed
-./python/mergeOutput.py -v out/fakepred/
+./python/mergeOutput.py -v --onedata out/fakepred/
 
 # Make the closure plots using the new prediction
-plotFakeClosure \
- -d 10 \
- -r 1 \
- -t ${TAG}  \
- -i out/susyplot/merged/ \
- -f out/fakepred/merged/data_${TAG}.root \
- -o out/fakepred/merged/fake_closure_plots_${TAG}
+python/plotFakeClosure.py \
+ --tag ${TAG} \
+ --input_dir  out/susyplot/merged/ \
+ --input_fake out/fakepred/merged/data_${TAG}.root \
+ --output_dir out/fakepred/merged/fake_closure_plots_${TAG}

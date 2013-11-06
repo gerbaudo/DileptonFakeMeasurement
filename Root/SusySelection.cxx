@@ -26,26 +26,6 @@ std::string SusySelection::WeightComponents::str() const
   return oss.str();
 }
 //-----------------------------------------
-std::string SusySelection::SsPassFlags::str() const
-{
-  std::ostringstream oss;
-  oss<<" eq2l: "<<eq2l
-     <<" tauVeto: "<<tauVeto
-     <<" trig2l: "<<trig2l
-     <<" trig2lmatch: "<<trig2lmatch
-     <<" true2l: "<<true2l
-     <<" sameSign: "<<sameSign
-     <<" fjveto: "<<fjveto
-     <<" bjveto: "<<bjveto
-     <<" ge1j: "<<ge1j
-     <<" lepPt: "<<lepPt
-     <<" zllVeto: "<<zllVeto
-     <<" mtllmet: "<<mtllmet
-     <<" ht: "<<ht
-     <<" metrel: "<<metrel;
-  return oss.str();
-}
-//-----------------------------------------
 SusySelection::SusySelection() :
   m_susyObj(NULL),
   m_xsReader(NULL),
@@ -192,12 +172,12 @@ bool SusySelection::passSrSsBase()
   return false;
 }
 //-----------------------------------------
-SusySelection::SsPassFlags SusySelection::passSrSs(const WH_SR signalRegion,
-                                                   LeptonVector& leptons,
-                                                   const TauVector& taus,
-                                                   const JetVector& jets,
-                                                   const Met *met,
-                                                   bool allowQflip)
+SsPassFlags SusySelection::passSrSs(const WH_SR signalRegion,
+                                    LeptonVector& leptons,
+                                    const TauVector& taus,
+                                    const JetVector& jets,
+                                    const Met *met,
+                                    bool allowQflip)
 {
   SsPassFlags f;
   if(leptons.size()<2) return f;

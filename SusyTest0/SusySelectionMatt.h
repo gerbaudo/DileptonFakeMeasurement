@@ -22,6 +22,7 @@
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyXSReader/XSReader.h"
 #include "SusyTest0/SusyAnaDefsMatt.h"
+#include "SusyTest0/SsPassFlags.h"
 
 #include "SUSYTools/SUSYObjDef.h"
 
@@ -109,7 +110,7 @@ class SusySelectionMatt : public SusyNtAna
     bool passSimpleZ2(const LeptonVector& leptons, const JetVector& jets, const Met* met);
 
     bool passMuonRelIso(const LeptonVector &leptons, float maxVal);
-    bool passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met);
+    SsPassFlags passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met);
 
     // Higgs jet counting..
     //int nHiggsSignalJets(const JetVector& jets);

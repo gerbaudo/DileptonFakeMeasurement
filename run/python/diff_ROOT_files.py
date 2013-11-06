@@ -76,7 +76,12 @@ class diffROOT(object):
                                      h2.GetBinContent(iX,iY) ) 
                                    for iX in range(nbinsX+2) for iY in range(nbinsY+2)]])
         same = pDiff < 1e-6
-        return all([bins,loX,hiX,same])
+        equal = all([bins,loX,hiX,same])
+        def binContents(h) :
+            bc, nbins = h.GetBinContent, h.GetNbinsX()
+            return '['+', '.join("%.3f"%bc(b) for b in range(1, 1+nbins))+']'
+        if not equal : print "%s : %s != %s"%(h1.GetName(), binContents(h1), binContents(h2))
+        return equal
     
 
 
