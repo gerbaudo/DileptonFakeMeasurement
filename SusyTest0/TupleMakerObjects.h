@@ -18,10 +18,14 @@ struct FourMom {
     double px, py, pz, E;
     bool isMu, isEl, isJet;
     FourMom() : px(0), py(0), pz(0), E(0), isMu(false), isEl(false), isJet(false) {}
-  FourMom& set4mom(const Lepton &l) { px=l.Px(); py=l.Py(); pz=l.Pz(); E=l.E(); return *this; }
-  FourMom& set4mom(const Jet &j)    { px=j.Px(); py=j.Py(); pz=j.Pz(); E=j.E(); return *this; }
+#ifndef __CINT__
+// cint is not able to parse 'complex' code; see
+// http://root.cern.ch/drupal/content/interacting-shared-libraries-rootcint
+    FourMom& set4mom(const Lepton &l) { px=l.Px(); py=l.Py(); pz=l.Pz(); E=l.E(); return *this; }
+    FourMom& set4mom(const Jet &j)    { px=j.Px(); py=j.Py(); pz=j.Pz(); E=j.E(); return *this; }
     FourMom& setMu(const Lepton &l) { isMu=true; isEl = isJet = false; return set4mom(l); }
     FourMom& setEl(const Lepton &l) { isEl=true; isMu = isJet = false; return set4mom(l); }    
+#endif
 };
 
 struct EventParameters {
