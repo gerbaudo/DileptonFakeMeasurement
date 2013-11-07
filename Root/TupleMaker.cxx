@@ -39,7 +39,7 @@ FourMom lepton2FourMom (const Lepton *l)
             : l && l->isEle() ? FourMom().setEl(*l)
             : FourMom());
 }
-FourMom jet2FourMom (const Jet *j) { return (j ? FourMom().set4mom(*j) : FourMom()); }
+FourMom jet2FourMom (const Jet *j) { return (j ? FourMom().setJet(*j) : FourMom()); }
 //----------------------------------------------------------
 bool TupleMaker::fill(const Lepton &l0, const Lepton &l1,
                       const LeptonVector &otherLeptons, const JetVector &jets)

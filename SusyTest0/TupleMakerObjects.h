@@ -24,7 +24,8 @@ struct FourMom {
     FourMom& set4mom(const Lepton &l) { px=l.Px(); py=l.Py(); pz=l.Pz(); E=l.E(); return *this; }
     FourMom& set4mom(const Jet &j)    { px=j.Px(); py=j.Py(); pz=j.Pz(); E=j.E(); return *this; }
     FourMom& setMu(const Lepton &l) { isMu=true; isEl = isJet = false; return set4mom(l); }
-    FourMom& setEl(const Lepton &l) { isEl=true; isMu = isJet = false; return set4mom(l); }    
+    FourMom& setEl(const Lepton &l) { isEl=true; isMu = isJet = false; return set4mom(l); }
+    FourMom& setJet(const Jet &j)   { isJet=true; isMu = isEl = false; return set4mom(j); }
 #endif
 };
 
