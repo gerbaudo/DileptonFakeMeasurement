@@ -20,11 +20,11 @@ using std::endl;
 using std::string;
 
 //----------------------------------------------------------
-TupleMaker::TupleMaker(const std::string &outFilename, const std::string &treename):
+TupleMaker::TupleMaker(const std::string &outFilename, const std::string &treename, bool delayInit):
     file_(0),
     tree_(0)
 {
-    init(outFilename, treename);
+    if(!delayInit) init(outFilename, treename);
 }
 //----------------------------------------------------------
 TupleMaker::~TupleMaker()
@@ -60,7 +60,11 @@ bool TupleMaker::fill(const Lepton &l0, const Lepton &l1,
 //----------------------------------------------------------
 bool TupleMaker::init(const std::string &outFilename, const std::string &treename)
 {
-    return (initFile(outFilename) && initTree(treename));
+    if(file_ && file_->IsOpen() && tree_) {
+        cout<<"TupleMaker::init: already initialized"<<endl;
+        return false;
+    }
+    else return (initFile(outFilename) && initTree(treename));
 }
 //----------------------------------------------------------
 bool TupleMaker::initFile(const std::string &outFilename)
@@ -78,6 +82,7 @@ bool TupleMaker::initTree(const std::string &treename)
         file_->cd();
         string title("TupleMaker tree");
         tree_ = new TTree(treename.c_str(), title.c_str());
+        tree_->SetDirectory(file_);
         initTreeBranches();
         initialized = true;
     } else {
@@ -107,11 +112,14 @@ bool TupleMaker::close()
 {
     bool closed(false);
     if(file_) {
+        file_->cd();
         file_->Write();
         file_->Close();
         file_->Delete();
         file_ = 0;
         closed = true;
+    } else {
+        cout<<"TupleMaker::close : file not there"<<endl;
     }
     return closed;
 }

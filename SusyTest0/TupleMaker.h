@@ -41,19 +41,19 @@ namespace wh
 */
 class TupleMaker {
 public:
-    TupleMaker(const std::string &outFilename, const std::string &treename);
+    TupleMaker(const std::string &outFilename, const std::string &treename, bool delayInit=true);
     ~TupleMaker();
+    bool init(const std::string &outFilename, const std::string &treename);
+    bool close();
     bool fill(const Susy::Lepton &l0, const Susy::Lepton &l1,
               const LeptonVector &otherLeptons, const JetVector &jets);
 private: // rule of three 
     TupleMaker(const TupleMaker&);
     TupleMaker& operator=(const TupleMaker&);
 private:
-    bool init(const std::string &outFilename, const std::string &treename);
     bool initFile(const std::string &outFilename);
     bool initTree(const std::string &treename);
     bool initTreeBranches();
-    bool close();
 private:
     TFile *file_;
     TTree *tree_;
