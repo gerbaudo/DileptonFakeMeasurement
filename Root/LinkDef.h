@@ -8,6 +8,7 @@
 #include "SusyTest0/EffObject.h"
 #include "SusyTest0/SsPassFlags.h"
 #include "SusyTest0/SelectionRegions.h" 
+#include "SusyTest0/TupleMakerObjects.h"
 
 #ifdef __CINT__
 
@@ -30,4 +31,9 @@
 #pragma link C++ struct SsPassFlags;
 #pragma link C++ namespace susywh;
 #pragma link C++ enum susywh::SelectionRegions;
+#pragma link C++ namespace susy;
+#pragma link C++ namespace susy::wh;
+#pragma link C++ struct susy::wh::FourMom+;
+#pragma link C++ struct susy::wh::EventParameters+;
+#pragma link C++ class vector<susy::wh::FourMom>+;
 #endif
