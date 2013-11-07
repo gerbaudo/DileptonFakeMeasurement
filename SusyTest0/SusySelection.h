@@ -1,3 +1,4 @@
+// emacs -*- C++ -*-
 #ifndef SusySelection_h
 #define SusySelection_h
 
@@ -11,6 +12,7 @@
 // Root Packages
 #include "TTree.h"
 
+#include "SusyTest0/TupleMaker.h"
 // Susy Common
 #include "SusyNtuple/SusyNtAna.h"
 #include "SusyNtuple/DilTrigLogic.h"
@@ -130,12 +132,14 @@ class SusySelection : public SusyNtAna
     void initChargeFlipTool();
     void cacheStaticWeightComponents(); //! cache those weight components that do not depend on sel
     void computeNonStaticWeightComponents(cvl_t& leptons, cvj_t& jets);
-    ClassDef(SusySelection, 1);
+    ClassDef(SusySelection, 2);
 
   protected:
 
     SUSYObjDef* m_susyObj;            // susy obj
     XSReader* m_xsReader;
+    susy::wh::TupleMaker m_tupleMaker;
+    bool m_writeTuple;
 
     DilTrigLogic*       m_trigObj;      // My trigger logic class
     bool                m_useMCTrig;    // Use MC Trigger, i.e. toggle the matching in DilTrigLogic::passDil*()

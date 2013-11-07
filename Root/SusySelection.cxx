@@ -29,6 +29,8 @@ std::string SusySelection::WeightComponents::str() const
 SusySelection::SusySelection() :
   m_susyObj(NULL),
   m_xsReader(NULL),
+  m_tupleMaker("",""),
+  m_writeTuple(false),
   m_trigObj(NULL),
   m_useMCTrig(false),
   m_w(1.0),
@@ -40,6 +42,7 @@ SusySelection::SusySelection() :
   setAnaType(Ana_2LepWH);
   setSelectTaus(true);
   initChargeFlipTool();
+  m_writeTuple = true; // tmp DG dev
 }
 void SusySelection::Begin(TTree* /*tree*/)
 {
@@ -54,6 +57,12 @@ void SusySelection::Begin(TTree* /*tree*/)
     m_xsReader->setDebug(m_dbg);
     m_xsReader->LoadXSInfo();
   } // end if(m_useXsReader)
+  if(m_writeTuple) {
+      cout<<"todo : check names have been specified"<<endl;
+      cout<<(m_tupleMaker.init("foo.root", "tree") ?
+             "initialized ntuple file foo.root" :
+             "cannot initialize ntuple file")<<endl;
+  }
 }
 //-----------------------------------------
 Bool_t SusySelection::Process(Long64_t entry)
@@ -69,13 +78,21 @@ Bool_t SusySelection::Process(Long64_t entry)
   const JetVector&   bj = m_baseJets;
   const LeptonVector& l = m_signalLeptons;
   if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
-  passSrSs(WH_SRSS1, m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip);
-
+  if(passSrSs(WH_SRSS1,
+              m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip).metrel) {
+      if(m_writeTuple) {
+          cout<<"calling TupleMaker::fill"<<endl;
+          const Lepton *l0 = m_signalLeptons[0];
+          const Lepton *l1 = m_signalLeptons[0];
+          m_tupleMaker.fill(*l0, *l1, m_signalLeptons, m_signalJets2Lep);
+      }
+  }
   return kTRUE;
 }
 //-----------------------------------------
 void SusySelection::Terminate()
 {
+    if(m_writeTuple) m_tupleMaker.close();
   SusyNtAna::Terminate();
   if(m_dbg) cout << "SusySelection::Terminate" << endl;
   dumpEventCounters();
