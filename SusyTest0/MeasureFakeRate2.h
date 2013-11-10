@@ -54,101 +54,21 @@ class MeasureFakeRate2 : public SusySelectionMatt
   void fillRatesHistos(const Lepton* lep, const JetVector& jets,
                        const Met* met, sf::ControlRegion CR);
   // Miscellaneous
-  bool passLFTrig(const LeptonVector &leps);
   LeptonSource getLeptonSource(const Lepton* l);
-  bool isSignalWithEtcone(const Lepton* lep);
-  bool isSignalWithoutEtcone(const Lepton* lep);
-  bool isSignalWithoutPtcone(const Lepton* lep);
-  bool isSignalWithoutd0Sig(const Lepton* lep);
-  bool isSignalWithoutz0Sig(const Lepton* lep);
-  bool isSignalWithoutIP(const Lepton* lep);
-  DiLepPair getDilepPair(const Lepton* tag, const Lepton* probe);
-  // Histograms for variables
   const int CR_N;
   static const int kNmaxControlRegions=64;
-  //  static const int getNcontrolRegions()
-  const std::vector<int> m_controlRegions; // where we compute SF and rates (pseudo t&p)
-  const std::vector<int> m_signalRegions;  // where we compute fractions to make the weighted avg
+  const std::vector<int> m_controlRegions; //!< where we compute SF and rates (pseudo t&p)
+  const std::vector<int> m_signalRegions;  //!< where we compute fractions to make the weighted avg
 
-  #define NEW(name)   name[LT_N][kNmaxControlRegions][Ch_N]
-  #define NEWCR(name) name[LT_N][kNmaxControlRegions]
-
-  EffObject* NEW(h_l_pt);
-  EffObject* NEW(h_l_pt_coarse);
-  EffObject* NEW(h_l_pt_heavy);
-  EffObject* NEW(h_l_pt_others);
-  EffObject* NEW(h_l_eta);
-  EffObject* NEW(h_l_eta_coarse);
-  EffObject* NEW(h_metrel);
-  EffObject* NEW(h_metrel_fine);
-  EffObject* NEW(h_metrel_coarse);
-  EffObject* NEW(h_met);
-  EffObject* NEW(h_met_fine);
-  EffObject* NEW(h_met_coarse);
-
-  EffObject* NEW(h_njets);
-  EffObject* NEW(h_nlightjets);
-  EffObject* NEW(h_nheavyjets);
-  EffObject* NEW(h_nlightjetsNoB);
-
-  EffObject* NEW(h_flavor);
-  EffObject* NEW(h_l_type);
-  EffObject* NEW(h_l_origin);
-
-  EffObject* NEW(h_onebin);
-
-  EffObject* NEW(h_heavy_d0sig);
-  EffObject* NEW(h_light_d0sig);
-  EffObject* NEW(h_conv_d0sig);
-
-  // New params
-  EffObject* NEW(h_ht);
-  EffObject* NEW(h_ht_pt);
-  EffObject* NEW(h_ht_wMet);
-  EffObject* NEW(h_ht_pt_wMet);
-
-  // 2D param
-  EffObject2* NEW(h_l_pt_bjet);
-  EffObject2* NEW(h_l_pt_eta);
-
-  // CR Plots
-  EffObject* NEWCR(h_met_cr);
-  EffObject* NEWCR(h_mll_cr);
-  EffObject* NEWCR(h_mt_tag_cr);
-  EffObject* NEWCR(h_mt_probe_cr);
-  EffObject* NEWCR(h_ht_cr);
-
-  // Check for Conf
-  EffObject* NEW(h_with_without_Etcone);
-
-
-  #undef NEW
-  #undef NEWCR
-
-  // Histos to determine cuts
-  #define NEWCUT(name) name[LT_N][kNmaxControlRegions]
-
-  EffObject* NEWCUT(h_ptcone);
-  EffObject* NEWCUT(h_etcone);
-  EffObject* NEWCUT(h_d0Sig);
-  EffObject* NEWCUT(h_z0Sig);
-
-  EffObject* NEWCUT(h_dist_relptcone);
-  EffObject* NEWCUT(h_dist_d0Sig);
-  EffObject* NEWCUT(h_dist_z0Sig);
-  EffObject* NEWCUT(h_dist_l_pt);
-  EffObject* NEWCUT(h_dist_ptcone);
-
-  EffObject2* NEWCUT(h_dist_mll_ptcone);
-
-  TProfile* NEWCUT(p_npv_etcone);
-  TProfile* NEWCUT(p_npv_ptcone);
-  TProfile* NEWCUT(p_npv_ptconeElStyle);
-  TProfile* NEWCUT(p_mu_etcone);
-  TProfile* NEWCUT(p_mu_ptcone);
-  TProfile* NEWCUT(p_mu_ptconeElStyle);
-
-  #undef NEWCUT
+  EffObject* h_l_pt         [LT_N][kNmaxControlRegions][Ch_N];
+  EffObject* h_l_pt_coarse  [LT_N][kNmaxControlRegions][Ch_N];
+  EffObject* h_l_eta        [LT_N][kNmaxControlRegions][Ch_N];
+  EffObject* h_l_eta_coarse [LT_N][kNmaxControlRegions][Ch_N];
+  EffObject* h_metrel       [LT_N][kNmaxControlRegions][Ch_N];
+  EffObject* h_met          [LT_N][kNmaxControlRegions][Ch_N];
+  EffObject* h_njets        [LT_N][kNmaxControlRegions][Ch_N];
+  EffObject* h_onebin       [LT_N][kNmaxControlRegions][Ch_N];
+  EffObject* h_flavor       [LT_N][kNmaxControlRegions][Ch_N];
 
  protected:
   TFile*       m_outFile;           // Output file
