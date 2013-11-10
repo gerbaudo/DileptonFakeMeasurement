@@ -80,7 +80,7 @@ def main() :
     buildElectronRates(inputFiles, outputFile, outputPlotDir, verbose)
     buildSystematics  (allInputFiles['allBkg'], outputFile)
     outputFile.Close()
-    if verbose : print "output saved to \n%s"%'\n'.join([outputFname, outFractionsMu, outFractionsEl])
+    if verbose : print "output saved to \n%s"%'\n'.join([outputFname, outputPlotDir])
 
 def samples() : return ['allBkg', 'ttbar', 'wjets', 'zjets', 'diboson', 'heavyflavor']
 def fakeProcesses() : return ['ttbar', 'wjets', 'zjets', 'diboson', 'heavyflavor']
