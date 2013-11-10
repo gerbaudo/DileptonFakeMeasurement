@@ -15,9 +15,6 @@ enum LeptonType            { LT_EL = 0,  LT_MU, LT_N };
 static string LTNames[] =  { "elec",     "muon"      };
 // Dilepton Types for iterative corrections
 enum DiLepPair             { DL_TT = 0, DL_TL, DL_LT, DL_LL, DL_ALL, DL_N };
-// Lepton sources
-enum LeptonSource         { LS_HF = 0, LS_LF,   LS_Conv, LS_Real, LS_QCD, LS_Unk,  LS_N };
-static string LSNames[] = { "heavy",   "light", "conv",  "real",  "qcd", "unknown"      };
 // lepton channel
 enum Chan                   { Ch_all = 0, Ch_ee, Ch_mm, Ch_em, Ch_N };
 static string chanNames[] = {   "all",      "ee",  "mm",  "em"      };

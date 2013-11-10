@@ -20,6 +20,7 @@
 #include "SusyTest0/SusySelectionMatt.h"
 #include "SusyTest0/SusyAnaDefsMatt.h"
 #include "SusyTest0/FakeRegions.h"
+#include "SusyTest0/FakeLeptonSources.h"
 #include "SusyTest0/EffObject.h"
 #include <fstream>
 #include <vector>
@@ -28,11 +29,10 @@ using namespace std;
 using namespace Susy;
 namespace sf = susy::fake;
 
-typedef unsigned int uint;
-
 
 class MeasureFakeRate2 : public SusySelectionMatt
 {
+
  public:
   MeasureFakeRate2();
   virtual ~MeasureFakeRate2();
@@ -54,7 +54,7 @@ class MeasureFakeRate2 : public SusySelectionMatt
   void fillRatesHistos(const Lepton* lep, const JetVector& jets,
                        const Met* met, sf::ControlRegion CR);
   // Miscellaneous
-  LeptonSource getLeptonSource(const Lepton* l);
+  sf::LeptonSource getLeptonSource(const Lepton* l);
   const int CR_N;
   static const int kNmaxControlRegions=64;
   const std::vector<int> m_controlRegions; //!< where we compute SF and rates (pseudo t&p)

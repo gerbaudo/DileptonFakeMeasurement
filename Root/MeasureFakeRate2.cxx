@@ -189,9 +189,9 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
   FILL(h_njets,      jets.size());
   FILL(h_onebin, 0);  
   if( nt.evt()->isMC ){ // If the event is MC, save the flavor
-    LeptonSource ls(getLeptonSource(lep));
-    FILL(h_flavor, ls);
-    if(ls==LS_HF||ls==LS_LF) FILL(h_flavor,      LS_QCD);
+      LeptonSource ls(getLeptonSource(lep));
+      FILL(h_flavor, ls);
+      if(ls==LS_HF||ls==LS_LF) FILL(h_flavor,      LS_QCD);
   }
   #undef FILL
 }
@@ -409,7 +409,7 @@ bool MeasureFakeRate2::passConvCR(const LeptonVector &leptons,
   return true;
 }
 //----------------------------------------------------------
-LeptonSource MeasureFakeRate2::getLeptonSource(const Lepton* l)
+sf::LeptonSource MeasureFakeRate2::getLeptonSource(const Lepton* l)
 {
   if( isRealLepton(l) ) return LS_Real;
   if( isHFLepton(l) )   return LS_HF;
