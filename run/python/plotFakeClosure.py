@@ -57,6 +57,7 @@ def main() :
     inputFakeFile = opts.input_fake
     inputDirname  = opts.input_dir
     outputDir     = opts.output_dir
+    outputDir     = outputDir if outputDir.endswith('/') else outputDir+'/'
     verbose       = opts.verbose
     if verbose : print '\nUsing the following options:\n'+'\n'.join("%s : %s"%(o, str(getattr(opts, o))) for o in allOptions)
 
