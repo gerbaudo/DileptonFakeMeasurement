@@ -30,15 +30,6 @@ namespace sf = susy::fake;
 
 typedef unsigned int uint;
 
-enum CRPLOT
-{
-  CRP_met=0,
-  CRP_mll,
-  CRP_mt_tag,
-  CRP_mt_probe,
-  CRP_ht,
-  CRP_N
-};
 
 class MeasureFakeRate2 : public SusySelectionMatt
 {
