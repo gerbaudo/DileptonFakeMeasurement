@@ -53,8 +53,6 @@ class MeasureFakeRate2 : public SusySelectionMatt
                   ControlRegion CR);
   bool passHFCR(const LeptonVector &leptons, const JetVector& jets, const Met* met,
                 ControlRegion CR);
-  bool passLFZjetCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
-  bool passLFWjetCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
   bool passConvCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
   bool passSignalRegion(const LeptonVector &leptons, const JetVector& jets, const Met* met,
                         ControlRegion CR);
@@ -64,8 +62,6 @@ class MeasureFakeRate2 : public SusySelectionMatt
                  const Met* met, ControlRegion CR);
   void fillRatesHistos(const Lepton* lep, const JetVector& jets,
                        const Met* met, ControlRegion CR);
-  void fillCrHistos(const Lepton* tag, const Lepton* probe, const JetVector& jets, const Met* met,
-                    ControlRegion CR, CRPLOT CRP);
   // Miscellaneous
   bool passLFTrig(const LeptonVector &leps);
   LeptonSource getLeptonSource(const Lepton* l);

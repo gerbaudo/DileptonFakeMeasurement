@@ -1,13 +1,8 @@
 #ifndef SUSYSELECTIONMATT_h
 #define SUSYSELECTIONMATT_h
 
-//////////////////////////////////////////////////////////
-// General script to implement basic selection with all //
-// signal region cut methods.                           //
-//////////////////////////////////////////////////////////
-
 // Common Packages
-#include "Mt2/mt2_bisect.h" // I don't want to recode this..
+#include "Mt2/mt2_bisect.h"
 #include "LeptonTruthTools/RecoTruthMatch.h"
 
 // Root Packages
@@ -49,22 +44,13 @@ class SusySelectionMatt : public SusyNtAna
 
     SusySelectionMatt();
     virtual ~SusySelectionMatt(){};
-
-    ofstream out;
-
-    // Begin is called before looping on entries
     virtual void    Begin(TTree *tree);
-    // Terminate is called after looping is finished
     virtual void    Terminate();
-
-    // Main event loop function
     virtual Bool_t  Process(Long64_t entry);
-
-    // Full event selection. Specify which leptons to use.
+    virtual void dumpEventCounters();
     bool selectEvent(bool count=false);
     bool selectBaseEvent(bool doMll=true, bool count=false);
     bool selectAnaEvent(const LeptonVector& leptons, const LeptonVector& baseLeptons, bool count=false);
-		     
     // Signal regions
     // Completely Redefining this shit!!!
 
@@ -127,40 +113,6 @@ class SusySelectionMatt : public SusyNtAna
     bool passMll(const LeptonVector& leptons, float mll = 20);
     bool passBadMet(const Met* met, float cutval=0.8);
 
-    // Variables to calculate
-    float MyMt(TLorentzVector v0, TLorentzVector v1){
-      return sqrt( 2*v0.Pt()*v1.Pt()*(1-cos(v0.DeltaPhi(v1))));
-    };
-    float MyMCT(TLorentzVector v1, TLorentzVector v2){
-      float mct = (v1.Et() + v2.Et())*(v1.Et() + v2.Et()) - (v1-v2).Perp2();
-      return sqrt( fabs(mct) );
-    };
-    float MyMCTPerp(TLorentzVector lep0, TLorentzVector lep1, TLorentzVector met){
-      // Get 3 vectors for objects
-      TVector3 U_t  = (-met-lep0-lep1).Vect();
-      U_t.SetZ(0);
-      U_t = U_t.Unit();
-      TVector3 l0_t = lep0.Vect(); l0_t.SetZ(0);
-      TVector3 l1_t = lep1.Vect(); l1_t.SetZ(0);
-
-      // Calculate
-      TVector3 p0_t = U_t.Cross( l0_t.Cross(U_t) );
-      TVector3 p1_t = U_t.Cross( l1_t.Cross(U_t) );
-
-      float value = 2*(p0_t.Mag()*p1_t.Mag() + p0_t*p1_t);
-      if( value < 0 ) return 0;
-      return sqrt(value);
-      //return sqrt( 2*(p0_t.Perp()*p1_t.Perp() + p0_t.X()*p1_t.X() + p0_t.Y()*p1_t.Y()) );
-
-    };
-    float MyMCTPara(TLorentzVector lep0, TLorentzVector lep1, TLorentzVector met){
-      // Maybe wrong..
-      TVector3 U_t  = (-met-lep0-lep1).Vect().Unit();
-      TVector3 p0_t = (lep0.Vect() * U_t) * U_t;
-      TVector3 p1_t = (lep1.Vect() * U_t) * U_t;
-      return sqrt( 2*(p0_t.Perp()*p1_t.Perp() + p0_t.X()*p1_t.X() + p0_t.Y()*p1_t.Y()) );
-    };
-
     // Signal Region Cuts
     bool passJetVeto(const JetVector& jets);
     int nL20Close(const JetVector& jets);
@@ -175,7 +127,6 @@ class SusySelectionMatt : public SusyNtAna
     bool passdPhi(TLorentzVector v0, TLorentzVector v1, float cut);
     bool passMT2(const LeptonVector& leptons, const Met* met, float cut);
     float getMt2(const LeptonVector& leptons, const Met* met);
-    float GetNVertexBsCorrected(float nRecoVtx);
 
     // Idendification methods
     bool isRealLepton(const Lepton* lep);
@@ -186,29 +137,7 @@ class SusySelectionMatt : public SusyNtAna
     bool isQCDLepton(const Lepton* lep);
     bool isTrueDilepton(const LeptonVector &leptons);
     bool isFakeDilepton(const LeptonVector &leptons);
-    bool isBaselineLepton(const LeptonVector &leptons);
-
-    // Photon+jet MC methods
-    bool passCheckMC(int mcRunNumber, float pt);
-    float getPhotonXS(int mcRunNumber);
-
-    // Dump cutflow - if derived class uses different cut ordering,
-    // override this method
-    virtual void dumpEventCounters();
-    void dumpInterestingEvents(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    void dumpTrigFlag(uint flag);
-    void printCounter(string cut, float counter[ET_N][WT_N], int weight);
-
-    // debug check
-    bool debugEvent();
-    void dumpPreObjects();
-    void dumpJets();
-    void checkSys();
-
-    // Save file name for easy writing
     void setFileName(string f){ m_fileName = f; };
-    string getFileName(){ return m_fileName; };
-    
     // Get Btag weight
     float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true,
 		       bool doMediumpp=false);
@@ -262,14 +191,7 @@ class SusySelectionMatt : public SusyNtAna
     int getChan(const LeptonVector& leps);
 
     // Miscellaneous methods
-    void printLep(const Lepton* lep);
-    void printJet(const Jet* jet);
- 
-    // --- For testing --- // 
-    void selectFakeObjects();
-    bool isMySignalMuon(const Muon* mu);
-    bool isMySignalLepton(const Lepton* lep);
-
+    void printCounter(string cut, float counter[ET_N][WT_N], int weight);
     ClassDef(SusySelectionMatt, 1);
 
   protected:
@@ -278,10 +200,8 @@ class SusySelectionMatt : public SusyNtAna
 
     DilTrigLogic*       m_trigObj;      // My trigger logic class
     bool                m_useMCTrig;    // Use MC Trigger
-
     string              m_fileName;     // File name
     float               m_w;            // mc weight
-
     bool                m_do1fb;        // For get weight method
     bool                m_doAD;         // do weights for A-B
 

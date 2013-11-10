@@ -6,37 +6,18 @@
 #include "SusyTest0/MeasureFakeRate2.h"
 #include "SusyTest0/SelectionRegions.h"
 #include "SusyTest0/criteria.h"
+#include "SusyTest0/FakeBinnings.h"
 
 using namespace susywh; // pull in SelectionRegions
 const int controlRegions[] = {
   kCR_Real, kCR_SideLow, kCR_SideHigh, kCR_HF, kCR_HF_high,
-  kCR_LFZjet, kCR_LFWjet, kCR_Conv, kCR_CFlip,
-  kCR_MCHeavy, kCR_MCLight, kCR_MCConv, kCR_MCQCD,
-  kCR_MCALL, kCR_MCReal, kCR_MCNone
+  kCR_Conv,
+  kCR_MCConv, kCR_MCQCD,
+  kCR_MCReal
 };
 const size_t nControlRegions = sizeof(controlRegions)/sizeof(controlRegions[0]);
 const int signalRegions[] = {
-  kCR_SRmT2a,
-  kCR_SRmT2b,
-  kCR_SRmT2c,
-  kCR_SRWWa,
-  kCR_SRWWb,
-  kCR_SRWWc,
-  kCR_SRZjets,
-  kCR_VRSS,
-  kCR_CRWWMet,
-  kCR_CRWWmT2,
-  kCR_CRTopMet,
-  kCR_CRTopmT2,
-  kCR_CRZVMet,
-  kCR_CRZVmT2_90,
-  kCR_CRZVmT2_120,
-  kCR_CRZVmT2_150,
-  kCR_CRZVmT2_100,
-  kCR_CRTopZjets,
-  kCR_CRZXZjets,
   kCR_SSInc,
-  kCR_PremT2,
   kCR_SRWHSS,
   kPR_CR8lpt   ,
   kPR_CR8ee    ,
@@ -72,7 +53,6 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
 {
   if(m_dbg) cout << "MeasureFakeRate2::Begin" << endl;
   SusySelectionMatt::Begin(0);
-  cout<<"Creating: "<<out<<endl;
   initHistos(m_fileName);
 }
 /*--------------------------------------------------------------------------------*/
@@ -92,6 +72,7 @@ void MeasureFakeRate2::Terminate()
 /*--------------------------------------------------------------------------------*/
 void MeasureFakeRate2::initHistos(string outName)
 {
+    using namespace susy::fake; // pull in binning(s)
   // DG : here we will switch to a loop over m_controlRegions and m_signalRegions
   // const int CR_N(getNumControlRegions());
   if(CR_N >= kNmaxControlRegions)
@@ -105,64 +86,31 @@ void MeasureFakeRate2::initHistos(string outName)
   m_outFile = new TFile((outName).c_str(),"recreate");
   m_outFile->cd();
   cout<<"File created: "<<m_outFile<<endl;
-
   // All the rates will be stored in efficiency objects.
   #define EFFVAR(eff,name,nbins,bins) do{ eff = new EffObject(name,nbins,bins); } while(0)
   #define EFF(eff,name,nbins,xmin,xmax) do{ eff = new EffObject(name,nbins,xmin,xmax); } while(0)
-  #define LABEL(eff, bin, label) do{ eff->SetXLabel(bin, label); }while(0)
-
   for(int il=0; il<LT_N; ++il){ // for lName in [elec, muon]
-    string lName = LTNames[il];
+    string lepton = LTNames[il];
     for(int icr=0; icr<CR_N; ++icr){ // see CRNames in SusyAnaDefsMatt.h for complete list
-      string cName = CRNames[icr];
+      string region = CRNames[icr];
       for(int ich=0; ich<Ch_N; ++ich){ // for chan in [all, ee, mm, em]
-        string chan = chanNames[ich];
-        string base = lName + "_" + cName + "_" + chan + "_";
-        EFFVAR(h_l_pt         [il][icr][ich], (base+"l_pt"),         nFakePtbins,FakePtbins);
-        EFFVAR(h_l_pt_coarse  [il][icr][ich], (base+"l_pt_coarse"),  nCoarseFakePtbins,coarseFakePtbins);
-        EFFVAR(h_l_pt_heavy   [il][icr][ich], (base+"l_pt_heavy"),   nFakePtbins,FakePtbins);
-        EFFVAR(h_l_pt_others  [il][icr][ich], (base+"l_pt_others"),  nFakePtbins,FakePtbins);
-        EFFVAR(h_l_eta        [il][icr][ich], (base+"l_eta"),        nEtabins,Etabins);
-        EFFVAR(h_l_eta_coarse [il][icr][ich], (base+"l_eta_coarse"), nCoarseEtabins,CoarseEtabins);
-        EFFVAR(h_metrel       [il][icr][ich], (base+"metrel"),       nMetbins, Metbins);
-        EFFVAR(h_met          [il][icr][ich], (base+"met"),          nMetbins, Metbins);
-        EFF   (h_metrel_fine  [il][icr][ich], (base+"metrel_fine"),  40,0,200);
-        EFF   (h_met_fine     [il][icr][ich], (base+"met_fine"),     40,0,200);
-        EFFVAR(h_metrel_coarse[il][icr][ich], (base+"metrel_coarse"),nCoarseMetbins, coarseMetbins);
-        EFFVAR(h_met_coarse   [il][icr][ich], (base+"met_coarse"),   nCoarseMetbins, coarseMetbins);
-        EFFVAR(h_njets        [il][icr][ich], (base+"njets"),        nJetbins, Jetbins);
-        EFFVAR(h_nlightjets   [il][icr][ich], (base+"nlightjets"),   nJetbins, Jetbins);
-        EFFVAR(h_nheavyjets   [il][icr][ich], (base+"nheavyjets"),   nJetbins, Jetbins);
-        EFFVAR(h_nlightjetsNoB[il][icr][ich], (base+"nlightjetsNoB"),nJetbins, Jetbins);
-        EFF   (h_onebin       [il][icr][ich], (base+"onebin"),       1, -0.5, 0.5);
-        // d0sig
-        EFF(h_heavy_d0sig     [il][icr][ich], (base+"heavy_d0sig"),  50, 0, 5);
-        EFF(h_light_d0sig     [il][icr][ich], (base+"light_d0sig"),  50, 0, 5);
-        EFF(h_conv_d0sig      [il][icr][ich], (base+"conv_d0sig"),   50, 0, 5);
-        EFF(h_l_type          [il][icr][ich], (base+"l_type"),       nType, Typemin, Typemax);
-        EFF(h_l_origin        [il][icr][ich], (base+"l_origin"),     nOrigin, Originmin, Originmax);
-        // Flavor counting
-        EFF(h_flavor          [il][icr][ich], (base+"flavor"),       LS_N, -0.5, LS_N-0.5);
-        EFF(h_ht              [il][icr][ich], (base+"ht"),           20, 0, 400);
-        EFFVAR(h_ht_pt        [il][icr][ich], (base+"ht_pt"),        nHtbins, Htbins);
-        EFF(h_ht_wMet         [il][icr][ich], (base+"ht_wMet"),      20, 0, 400);
-        EFFVAR(h_ht_pt_wMet   [il][icr][ich], (base+"ht_pt_wMet"),   nHtbins, Htbins);
-        EFF(h_with_without_Etcone[il][icr][ich], (base+"with_without_Etcone"),3, -0.5, 2.5);
-
-        for(int lbl=0; lbl<LS_N; ++lbl) LABEL(h_flavor[il][icr][ich], lbl+1, LSNames[lbl]);
+        string channel = chanNames[ich];
+        string bn(lepton+"_"+region+"_"+channel+"_");
+        h_l_pt         [il][icr][ich] = new EffObject(bn+"l_pt",         nFakePtbins,       FakePtbins);
+        h_l_pt_coarse  [il][icr][ich] = new EffObject(bn+"l_pt_coarse",  nCoarseFakePtbins, coarseFakePtbins);
+        h_l_eta        [il][icr][ich] = new EffObject(bn+"l_eta",        nEtabins,          Etabins);
+        h_l_eta_coarse [il][icr][ich] = new EffObject(bn+"l_eta_coarse", nCoarseEtabins,    CoarseEtabins);
+        h_metrel       [il][icr][ich] = new EffObject(bn+"metrel",       nMetbins,          Metbins);
+        h_met          [il][icr][ich] = new EffObject(bn+"met",          nMetbins,          Metbins);
+        h_njets        [il][icr][ich] = new EffObject(bn+"njets",        nJetbins,          Jetbins);
+        h_onebin       [il][icr][ich] = new EffObject(bn+"onebin",       1,    -0.5, 0.5);
+        h_flavor       [il][icr][ich] = new EffObject(bn+"flavor",       LS_N, -0.5, LS_N-0.5);
+        for(int lbl=0; lbl<LS_N; ++lbl) h_flavor[il][icr][ich]->SetXLabel(lbl+1, LSNames[lbl]);
       } // end for(ich)
-      // Saving CR plots to look at how cuts affect distribution
-      string base = lName + "_" + cName + "_all_";
-      EFF(h_met_cr     [il][icr], (base+"met_cr"),      50, 0, 200);
-      EFF(h_mt_tag_cr  [il][icr], (base+"mt_tag_cr"),   50, 0, 200);
-      EFF(h_mt_probe_cr[il][icr], (base+"mt_probe_cr"), 50, 0, 200);
-      EFF(h_ht_cr      [il][icr], (base+"ht_cr"),       50, 0, 400);
-      EFF(h_mll_cr     [il][icr], (base+"mll_cr"),      30, 0, 300);
     } // end for(icr)
   } // end for(il)
   #undef EFFVAR
   #undef EFF
-  #undef LABEL
 }
 //----------------------------------------------------------
 void printProgress(const Susy::Event *e, Long64_t counter)
@@ -202,18 +150,11 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     case CR_SideHigh : passCR = passRealCR  (leptons, jets, m_met, CR); break;
     case CR_HF       : passCR = passHFCR    (leptons, jets, m_met, CR); break;
     case CR_HF_high  : passCR = passHFCR    (leptons, jets, m_met, CR); break;
-    case CR_LFZjet   : passCR = passLFZjetCR(leptons, jets, m_met    ); break;
-    case CR_LFWjet   : passCR = passLFWjetCR(leptons, jets, m_met    ); break;
     case CR_Conv     : passCR = passConvCR  (leptons, jets, m_met    ); break;
-    case CR_CFlip    : passCR = passCFCR    (leptons, jets, m_met    ); break;
-    case CR_MCHeavy  : passCR = passMCReg   (leptons, jets, m_met, CR); break;
-    case CR_MCLight  : passCR = passMCReg   (leptons, jets, m_met, CR); break;
     case CR_MCConv   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
     case CR_MCQCD    : passCR = passMCReg   (leptons, jets, m_met, CR); break;
-    case CR_MCALL    : passCR = passMCReg   (leptons, jets, m_met, CR); break;
     case CR_MCReal   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
-    case CR_MCNone   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
-      // Remaining signal and control regions
+        // Remaining signal and control regions
     default          : passCR = passSignalRegion(leptons,jets,m_met,CR); break;
     } // end switch(CR)
     if( passCR ){
@@ -229,7 +170,6 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
 void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
                                        const Met* met, ControlRegion CR)
 {
-
   LeptonType lt(lep->isEle() ? LT_EL : LT_MU);
   bool pass(isSignalLepton(lep, m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC));
 
@@ -242,76 +182,17 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
   FILL(h_l_pt_coarse,  lep->Pt());
   FILL(h_l_eta,        fabs(lep->Eta()));
   FILL(h_l_eta_coarse, fabs(lep->Eta()));
-  if(nt.evt()->isMC){
-    if( isHFLepton(lep) ) FILL(h_l_pt_heavy, lep->Pt());
-    else                  FILL(h_l_pt_others, lep->Pt());
-  }
   FILL(h_metrel,        m_metRel);
   FILL(h_met,           met->Et);
-  FILL(h_metrel_coarse, m_metRel);
-  FILL(h_met_coarse,    met->Et);
-  FILL(h_metrel_fine,   m_metRel);
-  FILL(h_met_fine,      met->Et);
-  // Number of jets
   FILL(h_njets,      jets.size());
-  FILL(h_nlightjets, numberOfCLJets(jets));
-  FILL(h_nheavyjets, numberOfCBJets(jets));
-  if( numberOfCBJets(jets) == 0 ) FILL(h_nlightjetsNoB, numberOfCLJets(jets));
-  // Single bin
-  FILL(h_onebin, 0);
-  // If the event is MC, save the flavor
-  if( nt.evt()->isMC ){
+  FILL(h_onebin, 0);  
+  if( nt.evt()->isMC ){ // If the event is MC, save the flavor
     LeptonSource ls(getLeptonSource(lep));
-    if(ls == LS_Real){
-      FILL(h_l_type,   lep->mcType);
-      FILL(h_l_origin, lep->mcOrigin);
-    }
     FILL(h_flavor, ls);
     if(ls==LS_HF||ls==LS_LF) FILL(h_flavor,      LS_QCD);
-    if(ls == LS_HF)          FILL(h_heavy_d0sig, lep->d0Sig(true));
-    if(ls == LS_LF)          FILL(h_light_d0sig, lep->d0Sig(true));
-    if(ls == LS_Conv)        FILL(h_conv_d0sig,  lep->d0Sig(true));
-  } else {
-    float d0sig = lep->d0Sig(true);
-    FILL(h_heavy_d0sig, d0sig);
-    FILL(h_light_d0sig, d0sig);
-    FILL(h_conv_d0sig,  d0sig);
-  }
-  // Ht Plots
-  float ht = lep->Pt();
-  for(uint ij=0; ij<jets.size(); ++ij) ht += jets.at(ij)->Pt();
-  FILL(h_ht,         ht);
-  FILL(h_ht_pt,      ht/lep->Pt());
-  FILL(h_ht_wMet,    ht+met->Et);
-  FILL(h_ht_pt_wMet, (ht+met->Et)/lep->Pt());
-
-  bool with = isSignalWithEtcone(lep);
-  bool without = isSignalWithoutEtcone(lep);
-  FILL(h_with_without_Etcone, 0);
-  if(with)    FILL(h_with_without_Etcone, 1);
-  if(without) FILL(h_with_without_Etcone, 2);
-  #undef FILL
-}
-/*--------------------------------------------------------------------------------*/
-void MeasureFakeRate2::fillCrHistos(const Lepton* tag, const Lepton* probe, const JetVector& jets, const Met* met,
-                                    ControlRegion CR, CRPLOT CRP)
-{
-  LeptonType lt = probe->isEle() ? LT_EL : LT_MU;
-  bool pass(isSignalLepton(probe, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC));
-  #define FILL(eff, var) do{ eff[lt][CR]->Fill(pass,m_evtWeight,var); } while(0)
-
-  if(CRP == CRP_mll)       FILL(h_mll_cr, (*tag+*probe).M());
-  if(CRP == CRP_met)       FILL(h_met_cr, met->Et);
-  if(CRP == CRP_mt_tag)    FILL(h_mt_tag_cr, Mt(tag, met));
-  if(CRP == CRP_mt_probe)  FILL(h_mt_probe_cr, Mt(probe, met));
-  if(CRP == CRP_ht){
-    float ht = tag->Pt() + probe->Pt();
-    for(uint i=0; i<jets.size(); ++i) ht += jets.at(i)->Pt();
-    FILL(h_ht_cr, ht);
   }
   #undef FILL
 }
-
 /*--------------------------------------------------------------------------------*/
 // Control Regions
 /*--------------------------------------------------------------------------------*/
@@ -335,12 +216,8 @@ bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
   m_metRel = getMetRel(met,leptons,jets);
   for(uint il=0; il<leptons.size(); ++il){
     Lepton* l=leptons[il];
-    if(CR==CR_MCHeavy && isHFLepton(l))  m_probes.push_back( l ); // Heavy
-    if(CR==CR_MCLight && isLFLepton(l))  m_probes.push_back( l ); // Light
     if(CR==CR_MCConv && isConvLepton(l)) m_probes.push_back( l ); // Conversion
-    if(CR==CR_MCNone && isFakeLepton(l)) m_probes.push_back( l ); // None CR
     if(CR==CR_MCQCD && isQCDLepton(l))   m_probes.push_back( l ); // QCD
-    if(CR==CR_MCALL)                     m_probes.push_back( l ); // All fakes <-- Will include reals
     if(CR==CR_MCReal && isRealLepton(l)) m_probes.push_back( l ); // Real
   }
   m_evtWeight = getEvtWeight(leptons);
@@ -361,27 +238,7 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   SsPassFlags whssFlags(computeWhssPass ? passWhSS(leptons,jets,met) : SsPassFlags());
   bool isEe(Ch_ee==getChan(leptons)), isMm(Ch_mm==getChan(leptons));
   switch(CR) {
-  case CR_SRmT2a       : passSR = passSRmT2a    (leptons,jets,met,false,true); break;
-  case CR_SRmT2b       : passSR = passSRmT2b    (leptons,jets,met,false,true); break;
-  case CR_SRmT2c       : passSR = passSRmT2c    (leptons,jets,met,false,true); break;
-  case CR_SRWWa        : passSR = passSRWWa     (leptons,jets,met,false,true); break;
-  case CR_SRWWb        : passSR = passSRWWb     (leptons,jets,met,false,true); break;
-  case CR_SRWWc        : passSR = passSRWWc     (leptons,jets,met,false,true); break;
-  case CR_SRZjets      : passSR = passSRZjets   (leptons,jets,met,false,true); break;
-  case CR_VRSS         : passSR = passVRSS      (leptons,jets,met);            break;
-  case CR_SSInc        : passSR = sameSign      (leptons);                     break;
-  case CR_CRWWMet      : passSR = passCRWWMet   (leptons,jets,met,false,true); break;
-  case CR_CRWWmT2      : passSR = passCRWWmT2   (leptons,jets,met,false,true); break;
-  case CR_CRTopMet     : passSR = passCRTopMet  (leptons,jets,met,false,true); break;
-  case CR_CRTopmT2     : passSR = passCRTopmT2  (leptons,jets,met,false,true); break;
-  case CR_CRZVMet      : passSR = passCRZVMet   (leptons,jets,met,false,true); break;
-  case CR_CRZVmT2_90   : passSR = passCRZVmT2a  (leptons,jets,met,false,true); break;
-  case CR_CRZVmT2_120  : passSR = passCRZVmT2b  (leptons,jets,met,false,true); break;
-  case CR_CRZVmT2_150  : passSR = passCRZVmT2c  (leptons,jets,met,false,true); break;
-  case CR_CRZVmT2_100  : passSR = passCRZVmT2d  (leptons,jets,met,false,true); break;
-  case CR_CRTopZjets   : passSR = passCRTopZjets(leptons,jets,met,false,true); break;
-  case CR_CRZXZjets    : passSR = passCRZXZjets (leptons,jets,met,false,true); break;
-  case CR_PremT2       : passSR = passCRPremT2  (leptons,jets,met);            break;
+  case CR_SSInc        : passSR = sameSign(leptons);                           break;
   case CR_SRWHSS       : passSR =  whssFlags.metrel;                           break;
   case CR_CR8lpt       : passSR =  whssFlags.lepPt;                            break;
   case CR_CR8ee        : passSR = (whssFlags.lepPt   && isEe);                 break;
@@ -484,7 +341,6 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
   }// end loop over baseline leptons
   if( nProbes != 1 ) return false;
   // Check mll
-  fillCrHistos(tag,probe,jets,met,CR_HF,CRP_mll);
   bool isMM = tag->isMu() && probe->isMu();
   if(isMM){
     float mll(Mll(tag,probe)), mZ(91.2);
@@ -500,11 +356,7 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
     return false;
 
   // Met and Mt Cut
-  fillCrHistos(tag,probe,jets,met,CR_HF,CRP_ht);
-  fillCrHistos(tag,probe,jets,met,CR_HF,CRP_met);
   if( met->Et > 40 )       return false;
-  fillCrHistos(tag,probe,jets,met,CR_HF,CRP_mt_tag);
-  fillCrHistos(tag,probe,jets,met,CR_HF,CRP_mt_probe);
   if( CR == CR_HF )      if( Mt(probe,met) > 40  ) return false;
   if( CR == CR_HF_high ) if( Mt(probe,met) > 100 ) return false;
 
@@ -514,120 +366,6 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
   if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(temp, true);
   m_probes.push_back( probe );
   m_tags.push_back( tag );
-  return true;
-}
-
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-// Light Flavor Control Region -- Zjet
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-bool MeasureFakeRate2::passLFZjetCR(const LeptonVector &leptons,
-				    const JetVector &jets,
-				    const Met* met)
-{
-  // Light flavor tag and probe using Z+jet events
-  // * Same-flavor OS signal leptons 10 GeV of Z peak
-  // * Probe lepton of different flavor
-  // * M(lll) not within 10 GeV of Z peak
-  // * met < 40 GeV
-  // * Mt(probe,met) < 50 GeV
-  // * Reject events with b-jet
-  // * Pass LF Trig function
-
-  // Require exactly 3 leptons
-  if( leptons.size() != 3 )       return false;
-
-  // Reject events with b-jet
-  if( numberOfCBJets(jets) != 0 ) return false;
-
-  // Use Signal info since it's cleaner
-  LeptonVector sigLeps;
-  if(m_signalMuons.size() == 2 && m_baseElectrons.size() == 1){
-    if(m_signalMuons[0]->q * m_signalMuons[1]->q < 0){
-      sigLeps.push_back( (Lepton*) m_signalMuons[0]);
-      sigLeps.push_back( (Lepton*) m_signalMuons[1]);
-      m_probes.push_back( (Lepton*) m_baseElectrons[0]);
-    }
-  }
-  if(m_baseMuons.size() == 1 && m_signalElectrons.size() == 2){
-    if(m_signalElectrons[0]->q * m_signalElectrons[1]->q < 0){
-      sigLeps.push_back( (Lepton*) m_signalElectrons[0]);
-      sigLeps.push_back( (Lepton*) m_signalElectrons[1]);
-      m_probes.push_back( (Lepton*) m_baseMuons[0]);
-    }
-  }
-  if(sigLeps.size() != 2)    return false;
-  if( !passLFTrig(sigLeps) ) return false;
-  // Mass rejections
-  float mZ   = 91.2;
-  float mll  = Mll(sigLeps[0],sigLeps[1]);
-  float mlll = Mlll(sigLeps[0],sigLeps[1],m_probes[0]);
-  if( fabs(mll-mZ) > 10 )  return false;
-  if( fabs(mlll-mZ) < 10 ) return false;
-  // Mt Cut
-  if( Mt(m_probes[0],met) > 50 ) return false;
-  // Update and save objects
-  m_metRel = getMetRel(met, leptons, jets);
-  if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(sigLeps, true) * m_probes[0]->effSF;
-  return true;
-
-}
-
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-// Light Flavor Control Region -- Wjet
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
-bool MeasureFakeRate2::passLFWjetCR(const LeptonVector &leptons,
-				    const JetVector &jets,
-				    const Met* met)
-{
-
-  // Light Flavor control region for W+jet
-  // * Two same-sign same-flavor leptons
-  // * Tag is leading probe is subleading
-  // * Tag must be signal and match to tight trigger
-  // * Veto mll region 70-100 get rid of Zs
-  // * Mt(tag,met) > 40
-  // * Met/HT > 0.4
-  // * Met > 20 GeV
-  // * No b jets
-
-  // Select two baseline leptons of SF SS
-  // Reject events with bJet
-  if( leptons.size() != 2 )     return false;
-  if( oppositeFlavor(leptons) ) return false;
-  if( oppositeSign(leptons) )   return false;
-  // Define tag as leading lepton. This is very nearly true for W+jet
-  Lepton* tag = leptons[0];
-  Lepton* probe = leptons[1];
-  // Require tag to be signal lepton
-  if( !isSignalLepton(tag, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC) )
-    return false;
-  // Make sure lepton passes single trigger
-  if( tag->isEle() ){
-    if( !(tag->Pt() > 25 && tag->matchTrig(TRIG_e24vhi_medium1)) ) return false;
-  }
-  else if(tag->isMu()){
-    if( !(tag->Pt() > 25 && tag->matchTrig(TRIG_mu24i_tight)) ) return false;
-  }
-  // First cut: Reject Z
-  float mll = Mll(tag,probe);
-  fillCrHistos(tag,probe,jets,met,CR_LFWjet,CRP_mll);
-  if( 70 < mll && mll < 100 ) return false;
-  // Second Cut: Mt to reduce Z and enhace W+jet
-  fillCrHistos(tag,probe,jets,met,CR_LFWjet,CRP_mt_tag);
-  fillCrHistos(tag,probe,jets,met,CR_LFWjet,CRP_mt_probe);
-  if( Mt(tag,met) < 40 ) return false;
-  // Thid cut: MET/HT shown to separate W+jet and all other backgrounds
-  float Ht = tag->Pt() + probe->Pt();
-  for(uint i=0; i<jets.size(); ++i) Ht += jets.at(i)->Pt();
-  fillCrHistos(tag,probe,jets,met,CR_LFWjet,CRP_ht);
-  if( met->Et/Ht < 0.4 ) return false;
-  // Fourth Cut: Met > 20 to get rid of region with bad agreement..
-  fillCrHistos(tag,probe,jets,met,CR_LFWjet,CRP_met);
-  if( met-> Et < 20 ) return false;
-  // We made it!
-  m_metRel = getMetRel(met,leptons,jets);
-  if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(leptons, true);
-  m_probes.push_back(probe);
   return true;
 }
 
