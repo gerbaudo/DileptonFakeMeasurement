@@ -39,7 +39,6 @@ class MeasureFakeRate2 : public SusySelectionMatt
   virtual void    Begin(TTree *tree);
   virtual void    Terminate();
   virtual Bool_t  Process(Long64_t entry);
-  // Initialize Histograms
   void initHistos(string outName);
   // Data Control Regions
   bool passRealCR(const LeptonVector &leptons, const JetVector& jets, const Met* met,
@@ -49,7 +48,6 @@ class MeasureFakeRate2 : public SusySelectionMatt
   bool passConvCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
   bool passSignalRegion(const LeptonVector &leptons, const JetVector& jets, const Met* met,
                         sf::ControlRegion CR);
-  bool passCFCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
   // Monte Carlo Regions
   bool passMCReg(const LeptonVector &leptons, const JetVector& jets,
                  const Met* met, sf::ControlRegion CR);

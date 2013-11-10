@@ -408,47 +408,6 @@ bool MeasureFakeRate2::passConvCR(const LeptonVector &leptons,
   m_evtWeight = getEvtWeight(tempL,true,true) * eff;
   return true;
 }
-
-/*--------------------------------------------------------------------------------*/
-// Pass Charge flip control region
-/*--------------------------------------------------------------------------------*/
-bool MeasureFakeRate2::passCFCR(const LeptonVector &leptons,
-                                const JetVector& jets,
-                                const Met* met)
-{
-  // Real CRA:
-  // * Require Exactly two baseline leptons SF
-  // * Require single lepton triggers
-  // * Require fall in Z mass window
-  // * Require at least one tight lepton for tag
-  // * Require to be same-sign
-
-  // Same flavor dilepton
-  if( leptons.size() != 2 )  return false;
-  if( !sameFlavor(leptons) ) return false;
-  if( !sameSign(leptons) )   return false;
-  // In Z window or side bands
-  float mll = Mll(leptons[0],leptons[1]);
-  if( !(70 < mll && mll < 100) ) return false;
-  // At least one tight lepton
-  int nVtx   = nt.evt()->nVtx;
-  bool isMC  = nt.evt()->isMC;
-  bool l0sig(isSignalLepton(leptons[0], m_baseElectrons, m_baseMuons, nVtx, isMC));
-  bool l1sig(isSignalLepton(leptons[1], m_baseElectrons, m_baseMuons, nVtx, isMC));
-  if( !l0sig && !l1sig ) return false;
-  // Pass trigger
-  uint l0flag = leptons[0]->trigFlags;
-  bool l0trig = leptons[0]->isEle() ? l0flag & TRIG_e24vhi_medium1 : l0flag & TRIG_mu24i_tight;
-  uint l1flag = leptons[1]->trigFlags;
-  bool l1trig = leptons[1]->isEle() ? l1flag & TRIG_e24vhi_medium1 : l1flag & TRIG_mu24i_tight;
-  if( l0sig && l0trig && leptons[0]->Pt() > 25 ) m_probes.push_back( leptons[1] );
-  if( l1sig && l1trig && leptons[1]->Pt() > 25 ) m_probes.push_back( leptons[0] );
-  if( m_probes.size() == 0 ) return false;
-  m_metRel = getMetRel(met, leptons, jets);
-  if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(leptons);
-  return true;
-}
-
 /*--------------------------------------------------------------------------------*/
 // Light Flavor Trigger Requirements
 /*--------------------------------------------------------------------------------*/
