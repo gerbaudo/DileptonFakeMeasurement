@@ -1,4 +1,13 @@
-localSetupROOT
+# commands to set up a new dev area
+#
+# caveats:
+# - if you don't have a github account, you need to change the git
+#   protocol git: -> https: (see for example
+#   http://stackoverflow.com/questions/7502247/is-an-ssh-key-required-to-clone-a-public-github-account)
+# - the SusyNt patch might not be needed when using a recent
+#   SusyNtuple version (try switching to the SusyNtuple trunk)
+
+localSetupROOT # or asetup 17.3.4.6
 SVN_INST=svn+ssh://svn.cern.ch/reps/atlasinst/Institutes
 SVN_PHYS=svn+ssh://svn.cern.ch/reps/atlasphys/Physics
 svn co ${SVN_INST}/UCIrvine/SUSYAnalysis/SusyNtuple/tags/SusyNtuple-00-01-04                    SusyNtuple

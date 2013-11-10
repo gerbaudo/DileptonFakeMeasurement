@@ -1,13 +1,49 @@
-localSetupROOT # (or asetup 17.3.4.6)
-SVN_INST=svn+ssh://svn.cern.ch/reps/atlasinst/Institutes
-SVN_PHYS=svn+ssh://svn.cern.ch/reps/atlasphys/Physics
-svn co ${SVN_INST}/UCIrvine/SUSYAnalysis/SusyNtuple/tags/SusyNtuple-00-01-04                    SusyNtuple
-svn co ${SVN_PHYS}/SUSY/Analyses/WeakProduction/LeptonTruthTools/tags/LeptonTruthTools-00-01-06 LeptonTruthTools
-svn co ${SVN_PHYS}/SUSY/Analyses/WeakProduction/MultiLep/tags/MultiLep-01-06-01                 MultiLep
-svn co ${SVN_INST}/UCIrvine/mrelich/SusyXSReader/trunk                                          SusyXSReader
-svn co ${SVN_INST}/UCIrvine/mrelich/SusyMatrixMethod/tags/SusyMatrixMethod-00-01-26             SusyMatrixMethod
-svn co ${SVN_PHYS}/SUSY/Analyses/WeakProduction/HistFitterTree/tags/HistFitterTree-00-00-15     HistFitterTree
-svn co ${SVN_PHYS}/SUSY/Analyses/WeakProduction/ChargeFlip/trunk                                ChargeFlip
-source MultiLep/installscripts/install_script.sh
-./RootCore/scripts/find_packages.sh
-./RootCore/scripts/build.sh
+Package to run the WH 2 lepton analysis.
+
+Getting started
+---------------
+
+Set the area up using the commands in doc/setup_area.sh
+
+Running the reference cutflow
+-----------------------------
+First you need to create the necessary list of input files.
+If you are not running from the uci machines, then you need to change
+the base input path in the script.
+
+```
+cd run
+./python/makeList.py --also-placeholders
+```
+
+Run the code:
+
+```
+SusySel \
+ -i filelist/Sherpa_CT10_lllnu_WZ.txt \
+ -o /tmp/Sherpa_CT10_lllnu_WZ.root \
+ -s Sherpa_CT10_lllnu_WZ \
+ | tee SusySel.log
+```
+
+Making plots
+------------
+
+The histograms are defined and filled in SusyPlot.
+
+
+```
+export ${TAG}=Oct_10 # this is some tag to identify today's results
+./python/submitJobs.py --susyplot -t ${TAG}
+
+# merge the outputs when the jobs are done
+./python/mergeOutput.py -v out/susyplot/
+
+./python/plotHistos.py \
+  --input-dir out/susyplot/ \
+  --tag ${TAG} \
+  --test
+```
+
+davide.gerbaudo@gmail.com
+2013
