@@ -19,12 +19,14 @@
 // Susy Packages
 #include "SusyTest0/SusySelectionMatt.h"
 #include "SusyTest0/SusyAnaDefsMatt.h"
+#include "SusyTest0/FakeRegions.h"
 #include "SusyTest0/EffObject.h"
 #include <fstream>
 #include <vector>
 
 using namespace std;
 using namespace Susy;
+namespace sf = susy::fake;
 
 typedef unsigned int uint;
 
@@ -50,18 +52,18 @@ class MeasureFakeRate2 : public SusySelectionMatt
   void initHistos(string outName);
   // Data Control Regions
   bool passRealCR(const LeptonVector &leptons, const JetVector& jets, const Met* met,
-                  ControlRegion CR);
+                  sf::ControlRegion CR);
   bool passHFCR(const LeptonVector &leptons, const JetVector& jets, const Met* met,
-                ControlRegion CR);
+                sf::ControlRegion CR);
   bool passConvCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
   bool passSignalRegion(const LeptonVector &leptons, const JetVector& jets, const Met* met,
-                        ControlRegion CR);
+                        sf::ControlRegion CR);
   bool passCFCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
   // Monte Carlo Regions
   bool passMCReg(const LeptonVector &leptons, const JetVector& jets,
-                 const Met* met, ControlRegion CR);
+                 const Met* met, sf::ControlRegion CR);
   void fillRatesHistos(const Lepton* lep, const JetVector& jets,
-                       const Met* met, ControlRegion CR);
+                       const Met* met, sf::ControlRegion CR);
   // Miscellaneous
   bool passLFTrig(const LeptonVector &leps);
   LeptonSource getLeptonSource(const Lepton* l);

@@ -9,6 +9,8 @@
 #include "SusyTest0/FakeBinnings.h"
 
 using namespace susywh; // pull in SelectionRegions
+using namespace susy::fake;
+
 const int controlRegions[] = {
   kCR_Real, kCR_SideLow, kCR_SideHigh, kCR_HF, kCR_HF_high,
   kCR_Conv,
@@ -168,7 +170,7 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
 // Plotting Method
 /*--------------------------------------------------------------------------------*/
 void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
-                                       const Met* met, ControlRegion CR)
+                                       const Met* met, sf::ControlRegion CR)
 {
   LeptonType lt(lep->isEle() ? LT_EL : LT_MU);
   bool pass(isSignalLepton(lep, m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC));
@@ -203,7 +205,7 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
 bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
 				 const JetVector &jets,
 				 const Met* met,
-				 ControlRegion CR)
+				 sf::ControlRegion CR)
 {
   // Used to measure fake rate in MC in a region
   // that is close to our signal region
@@ -229,7 +231,7 @@ bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
 bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
                                         const JetVector &jets,
                                         const Met* met,
-                                        ControlRegion CR)
+                                        sf::ControlRegion CR)
 {
   if( leptons.size() != 2 ) return false;
   bool passSR = false;
@@ -258,7 +260,7 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
 bool MeasureFakeRate2::passRealCR(const LeptonVector &leptons,
                                   const JetVector &jets,
                                   const Met* met,
-                                  ControlRegion CR)
+                                  sf::ControlRegion CR)
 {
   // Real CRA:
   // * Require Exactly two baseline leptons SF
@@ -297,7 +299,7 @@ bool MeasureFakeRate2::passRealCR(const LeptonVector &leptons,
 bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
                                 const JetVector &jets,
                                 const Met* met,
-                                ControlRegion CR)
+                                sf::ControlRegion CR)
 {
   // This is a heavy flavor tag and probe trying
   // to select b-bbar events by looking at loose
