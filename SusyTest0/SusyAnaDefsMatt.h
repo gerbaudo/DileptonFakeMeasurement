@@ -22,13 +22,13 @@ enum DiLepPair             { DL_TT = 0, DL_TL, DL_LT, DL_LL, DL_ALL, DL_N };
 // There is no need for an additional enum, and we will drop this.
 enum SignalRegion
 {
-  CRSSInc,
-  SR_WHSS,
-  CR8lpt,
-  CR8ee,
-  CR8mm,
-  CR8mmMtww,
-  CR8mmHt,
+  CR_SSInc,
+  CR_WHSS,
+  CR_CR8lpt,
+  CR_CR8ee,
+  CR_CR8mm,
+  CR_CR8mmMtww,
+  CR_CR8mmHt,
   CR_SsEwk,
   CR_SsEwkLoose,
 };

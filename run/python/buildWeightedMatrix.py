@@ -92,18 +92,9 @@ def frac2str(frac) :
 def selectionRegions() :
     header = os.path.dirname(__file__)+'/../../SusyTest0/SusyAnaDefsMatt.h'
     enum = enumFromHeader(header, 'SignalRegion')
-    enum = [x[0] for x in sorted(enum.iteritems(), key=operator.itemgetter(1))] # sort by value
-    fix = {'CRSSInc'   :'CR_SSInc'     ,
-           'SR_WHSS'   :'CR_WHSS'      ,
-           'CR8lpt'    :'CR_CR8lpt'    ,
-           'CR8ee'     :'CR_CR8ee'     ,
-           'CR8mm'     :'CR_CR8mm'     ,
-           'CR8mmMtww' :'CR_CR8mmMtww' ,
-           'CR8mmHt'   :'CR_CR8mmHt'   ,
-           } # some enums have string repr different from their literal repr
-    print "selectionRegions : fix ugly mapping when conflicting enums have been removed"
-    enum = [fix[e] if e in fix else e for e in enum]
-    enum = filter(len, enum)
+    def dictKeysSortedByValue(aDict={}) :
+        return [x[0] for x in sorted(aDict.iteritems(), key=operator.itemgetter(1))]
+    enum = filter(len, dictKeysSortedByValue(enum))
     return enum
 def getInputFiles(inputDirname, tag, verbose=False) :
     inDir = inputDirname
