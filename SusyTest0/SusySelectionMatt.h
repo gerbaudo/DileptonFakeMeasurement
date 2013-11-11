@@ -51,18 +51,15 @@ class SusySelectionMatt : public SusyNtAna
     bool selectEvent(bool count=false);
     bool selectBaseEvent(bool doMll=true, bool count=false);
     SsPassFlags passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    bool passEwkSs     (const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    bool passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met);
+    static bool passEwkSs     (const LeptonVector& leptons, const JetVector& jets, const Met* met);
+    static bool passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met);
 
     // Cut methods
     bool passHfor();
     bool passTrigger(const LeptonVector& leptons);
-    bool sameSign(const LeptonVector& leptons);
-    bool oppositeSign(const LeptonVector& leptons) { return !sameSign(leptons); }
-    bool sameFlavor(const LeptonVector& leptons);
-
-    // Signal Region Cuts
-
+    static bool sameSign(const LeptonVector& leptons);
+    static bool oppositeSign(const LeptonVector& leptons) { return !sameSign(leptons); }
+    static bool sameFlavor(const LeptonVector& leptons);
 
     // Idendification methods
     bool isRealLepton(const Lepton* lep);
