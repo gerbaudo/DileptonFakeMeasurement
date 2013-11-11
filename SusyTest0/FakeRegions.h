@@ -29,6 +29,8 @@ enum ControlRegion // these are the regions used in MeasureFakeRate2
   CR_CR8mm,
   CR_CR8mmMtww,
   CR_CR8mmHt,
+  CR_SsEwk,
+  CR_SsEwkLoose,
 };
 
 static string CRNames[] =
@@ -49,6 +51,8 @@ static string CRNames[] =
   "CR_CR8mm",
   "CR_CR8mmMtww",
   "CR_CR8mmHt",
+  "CR_SsEwk",
+  "CR_SsEwkLoose",
 
 };
 

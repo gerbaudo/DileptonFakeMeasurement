@@ -51,6 +51,8 @@ class SusySelectionMatt : public SusyNtAna
     bool selectEvent(bool count=false);
     bool selectBaseEvent(bool doMll=true, bool count=false);
     SsPassFlags passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met);
+    bool passEwkSs     (const LeptonVector& leptons, const JetVector& jets, const Met* met);
+    bool passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met);
 
     // Cut methods
     bool passHfor();

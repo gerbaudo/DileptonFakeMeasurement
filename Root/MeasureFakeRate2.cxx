@@ -22,7 +22,9 @@ const int signalRegions[] = {
   kPR_CR8ee    ,
   kPR_CR8mm    ,
   kPR_CR8mmMtww,
-  kPR_CR8mmHt
+  kPR_CR8mmHt,
+  CR_SsEwk,
+  CR_SsEwkLoose
 };
 const size_t nSignalRegions = sizeof(signalRegions)/sizeof(signalRegions[0]);
 
@@ -247,6 +249,8 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   case CR_CR8mm        : passSR = (whssFlags.lepPt   && isMm);                 break;
   case CR_CR8mmMtww    : passSR = (whssFlags.mtllmet && isMm);                 break;
   case CR_CR8mmHt      : passSR = (whssFlags.ht      && isMm);                 break;
+  case CR_SsEwk        : passSR = passEwkSs     (leptons, jets, met);          break;
+  case CR_SsEwkLoose   : passSR = passEwkSsLoose(leptons, jets, met);          break;
   default: cout<<"invalid ControlRegion "<<CR<<endl;
   }
   for(uint i=0; i<leptons.size(); ++i) m_probes.push_back( leptons[i]);
