@@ -29,6 +29,8 @@ enum SignalRegion
   CR8mm,
   CR8mmMtww,
   CR8mmHt,
+  CR_SsEwk,
+  CR_SsEwkLoose,
 };
 
 #endif
