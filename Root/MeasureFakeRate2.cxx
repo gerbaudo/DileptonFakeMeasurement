@@ -23,8 +23,8 @@ const int signalRegions[] = {
   kPR_CR8mm    ,
   kPR_CR8mmMtww,
   kPR_CR8mmHt,
-  CR_SsEwk,
-  CR_SsEwkLoose
+  susy::fake::CR_SsEwk,
+  susy::fake::CR_SsEwkLoose
 };
 const size_t nSignalRegions = sizeof(signalRegions)/sizeof(signalRegions[0]);
 
@@ -141,15 +141,15 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     const LeptonVector& leptons = m_baseLeptons;
     const JetVector& jets = m_signalJets2Lep;
     switch(CR) {
-    case CR_Real     : passCR = passRealCR  (leptons, jets, m_met, CR); break;
-    case CR_SideLow  : passCR = passRealCR  (leptons, jets, m_met, CR); break;
-    case CR_SideHigh : passCR = passRealCR  (leptons, jets, m_met, CR); break;
-    case CR_HF       : passCR = passHFCR    (leptons, jets, m_met, CR); break;
-    case CR_HF_high  : passCR = passHFCR    (leptons, jets, m_met, CR); break;
-    case CR_Conv     : passCR = passConvCR  (leptons, jets, m_met    ); break;
-    case CR_MCConv   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
-    case CR_MCQCD    : passCR = passMCReg   (leptons, jets, m_met, CR); break;
-    case CR_MCReal   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
+    case susy::fake::CR_Real     : passCR = passRealCR  (leptons, jets, m_met, CR); break;
+    case susy::fake::CR_SideLow  : passCR = passRealCR  (leptons, jets, m_met, CR); break;
+    case susy::fake::CR_SideHigh : passCR = passRealCR  (leptons, jets, m_met, CR); break;
+    case susy::fake::CR_HF       : passCR = passHFCR    (leptons, jets, m_met, CR); break;
+    case susy::fake::CR_HF_high  : passCR = passHFCR    (leptons, jets, m_met, CR); break;
+    case susy::fake::CR_Conv     : passCR = passConvCR  (leptons, jets, m_met    ); break;
+    case susy::fake::CR_MCConv   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
+    case susy::fake::CR_MCQCD    : passCR = passMCReg   (leptons, jets, m_met, CR); break;
+    case susy::fake::CR_MCReal   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
         // Remaining signal and control regions
     default          : passCR = passSignalRegion(leptons,jets,m_met,CR); break;
     } // end switch(CR)
@@ -237,20 +237,21 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
 {
   if( leptons.size() != 2 ) return false;
   bool passSR = false;
-  bool computeWhssPass(CR==CR_SRWHSS || CR==CR_CR8lpt || CR==CR_CR8ee || CR==CR_CR8mm
-                       ||CR==CR_CR8mmMtww||CR==CR_CR8mmHt);
+  bool computeWhssPass(CR==susy::fake::CR_SRWHSS || CR==susy::fake::CR_CR8lpt
+                       || CR==susy::fake::CR_CR8ee || CR==susy::fake::CR_CR8mm
+                       || CR==susy::fake::CR_CR8mmMtww || CR==susy::fake::CR_CR8mmHt);
   SsPassFlags whssFlags(computeWhssPass ? passWhSS(leptons,jets,met) : SsPassFlags());
   bool isEe(Ch_ee==getChan(leptons)), isMm(Ch_mm==getChan(leptons));
   switch(CR) {
-  case CR_SSInc        : passSR = sameSign(leptons);                           break;
-  case CR_SRWHSS       : passSR =  whssFlags.metrel;                           break;
-  case CR_CR8lpt       : passSR =  whssFlags.lepPt;                            break;
-  case CR_CR8ee        : passSR = (whssFlags.lepPt   && isEe);                 break;
-  case CR_CR8mm        : passSR = (whssFlags.lepPt   && isMm);                 break;
-  case CR_CR8mmMtww    : passSR = (whssFlags.mtllmet && isMm);                 break;
-  case CR_CR8mmHt      : passSR = (whssFlags.ht      && isMm);                 break;
-  case CR_SsEwk        : passSR = passEwkSs     (leptons, jets, met);          break;
-  case CR_SsEwkLoose   : passSR = passEwkSsLoose(leptons, jets, met);          break;
+  case susy::fake::CR_SSInc        : passSR = sameSign(leptons);                  break;
+  case susy::fake::CR_SRWHSS       : passSR =  whssFlags.metrel;                  break;
+  case susy::fake::CR_CR8lpt       : passSR =  whssFlags.lepPt;                   break;
+  case susy::fake::CR_CR8ee        : passSR = (whssFlags.lepPt   && isEe);        break;
+  case susy::fake::CR_CR8mm        : passSR = (whssFlags.lepPt   && isMm);        break;
+  case susy::fake::CR_CR8mmMtww    : passSR = (whssFlags.mtllmet && isMm);        break;
+  case susy::fake::CR_CR8mmHt      : passSR = (whssFlags.ht      && isMm);        break;
+  case susy::fake::CR_SsEwk        : passSR = passEwkSs     (leptons, jets, met); break;
+  case susy::fake::CR_SsEwkLoose   : passSR = passEwkSsLoose(leptons, jets, met); break;
   default: cout<<"invalid ControlRegion "<<CR<<endl;
   }
   for(uint i=0; i<leptons.size(); ++i) m_probes.push_back( leptons[i]);
