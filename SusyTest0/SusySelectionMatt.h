@@ -50,45 +50,25 @@ class SusySelectionMatt : public SusyNtAna
     virtual void dumpEventCounters();
     bool selectEvent(bool count=false);
     bool selectBaseEvent(bool doMll=true, bool count=false);
-    bool selectAnaEvent(const LeptonVector& leptons, const LeptonVector& baseLeptons, bool count=false);
     SsPassFlags passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met);
 
     // Cut methods
     bool passHfor();
-    bool passNLepCut(const LeptonVector& leptons);
-    bool passNBaseLepCut(const LeptonVector& baseLeptons);
     bool passTrigger(const LeptonVector& leptons);
-    bool sameFlavor(const LeptonVector& leptons);
-    bool oppositeFlavor(const LeptonVector& leptons);
     bool sameSign(const LeptonVector& leptons);
-    bool oppositeSign(const LeptonVector& leptons);
-    bool passMll(const LeptonVector& leptons, float mll = 20);
-    bool passBadMet(const Met* met, float cutval=0.8);
+    bool oppositeSign(const LeptonVector& leptons) { return !sameSign(leptons); }
+    bool sameFlavor(const LeptonVector& leptons);
 
     // Signal Region Cuts
-    bool passJetVeto(const JetVector& jets);
-    int nL20Close(const JetVector& jets);
-    int nB20Close(const JetVector& jets);
-    int nF30Close(const JetVector& jets);
 
-    bool passZVeto(const LeptonVector& leptons, float Zlow = 81.2, float Zhigh = 101.2);
-    bool passMETRel(const Met *met, const LeptonVector& leptons, 
-		    const JetVector& jets, float maxMet = 100);
-    bool passbJetVeto(const JetVector& jets);
-    bool passge2Jet(const JetVector& jets);
-    bool passdPhi(TLorentzVector v0, TLorentzVector v1, float cut);
-    bool passMT2(const LeptonVector& leptons, const Met* met, float cut);
-    float getMt2(const LeptonVector& leptons, const Met* met);
 
     // Idendification methods
     bool isRealLepton(const Lepton* lep);
-    bool isFakeLepton(const Lepton* lep);
+    bool isFakeLepton(const Lepton* lep) { return !isRealLepton(lep); }
     bool isConvLepton(const Lepton* lep);
     bool isHFLepton(const Lepton* lep);
     bool isLFLepton(const Lepton* lep);
     bool isQCDLepton(const Lepton* lep);
-    bool isTrueDilepton(const LeptonVector &leptons);
-    bool isFakeDilepton(const LeptonVector &leptons);
     void setFileName(string f){ m_fileName = f; };
     // Get Btag weight
     float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true,
@@ -96,15 +76,7 @@ class SusySelectionMatt : public SusyNtAna
     float getBTagWeight(const Event* evt);
 
     // Some controls
-    void setUse1fb(bool use1fb){ m_do1fb = use1fb; };
-    bool is1fb(){ return isPeriodAB3(nt.evt()->run); };
-    void setUseAD(bool useAD){ m_doAD = useAD; };
-    bool isB3(){
-      uint run = nt.evt()->run;
-      return 203169 <= run && run <= 203195;
-    };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
-
     void setDoSusy(bool susy){ m_doSusy = susy; };
 
     // Method to increment the counters for the event weight types
