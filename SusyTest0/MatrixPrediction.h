@@ -77,7 +77,7 @@ class MatrixPrediction : public SusyPlotter
     bool m_allconfigured;
     bool initMatrixTool();
     // Histograms
-#define FAKEHIST( name ) hf_ ## name[Ch_N][PR_N][MP_N][WTog_N][SusyMatrixMethod::SYS_N_USER];
+#define FAKEHIST( name ) hf_ ## name[susy::wh::Ch_N][PR_N][MP_N][WTog_N][SusyMatrixMethod::SYS_N_USER];
     TH1F* FAKEHIST( ll_M );
     TH1F* FAKEHIST( l0_pt );
     TH1F* FAKEHIST( l1_pt );

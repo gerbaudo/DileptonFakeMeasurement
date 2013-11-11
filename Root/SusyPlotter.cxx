@@ -10,6 +10,7 @@
 
 using namespace std;
 using namespace Susy;
+using namespace susy::wh;
 
 // Histogram bins
 const float varptbins[] = {0,10,20,30,40,50,70,100,150,200,250};
@@ -71,11 +72,6 @@ SusyPlotter::SusyPlotter() :
 void SusyPlotter::initNames()
 {
   size_t i=0;
-  chanNames[i++] = "all";
-  chanNames[i++] = "ee";
-  chanNames[i++] = "mm";
-  chanNames[i++] = "em";
-  i=0;
   PRNames[i++] = "sr8base";
   PRNames[i++] = "cr8lpt";
   PRNames[i++] = "cr8lptee";
@@ -165,7 +161,7 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
 {
   if(m_dbg) cout << "SusyPlotter::fillHistos" << endl;
   if( leps.size() != 2 ) return;
-  int ch = getChan(leps);
+  susy::wh::Chan ch = getChan(leps);
   const Lepton* l0 = leps[0];
   const Lepton* l1 = leps[1];
   assert(l0);
@@ -288,7 +284,7 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
   #undef FILL2
 }
 //-----------------------------------------
-int SusyPlotter::getChan(const LeptonVector& leps)
+susy::wh::Chan SusyPlotter::getChan(const LeptonVector& leps)
 {
   uint ie = 0;
   uint im = 0;
@@ -338,7 +334,7 @@ void SusyPlotter::initHistos()
   //m_histFile->mkdir( sysNames[sys].c_str() ) -> cd();
   for(uint iPR=0; iPR<PR_N; ++iPR){   // for(Plot Region)
     string PR = PRNames[iPR];
-    for(uint iCh=0; iCh<Ch_N; ++iCh){ // for(lepton channel)
+    for(uint iCh=0; iCh<susy::wh::Ch_N; ++iCh){ // for(lepton channel)
       string chan = chanNames[iCh];
       for(uint iSys=0; iSys<m_systs.size(); ++iSys){
         string sys = m_systNames.at(iSys);

@@ -9,7 +9,7 @@
 
 using namespace std;
 using namespace Susy;
-
+using namespace susy::wh;
 
 const float ptmin    = 0;
 const float ptmax    = 250;

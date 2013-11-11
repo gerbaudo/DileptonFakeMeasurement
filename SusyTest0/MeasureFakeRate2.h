@@ -22,13 +22,13 @@
 #include "SusyTest0/FakeRegions.h"
 #include "SusyTest0/FakeLeptonSources.h"
 #include "SusyTest0/EffObject.h"
+#include "SusyTest0/DileptonChannel.h"
 #include <fstream>
 #include <vector>
 
 using namespace std;
 using namespace Susy;
 namespace sf = susy::fake;
-
 
 class MeasureFakeRate2 : public SusySelectionMatt
 {
@@ -60,15 +60,15 @@ class MeasureFakeRate2 : public SusySelectionMatt
   const std::vector<int> m_controlRegions; //!< where we compute SF and rates (pseudo t&p)
   const std::vector<int> m_signalRegions;  //!< where we compute fractions to make the weighted avg
 
-  EffObject* h_l_pt         [LT_N][kNmaxControlRegions][Ch_N];
-  EffObject* h_l_pt_coarse  [LT_N][kNmaxControlRegions][Ch_N];
-  EffObject* h_l_eta        [LT_N][kNmaxControlRegions][Ch_N];
-  EffObject* h_l_eta_coarse [LT_N][kNmaxControlRegions][Ch_N];
-  EffObject* h_metrel       [LT_N][kNmaxControlRegions][Ch_N];
-  EffObject* h_met          [LT_N][kNmaxControlRegions][Ch_N];
-  EffObject* h_njets        [LT_N][kNmaxControlRegions][Ch_N];
-  EffObject* h_onebin       [LT_N][kNmaxControlRegions][Ch_N];
-  EffObject* h_flavor       [LT_N][kNmaxControlRegions][Ch_N];
+  EffObject* h_l_pt         [LT_N][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_l_pt_coarse  [LT_N][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_l_eta        [LT_N][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_l_eta_coarse [LT_N][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_metrel       [LT_N][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_met          [LT_N][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_njets        [LT_N][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_onebin       [LT_N][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_flavor       [LT_N][kNmaxControlRegions][susy::wh::Ch_N];
 
  protected:
   TFile*       m_outFile;           // Output file

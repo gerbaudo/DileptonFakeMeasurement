@@ -1,15 +1,12 @@
-////////////////////////////////////////////////////
-// Will house the control regions used to measure //
-// the fake rates used in 2-lep analysis.         //
-////////////////////////////////////////////////////
-
 #include "SusyTest0/MeasureFakeRate2.h"
 #include "SusyTest0/SelectionRegions.h"
 #include "SusyTest0/criteria.h"
 #include "SusyTest0/FakeBinnings.h"
+#include "SusyTest0/DileptonChannel.h"
 
 using namespace susywh; // pull in SelectionRegions
 using namespace susy::fake;
+using namespace susy::wh;
 
 const int controlRegions[] = {
   kCR_Real, kCR_SideLow, kCR_SideHigh, kCR_HF, kCR_HF_high,
@@ -74,7 +71,6 @@ void MeasureFakeRate2::Terminate()
 /*--------------------------------------------------------------------------------*/
 void MeasureFakeRate2::initHistos(string outName)
 {
-    using namespace susy::fake; // pull in binning(s)
   // DG : here we will switch to a loop over m_controlRegions and m_signalRegions
   // const int CR_N(getNumControlRegions());
   if(CR_N >= kNmaxControlRegions)
@@ -89,8 +85,6 @@ void MeasureFakeRate2::initHistos(string outName)
   m_outFile->cd();
   cout<<"File created: "<<m_outFile<<endl;
   // All the rates will be stored in efficiency objects.
-  #define EFFVAR(eff,name,nbins,bins) do{ eff = new EffObject(name,nbins,bins); } while(0)
-  #define EFF(eff,name,nbins,xmin,xmax) do{ eff = new EffObject(name,nbins,xmin,xmax); } while(0)
   for(int il=0; il<LT_N; ++il){ // for lName in [elec, muon]
     string lepton = LTNames[il];
     for(int icr=0; icr<CR_N; ++icr){ // see CRNames in SusyAnaDefsMatt.h for complete list
@@ -111,8 +105,6 @@ void MeasureFakeRate2::initHistos(string outName)
       } // end for(ich)
     } // end for(icr)
   } // end for(il)
-  #undef EFFVAR
-  #undef EFF
 }
 //----------------------------------------------------------
 void printProgress(const Susy::Event *e, Long64_t counter)
@@ -172,28 +164,36 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
 void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
                                        const Met* met, sf::ControlRegion CR)
 {
-  LeptonType lt(lep->isEle() ? LT_EL : LT_MU);
-  bool pass(isSignalLepton(lep, m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC));
+    struct FillEffHistos {
+        bool n_; double w_;
+        LeptonType l_; ControlRegion r_; Chan c_;
+        FillEffHistos(bool alsoNum, double weight, LeptonType l, ControlRegion r, Chan c)
+            : n_(alsoNum), w_(weight), l_(l), r_(r), c_(c) {}
+        void operator () (EffObject* eff_array[LT_N][kNmaxControlRegions][susy::wh::Ch_N],
+                          double value) {
+            if(EffObject* eff = eff_array[l_][r_][c_])         eff->Fill(n_, w_, value);
+            if(c_ != Ch_all)
+                if(EffObject* eff = eff_array[l_][r_][Ch_all]) eff->Fill(n_, w_, value);
+        }
+    };
 
-  #define FILL(eff, var) \
-    do{                  eff[lt][CR][m_ch]->Fill(pass,m_evtWeight,var);   \
-      if(m_ch != Ch_all) eff[lt][CR][Ch_all]->Fill(pass,m_evtWeight,var); \
-    }while(0)
-
-  FILL(h_l_pt,         lep->Pt());
-  FILL(h_l_pt_coarse,  lep->Pt());
-  FILL(h_l_eta,        fabs(lep->Eta()));
-  FILL(h_l_eta_coarse, fabs(lep->Eta()));
-  FILL(h_metrel,        m_metRel);
-  FILL(h_met,           met->Et);
-  FILL(h_njets,      jets.size());
-  FILL(h_onebin, 0);  
-  if( nt.evt()->isMC ){ // If the event is MC, save the flavor
-      LeptonSource ls(getLeptonSource(lep));
-      FILL(h_flavor, ls);
-      if(ls==LS_HF||ls==LS_LF) FILL(h_flavor,      LS_QCD);
-  }
-  #undef FILL
+    LeptonType lt(lep->isEle() ? LT_EL : LT_MU);
+    bool pass(isSignalLepton(lep, m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC));
+    FillEffHistos fillEff(pass, m_evtWeight, lt, CR, static_cast<Chan>(m_ch));    
+    fillEff(h_l_pt        , lep->Pt());
+    fillEff(h_l_pt_coarse , lep->Pt());
+    fillEff(h_l_eta       , fabs(lep->Eta()));
+    fillEff(h_l_eta_coarse, fabs(lep->Eta()));
+    fillEff(h_metrel      , m_metRel);
+    fillEff(h_met         , met->Et);
+    fillEff(h_njets       , jets.size());
+    fillEff(h_onebin      , 0.0);
+    if( nt.evt()->isMC ){ // If the event is MC, save the flavor
+        LeptonSource ls(getLeptonSource(lep));
+        bool isQcd(ls==LS_HF||ls==LS_LF);
+        fillEff(h_flavor, ls);
+        if(isQcd) fillEff(h_flavor, LS_QCD);
+    }
 }
 /*--------------------------------------------------------------------------------*/
 // Control Regions

@@ -2,8 +2,6 @@
 #ifndef SUSY_FAKE_FAKEBINNINGS_H
 #define SUSY_FAKE_FAKEBINNINGS_H
 
-
-
 // binnings used to derive the fake estimate
 
 namespace susy {

@@ -2,7 +2,7 @@
 #define SusyAna_SusyPlotter_h
 
 #include "SusyTest0/SusySelection.h"
-//#include "SusyTest0/SusyAnaDefs.h"
+#include "SusyTest0/DileptonChannel.h"
 
 #include "TH1F.h"
 #include "TH2F.h"
@@ -14,8 +14,6 @@
 class SusyPlotter : public SusySelection
 {
  public:
-  enum Chan { Ch_all = 0, Ch_ee, Ch_mm, Ch_em, Ch_N };
-  string chanNames[Ch_N];
   enum PlotRegion{
     PR_SR8base,
     PR_CR8lpt, PR_CR8ee, // looser regions for fake control plots, same for SR9lpt
@@ -36,7 +34,7 @@ class SusyPlotter : public SusySelection
   float Mt(TLorentzVector p1, TLorentzVector met) {
     return sqrt(2*p1.Pt()*met.Et()*(1-cos(p1.DeltaPhi(met))));
   };
-  int getChan(const LeptonVector& leps); // compute lepton channel
+  susy::wh::Chan getChan(const LeptonVector& leps); // compute lepton channel
   void setSysts(); // get list of systematics to consider; override in SusyMatrixMethod
   void initNames(); // initialize enum literals; should be static, but rootcint cannot deal with it
   void initHistos();
@@ -53,7 +51,7 @@ class SusyPlotter : public SusySelection
   bool                m_doFake;             // do Fake estimate
 
   // preprocessor convenience - add more indices later
-#define DEFHIST( name ) h_ ## name[Ch_N][PR_N][40/*Guess for # of sys*/];  
+#define DEFHIST( name ) h_ ## name[susy::wh::Ch_N][PR_N][40/*Guess for # of sys*/];  
 
   TH1F* DEFHIST(onebin); // One bin
   TH1F* DEFHIST(l0_pt); // Pt
