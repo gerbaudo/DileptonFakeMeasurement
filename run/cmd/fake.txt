@@ -22,7 +22,7 @@ TAG="Oct_10"
 # Here, for the real-lepton efficiencies (tag-and-probe),
 # the Z-peak sideband subtraction is also applied.
 # The SF are printed out to screen; copy them to FinalNewFake.h
-./python/determineFakeScaleFactor.py \\
+./python/determineFakeScaleFactor.py \
  --tag ${TAG} \
  --input_dir  out/fakerate/merged/ \
  --input_iter out/fakerate/merged/iterative_out_${TAG}.root \
