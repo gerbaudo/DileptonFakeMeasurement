@@ -34,6 +34,7 @@ r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line o
 from rootUtils import buildRatioHistogram
 from utils import (enumFromHeader
                    ,first
+                   ,mkdirIfNeeded
                    ,json_write
                    )
 import matplotlib as mpl
@@ -73,6 +74,7 @@ def main() :
 
     allInputFiles = getInputFiles(inputDirname, tag, verbose) # includes allBkg, which is used only for sys
     assert all(f for f in allInputFiles.values()), ("missing inputs: \n%s"%'\n'.join(["%s : %s"%kv for kv in allInputFiles.iteritems()]))
+    mkdirIfNeeded(outputPlotDir)
     outputFile = r.TFile.Open(outputFname, 'recreate')
     inputFiles = dict((k, v) for k, v in allInputFiles.iteritems() if k in fakeProcesses())
 
