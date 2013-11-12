@@ -2,6 +2,7 @@
 #define SusyAna_MatrixPrediction_h
 
 #include "SusyTest0/SusyPlotter.h"
+#include "SusyMatrixMethod/FakeRegions.h"
 #include "SusyMatrixMethod/MatrixLepton.h"
 #include "SusyMatrixMethod/DiLeptonMatrixMethod.h"
 
@@ -60,8 +61,8 @@ class MatrixPrediction : public SusyPlotter
     void fillFakeHistos(const LeptonVector &baseLeps, const JetVector &jets, 
                         const Met* met,float weight, PlotRegion PR, uint sys);
     // Get the fake event weight given a signal region
-    float getFakeWeight(const LeptonVector &baseLeps, SusyMatrixMethod::FAKE_REGION region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NONE);
-    float getRFWeight(const LeptonVector &baseLeps, SusyMatrixMethod::FAKE_REGION region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NONE);
+    float getFakeWeight(const LeptonVector &baseLeps, susy::fake::Region region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NONE);
+    float getRFWeight(const LeptonVector &baseLeps, susy::fake::Region region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NONE);
     MatrixPair getMatrixPair(const LeptonVector &baseLeps); //!< Get the Matrix Pair type
     MatrixPrediction& setMatrixFilename(const std::string filename); // to be called before Begin
     static std::string dilepDetails(const Susy::Event &event, const DiLepEvtType &ll,

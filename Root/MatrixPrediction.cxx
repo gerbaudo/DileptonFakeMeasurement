@@ -42,6 +42,7 @@ void MatrixPrediction::Begin(TTree* /*tree*/)
 Bool_t MatrixPrediction::Process(Long64_t entry)
 {
   namespace smm = SusyMatrixMethod;
+  namespace sf = susy::fake;
 
   if(!m_allconfigured) return false;
   m_printer.countAndPrint(cout);
@@ -69,16 +70,17 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   if(!ssf.passLpt()) return false;
   for(uint s = 0; s<m_systs.size(); ++s){
     smm::SYSTEMATIC sys = static_cast<smm::SYSTEMATIC>(m_systs.at(s));
-    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
-    if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8ee,     metRel,sys), PR_CR8ee,     sys);
+    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
+    if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8ee,     metRel,sys), PR_CR8ee,     sys);
     if(isMm && ssf.lepPt
-            && passMinMet   ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8mm,     metRel,sys), PR_CR8mm,     sys);
-    if(isMm && ssf.mtllmet  ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8mmMtww, metRel,sys), PR_CR8mmMtww, sys);
-    if(isMm && ssf.ht       ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8mmHt,   metRel,sys), PR_CR8mmHt,   sys);
-    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_SR_WHSS,   metRel,sys), PR_CR8lpt,    sys);
-    if(isOf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_SR_WHSS,   metRel,sys), PR_CR9lpt,    sys);
-    if(isSf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_SR_WHSS,   metRel,sys), PR_SR8,       sys);
-    if(isOf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_SR_WHSS,   metRel,sys), PR_SR9,       sys);
+            && passMinMet   ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mm,     metRel,sys), PR_CR8mm,     sys);
+    if(isMm && ssf.mtllmet  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mmMtww, metRel,sys), PR_CR8mmMtww, sys);
+    if(isMm && ssf.ht       ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mmHt,   metRel,sys), PR_CR8mmHt,   sys);
+    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_CR8lpt,    sys);
+    if(isOf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_CR9lpt,    sys);
+    if(isSf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_SR8,       sys);
+    if(isOf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_SR9,       sys);
+
   } // end for(s)
   return ssf.passAll();
 }
@@ -139,7 +141,7 @@ do{                                                                       \
 }
 //----------------------------------------------------------
 void MatrixPrediction::fillFakeHistos(const LeptonVector &baseLeps, const JetVector &jets,
-				      const Met* met,float weight, PlotRegion PR, uint sys)
+                                      const Met* met,float weight, PlotRegion PR, uint sys)
 {
 
   if(m_dbg) cout << "MatrixPrediction::plotFakeHisto" << endl;
@@ -180,7 +182,7 @@ do{                                                                   \
 }
 //----------------------------------------------------------
 float MatrixPrediction::getFakeWeight(const LeptonVector &baseLeps,
-                                      SusyMatrixMethod::FAKE_REGION region,
+                                      susy::fake::Region region,
                                       float metRel,
                                       SusyMatrixMethod::SYSTEMATIC sys)
 {
@@ -198,9 +200,9 @@ float MatrixPrediction::getFakeWeight(const LeptonVector &baseLeps,
 }
 //----------------------------------------------------------
 float MatrixPrediction::getRFWeight(const LeptonVector &baseLeps,
-				      SusyMatrixMethod::FAKE_REGION region,
-				      float metRel,
-				      SusyMatrixMethod::SYSTEMATIC sys)
+                                    susy::fake::Region region,
+                                    float metRel,
+                                    SusyMatrixMethod::SYSTEMATIC sys)
 {
 
   if(baseLeps.size() != 2) return 0.0;

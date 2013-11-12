@@ -17,9 +17,9 @@
 #include "TProfile.h"
 
 // Susy Packages
+#include "SusyMatrixMethod/FakeRegions.h"
 #include "SusyTest0/SusySelectionMatt.h"
 #include "SusyTest0/SusyAnaDefsMatt.h"
-#include "SusyTest0/FakeRegions.h"
 #include "SusyTest0/FakeLeptonSources.h"
 #include "SusyTest0/EffObject.h"
 #include "SusyTest0/DileptonChannel.h"
@@ -28,7 +28,6 @@
 
 using namespace std;
 using namespace Susy;
-namespace sf = susy::fake;
 
 class MeasureFakeRate2 : public SusySelectionMatt
 {
@@ -42,24 +41,24 @@ class MeasureFakeRate2 : public SusySelectionMatt
   void initHistos(string outName);
   // Data Control Regions
   bool passRealCR(const LeptonVector &leptons, const JetVector& jets, const Met* met,
-                  sf::ControlRegion CR);
+                  susy::fake::Region CR);
   bool passHFCR(const LeptonVector &leptons, const JetVector& jets, const Met* met,
-                sf::ControlRegion CR);
+                susy::fake::Region CR);
   bool passConvCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
   bool passSignalRegion(const LeptonVector &leptons, const JetVector& jets, const Met* met,
-                        sf::ControlRegion CR);
+                        susy::fake::Region CR);
   // Monte Carlo Regions
   bool passMCReg(const LeptonVector &leptons, const JetVector& jets,
-                 const Met* met, sf::ControlRegion CR);
+                 const Met* met, susy::fake::Region CR);
   void fillRatesHistos(const Lepton* lep, const JetVector& jets,
-                       const Met* met, sf::ControlRegion CR);
+                       const Met* met, size_t regionIndex);
   // Miscellaneous
-  sf::LeptonSource getLeptonSource(const Lepton* l);
+  susy::fake::LeptonSource getLeptonSource(const Lepton* l);
   const int CR_N;
   static const int kNmaxControlRegions=64;
-  const std::vector<int> m_controlRegions; //!< where we compute SF and rates (pseudo t&p)
-  const std::vector<int> m_signalRegions;  //!< where we compute fractions to make the weighted avg
-
+  const std::vector<susy::fake::Region> m_controlRegions; //!< where we compute SF and rates (pseudo t&p)
+  const std::vector<susy::fake::Region> m_signalRegions;  //!< where we compute fractions to make the weighted avg
+  const std::vector<susy::fake::Region> allRegions() const; //!< generate on the fly the sum of the two above
   EffObject* h_l_pt         [LT_N][kNmaxControlRegions][susy::wh::Ch_N];
   EffObject* h_l_pt_coarse  [LT_N][kNmaxControlRegions][susy::wh::Ch_N];
   EffObject* h_l_eta        [LT_N][kNmaxControlRegions][susy::wh::Ch_N];

@@ -7,24 +7,25 @@
 using namespace susywh; // pull in SelectionRegions
 using namespace susy::fake;
 using namespace susy::wh;
+namespace sf = susy::fake;
 
-const int controlRegions[] = {
-  kCR_Real, kCR_SideLow, kCR_SideHigh, kCR_HF, kCR_HF_high,
-  kCR_Conv,
-  kCR_MCConv, kCR_MCQCD,
-  kCR_MCReal
+const sf::Region controlRegions[] = {
+    sf::CR_Real, sf::CR_SideLow, sf::CR_SideHigh, sf::CR_HF, sf::CR_HF_high,
+    sf::CR_Conv,
+    sf::CR_MCConv, sf::CR_MCQCD,
+    sf::CR_MCReal
 };
 const size_t nControlRegions = sizeof(controlRegions)/sizeof(controlRegions[0]);
-const int signalRegions[] = {
-  kCR_SSInc,
-  kCR_SRWHSS,
-  kPR_CR8lpt   ,
-  kPR_CR8ee    ,
-  kPR_CR8mm    ,
-  kPR_CR8mmMtww,
-  kPR_CR8mmHt,
-  susy::fake::CR_SsEwk,
-  susy::fake::CR_SsEwkLoose
+const sf::Region signalRegions[] = {
+  sf::CR_SSInc,
+  sf::CR_SRWHSS,
+  sf::CR_CR8lpt,
+  sf::CR_CR8ee,
+  sf::CR_CR8mm,
+  sf::CR_CR8mmMtww,
+  sf::CR_CR8mmHt,
+  sf::CR_SsEwk,
+  sf::CR_SsEwkLoose
 };
 const size_t nSignalRegions = sizeof(signalRegions)/sizeof(signalRegions[0]);
 
@@ -89,8 +90,9 @@ void MeasureFakeRate2::initHistos(string outName)
   // All the rates will be stored in efficiency objects.
   for(int il=0; il<LT_N; ++il){ // for lName in [elec, muon]
     string lepton = LTNames[il];
-    for(int icr=0; icr<CR_N; ++icr){ // see CRNames in SusyAnaDefsMatt.h for complete list
-      string region = CRNames[icr];
+    vector<sf::Region> regions(allRegions());
+    for(size_t icr=0; icr<regions.size(); ++icr){ // see CRNames in SusyAnaDefsMatt.h for complete list
+      string region(sf::region2str(regions[icr]));
       for(int ich=0; ich<Ch_N; ++ich){ // for chan in [all, ee, mm, em]
         string channel = chanNames[ich];
         string bn(lepton+"_"+region+"_"+channel+"_");
@@ -132,8 +134,9 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
   bool uniqueLepPair(m_baseLeptons.size() == 2);
   if(uniqueLepPair && !susy::passMllMin(m_baseLeptons, 20.0)) return false;
   // Loop over all regions (regardless of data or mc) and only fill relevant data quantitites.
-  for(int cr = 0; cr<CR_N; ++cr){
-    ControlRegion CR = static_cast<ControlRegion>(cr);
+  vector<sf::Region> regions(allRegions());
+  for(size_t cr = 0; cr<regions.size(); ++cr){
+    sf::Region CR = regions[cr];
     m_ch = Ch_all;
     m_probes.clear();
     m_tags.clear();
@@ -141,20 +144,20 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     const LeptonVector& leptons = m_baseLeptons;
     const JetVector& jets = m_signalJets2Lep;
     switch(CR) {
-    case susy::fake::CR_Real     : passCR = passRealCR  (leptons, jets, m_met, CR); break;
-    case susy::fake::CR_SideLow  : passCR = passRealCR  (leptons, jets, m_met, CR); break;
-    case susy::fake::CR_SideHigh : passCR = passRealCR  (leptons, jets, m_met, CR); break;
-    case susy::fake::CR_HF       : passCR = passHFCR    (leptons, jets, m_met, CR); break;
-    case susy::fake::CR_HF_high  : passCR = passHFCR    (leptons, jets, m_met, CR); break;
-    case susy::fake::CR_Conv     : passCR = passConvCR  (leptons, jets, m_met    ); break;
-    case susy::fake::CR_MCConv   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
-    case susy::fake::CR_MCQCD    : passCR = passMCReg   (leptons, jets, m_met, CR); break;
-    case susy::fake::CR_MCReal   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
+    case sf::CR_Real     : passCR = passRealCR  (leptons, jets, m_met, CR); break;
+    case sf::CR_SideLow  : passCR = passRealCR  (leptons, jets, m_met, CR); break;
+    case sf::CR_SideHigh : passCR = passRealCR  (leptons, jets, m_met, CR); break;
+    case sf::CR_HF       : passCR = passHFCR    (leptons, jets, m_met, CR); break;
+    case sf::CR_HF_high  : passCR = passHFCR    (leptons, jets, m_met, CR); break;
+    case sf::CR_Conv     : passCR = passConvCR  (leptons, jets, m_met    ); break;
+    case sf::CR_MCConv   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
+    case sf::CR_MCQCD    : passCR = passMCReg   (leptons, jets, m_met, CR); break;
+    case sf::CR_MCReal   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
         // Remaining signal and control regions
     default          : passCR = passSignalRegion(leptons,jets,m_met,CR); break;
     } // end switch(CR)
     if( passCR ){
-      for(size_t ip=0; ip<m_probes.size(); ++ip) fillRatesHistos(m_probes.at(ip), jets, m_met, CR);
+      for(size_t ip=0; ip<m_probes.size(); ++ip) fillRatesHistos(m_probes.at(ip), jets, m_met, cr);
     } // if(passCR)
   } // for(cr)
   return kTRUE;
@@ -164,12 +167,12 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
 // Plotting Method
 /*--------------------------------------------------------------------------------*/
 void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
-                                       const Met* met, sf::ControlRegion CR)
+                                       const Met* met, size_t regionIndex)
 {
     struct FillEffHistos {
         bool n_; double w_;
-        LeptonType l_; ControlRegion r_; Chan c_;
-        FillEffHistos(bool alsoNum, double weight, LeptonType l, ControlRegion r, Chan c)
+        LeptonType l_; size_t r_; Chan c_;
+        FillEffHistos(bool alsoNum, double weight, LeptonType l, size_t r, Chan c)
             : n_(alsoNum), w_(weight), l_(l), r_(r), c_(c) {}
         void operator () (EffObject* eff_array[LT_N][kNmaxControlRegions][susy::wh::Ch_N],
                           double value) {
@@ -181,7 +184,7 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
 
     LeptonType lt(lep->isEle() ? LT_EL : LT_MU);
     bool pass(isSignalLepton(lep, m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC));
-    FillEffHistos fillEff(pass, m_evtWeight, lt, CR, static_cast<Chan>(m_ch));    
+    FillEffHistos fillEff(pass, m_evtWeight, lt, regionIndex, static_cast<Chan>(m_ch));    
     fillEff(h_l_pt        , lep->Pt());
     fillEff(h_l_pt_coarse , lep->Pt());
     fillEff(h_l_eta       , fabs(lep->Eta()));
@@ -207,7 +210,7 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
 bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
 				 const JetVector &jets,
 				 const Met* met,
-				 sf::ControlRegion CR)
+				 sf::Region CR)
 {
   // Used to measure fake rate in MC in a region
   // that is close to our signal region
@@ -233,7 +236,7 @@ bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
 bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
                                         const JetVector &jets,
                                         const Met* met,
-                                        sf::ControlRegion CR)
+                                        sf::Region CR)
 {
   if( leptons.size() != 2 ) return false;
   bool passSR = false;
@@ -265,7 +268,7 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
 bool MeasureFakeRate2::passRealCR(const LeptonVector &leptons,
                                   const JetVector &jets,
                                   const Met* met,
-                                  sf::ControlRegion CR)
+                                  sf::Region CR)
 {
   // Real CRA:
   // * Require Exactly two baseline leptons SF
@@ -304,7 +307,7 @@ bool MeasureFakeRate2::passRealCR(const LeptonVector &leptons,
 bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
                                 const JetVector &jets,
                                 const Met* met,
-                                sf::ControlRegion CR)
+                                sf::Region CR)
 {
   // This is a heavy flavor tag and probe trying
   // to select b-bbar events by looking at loose
@@ -421,4 +424,12 @@ sf::LeptonSource MeasureFakeRate2::getLeptonSource(const Lepton* l)
   if( isLFLepton(l) )   return LS_LF;
   if( isConvLepton(l) ) return LS_Conv;
   return LS_Unk;
+}
+//----------------------------------------------------------
+const std::vector<susy::fake::Region> MeasureFakeRate2::allRegions() const
+{
+    vector<sf::Region> allRegions;
+    allRegions.insert(allRegions.end(), m_controlRegions.begin(), m_controlRegions.end());
+    allRegions.insert(allRegions.end(), m_signalRegions.begin(), m_signalRegions.end());
+    return allRegions;
 }
