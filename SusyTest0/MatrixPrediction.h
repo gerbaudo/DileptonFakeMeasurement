@@ -2,9 +2,11 @@
 #define SusyAna_MatrixPrediction_h
 
 #include "SusyTest0/SusyPlotter.h"
+#include "SusyTest0/PlotRegion.h"
 #include "SusyMatrixMethod/FakeRegions.h"
 #include "SusyMatrixMethod/MatrixLepton.h"
 #include "SusyMatrixMethod/DiLeptonMatrixMethod.h"
+
 
 /*
 
@@ -59,7 +61,7 @@ class MatrixPrediction : public SusyPlotter
     //! Extra histograms and plotting function specific to matrix method
     bool bookFakeHisto();
     void fillFakeHistos(const LeptonVector &baseLeps, const JetVector &jets, 
-                        const Met* met,float weight, PlotRegion PR, uint sys);
+                        const Met* met,float weight, size_t regionIndex, uint sys);
     // Get the fake event weight given a signal region
     float getFakeWeight(const LeptonVector &baseLeps, susy::fake::Region region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NONE);
     float getRFWeight(const LeptonVector &baseLeps, susy::fake::Region region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NONE);
@@ -78,7 +80,7 @@ class MatrixPrediction : public SusyPlotter
     bool m_allconfigured;
     bool initMatrixTool();
     // Histograms
-#define FAKEHIST( name ) hf_ ## name[susy::wh::Ch_N][PR_N][MP_N][WTog_N][SusyMatrixMethod::SYS_N_USER];
+#define FAKEHIST( name ) hf_ ## name[susy::wh::Ch_N][susy::wh::kNumberOfPlotRegions][MP_N][WTog_N][SusyMatrixMethod::SYS_N_USER];
     TH1F* FAKEHIST( ll_M );
     TH1F* FAKEHIST( l0_pt );
     TH1F* FAKEHIST( l1_pt );

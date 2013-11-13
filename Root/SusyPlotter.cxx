@@ -11,6 +11,7 @@
 using namespace std;
 using namespace Susy;
 using namespace susy::wh;
+namespace swh = susy::wh;
 
 // Histogram bins
 const float varptbins[] = {0,10,20,30,40,50,70,100,150,200,250};
@@ -66,22 +67,6 @@ SusyPlotter::SusyPlotter() :
   m_histFile(0),
   m_doFake(false)
 {
-  initNames();
-}
-//-----------------------------------------
-void SusyPlotter::initNames()
-{
-  size_t i=0;
-  PRNames[i++] = "sr8base";
-  PRNames[i++] = "cr8lpt";
-  PRNames[i++] = "cr8lptee";
-  PRNames[i++] = "cr8lptmm";
-  PRNames[i++] = "cr8lptmmMtww";
-  PRNames[i++] = "cr8lptmmHt";
-  PRNames[i++] = "sr8";
-  PRNames[i++] = "sr9base";
-  PRNames[i++] = "cr9lpt";
-  PRNames[i++] = "sr9";
 }
 //-----------------------------------------
 void SusyPlotter::Begin(TTree* /*tree*/)
@@ -118,19 +103,19 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   const DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
   bool sameFlav(ll==ee||ll==mm);
   if(ssf.passLpt()) {
-    PlotRegion pr = (sameFlav ? PR_CR8lpt : PR_CR9lpt);
+    swh::Region pr = (sameFlav ? swh::PR_CR8lpt : swh::PR_CR9lpt);
     fillHistos(ncl, j, m, weight, pr, sys);
     if     (ll==ee && ssf.zllVeto) fillHistos(ncl, j, m, weight, PR_CR8ee, sys);
     else if(ll==mm) {
       bool passMinMet(m->Et > 40.0);
-      if(passMinMet ) fillHistos(ncl, j, m, weight, PR_CR8mm,     sys);
-      if(ssf.mtllmet) fillHistos(ncl, j, m, weight, PR_CR8mmMtww, sys);
-      if(ssf.ht     ) fillHistos(ncl, j, m, weight, PR_CR8mmHt,   sys);
+      if(passMinMet ) fillHistos(ncl, j, m, weight, swh::PR_CR8mm,     sys);
+      if(ssf.mtllmet) fillHistos(ncl, j, m, weight, swh::PR_CR8mmMtww, sys);
+      if(ssf.ht     ) fillHistos(ncl, j, m, weight, swh::PR_CR8mmHt,   sys);
     } // end if(mm)
   } // end passLpt
   if(ssf.passAll()) {
-    PlotRegion pr = (sameFlav ? PR_SR8    : PR_SR9);
-    fillHistos(ncl, j, m, weight, pr, sys);
+      swh::Region pr = (sameFlav ? swh::PR_SR8    : swh::PR_SR9);
+      fillHistos(ncl, j, m, weight, pr, sys);
   }
   return kTRUE;
 }
@@ -157,31 +142,32 @@ SusyPlotter& SusyPlotter::setOutputFilename(const std::string &name)
 //-----------------------------------------
 void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
                              const Met* met, const float weight,
-                             PlotRegion PR, uint sys)
+                             size_t regionIndex, uint sys)
 {
   if(m_dbg) cout << "SusyPlotter::fillHistos" << endl;
   if( leps.size() != 2 ) return;
   susy::wh::Chan ch = getChan(leps);
   const Lepton* l0 = leps[0];
   const Lepton* l1 = leps[1];
+  const size_t &ri = regionIndex;
   assert(l0);
   assert(l1);
   #define FILL(h, var)					\
     do{								\
-      float max   = h[ch][PR][sys]->GetXaxis()->GetXmax();	\
+      float max   = h[ch][ri][sys]->GetXaxis()->GetXmax();	\
       float xfill = var > max ? max - 1e-4 : var;		\
-      h[ch][PR][sys]->Fill(xfill,weight);			\
-      h[Ch_all][PR][sys]->Fill(xfill,weight);			\
+      h[ch][ri][sys]->Fill(xfill,weight);			\
+      h[Ch_all][ri][sys]->Fill(xfill,weight);			\
     }while(0)
 
   #define FILL2(h, varx, vary)						\
     do{									\
-      float maxx   = h[ch][PR][sys]->GetXaxis()->GetXmax();	\
+      float maxx   = h[ch][ri][sys]->GetXaxis()->GetXmax();	\
       float xfill = varx > maxx ? maxx - 1e-4 : varx;		\
-      float maxy   = h[ch][PR][sys]->GetYaxis()->GetXmax();	\
+      float maxy   = h[ch][ri][sys]->GetYaxis()->GetXmax();	\
       float yfill = vary > maxy ? maxy - 1e-4 : vary;		\
-      h[ch][PR][sys]->Fill(xfill,yfill,weight);			\
-      h[Ch_all][PR][sys]->Fill(xfill,yfill,weight);			\
+      h[ch][ri][sys]->Fill(xfill,yfill,weight);			\
+      h[Ch_all][ri][sys]->Fill(xfill,yfill,weight);			\
     }while(0)
 
   const TLorentzVector mlv = met->lv();
@@ -332,8 +318,8 @@ void SusyPlotter::initHistos()
   TH1::SetDefaultSumw2(true);
   m_histFile->cd();
   //m_histFile->mkdir( sysNames[sys].c_str() ) -> cd();
-  for(uint iPR=0; iPR<PR_N; ++iPR){   // for(Plot Region)
-    string PR = PRNames[iPR];
+  for(size_t iPR=0; iPR<swh::kNumberOfPlotRegions; ++iPR){   // for(Plot Region)
+      string PR(swh::region2str(swh::PlotRegions[iPR]));
     for(uint iCh=0; iCh<susy::wh::Ch_N; ++iCh){ // for(lepton channel)
       string chan = chanNames[iCh];
       for(uint iSys=0; iSys<m_systs.size(); ++iSys){
