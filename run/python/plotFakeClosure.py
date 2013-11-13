@@ -53,7 +53,7 @@ def main() :
     allOptions = requiredOptions + otherOptions
     def optIsNotSpecified(o) : return not hasattr(opts, o) or getattr(opts,o) is None
     if any(optIsNotSpecified(o) for o in requiredOptions) : parser.error('Missing required option')
-    tag = opts.tag
+    tag           = opts.tag.strip('_')
     inputFakeFile = opts.input_fake
     inputDirname  = opts.input_dir
     outputDir     = opts.output_dir
@@ -98,9 +98,8 @@ def susyplotSamples() : return [dataSample()] + mcSamples()
 def getInputFiles(inputDirname, tag, verbose=False) :
     print "getInputFiles ~duplicated with buildWeightedMatrix.py; refactor"
     inDir = inputDirname
-    tag = tag if tag.startswith('_') else '_'+tag
     samples = susyplotSamples()
-    files = dict(zip(samples, [r.TFile.Open(inDir+'/'+s+tag+'.root') for s in samples]))
+    files = dict(zip(samples, [r.TFile.Open(inDir+'/'+s+'_'+tag+'.root') for s in samples]))
     if verbose : print "getInputFiles('%s'):\n\t%s"%(inputDirname, '\n\t'.join("%s : %s"%(k, f.GetName()) for k, f in files.iteritems()))
     return files
 def xaxisLabel(varname) :
