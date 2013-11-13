@@ -3,6 +3,7 @@
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyTest0/utils.h"
 #include "SusyTest0/criteria.h"
+#include "SusyTest0/SusySelectionMatt.h"
 
 #include <iomanip>
 #include <sstream>      // std::ostringstream
@@ -71,24 +72,20 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   if(!ssf.passLpt()) return false;
   for(uint s = 0; s<m_systs.size(); ++s){
     smm::SYSTEMATIC sys = static_cast<smm::SYSTEMATIC>(m_systs.at(s));
-    double w_CR8lpt   (getFakeWeight(l,sf::CR_CR8lpt,    metRel,sys));
-    double w_CR8ee    (getFakeWeight(l,sf::CR_CR8ee,     metRel,sys));
-    double w_CR8mm    (getFakeWeight(l,sf::CR_CR8mm,     metRel,sys));
-    double w_CR8mmMtww(getFakeWeight(l,sf::CR_CR8mmMtww, metRel,sys));
-    double w_CR8mmHt  (getFakeWeight(l,sf::CR_CR8mmHt,   metRel,sys));
-    double w_SRWHSS   (getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys));
-
-    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, w_CR8lpt,    PR_CR8lpt,    sys);
-    if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, w_CR8ee,     PR_CR8ee,     sys);
+    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
+    if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8ee,     metRel,sys), PR_CR8ee,     sys);
     if(isMm && ssf.lepPt
-            && passMinMet   ) fillHistos(ncl, j, m, w_CR8mm,     PR_CR8mm,     sys);
-    if(isMm && ssf.mtllmet  ) fillHistos(ncl, j, m, w_CR8mmMtww, PR_CR8mmMtww, sys);
-    if(isMm && ssf.ht       ) fillHistos(ncl, j, m, w_CR8mmHt,   PR_CR8mmHt,   sys);
-    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, w_SRWHSS,    PR_CR8lpt,    sys);
-    if(isOf && ssf.lepPt    ) fillHistos(ncl, j, m, w_SRWHSS,    PR_CR9lpt,    sys);
-    if(isSf && ssf.passAll()) fillHistos(ncl, j, m, w_SRWHSS,    PR_SR8,       sys);
-    if(isOf && ssf.passAll()) fillHistos(ncl, j, m, w_SRWHSS,    PR_SR9,       sys);
-
+            && passMinMet   ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mm,     metRel,sys), PR_CR8mm,     sys);
+    if(isMm && ssf.mtllmet  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mmMtww, metRel,sys), PR_CR8mmMtww, sys);
+    if(isMm && ssf.ht       ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mmHt,   metRel,sys), PR_CR8mmHt,   sys);
+    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_CR8lpt,    sys);
+    if(isOf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_CR9lpt,    sys);
+    if(isSf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_SR8,       sys);
+    if(isOf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_SR9,       sys);
+    bool passEwkSs     (SusySelectionMatt::passEwkSs     (ncl,j,m));
+    bool passEwkSsLoose(SusySelectionMatt::passEwkSsLoose(ncl,j,m));
+    if(passEwkSs)      fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwk,     metRel,sys), PR_SsEwk,     sys);
+    if(passEwkSsLoose) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwkLoose,metRel,sys), PR_SsEwkLoose,sys);
   } // end for(s)
   return ssf.passAll();
 }
@@ -109,7 +106,6 @@ bool MatrixPrediction::bookFakeHisto()
   m_histFile->cd();  // Histogram file from SusyPlotter
   for(uint iPR=0; iPR<kNumberOfPlotRegions; ++iPR){ // Plot Region
       string PR = swh::region2str(PlotRegions[iPR]);
-      cout<<" pr : "<<PR<<endl;
     for(uint iCh=0; iCh<Ch_N; ++iCh){ // lepton channel
       string chan = chanNames[iCh];
       for(uint iMP=0; iMP<MP_N; ++iMP){  // matrix pairs

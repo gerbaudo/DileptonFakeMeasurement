@@ -7,6 +7,7 @@
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyTest0/criteria.h"
 #include "SusyMatrixMethod/DiLeptonMatrixMethod.h"
+#include "SusyTest0/SusySelectionMatt.h"
 
 using namespace std;
 using namespace Susy;
@@ -117,6 +118,10 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       swh::Region pr = (sameFlav ? swh::PR_SR8    : swh::PR_SR9);
       fillHistos(ncl, j, m, weight, pr, sys);
   }
+  bool passEwkSs     (SusySelectionMatt::passEwkSs     (ncl,j,m));
+  bool passEwkSsLoose(SusySelectionMatt::passEwkSsLoose(ncl,j,m));
+  if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     sys);
+  if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,sys);
   return kTRUE;
 }
 //-----------------------------------------

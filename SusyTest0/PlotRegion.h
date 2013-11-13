@@ -11,6 +11,8 @@ enum Region{
     PR_CR8lpt, PR_CR8ee, // looser regions for fake control plots, same for SR9lpt
     PR_CR8mm, PR_CR8mmMtww, PR_CR8mmHt,
     PR_SR8, PR_SR9base, PR_CR9lpt, PR_SR9,
+    PR_SsEwk,
+    PR_SsEwkLoose,
 };
 
 const Region PlotRegions[] = {
@@ -18,6 +20,7 @@ const Region PlotRegions[] = {
     PR_CR8lpt, PR_CR8ee,
     PR_CR8mm, PR_CR8mmMtww, PR_CR8mmHt,
     PR_SR8, PR_SR9base, PR_CR9lpt, PR_SR9,
+    PR_SsEwk, PR_SsEwkLoose,
 };
 const size_t kNumberOfPlotRegions = sizeof(PlotRegions) / sizeof(PlotRegions[0]);
 const string RegionNames[] =
@@ -32,6 +35,8 @@ const string RegionNames[] =
   ,"sr9base"
   ,"cr9lpt"
   ,"sr9"
+  ,"srSsEwk"
+  ,"crSsEwkLoose"
 };
 
 inline std::string region2str(const Region &r) {return RegionNames[r];}
