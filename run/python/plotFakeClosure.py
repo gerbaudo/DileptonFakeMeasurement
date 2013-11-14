@@ -26,6 +26,7 @@ from rootUtils import (referenceLine
                        )
 from utils import (enumFromHeader
                    ,json_write
+                   ,mkdirIfNeeded
                    ,rmIfExists
                    )
 from SampleUtils import colors
@@ -64,6 +65,7 @@ def main() :
     inputFiles = getInputFiles(inputDirname, tag, verbose)
     inputFiles[fakeSample()] = r.TFile.Open(inputFakeFile)
     assert all(f for f in inputFiles.values()), ("missing inputs: \n%s"%'\n'.join(["%s : %s"%kv for kv in inputFiles.iteritems()]))
+    mkdirIfNeeded(outputDir)
 
     for region in ['cr8lptee', 'cr8lptmm', 'cr9lpt', 'cr8lptmmMtww', 'cr8lptmmHt'] :
         for channel in ['ee', 'em', 'mm'] :
