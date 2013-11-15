@@ -19,7 +19,6 @@
 #include "SusyNtuple/SusyNtTools.h"
 #include "SusyNtuple/SusyDefs.h"
 
-#include "SUSYTools/SUSYObjDef.h"
 #include "SusyXSReader/XSReader.h"
 #include "SusyTest0/ProgressPrinter.h"
 #include "SusyTest0/SsPassFlags.h"

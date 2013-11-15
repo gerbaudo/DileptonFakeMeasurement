@@ -7,7 +7,7 @@ PACKAGE_PRELOAD  = Tree
 PACKAGE_CXXFLAGS = 
 PACKAGE_LDFLAGS  = 
 PACKAGE_BINFLAGS = -lCintex -lReflex -lPyROOT -lXMLParser -lEG
-PACKAGE_DEP      = SusyNtuple DGTriggerReweight LeptonTruthTools SUSYTools SusyXSReader SusyMatrixMethod ChargeFlip
+PACKAGE_DEP      = SusyNtuple DGTriggerReweight LeptonTruthTools SusyXSReader SusyMatrixMethod ChargeFlip
 PACKAGE_NOOPT    = 0
 
 include $(ROOTCOREDIR)/Makefile-common

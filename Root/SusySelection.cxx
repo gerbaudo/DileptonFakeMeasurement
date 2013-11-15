@@ -7,7 +7,6 @@
 #include "SusyTest0/SusySelection.h"
 #include "SusyTest0/SusyPlotter.h"
 
-#include "LeptonTruthTools/RecoTruthMatch.h" // provides RecoTruthMatch::
 #include "ChargeFlip/chargeFlip.h"
 #include "SusyTest0/criteria.h"
 #include "SusyTest0/kinematic.h"
