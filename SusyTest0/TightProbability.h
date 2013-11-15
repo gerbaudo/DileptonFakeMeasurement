@@ -1,10 +1,13 @@
 #ifndef TIGHTPROBABILITY_H
 #define TIGHTPROBABILITY_H
 
+#include "SusyTest0/SusySelection.h"
+
+#include "TH1F.h"
+
 #include <string>
 #include <vector>
 
-#include "SusyTest0/SusySelection.h"
 
 
 class TDirectory;
