@@ -34,5 +34,7 @@ cd SusyNtuple; patch <   ../SusyTest0/doc/SusyNtuple.patch2013-09-11 ; cd -
 echo "check whether the patch was applied correctly..."
 echo "you should switch to the trunk"
 
+cd RootCore ; ./configure ; cd ..
+source ./RootCore/scripts/setup.sh
 ./RootCore/scripts/find_packages.sh
 ./RootCore/scripts/build.sh
