@@ -29,7 +29,6 @@ std::string SusySelection::WeightComponents::str() const
 }
 //-----------------------------------------
 SusySelection::SusySelection() :
-  m_susyObj(NULL),
   m_xsReader(NULL),
   m_tupleMaker("",""),
   m_writeTuple(false),

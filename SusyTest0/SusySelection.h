@@ -175,7 +175,6 @@ class SusySelection : public SusyNtAna
 
   protected:
 
-    SUSYObjDef* m_susyObj;            // susy obj
     XSReader* m_xsReader;
     susy::wh::TupleMaker m_tupleMaker;
     bool m_writeTuple;
