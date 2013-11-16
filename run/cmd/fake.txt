@@ -57,3 +57,6 @@ python/plotFakeClosure.py \
  --input_dir  out/susyplot/merged/ \
  --input_fake out/fakepred/merged/data_${TAG}.root \
  --output_dir out/fakepred/merged/fake_closure_plots_${TAG}
+
+# to make the closure plots you might need the susyplot histograms
+./python/submitJobs.py --susyplot -o  -t ${TAG} -e 'wA_noslep'
