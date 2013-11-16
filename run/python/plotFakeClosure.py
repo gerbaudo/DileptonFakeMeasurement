@@ -211,12 +211,17 @@ def drawTop(pad, hists, err_band, label=('','')) :
     leg.SetBorderSize(0)
     leg.AddEntry(h_data, dataSample(), 'P')
     leg.AddEntry(h_bkg, 'sm', 'L')
+    counters = dict()
+    if 'nbjets' in h_data.GetName() :
+        counters['data'] = h_data.Integral()
+        counters['sm'] = h_bkg.Integral()
     for s in bkSamples() :
         h = hists[s]
         h.SetMarkerSize(0)
         h.SetFillColor(colors[s])
         h.SetLineColor(h.GetFillColor())
         h.SetDrawOption('bar')
+        if 'nbjets' in h.GetName() : counters[s] = h.Integral()
         stack.Add(h)
     for s in bkSamples()[::-1] : leg.AddEntry(hists[s], s, 'F') # stack goes b-t, legend goes t-b
     h_data.SetMarkerStyle(r.kFullDotLarge)
@@ -241,6 +246,11 @@ def drawTop(pad, hists, err_band, label=('','')) :
     yAx.SetLabelSize(textScaleUp*yAx.GetLabelSize())
     pad._graphical_objects = [stack, h_data, h_bkg, err_band, leg, tex] + [h for h in stack.GetStack()]
     pad.Update()
+    if 'nbjets' in h_data.GetName() :
+        print h_data.GetName()
+        print " ".join(["%12s"%k for k,v in sorted(counters.items())])
+        print " ".join(["%12s"%("%.2f"%v) for k,v in sorted(counters.items())])
+
 
 def getXrange(h) :
     nbins = h.GetNbinsX()
