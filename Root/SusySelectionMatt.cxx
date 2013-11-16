@@ -236,7 +236,7 @@ bool SusySelectionMatt::passEwkSs(const LeptonVector& leptons, const JetVector& 
     return (noBjets && noFwJets && someCentralJets
             && (getMetRel(met, leptons, jets)>50.0)
             && sameSign(leptons)
-            && (ll.M()<60.0) && (ll.Pt()<20.) && (fabs(l0.DeltaPhi(l1) >= 1.3)));
+            && (ll.M()<60.0) && (ll.Pt()<20.) && (fabs(l0.DeltaPhi(l1)) >= 1.3));
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelectionMatt::passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met)
