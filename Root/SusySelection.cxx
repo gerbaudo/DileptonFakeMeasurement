@@ -84,9 +84,10 @@ Bool_t SusySelection::Process(Long64_t entry)
           cout<<"calling TupleMaker::fill"<<endl;
           double weight(m_weightComponents.product());
           unsigned int run(nt.evt()->run), event(nt.evt()->event);
+          LeptonVector dummyLowPtLeps; // DG : placeholder for low-pt, below-baseline leptons
           const Lepton *l0 = m_signalLeptons[0];
-          const Lepton *l1 = m_signalLeptons[0];
-          m_tupleMaker.fill(weight, run, event, *l0, *l1, m_signalLeptons, m_signalJets2Lep);
+          const Lepton *l1 = m_signalLeptons[1];
+          m_tupleMaker.fill(weight, run, event, *l0, *l1, dummyLowPtLeps, m_signalJets2Lep);
       }
   }
   return kTRUE;
