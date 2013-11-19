@@ -82,9 +82,11 @@ Bool_t SusySelection::Process(Long64_t entry)
               m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip).metrel) {
       if(m_writeTuple) {
           cout<<"calling TupleMaker::fill"<<endl;
+          double weight(m_weightComponents.product());
+          unsigned int run(nt.evt()->run), event(nt.evt()->event);
           const Lepton *l0 = m_signalLeptons[0];
           const Lepton *l1 = m_signalLeptons[0];
-          m_tupleMaker.fill(*l0, *l1, m_signalLeptons, m_signalJets2Lep);
+          m_tupleMaker.fill(weight, run, event, *l0, *l1, m_signalLeptons, m_signalJets2Lep);
       }
   }
   return kTRUE;
