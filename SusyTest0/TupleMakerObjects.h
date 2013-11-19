@@ -34,6 +34,11 @@ struct EventParameters {
     unsigned int eventNumber;
     unsigned int runNumber;
     EventParameters() : weight(0), eventNumber(0), runNumber(0) {}
+#ifndef __CINT__
+    EventParameters& setWeight(const double &w) { weight=w; return *this; }
+    EventParameters& setEvent(const unsigned int &e) { eventNumber=e; return *this; }
+    EventParameters& setRun(const unsigned int &r) { runNumber=r; return *this; }
+#endif
 };
 
 } // namespace wh
