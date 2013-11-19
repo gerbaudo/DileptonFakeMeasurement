@@ -118,6 +118,8 @@ class SusySelection : public SusyNtAna
     bool passMuonRelIso(const LeptonVector &leptons, float maxVal);
     void setUseXsReader(bool val){ m_useXsReader = val; };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
+    void setWriteNtuple(bool val) { m_writeTuple = val; };
+    void setTupleFile(const std::string &name) { m_writeTuple = true; m_outTupleFile = name; };
     //! increment the counters for the all event weight types
     void increment(float counters[], const WeightComponents &wc);
     float computeChargeFlipProb(LeptonVector &leptons, Met &met,
@@ -140,6 +142,7 @@ class SusySelection : public SusyNtAna
     XSReader* m_xsReader;
     susy::wh::TupleMaker m_tupleMaker;
     bool m_writeTuple;
+    std::string m_outTupleFile;
 
     DilTrigLogic*       m_trigObj;      // My trigger logic class
     bool                m_useMCTrig;    // Use MC Trigger, i.e. toggle the matching in DilTrigLogic::passDil*()

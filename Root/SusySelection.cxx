@@ -10,6 +10,7 @@
 #include "LeptonTruthTools/RecoTruthMatch.h" // provides RecoTruthMatch::
 #include "ChargeFlip/chargeFlip.h"
 #include "SusyTest0/criteria.h"
+#include "SusyTest0/utils.h"
 
 using namespace std;
 using namespace Susy;
@@ -31,6 +32,7 @@ SusySelection::SusySelection() :
   m_xsReader(NULL),
   m_tupleMaker("",""),
   m_writeTuple(false),
+  m_outTupleFile(""),
   m_trigObj(NULL),
   m_useMCTrig(false),
   m_w(1.0),
@@ -42,7 +44,6 @@ SusySelection::SusySelection() :
   setAnaType(Ana_2LepWH);
   setSelectTaus(true);
   initChargeFlipTool();
-  m_writeTuple = true; // tmp DG dev
 }
 void SusySelection::Begin(TTree* /*tree*/)
 {
@@ -58,10 +59,12 @@ void SusySelection::Begin(TTree* /*tree*/)
     m_xsReader->LoadXSInfo();
   } // end if(m_useXsReader)
   if(m_writeTuple) {
-      cout<<"todo : check names have been specified"<<endl;
-      cout<<(m_tupleMaker.init("foo.root", "tree") ?
-             "initialized ntuple file foo.root" :
-             "cannot initialize ntuple file")<<endl;
+      if(endswith(m_outTupleFile, ".root") && m_tupleMaker.init(m_outTupleFile, "SusySel"))
+          cout<<"initialized ntuple file "<<m_outTupleFile<<endl;
+      else {
+          cout<<"cannot initialize ntuple file '"<<m_outTupleFile<<"'"<<endl;
+          m_writeTuple = false;
+      }
   }
 }
 //-----------------------------------------
@@ -81,7 +84,6 @@ Bool_t SusySelection::Process(Long64_t entry)
   if(passSrSs(WH_SRSS1,
               m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip).metrel) {
       if(m_writeTuple) {
-          cout<<"calling TupleMaker::fill"<<endl;
           double weight(m_weightComponents.product());
           unsigned int run(nt.evt()->run), event(nt.evt()->event);
           LeptonVector dummyLowPtLeps; // DG : placeholder for low-pt, below-baseline leptons
