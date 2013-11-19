@@ -23,10 +23,11 @@ void usage(const char *exeName) {
       <<"\t"<<"-k [--num-skip]    nSkip (default 0)"     <<endl
       <<"\t"<<"-i [--input]       (file, list, or dir)"  <<endl
     //<<"\t"<<"-o [--output]      samplename"            <<endl // DG: should be there
-      <<"\t"<<"-s [--sample]      output file"           <<endl
-      <<"\t"<<"-d [--debug]     : debug (>0 print stuff)"<<endl
-      <<"\t"<<"-h [--help]      : print help"            <<endl
-      <<"\t"<<"--WH-sample      : xsec from SusyXSReader"<<endl
+      <<"\t"<<"-s [--sample]"                            <<endl
+      <<"\t"<<"-t [--tuple-out] fname.root (out ntuple file)"<<endl
+      <<"\t"<<"-d [--debug]       : debug (>0 print stuff)"<<endl
+      <<"\t"<<"-h [--help]        : print help"            <<endl
+      <<"\t"<<"--WH-sample        : xsec from SusyXSReader"<<endl
       <<endl;
 }
 
@@ -46,6 +47,7 @@ int main(int argc, char** argv)
   string input;
   string output;
   bool useSusyXSReader = false;
+  bool writeTuple = false;
 
   int optind(1);
   while ((optind < argc)) {
@@ -59,8 +61,8 @@ int main(int argc, char** argv)
     else if(sw=="-k"||sw=="--num-skip"   ) { nSkip = atoi(argv[++optind]); }
     else if(sw=="-d"||sw=="--debug"      ) { dbg = atoi(argv[++optind]); }
     else if(sw=="-i"||sw=="--input"      ) { input = argv[++optind]; }
-    //else if(sw=="-o"||sw=="--output"     ) { output = argv[++optind]; }
     else if(sw=="-s"||sw=="--sample"     ) { sample = argv[++optind]; }
+    else if(sw=="-t"||sw=="--tuple-out")   { writeTuple = true; output = argv[++optind]; }
     else if(sw=="-h"||sw=="--help"       ) { usage(argv[0]); return 0; }
     else if(sw=="--WH-sample"            ) { useSusyXSReader = true; }
     else cout<<"Unknown switch "<<sw<<endl;
@@ -68,12 +70,13 @@ int main(int argc, char** argv)
   } // end while(optind<argc)
 
   cout<<"flags:"             <<endl
-      <<"  sample  "<<sample <<endl
-      <<"  nEvt    "<<nEvt   <<endl
-      <<"  nSkip   "<<nSkip  <<endl
-      <<"  dbg     "<<dbg    <<endl
-      <<"  input   "<<input  <<endl
-      <<"  output  "<<output <<endl
+      <<"  sample     "<<sample <<endl
+      <<"  nEvt       "<<nEvt   <<endl
+      <<"  nSkip      "<<nSkip  <<endl
+      <<"  dbg        "<<dbg    <<endl
+      <<"  input      "<<input  <<endl
+      <<"  output     "<<output <<endl
+      <<"  writeTuple "<<writeTuple <<endl
       <<endl;
 
   TChain* chain = new TChain("susyNt");
@@ -89,6 +92,7 @@ int main(int argc, char** argv)
   susyAna->setDebug(dbg);
   susyAna->setSampleName(sample);
   susyAna->buildSumwMap(chain);
+  if(writeTuple) susyAna->setTupleFile(output);
   nEvt = (nEvt>0 ? nEvt : nEntries);
   cout<<"Total entries:   "<<nEntries<<endl
       <<"Process entries: "<<nEvt<<endl;
