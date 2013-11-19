@@ -41,11 +41,13 @@ FourMom lepton2FourMom (const Lepton *l)
 }
 FourMom jet2FourMom (const Jet *j) { return (j ? FourMom().setJet(*j) : FourMom()); }
 //----------------------------------------------------------
-bool TupleMaker::fill(const Lepton &l0, const Lepton &l1,
+bool TupleMaker::fill(const double &weight, const unsigned int &run, const unsigned int event,
+                      const Lepton &l0, const Lepton &l1,
                       const LeptonVector &otherLeptons, const JetVector &jets)
 {
     bool someBytesWritten(false);
     if(tree_) {
+        eventPars_.setWeight(weight).setRun(run).setEvent(event);
         l0.isMu() ? l0_.setMu(l0) : l0_.setEl(l0);
         l1.isMu() ? l1_.setMu(l1) : l1_.setEl(l1);
         jets_.clear();

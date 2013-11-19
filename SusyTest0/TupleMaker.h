@@ -45,7 +45,8 @@ public:
     ~TupleMaker();
     bool init(const std::string &outFilename, const std::string &treename);
     bool close();
-    bool fill(const Susy::Lepton &l0, const Susy::Lepton &l1,
+    bool fill(const double &weight, const unsigned int &run, const unsigned int event,
+              const Susy::Lepton &l0, const Susy::Lepton &l1,
               const LeptonVector &otherLeptons, const JetVector &jets);
 private: // rule of three 
     TupleMaker(const TupleMaker&);
