@@ -47,7 +47,7 @@ def computeMt2j(l0, l1, j0, j1, met, zeroMass=False, lspMass=0.0) :
 def computeMljj(l0, l1, j0, j1) :
     "Todo: extened combinatorics to N_j>2; good enough for now (we have few cases with >=3j)"
     jj = j0+j1
-    dr0, dr1 = jj.DeltaR(l0), jj.DeltaR(j1)
+    dr0, dr1 = jj.DeltaR(l0), jj.DeltaR(l1)
     return (jj+l0).M() if dr0<dr1 else (jj+l1).M()
 
 hs_mt2j = dict()
