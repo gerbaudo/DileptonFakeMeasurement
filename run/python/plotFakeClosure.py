@@ -67,7 +67,7 @@ def main() :
     assert all(f for f in inputFiles.values()), ("missing inputs: \n%s"%'\n'.join(["%s : %s"%kv for kv in inputFiles.iteritems()]))
     mkdirIfNeeded(outputDir)
 
-    for region in ['cr8lptee', 'cr8lptmm', 'cr9lpt', 'cr8lptmmMtww', 'cr8lptmmHt', 'crSsEwkLoose'] :
+    for region in ['cr8lptee', 'cr8lptmm', 'cr9lpt', 'sr8', 'sr9', 'srSsEwk', 'crSsEwkLoose'] :
         for channel in ['ee', 'em', 'mm'] :
             for varname in ['l0_pt', 'l1_pt', 'll_M', 'metrel', 'met', 'njets', 'nbjets'] :
                 histo_basename = region+'_'+channel+'_'+varname
@@ -200,7 +200,10 @@ def buildErrBandRatioGraph(errband_graph) :
         gr.SetPointEYlow (p, ey_lo)
         gr.SetPointEYhigh(p, ey_hi)
     return gr
-
+def integralAndError(histo) :
+    error = r.Double(0.0)
+    integral = histo.IntegralAndError(0, histo.GetNbinsX(), error)
+    return integral, float(error)
 def drawTop(pad, hists, err_band, label=('','')) :
     pad.Draw()
     pad.cd()
@@ -213,15 +216,15 @@ def drawTop(pad, hists, err_band, label=('','')) :
     leg.AddEntry(h_bkg, 'sm', 'L')
     counters = dict()
     if 'nbjets' in h_data.GetName() :
-        counters['data'] = h_data.Integral()
-        counters['sm'] = h_bkg.Integral()
+        counters['data'] = integralAndError(h_data)
+        counters['sm'] = integralAndError(h_bkg)
     for s in bkSamples() :
         h = hists[s]
         h.SetMarkerSize(0)
         h.SetFillColor(colors[s])
         h.SetLineColor(h.GetFillColor())
         h.SetDrawOption('bar')
-        if 'nbjets' in h.GetName() : counters[s] = h.Integral()
+        if 'nbjets' in h.GetName() : counters[s] = integralAndError(h)
         stack.Add(h)
     for s in bkSamples()[::-1] : leg.AddEntry(hists[s], s, 'F') # stack goes b-t, legend goes t-b
     h_data.SetMarkerStyle(r.kFullDotLarge)
@@ -248,8 +251,8 @@ def drawTop(pad, hists, err_band, label=('','')) :
     pad.Update()
     if 'nbjets' in h_data.GetName() :
         print h_data.GetName()
-        print " ".join(["%12s"%k for k,v in sorted(counters.items())])
-        print " ".join(["%12s"%("%.2f"%v) for k,v in sorted(counters.items())])
+        print " | ".join(["%12s"%k for k,v in sorted(counters.items())])
+        print " | ".join(["%12s"%("%.1f +/- %.1f"%v) for k,v in sorted(counters.items())])
 
 
 def getXrange(h) :
