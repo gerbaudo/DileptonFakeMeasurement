@@ -14,6 +14,7 @@ namespace wh
 
   using Susy::Lepton;
   using Susy::Jet;
+  using Susy::Met;
 struct FourMom {
     double px, py, pz, E;
     bool isMu, isEl, isJet;
@@ -26,6 +27,7 @@ struct FourMom {
     FourMom& setMu(const Lepton &l) { isMu=true; isEl = isJet = false; return set4mom(l); }
     FourMom& setEl(const Lepton &l) { isEl=true; isMu = isJet = false; return set4mom(l); }
     FourMom& setJet(const Jet &j)   { isJet=true; isMu = isEl = false; return set4mom(j); }
+    FourMom& setMet(const Met &m)   { isJet=isMu=isEl=false; px=m.lv().Px(); py=m.lv().Py(); E=m.lv().E(); return *this; }
 #endif
 };
 

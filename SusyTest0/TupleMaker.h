@@ -13,6 +13,7 @@ namespace Susy
 {
 class Lepton;
 class Jet;
+class Met;
 }
 // LeptonVector is defined in SusyDefs.h, but that's a huge include just for one def...refactor
 typedef std::vector<Susy::Lepton*> LeptonVector;
@@ -45,8 +46,8 @@ public:
     ~TupleMaker();
     bool init(const std::string &outFilename, const std::string &treename);
     bool close();
-    bool fill(const double &weight, const unsigned int &run, const unsigned int event,
-              const Susy::Lepton &l0, const Susy::Lepton &l1,
+    bool fill(const double weight, const unsigned int run, const unsigned int event,
+              const Susy::Lepton &l0, const Susy::Lepton &l1, const Susy::Met &met,
               const LeptonVector &otherLeptons, const JetVector &jets);
 private: // rule of three 
     TupleMaker(const TupleMaker&);

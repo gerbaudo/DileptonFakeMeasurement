@@ -89,7 +89,7 @@ Bool_t SusySelection::Process(Long64_t entry)
           LeptonVector dummyLowPtLeps; // DG : placeholder for low-pt, below-baseline leptons
           const Lepton *l0 = m_signalLeptons[0];
           const Lepton *l1 = m_signalLeptons[1];
-          m_tupleMaker.fill(weight, run, event, *l0, *l1, dummyLowPtLeps, m_signalJets2Lep);
+          m_tupleMaker.fill(weight, run, event, *l0, *l1, *m_met, dummyLowPtLeps, m_signalJets2Lep);
       }
   }
   return kTRUE;
