@@ -71,14 +71,20 @@ for sample, filename in filenames.iteritems() :
         mt2_jb = computeMt2j(l0, l1, j0, j1, met, zeroMass=True)
         mt2_jc = computeMt2j(l0, l1, j0, j1, met, lspMass=100.0)
         mljj = computeMljj(l0, l1, j0, j1)
-        weight, evtN = pars.weight, pars.eventNumber
-        if iEvent<5 :
-            print evtN,') mt2_j(m!=0): ',mt2_ja,', mt2_j(m==0): ',mt2_jb,', mt2_j(lsp=100): ',mt2_jc
+        weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
+        if iEvent<5 or sample=='diboson':
+            print 'evt ',evtN,') mt2_j(m!=0): ',mt2_ja,', mt2_j(m==0): ',mt2_jb,', mt2_j(lsp=100): ',mt2_jc,\
+                  ' met (%.2f, %.2f)'%(met.Px(), met.Py()),\
+                  ' l0 (%.2f, %2.f, %.2f)'%(l0.Px(), l0.Py(), l0.M()),\
+                  ' l1 (%.2f, %2.f, %.2f)'%(l1.Px(), l1.Py(), l1.M()),\
+                  ' j0 (%.2f, %2.f, %.2f)'%(j0.Px(), j0.Py(), j0.M()),\
+                  ' j1 (%.2f, %2.f, %.2f)'%(j1.Px(), j1.Py(), j1.M())
         iEvent += 1
         h_mt2j.Fill(mt2_ja, weight)
         h_mljj.Fill(mljj, weight)
     hs_mt2j[sample] = h_mt2j
     hs_mljj[sample] = h_mljj
+    if sample=='diboson' : print "diboson entries ",h_mt2j.GetEntries()
 
 
 def plot(histos, var) :
