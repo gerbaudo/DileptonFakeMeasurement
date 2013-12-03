@@ -86,10 +86,11 @@ Bool_t SusySelection::Process(Long64_t entry)
       if(m_writeTuple) {
           double weight(m_weightComponents.product());
           unsigned int run(nt.evt()->run), event(nt.evt()->event);
-          LeptonVector dummyLowPtLeps; // DG : placeholder for low-pt, below-baseline leptons
+          LeptonVector anyLep(getAnyElOrMu(nt));
+          LeptonVector lowPtLep(subtract_vector(anyLep, m_baseLeptons));
           const Lepton *l0 = m_signalLeptons[0];
           const Lepton *l1 = m_signalLeptons[1];
-          m_tupleMaker.fill(weight, run, event, *l0, *l1, *m_met, dummyLowPtLeps, m_signalJets2Lep);
+          m_tupleMaker.fill(weight, run, event, *l0, *l1, *m_met, lowPtLep, m_signalJets2Lep);
       }
   }
   return kTRUE;
@@ -669,3 +670,21 @@ void SusySelection::initChargeFlipTool()
   if(m_dbg) m_chargeFlip->printSettings();
 }
 //-----------------------------------------
+LeptonVector SusySelection::getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/)
+{
+    // DG 2013-12-02:
+    // todo1 : re-implement with std algo
+    // todo2 : re-implement with syst
+    LeptonVector leptons;
+    for(uint ie=0; ie<susyNt.ele()->size(); ++ie){
+        if(Electron* e = & susyNt.ele()->at(ie)){ //e->setState(sys);
+            leptons.push_back(static_cast<Lepton*>(e));
+        }
+    }
+    for(uint im=0; im<susyNt.muo()->size(); ++im){
+        if(Muon* m = & susyNt.muo()->at(im)){ //m->setState(sys);
+            leptons.push_back(static_cast<Lepton*>(m));
+        }
+    }
+    return leptons;
+}

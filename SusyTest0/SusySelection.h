@@ -124,6 +124,8 @@ class SusySelection : public SusyNtAna
     void increment(float counters[], const WeightComponents &wc);
     float computeChargeFlipProb(LeptonVector &leptons, Met &met,
                                 uint systematic, bool update4mom);
+    //! any electron or muon, before pt cuts, before overlap removal
+    static vl_t getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/);
  protected:
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
     float computeEventWeightXsFromReader(float lumi);
