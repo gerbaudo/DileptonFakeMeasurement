@@ -19,9 +19,10 @@ tlv = r.TLorentzVector
 #r.gInterpreter.GenerateDictionary('vector< vector< int > >', 'vector')
 
 treename = 'SusySel'
+tag = 'Dec_02'
 basedir = '/gdata/atlas/gerbaudo/wh/Susy2013_Nt_01_04_dev/SusyTest0/run/out/susysel/merged/'
-samples = ['diboson', 'heavyflavor', 'ttbar', 'wjets', 'zjets']
-filenames = dict((s, glob.glob(basedir+'/'+s+'*root')) for s in samples)
+samples = ['diboson', 'heavyflavor', 'ttbar', 'wjets', 'zjets','WH_2Lep_3']
+filenames = dict((s, glob.glob(basedir+'/'+s+'*'+tag+'.root')) for s in samples)
 assert all(len(v)==1 for v in filenames.values()),"ambiguous filenames\n%s"%str(filenames)
 filenames = dict((s,v[0]) for s,v in filenames.iteritems())
 
@@ -93,10 +94,11 @@ def plot(histos, var) :
     pm = first(histos)
     pm.SetMaximum(1.1*max([h.GetMaximum() for h in histos.values()]))
     pm.Draw('axis')
-    markers = dict(zip(histos.keys(), [r.kPlus, r.kCircle, r.kMultiply, r.kOpenSquare, r.kOpenTriangleUp]))
+    markers = dict(zip(histos.keys(),
+                       [r.kPlus, r.kCircle, r.kMultiply, r.kOpenSquare, r.kOpenTriangleUp, r.kOpenTriangleDown]))
     for s,h in histos.iteritems() :
-        h.SetLineColor(colors[s])
-        h.SetMarkerColor(colors[s])
+        h.SetLineColor(colors[s] if s in colors else r.kBlack)
+        h.SetMarkerColor(h.GetLineColor())
         h.SetLineWidth(2*h.GetLineWidth())
         h.SetMarkerStyle(markers[s])
         h.Draw('same')
