@@ -244,7 +244,7 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   SsPassFlags whssFlags(computeWhssPass ? passWhSS(leptons,jets,met) : SsPassFlags());
   bool isEe(Ch_ee==getChan(leptons)), isMm(Ch_mm==getChan(leptons));
   switch(CR) {
-  case susy::fake::CR_SSInc        : passSR = sameSign(leptons);                  break;
+  case susy::fake::CR_SSInc        : passSR = susy::sameSign(leptons);            break;
   case susy::fake::CR_SRWHSS       : passSR =  whssFlags.metrel;                  break;
   case susy::fake::CR_CR8lpt       : passSR =  whssFlags.lepPt;                   break;
   case susy::fake::CR_CR8ee        : passSR = (whssFlags.lepPt   && isEe);        break;

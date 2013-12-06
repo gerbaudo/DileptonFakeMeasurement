@@ -56,8 +56,6 @@ class SusySelectionMatt : public SusyNtAna
     // Cut methods
     bool passHfor();
     bool passTrigger(const LeptonVector& leptons);
-    static bool sameSign(const LeptonVector& leptons);
-    static bool oppositeSign(const LeptonVector& leptons) { return !sameSign(leptons); }
     static bool sameFlavor(const LeptonVector& leptons);
 
     // Idendification methods

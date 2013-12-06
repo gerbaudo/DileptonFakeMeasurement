@@ -199,7 +199,7 @@ SsPassFlags SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVe
   // At some point try to unify SusySelection with SusySelectionMatt.
   SsPassFlags f;
   bool lsf(false), bsf(false); // compute trigw and btagw only when accepting the event
-  if(sameSign(leptons)) { increment(n_pass_CRWHSS2lss  [m_ET], lsf, bsf); f.sameSign=true;} else return f;
+  if(susy::sameSign(leptons)) { increment(n_pass_CRWHSS2lss  [m_ET], lsf, bsf); f.sameSign=true;} else return f;
   DiLepEvtType ll = m_ET = getDiLepEvtType(leptons);
   bool isee(ll==ET_ee), isem(ll==ET_em||ll==ET_me), ismm(ll==ET_mm);
   float ptL0Min  = 30;
@@ -235,7 +235,7 @@ bool SusySelectionMatt::passEwkSs(const LeptonVector& leptons, const JetVector& 
     TLorentzVector ll(l0+l1);
     return (noBjets && noFwJets && someCentralJets
             && (getMetRel(met, leptons, jets)>50.0)
-            && sameSign(leptons)
+            && susy::sameSign(leptons)
             && (ll.M()<60.0) && (ll.Pt()<20.) && (fabs(l0.DeltaPhi(l1)) >= 1.3));
 }
 /*--------------------------------------------------------------------------------*/
@@ -245,7 +245,7 @@ bool SusySelectionMatt::passEwkSsLoose(const LeptonVector& leptons, const JetVec
     bool noBjets(numberOfCBJets(jets)==0), noFwJets(numberOfFJets(jets)==0);
     bool someCentralJets(numberOfCLJets(jets)>0);
     return (noBjets && noFwJets && someCentralJets
-            && sameSign(leptons)
+            && susy::sameSign(leptons)
             && (getMetRel(met, leptons, jets)>40.0));
 }
 /*--------------------------------------------------------------------------------*/
@@ -268,12 +268,6 @@ bool SusySelectionMatt::passTrigger(const LeptonVector& leptons)
       return true;
   }
   return false;
-}
-/*--------------------------------------------------------------------------------*/
-bool SusySelectionMatt::sameSign(const LeptonVector& leptons)
-{
-  if( leptons.size() < 2 ) return false;
-  return leptons.at(0)->q * leptons.at(1)->q > 0;
 }
 /*--------------------------------------------------------------------------------*/
 bool SusySelectionMatt::sameFlavor(const LeptonVector& leptons)
