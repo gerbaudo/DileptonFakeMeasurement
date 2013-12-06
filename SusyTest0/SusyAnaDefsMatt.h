@@ -13,8 +13,6 @@
 // Lepton Types
 enum LeptonType            { LT_EL = 0,  LT_MU, LT_N };
 static string LTNames[] =  { "elec",     "muon"      };
-// Dilepton Types for iterative corrections
-enum DiLepPair             { DL_TT = 0, DL_TL, DL_LT, DL_LL, DL_ALL, DL_N };
 
 // Signal regions; these were used in FinalNewFake to determine the
 // signal regions where we want to compute the fake prediction.
