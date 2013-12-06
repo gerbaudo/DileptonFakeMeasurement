@@ -276,7 +276,7 @@ bool MeasureFakeRate2::passRealCR(const LeptonVector &leptons,
 
   // Same flavor dilepton
   if( leptons.size() != 2 )  return false;
-  if( !sameFlavor(leptons) ) return false;
+  if( !susy::sameFlavor(leptons) ) return false;
   // In Z window or side bands
   float mll = Mll(leptons[0],leptons[1]);
   if(CR == CR_Real)         { if( fabs(mll-91.2) > 10 ) return false; }

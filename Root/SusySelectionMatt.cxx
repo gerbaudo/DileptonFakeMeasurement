@@ -270,12 +270,6 @@ bool SusySelectionMatt::passTrigger(const LeptonVector& leptons)
   return false;
 }
 /*--------------------------------------------------------------------------------*/
-bool SusySelectionMatt::sameFlavor(const LeptonVector& leptons)
-{
-  if( leptons.size() < 2 ) return false;
-  return (leptons.at(0)->isMu() == leptons.at(1)->isMu());
-}
-/*--------------------------------------------------------------------------------*/
 bool SusySelectionMatt::isRealLepton(const Lepton* lep)
 {
   // Updated way of handling real and fake leptons using LeptonTruthTools
