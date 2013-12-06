@@ -1,10 +1,8 @@
 #include "SusyTest0/MeasureFakeRate2.h"
-#include "SusyTest0/SelectionRegions.h"
 #include "SusyTest0/criteria.h"
 #include "SusyTest0/FakeBinnings.h"
 #include "SusyTest0/DileptonChannel.h"
 
-using namespace susywh; // pull in SelectionRegions
 using namespace susy::fake;
 using namespace susy::wh;
 namespace sf = susy::fake;
@@ -28,14 +26,16 @@ const sf::Region signalRegions[] = {
   sf::CR_SsEwkLoose
 };
 const size_t nSignalRegions = sizeof(signalRegions)/sizeof(signalRegions[0]);
+const MeasureFakeRate2::LeptonType leptonTypes[] = {MeasureFakeRate2::kElectron, MeasureFakeRate2::kMuon};
+const size_t nLeptonTypes(sizeof(leptonTypes) / sizeof(leptonTypes[0]));
 
 /*--------------------------------------------------------------------------------*/
 // Fake Rate Constructor
 /*--------------------------------------------------------------------------------*/
 MeasureFakeRate2::MeasureFakeRate2() :
-  CR_N(nControlRegions + nSignalRegions),
   m_controlRegions(controlRegions, controlRegions + nControlRegions),
   m_signalRegions (signalRegions,  signalRegions  + nSignalRegions),
+  m_leptonTypes(leptonTypes, leptonTypes + nLeptonTypes),
   m_outFile(NULL),
   m_evtWeight(1.),
   m_metRel(0.),
@@ -74,24 +74,21 @@ void MeasureFakeRate2::Terminate()
 /*--------------------------------------------------------------------------------*/
 void MeasureFakeRate2::initHistos(string outName)
 {
-  // DG : here we will switch to a loop over m_controlRegions and m_signalRegions
-  // const int CR_N(getNumControlRegions());
-  if(CR_N >= kNmaxControlRegions)
-    cout<<"MeasureFakeRate2::initHistos:"
-        <<" "<<kNmaxControlRegions<<" histos reserved"
-        <<" trying to book "<<CR_N<<endl
-        <<" Exiting."
-        <<endl;
-  assert(CR_N<kNmaxControlRegions);
+  size_t nRegions(allRegions().size()), nLeptonTypes(m_leptonTypes.size());
+  if(nRegions > kNmaxControlRegions)
+    cout<<" Trying book histos for "<<nRegions<<" regions "<<" >= "<<kNmaxControlRegions<<endl<<" Exiting."<<endl;
+  if(nLeptonTypes > kNmaxLeptonTypes)
+    cout<<" Trying book histos for "<<nLeptonTypes<<" lepton types >= "<<kNmaxLeptonTypes<<endl<<" Exiting."<<endl;
+  assert(nRegions <= kNmaxControlRegions);
+  assert(nLeptonTypes <= kNmaxLeptonTypes);
   cout<<"Creating file: "<<outName<<endl;
   m_outFile = new TFile((outName).c_str(),"recreate");
   m_outFile->cd();
   cout<<"File created: "<<m_outFile<<endl;
-  // All the rates will be stored in efficiency objects.
-  for(int il=0; il<LT_N; ++il){ // for lName in [elec, muon]
-    string lepton = LTNames[il];
+  for(size_t il=0; il<m_leptonTypes.size(); ++il){
+    string lepton(LeptonType2str(m_leptonTypes[il]));
     vector<sf::Region> regions(allRegions());
-    for(size_t icr=0; icr<regions.size(); ++icr){ // see CRNames in SusyAnaDefsMatt.h for complete list
+    for(size_t icr=0; icr<regions.size(); ++icr){
       string region(sf::region2str(regions[icr]));
       for(int ich=0; ich<Ch_N; ++ich){ // for chan in [all, ee, mm, em]
         string channel = chanNames[ich];
@@ -174,7 +171,7 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
         LeptonType l_; size_t r_; Chan c_;
         FillEffHistos(bool alsoNum, double weight, LeptonType l, size_t r, Chan c)
             : n_(alsoNum), w_(weight), l_(l), r_(r), c_(c) {}
-        void operator () (EffObject* eff_array[LT_N][kNmaxControlRegions][susy::wh::Ch_N],
+        void operator () (EffObject* eff_array[kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N],
                           double value) {
             if(EffObject* eff = eff_array[l_][r_][c_])         eff->Fill(n_, w_, value);
             if(c_ != Ch_all)
@@ -182,7 +179,9 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
         }
     };
 
-    LeptonType lt(lep->isEle() ? LT_EL : LT_MU);
+    bool isElOrMu(lep->isEle() || lep->isMu());
+    assert(isElOrMu);
+    LeptonType lt(lep->isEle() ? kElectron : kMuon);
     bool pass(isSignalLepton(lep, m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC));
     FillEffHistos fillEff(pass, m_evtWeight, lt, regionIndex, static_cast<Chan>(m_ch));    
     fillEff(h_l_pt        , lep->Pt());
@@ -433,3 +432,15 @@ const std::vector<susy::fake::Region> MeasureFakeRate2::allRegions() const
     allRegions.insert(allRegions.end(), m_signalRegions.begin(), m_signalRegions.end());
     return allRegions;
 }
+//----------------------------------------------------------
+const std::string MeasureFakeRate2::LeptonType2str(const LeptonType l)
+{
+    string lname("unknown");
+    switch(l) {
+    case kElectron : lname = "elec"; break;
+    case kMuon     : lname = "muon"; break;
+    default        : ;
+    }
+    return lname;
+}
+//----------------------------------------------------------

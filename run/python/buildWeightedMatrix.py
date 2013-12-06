@@ -90,6 +90,7 @@ def frac2str(frac) :
     return '\n'.join([''.join("%12s"%s for s in fakeProcesses()),
                       ''.join("%12s"%("%.3f"%frac[s]) for s in fakeProcesses())])
 def selectionRegions() :
+    print "probably broken; should now pick the sr names from MeasureFakeRate2::m_signalRegions + susy::fake::RegionNames"
     header = os.path.dirname(__file__)+'/../../SusyTest0/SusyAnaDefsMatt.h'
     enum = enumFromHeader(header, 'SignalRegion')
     def dictKeysSortedByValue(aDict={}) :
