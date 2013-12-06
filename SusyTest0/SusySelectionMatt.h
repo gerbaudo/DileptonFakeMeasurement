@@ -16,7 +16,6 @@
 #include "SusyNtuple/SusyNtTools.h"
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyXSReader/XSReader.h"
-#include "SusyTest0/SusyAnaDefsMatt.h"
 #include "SusyTest0/SsPassFlags.h"
 
 #include "SUSYTools/SUSYObjDef.h"

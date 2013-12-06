@@ -1,7 +1,6 @@
 #include "SusyTest0/MeasureFakeRate2.h"
 #include "SusyTest0/criteria.h"
 #include "SusyTest0/FakeBinnings.h"
-#include "SusyTest0/DileptonChannel.h"
 
 using namespace susy::fake;
 using namespace susy::wh;
