@@ -37,6 +37,7 @@ class MeasureFakeRate2 : public SusySelectionMatt
   virtual void    Terminate();
   virtual Bool_t  Process(Long64_t entry);
   void initHistos(string outName);
+  MeasureFakeRate2& setFileName(string f){ m_fileName = f; return *this; }
   // Data Control Regions
   bool passRealCR(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR);
   bool passHFCR(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR);
@@ -66,6 +67,7 @@ class MeasureFakeRate2 : public SusySelectionMatt
   EffObject* h_flavor       [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
 
  protected:
+  std::string  m_fileName;          // Outname file name
   TFile*       m_outFile;           // Output file
   LeptonVector m_probes;            // Probe lepton vector
   LeptonVector m_tags;              // Tag Lepton vector

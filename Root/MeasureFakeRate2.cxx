@@ -35,6 +35,7 @@ MeasureFakeRate2::MeasureFakeRate2() :
   m_controlRegions(controlRegions, controlRegions + nControlRegions),
   m_signalRegions (signalRegions,  signalRegions  + nSignalRegions),
   m_leptonTypes(leptonTypes, leptonTypes + nLeptonTypes),
+  m_fileName("measurefakerate2.root"),
   m_outFile(NULL),
   m_evtWeight(1.),
   m_metRel(0.),

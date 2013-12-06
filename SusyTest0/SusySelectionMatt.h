@@ -64,7 +64,6 @@ class SusySelectionMatt : public SusyNtAna
     bool isHFLepton(const Lepton* lep);
     bool isLFLepton(const Lepton* lep);
     bool isQCDLepton(const Lepton* lep);
-    void setFileName(string f){ m_fileName = f; };
     // Get Btag weight
     float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true,
 		       bool doMediumpp=false);
@@ -119,7 +118,6 @@ class SusySelectionMatt : public SusyNtAna
 
     DilTrigLogic*       m_trigObj;      // My trigger logic class
     bool                m_useMCTrig;    // Use MC Trigger
-    string              m_fileName;     // File name
     float               m_w;            // mc weight
     bool                m_do1fb;        // For get weight method
     bool                m_doAD;         // do weights for A-B
