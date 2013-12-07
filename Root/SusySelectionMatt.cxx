@@ -334,7 +334,7 @@ float SusySelectionMatt::getBTagWeight(const Event* evt)
   JetVector tempJets;
   for(uint ij=0; ij<m_baseJets.size(); ++ij){
     Jet* jet = m_baseJets.at(ij);
-    if( !(jet->Pt() > 20 && fabs(jet->detEta) < 2.4) ) continue;
+    if( !(jet->Pt() > 20 && fabs(jet->detEta) < JET_ETA_CUT_2L) ) continue;
     tempJets.push_back(jet);
   }
   return bTagSF(evt, tempJets, evt->mcChannel, BTag_NOM);
