@@ -167,3 +167,34 @@ void SusySelectionMatt::printCounter(string cut, float counter[ET_N][WT_N], int 
     cout << "\t" << Form("%10.3f",counter[i][weight]);
   cout << endl;
 }
+/*--------------------------------------------------------------------------------*/
+void SusySelectionMatt::increment(float flag[], bool includeLepSF, bool includeBtag)
+{
+    flag[WT_Raw]   += 1.0;
+    flag[WT_Evt]   += nt.evt()->w;
+    flag[WT_PU]    += nt.evt()->w * nt.evt()->wPileup;
+    flag[WT_PU1fb] += nt.evt()->w * nt.evt()->wPileupAB3;
+    flag[WT_LSF]   += (includeLepSF ? 
+                       nt.evt()->w * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF :
+                       nt.evt()->w);
+    float btag = includeBtag ? 1.0 : 1.0;
+    flag[WT_Btag]  += nt.evt()->w * btag;
+    
+    float trig = m_baseLeptons.size() == 2 && nt.evt()->isMC && !m_useMCTrig ? 
+        m_trigObj->getTriggerWeight(m_baseLeptons,
+                                    nt.evt()->isMC,
+                                    m_met->Et,
+                                    m_signalJets2Lep.size(),
+                                    nt.evt()->nVtx,
+                                    NtSys_NOM) : 1;
+    //cout<<"\tTrigger weight: "<<trig<<endl;
+    flag[WT_Trig] += trig * nt.evt()->w;
+    
+    float all = getEventWeightAB3() * btag * trig;
+    all = includeLepSF ? all * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : all;      
+    flag[WT_AllAB3] += all;
+    
+    float allAE = 1.0 * btag * trig;
+    allAE = includeLepSF ? allAE * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : allAE;
+    flag[WT_AllAE] += allAE;
+}
