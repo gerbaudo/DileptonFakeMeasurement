@@ -89,7 +89,8 @@ class SusySelection : public SusyNtAna
     SsPassFlags passSrSs(const WH_SR signalRegion,
                          vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
     // Cut methods
-    bool passHfor();
+    bool passHfor() { return passHfor(nt); }
+    static bool passHfor(Susy::SusyNtObject &nto);
     bool passTrig2L(const LeptonVector& leptons);
     bool passTrig2LMatch(const LeptonVector& leptons);
     bool passTrig2LwithMatch(const LeptonVector& leptons);

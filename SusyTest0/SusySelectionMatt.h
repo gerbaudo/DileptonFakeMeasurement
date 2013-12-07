@@ -52,7 +52,6 @@ class SusySelectionMatt : public SusyNtAna
     SsPassFlags passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met);
 
     // Cut methods
-    bool passHfor();
     bool passTrigger(const LeptonVector& leptons);
 
     // Idendification methods

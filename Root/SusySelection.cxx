@@ -237,10 +237,11 @@ SsPassFlags SusySelection::passSrSs(const WH_SR signalRegion,
   return f;
 }
 //-----------------------------------------
-bool SusySelection::passHfor()
+bool SusySelection::passHfor(Susy::SusyNtObject &nto)
 {
-  if(nt.evt()->hfor == 4 ) return false;
-  return true;
+    // DG : inheriting hardcoded magic values from HforToolD3PD.cxx, dah.
+    const int kill(4);
+    return nto.evt()->hfor != kill;
 }
 //-----------------------------------------
 bool SusySelection::passTrig2L(const LeptonVector& leptons)

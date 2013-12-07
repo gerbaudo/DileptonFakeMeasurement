@@ -5,6 +5,7 @@
 
 #include "SusyTest0/DileptonChannel.h"
 #include "SusyTest0/criteria.h"
+#include "SusyTest0/SusySelection.h" // passHfor
 
 using namespace std;
 using namespace Susy;
@@ -136,7 +137,7 @@ bool SusySelectionMatt::selectEvent(bool count)
   if(count) increment(n_pass_Cosmic);
   if(m_dbg) cout<<"\tPass Cosmic"<<endl;
   // HFor
-  if( !passHfor() )                  return false;
+  if( !SusySelection::passHfor(nt) ) return false;
   if(count) increment(n_pass_HFOR);
   if(m_dbg) cout<<"\tPass Hfor"<<endl;
   // HotSpot
@@ -226,12 +227,6 @@ SsPassFlags SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVe
 }
 /*--------------------------------------------------------------------------------*/
 // Generic cuts
-/*--------------------------------------------------------------------------------*/
-bool SusySelectionMatt::passHfor()
-{
-  if(nt.evt()->hfor == 4 ) return false;
-  return true;
-}
 /*--------------------------------------------------------------------------------*/
 bool SusySelectionMatt::passTrigger(const LeptonVector& leptons)
 {
