@@ -22,6 +22,8 @@
 #include "SusyTest0/FakeLeptonSources.h"
 #include "SusyTest0/SusySelectionMatt.h"
 #include "SusyTest0/EffObject.h"
+#include "SusyTest0/SsPassFlags.h"
+
 #include <vector>
 
 using namespace std;
@@ -38,6 +40,8 @@ class MeasureFakeRate2 : public SusySelectionMatt
   virtual Bool_t  Process(Long64_t entry);
   void initHistos(string outName);
   MeasureFakeRate2& setFileName(string f){ m_fileName = f; return *this; }
+  bool selectEvent(bool count=false);
+  SsPassFlags passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met);
   // Data Control Regions
   bool passRealCR(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR);
   bool passHFCR(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR);
@@ -46,6 +50,9 @@ class MeasureFakeRate2 : public SusySelectionMatt
   // Monte Carlo Regions
   bool passMCReg(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR);
   void fillRatesHistos(const Lepton* lep, const JetVector& jets, const Met* met, size_t regionIndex);
+  // weight
+  float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true, bool doMediumpp=false);
+  float getBTagWeight(const Event* evt);
   // Miscellaneous
   susy::fake::LeptonSource getLeptonSource(const Lepton* l);
   static const size_t kNmaxControlRegions=64, kNmaxLeptonTypes=2;

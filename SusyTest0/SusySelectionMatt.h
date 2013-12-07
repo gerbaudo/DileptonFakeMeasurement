@@ -16,7 +16,6 @@
 #include "SusyNtuple/SusyNtTools.h"
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyXSReader/XSReader.h"
-#include "SusyTest0/SsPassFlags.h"
 
 #include "SUSYTools/SUSYObjDef.h"
 
@@ -47,13 +46,6 @@ class SusySelectionMatt : public SusyNtAna
     virtual void    Terminate();
     virtual Bool_t  Process(Long64_t entry);
     virtual void dumpEventCounters();
-    bool selectEvent(bool count=false);
-    SsPassFlags passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-
-    // Get Btag weight
-    float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true,
-		       bool doMediumpp=false);
-    float getBTagWeight(const Event* evt);
     // Method to increment the counters for the event weight types
     void increment(float flag[], bool includeLepSF=false, bool includeBtag=false){
       flag[WT_Raw]   += 1.0;
@@ -63,7 +55,7 @@ class SusySelectionMatt : public SusyNtAna
       flag[WT_LSF]   += (includeLepSF ? 
 			 nt.evt()->w * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF :
 			 nt.evt()->w);
-      float btag = includeBtag ? getBTagWeight(nt.evt()) : 1.0;
+      float btag = includeBtag ? 1.0 : 1.0;
       flag[WT_Btag]  += nt.evt()->w * btag;
       
       float trig = m_baseLeptons.size() == 2 && nt.evt()->isMC && !m_useMCTrig ? 
@@ -80,7 +72,7 @@ class SusySelectionMatt : public SusyNtAna
       all = includeLepSF ? all * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : all;      
       flag[WT_AllAB3] += all;
 
-      float allAE = getEventWeight(LUMI_A_L,true) * btag * trig;
+      float allAE = 1.0 * btag * trig;
       allAE = includeLepSF ? allAE * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : allAE;
       flag[WT_AllAE] += allAE;
 
