@@ -21,6 +21,7 @@
 #include "SusyXSReader/XSReader.h"
 #include "SusyTest0/ProgressPrinter.h"
 #include "SusyTest0/SsPassFlags.h"
+#include "SusyTest0/DileptonChannel.h"
 
 #include <fstream>
 
@@ -124,6 +125,8 @@ class SusySelection : public SusyNtAna
     void increment(float counters[], const WeightComponents &wc);
     float computeChargeFlipProb(LeptonVector &leptons, Met &met,
                                 uint systematic, bool update4mom);
+    static susy::wh::Chan getChan(const LeptonVector& leps); // compute lepton channel
+
  protected:
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
     float computeEventWeightXsFromReader(float lumi);

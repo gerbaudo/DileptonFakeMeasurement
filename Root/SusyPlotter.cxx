@@ -151,7 +151,7 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
 {
   if(m_dbg) cout << "SusyPlotter::fillHistos" << endl;
   if( leps.size() != 2 ) return;
-  susy::wh::Chan ch = getChan(leps);
+  susy::wh::Chan ch = SusySelection::getChan(leps);
   const Lepton* l0 = leps[0];
   const Lepton* l1 = leps[1];
   const size_t &ri = regionIndex;
@@ -273,21 +273,6 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
   } // end if(nJ>=2)
   #undef FILL
   #undef FILL2
-}
-//-----------------------------------------
-susy::wh::Chan SusyPlotter::getChan(const LeptonVector& leps)
-{
-  uint ie = 0;
-  uint im = 0;
-  for(uint i=0; i<leps.size(); ++i){
-    if( leps.at(i)->isEle() ) ie++;
-    else if( leps.at(i)->isMu() ) im++;
-  }
-  if( ie == 2 && im == 0 ) return Ch_ee;
-  if( ie == 1 && im == 1 ) return Ch_em;
-  if( ie == 0 && im == 2 ) return Ch_mm;
-  cout<<"Not ee/mm/em... Number Electrons: "<<ie<<" Number Muons: "<<im<<endl;
-  return Ch_N; // not in range
 }
 //-----------------------------------------
 void SusyPlotter::setSysts()

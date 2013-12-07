@@ -3,7 +3,6 @@
 #include <iomanip>
 #include "TCanvas.h"
 
-#include "SusyTest0/DileptonChannel.h"
 #include "SusyTest0/criteria.h"
 #include "SusyTest0/SusySelection.h" // passHfor
 
@@ -401,19 +400,4 @@ void SusySelectionMatt::printCounter(string cut, float counter[ET_N][WT_N], int 
   for(int i=0; i<ET_N-2; ++i)
     cout << "\t" << Form("%10.3f",counter[i][weight]);
   cout << endl;
-}
-/*--------------------------------------------------------------------------------*/
-int SusySelectionMatt::getChan(const LeptonVector& leps)
-{
-  uint ie = 0;
-  uint im = 0;
-  for(uint i=0; i<leps.size(); ++i){
-    if( leps.at(i)->isEle() ) ie++;
-    else if( leps.at(i)->isMu() ) im++;
-  }
-  if( ie == 2 && im == 0 ) return susy::wh::Ch_ee;
-  if( ie == 1 && im == 1 ) return susy::wh::Ch_em;
-  if( ie == 0 && im == 2 ) return susy::wh::Ch_mm;
-  cout<<"Not ee/mm/em... Number Electrons: "<<ie<<" Number Muons: "<<im<<endl;
-  return susy::wh::Ch_N; // not in range
 }

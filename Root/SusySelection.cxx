@@ -587,6 +587,21 @@ float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
   return flipProb*overlapFrac;
 }
 //-----------------------------------------
+susy::wh::Chan SusySelection::getChan(const LeptonVector& leps)
+{
+  uint ie = 0;
+  uint im = 0;
+  for(uint i=0; i<leps.size(); ++i){
+    if( leps.at(i)->isEle() ) ie++;
+    else if( leps.at(i)->isMu() ) im++;
+  }
+  if( ie == 2 && im == 0 ) return susy::wh::Ch_ee;
+  if( ie == 1 && im == 1 ) return susy::wh::Ch_em;
+  if( ie == 0 && im == 2 ) return susy::wh::Ch_mm;
+  cout<<"Not ee/mm/em... Number Electrons: "<<ie<<" Number Muons: "<<im<<endl;
+  return susy::wh::Ch_N; // not in range
+}
+//-----------------------------------------
 void SusySelection::resetAllCounters()
 {
   for(int w=0; w<kWeightTypesN; ++w){// Loop over weight types

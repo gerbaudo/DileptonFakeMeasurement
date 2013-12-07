@@ -150,7 +150,7 @@ void MatrixPrediction::fillFakeHistos(const LeptonVector &baseLeps, const JetVec
   const size_t &ri = regionIndex;
   if(m_dbg) cout << "MatrixPrediction::plotFakeHisto" << endl;
   if( baseLeps.size() != 2 ) return;
-  int ch = getChan(baseLeps);
+  int ch = SusySelection::getChan(baseLeps);
   int mp = getMatrixPair(baseLeps);
   const Lepton* l0 = baseLeps[0];
   const Lepton* l1 = baseLeps[1];

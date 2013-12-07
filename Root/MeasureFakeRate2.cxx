@@ -219,7 +219,7 @@ bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
   // * probes are the fake leptons of specific type
   if( !nt.evt()->isMC )     return false;
   if( leptons.size() != 2 ) return false;
-  m_ch = getChan(leptons);
+  m_ch = SusySelection::getChan(leptons);
   m_metRel = getMetRel(met,leptons,jets);
   for(uint il=0; il<leptons.size(); ++il){
     Lepton* l=leptons[il];
@@ -244,7 +244,9 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
                        || CR==susy::fake::CR_CR8ee || CR==susy::fake::CR_CR8mm
                        || CR==susy::fake::CR_CR8mmMtww || CR==susy::fake::CR_CR8mmHt);
   SsPassFlags whssFlags(computeWhssPass ? passWhSS(leptons,jets,met) : SsPassFlags());
-  bool isEe(Ch_ee==getChan(leptons)), isMm(Ch_mm==getChan(leptons));
+  susy::wh::Chan ch(SusySelection::getChan(leptons));
+  m_ch = SusySelection::getChan(leptons);
+  bool isEe(susy::wh::Ch_ee==ch), isMm(susy::wh::Ch_mm==ch);
   switch(CR) {
   case susy::fake::CR_SSInc        : passSR = susy::sameSign(leptons);            break;
   case susy::fake::CR_SRWHSS       : passSR =  whssFlags.metrel;                  break;
@@ -259,7 +261,6 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   }
   for(uint i=0; i<leptons.size(); ++i) m_probes.push_back( leptons[i]);
   if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(leptons);
-  m_ch = getChan(leptons);
   return passSR;
 }
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//

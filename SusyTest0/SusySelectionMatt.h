@@ -101,9 +101,6 @@ class SusySelectionMatt : public SusyNtAna
 
     };
 
-    // Channels for plotting
-    int getChan(const LeptonVector& leps);
-
     // Miscellaneous methods
     void printCounter(string cut, float counter[ET_N][WT_N], int weight);
     ClassDef(SusySelectionMatt, 1);

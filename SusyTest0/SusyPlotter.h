@@ -2,7 +2,6 @@
 #define SusyAna_SusyPlotter_h
 
 #include "SusyTest0/SusySelection.h"
-#include "SusyTest0/DileptonChannel.h"
 #include "SusyTest0/PlotRegion.h"
 
 #include "TH1F.h"
@@ -25,7 +24,6 @@ class SusyPlotter : public SusySelection
   float Mt(TLorentzVector p1, TLorentzVector met) {
     return sqrt(2*p1.Pt()*met.Et()*(1-cos(p1.DeltaPhi(met))));
   };
-  susy::wh::Chan getChan(const LeptonVector& leps); // compute lepton channel
   void setSysts(); // get list of systematics to consider; override in SusyMatrixMethod
   void initHistos();
  public:
