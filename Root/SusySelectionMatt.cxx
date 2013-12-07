@@ -160,26 +160,6 @@ bool SusySelectionMatt::selectEvent(bool count)
   return true;
 }
 /*--------------------------------------------------------------------------------*/
-bool SusySelectionMatt::selectBaseEvent(bool doMll, bool count)
-{
-  // Make sure event level cuts are checked
-  if( !selectEvent(count) )               return false;
-  // Lepton Analysis cuts
-  if( m_baseLeptons.size() < 2 )                return false;
-  if(count) increment(n_pass_atleast2Lep);
-  if( m_dbg ) cout<<"\tPassed at least 2 leptons"<<endl;
-  if(m_baseLeptons.size() != 2)                 return false;
-  if(count) increment(n_pass_exactly2Lep);
-  if( m_dbg ) cout<<"\tPassed Exctly 2 leptons"<<endl;
-  if(doMll && m_baseLeptons.size() == 2){
-    if( Mll(m_baseLeptons[0], m_baseLeptons[1]) < 20 )
-      return false;
-    if(count) increment(n_pass_mll20);
-    if( m_dbg ) cout<<"\tPass mll > 20"<<endl;
-  }
-  return true;
-}
-/*--------------------------------------------------------------------------------*/
 SsPassFlags SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met)
 {
   // for now keep it simple:

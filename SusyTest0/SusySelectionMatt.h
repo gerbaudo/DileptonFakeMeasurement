@@ -48,7 +48,6 @@ class SusySelectionMatt : public SusyNtAna
     virtual Bool_t  Process(Long64_t entry);
     virtual void dumpEventCounters();
     bool selectEvent(bool count=false);
-    bool selectBaseEvent(bool doMll=true, bool count=false);
     SsPassFlags passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met);
 
     // Get Btag weight
