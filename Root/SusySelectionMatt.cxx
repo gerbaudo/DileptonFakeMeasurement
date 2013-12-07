@@ -227,19 +227,6 @@ SsPassFlags SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVe
 /*--------------------------------------------------------------------------------*/
 // Generic cuts
 /*--------------------------------------------------------------------------------*/
-bool SusySelectionMatt::passTrigger(const LeptonVector& leptons)
-{
-  if(leptons.size() != 2) return false;
-  bool passEvtTrig   = m_trigObj->passDilEvtTrig(leptons, m_met->Et, nt.evt());
-  bool passTrigMatch = m_trigObj->passDilTrigMatch(leptons, m_met->Et, nt.evt());
-  if( passEvtTrig ){ increment(n_pass_evtTrig[m_ET],true); }
-  if( passEvtTrig && passTrigMatch){
-      increment(n_pass_trigMatch[m_ET],true);
-      return true;
-  }
-  return false;
-}
-/*--------------------------------------------------------------------------------*/
 bool SusySelectionMatt::isRealLepton(const Lepton* lep)
 {
   // Updated way of handling real and fake leptons using LeptonTruthTools

@@ -409,7 +409,8 @@ bool MeasureFakeRate2::passConvCR(const LeptonVector &leptons,
   if( preMuons[0]->q * preMuons[1]->q > 0 )  return false; // Opposite sign
   LeptonVector tempL(preMuons.size(), NULL);
   std::transform(preMuons.begin(), preMuons.end(), tempL.begin(), muon_ptr2lepton_ptr);
-  if( !passTrigger(tempL) )                  return false; // Pt and trigger requirement
+  bool passTrigger(SusySelection::passTrig2LwithMatch(tempL, m_trigObj, m_met->Et, nt.evt()));
+  if( !passTrigger )                         return false; // Pt and trigger requirement
   if( met->Et > 50 )                         return false; // Met < 50
   if( (*preMuons[0]+*preMuons[1]).M() < 20 ) return false; // M(mu,mu) > 20
   if( Mt((Lepton*) preElecs[0], met) > 40)   return false; // Mt(elec, met) < 40
