@@ -258,7 +258,7 @@ bool SusySelection::passTrig2LMatch(const LeptonVector& leptons, DilTrigLogic *d
 //-----------------------------------------
 bool SusySelection::passTrig2LwithMatch(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt)
 {
-  return (passTrig2L(leptons, dtl, met, evt) && passTrig2LwithMatch(leptons, dtl, met, evt));
+  return (passTrig2L(leptons, dtl, met, evt) && passTrig2LMatch(leptons, dtl, met, evt));
 }
 //-----------------------------------------
 bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
