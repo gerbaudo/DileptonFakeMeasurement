@@ -43,7 +43,8 @@ MeasureFakeRate2::MeasureFakeRate2() :
   m_outFile(NULL),
   m_evtWeight(1.),
   m_metRel(0.),
-  m_ch(0)
+  m_ch(0),
+  m_ET(ET_Unknown)
 {
   resetCounters();
 }
