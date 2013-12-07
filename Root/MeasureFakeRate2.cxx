@@ -224,9 +224,10 @@ bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
   m_metRel = getMetRel(met,leptons,jets);
   for(uint il=0; il<leptons.size(); ++il){
     Lepton* l=leptons[il];
-    if(CR==CR_MCConv && isConvLepton(l)) m_probes.push_back( l ); // Conversion
-    if(CR==CR_MCQCD && isQCDLepton(l))   m_probes.push_back( l ); // QCD
-    if(CR==CR_MCReal && isRealLepton(l)) m_probes.push_back( l ); // Real
+    bool isQcdLepton(susy::isHFLepton(l) || susy::isLFLepton(l));
+    if(CR==CR_MCConv && susy::isConvLepton(l)) m_probes.push_back( l ); // Conversion
+    if(CR==CR_MCQCD && isQcdLepton)            m_probes.push_back( l ); // QCD
+    if(CR==CR_MCReal && susy::isRealLepton(l)) m_probes.push_back( l ); // Real
   }
   m_evtWeight = getEvtWeight(leptons);
   return true;
@@ -424,9 +425,9 @@ bool MeasureFakeRate2::passConvCR(const LeptonVector &leptons,
 sf::LeptonSource MeasureFakeRate2::getLeptonSource(const Lepton* l)
 {
   if( isRealLepton(l) ) return LS_Real;
-  if( isHFLepton(l) )   return LS_HF;
-  if( isLFLepton(l) )   return LS_LF;
-  if( isConvLepton(l) ) return LS_Conv;
+  if( susy::isHFLepton(l) )   return LS_HF;
+  if( susy::isLFLepton(l) )   return LS_LF;
+  if( susy::isConvLepton(l) ) return LS_Conv;
   return LS_Unk;
 }
 //----------------------------------------------------------

@@ -54,10 +54,6 @@ class SusySelectionMatt : public SusyNtAna
     // Idendification methods
     bool isRealLepton(const Lepton* lep);
     bool isFakeLepton(const Lepton* lep) { return !isRealLepton(lep); }
-    bool isConvLepton(const Lepton* lep);
-    bool isHFLepton(const Lepton* lep);
-    bool isLFLepton(const Lepton* lep);
-    bool isQCDLepton(const Lepton* lep);
     // Get Btag weight
     float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true,
 		       bool doMediumpp=false);

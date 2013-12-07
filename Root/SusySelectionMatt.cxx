@@ -266,28 +266,6 @@ bool SusySelectionMatt::isRealLepton(const Lepton* lep)
   }
 }
 /*--------------------------------------------------------------------------------*/
-bool SusySelectionMatt::isConvLepton(const Lepton* lep)
-{
-  bool isConv       = lep->truthType == RecoTruthMatch::CONV;
-  bool isChargeFlip =  lep->isEle() ? ((Electron*) lep)->isChargeFlip : false;
-  return isConv && !isChargeFlip;
-}
-/*--------------------------------------------------------------------------------*/
-bool SusySelectionMatt::isHFLepton(const Lepton* lep)
-{
-  return (lep->truthType == RecoTruthMatch::HF);
-}
-/*--------------------------------------------------------------------------------*/
-bool SusySelectionMatt::isLFLepton(const Lepton* lep)
-{
-  return (lep->truthType == RecoTruthMatch::LF);
-}
-/*--------------------------------------------------------------------------------*/
-bool SusySelectionMatt::isQCDLepton(const Lepton* lep)
-{
-  return isHFLepton(lep) || isLFLepton(lep);
-}
-/*--------------------------------------------------------------------------------*/
 float SusySelectionMatt::getEvtWeight(const LeptonVector& leptons, bool includeBTag, bool includeTrig,
 				  bool doMediumpp)
 {
