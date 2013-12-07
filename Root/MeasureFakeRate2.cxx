@@ -3,6 +3,7 @@
 #include "SusyTest0/FakeBinnings.h"
 #include "SusyTest0/SusySelection.h" // passEwkSs*
 
+#include <algorithm> // transform
 using namespace susy::fake;
 using namespace susy::wh;
 namespace sf = susy::fake;
@@ -383,6 +384,7 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
 // Conversion Control Region -- Conv
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
+Susy::Lepton* muon_ptr2lepton_ptr(Susy::Muon *m) { return static_cast<Susy::Lepton*>(m); }
 bool MeasureFakeRate2::passConvCR(const LeptonVector &leptons,
                                   const JetVector &jets,
                                   const Met* met)
@@ -405,8 +407,8 @@ bool MeasureFakeRate2::passConvCR(const LeptonVector &leptons,
   float mlll = (*preMuons[0] + *preMuons[1] + *preElecs[0]).M();
   if( !(80 < mlll && mlll < 100) )           return false;
   if( preMuons[0]->q * preMuons[1]->q > 0 )  return false; // Opposite sign
-  LeptonVector tempL; ElectronVector tempE;
-  buildLeptons(tempL, tempE, preMuons);
+  LeptonVector tempL(preMuons.size(), NULL);
+  std::transform(preMuons.begin(), preMuons.end(), tempL.begin(), muon_ptr2lepton_ptr);
   if( !passTrigger(tempL) )                  return false; // Pt and trigger requirement
   if( met->Et > 50 )                         return false; // Met < 50
   if( (*preMuons[0]+*preMuons[1]).M() < 20 ) return false; // M(mu,mu) > 20
