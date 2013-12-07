@@ -114,6 +114,9 @@ class SusySelection : public SusyNtAna
     bool passeq2JetWoutFwVeto(const JetVector& jets);
     bool passNj(const JetVector& jets, int minNj=2, int maxNj=3);
     bool passMuonRelIso(const LeptonVector &leptons, float maxVal);
+    static bool passEwkSs     (const LeptonVector& leptons, const JetVector& jets, const Met* met);
+    static bool passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met);
+
     void setUseXsReader(bool val){ m_useXsReader = val; };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
     //! increment the counters for the all event weight types

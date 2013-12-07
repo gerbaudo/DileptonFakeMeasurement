@@ -82,8 +82,8 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
     if(isOf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_CR9lpt,    sys);
     if(isSf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_SR8,       sys);
     if(isOf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_SR9,       sys);
-    bool passEwkSs     (SusySelectionMatt::passEwkSs     (ncl,j,m));
-    bool passEwkSsLoose(SusySelectionMatt::passEwkSsLoose(ncl,j,m));
+    bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
+    bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
     if(passEwkSs)      fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwk,     metRel,sys), PR_SsEwk,     sys);
     if(passEwkSsLoose) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwkLoose,metRel,sys), PR_SsEwkLoose,sys);
   } // end for(s)

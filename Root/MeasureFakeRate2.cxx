@@ -1,6 +1,7 @@
 #include "SusyTest0/MeasureFakeRate2.h"
 #include "SusyTest0/criteria.h"
 #include "SusyTest0/FakeBinnings.h"
+#include "SusyTest0/SusySelection.h" // passEwkSs*
 
 using namespace susy::fake;
 using namespace susy::wh;
@@ -252,8 +253,8 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   case susy::fake::CR_CR8mm        : passSR = (whssFlags.lepPt   && isMm);        break;
   case susy::fake::CR_CR8mmMtww    : passSR = (whssFlags.mtllmet && isMm);        break;
   case susy::fake::CR_CR8mmHt      : passSR = (whssFlags.ht      && isMm);        break;
-  case susy::fake::CR_SsEwk        : passSR = passEwkSs     (leptons, jets, met); break;
-  case susy::fake::CR_SsEwkLoose   : passSR = passEwkSsLoose(leptons, jets, met); break;
+  case susy::fake::CR_SsEwk        : passSR = SusySelection::passEwkSs     (leptons, jets, met); break;
+  case susy::fake::CR_SsEwkLoose   : passSR = SusySelection::passEwkSsLoose(leptons, jets, met); break;
   default: cout<<"invalid ControlRegion "<<CR<<endl;
   }
   for(uint i=0; i<leptons.size(); ++i) m_probes.push_back( leptons[i]);

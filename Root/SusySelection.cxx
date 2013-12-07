@@ -367,6 +367,29 @@ bool SusySelection::passMuonRelIso(const LeptonVector &leptons, float maxVal)
   return true;
 }
 //-----------------------------------------
+bool SusySelection::passEwkSs(const LeptonVector& leptons, const JetVector& jets, const Met* met)
+{
+    if(leptons.size()<2) return false;
+    bool noBjets(numberOfCBJets(jets)==0), noFwJets(numberOfFJets(jets)==0);
+    bool someCentralJets(numberOfCLJets(jets)>0);
+    const Lepton &l0 = *leptons[0], &l1 = *leptons[1];
+    TLorentzVector ll(l0+l1);
+    return (noBjets && noFwJets && someCentralJets
+            && (getMetRel(met, leptons, jets)>50.0)
+            && susy::sameSign(leptons)
+            && (ll.M()<60.0) && (ll.Pt()<20.) && (fabs(l0.DeltaPhi(l1)) >= 1.3));
+}
+//-----------------------------------------
+bool SusySelection::passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met)
+{
+    if(leptons.size()<2) return false;
+    bool noBjets(numberOfCBJets(jets)==0), noFwJets(numberOfFJets(jets)==0);
+    bool someCentralJets(numberOfCLJets(jets)>0);
+    return (noBjets && noFwJets && someCentralJets
+            && susy::sameSign(leptons)
+            && (getMetRel(met, leptons, jets)>40.0));
+}
+//-----------------------------------------
 void SusySelection::cacheStaticWeightComponents()
 {
   m_weightComponents.reset();
