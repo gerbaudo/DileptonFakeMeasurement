@@ -563,6 +563,98 @@ float MeasureFakeRate2::getBTagWeight(const Event* evt)
   return bTagSF(evt, tempJets, evt->mcChannel, BTag_NOM);
 }
 //----------------------------------------------------------
+void MeasureFakeRate2::dumpEventCounters()
+{
+  string v_WT[] = {"Raw","Event","Pileup","Pileup A-B3",
+                   "LeptonSF","btagSF","TrigSF","All A-B3", "All A-E"};
+
+  for(int w=0; w<WT_N; ++w){
+    cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" << endl;
+    cout << "SusySelectionMatt Event counts for weight: " << v_WT[w] << endl;
+    cout << endl;
+    cout << "read in:       " << n_readin[w]           << endl;
+    cout << "pass LAr:      " << n_pass_LAr[w]         << endl;
+    cout << "pass BadJet:   " << n_pass_BadJet[w]      << endl;
+    cout << "pass FEB:      " << n_pass_FEBCut[w]      << endl;
+    cout << "pass BadMu:    " << n_pass_BadMuon[w]     << endl;
+    cout << "pass Cosmic:   " << n_pass_Cosmic[w]      << endl;
+    cout << "pass HFOR:     " << n_pass_HFOR[w]        << endl;
+    cout << "pass Hot Spot: " << n_pass_HotSpot[w]     << endl;
+    cout << "pass Tile Err: " << n_pass_TileError[w]   << endl;
+    cout << "   ------  Start Comparison Here ------ " << endl;
+    cout << ">=2 Lep        " << n_pass_atleast2Lep[w] << endl;
+    cout << "pass Exactly 2 " << n_pass_exactly2Lep[w] << endl;
+    cout << "pass mll > 20  " << n_pass_mll20[w]       << endl;
+    cout << "pass nSigLep:  " << n_pass_signalLep[w]   << endl;
+
+    cout << "************************************" << endl;
+
+     cout << "Cut                   \tee\t\tmm\t\tem" << endl;
+    printCounter("pass flavor:     " , n_pass_flavor    , w);
+    printCounter("pass evt trig:   " , n_pass_evtTrig   , w);
+    printCounter("pass trig match: " , n_pass_trigMatch , w);
+    printCounter("pass tau veto:   " , n_pass_signalTau , w);
+    printCounter("pass Truth:      " , n_pass_truth     , w);
+    printCounter("pass OS:         " , n_pass_os        , w);
+    printCounter("pass SS:         " , n_pass_ss        , w);
+    cout << "-----------------------------------------------------"   << endl;
+    cout << "Cut                   \tee\t\tmm\t\tem" << endl;
+    printCounter("pass: WHSS 2lss    ", n_pass_CRWHSS2lss  , w);
+    printCounter("pass: WHSS tauveto ", n_pass_CRWHSStauv  , w);
+    printCounter("pass: WHSS muiso   ", n_pass_CRWHSSmuiso , w);
+    printCounter("pass: WHSS eld0    ", n_pass_CRWHSSeled0 , w);
+    printCounter("pass: WHSS fjveto  ", n_pass_CRWHSSnfj   , w);
+    printCounter("pass: WHSS bjveto  ", n_pass_CRWHSSnbj   , w);
+    printCounter("pass: WHSS nj      ", n_pass_CRWHSSnj    , w);
+    printCounter("pass: WHSS 2lpt    ", n_pass_CRWHSS2lpt  , w);
+    printCounter("pass: WHSS zveto   ", n_pass_CRWHSSzveto , w);
+    printCounter("pass: WHSS mwwt    ", n_pass_CRWHSSmwwt  , w);
+    printCounter("pass: WHSS htmin   ", n_pass_CRWHSShtmin , w);
+    printCounter("pass: WHSS metrel  ", n_pass_CRWHSSmetrel, w);
+    printCounter("pass: WHSS         ", n_pass_CRWHSS      , w);
+  }// end loop over weight type
+
+}
+//----------------------------------------------------------
+void MeasureFakeRate2::printCounter(string cut, float counter[ET_N][WT_N], int weight)
+{
+  cout << cut;
+  for(int i=0; i<ET_N-2; ++i)
+    cout << "\t" << Form("%10.3f",counter[i][weight]);
+  cout << endl;
+}
+//----------------------------------------------------------
+void MeasureFakeRate2::increment(float flag[], bool includeLepSF, bool includeBtag)
+{
+    flag[WT_Raw]   += 1.0;
+    flag[WT_Evt]   += nt.evt()->w;
+    flag[WT_PU]    += nt.evt()->w * nt.evt()->wPileup;
+    flag[WT_PU1fb] += nt.evt()->w * nt.evt()->wPileupAB3;
+    flag[WT_LSF]   += (includeLepSF ? 
+                       nt.evt()->w * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF :
+                       nt.evt()->w);
+    float btag = includeBtag ? getBTagWeight(nt.evt()) : 1.0;
+    flag[WT_Btag]  += nt.evt()->w * btag;
+    
+    float trig = m_baseLeptons.size() == 2 && nt.evt()->isMC && !m_useMCTrig ? 
+        m_trigObj->getTriggerWeight(m_baseLeptons,
+                                    nt.evt()->isMC,
+                                    m_met->Et,
+                                    m_signalJets2Lep.size(),
+                                    nt.evt()->nVtx,
+                                    NtSys_NOM) : 1;
+    //cout<<"\tTrigger weight: "<<trig<<endl;
+    flag[WT_Trig] += trig * nt.evt()->w;
+    
+    float all = getEventWeightAB3() * btag * trig;
+    all = includeLepSF ? all * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : all;      
+    flag[WT_AllAB3] += all;
+    
+    float allAE = getEventWeight(LUMI_A_L,true) * btag * trig;
+    allAE = includeLepSF ? allAE * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : allAE;
+    flag[WT_AllAE] += allAE;
+}
+//----------------------------------------------------------
 sf::LeptonSource MeasureFakeRate2::getLeptonSource(const Lepton* l)
 {
   uint dsid(nt.evt()->mcChannel);

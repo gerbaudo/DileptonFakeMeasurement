@@ -45,10 +45,6 @@ class SusySelectionMatt : public SusyNtAna
     virtual void    Begin(TTree *tree);
     virtual void    Terminate();
     virtual Bool_t  Process(Long64_t entry);
-    virtual void dumpEventCounters();
-    // Miscellaneous methods
-    void increment(float flag[], bool includeLepSF=false, bool includeBtag=false);
-    void printCounter(string cut, float counter[ET_N][WT_N], int weight);
     ClassDef(SusySelectionMatt, 1);
 
   protected:

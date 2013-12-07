@@ -53,6 +53,10 @@ class MeasureFakeRate2 : public SusySelectionMatt
   // weight
   float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true, bool doMediumpp=false);
   float getBTagWeight(const Event* evt);
+  // counter methods
+  void dumpEventCounters();
+  void increment(float flag[], bool includeLepSF=false, bool includeBtag=false);
+  void printCounter(string cut, float counter[ET_N][WT_N], int weight);
   // Miscellaneous
   susy::fake::LeptonSource getLeptonSource(const Lepton* l);
   static const size_t kNmaxControlRegions=64, kNmaxLeptonTypes=2;
