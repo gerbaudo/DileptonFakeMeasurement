@@ -92,9 +92,12 @@ class SusySelection : public SusyNtAna
     // Cut methods
     bool passHfor() { return passHfor(nt); }
     static bool passHfor(Susy::SusyNtObject &nto);
-    bool passTrig2L(const LeptonVector& leptons);
-    bool passTrig2LMatch(const LeptonVector& leptons);
-    bool passTrig2LwithMatch(const LeptonVector& leptons);
+    static bool passTrig2L         (const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt);
+    static bool passTrig2LMatch    (const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt);
+    static bool passTrig2LwithMatch(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt);
+    bool passTrig2L(const LeptonVector& leptons) { return passTrig2L(leptons, m_trigObj, m_met->Et, nt.evt()); }
+    bool passTrig2LMatch(const LeptonVector& leptons) { return passTrig2LMatch(leptons, m_trigObj, m_met->Et, nt.evt()); }
+    bool passTrig2LwithMatch(const LeptonVector& leptons) { return passTrig2LwithMatch(leptons, m_trigObj, m_met->Et, nt.evt()); }
     //! for the SS selection we want to accept OS events with an el, for Qflip
     /*!  For MC events that are OS, but that we want to consider as SS
       with some charge-flip probability, the 4-mom of the q-flipped

@@ -244,21 +244,21 @@ bool SusySelection::passHfor(Susy::SusyNtObject &nto)
     return nto.evt()->hfor != kill;
 }
 //-----------------------------------------
-bool SusySelection::passTrig2L(const LeptonVector& leptons)
+bool SusySelection::passTrig2L(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt)
 {
-  if(leptons.size() != 2 || !m_trigObj) return false;
-  return m_trigObj->passDilEvtTrig(leptons, m_met->Et, nt.evt());
+  if(leptons.size() != 2 || !dtl) return false;
+  return dtl->passDilEvtTrig(leptons, met, evt);
 }
 //-----------------------------------------
-bool SusySelection::passTrig2LMatch(const LeptonVector& leptons)
+bool SusySelection::passTrig2LMatch(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt)
 {
-  if(leptons.size() != 2 || !m_trigObj) return false;
-  return m_trigObj->passDilTrigMatch(leptons, m_met->Et, nt.evt());
+  if(leptons.size() != 2 || !dtl) return false;
+  return dtl->passDilTrigMatch(leptons, met, evt);
 }
 //-----------------------------------------
-bool SusySelection::passTrig2LwithMatch(const LeptonVector& leptons)
+bool SusySelection::passTrig2LwithMatch(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt)
 {
-  return (passTrig2L(leptons) && passTrig2LwithMatch(leptons));
+  return (passTrig2L(leptons, dtl, met, evt) && passTrig2LwithMatch(leptons, dtl, met, evt));
 }
 //-----------------------------------------
 bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
