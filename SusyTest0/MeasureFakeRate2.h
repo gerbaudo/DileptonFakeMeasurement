@@ -57,6 +57,7 @@ class MeasureFakeRate2 : public SusySelectionMatt
   void dumpEventCounters();
   void increment(float flag[], bool includeLepSF=false, bool includeBtag=false);
   void printCounter(string cut, float counter[ET_N][WT_N], int weight);
+  void resetCounters();
   // Miscellaneous
   susy::fake::LeptonSource getLeptonSource(const Lepton* l);
   static const size_t kNmaxControlRegions=64, kNmaxLeptonTypes=2;
@@ -89,5 +90,42 @@ class MeasureFakeRate2 : public SusySelectionMatt
   float        m_metRel;            // Met Rel to be plotted
   int          m_ch;                // Set the channel
 
+  // Event counters
+  float                n_readin           [WT_N];
+  float                n_pass_LAr         [WT_N];
+  float                n_pass_BadJet      [WT_N];
+  float                n_pass_BadMuon     [WT_N];
+  float                n_pass_Cosmic      [WT_N];
+  float                n_pass_atleast2Lep [WT_N];
+  float                n_pass_exactly2Lep [WT_N];
+  float                n_pass_mll20       [WT_N];
+  float                n_pass_signalLep   [WT_N];
+  float                n_pass_HFOR        [WT_N];
+  float                n_pass_HotSpot     [WT_N];
+  float                n_pass_TileError   [WT_N];
+  float                n_pass_FEBCut      [WT_N];
+
+  float                n_pass_flavor      [ET_N][WT_N];
+  float                n_pass_mll         [ET_N][WT_N];    
+  float                n_pass_signalTau   [ET_N][WT_N];
+  float                n_pass_os          [ET_N][WT_N];
+  float                n_pass_ss          [ET_N][WT_N];
+  float                n_pass_evtTrig     [ET_N][WT_N];
+  float                n_pass_trigMatch   [ET_N][WT_N];
+  float                n_pass_truth       [ET_N][WT_N];
+
+  float                n_pass_CRWHSS2lss  [ET_N][WT_N];
+  float                n_pass_CRWHSStauv  [ET_N][WT_N];
+  float                n_pass_CRWHSSmuiso [ET_N][WT_N];
+  float                n_pass_CRWHSSeled0 [ET_N][WT_N];
+  float                n_pass_CRWHSSnfj   [ET_N][WT_N];
+  float                n_pass_CRWHSSnbj   [ET_N][WT_N];
+  float                n_pass_CRWHSSnj    [ET_N][WT_N];
+  float                n_pass_CRWHSS2lpt  [ET_N][WT_N];
+  float                n_pass_CRWHSSzveto [ET_N][WT_N];
+  float                n_pass_CRWHSSmwwt  [ET_N][WT_N];
+  float                n_pass_CRWHSShtmin [ET_N][WT_N];
+  float                n_pass_CRWHSSmetrel[ET_N][WT_N];
+  float                n_pass_CRWHSS      [ET_N][WT_N];
 };
 #endif
