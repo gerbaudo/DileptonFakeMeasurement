@@ -24,7 +24,6 @@ SusySelectionMatt::SusySelectionMatt() :
   m_nLepMax(2),
   m_cutNBaseLep(true),
   m_ET(ET_Unknown),
-  m_doSusy(false),
   m_susyXS(NULL)
 {
   // Loop over weight types

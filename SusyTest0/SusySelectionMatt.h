@@ -69,7 +69,6 @@ class SusySelectionMatt : public SusyNtAna
 
     // Some controls
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
-    void setDoSusy(bool susy){ m_doSusy = susy; };
 
     // Method to increment the counters for the event weight types
     void increment(float flag[], bool includeLepSF=false, bool includeBtag=false){
@@ -131,7 +130,6 @@ class SusySelectionMatt : public SusyNtAna
 
     DiLepEvtType        m_ET;           // Dilepton event type to store cf
 
-    bool                 m_doSusy;       // flag to turn on susy xs
     XSReader*            m_susyXS;       // susy xs object
 
     // Event counters
