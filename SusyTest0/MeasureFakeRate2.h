@@ -55,6 +55,9 @@ class MeasureFakeRate2 : public SusySelectionMatt
   enum LeptonType {kElectron, kMuon}; // DG Dec13: move this enum to a separate file when Fake is a separate package
   const std::vector<LeptonType> m_leptonTypes; //! types of leptons for which we will measure the fake probability
   static const std::string LeptonType2str(const LeptonType l);
+  //! slightly different from criteria::isRealLepton; need to check whether this implementation is still needed (DG 2013-12-06)
+  static bool isRealLepton(const Lepton* lep, uint dsid);
+  static bool isFakeLepton(const Lepton* lep, uint dsid) { return !MeasureFakeRate2::isRealLepton(lep, dsid); }
 
   EffObject* h_l_pt         [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
   EffObject* h_l_pt_coarse  [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];

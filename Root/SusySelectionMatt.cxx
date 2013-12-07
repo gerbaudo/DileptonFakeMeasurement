@@ -227,45 +227,6 @@ SsPassFlags SusySelectionMatt::passWhSS(const LeptonVector& leptons, const JetVe
 /*--------------------------------------------------------------------------------*/
 // Generic cuts
 /*--------------------------------------------------------------------------------*/
-bool SusySelectionMatt::isRealLepton(const Lepton* lep)
-{
-  // Updated way of handling real and fake leptons using LeptonTruthTools
-  // Need to handle new g2ww -- Assume all real for now
-  uint mcId = nt.evt()->mcChannel;
-  if( mcId == 169471 || mcId == 169472 || mcId == 169473 || mcId == 169474 ||
-      mcId == 169475 || mcId == 169476 || mcId == 169477 || mcId == 169478 ||
-      mcId == 169479)
-    return true;
-  return (lep->truthType == RecoTruthMatch::PROMPT);
-  // Code taken from Steve.  There seems to be an issue with Sherpa samples, so
-  // need to handle those separately. Also just for clarification:
-  // * mcOrigin = 9 -- Tau Lepton
-  // * mcType   = 1 -- Unknown Electron
-  // * mcType   = 2 -- Iso Electron
-  // * mcType   = 5 -- Unknown Muon
-  // * mcType   = 6 -- Iso Muon
-  // Cut is sample dependent due to Sherpa classifications broken
-  // All tau leptons are classified as non-iso
-  // I'm not sure why, yet, but for now I will treat them as real leptons.
-  if(lep->mcOrigin == 9) return true;
-  const int mcType = lep->mcType;
-  // Sherpa diboson, assume all unknowns are real leptons
-  // This is an approximation, but probably ok.
-  if( (mcId>=126892 && mcId<=126895) || (mcId>=147770 && mcId<=147772) ||
-      (mcId>=147774 && mcId<=147776)){
-    if(lep->isEle()) return mcType == 1 || mcType == 2;
-    else             return mcType == 5 || mcType == 6;
-  }
-  else{
-    // 2-lep classifies everything as real if it
-    // is from W, Z, tau, or top..
-    //uint origin = lep->mcOrigin;
-    //return origin == 9 || origin == 12 || origin == 13 || origin == 10;
-    if(lep->isEle()) return mcType == 2;
-    else             return mcType == 6;
-  }
-}
-/*--------------------------------------------------------------------------------*/
 float SusySelectionMatt::getEvtWeight(const LeptonVector& leptons, bool includeBTag, bool includeTrig,
 				  bool doMediumpp)
 {

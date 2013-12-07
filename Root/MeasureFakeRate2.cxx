@@ -225,9 +225,10 @@ bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
   for(uint il=0; il<leptons.size(); ++il){
     Lepton* l=leptons[il];
     bool isQcdLepton(susy::isHFLepton(l) || susy::isLFLepton(l));
+    uint dsid(nt.evt()->mcChannel);
     if(CR==CR_MCConv && susy::isConvLepton(l)) m_probes.push_back( l ); // Conversion
     if(CR==CR_MCQCD && isQcdLepton)            m_probes.push_back( l ); // QCD
-    if(CR==CR_MCReal && susy::isRealLepton(l)) m_probes.push_back( l ); // Real
+    if(CR==CR_MCReal && isRealLepton(l, dsid)) m_probes.push_back( l ); // Real
   }
   m_evtWeight = getEvtWeight(leptons);
   return true;
@@ -424,7 +425,8 @@ bool MeasureFakeRate2::passConvCR(const LeptonVector &leptons,
 //----------------------------------------------------------
 sf::LeptonSource MeasureFakeRate2::getLeptonSource(const Lepton* l)
 {
-  if( isRealLepton(l) ) return LS_Real;
+  uint dsid(nt.evt()->mcChannel);
+  if( isRealLepton(l, dsid) ) return LS_Real;
   if( susy::isHFLepton(l) )   return LS_HF;
   if( susy::isLFLepton(l) )   return LS_LF;
   if( susy::isConvLepton(l) ) return LS_Conv;
@@ -448,5 +450,43 @@ const std::string MeasureFakeRate2::LeptonType2str(const LeptonType l)
     default        : ;
     }
     return lname;
+}
+//----------------------------------------------------------
+bool MeasureFakeRate2::isRealLepton(const Lepton* lep, uint dsid)
+{
+  // Updated way of handling real and fake leptons using LeptonTruthTools
+  // Need to handle new g2ww -- Assume all real for now
+  if( dsid == 169471 || dsid == 169472 || dsid == 169473 || dsid == 169474 ||
+      dsid == 169475 || dsid == 169476 || dsid == 169477 || dsid == 169478 ||
+      dsid == 169479)
+    return true;
+  return (lep->truthType == RecoTruthMatch::PROMPT);
+  // Code taken from Steve.  There seems to be an issue with Sherpa samples, so
+  // need to handle those separately. Also just for clarification:
+  // * mcOrigin = 9 -- Tau Lepton
+  // * mcType   = 1 -- Unknown Electron
+  // * mcType   = 2 -- Iso Electron
+  // * mcType   = 5 -- Unknown Muon
+  // * mcType   = 6 -- Iso Muon
+  // Cut is sample dependent due to Sherpa classifications broken
+  // All tau leptons are classified as non-iso
+  // I'm not sure why, yet, but for now I will treat them as real leptons.
+  if(lep->mcOrigin == 9) return true;
+  const int mcType = lep->mcType;
+  // Sherpa diboson, assume all unknowns are real leptons
+  // This is an approximation, but probably ok.
+  if( (dsid>=126892 && dsid<=126895) || (dsid>=147770 && dsid<=147772) ||
+      (dsid>=147774 && dsid<=147776)){
+    if(lep->isEle()) return mcType == 1 || mcType == 2;
+    else             return mcType == 5 || mcType == 6;
+  }
+  else{
+    // 2-lep classifies everything as real if it
+    // is from W, Z, tau, or top..
+    //uint origin = lep->mcOrigin;
+    //return origin == 9 || origin == 12 || origin == 13 || origin == 10;
+    if(lep->isEle()) return mcType == 2;
+    else             return mcType == 6;
+  }
 }
 //----------------------------------------------------------

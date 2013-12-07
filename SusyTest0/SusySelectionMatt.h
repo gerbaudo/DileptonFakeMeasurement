@@ -51,9 +51,6 @@ class SusySelectionMatt : public SusyNtAna
     bool selectBaseEvent(bool doMll=true, bool count=false);
     SsPassFlags passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met);
 
-    // Idendification methods
-    bool isRealLepton(const Lepton* lep);
-    bool isFakeLepton(const Lepton* lep) { return !isRealLepton(lep); }
     // Get Btag weight
     float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true,
 		       bool doMediumpp=false);
