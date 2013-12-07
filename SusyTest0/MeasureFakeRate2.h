@@ -20,7 +20,7 @@
 #include "SusyMatrixMethod/FakeRegions.h"
 #include "SusyTest0/DileptonChannel.h"
 #include "SusyTest0/FakeLeptonSources.h"
-#include "SusyTest0/SusySelectionMatt.h"
+#include "SusyTest0/SusySelection.h"
 #include "SusyTest0/EffObject.h"
 #include "SusyTest0/SsPassFlags.h"
 
@@ -43,7 +43,7 @@ enum WeightType
   WT_N
 };
 
-class MeasureFakeRate2 : public SusySelectionMatt
+class MeasureFakeRate2 : public SusySelection
 {
 
  public:

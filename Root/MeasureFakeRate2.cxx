@@ -60,7 +60,7 @@ MeasureFakeRate2::~MeasureFakeRate2()
 void MeasureFakeRate2::Begin(TTree* /*tree*/)
 {
   if(m_dbg) cout << "MeasureFakeRate2::Begin" << endl;
-  SusySelectionMatt::Begin(0);
+  SusySelection::Begin(0);
   initHistos(m_fileName);
 }
 /*--------------------------------------------------------------------------------*/
@@ -574,7 +574,7 @@ void MeasureFakeRate2::dumpEventCounters()
 
   for(int w=0; w<WT_N; ++w){
     cout << "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" << endl;
-    cout << "SusySelectionMatt Event counts for weight: " << v_WT[w] << endl;
+    cout << "SusySelection Event counts for weight: " << v_WT[w] << endl;
     cout << endl;
     cout << "read in:       " << n_readin[w]           << endl;
     cout << "pass LAr:      " << n_pass_LAr[w]         << endl;
