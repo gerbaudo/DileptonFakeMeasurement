@@ -68,10 +68,6 @@ SusySelectionMatt::SusySelectionMatt() :
       n_pass_CRWHSS      [i][w] = 0;
     }
   }// end loop over weight types
-
-  m_BoundLow = TF1("expo","expo",1.5,4.0);
-  m_BoundLow.FixParameter(0, 6.11861);
-  m_BoundLow.FixParameter(1,-1.118815);
 }
 
 /*--------------------------------------------------------------------------------*/

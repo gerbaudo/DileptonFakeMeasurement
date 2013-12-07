@@ -59,8 +59,6 @@ class SusySelectionMatt : public SusyNtAna
 
     bool                m_dumpCounts;   // Flag to dump counters
 
-    TF1                 m_BoundLow;      // function for ZJets CR
-
     // Cut variables
     float                m_nLepMin;      // min leptons
     float                m_nLepMax;      // max leptons
