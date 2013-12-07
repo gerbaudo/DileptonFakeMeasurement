@@ -54,10 +54,6 @@ class SusySelectionMatt : public SusyNtAna
     float getEvtWeight(const LeptonVector &leptons, bool includeBTag=false, bool includeTrig=true,
 		       bool doMediumpp=false);
     float getBTagWeight(const Event* evt);
-
-    // Some controls
-    void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
-
     // Method to increment the counters for the event weight types
     void increment(float flag[], bool includeLepSF=false, bool includeBtag=false){
       flag[WT_Raw]   += 1.0;
