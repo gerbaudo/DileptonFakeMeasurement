@@ -3,7 +3,6 @@
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyTest0/utils.h"
 #include "SusyTest0/criteria.h"
-#include "SusyTest0/SusySelectionMatt.h"
 
 #include <iomanip>
 #include <sstream>      // std::ostringstream

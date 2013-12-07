@@ -7,7 +7,6 @@
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyTest0/criteria.h"
 #include "SusyMatrixMethod/DiLeptonMatrixMethod.h"
-#include "SusyTest0/SusySelectionMatt.h"
 
 using namespace std;
 using namespace Susy;
