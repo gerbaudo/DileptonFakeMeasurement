@@ -21,6 +21,7 @@
 #include "SusyXSReader/XSReader.h"
 #include "SusyTest0/ProgressPrinter.h"
 #include "SusyTest0/SsPassFlags.h"
+#include "SusyTest0/DileptonChannel.h"
 
 #include <fstream>
 
@@ -89,10 +90,14 @@ class SusySelection : public SusyNtAna
     SsPassFlags passSrSs(const WH_SR signalRegion,
                          vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
     // Cut methods
-    bool passHfor();
-    bool passTrig2L(const LeptonVector& leptons);
-    bool passTrig2LMatch(const LeptonVector& leptons);
-    bool passTrig2LwithMatch(const LeptonVector& leptons);
+    bool passHfor() { return passHfor(nt); }
+    static bool passHfor(Susy::SusyNtObject &nto);
+    static bool passTrig2L         (const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt);
+    static bool passTrig2LMatch    (const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt);
+    static bool passTrig2LwithMatch(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt);
+    bool passTrig2L(const LeptonVector& leptons) { return passTrig2L(leptons, m_trigObj, m_met->Et, nt.evt()); }
+    bool passTrig2LMatch(const LeptonVector& leptons) { return passTrig2LMatch(leptons, m_trigObj, m_met->Et, nt.evt()); }
+    bool passTrig2LwithMatch(const LeptonVector& leptons) { return passTrig2LwithMatch(leptons, m_trigObj, m_met->Et, nt.evt()); }
     //! for the SS selection we want to accept OS events with an el, for Qflip
     /*!  For MC events that are OS, but that we want to consider as SS
       with some charge-flip probability, the 4-mom of the q-flipped
@@ -114,12 +119,17 @@ class SusySelection : public SusyNtAna
     bool passeq2JetWoutFwVeto(const JetVector& jets);
     bool passNj(const JetVector& jets, int minNj=2, int maxNj=3);
     bool passMuonRelIso(const LeptonVector &leptons, float maxVal);
+    static bool passEwkSs     (const LeptonVector& leptons, const JetVector& jets, const Met* met);
+    static bool passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met);
+
     void setUseXsReader(bool val){ m_useXsReader = val; };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
     //! increment the counters for the all event weight types
     void increment(float counters[], const WeightComponents &wc);
     float computeChargeFlipProb(LeptonVector &leptons, Met &met,
                                 uint systematic, bool update4mom);
+    static susy::wh::Chan getChan(const LeptonVector& leps); // compute lepton channel
+
  protected:
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
     float computeEventWeightXsFromReader(float lumi);

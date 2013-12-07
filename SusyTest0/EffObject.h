@@ -48,7 +48,6 @@ class EffObject : public TObject
     float min = den->GetXaxis()->GetXmin();
     float fillx = var > max ? max - 1e-4 : var;	
     fillx = fillx < min ? min + 1e-4 : fillx;
-
     den->Fill(fillx,weight);
     if(pass) num->Fill(fillx,weight);
   };
@@ -59,11 +58,11 @@ class EffObject : public TObject
   }
 
   ClassDef(EffObject,1);
-
+  
  private:
   TH1F* num;
   TH1F* den;
-  
+
 };
 
 // 2D Eff object
