@@ -21,19 +21,6 @@
 
 #include <fstream>
 
-enum WeightType
-{
-  WT_Raw = 0,   // weight = 1;
-  WT_Evt,       // weight = gen weight
-  WT_PU,        // weight = pileup weight
-  WT_PU1fb,     // weight = pileup weight for 1/fb
-  WT_LSF,       // weight = lepton SF
-  WT_Btag,      // weight = btag
-  WT_Trig,      // Trigger weight
-  WT_AllAB3,    // all weights for A-B3
-  WT_AllAE,     // all weights for A-E
-  WT_N
-};
 
 class SusySelectionMatt : public SusyNtAna
 {

@@ -29,6 +29,20 @@
 using namespace std;
 using namespace Susy;
 
+enum WeightType
+{
+  WT_Raw = 0,   // weight = 1;
+  WT_Evt,       // weight = gen weight
+  WT_PU,        // weight = pileup weight
+  WT_PU1fb,     // weight = pileup weight for 1/fb
+  WT_LSF,       // weight = lepton SF
+  WT_Btag,      // weight = btag
+  WT_Trig,      // Trigger weight
+  WT_AllAB3,    // all weights for A-B3
+  WT_AllAE,     // all weights for A-E
+  WT_N
+};
+
 class MeasureFakeRate2 : public SusySelectionMatt
 {
 
@@ -89,6 +103,7 @@ class MeasureFakeRate2 : public SusySelectionMatt
   float        m_evtWeight;         // Event Weight
   float        m_metRel;            // Met Rel to be plotted
   int          m_ch;                // Set the channel
+  DiLepEvtType m_ET;                // Dilepton event type to store cf
 
   // Event counters
   float                n_readin           [WT_N];

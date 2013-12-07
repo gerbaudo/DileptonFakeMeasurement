@@ -3,6 +3,8 @@
 #include "SusyTest0/FakeBinnings.h"
 #include "SusyTest0/SusySelection.h" // passEwkSs*
 
+#include "LeptonTruthTools/RecoTruthMatch.h"
+
 #include <algorithm> // transform
 using namespace susy::fake;
 using namespace susy::wh;
