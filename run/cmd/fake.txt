@@ -22,7 +22,7 @@ TAG="Oct_10"
 # Here, for the real-lepton efficiencies (tag-and-probe),
 # the Z-peak sideband subtraction is also applied.
 # The SF are printed out to screen; copy them to FinalNewFake.h
-./python/determineFakeScaleFactor.py \\
+./python/determineFakeScaleFactor.py \
  --tag ${TAG} \
  --input_dir  out/fakerate/merged/ \
  --input_iter out/fakerate/merged/iterative_out_${TAG}.root \
@@ -57,3 +57,6 @@ python/plotFakeClosure.py \
  --input_dir  out/susyplot/merged/ \
  --input_fake out/fakepred/merged/data_${TAG}.root \
  --output_dir out/fakepred/merged/fake_closure_plots_${TAG}
+
+# to make the closure plots you might need the susyplot histograms
+./python/submitJobs.py --susyplot -o  -t ${TAG} -e 'wA_noslep'

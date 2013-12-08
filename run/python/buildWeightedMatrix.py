@@ -34,6 +34,7 @@ r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line o
 from rootUtils import buildRatioHistogram
 from utils import (enumFromHeader
                    ,first
+                   ,mkdirIfNeeded
                    ,json_write
                    )
 import matplotlib as mpl
@@ -73,6 +74,7 @@ def main() :
 
     allInputFiles = getInputFiles(inputDirname, tag, verbose) # includes allBkg, which is used only for sys
     assert all(f for f in allInputFiles.values()), ("missing inputs: \n%s"%'\n'.join(["%s : %s"%kv for kv in allInputFiles.iteritems()]))
+    mkdirIfNeeded(outputPlotDir)
     outputFile = r.TFile.Open(outputFname, 'recreate')
     inputFiles = dict((k, v) for k, v in allInputFiles.iteritems() if k in fakeProcesses())
 
@@ -80,7 +82,7 @@ def main() :
     buildElectronRates(inputFiles, outputFile, outputPlotDir, verbose)
     buildSystematics  (allInputFiles['allBkg'], outputFile)
     outputFile.Close()
-    if verbose : print "output saved to \n%s"%'\n'.join([outputFname, outFractionsMu, outFractionsEl])
+    if verbose : print "output saved to \n%s"%'\n'.join([outputFname, outputPlotDir])
 
 def samples() : return ['allBkg', 'ttbar', 'wjets', 'zjets', 'diboson', 'heavyflavor']
 def fakeProcesses() : return ['ttbar', 'wjets', 'zjets', 'diboson', 'heavyflavor']
@@ -88,20 +90,12 @@ def frac2str(frac) :
     return '\n'.join([''.join("%12s"%s for s in fakeProcesses()),
                       ''.join("%12s"%("%.3f"%frac[s]) for s in fakeProcesses())])
 def selectionRegions() :
+    print "probably broken; should now pick the sr names from MeasureFakeRate2::m_signalRegions + susy::fake::RegionNames"
     header = os.path.dirname(__file__)+'/../../SusyTest0/SusyAnaDefsMatt.h'
     enum = enumFromHeader(header, 'SignalRegion')
-    enum = [x[0] for x in sorted(enum.iteritems(), key=operator.itemgetter(1))] # sort by value
-    enum = enum[:-1] # the last one is just the enum size (SR_N), not an actual value
-    fix = {'CRSSInc':'CR_SSInc',
-           'SR_WHSS':'CR_WHSS',
-           'CR8lpt'    :'CR_CR8lpt'    ,
-           'CR8ee'     :'CR_CR8ee'     ,
-           'CR8mm'     :'CR_CR8mm'     ,
-           'CR8mmMtww' :'CR_CR8mmMtww' ,
-           'CR8mmHt'   :'CR_CR8mmHt'   ,
-           } # some enums have string repr different from their literal repr
-    print "selectionRegions : fix ugly mapping when conflicting enums have been removed"
-    enum = [fix[e] if e in fix else e for e in enum]
+    def dictKeysSortedByValue(aDict={}) :
+        return [x[0] for x in sorted(aDict.iteritems(), key=operator.itemgetter(1))]
+    enum = filter(len, dictKeysSortedByValue(enum))
     return enum
 def getInputFiles(inputDirname, tag, verbose=False) :
     inDir = inputDirname
@@ -271,7 +265,7 @@ def plotFractions(fractDict={}, outplotdir='./', prefix='') :
     input : fractDict[sr][lep_type][sample] = float
     """
     outplotdir = outplotdir if outplotdir.endswith('/') else outplotdir+'/'
-    def isInterestingRegion(r) : return any(k in r for k in ['CR8', 'WHSS', 'SSInc'])
+    def isInterestingRegion(r) : return any(k in r for k in ['CR8', 'WHSS', 'SSInc', 'SsEwk'])
     regions  = [r for r in selectionRegions() if isInterestingRegion(r)]
     leptypes = sorted(first(fractDict).keys())
     samples  = sorted(first(first(fractDict)).keys())
@@ -292,9 +286,12 @@ def plotFractions(fractDict={}, outplotdir='./', prefix='') :
         plt.ylim((0.0, 1.0))
         plt.grid(True)
         plt.yticks(np.arange(0.0, 1.0, 0.2))
-        plt.legend([p[0] for p in plots], samples, bbox_to_anchor=(1.2, 1.05))
+        labels = {'heavyflavor' : 'bb/cc', 'diboson' : 'VV', 'ttbar':'tt'}
+        labels = [labels[s] if s in labels else s for s in samples]
+        leg = plt.legend([p[0] for p in plots], labels, bbox_to_anchor=(1.135, 1.05))
+        leg.get_frame().set_alpha(0.5)
         fig.autofmt_xdate(bottom=0.25, rotation=90, ha='center')
-        plt.savefig(outplotdir+prefix+'_'+lt+'.png')
+        fig.savefig(outplotdir+prefix+'_'+lt+'.png')
 
 if __name__=='__main__' :
     main()

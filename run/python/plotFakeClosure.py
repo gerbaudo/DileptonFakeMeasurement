@@ -26,6 +26,7 @@ from rootUtils import (referenceLine
                        )
 from utils import (enumFromHeader
                    ,json_write
+                   ,mkdirIfNeeded
                    ,rmIfExists
                    )
 from SampleUtils import colors
@@ -53,18 +54,20 @@ def main() :
     allOptions = requiredOptions + otherOptions
     def optIsNotSpecified(o) : return not hasattr(opts, o) or getattr(opts,o) is None
     if any(optIsNotSpecified(o) for o in requiredOptions) : parser.error('Missing required option')
-    tag = opts.tag
+    tag           = opts.tag.strip('_')
     inputFakeFile = opts.input_fake
     inputDirname  = opts.input_dir
     outputDir     = opts.output_dir
+    outputDir     = outputDir if outputDir.endswith('/') else outputDir+'/'
     verbose       = opts.verbose
     if verbose : print '\nUsing the following options:\n'+'\n'.join("%s : %s"%(o, str(getattr(opts, o))) for o in allOptions)
 
     inputFiles = getInputFiles(inputDirname, tag, verbose)
     inputFiles[fakeSample()] = r.TFile.Open(inputFakeFile)
     assert all(f for f in inputFiles.values()), ("missing inputs: \n%s"%'\n'.join(["%s : %s"%kv for kv in inputFiles.iteritems()]))
+    mkdirIfNeeded(outputDir)
 
-    for region in ['cr8lptee', 'cr8lptmm', 'cr9lpt', 'cr8lptmmMtww', 'cr8lptmmHt'] :
+    for region in ['cr8lptee', 'cr8lptmm', 'cr9lpt', 'sr8', 'sr9', 'srSsEwk', 'crSsEwkLoose'] :
         for channel in ['ee', 'em', 'mm'] :
             for varname in ['l0_pt', 'l1_pt', 'll_M', 'metrel', 'met', 'njets', 'nbjets'] :
                 histo_basename = region+'_'+channel+'_'+varname
@@ -97,9 +100,8 @@ def susyplotSamples() : return [dataSample()] + mcSamples()
 def getInputFiles(inputDirname, tag, verbose=False) :
     print "getInputFiles ~duplicated with buildWeightedMatrix.py; refactor"
     inDir = inputDirname
-    tag = tag if tag.startswith('_') else '_'+tag
     samples = susyplotSamples()
-    files = dict(zip(samples, [r.TFile.Open(inDir+'/'+s+tag+'.root') for s in samples]))
+    files = dict(zip(samples, [r.TFile.Open(inDir+'/'+s+'_'+tag+'.root') for s in samples]))
     if verbose : print "getInputFiles('%s'):\n\t%s"%(inputDirname, '\n\t'.join("%s : %s"%(k, f.GetName()) for k, f in files.iteritems()))
     return files
 def xaxisLabel(varname) :
@@ -198,7 +200,10 @@ def buildErrBandRatioGraph(errband_graph) :
         gr.SetPointEYlow (p, ey_lo)
         gr.SetPointEYhigh(p, ey_hi)
     return gr
-
+def integralAndError(histo) :
+    error = r.Double(0.0)
+    integral = histo.IntegralAndError(0, histo.GetNbinsX(), error)
+    return integral, float(error)
 def drawTop(pad, hists, err_band, label=('','')) :
     pad.Draw()
     pad.cd()
@@ -209,12 +214,17 @@ def drawTop(pad, hists, err_band, label=('','')) :
     leg.SetBorderSize(0)
     leg.AddEntry(h_data, dataSample(), 'P')
     leg.AddEntry(h_bkg, 'sm', 'L')
+    counters = dict()
+    if 'nbjets' in h_data.GetName() :
+        counters['data'] = integralAndError(h_data)
+        counters['sm'] = integralAndError(h_bkg)
     for s in bkSamples() :
         h = hists[s]
         h.SetMarkerSize(0)
         h.SetFillColor(colors[s])
         h.SetLineColor(h.GetFillColor())
         h.SetDrawOption('bar')
+        if 'nbjets' in h.GetName() : counters[s] = integralAndError(h)
         stack.Add(h)
     for s in bkSamples()[::-1] : leg.AddEntry(hists[s], s, 'F') # stack goes b-t, legend goes t-b
     h_data.SetMarkerStyle(r.kFullDotLarge)
@@ -239,6 +249,11 @@ def drawTop(pad, hists, err_band, label=('','')) :
     yAx.SetLabelSize(textScaleUp*yAx.GetLabelSize())
     pad._graphical_objects = [stack, h_data, h_bkg, err_band, leg, tex] + [h for h in stack.GetStack()]
     pad.Update()
+    if 'nbjets' in h_data.GetName() :
+        print h_data.GetName()
+        print " | ".join(["%12s"%k for k,v in sorted(counters.items())])
+        print " | ".join(["%12s"%("%.1f +/- %.1f"%v) for k,v in sorted(counters.items())])
+
 
 def getXrange(h) :
     nbins = h.GetNbinsX()

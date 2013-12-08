@@ -260,27 +260,28 @@ SsPassFlags SusySelection::passSrSs(const WH_SR signalRegion,
   return f;
 }
 //-----------------------------------------
-bool SusySelection::passHfor()
+bool SusySelection::passHfor(Susy::SusyNtObject &nto)
 {
-  if(nt.evt()->hfor == 4 ) return false;
-  return true;
+    // DG : inheriting hardcoded magic values from HforToolD3PD.cxx, dah.
+    const int kill(4);
+    return nto.evt()->hfor != kill;
 }
 //-----------------------------------------
-bool SusySelection::passTrig2L(const LeptonVector& leptons)
+bool SusySelection::passTrig2L(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt)
 {
-  if(leptons.size() != 2 || !m_trigObj) return false;
-  return m_trigObj->passDilEvtTrig(leptons, m_met->Et, nt.evt());
+  if(leptons.size() != 2 || !dtl) return false;
+  return dtl->passDilEvtTrig(leptons, met, evt);
 }
 //-----------------------------------------
-bool SusySelection::passTrig2LMatch(const LeptonVector& leptons)
+bool SusySelection::passTrig2LMatch(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt)
 {
-  if(leptons.size() != 2 || !m_trigObj) return false;
-  return m_trigObj->passDilTrigMatch(leptons, m_met->Et, nt.evt());
+  if(leptons.size() != 2 || !dtl) return false;
+  return dtl->passDilTrigMatch(leptons, met, evt);
 }
 //-----------------------------------------
-bool SusySelection::passTrig2LwithMatch(const LeptonVector& leptons)
+bool SusySelection::passTrig2LwithMatch(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt)
 {
-  return (passTrig2L(leptons) && passTrig2LwithMatch(leptons));
+  return (passTrig2L(leptons, dtl, met, evt) && passTrig2LMatch(leptons, dtl, met, evt));
 }
 //-----------------------------------------
 bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
@@ -388,6 +389,29 @@ bool SusySelection::passMuonRelIso(const LeptonVector &leptons, float maxVal)
     } // end if(isMu)
   } // end for(i)
   return true;
+}
+//-----------------------------------------
+bool SusySelection::passEwkSs(const LeptonVector& leptons, const JetVector& jets, const Met* met)
+{
+    if(leptons.size()<2) return false;
+    bool noBjets(numberOfCBJets(jets)==0), noFwJets(numberOfFJets(jets)==0);
+    bool someCentralJets(numberOfCLJets(jets)>0);
+    const Lepton &l0 = *leptons[0], &l1 = *leptons[1];
+    TLorentzVector ll(l0+l1);
+    return (noBjets && noFwJets && someCentralJets
+            && (getMetRel(met, leptons, jets)>50.0)
+            && susy::sameSign(leptons)
+            && (ll.M()<60.0) && (ll.Pt()<20.) && (fabs(l0.DeltaPhi(l1)) >= 1.3));
+}
+//-----------------------------------------
+bool SusySelection::passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met)
+{
+    if(leptons.size()<2) return false;
+    bool noBjets(numberOfCBJets(jets)==0), noFwJets(numberOfFJets(jets)==0);
+    bool someCentralJets(numberOfCLJets(jets)>0);
+    return (noBjets && noFwJets && someCentralJets
+            && susy::sameSign(leptons)
+            && (getMetRel(met, leptons, jets)>40.0));
 }
 //-----------------------------------------
 void SusySelection::cacheStaticWeightComponents()
@@ -584,6 +608,21 @@ float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
     met.phi = smearedMet.Phi();
   }
   return flipProb*overlapFrac;
+}
+//-----------------------------------------
+susy::wh::Chan SusySelection::getChan(const LeptonVector& leps)
+{
+  uint ie = 0;
+  uint im = 0;
+  for(uint i=0; i<leps.size(); ++i){
+    if( leps.at(i)->isEle() ) ie++;
+    else if( leps.at(i)->isMu() ) im++;
+  }
+  if( ie == 2 && im == 0 ) return susy::wh::Ch_ee;
+  if( ie == 1 && im == 1 ) return susy::wh::Ch_em;
+  if( ie == 0 && im == 2 ) return susy::wh::Ch_mm;
+  cout<<"Not ee/mm/em... Number Electrons: "<<ie<<" Number Muons: "<<im<<endl;
+  return susy::wh::Ch_N; // not in range
 }
 //-----------------------------------------
 void SusySelection::resetAllCounters()

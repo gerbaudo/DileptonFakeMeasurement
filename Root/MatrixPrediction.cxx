@@ -9,7 +9,8 @@
 
 using namespace std;
 using namespace Susy;
-
+using namespace susy::wh; // cleanup
+namespace swh = susy::wh;
 
 const float ptmin    = 0;
 const float ptmax    = 250;
@@ -42,6 +43,7 @@ void MatrixPrediction::Begin(TTree* /*tree*/)
 Bool_t MatrixPrediction::Process(Long64_t entry)
 {
   namespace smm = SusyMatrixMethod;
+  namespace sf = susy::fake;
 
   if(!m_allconfigured) return false;
   m_printer.countAndPrint(cout);
@@ -69,16 +71,20 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   if(!ssf.passLpt()) return false;
   for(uint s = 0; s<m_systs.size(); ++s){
     smm::SYSTEMATIC sys = static_cast<smm::SYSTEMATIC>(m_systs.at(s));
-    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
-    if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8ee,     metRel,sys), PR_CR8ee,     sys);
+    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
+    if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8ee,     metRel,sys), PR_CR8ee,     sys);
     if(isMm && ssf.lepPt
-            && passMinMet   ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8mm,     metRel,sys), PR_CR8mm,     sys);
-    if(isMm && ssf.mtllmet  ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8mmMtww, metRel,sys), PR_CR8mmMtww, sys);
-    if(isMm && ssf.ht       ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_CR8mmHt,   metRel,sys), PR_CR8mmHt,   sys);
-    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_SR_WHSS,   metRel,sys), PR_CR8lpt,    sys);
-    if(isOf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_SR_WHSS,   metRel,sys), PR_CR9lpt,    sys);
-    if(isSf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_SR_WHSS,   metRel,sys), PR_SR8,       sys);
-    if(isOf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,smm::FR_SR_WHSS,   metRel,sys), PR_SR9,       sys);
+            && passMinMet   ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mm,     metRel,sys), PR_CR8mm,     sys);
+    if(isMm && ssf.mtllmet  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mmMtww, metRel,sys), PR_CR8mmMtww, sys);
+    if(isMm && ssf.ht       ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mmHt,   metRel,sys), PR_CR8mmHt,   sys);
+    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_CR8lpt,    sys);
+    if(isOf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_CR9lpt,    sys);
+    if(isSf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_SR8,       sys);
+    if(isOf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_SR9,       sys);
+    bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
+    bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
+    if(passEwkSs)      fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwk,     metRel,sys), PR_SsEwk,     sys);
+    if(passEwkSsLoose) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwkLoose,metRel,sys), PR_SsEwkLoose,sys);
   } // end for(s)
   return ssf.passAll();
 }
@@ -97,9 +103,8 @@ bool MatrixPrediction::bookFakeHisto()
     return false;
   }
   m_histFile->cd();  // Histogram file from SusyPlotter
-  for(uint iPR=0; iPR<PR_N; ++iPR){ // Plot Region
-    string PR = PRNames[iPR];
-    //if( !(iPR == PR_VR1 || iPR == PR_VR3) ) continue;
+  for(uint iPR=0; iPR<kNumberOfPlotRegions; ++iPR){ // Plot Region
+      string PR = swh::region2str(PlotRegions[iPR]);
     for(uint iCh=0; iCh<Ch_N; ++iCh){ // lepton channel
       string chan = chanNames[iCh];
       for(uint iMP=0; iMP<MP_N; ++iMP){  // matrix pairs
@@ -139,27 +144,27 @@ do{                                                                       \
 }
 //----------------------------------------------------------
 void MatrixPrediction::fillFakeHistos(const LeptonVector &baseLeps, const JetVector &jets,
-				      const Met* met,float weight, PlotRegion PR, uint sys)
+                                      const Met* met,float weight, size_t regionIndex, uint sys)
 {
-
+  const size_t &ri = regionIndex;
   if(m_dbg) cout << "MatrixPrediction::plotFakeHisto" << endl;
   if( baseLeps.size() != 2 ) return;
-  int ch = getChan(baseLeps);
+  int ch = SusySelection::getChan(baseLeps);
   int mp = getMatrixPair(baseLeps);
   const Lepton* l0 = baseLeps[0];
   const Lepton* l1 = baseLeps[1];
 #define FILL(h, var)            \
 do{                                                                   \
-  float max   = h[ch][PR][mp][WT_ON][sys]->GetXaxis()->GetXmax();       \
+  float max   = h[ch][ri][mp][WT_ON][sys]->GetXaxis()->GetXmax();       \
   float xfill = var > max ? max - 1e-4 : var;                           \
-  h[ch][PR][mp][WT_ON][sys]->Fill(xfill,weight);                        \
-  h[Ch_all][PR][mp][WT_ON][sys]->Fill(xfill,weight);                    \
-  h[ch][PR][mp][WT_OFF][sys]->Fill(xfill,1.0);                          \
-  h[Ch_all][PR][mp][WT_OFF][sys]->Fill(xfill,1.0);                      \
-  h[ch][PR][MP_ALL][WT_ON][sys]->Fill(xfill,weight);                    \
-  h[Ch_all][PR][MP_ALL][WT_ON][sys]->Fill(xfill,weight);                \
-  h[ch][PR][MP_ALL][WT_OFF][sys]->Fill(xfill,1.0);                      \
-  h[Ch_all][PR][MP_ALL][WT_OFF][sys]->Fill(xfill,1.0);                  \
+  h[ch][ri][mp][WT_ON][sys]->Fill(xfill,weight);                        \
+  h[Ch_all][ri][mp][WT_ON][sys]->Fill(xfill,weight);                    \
+  h[ch][ri][mp][WT_OFF][sys]->Fill(xfill,1.0);                          \
+  h[Ch_all][ri][mp][WT_OFF][sys]->Fill(xfill,1.0);                      \
+  h[ch][ri][MP_ALL][WT_ON][sys]->Fill(xfill,weight);                    \
+  h[Ch_all][ri][MP_ALL][WT_ON][sys]->Fill(xfill,weight);                \
+  h[ch][ri][MP_ALL][WT_OFF][sys]->Fill(xfill,1.0);                      \
+  h[Ch_all][ri][MP_ALL][WT_OFF][sys]->Fill(xfill,1.0);                  \
  }while(0)
 
   float metrel = getMetRel(met, baseLeps, jets);
@@ -180,7 +185,7 @@ do{                                                                   \
 }
 //----------------------------------------------------------
 float MatrixPrediction::getFakeWeight(const LeptonVector &baseLeps,
-                                      SusyMatrixMethod::FAKE_REGION region,
+                                      susy::fake::Region region,
                                       float metRel,
                                       SusyMatrixMethod::SYSTEMATIC sys)
 {
@@ -198,9 +203,9 @@ float MatrixPrediction::getFakeWeight(const LeptonVector &baseLeps,
 }
 //----------------------------------------------------------
 float MatrixPrediction::getRFWeight(const LeptonVector &baseLeps,
-				      SusyMatrixMethod::FAKE_REGION region,
-				      float metRel,
-				      SusyMatrixMethod::SYSTEMATIC sys)
+                                    susy::fake::Region region,
+                                    float metRel,
+                                    SusyMatrixMethod::SYSTEMATIC sys)
 {
 
   if(baseLeps.size() != 2) return 0.0;
