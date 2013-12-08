@@ -23,6 +23,7 @@ defaultBatchTag = '_Jul25_n0145'
 parser = optparse.OptionParser()
 parser.add_option('--susyplot', action='store_true', default=False)
 parser.add_option('--susysel',  action='store_true', default=False)
+parser.add_option('--seltuple', action='store_true', default=False)
 parser.add_option('--fakeprob', action='store_true', default=False)
 parser.add_option('--fakerate', action='store_true', default=False, help='fake rate with code from Matt')
 parser.add_option('--fakepred', action='store_true', default=False, help='run FakePred by Matt')
@@ -51,18 +52,20 @@ exclude      = options.exclude
 submit       = options.submit
 susyplot     = options.susyplot
 susysel      = options.susysel
+seltuple     = options.seltuple
 fakepred     = options.fakepred
 fakeprob     = options.fakeprob
 fakerate     = options.fakerate
 alsoph       = options.alsoplaceholders
 verbose      = options.verbose
 
-if not [susyplot, susysel, fakeprob, fakerate, fakepred].count(True)==1 :
+if not [susyplot, susysel, seltuple, fakeprob, fakerate, fakepred].count(True)==1 :
     parser.error("specify one executable")
 scriptDir = 'batch'
 template  = ''
 template += scriptDir+'/templates/susyPlot.sh.template' if susyplot else ''
 template += scriptDir+'/templates/susySel.sh.template'  if susysel else ''
+template += scriptDir+'/templates/selTuple.sh.template' if seltuple else ''
 template += scriptDir+'/templates/fakeprob.sh.template' if fakeprob else ''
 template += scriptDir+'/templates/fakerate.sh.template' if fakerate else ''
 template += scriptDir+'/templates/fakepred.sh.template' if fakepred else ''
@@ -71,6 +74,7 @@ logdir = 'log/'
 def subdir() :
     if susyplot : return 'susyplot'
     if susysel  : return 'susysel'
+    if seltuple : return 'susysel'
     if fakeprob : return 'fakeprob'
     if fakerate : return 'fakerate'
     if fakepred : return 'fakepred'
