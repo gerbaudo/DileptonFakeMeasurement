@@ -53,6 +53,8 @@ def computeMljj(l0, l1, j0, j1) :
 
 hs_mt2j = dict()
 hs_mljj = dict()
+hs_slpt = dict()
+
 for sample, filename in filenames.iteritems() :
     file = r.TFile.Open(filename)
     tree = file.Get(treename)
@@ -60,11 +62,13 @@ for sample, filename in filenames.iteritems() :
     iEvent = 0
     h_mt2j = r.TH1F('h_mt2j_'+sample, ';m^{J}_{T2} [GeV]; entries/bin', 20, 0.0, 400.0)
     h_mljj = r.TH1F('h_mljj_'+sample, ';m_{ljj} [GeV]; entries/bin', 35, 0.0, 700.0)
+    h_slpt = r.TH1F('h_slpt_'+sample, '; p_{T, soft-lep}[GeV]; entries/bin', 35, 0.0, 700.0)
     for event in tree :
         l0 = fm2tlv(event.l0)
         l1 = fm2tlv(event.l1)
         met = fm2tlv(event.met)
         jets = [fm2tlv(j) for j in event.jets]
+        lepts = [fm2tlv(l) for l in event.lepts]
         pars = event.pars
         if len(jets)<2 : continue
         j0, j1 = jets[0], jets[1]
@@ -83,8 +87,10 @@ for sample, filename in filenames.iteritems() :
         iEvent += 1
         h_mt2j.Fill(mt2_ja, weight)
         h_mljj.Fill(mljj, weight)
+        for l in lepts : h_slpt.Fill(l.Pt())
     hs_mt2j[sample] = h_mt2j
     hs_mljj[sample] = h_mljj
+    hs_slpt[sample] = h_slpt
     if sample=='diboson' : print "diboson entries ",h_mt2j.GetEntries()
 
 
@@ -109,3 +115,4 @@ def plot(histos, var) :
 
 plot(hs_mt2j, 'mt2j')
 plot(hs_mljj, 'mljj')
+plot(hs_slpt, 'lspt')
