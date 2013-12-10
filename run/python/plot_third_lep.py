@@ -1,5 +1,17 @@
 #!/bin/env python
 
+# plot the third lepton that we want to use to reject the diboson bkg
+#
+# Input:
+# small ntuples from susy::wh::TupleMaker
+# Output:
+# plots of multiplicity and best candidate for a Z->ll lepton
+#
+# todo: include functions from utils, rootUtils, and avoid duplication
+#
+# davide.gerbaudo@gmail.com
+# 2013-12-09
+
 import array
 import glob
 import math
