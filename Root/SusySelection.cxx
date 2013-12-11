@@ -10,6 +10,7 @@
 #include "LeptonTruthTools/RecoTruthMatch.h" // provides RecoTruthMatch::
 #include "ChargeFlip/chargeFlip.h"
 #include "SusyTest0/criteria.h"
+#include "SusyTest0/utils.h"
 
 using namespace std;
 using namespace Susy;
@@ -29,6 +30,9 @@ std::string SusySelection::WeightComponents::str() const
 SusySelection::SusySelection() :
   m_susyObj(NULL),
   m_xsReader(NULL),
+  m_tupleMaker("",""),
+  m_writeTuple(false),
+  m_outTupleFile(""),
   m_trigObj(NULL),
   m_useMCTrig(false),
   m_w(1.0),
@@ -54,6 +58,14 @@ void SusySelection::Begin(TTree* /*tree*/)
     m_xsReader->setDebug(m_dbg);
     m_xsReader->LoadXSInfo();
   } // end if(m_useXsReader)
+  if(m_writeTuple) {
+      if(endswith(m_outTupleFile, ".root") && m_tupleMaker.init(m_outTupleFile, "SusySel"))
+          cout<<"initialized ntuple file "<<m_outTupleFile<<endl;
+      else {
+          cout<<"cannot initialize ntuple file '"<<m_outTupleFile<<"'"<<endl;
+          m_writeTuple = false;
+      }
+  }
 }
 //-----------------------------------------
 Bool_t SusySelection::Process(Long64_t entry)
@@ -69,13 +81,24 @@ Bool_t SusySelection::Process(Long64_t entry)
   const JetVector&   bj = m_baseJets;
   const LeptonVector& l = m_signalLeptons;
   if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
-  passSrSs(WH_SRSS1, m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip);
-
+  if(passSrSs(WH_SRSS1,
+              m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip).metrel) {
+      if(m_writeTuple) {
+          double weight(m_weightComponents.product());
+          unsigned int run(nt.evt()->run), event(nt.evt()->event);
+          LeptonVector anyLep(getAnyElOrMu(nt));
+          LeptonVector lowPtLep(subtract_vector(anyLep, m_baseLeptons));
+          const Lepton *l0 = m_signalLeptons[0];
+          const Lepton *l1 = m_signalLeptons[1];
+          m_tupleMaker.fill(weight, run, event, *l0, *l1, *m_met, lowPtLep, m_signalJets2Lep);
+      }
+  }
   return kTRUE;
 }
 //-----------------------------------------
 void SusySelection::Terminate()
 {
+    if(m_writeTuple) m_tupleMaker.close();
   SusyNtAna::Terminate();
   if(m_dbg) cout << "SusySelection::Terminate" << endl;
   dumpEventCounters();
@@ -686,3 +709,21 @@ void SusySelection::initChargeFlipTool()
   if(m_dbg) m_chargeFlip->printSettings();
 }
 //-----------------------------------------
+LeptonVector SusySelection::getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/)
+{
+    // DG 2013-12-02:
+    // todo1 : re-implement with std algo
+    // todo2 : re-implement with syst
+    LeptonVector leptons;
+    for(uint ie=0; ie<susyNt.ele()->size(); ++ie){
+        if(Electron* e = & susyNt.ele()->at(ie)){ //e->setState(sys);
+            leptons.push_back(static_cast<Lepton*>(e));
+        }
+    }
+    for(uint im=0; im<susyNt.muo()->size(); ++im){
+        if(Muon* m = & susyNt.muo()->at(im)){ //m->setState(sys);
+            leptons.push_back(static_cast<Lepton*>(m));
+        }
+    }
+    return leptons;
+}

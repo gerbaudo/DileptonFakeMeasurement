@@ -37,10 +37,10 @@ def topRightLegend(pad,  legWidth, legHeight, shift=0.0) :
     leg.SetFillStyle(0)
     pad._leg = leg
     return leg
-def drawLegendWithDictKeys(pad, histosDict, legWidth=0.325, legHeight=0.225) :
+def drawLegendWithDictKeys(pad, histosDict, legWidth=0.325, legHeight=0.225, opt='p') :
     leg = topRightLegend(pad, legWidth, legHeight)
     for s,h in histosDict.iteritems() :
-        leg.AddEntry(h, s, 'p')
+        leg.AddEntry(h, s, opt)
     leg.Draw()
     pad.Update()
     return leg

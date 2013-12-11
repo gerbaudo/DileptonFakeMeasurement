@@ -1,3 +1,4 @@
+// emacs -*- C++ -*-
 #ifndef SusySelection_h
 #define SusySelection_h
 
@@ -11,6 +12,7 @@
 // Root Packages
 #include "TTree.h"
 
+#include "SusyTest0/TupleMaker.h"
 // Susy Common
 #include "SusyNtuple/SusyNtAna.h"
 #include "SusyNtuple/DilTrigLogic.h"
@@ -124,11 +126,15 @@ class SusySelection : public SusyNtAna
 
     void setUseXsReader(bool val){ m_useXsReader = val; };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
+    void setWriteNtuple(bool val) { m_writeTuple = val; };
+    void setTupleFile(const std::string &name) { m_writeTuple = true; m_outTupleFile = name; };
     //! increment the counters for the all event weight types
     void increment(float counters[], const WeightComponents &wc);
     float computeChargeFlipProb(LeptonVector &leptons, Met &met,
                                 uint systematic, bool update4mom);
-    static susy::wh::Chan getChan(const LeptonVector& leps); // compute lepton channel
+    //! any electron or muon, before pt cuts, before overlap removal
+    static vl_t getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/);
+    static susy::wh::Chan getChan(const LeptonVector& leps); //!< compute lepton channel
 
  protected:
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
@@ -140,12 +146,15 @@ class SusySelection : public SusyNtAna
     void initChargeFlipTool();
     void cacheStaticWeightComponents(); //! cache those weight components that do not depend on sel
     void computeNonStaticWeightComponents(cvl_t& leptons, cvj_t& jets);
-    ClassDef(SusySelection, 1);
+    ClassDef(SusySelection, 2);
 
   protected:
 
     SUSYObjDef* m_susyObj;            // susy obj
     XSReader* m_xsReader;
+    susy::wh::TupleMaker m_tupleMaker;
+    bool m_writeTuple;
+    std::string m_outTupleFile;
 
     DilTrigLogic*       m_trigObj;      // My trigger logic class
     bool                m_useMCTrig;    // Use MC Trigger, i.e. toggle the matching in DilTrigLogic::passDil*()
