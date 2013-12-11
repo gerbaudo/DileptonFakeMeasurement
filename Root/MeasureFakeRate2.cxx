@@ -108,6 +108,8 @@ void MeasureFakeRate2::initHistos(string outName)
         h_njets        [il][icr][ich] = new EffObject(bn+"njets",        nJetbins,          Jetbins);
         h_onebin       [il][icr][ich] = new EffObject(bn+"onebin",       1,    -0.5, 0.5);
         h_flavor       [il][icr][ich] = new EffObject(bn+"flavor",       LS_N, -0.5, LS_N-0.5);
+        h_l_pt_true    [il][icr][ich] = new TH1F     ((bn+"l_pt_true").c_str(), "", nFakePtbins, FakePtbins);
+        h_l_pt_fake    [il][icr][ich] = new TH1F     ((bn+"l_pt_fake").c_str(), "", nFakePtbins, FakePtbins);
         for(int lbl=0; lbl<LS_N; ++lbl) h_flavor[il][icr][ich]->SetXLabel(lbl+1, LSNames[lbl]);
       } // end for(ich)
     } // end for(icr)
@@ -203,6 +205,8 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
         bool isQcd(ls==LS_HF||ls==LS_LF);
         fillEff(h_flavor, ls);
         if(isQcd) fillEff(h_flavor, LS_QCD);
+        TH1F *hlpt = (ls==LS_Real ? h_l_pt_true[lt][regionIndex][m_ch] : h_l_pt_fake[lt][regionIndex][m_ch]);
+        if(hlpt) hlpt->Fill(lep->Pt(), m_evtWeight);
     }
 }
 /*--------------------------------------------------------------------------------*/
