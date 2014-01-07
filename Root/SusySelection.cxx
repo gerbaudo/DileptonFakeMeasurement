@@ -82,7 +82,8 @@ Bool_t SusySelection::Process(Long64_t entry)
   const LeptonVector& l = m_signalLeptons;
   if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
   if(passSrSs(WH_SRSS1,
-              m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip).metrel) {
+              m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip)
+     .lepPt) {
       if(m_writeTuple) {
           double weight(m_weightComponents.product());
           unsigned int run(nt.evt()->run), event(nt.evt()->event);
