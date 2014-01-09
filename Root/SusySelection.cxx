@@ -626,6 +626,19 @@ susy::wh::Chan SusySelection::getChan(const LeptonVector& leps)
   return susy::wh::Ch_N; // not in range
 }
 //-----------------------------------------
+SsPassFlags SusySelection::assignNjetFlags(const JetVector& jets, SsPassFlags f)
+{
+  int njCl = numberOfCLJets(jets);
+  int njB  = numberOfCBJets(jets);
+  int njF  = numberOfFJets (jets);
+  f.bjveto = njB  == 0;
+  f.fjveto = njF  == 0;
+  f.ge1j   = njCl >= 1;
+  f.eq1j   = njCl == 1;
+  f.ge2j   = njCl >= 2;
+  return f;
+}
+//-----------------------------------------
 void SusySelection::resetAllCounters()
 {
   for(int w=0; w<kWeightTypesN; ++w){// Loop over weight types

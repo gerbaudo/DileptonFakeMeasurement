@@ -135,6 +135,7 @@ class SusySelection : public SusyNtAna
     //! any electron or muon, before pt cuts, before overlap removal
     static vl_t getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/);
     static susy::wh::Chan getChan(const LeptonVector& leps); //!< compute lepton channel
+    static SsPassFlags assignNjetFlags(const JetVector& jets, SsPassFlags f);
 
  protected:
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
