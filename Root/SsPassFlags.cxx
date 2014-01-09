@@ -15,6 +15,8 @@ std::string SsPassFlags::str() const
      <<" fjveto: "<<fjveto
      <<" bjveto: "<<bjveto
      <<" ge1j: "<<ge1j
+     <<" eq1j: "<<eq1j
+     <<" ge2j: "<<ge2j
      <<" lepPt: "<<lepPt
      <<" zllVeto: "<<zllVeto
      <<" mtllmet: "<<mtllmet
