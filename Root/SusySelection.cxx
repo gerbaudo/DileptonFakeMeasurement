@@ -262,11 +262,15 @@ SsPassFlags SusySelection::passSrSs(const WH_SR signalRegion,
   float* cnt_mWwt     = f.eq1j ? n_pass_eq1jmWwt     [ll] : n_pass_ge2jmWwt     [ll];
   float* cnt_ht       = f.eq1j ? n_pass_eq1jht       [ll] : n_pass_ge2jht       [ll];
   float* cnt_metRel   = f.eq1j ? n_pass_eq1jmetRel   [ll] : n_pass_ge2jmetRel   [ll];
+  float* cnt_3rdLep   = f.eq1j ? n_pass_eq1j3rdLep   [ll] : n_pass_ge2j3rdLep   [ll];
   if(susy::pass2LepPt(ncls, ptL0Min, ptL1Min))  { increment(cnt_lepPt   , wc); f.lepPt   = true;} else return f;
   if(susy::passZllVeto(ncls, loMllZ, hiMllZ))   { increment(cnt_mllZveto, wc); f.zllVeto = true;} else return f;
   if(susy::passMtLlMetMin(ncls, met, mtwwMin))  { increment(cnt_mWwt    , wc); f.mtllmet = true;} else return f;
   if(susy::passHtMin(ncls, js, met, htMin))     { increment(cnt_ht      , wc); f.ht      = true;} else return f;
   if(passMetRelMin (met,ncls,js,metRelMin))     { increment(cnt_metRel  , wc); f.metrel  = true;} else return f;
+  LeptonVector anyLeptons(getAnyElOrMu(nt));
+  LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
+  if(passThirdLeptonVeto(ncls[0], ncls[1], lowPtLep)) { increment(cnt_3rdLep, wc); f.veto3rdL = true;} else return f;
   return f;
 }
 //-----------------------------------------
@@ -557,6 +561,7 @@ void SusySelection::dumpEventCounters()
     cout<<"mWwt             : "<<lcpet(n_pass_eq1jmWwt       , w, cw)<<endl;
     cout<<"ht               : "<<lcpet(n_pass_eq1jht         , w, cw)<<endl;
     cout<<"metRel           : "<<lcpet(n_pass_eq1jmetRel     , w, cw)<<endl;
+    cout<<"3rdLepVeto       : "<<lcpet(n_pass_eq1j3rdLep     , w, cw)<<endl;
     cout<<midRule                                                    <<endl;
     cout<<"ge2j             : "<<lcpet(n_pass_ge2j           , w, cw)<<endl;
     cout<<"lepPt            : "<<lcpet(n_pass_ge2jlepPt      , w, cw)<<endl;
@@ -564,6 +569,7 @@ void SusySelection::dumpEventCounters()
     cout<<"mWwt             : "<<lcpet(n_pass_ge2jmWwt       , w, cw)<<endl;
     cout<<"ht               : "<<lcpet(n_pass_ge2jht         , w, cw)<<endl;
     cout<<"metRel           : "<<lcpet(n_pass_ge2jmetRel     , w, cw)<<endl;
+    cout<<"3rdLepVeto       : "<<lcpet(n_pass_ge2j3rdLep     , w, cw)<<endl;
     cout<<midRule                                                    <<endl;
   }// end for(w)
 }
@@ -672,7 +678,7 @@ bool SusySelection::passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lept
         if(ll0.isZcandidate() && ll0.isInZwindow(maxDeltaMz)) nCandInWindow++;
         if(ll1.isZcandidate() && ll1.isInZwindow(maxDeltaMz)) nCandInWindow++;
     }
-    return nCandInWindow > 0;
+    return nCandInWindow == 0;
 }
 //-----------------------------------------
 void SusySelection::resetAllCounters()
@@ -744,16 +750,19 @@ void SusySelection::resetAllCounters()
       n_pass_mWwt       [i][w] = 0;
       n_pass_ht         [i][w] = 0;
       n_pass_metRel     [i][w] = 0;
+      n_pass_3rdLep     [i][w] = 0;
       n_pass_eq1jlepPt   [i][w] = 0;
       n_pass_eq1jmllZveto[i][w] = 0;
       n_pass_eq1jmWwt    [i][w] = 0;
       n_pass_eq1jht      [i][w] = 0;
       n_pass_eq1jmetRel  [i][w] = 0;
+      n_pass_eq1j3rdLep  [i][w] = 0;
       n_pass_ge2jlepPt   [i][w] = 0;
       n_pass_ge2jmllZveto[i][w] = 0;
       n_pass_ge2jmWwt    [i][w] = 0;
       n_pass_ge2jht      [i][w] = 0;
       n_pass_ge2jmetRel  [i][w] = 0;
+      n_pass_ge2j3rdLep  [i][w] = 0;
     } // end for(i)
   } // end for(w)
 }
