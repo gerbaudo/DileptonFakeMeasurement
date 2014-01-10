@@ -565,10 +565,6 @@ void SusySelection::dumpEventCounters()
     cout<<"ht               : "<<lcpet(n_pass_ge2jht         , w, cw)<<endl;
     cout<<"metRel           : "<<lcpet(n_pass_ge2jmetRel     , w, cw)<<endl;
     cout<<midRule                                                    <<endl;
-    cout<<"mllMin           : "<<lcpet(n_pass_mllMin         , w, cw)<<endl;
-    cout<<"flavor:          : "<<lcpet(n_pass_flavor         , w, cw)<<endl;
-    cout<<"OS:              : "<<lcpet(n_pass_os             , w, cw)<<endl;
-    cout<<midRule                                                    <<endl;
   }// end for(w)
 }
 //-----------------------------------------
