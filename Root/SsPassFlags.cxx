@@ -21,6 +21,7 @@ std::string SsPassFlags::str() const
      <<" zllVeto: "<<zllVeto
      <<" mtllmet: "<<mtllmet
      <<" ht: "<<ht
-     <<" metrel: "<<metrel;
+     <<" metrel: "<<metrel
+     <<" veto3rdL: "<<veto3rdL;
   return oss.str();
 }
