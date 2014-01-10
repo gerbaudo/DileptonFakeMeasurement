@@ -136,6 +136,8 @@ class SusySelection : public SusyNtAna
     static vl_t getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/);
     static susy::wh::Chan getChan(const LeptonVector& leps); //!< compute lepton channel
     static SsPassFlags assignNjetFlags(const JetVector& jets, SsPassFlags f);
+    //! determine whether a third lepton makes a Z candidate with a signal lepton
+    static bool passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lepton* l1, const LeptonVector& otherLeptons);
 
  protected:
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader

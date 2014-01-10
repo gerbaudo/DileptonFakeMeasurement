@@ -653,6 +653,28 @@ SsPassFlags SusySelection::assignNjetFlags(const JetVector& jets, SsPassFlags f)
   return f;
 }
 //-----------------------------------------
+bool SusySelection::passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lepton* l1, const LeptonVector& otherLeptons)
+{
+    struct LepPair {
+        const Susy::Lepton *signal, *other;
+        LepPair(const Susy::Lepton *s, const Susy::Lepton *o) : signal(s), other(o) { assert(s!=0 && o!=0); }
+        bool haveOppositeSign() { return (signal->q * other->q) > 0; }
+        bool haveSameFlavor() { return (signal->isMu() && other->isMu()) || (signal->isEle() && other->isEle()); }
+        bool areSeparated() { return signal->DeltaR(*other) > 0.05; }
+        bool isZcandidate() { return haveOppositeSign() && haveSameFlavor() && areSeparated(); }
+        float m() { return (*signal + *other).M(); }
+        bool isInZwindow(float maxDelta) { const float mz(91.2); return isZcandidate() && abs(m() - mz) < maxDelta; }
+    };
+    float maxDeltaMz(20.0);
+    size_t nCandInWindow(0);
+    for(size_t i=0; i<otherLeptons.size(); ++i) {
+        LepPair ll0(l0, otherLeptons[i]), ll1(l1, otherLeptons[i]);
+        if(ll0.isZcandidate() && ll0.isInZwindow(maxDeltaMz)) nCandInWindow++;
+        if(ll1.isZcandidate() && ll1.isInZwindow(maxDeltaMz)) nCandInWindow++;
+    }
+    return nCandInWindow > 0;
+}
+//-----------------------------------------
 void SusySelection::resetAllCounters()
 {
   for(int w=0; w<kWeightTypesN; ++w){// Loop over weight types
