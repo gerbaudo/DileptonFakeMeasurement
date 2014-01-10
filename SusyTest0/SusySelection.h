@@ -259,11 +259,23 @@ class SusySelection : public SusyNtAna
     float n_pass_fjVeto     [ET_N][kWeightTypesN];
     float n_pass_bjVeto     [ET_N][kWeightTypesN];
     float n_pass_ge1j       [ET_N][kWeightTypesN];
+    float n_pass_eq1j       [ET_N][kWeightTypesN];
+    float n_pass_ge2j       [ET_N][kWeightTypesN];
     float n_pass_lepPt      [ET_N][kWeightTypesN];
     float n_pass_mllZveto   [ET_N][kWeightTypesN];
     float n_pass_mWwt       [ET_N][kWeightTypesN];
     float n_pass_ht         [ET_N][kWeightTypesN];
     float n_pass_metRel     [ET_N][kWeightTypesN];
+    float n_pass_eq1jlepPt      [ET_N][kWeightTypesN];
+    float n_pass_eq1jmllZveto   [ET_N][kWeightTypesN];
+    float n_pass_eq1jmWwt       [ET_N][kWeightTypesN];
+    float n_pass_eq1jht         [ET_N][kWeightTypesN];
+    float n_pass_eq1jmetRel     [ET_N][kWeightTypesN];
+    float n_pass_ge2jlepPt      [ET_N][kWeightTypesN];
+    float n_pass_ge2jmllZveto   [ET_N][kWeightTypesN];
+    float n_pass_ge2jmWwt       [ET_N][kWeightTypesN];
+    float n_pass_ge2jht         [ET_N][kWeightTypesN];
+    float n_pass_ge2jmetRel     [ET_N][kWeightTypesN];
 };
 
 #endif // SusySelection_h

@@ -248,16 +248,25 @@ SsPassFlags SusySelection::passSrSs(const WH_SR signalRegion,
   bool sameSign = allowQflip ? sameSignOrQflip(ncls, ncmet, ll, u4m, mc) : susy::sameSign(ncls);
   if(sameSign)                                  { increment(n_pass_ss       [ll], wc); f.sameSign   =true;} else return f;
   met = &ncmet; // after qflip, use potentially smeared lep and met
-                                                  increment(n_pass_muIso    [ll], wc);
-                                                  increment(n_pass_elD0Sig  [ll], wc);
-  if(passfJetVeto  (js))                        { increment(n_pass_fjVeto   [ll], wc); f.fjveto     =true;} else return f;
-  if(passbJetVeto  (js))                        { increment(n_pass_bjVeto   [ll], wc); f.bjveto     =true;} else return f;
-  if(passge1Jet    (js))                        { increment(n_pass_ge1j     [ll], wc); f.ge1j       =true;} else return f;
-  if(susy::pass2LepPt(ncls, ptL0Min, ptL1Min))  { increment(n_pass_lepPt    [ll], wc); f.lepPt      =true;} else return f;
-  if(susy::passZllVeto(ncls, loMllZ, hiMllZ))   { increment(n_pass_mllZveto [ll], wc); f.zllVeto    =true;} else return f;
-  if(susy::passMtLlMetMin(ncls, met, mtwwMin))  { increment(n_pass_mWwt     [ll], wc); f.mtllmet    =true;} else return f;
-  if(susy::passHtMin(ncls, js, met, htMin))     { increment(n_pass_ht       [ll], wc); f.ht         =true;} else return f;
-  if(passMetRelMin (met,ncls,js,metRelMin))     { increment(n_pass_metRel   [ll], wc); f.metrel     =true;} else return f;
+  increment(n_pass_muIso    [ll], wc);
+  increment(n_pass_elD0Sig  [ll], wc);
+  f = assignNjetFlags(js, f);
+  if(f.fjveto) increment(n_pass_fjVeto [ll], wc); else return f;
+  if(f.bjveto) increment(n_pass_bjVeto [ll], wc); else return f;
+  if(f.ge1j  ) increment(n_pass_ge1j   [ll], wc); else return f;
+  if(f.eq1j  ) increment(n_pass_eq1j   [ll], wc);
+  else         increment(n_pass_ge2j   [ll], wc);
+  assert(f.eq1j != f.ge2j); // from here on count separately eq1j and ge2j
+  float* cnt_lepPt    = f.eq1j ? n_pass_eq1jlepPt    [ll] : n_pass_ge2jlepPt    [ll];
+  float* cnt_mllZveto = f.eq1j ? n_pass_eq1jmllZveto [ll] : n_pass_ge2jmllZveto [ll];
+  float* cnt_mWwt     = f.eq1j ? n_pass_eq1jmWwt     [ll] : n_pass_ge2jmWwt     [ll];
+  float* cnt_ht       = f.eq1j ? n_pass_eq1jht       [ll] : n_pass_ge2jht       [ll];
+  float* cnt_metRel   = f.eq1j ? n_pass_eq1jmetRel   [ll] : n_pass_ge2jmetRel   [ll];
+  if(susy::pass2LepPt(ncls, ptL0Min, ptL1Min))  { increment(cnt_lepPt   , wc); f.lepPt   = true;} else return f;
+  if(susy::passZllVeto(ncls, loMllZ, hiMllZ))   { increment(cnt_mllZveto, wc); f.zllVeto = true;} else return f;
+  if(susy::passMtLlMetMin(ncls, met, mtwwMin))  { increment(cnt_mWwt    , wc); f.mtllmet = true;} else return f;
+  if(susy::passHtMin(ncls, js, met, htMin))     { increment(cnt_ht      , wc); f.ht      = true;} else return f;
+  if(passMetRelMin (met,ncls,js,metRelMin))     { increment(cnt_metRel  , wc); f.metrel  = true;} else return f;
   return f;
 }
 //-----------------------------------------
@@ -541,11 +550,20 @@ void SusySelection::dumpEventCounters()
     cout<<"fjVeto           : "<<lcpet(n_pass_fjVeto         , w, cw)<<endl;
     cout<<"bjVeto           : "<<lcpet(n_pass_bjVeto         , w, cw)<<endl;
     cout<<"ge1j             : "<<lcpet(n_pass_ge1j           , w, cw)<<endl;
-    cout<<"lepPt            : "<<lcpet(n_pass_lepPt          , w, cw)<<endl;
-    cout<<"mllZveto         : "<<lcpet(n_pass_mllZveto       , w, cw)<<endl;
-    cout<<"mWwt             : "<<lcpet(n_pass_mWwt           , w, cw)<<endl;
-    cout<<"ht               : "<<lcpet(n_pass_ht             , w, cw)<<endl;
-    cout<<"metRel           : "<<lcpet(n_pass_metRel         , w, cw)<<endl;
+    cout<<midRule                                                    <<endl;
+    cout<<"eq1j             : "<<lcpet(n_pass_eq1j           , w, cw)<<endl;
+    cout<<"lepPt            : "<<lcpet(n_pass_eq1jlepPt      , w, cw)<<endl;
+    cout<<"mllZveto         : "<<lcpet(n_pass_eq1jmllZveto   , w, cw)<<endl;
+    cout<<"mWwt             : "<<lcpet(n_pass_eq1jmWwt       , w, cw)<<endl;
+    cout<<"ht               : "<<lcpet(n_pass_eq1jht         , w, cw)<<endl;
+    cout<<"metRel           : "<<lcpet(n_pass_eq1jmetRel     , w, cw)<<endl;
+    cout<<midRule                                                    <<endl;
+    cout<<"ge2j             : "<<lcpet(n_pass_ge2j           , w, cw)<<endl;
+    cout<<"lepPt            : "<<lcpet(n_pass_ge2jlepPt      , w, cw)<<endl;
+    cout<<"mllZveto         : "<<lcpet(n_pass_ge2jmllZveto   , w, cw)<<endl;
+    cout<<"mWwt             : "<<lcpet(n_pass_ge2jmWwt       , w, cw)<<endl;
+    cout<<"ht               : "<<lcpet(n_pass_ge2jht         , w, cw)<<endl;
+    cout<<"metRel           : "<<lcpet(n_pass_ge2jmetRel     , w, cw)<<endl;
     cout<<midRule                                                    <<endl;
     cout<<"mllMin           : "<<lcpet(n_pass_mllMin         , w, cw)<<endl;
     cout<<"flavor:          : "<<lcpet(n_pass_flavor         , w, cw)<<endl;
@@ -701,11 +719,23 @@ void SusySelection::resetAllCounters()
       n_pass_fjVeto     [i][w] = 0;
       n_pass_bjVeto     [i][w] = 0;
       n_pass_ge1j       [i][w] = 0;
+      n_pass_eq1j       [i][w] = 0;
+      n_pass_ge2j       [i][w] = 0;
       n_pass_lepPt      [i][w] = 0;
       n_pass_mllZveto   [i][w] = 0;
       n_pass_mWwt       [i][w] = 0;
       n_pass_ht         [i][w] = 0;
       n_pass_metRel     [i][w] = 0;
+      n_pass_eq1jlepPt   [i][w] = 0;
+      n_pass_eq1jmllZveto[i][w] = 0;
+      n_pass_eq1jmWwt    [i][w] = 0;
+      n_pass_eq1jht      [i][w] = 0;
+      n_pass_eq1jmetRel  [i][w] = 0;
+      n_pass_ge2jlepPt   [i][w] = 0;
+      n_pass_ge2jmllZveto[i][w] = 0;
+      n_pass_ge2jmWwt    [i][w] = 0;
+      n_pass_ge2jht      [i][w] = 0;
+      n_pass_ge2jmetRel  [i][w] = 0;
     } // end for(i)
   } // end for(w)
 }
