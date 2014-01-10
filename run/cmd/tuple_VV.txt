@@ -1,0 +1,4 @@
+# one signal
+./python/submitJobs.py --seltuple   -o --tag=${TAG} -s 'notauhad_WH_2Lep_3'  --submit
+# diboson and triboson samples
+./python/submitJobs.py --seltuple   -o --tag=${TAG} -s '(PowhegPythia8|gg2|Sherpa_CT10|PowhegPythia8|MadGraphPythia_AU)' --submit
