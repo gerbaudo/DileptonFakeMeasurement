@@ -659,7 +659,7 @@ SsPassFlags SusySelection::assignNjetFlags(const JetVector& jets, SsPassFlags f)
   return f;
 }
 //-----------------------------------------
-bool SusySelection::passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lepton* l1, const LeptonVector& otherLeptons)
+bool SusySelection::passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lepton* l1, const LeptonVector& otherLeptons, bool verbose)
 {
     struct LepPair {
         const Susy::Lepton *signal, *other;
@@ -674,9 +674,18 @@ bool SusySelection::passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lept
     float maxDeltaMz(20.0);
     size_t nCandInWindow(0);
     for(size_t i=0; i<otherLeptons.size(); ++i) {
-        LepPair ll0(l0, otherLeptons[i]), ll1(l1, otherLeptons[i]);
-        if(ll0.isZcandidate() && ll0.isInZwindow(maxDeltaMz)) nCandInWindow++;
-        if(ll1.isZcandidate() && ll1.isInZwindow(maxDeltaMz)) nCandInWindow++;
+        const Susy::Lepton* ol = otherLeptons[i];
+        LepPair ll0(l0, ol), ll1(l1, ol);
+        if(ll0.isZcandidate() && ll0.isInZwindow(maxDeltaMz)) {
+            nCandInWindow++;
+            if(verbose)
+                cout<<"Z candidate: m_ll "<<(*l0+*ol).M()<<" l0 pt "<<l0->Pt()<<" ol pt "<<ol->Pt()<<" dR "<<l0->DeltaR(*ol)<<endl;
+        }
+        if(ll1.isZcandidate() && ll1.isInZwindow(maxDeltaMz)) {
+            nCandInWindow++;
+            if(verbose)
+                cout<<"Z candidate: m_ll "<<(*l1+*ol).M()<<" l1 pt "<<l0->Pt()<<" ol pt "<<ol->Pt()<<" dR "<<l1->DeltaR(*ol)<<endl;
+        }
     }
     return nCandInWindow == 0;
 }
