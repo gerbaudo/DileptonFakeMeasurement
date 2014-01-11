@@ -676,18 +676,18 @@ bool SusySelection::passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lept
     size_t nCandInWindow(0);
     for(size_t i=0; i<otherLeptons.size(); ++i) {
         const Susy::Lepton* ol = otherLeptons[i];
+        if(verbose) cout<<" lep["<<i<<"] "<<(ol->isEle() ? "E" : ol->isMu() ? "M" : "?")<<" pt "<<ol->Pt()<<endl;
         LepPair ll0(l0, ol), ll1(l1, ol);
         if(ll0.isZcandidate() && ll0.isInZwindow(maxDeltaMz)) {
             nCandInWindow++;
-            if(verbose)
-                cout<<"Z candidate: m_ll "<<(*l0+*ol).M()<<" l0 pt "<<l0->Pt()<<" ol pt "<<ol->Pt()<<" dR "<<l0->DeltaR(*ol)<<endl;
+            if(verbose) cout<<" Z candidate: m_ll "<<ll0.m()<<" l0 pt "<<l0->Pt()<<" ol pt "<<ol->Pt()<<" dR "<<ll0.dR()<<endl;
         }
         if(ll1.isZcandidate() && ll1.isInZwindow(maxDeltaMz)) {
             nCandInWindow++;
-            if(verbose)
-                cout<<"Z candidate: m_ll "<<(*l1+*ol).M()<<" l1 pt "<<l0->Pt()<<" ol pt "<<ol->Pt()<<" dR "<<l1->DeltaR(*ol)<<endl;
+            if(verbose) cout<<" Z candidate: m_ll "<<ll1.m()<<" l1 pt "<<l1->Pt()<<" ol pt "<<ol->Pt()<<" dR "<<ll1.dR()<<endl;
         }
     }
+    if(verbose && nCandInWindow==0) cout<<" No Z candidate"<<endl;
     return nCandInWindow == 0;
 }
 //-----------------------------------------
