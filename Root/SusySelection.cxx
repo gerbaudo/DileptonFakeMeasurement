@@ -664,7 +664,7 @@ bool SusySelection::passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lept
     struct LepPair {
         const Susy::Lepton *signal, *other;
         LepPair(const Susy::Lepton *s, const Susy::Lepton *o) : signal(s), other(o) { assert(s!=0 && o!=0); }
-        bool haveOppositeSign() { return (signal->q * other->q) > 0; }
+        bool haveOppositeSign() { return (signal->q * other->q) < 0; }
         bool haveSameFlavor() { return (signal->isMu() && other->isMu()) || (signal->isEle() && other->isEle()); }
         bool areSeparated() { return signal->DeltaR(*other) > 0.05; }
         bool isZcandidate() { return haveOppositeSign() && haveSameFlavor() && areSeparated(); }
