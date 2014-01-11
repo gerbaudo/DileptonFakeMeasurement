@@ -32,6 +32,7 @@ SusySelection::SusySelection() :
   m_xsReader(NULL),
   m_tupleMaker("",""),
   m_writeTuple(false),
+  m_debugThisEvent(false),
   m_outTupleFile(""),
   m_trigObj(NULL),
   m_useMCTrig(false),
@@ -130,6 +131,7 @@ bool SusySelection::selectEvent()
   const Susy::Met *met = m_met;
   uint run = nt.evt()->run;
   bool mc = nt.evt()->isMC;
+  m_debugThisEvent = susy::isEventInList(nt.evt()->event);
   float mllMin(20);
   WeightComponents &wc = m_weightComponents;
   if(passGRL        (flag           ))  { increment(n_pass_Grl     , wc);} else { return false; }
@@ -270,7 +272,19 @@ SsPassFlags SusySelection::passSrSs(const WH_SR signalRegion,
   if(passMetRelMin (met,ncls,js,metRelMin))     { increment(cnt_metRel  , wc); f.metrel  = true;} else return f;
   LeptonVector anyLeptons(getAnyElOrMu(nt));
   LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
-  if(passThirdLeptonVeto(ncls[0], ncls[1], lowPtLep)) { increment(cnt_3rdLep, wc); f.veto3rdL = true;} else return f;
+  if(m_debugThisEvent) {
+      unsigned int run(nt.evt()->run), event(nt.evt()->event);
+      const Lepton *l0(ncls[0]), *l1(ncls[1]);
+      bool l0El(l0->isEle()), l0Mu(l0->isMu()), l1El(l1->isEle()), l1Mu(l1->isMu());
+      cout<<"run "<<run<<" event "<<event<<" "
+          <<(l0El ? "E" : l0Mu ? "M" : "?")
+          <<(l1El ? "E" : l1Mu ? "M" : "?")
+          <<" l0 pt "<<l0->Pt()<<" eta "<<l0->Eta()<<" phi "<<l0->Phi()
+          <<" l1 pt "<<l1->Pt()<<" eta "<<l1->Eta()<<" phi "<<l1->Phi()
+          <<endl;
+  }
+  if(passThirdLeptonVeto(ncls[0], ncls[1], lowPtLep, m_debugThisEvent)) { increment(cnt_3rdLep, wc); f.veto3rdL = true; }
+  else return f;
   return f;
 }
 //-----------------------------------------

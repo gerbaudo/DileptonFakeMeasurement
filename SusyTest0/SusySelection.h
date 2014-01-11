@@ -137,7 +137,7 @@ class SusySelection : public SusyNtAna
     static susy::wh::Chan getChan(const LeptonVector& leps); //!< compute lepton channel
     static SsPassFlags assignNjetFlags(const JetVector& jets, SsPassFlags f);
     //! determine whether a third lepton makes a Z candidate with a signal lepton
-    static bool passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lepton* l1, const LeptonVector& otherLeptons);
+    static bool passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lepton* l1, const LeptonVector& otherLeptons, bool verbose=false);
 
  protected:
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
@@ -157,6 +157,7 @@ class SusySelection : public SusyNtAna
     XSReader* m_xsReader;
     susy::wh::TupleMaker m_tupleMaker;
     bool m_writeTuple;
+    bool m_debugThisEvent;
     std::string m_outTupleFile;
 
     DilTrigLogic*       m_trigObj;      // My trigger logic class
