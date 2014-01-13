@@ -16,6 +16,7 @@ from math import cos, fabs, sin, sqrt, pi
 from utils import first
 from rootUtils import drawLegendWithDictKeys
 from SampleUtils import colors
+from kin import phi_mpi_pi
 
 rootcoredir = os.environ['ROOTCOREDIR']
 r.gROOT.LoadMacro(rootcoredir+'/scripts/load_packages.C+')
@@ -67,7 +68,7 @@ def computeMljj(l0, l1, j0, j1) :
     dr0, dr1 = jj.DeltaR(l0), jj.DeltaR(l1)
     return (jj+l0).M() if dr0<dr1 else (jj+l1).M()
 
-leafNames = ['pt0', 'pt1', 'mll', 'mtllmet', 'ht', 'metrel', 'mt2j', 'mljj']
+leafNames = ['pt0', 'pt1', 'mll', 'mtllmet', 'ht', 'metrel', 'dphill', 'detall', 'mt2j', 'mljj', 'dphijj', 'detajj']
 structDecl  = 'struct vars { '
 structDecl += ' '.join(["float %s;"%v for v in leafNames])
 structDecl += " };"
@@ -111,11 +112,15 @@ def createOutTree(filenames, dilepChan, nJetChan, tag='', overwrite=False) :
             vars.mtllmet = computeMt(l0+l1, met)
             vars.ht = computeHt(met, [l0, l1]+jets)
             vars.metrel = computeMetRel(met, [l0, l1]+jets)
+            vars.dphill = fabs(phi_mpi_pi(l0.DeltaPhi(l1)))
+            vars.detall = fabs(l0.Eta() - l1.Eta())
             # third lep, mljj,
             if nJets >1 :
                 j0, j1 = jets[0], jets[1]
                 vars.mt2j = computeMt2j(l0, l1, j0, j1, met)
                 vars.mljj = computeMljj(l0, l1, j0, j1)
+                vars.dphijj = fabs(phi_mpi_pi(j0.DeltaPhi(j1)))
+                vars.detajj = fabs(j0.Eta() - j1.Eta())
             outTree.Fill()
         print "filled ",outTree.GetEntries()," entries"
         outFile.Write()
@@ -184,6 +189,7 @@ tag = 'Jan_11' #'Jan_11'
 basedir = '/gdata/atlas/gerbaudo/wh/Susy2013_Nt_01_04_dev/SusyTest0/run/out/susysel/'
 
 bkgSamples = ['wjets', 'zjets', 'ttbar', 'diboson', 'heavyflavor']
+bkgSamples = ['ttbar']
 sigSamples = ["Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_%d"%d for d in range(1,1+1)]
 
 bkgFilenanes = buildFnamesDict(bkgSamples, basedir+'/merged/', tag)
