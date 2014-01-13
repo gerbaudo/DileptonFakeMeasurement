@@ -30,6 +30,11 @@ def buildFnamesDict(samples, dir='', tag='') :
     filenames = dict((s,v[0]) for s,v in filenames.iteritems() if len(v)==1 and v[0])
     return filenames
 
+def FourMom2LepType(fm) :
+    return 'e' if fm.isEl else 'm' if fm.isMu else None
+def getDilepType(fmLep0, fmLep1) :
+    dilepType = ''.join(sorted(FourMom2LepType(l) for l in [fmLep0, fmLep1])) # sort -> em instead of me
+    return dilepType
 def FourMom2TLorentzVector(fm) :
     l = tlv()
     l.SetPxPyPzE(fm.px, fm.py, fm.pz, fm.E)
@@ -71,15 +76,17 @@ vars = r.vars()
 def resetVars(v) :
     for l in leafNames : setattr(v, l, 0.0)
 
-def createOutTree(filenames, overwrite=False) :
+def createOutTree(filenames, dilepChan, nJetChan, tag='', overwrite=False) :
+    assert dilepChan in ['ee','mm','em']
+    assert nJetChan in ['eq1j', 'ge2j']
     outFilenames = dict()
     for sample, filename in filenames.iteritems() :
         print sample
-        outFilename = '/tmp/'+sample+'.root'
+        outFilename = '/tmp/'+sample+'_'+dilepChan+'_'+nJetChan+'.root'
         if os.path.exists(outFilename) and not overwrite :
             outFilenames[sample] = outFilename
             continue
-        outFile = r.TFile.Open('/tmp/'+sample+'.root', 'recreate')
+        outFile = r.TFile.Open(outFilename, 'recreate')
         outTree = r.TTree("training","Training tree")
         outTree.Branch('vars', vars, '/F:'.join(leafNames))
         outTree.SetDirectory(outFile)
@@ -94,6 +101,10 @@ def createOutTree(filenames, overwrite=False) :
             jets = [fm2tlv(j) for j in event.jets]
             lepts = [fm2tlv(l) for l in event.lepts]
             pars = event.pars
+            dilepType = getDilepType(event.l0, event.l1)
+            nJets = len(jets)
+            if dilepType != dilepChan : continue
+            if nJets<1 or (nJets==1 and nJetChan is 'ge2j') : continue
             vars.pt0 = l0.Pt()
             vars.pt1 = l1.Pt()
             vars.mll = (l0+l1).M()
@@ -101,7 +112,7 @@ def createOutTree(filenames, overwrite=False) :
             vars.ht = computeHt(met, [l0, l1]+jets)
             vars.metrel = computeMetRel(met, [l0, l1]+jets)
             # third lep, mljj,
-            if len(jets) >1 :
+            if nJets >1 :
                 j0, j1 = jets[0], jets[1]
                 vars.mt2j = computeMt2j(l0, l1, j0, j1, met)
                 vars.mljj = computeMljj(l0, l1, j0, j1)
@@ -113,12 +124,14 @@ def createOutTree(filenames, overwrite=False) :
     return outFilenames
 
 
-def train(sigFiles=[], bkgFiles=[]) :
+def train(sigFiles=[], bkgFiles=[], dilepChan='', nJetChan='') :
+    assert dilepChan in ['ee','mm','em']
+    assert nJetChan in ['eq1j', 'ge2j']
     bkgTree, sigTree = r.TChain('training'), r.TChain('training')
     for b in bkgFiles : bkgTree.Add(b)
     for s in sigFiles : sigTree.Add(s)
     r.TMVA.Tools.Instance()
-    fileOut = r.TFile("testmva.root","RECREATE")
+    fileOut = r.TFile("testmva_%s_%s.root"%(dilepChan, nJetChan),"RECREATE")
     factory = r.TMVA.Factory("TMVAClassification", fileOut,
                              ":".join(["!V",
                                        "!Silent",
@@ -162,23 +175,26 @@ def train(sigFiles=[], bkgFiles=[]) :
 # main
 # todo: move to main func, add cmd-line opt, etc.
 # ------
-    
+
 treename = 'SusySel'
-tag = 'Jan_06' #'Jan_11'
+tag = 'Jan_11' #'Jan_11'
 basedir = '/gdata/atlas/gerbaudo/wh/Susy2013_Nt_01_04_dev/SusyTest0/run/out/susysel/'
-samples = ['McAtNloJimmy_CT10_ttbar_LeptonFilter','Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_1_']
 
 bkgSamples = ['wjets', 'zjets', 'ttbar', 'diboson', 'heavyflavor']
-sigSamples = ["Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_%d"%d for d in range(1,27+1)]
+sigSamples = ["Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_%d"%d for d in range(1,1+1)]
 
 bkgFilenanes = buildFnamesDict(bkgSamples, basedir+'/merged/', tag)
 sigFilenanes = buildFnamesDict(sigSamples, basedir, tag)
-bkgTrainFilenanes = createOutTree(bkgFilenanes)
-sigTrainFilenames = createOutTree(sigFilenanes)
 
-bkgFiles = bkgTrainFilenanes.values()
-sigFiles = [sigTrainFilenames.values()[0]]
-train(sigFiles, bkgFiles)
+for ll in ['ee','mm','em'] :
+    for nj in ['eq1j', 'ge2j'] :
+        print '-'*3+ll+nj+'-'*3
+        bkgTrainFilenanes = createOutTree(bkgFilenanes, ll, nj, tag=tag)
+        sigTrainFilenames = createOutTree(sigFilenanes, ll, nj, tag=tag)
+
+        bkgFiles = bkgTrainFilenanes.values()
+        sigFiles = [f for f in sigTrainFilenames.values()] # only one signal for now
+        train(sigFiles, bkgFiles, ll, nj)
 
 
 
