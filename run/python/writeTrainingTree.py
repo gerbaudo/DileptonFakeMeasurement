@@ -74,15 +74,14 @@ def computeMljj(l0, l1, j0, j1) :
     dr0, dr1 = jj.DeltaR(l0), jj.DeltaR(l1)
     return (jj+l0).M() if dr0<dr1 else (jj+l1).M()
 
-r.gROOT.ProcessLine("struct vars { \
-float pt0; \
-float pt1; \
-float mll; \
-float mtllmet; \
-float ht; \
-float metrel; \
-};")
+leafNames = ['pt0', 'pt1', 'mll', 'mtllmet', 'ht', 'metrel']
+structDecl  = 'struct vars { '
+structDecl += ' '.join(["float %s;"%v for v in leafNames])
+structDecl += " };"
+r.gROOT.ProcessLine(structDecl)
 vars = r.vars()
+def resetVars(v) :
+    for l in leafNames : setattr(v, l, 0.0)
 
 def createOutTree(filenames) :
     outFilenames = dict()
@@ -95,8 +94,8 @@ def createOutTree(filenames) :
         file = r.TFile.Open(filename)
         tree = file.Get(treename)
         print "processing %s (%d entries)"%(sample, tree.GetEntries())
-        iEvent = 0
-        for event in tree :
+        for iEvent, event in enumerate(tree) :
+            resetVars(vars)
             l0 = fm2tlv(event.l0)
             l1 = fm2tlv(event.l1)
             met = fm2tlv(event.met)
@@ -112,13 +111,8 @@ def createOutTree(filenames) :
             # third lep, mljj,
             if len(jets) >1 :
                 j0, j1 = jets[0], jets[1]
-
             outTree.Fill()
-            iEvent += 1
-            if iEvent  < 10 : print "len(jets) ",len(jets)
-            
         print "filled ",outTree.GetEntries()," entries"
-        print "%d evts with jets"%nEvWj
         outFile.Write()
         outFile.Close()
         outFilenames[sample] = outFile.GetName()
