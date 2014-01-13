@@ -20,6 +20,7 @@ import ROOT as r
 r.gROOT.SetStyle('Plain')
 r.gROOT.SetBatch(True)                     # no windows popping up
 r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
+from utils import phi_mpi_pi
 
 r.gROOT.LoadMacro('src/TupleMakerObjects.h+')
 tlv = r.TLorentzVector
@@ -72,11 +73,6 @@ def lepPairIsZcand(l0, l1) :
 def deltaMZ0((la, lb)) :
     "given a pair of leptons, return the abs difference m_ll - m_Z"
     return abs((la.p4 + lb.p4).M() - 91.2)
-def phi_mpi_pi(phi) :
-    pi = math.pi
-    while phi < -pi : phi += pi
-    while phi > +pi : phi -= pi
-    return phi
 
 def topRightLegend(pad,  legWidth, legHeight, shift=0.0) :
     rMarg, lMarg, tMarg = pad.GetRightMargin(), pad.GetLeftMargin(), pad.GetTopMargin()
