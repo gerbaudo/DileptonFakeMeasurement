@@ -69,6 +69,15 @@ void SusySelection::Begin(TTree* /*tree*/)
   }
 }
 //-----------------------------------------
+JetVector filterClJets(const JetVector &jets)
+{
+// ugly hack: utils::filter seems not to work properly with SusyNtTools::isCentralLightJet...
+    JetVector oj;
+    for(size_t i=0; i<jets.size(); ++i)
+        if(SusyNtTools::isCentralLightJet(jets[i])) oj.push_back(jets[i]);
+    return oj;
+}
+//-----------------------------------------
 Bool_t SusySelection::Process(Long64_t entry)
 {
   m_printer.countAndPrint(cout);
@@ -92,7 +101,7 @@ Bool_t SusySelection::Process(Long64_t entry)
           LeptonVector lowPtLep(subtract_vector(anyLep, m_baseLeptons));
           const Lepton *l0 = m_signalLeptons[0];
           const Lepton *l1 = m_signalLeptons[1];
-          const JetVector clJets(filter(m_signalJets2Lep, isCentralLightJet));
+          const JetVector clJets(filterClJets(m_signalJets2Lep));
           m_tupleMaker.fill(weight, run, event, *l0, *l1, *m_met, lowPtLep, clJets);
       }
   }
