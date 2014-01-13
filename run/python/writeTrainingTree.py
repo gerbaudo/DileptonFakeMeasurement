@@ -12,6 +12,7 @@ import ROOT as r
 r.gROOT.SetStyle('Plain')
 r.gROOT.SetBatch(True)                     # no windows popping up
 r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
+from math import cos, fabs, sin, sqrt, pi
 from utils import first
 from rootUtils import drawLegendWithDictKeys
 from SampleUtils import colors
@@ -22,17 +23,36 @@ r.load_packages()
 tlv = r.TLorentzVector
 
 treename = 'SusySel'
-tag = 'Jan_06'
+tag = 'Jan_06' #'Jan_11'
 basedir = '/gdata/atlas/gerbaudo/wh/Susy2013_Nt_01_04_dev/SusyTest0/run/out/susysel/'
 samples = ['McAtNloJimmy_CT10_ttbar_LeptonFilter','Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_1_']
-filenames = dict((s, glob.glob(basedir+'/'+s+'*'+tag+'.root')) for s in samples)
-assert all(len(v)==1 for v in filenames.values()),"ambiguous filenames\n%s"%str(filenames)
-filenames = dict((s,v[0]) for s,v in filenames.iteritems())
+
+bkgSamples = ['ttbar'] #['wjets', 'zjets', 'ttbar', 'diboson', 'heavyflavor']
+sigSamples = [] #["Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_%d"%d for d in range(1,27+1)]
+
+def buildFnamesDict(samples, dir='', tag='') :
+    for s in samples :
+        print basedir+'/'+s+'_'+tag+'.root'
+    filenames = dict((s, glob.glob(dir+'/'+s+'_'+tag+'.root')) for s in samples)
+    for s,v in filenames.iteritems() :
+        if len(v)!=1 : print "skipping '%s', ambiguous filenames :\n%s"%(s, str(v))
+    filenames = dict((s,v[0]) for s,v in filenames.iteritems() if len(v)==1 and v[0])
+    return filenames
+
+bkgFilenanes = buildFnamesDict(bkgSamples, basedir+'/merged/', tag)
+sigFilenanes = buildFnamesDict(sigSamples, basedir, tag)
 
 def FourMom2TLorentzVector(fm) :
     l = tlv()
     l.SetPxPyPzE(fm.px, fm.py, fm.pz, fm.E)
     return l
+def computeMt(lep, met) :
+    return sqrt(2.0 * lep.Pt() * met.Et() *(1.0-cos(lep.DeltaPhi(met))))
+def computeHt(met, leptsJets=[]) :
+    return sum(o.Pt() for o in leptsJets) + met.Et()
+def computeMetRel(met, leptsJets=[]) :
+    minDphi = min([0.5*pi]+[fabs(met.DeltaPhi(o)) for o in leptsJets])
+    return met.Et()*sin(minDphi)
 
 fm2tlv = FourMom2TLorentzVector # move to module
 mt2 = r.mt2_bisect.mt2()
@@ -54,48 +74,56 @@ def computeMljj(l0, l1, j0, j1) :
     dr0, dr1 = jj.DeltaR(l0), jj.DeltaR(l1)
     return (jj+l0).M() if dr0<dr1 else (jj+l1).M()
 
-hs_mt2j = dict()
-hs_mljj = dict()
-hs_slpt = dict()
-
 r.gROOT.ProcessLine("struct vars { \
 float pt0; \
 float pt1; \
 float mll; \
+float mtllmet; \
+float ht; \
+float metrel; \
 };")
 vars = r.vars()
 
 def createOutTree(filenames) :
-  
-  for sample, filename in filenames.iteritems() :
-      print sample
-      outFile = r.TFile.Open('/tmp/'+sample+'.root', 'recreate')
-      outTree = r.TTree("training","Training tree")
-      outTree.Branch('vars', vars, 'pt0/F:pt1:mll')
-      outTree.SetDirectory(outFile)
-      file = r.TFile.Open(filename)
-      tree = file.Get(treename)
-      print "processing %s (%d entries)"%(sample, tree.GetEntries())
-      iEvent = 0
-      for event in tree :
-          l0 = fm2tlv(event.l0)
-          l1 = fm2tlv(event.l1)
-          met = fm2tlv(event.met)
-          jets = [fm2tlv(j) for j in event.jets]
-          lepts = [fm2tlv(l) for l in event.lepts]
-          pars = event.pars
-          if len(jets)<2 : continue
-          j0, j1 = jets[0], jets[1]
-          vars.pt0 = l0.Pt()
-          vars.pt1 = l1.Pt()
-          vars.mll = (l0+l1).M()
-          outTree.Fill()
-          iEvent += 1
-          if iEvent  > 10 : continue
-  
-      print "filled ",outTree.GetEntries()," entries"
-      outFile.Write()
-      outFile.Close()
+    outFilenames = dict()
+    for sample, filename in filenames.iteritems() :
+        print sample
+        outFile = r.TFile.Open('/tmp/'+sample+'.root', 'recreate')
+        outTree = r.TTree("training","Training tree")
+        outTree.Branch('vars', vars, 'pt0/F:pt1:mll')
+        outTree.SetDirectory(outFile)
+        file = r.TFile.Open(filename)
+        tree = file.Get(treename)
+        print "processing %s (%d entries)"%(sample, tree.GetEntries())
+        iEvent = 0
+        for event in tree :
+            l0 = fm2tlv(event.l0)
+            l1 = fm2tlv(event.l1)
+            met = fm2tlv(event.met)
+            jets = [fm2tlv(j) for j in event.jets]
+            lepts = [fm2tlv(l) for l in event.lepts]
+            pars = event.pars
+            vars.pt0 = l0.Pt()
+            vars.pt1 = l1.Pt()
+            vars.mll = (l0+l1).M()
+            vars.mtllmet = computeMt(l0+l1, met)
+            vars.ht = computeHt(met, [l0, l1]+jets)
+            vars.metrel = computeMetRel(met, [l0, l1]+jets)
+            # third lep, mljj,
+            if len(jets) >1 :
+                j0, j1 = jets[0], jets[1]
+
+            outTree.Fill()
+            iEvent += 1
+            if iEvent  < 10 : print "len(jets) ",len(jets)
+            
+        print "filled ",outTree.GetEntries()," entries"
+        print "%d evts with jets"%nEvWj
+        outFile.Write()
+        outFile.Close()
+        outFilenames[sample] = outFile.GetName()
+    return outFilenames
+
 
 def train(sigFiles=[], bkgFiles=[]) :
     bkgTree, sigTree = r.TChain('training'), r.TChain('training')
@@ -145,10 +173,12 @@ def train(sigFiles=[], bkgFiles=[]) :
     factory.EvaluateAllMethods()
     
     
-#createOutTree(filenames)
+bkgTrainFilenanes = createOutTree(bkgFilenanes)
+sigTrainFilenames = createOutTree(sigFilenanes)
 
-train(sigFiles=['/tmp/Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_1_.root'],
-      bkgFiles=['/tmp/McAtNloJimmy_CT10_ttbar_LeptonFilter.root'])
+
+# train(sigFiles=['/tmp/Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_1_.root'],
+#       bkgFiles=['/tmp/McAtNloJimmy_CT10_ttbar_LeptonFilter.root'])
 
 
 
