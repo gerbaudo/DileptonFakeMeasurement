@@ -135,12 +135,13 @@ def train(sigFiles=[], bkgFiles=[], dilepChan='', nJetChan='') :
     factory = r.TMVA.Factory("TMVAClassification", fileOut,
                              ":".join(["!V",
                                        "!Silent",
-                                       "Color",
-                                       "DrawProgressBar",
+                                       "!Color",
+                                       "!DrawProgressBar",
                                        "Transformations=I;D;P;G,D",
                                        "AnalysisType=Classification"]
                                       ))
-    for l in leafNames : factory.AddVariable(l, 'F')
+    mvaVars = [l for l in leafNames if l not in ['pt0', 'pt1']]
+    for v in mvaVars : factory.AddVariable(v, 'F')
     sigCut = r.TCut("")
     bkgCut = r.TCut("")
     factory.AddSignalTree    (sigTree)
