@@ -61,7 +61,7 @@ fakerate     = options.fakerate
 alsoph       = options.alsoplaceholders
 verbose      = options.verbose
 
-if not [susyplot, susysel, seltuple, fakeprob, fakerate, fakepred].count(True)==1 :
+if not [susyplot, susysel, seltuple, fakeprob, fakerate, fakepred, faketupl].count(True)==1 :
     parser.error("specify one executable")
 scriptDir = 'batch'
 template  = ''
