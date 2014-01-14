@@ -35,9 +35,14 @@ MatrixPrediction::MatrixPrediction() :
 void MatrixPrediction::Begin(TTree* /*tree*/)
 {
   m_doFake = true;
-  SusyPlotter::Begin(0);
   if(m_dbg) cout << "MatrixPrediction::Begin" << endl;
-  m_allconfigured = (initMatrixTool() && bookFakeHisto());
+  if(m_writeTuple) {
+      SusySelection::Begin(0);
+      m_allconfigured = initMatrixTool();
+  } else {
+      SusyPlotter::Begin(0);
+      m_allconfigured = (initMatrixTool() && bookFakeHisto());
+  }
 }
 //----------------------------------------------------------
 Bool_t MatrixPrediction::Process(Long64_t entry)
@@ -69,29 +74,40 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   SsPassFlags ssf(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
   if(m_dbg>3) cout<<eventDetails(ssf.passAll(), *nt.evt(), ll, l)<<endl;
   if(!ssf.passLpt()) return false;
-  for(uint s = 0; s<m_systs.size(); ++s){
-    smm::SYSTEMATIC sys = static_cast<smm::SYSTEMATIC>(m_systs.at(s));
-    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
-    if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8ee,     metRel,sys), PR_CR8ee,     sys);
-    if(isMm && ssf.lepPt
-            && passMinMet   ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mm,     metRel,sys), PR_CR8mm,     sys);
-    if(isMm && ssf.mtllmet  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mmMtww, metRel,sys), PR_CR8mmMtww, sys);
-    if(isMm && ssf.ht       ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mmHt,   metRel,sys), PR_CR8mmHt,   sys);
-    if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_CR8lpt,    sys);
-    if(isOf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_CR9lpt,    sys);
-    if(isSf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_SR8,       sys);
-    if(isOf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_SR9,       sys);
-    bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
-    bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
-    if(passEwkSs)      fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwk,     metRel,sys), PR_SsEwk,     sys);
-    if(passEwkSsLoose) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwkLoose,metRel,sys), PR_SsEwkLoose,sys);
-  } // end for(s)
+  if(m_writeTuple && ssf.lepPt) {
+      double weight(getFakeWeight(l, sf::CR_CR8lpt, metRel, smm::SYS_NONE));
+      unsigned int run(nt.evt()->run), event(nt.evt()->event);
+      LeptonVector anyLep(getAnyElOrMu(nt));
+      LeptonVector lowPtLep(subtract_vector(anyLep, m_baseLeptons));
+      const Lepton *l0(l[0]), *l1(l[1]);
+      const JetVector clJets(SusySelection::filterClJets(m_signalJets2Lep));
+      m_tupleMaker.fill(weight, run, event, *l0, *l1, *m, lowPtLep, clJets);
+  } else {
+      for(uint s = 0; s<m_systs.size(); ++s){
+          smm::SYSTEMATIC sys = static_cast<smm::SYSTEMATIC>(m_systs.at(s));
+          if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
+          if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8ee,     metRel,sys), PR_CR8ee,     sys);
+          if(isMm && ssf.lepPt
+             && passMinMet   ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mm,     metRel,sys), PR_CR8mm,     sys);
+          if(isMm && ssf.mtllmet  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mmMtww, metRel,sys), PR_CR8mmMtww, sys);
+          if(isMm && ssf.ht       ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mmHt,   metRel,sys), PR_CR8mmHt,   sys);
+          if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_CR8lpt,    sys);
+          if(isOf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_CR9lpt,    sys);
+          if(isSf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_SR8,       sys);
+          if(isOf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_SR9,       sys);
+          bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
+          bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
+          if(passEwkSs)      fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwk,     metRel,sys), PR_SsEwk,     sys);
+          if(passEwkSsLoose) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwkLoose,metRel,sys), PR_SsEwkLoose,sys);
+      } // end for(s)
+  }
   return ssf.passAll();
 }
 //----------------------------------------------------------
 void MatrixPrediction::Terminate()
 {
-  SusyPlotter::Terminate();
+    if(m_writeTuple) SusySelection::Terminate();
+    else             SusyPlotter::Terminate();
   if(m_dbg) cout << "MatrixPrediction::Terminate" << endl;
   delete m_matrix;
 }
