@@ -41,19 +41,28 @@ def computeHt(met, leptsJets=[]) :
 def computeMetRel(met, leptsJets=[]) :
     minDphi = min([0.5*pi]+[fabs(met.DeltaPhi(o)) for o in leptsJets])
     return met.Et()*sin(minDphi)
-def lepIsSeparatedFromOther(l, otherLeps=[], minDr=0.05) :
-    return all(l.DeltaR(ol)>minDr for ol in otherLeps)
-def lepPairIsZcand(l0, l1) :
-    "Inputs are susy::wh::FourMom"
+
+def massBestZcandidate(l0, l1, otherLeps) :
+    "Inputs are susy::wh::FourMom; return 0.0 if there is no candidate"
+    l0, l1, otherLeps = addTlv(l0), addTlv(l1), [addTlv(l) for l in otherLeps]
     def lepFlavor(l) : return 'el' if l.isEl else 'mu' if l.isMu else 'other'
-    l0Fl, l1Fl = lepFlavor(l0), lepFlavor(l1)
-    elOrMu = l0Fl in ['el','mu']
-    sameFlavor = l0Fl==l1Fl
-    oppCharge  = l0.charge*l1.charge < 0.0
-    return elOrMu and sameFlavor and oppCharge
-def deltaMZ0((la, lb)) :
-    "given a pair of leptons, return the abs difference m_ll - m_Z"
-    return abs((la + lb).M() - 91.2)
+    def lepIsSeparatedFromOther(l, otherLeps=[], minDr=0.05) : return all(l.p4.DeltaR(ol.p4)>minDr for ol in otherLeps)
+    def lepPairIsZcand(la, lb) :
+        laFl, lbFl = lepFlavor(la), lepFlavor(lb)
+        elOrMu = laFl in ['el','mu']
+        sameFlavor = laFl==lbFl
+        oppCharge  = la.charge*lb.charge < 0.0
+        return elOrMu and sameFlavor and oppCharge
+    def mll((la, lb)) : return (la.p4 + lb.p4).M()
+    def deltaMZ0((la, lb)) : return abs(mll((la, lb)) - 91.2)
+    otherLeps = filter(lambda l : lepIsSeparatedFromOther(l, [l0, l1]), otherLeps)
+    validPairs = [(lh, ls) for lh in [l0, l1] for ls in otherLeps if lepPairIsZcand(lh, ls)]
+    pairsSortedByBestM = sorted(validPairs, key=deltaMZ0)
+    return mll(pairsSortedByBestM[0]) if len(pairsSortedByBestM) else 0.0
+def thirdLepZcandidateIsInWindow(l0, l1, otherLeps, windowHalfwidth=20.0) :
+    mZ0 = 91.2
+    return fabs(massBestZcandidate(l0, l1, otherLeps) - mZ0) < windowHalfwidth
+
 def getDilepType(fmLep0, fmLep1) :
     "Given two susy::wh::FourMom, return ee/em/mm"
     def FourMom2LepType(fm) : return 'e' if fm.isEl else 'm' if fm.isMu else None

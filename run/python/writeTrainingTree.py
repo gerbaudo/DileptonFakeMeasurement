@@ -12,8 +12,12 @@ r.gROOT.SetStyle('Plain')
 r.gROOT.SetBatch(True)                     # no windows popping up
 r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
 from math import fabs
-from kin import phi_mpi_pi, addTlv, computeMt, computeHt, computeMetRel, getDilepType, computeMt2, computeMt2j, computeMljj
-
+from kin import (phi_mpi_pi,
+                 addTlv,
+                 computeMt, computeHt, computeMetRel,
+                 getDilepType,
+                 computeMt2, computeMt2j, computeMljj,
+                 thirdLepZcandidateIsInWindow)
 
 def buildFnamesDict(samples, dir='', tag='') :
     filenames = dict((s, glob.glob(dir+'/'+s+'_'+tag+'.root')) for s in samples)
@@ -56,12 +60,12 @@ def createOutTree(filenames, dilepChan, nJetChan, tag='', overwrite=False) :
             met = addTlv(event.met)
             jets = [addTlv(j) for j in event.jets]
             lepts = [addTlv(l) for l in event.lepts]
-            #lepts = filter(lambda l : lepIsSeparatedFromOther(l, [l0, l1]), lepts)
             pars = event.pars
             dilepType = getDilepType(event.l0, event.l1)
             nJets = len(jets)
             if dilepType != dilepChan : continue
             if nJets<1 or (nJets==1 and nJetChan is 'ge2j') : continue
+            if thirdLepZcandidateIsInWindow(l0, l1, lepts, 20.0) : continue
             vars.pt0 = l0.p4.Pt()
             vars.pt1 = l1.p4.Pt()
             vars.mll = (l0.p4+l1.p4).M()
