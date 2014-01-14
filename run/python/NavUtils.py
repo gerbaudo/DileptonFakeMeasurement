@@ -43,6 +43,13 @@ class HistoNameClassifier :
                               +'(?P<syst>.*)') # last token, everything that's left
     def histoType(self, histoname='') :
         match = self.rep.search(histoname)
+        # hack to parse muon_CR_WHSS_ee_l_pt_fake
+        pr = 'CR_WHSS' if 'CR_WHSS' in histoname else None
+        ch = 'ee' if 'ee' in histoname else 'mm' if 'mm' in histoname else 'em' if 'em' in histoname else None
+        var = 'l_pt_fake' if 'l_pt_fake' in histoname else None
+        syst = None
+        return HistoType({'pr':pr, 'ch':ch, 'var':var, 'syst':syst})
+        
         if not match :
             if self.verbose : print "cannot classify %s" % histoname
         else :
