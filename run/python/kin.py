@@ -32,7 +32,7 @@ def FourMom2TLorentzVector(fm) :
     l.SetPxPyPzE(fm.px, fm.py, fm.pz, fm.E)
     return l
 def addTlv(l) :
-    l.p4 = FourMom2TLorentzVector(l)
+    if not hasattr(l, 'p4') : l.p4 = FourMom2TLorentzVector(l)
     return l
 def computeMt(lep, met) :
     return sqrt(2.0 * lep.Pt() * met.Et() *(1.0-cos(lep.DeltaPhi(met))))
