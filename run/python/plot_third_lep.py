@@ -20,7 +20,7 @@ import ROOT as r
 r.gROOT.SetStyle('Plain')
 r.gROOT.SetBatch(True)                     # no windows popping up
 r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
-from utils import phi_mpi_pi
+from kin import phi_mpi_pi, addTlv
 
 r.gROOT.LoadMacro('src/TupleMakerObjects.h+')
 tlv = r.TLorentzVector
@@ -39,15 +39,6 @@ colors = {
     'fake'        : r.kGray, # just another name for the same thing
     'heavyflavor' : r.kViolet+1
     }
-
-def FourMom2TLorentzVector(fm) :
-    l = tlv()
-    l.SetPxPyPzE(fm.px, fm.py, fm.pz, fm.E)
-    return l
-fm2tlv = FourMom2TLorentzVector
-def addTlv(l) :
-    l.p4 = fm2tlv(l)
-    return l
 
 def getInputFiles() :
     samples = ['diboson', 'WH_2Lep_3']
