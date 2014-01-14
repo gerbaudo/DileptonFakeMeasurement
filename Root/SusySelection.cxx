@@ -69,9 +69,8 @@ void SusySelection::Begin(TTree* /*tree*/)
   }
 }
 //-----------------------------------------
-JetVector filterClJets(const JetVector &jets)
+JetVector SusySelection::filterClJets(const JetVector &jets)
 {
-// ugly hack: utils::filter seems not to work properly with SusyNtTools::isCentralLightJet...
     JetVector oj;
     for(size_t i=0; i<jets.size(); ++i)
         if(SusyNtTools::isCentralLightJet(jets[i])) oj.push_back(jets[i]);

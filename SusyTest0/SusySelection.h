@@ -138,6 +138,8 @@ class SusySelection : public SusyNtAna
     static SsPassFlags assignNjetFlags(const JetVector& jets, SsPassFlags f);
     //! determine whether a third lepton makes a Z candidate with a signal lepton
     static bool passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lepton* l1, const LeptonVector& otherLeptons, bool verbose=false);
+    //! ugly hack function : utils::filter seems not to work properly with SusyNtTools::isCentralLightJet...
+    static JetVector filterClJets(const JetVector &jets);
 
  protected:
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
