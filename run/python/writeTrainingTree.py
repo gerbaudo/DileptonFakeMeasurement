@@ -5,22 +5,15 @@
 # davide.gerbaudo@gmail.com
 # Jan 2014
 
-import array
 import glob
 import os
 import ROOT as r
 r.gROOT.SetStyle('Plain')
 r.gROOT.SetBatch(True)                     # no windows popping up
 r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
-from math import cos, fabs, sin, sqrt, pi
-from utils import first
-from rootUtils import drawLegendWithDictKeys
-from SampleUtils import colors
-from kin import phi_mpi_pi, addTlv, computeMt, computeHt, computeMetRel, getDilepType
+from math import fabs
+from kin import phi_mpi_pi, addTlv, computeMt, computeHt, computeMetRel, getDilepType, computeMt2, computeMt2j, computeMljj
 
-rootcoredir = os.environ['ROOTCOREDIR']
-r.gROOT.LoadMacro(rootcoredir+'/scripts/load_packages.C+')
-r.load_packages()
 
 def buildFnamesDict(samples, dir='', tag='') :
     filenames = dict((s, glob.glob(dir+'/'+s+'_'+tag+'.root')) for s in samples)
@@ -29,24 +22,6 @@ def buildFnamesDict(samples, dir='', tag='') :
     filenames = dict((s,v[0]) for s,v in filenames.iteritems() if len(v)==1 and v[0])
     return filenames
 
-mt2 = r.mt2_bisect.mt2()
-def computeMt2(a, b, met, zeroMass, lspMass) :
-    pa    = array.array( 'd', [0.0 if zeroMass else a.M(), a.Px(), a.Py() ] )
-    pb    = array.array( 'd', [0.0 if zeroMass else b.M(), b.Px(), b.Py() ] )
-    pmiss = array.array( 'd', [0.0, met.Px(), met.Py() ] )
-    mt2.set_momenta(pa, pb, pmiss)
-    mt2.set_mn(lspMass)
-    return mt2.get_mt2()
-def computeMt2j(l0, l1, j0, j1, met, zeroMass=False, lspMass=0.0) :
-    "As described in CMS-SUS-13-017"
-    mt2_00 = computeMt2(l0+j0, l1+j1, met, zeroMass, lspMass)
-    mt2_01 = computeMt2(l1+j0, l0+j1, met, zeroMass, lspMass)
-    return min([mt2_00, mt2_01])
-def computeMljj(l0, l1, j0, j1) :
-    "Todo: extened combinatorics to N_j>2; good enough for now (we have few cases with >=3j)"
-    jj = j0+j1
-    dr0, dr1 = jj.DeltaR(l0), jj.DeltaR(l1)
-    return (jj+l0).M() if dr0<dr1 else (jj+l1).M()
 
 leafNames = ['pt0', 'pt1', 'mll', 'mtllmet', 'ht', 'metrel', 'dphill', 'detall', 'mt2j', 'mljj', 'dphijj', 'detajj']
 structDecl  = 'struct vars { '
