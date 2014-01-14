@@ -23,7 +23,6 @@ r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line o
 from kin import phi_mpi_pi, addTlv, lepIsSeparatedFromOther, lepPairIsZcand, deltaMZ0
 
 r.gROOT.LoadMacro('src/TupleMakerObjects.h+')
-tlv = r.TLorentzVector
 
 treename = 'SusySel'
 tag = 'Dec_09'
