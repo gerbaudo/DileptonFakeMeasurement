@@ -63,6 +63,8 @@ namespace susy
   int numberOfNeutrinoSolutions(const TLorentzVector &lPos, const TLorentzVector &lNeg,
                                 const Susy::Jet &jet0, const Susy::Jet &jet1,
                                 const TLorentzVector &met);
+  //! whether this event is in our list of 'interesting' events
+  bool isEventInList(int eventNumber);
 } // end namespace susy
 
 #endif

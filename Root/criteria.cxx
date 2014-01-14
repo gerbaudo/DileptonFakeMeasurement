@@ -1,5 +1,6 @@
 #include "SusyTest0/criteria.h"
 
+#include <algorithm>
 #include <cassert>
 #include <math.h>   // cos
 #include <numeric>  // std::accumulate
@@ -309,6 +310,16 @@ float mZTauTau(const TLorentzVector &l0, const TLorentzVector &l1,
   bool kinematicallyPossible(x1*x2 > 0.0);
   return (kinematicallyPossible ? (l0+l1).M() / std::sqrt(x1*x2) : -1.0);
 }
-
+//-----------------------------------------
+bool isEventInList(int eventNumber)
+{
+    int events[] = { 1357429, 2052596, 1053625, 1294758, 2074372, 164237 };
+    size_t nEvents = sizeof(events)/sizeof(events[0]);
+    const int* begin = events;
+    const int* end   = events + nEvents;
+    const int* it    = std::find(begin, end, eventNumber);
+    return it!=end;
+}
+//-----------------------------------------
 
 } // end namespace susy

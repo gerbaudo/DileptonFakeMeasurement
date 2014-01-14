@@ -135,6 +135,9 @@ class SusySelection : public SusyNtAna
     //! any electron or muon, before pt cuts, before overlap removal
     static vl_t getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/);
     static susy::wh::Chan getChan(const LeptonVector& leps); //!< compute lepton channel
+    static SsPassFlags assignNjetFlags(const JetVector& jets, SsPassFlags f);
+    //! determine whether a third lepton makes a Z candidate with a signal lepton
+    static bool passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lepton* l1, const LeptonVector& otherLeptons, bool verbose=false);
 
  protected:
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
@@ -154,6 +157,7 @@ class SusySelection : public SusyNtAna
     XSReader* m_xsReader;
     susy::wh::TupleMaker m_tupleMaker;
     bool m_writeTuple;
+    bool m_debugThisEvent;
     std::string m_outTupleFile;
 
     DilTrigLogic*       m_trigObj;      // My trigger logic class
@@ -258,11 +262,26 @@ class SusySelection : public SusyNtAna
     float n_pass_fjVeto     [ET_N][kWeightTypesN];
     float n_pass_bjVeto     [ET_N][kWeightTypesN];
     float n_pass_ge1j       [ET_N][kWeightTypesN];
+    float n_pass_eq1j       [ET_N][kWeightTypesN];
+    float n_pass_ge2j       [ET_N][kWeightTypesN];
     float n_pass_lepPt      [ET_N][kWeightTypesN];
     float n_pass_mllZveto   [ET_N][kWeightTypesN];
     float n_pass_mWwt       [ET_N][kWeightTypesN];
     float n_pass_ht         [ET_N][kWeightTypesN];
     float n_pass_metRel     [ET_N][kWeightTypesN];
+    float n_pass_3rdLep     [ET_N][kWeightTypesN];
+    float n_pass_eq1jlepPt      [ET_N][kWeightTypesN];
+    float n_pass_eq1jmllZveto   [ET_N][kWeightTypesN];
+    float n_pass_eq1jmWwt       [ET_N][kWeightTypesN];
+    float n_pass_eq1jht         [ET_N][kWeightTypesN];
+    float n_pass_eq1jmetRel     [ET_N][kWeightTypesN];
+    float n_pass_eq1j3rdLep     [ET_N][kWeightTypesN];
+    float n_pass_ge2jlepPt      [ET_N][kWeightTypesN];
+    float n_pass_ge2jmllZveto   [ET_N][kWeightTypesN];
+    float n_pass_ge2jmWwt       [ET_N][kWeightTypesN];
+    float n_pass_ge2jht         [ET_N][kWeightTypesN];
+    float n_pass_ge2jmetRel     [ET_N][kWeightTypesN];
+    float n_pass_ge2j3rdLep     [ET_N][kWeightTypesN];
 };
 
 #endif // SusySelection_h

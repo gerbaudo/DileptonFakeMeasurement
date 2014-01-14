@@ -7,7 +7,7 @@
   Aug 2013
  */
 
-#include <algorithm>    // std::set_intersection
+#include <algorithm>    // std::set_intersection, remove_if
 #include <fstream>
 #include <string>
 #include <vector>
@@ -38,6 +38,16 @@ std::vector<T> subtract_vector(std::vector<T>& a, const std::vector<T>& b)
   std::vector<T> difference;
   std::set_difference(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter( difference ));
   return difference;
+}
+
+// Filter a container with a predicate
+// Lifted from:
+// http://stackoverflow.com/questions/2797142/higher-order-function-filter-in-c
+template <typename C, typename P>
+  C filter(C const & container, P pred) {
+  C filtered(container);
+  filtered.erase(remove_if(filtered.begin(), filtered.end(), pred), filtered.end());
+  return filtered;
 }
 
 
