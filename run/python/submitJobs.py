@@ -27,6 +27,7 @@ parser.add_option('--seltuple', action='store_true', default=False)
 parser.add_option('--fakeprob', action='store_true', default=False)
 parser.add_option('--fakerate', action='store_true', default=False, help='fake rate with code from Matt')
 parser.add_option('--fakepred', action='store_true', default=False, help='run FakePred by Matt')
+parser.add_option('--faketupl', action='store_true', default=False, help='same as fakepred, but make tuples')
 parser.add_option("-o", "--overwrite", action="store_true", dest="overwrite", default=False,
                   help="overwrite existing batch scripts")
 parser.add_option("-O", "--other-opt", dest="otherOptions", default='',
@@ -54,6 +55,7 @@ susyplot     = options.susyplot
 susysel      = options.susysel
 seltuple     = options.seltuple
 fakepred     = options.fakepred
+faketupl     = options.faketupl
 fakeprob     = options.fakeprob
 fakerate     = options.fakerate
 alsoph       = options.alsoplaceholders
@@ -69,6 +71,7 @@ template += scriptDir+'/templates/selTuple.sh.template' if seltuple else ''
 template += scriptDir+'/templates/fakeprob.sh.template' if fakeprob else ''
 template += scriptDir+'/templates/fakerate.sh.template' if fakerate else ''
 template += scriptDir+'/templates/fakepred.sh.template' if fakepred else ''
+template += scriptDir+'/templates/fakepredtuple.sh.template' if faketupl else ''
 outdir = 'out/'
 logdir = 'log/'
 def subdir() :
@@ -78,6 +81,7 @@ def subdir() :
     if fakeprob : return 'fakeprob'
     if fakerate : return 'fakerate'
     if fakepred : return 'fakepred'
+    if faketupl : return 'faketuple'
 def formAndCreateOutdir(basedir, subdir) :
     d = basedir+'/'+subdir
     if not os.path.isdir(d)  : os.makedirs(d)
