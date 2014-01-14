@@ -16,13 +16,11 @@ from math import cos, fabs, sin, sqrt, pi
 from utils import first
 from rootUtils import drawLegendWithDictKeys
 from SampleUtils import colors
-from kin import phi_mpi_pi, addTlv, computeMt, computeHt, computeMetRel
+from kin import phi_mpi_pi, addTlv, computeMt, computeHt, computeMetRel, getDilepType
 
 rootcoredir = os.environ['ROOTCOREDIR']
 r.gROOT.LoadMacro(rootcoredir+'/scripts/load_packages.C+')
 r.load_packages()
-tlv = r.TLorentzVector
-
 
 def buildFnamesDict(samples, dir='', tag='') :
     filenames = dict((s, glob.glob(dir+'/'+s+'_'+tag+'.root')) for s in samples)
@@ -30,12 +28,6 @@ def buildFnamesDict(samples, dir='', tag='') :
         if len(v)!=1 : print "skipping '%s', ambiguous filenames :\n%s"%(s, str(v))
     filenames = dict((s,v[0]) for s,v in filenames.iteritems() if len(v)==1 and v[0])
     return filenames
-
-def FourMom2LepType(fm) :
-    return 'e' if fm.isEl else 'm' if fm.isMu else None
-def getDilepType(fmLep0, fmLep1) :
-    dilepType = ''.join(sorted(FourMom2LepType(l) for l in [fmLep0, fmLep1])) # sort -> em instead of me
-    return dilepType
 
 mt2 = r.mt2_bisect.mt2()
 def computeMt2(a, b, met, zeroMass, lspMass) :

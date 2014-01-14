@@ -45,3 +45,8 @@ def lepPairIsZcand(l0, l1) :
 def deltaMZ0((la, lb)) :
     "given a pair of leptons, return the abs difference m_ll - m_Z"
     return abs((la + lb).M() - 91.2)
+def getDilepType(fmLep0, fmLep1) :
+    "Given two susy::wh::FourMom, return ee/em/mm"
+    def FourMom2LepType(fm) : return 'e' if fm.isEl else 'm' if fm.isMu else None
+    dilepType = ''.join(sorted(FourMom2LepType(l) for l in [fmLep0, fmLep1])) # sort -> em instead of me
+    return dilepType
