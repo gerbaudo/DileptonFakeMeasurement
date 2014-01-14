@@ -16,7 +16,7 @@ from math import cos, fabs, sin, sqrt, pi
 from utils import first
 from rootUtils import drawLegendWithDictKeys
 from SampleUtils import colors
-from kin import phi_mpi_pi
+from kin import phi_mpi_pi, addTlv, FourMom2TLorentzVector, computeMt, computeHt, computeMetRel
 
 rootcoredir = os.environ['ROOTCOREDIR']
 r.gROOT.LoadMacro(rootcoredir+'/scripts/load_packages.C+')
@@ -36,17 +36,6 @@ def FourMom2LepType(fm) :
 def getDilepType(fmLep0, fmLep1) :
     dilepType = ''.join(sorted(FourMom2LepType(l) for l in [fmLep0, fmLep1])) # sort -> em instead of me
     return dilepType
-def FourMom2TLorentzVector(fm) :
-    l = tlv()
-    l.SetPxPyPzE(fm.px, fm.py, fm.pz, fm.E)
-    return l
-def computeMt(lep, met) :
-    return sqrt(2.0 * lep.Pt() * met.Et() *(1.0-cos(lep.DeltaPhi(met))))
-def computeHt(met, leptsJets=[]) :
-    return sum(o.Pt() for o in leptsJets) + met.Et()
-def computeMetRel(met, leptsJets=[]) :
-    minDphi = min([0.5*pi]+[fabs(met.DeltaPhi(o)) for o in leptsJets])
-    return met.Et()*sin(minDphi)
 
 fm2tlv = FourMom2TLorentzVector # move to module
 mt2 = r.mt2_bisect.mt2()
