@@ -26,6 +26,7 @@ void usage(const char *exeName, const char *defaultMatrixFile) {
       <<"\t"<<"-k [--num-skip]    nSkip (default 0)"     <<endl
       <<"\t"<<"-i [--input]       (file, list, or dir)"  <<endl
       <<"\t"<<"-o [--output]      output file"           <<endl
+      <<"\t"<<"-t [--tuple-out] fname.root (out ntuple file)"<<endl
       <<"\t"<<"-s [--sample]      samplename"            <<endl
       <<"\t"<<"-d [--debug]     : debug (>0 print stuff)"<<endl
       <<"\t"<<"-h [--help]      : print help"            <<endl
@@ -41,6 +42,7 @@ int main(int argc, char** argv)
   string sample;
   string input;
   string output;
+  bool writeTuple = false;
   string matrixFile(getRootCoreDir()+"/../SusyMatrixMethod/data/forDavide_Sep11_2013.root");
   int optind(1);
   while ((optind < argc)) {
@@ -53,6 +55,7 @@ int main(int argc, char** argv)
     else if(sw=="-i"||sw=="--input"      ) { input = argv[++optind]; }
     else if(sw=="-o"||sw=="--output"     ) { output = argv[++optind]; }
     else if(sw=="-s"||sw=="--sample"     ) { sample = argv[++optind]; }
+    else if(sw=="-t"||sw=="--tuple-out")   { writeTuple = true; output = argv[++optind]; }
     else if(sw=="-h"||sw=="--help"       ) { usage(argv[0], matrixFile.c_str()); return 0; }
     else cout<<"Unknown switch "<<sw<<endl;
     optind++;
@@ -64,6 +67,7 @@ int main(int argc, char** argv)
       <<"  dbg     "<<dbg       <<endl
       <<"  input   "<<input     <<endl
       <<"  output  "<<output    <<endl
+      <<"  writeTuple "<<writeTuple <<endl
       <<endl;
 
   TChain* chain = new TChain("susyNt");
@@ -90,7 +94,8 @@ int main(int argc, char** argv)
   fakePred.setMatrixFilename(matrixFile);
   fakePred.setDebug(dbg);
   fakePred.setSampleName(sample);
-  fakePred.setOutputFilename(output);
+  if(writeTuple) fakePred.setTupleFile(output);
+  else           fakePred.setOutputFilename(output);
 
   fakePred.buildSumwMap(chain);
   chain->Process(&fakePred, sample.c_str(), nEvt, nSkip);
