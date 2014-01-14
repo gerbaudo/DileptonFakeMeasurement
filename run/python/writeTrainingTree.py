@@ -27,7 +27,8 @@ def buildFnamesDict(samples, dir='', tag='') :
     return filenames
 
 
-leafNames = ['pt0', 'pt1', 'mll', 'mtllmet', 'ht', 'metrel', 'dphill', 'detall', 'mt2j', 'mljj', 'dphijj', 'detajj']
+leafNames = ['pt0', 'pt1', 'mll', 'mtmin', 'mtmax', 'mtllmet', 'ht', 'metrel', 'dphill', 'detall',
+             'mt2j', 'mljj', 'dphijj', 'detajj']
 structDecl  = 'struct vars { '
 structDecl += ' '.join(["float %s;"%v for v in leafNames])
 structDecl += " };"
@@ -66,9 +67,12 @@ def createOutTree(filenames, dilepChan, nJetChan, tag='', overwrite=False) :
             if dilepType != dilepChan : continue
             if nJets<1 or (nJets==1 and nJetChan is 'ge2j') : continue
             if thirdLepZcandidateIsInWindow(l0, l1, lepts, 20.0) : continue
+            mt0, mt1 = computeMt(l0.p4, met.p4), computeMt(l1.p4, met.p4)
             vars.pt0 = l0.p4.Pt()
             vars.pt1 = l1.p4.Pt()
             vars.mll = (l0.p4+l1.p4).M()
+            vars.mtmin = min([mt0, mt1])
+            vars.mtmax = max([mt0, mt1])
             vars.mtllmet = computeMt(l0.p4 + l1.p4, met.p4)
             vars.ht = computeHt(met.p4, [l0.p4, l1.p4]+[j.p4 for j in jets])
             vars.metrel = computeMetRel(met.p4, [l0.p4, l1.p4]+[j.p4 for j in jets])
