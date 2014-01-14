@@ -85,31 +85,32 @@ def createOutTree(filenames, dilepChan, nJetChan, tag='', overwrite=False) :
         print "processing %s (%d entries)"%(sample, tree.GetEntries())
         for iEvent, event in enumerate(tree) :
             resetVars(vars)
-            l0 = fm2tlv(event.l0)
-            l1 = fm2tlv(event.l1)
-            met = fm2tlv(event.met)
-            jets = [fm2tlv(j) for j in event.jets]
-            lepts = [fm2tlv(l) for l in event.lepts]
+            l0 = addTlv(event.l0)
+            l1 = addTlv(event.l1)
+            met = addTlv(event.met)
+            jets = [addTlv(j) for j in event.jets]
+            lepts = [addTlv(l) for l in event.lepts]
+            #lepts = filter(lambda l : lepIsSeparatedFromOther(l, [l0, l1]), lepts)
             pars = event.pars
             dilepType = getDilepType(event.l0, event.l1)
             nJets = len(jets)
             if dilepType != dilepChan : continue
             if nJets<1 or (nJets==1 and nJetChan is 'ge2j') : continue
-            vars.pt0 = l0.Pt()
-            vars.pt1 = l1.Pt()
-            vars.mll = (l0+l1).M()
-            vars.mtllmet = computeMt(l0+l1, met)
-            vars.ht = computeHt(met, [l0, l1]+jets)
-            vars.metrel = computeMetRel(met, [l0, l1]+jets)
-            vars.dphill = fabs(phi_mpi_pi(l0.DeltaPhi(l1)))
-            vars.detall = fabs(l0.Eta() - l1.Eta())
+            vars.pt0 = l0.p4.Pt()
+            vars.pt1 = l1.p4.Pt()
+            vars.mll = (l0.p4+l1.p4).M()
+            vars.mtllmet = computeMt(l0.p4 + l1.p4, met.p4)
+            vars.ht = computeHt(met.p4, [l0.p4, l1.p4]+[j.p4 for j in jets])
+            vars.metrel = computeMetRel(met.p4, [l0.p4, l1.p4]+[j.p4 for j in jets])
+            vars.dphill = fabs(phi_mpi_pi(l0.p4.DeltaPhi(l1.p4)))
+            vars.detall = fabs(l0.p4.Eta() - l1.p4.Eta())
             # third lep, mljj,
             if nJets >1 :
                 j0, j1 = jets[0], jets[1]
-                vars.mt2j = computeMt2j(l0, l1, j0, j1, met)
-                vars.mljj = computeMljj(l0, l1, j0, j1)
-                vars.dphijj = fabs(phi_mpi_pi(j0.DeltaPhi(j1)))
-                vars.detajj = fabs(j0.Eta() - j1.Eta())
+                vars.mt2j = computeMt2j(l0.p4, l1.p4, j0.p4, j1.p4, met.p4)
+                vars.mljj = computeMljj(l0.p4, l1.p4, j0.p4, j1.p4)
+                vars.dphijj = fabs(phi_mpi_pi(j0.p4.DeltaPhi(j1.p4)))
+                vars.detajj = fabs(j0.p4.Eta() - j1.p4.Eta())
             outTree.Fill()
         print "filled ",outTree.GetEntries()," entries"
         outFile.Write()
