@@ -32,3 +32,16 @@ def computeHt(met, leptsJets=[]) :
 def computeMetRel(met, leptsJets=[]) :
     minDphi = min([0.5*pi]+[fabs(met.DeltaPhi(o)) for o in leptsJets])
     return met.Et()*sin(minDphi)
+def lepIsSeparatedFromOther(l, otherLeps=[], minDr=0.05) :
+    return all(l.DeltaR(ol)>minDr for ol in otherLeps)
+def lepPairIsZcand(l0, l1) :
+    "Inputs are susy::wh::FourMom"
+    def lepFlavor(l) : return 'el' if l.isEl else 'mu' if l.isMu else 'other'
+    l0Fl, l1Fl = lepFlavor(l0), lepFlavor(l1)
+    elOrMu = l0Fl in ['el','mu']
+    sameFlavor = l0Fl==l1Fl
+    oppCharge  = l0.charge*l1.charge < 0.0
+    return elOrMu and sameFlavor and oppCharge
+def deltaMZ0((la, lb)) :
+    "given a pair of leptons, return the abs difference m_ll - m_Z"
+    return abs((la + lb).M() - 91.2)
