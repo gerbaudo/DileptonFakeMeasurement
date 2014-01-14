@@ -124,6 +124,9 @@ def train(sigFiles=[], bkgFiles=[], dilepChan='', nJetChan='') :
     bkgTree, sigTree = r.TChain('training'), r.TChain('training')
     for b in bkgFiles : bkgTree.Add(b)
     for s in sigFiles : sigTree.Add(s)
+    if not bkgTree.GetEntries() or not sigTree.GetEntries() :
+        print "TMVA cannot handle empty training trees...exiting"
+        return
     r.TMVA.Tools.Instance()
     fileOut = r.TFile("testmva_%s_%s.root"%(dilepChan, nJetChan),"RECREATE")
     factory = r.TMVA.Factory("TMVAClassification", fileOut,
