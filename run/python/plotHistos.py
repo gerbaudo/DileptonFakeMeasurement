@@ -7,7 +7,7 @@
 
 import collections, optparse, sys, glob
 #import numpy as np # not available, this hurts.
-from rootUtils import importRoot
+from rootUtils import importRoot, binContentsWithUoflow
 r = importRoot()
 r.gStyle.SetPadTickX(1)
 r.gStyle.SetPadTickY(1)
@@ -161,11 +161,6 @@ def plotZnHisto(pad, h, linecolor=r.kBlack, minY=0.0, maxY=1.0) :
     ax.Draw()
     return [h, ax]
 
-def binContentsWithUoflow(h) :
-    nBinsX = h.GetNbinsX()+1
-    return [h.GetBinContent(0)] + \
-           [h.GetBinContent(i) for i in range(1, nBinsX)] + \
-           [h.GetBinContent(nBinsX+1)]
     
 def maxSepVerticalLine(hSig, hBkg, yMin=0.0, yMax=1.0) :
     nxS, nxB = hSig.GetNbinsX(), hBkg.GetNbinsX()

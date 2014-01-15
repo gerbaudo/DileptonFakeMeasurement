@@ -99,3 +99,12 @@ def buildBotTopPads(canvas, splitFraction=0.275) :
     r.SetOwnership(topPad, False)
     canvas._pads = [topPad, botPad]
     return botPad, topPad
+def summedHisto(histos) :
+    "return an histogram that is the sum of the inputs"
+    hsum = histos[0].Clone(histos[0].GetName()+'_sum')
+    for h in histos[0:] : hsum.Add(h)
+    return hsum
+
+def binContentsWithUoflow(h) :
+    nBinsX = h.GetNbinsX()+1
+    return [h.GetBinContent(0)] + [h.GetBinContent(i) for i in range(1, nBinsX)] + [h.GetBinContent(nBinsX+1)]
