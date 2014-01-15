@@ -131,3 +131,15 @@ def cumEffHisto(histoTemplate, bincontents=[], leftToRight=True) :
     h.SetTitle('')
     h.SetFillStyle(0)
     return h
+def maxSepVerticalLine(hSig, hBkg, yMin=0.0, yMax=1.0) :
+    nxS, nxB = hSig.GetNbinsX(), hBkg.GetNbinsX()
+    assert nxS==nxB,"maxSepVerticalLine : histos with differen binning (%d!=%d)"%(nxS,nxB)
+    bcS = [hSig.GetBinContent(i) for i in range(1,1+nxS)]
+    bcB = [hBkg.GetBinContent(i) for i in range(1,1+nxB)]
+    def indexMaxDist(bcS, bcB) :
+        return sorted([(i,d) for i,d in enumerate([abs(a-b) for a,b in zip(bcS, bcB)])],
+                      key= lambda x : x[1])[-1][0]
+    iMax = indexMaxDist(bcS, bcB)
+    xPos = hSig.GetBinCenter(iMax+1)
+    sep = [abs(a-b) for a,b in zip(bcS, bcB)]
+    return r.TLine(xPos, yMin, xPos, yMax)

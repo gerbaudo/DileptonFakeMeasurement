@@ -7,7 +7,7 @@
 
 import collections, optparse, sys, glob
 #import numpy as np # not available, this hurts.
-from rootUtils import importRoot, binContentsWithUoflow, cloneAndFillHisto, cumEffHisto
+from rootUtils import importRoot, binContentsWithUoflow, cloneAndFillHisto, cumEffHisto, maxSepVerticalLine
 r = importRoot()
 r.gStyle.SetPadTickX(1)
 r.gStyle.SetPadTickY(1)
@@ -117,19 +117,6 @@ def plotZnHisto(pad, h, linecolor=r.kBlack, minY=0.0, maxY=1.0) :
     return [h, ax]
 
     
-def maxSepVerticalLine(hSig, hBkg, yMin=0.0, yMax=1.0) :
-    nxS, nxB = hSig.GetNbinsX(), hBkg.GetNbinsX()
-    assert nxS==nxB,"maxSepVerticalLine : histos with differen binning (%d!=%d)"%(nxS,nxB)
-    bcS = [hSig.GetBinContent(i) for i in range(1,1+nxS)]
-    bcB = [hBkg.GetBinContent(i) for i in range(1,1+nxB)]
-    def indexMaxDist(bcS, bcB) :
-        return sorted([(i,d) for i,d in enumerate([abs(a-b) for a,b in zip(bcS, bcB)])],
-                      key= lambda x : x[1])[-1][0]
-    iMax = indexMaxDist(bcS, bcB)
-    xPos = hSig.GetBinCenter(iMax+1)
-    sep = [abs(a-b) for a,b in zip(bcS, bcB)]
-    return r.TLine(xPos, yMin, xPos, yMax)
-
 def plotTopPad(pad, hSig, hBkg) :
     nxS, nxB = hSig.GetNbinsX()+1, hBkg.GetNbinsX()+1  # TH1 starts from 1
     assert nxS==nxB,"maxSepVerticalLine : histos with differen binning (%d!=%d)"%(nxS,nxB)
