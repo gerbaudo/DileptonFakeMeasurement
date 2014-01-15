@@ -30,21 +30,13 @@ def buildFnamesDict(samples, dir='', tag='') :
 leafNames = ['pt0', 'pt1', 'mll', 'mtmin', 'mtmax', 'mtllmet', 'ht', 'metrel', 'dphill', 'detall',
              'mt2j', 'mljj', 'dphijj', 'detajj']
 
-def loadStruct(sourceFile, overwrite=False) :
-    structDecl  = 'struct vars { \n'
-    structDecl += ' '.join(["float %s;"%v for v in leafNames+['weight']]) + '\n'
-    structDecl += 'void reset() { '+ ' = '.join(leafNames+['weight'])+' = 0.0; } \n'
-    structDecl += " };\n"
-    if not os.path.exists(sourceFile) or overwrite:
-        f = open(sourceFile, 'w')
-        f.write(structDecl)
-        f.close()
-    r.gROOT.LoadMacro(sourceFile+"+")
+structDecl  = 'struct vars { '
+structDecl += ' '.join(["float %s;"%v for v in leafNames])
+structDecl += " };"
+r.gROOT.ProcessLine(structDecl)
+def resetVars(v) : for l in leafNames : setattr(v, l, 0.0)
 
-loadStruct('train_struct.h')
 vars = r.vars()
-def resetVars(v) :
-    for l in leafNames : setattr(v, l, 0.0)
 
 def createOutTree(filenames, dilepChan, nJetChan, tag='', overwrite=False) :
     assert dilepChan in ['ee','mm','em']
