@@ -34,7 +34,8 @@ structDecl  = 'struct vars { '
 structDecl += ' '.join(["float %s;"%v for v in leafNames])
 structDecl += " };"
 r.gROOT.ProcessLine(structDecl)
-def resetVars(v) : for l in leafNames : setattr(v, l, 0.0)
+def resetVars(v) :
+    for l in leafNames : setattr(v, l, 0.0)
 
 vars = r.vars()
 
