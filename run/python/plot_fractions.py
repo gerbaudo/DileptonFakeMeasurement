@@ -19,19 +19,18 @@
 # 2013-09-19
 
 import os
-import ROOT as r
-
-r.gROOT.SetBatch(1)
-r.gErrorIgnoreLevel=r.kError # disable root warnings 
-r.gStyle.SetPadTickX(1)
-r.gStyle.SetPadTickY(1)
-
 from utils import commonPrefix, commonSuffix
 from rootUtils import (unitLineFromFirstHisto,
                        firstHisto,
                        drawLegendWithDictKeys,
-                       buildRatioHistogram
+                       buildRatioHistogram,
+                       importRoot
                        )
+r = importRoot()
+r.gErrorIgnoreLevel=r.kError # disable root warnings 
+r.gStyle.SetPadTickX(1)
+r.gStyle.SetPadTickY(1)
+
 #___________________________________________________________  
 class Entry :
     """

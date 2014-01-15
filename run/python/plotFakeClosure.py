@@ -13,17 +13,16 @@
 import numpy as np
 import optparse
 import os
-import ROOT as r
-r.gROOT.SetBatch(True)                     # no windows popping up
-r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
-r.gStyle.SetPadTickX(1)
-r.gStyle.SetPadTickY(1)
 from rootUtils import (referenceLine
                        ,topRightLegend
                        ,getMinMax
                        ,buildRatioHistogram
                        ,buildBotTopPads
+                       ,importRoot
                        )
+r = importRoot()
+r.gStyle.SetPadTickX(1)
+r.gStyle.SetPadTickY(1)
 from utils import (enumFromHeader
                    ,json_write
                    ,mkdirIfNeeded

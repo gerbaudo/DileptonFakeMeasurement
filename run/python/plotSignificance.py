@@ -10,10 +10,8 @@
 # Jan 2013
 
 import collections, optparse, sys
-import ROOT as r
-r.PyConfig.IgnoreCommandLineOptions = True
-r.gROOT.SetBatch(1)
-
+from rootUtils import importRoot
+r = importRoot()
 from PickleUtils import readFromPickle
 from SampleUtils import ModeAWhDbPar, ModeAWhDbReqid
 

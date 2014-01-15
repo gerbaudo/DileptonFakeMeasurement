@@ -7,9 +7,8 @@
 
 import collections, optparse, sys, glob
 #import numpy as np # not available, this hurts.
-import ROOT as r
-r.PyConfig.IgnoreCommandLineOptions = True
-r.gROOT.SetBatch(1)
+from rootUtils import importRoot
+r = importRoot()
 r.gStyle.SetPadTickX(1)
 r.gStyle.SetPadTickY(1)
 
