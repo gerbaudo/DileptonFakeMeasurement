@@ -65,7 +65,7 @@ def createOutTree(filenames, dilepChan, nJetChan, tag='', overwrite=False) :
             dilepType = getDilepType(event.l0, event.l1)
             nJets = len(jets)
             if dilepType != dilepChan : continue
-            if nJets<1 or (nJets==1 and nJetChan is 'ge2j') : continue
+            if nJets<1 or (nJets>1 and nJetChan=='eq1j') : continue
             if thirdLepZcandidateIsInWindow(l0, l1, lepts, 20.0) : continue
             mt0, mt1 = computeMt(l0.p4, met.p4), computeMt(l1.p4, met.p4)
             vars.pt0 = l0.p4.Pt()
