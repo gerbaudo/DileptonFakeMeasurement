@@ -42,7 +42,6 @@ def createOutTree(filenames, dilepChan, nJetChan, tag='', overwrite=False) :
     assert nJetChan in ['eq1j', 'ge2j']
     outFilenames = dict()
     for sample, filename in filenames.iteritems() :
-        print sample
         outFilename = '/tmp/'+sample+'_'+dilepChan+'_'+nJetChan+'.root'
         if os.path.exists(outFilename) and not overwrite :
             outFilenames[sample] = outFilename
@@ -53,7 +52,7 @@ def createOutTree(filenames, dilepChan, nJetChan, tag='', overwrite=False) :
         outTree.SetDirectory(outFile)
         file = r.TFile.Open(filename)
         tree = file.Get(treename)
-        print "processing %s (%d entries)"%(sample, tree.GetEntries())
+        print "processing %s %s %s (%d entries)"%(sample, dilepChan, nJetChan, tree.GetEntries())
         for iEvent, event in enumerate(tree) :
             resetVars(vars)
             l0 = addTlv(event.l0)
@@ -78,7 +77,6 @@ def createOutTree(filenames, dilepChan, nJetChan, tag='', overwrite=False) :
             vars.metrel = computeMetRel(met.p4, [l0.p4, l1.p4]+[j.p4 for j in jets])
             vars.dphill = fabs(phi_mpi_pi(l0.p4.DeltaPhi(l1.p4)))
             vars.detall = fabs(l0.p4.Eta() - l1.p4.Eta())
-            # third lep, mljj,
             if nJets >1 :
                 j0, j1 = jets[0], jets[1]
                 vars.mt2j = computeMt2j(l0.p4, l1.p4, j0.p4, j1.p4, met.p4)
@@ -118,8 +116,6 @@ def train(sigFiles=[], bkgFiles=[], dilepChan='', nJetChan='') :
     bkgCut = r.TCut("")
     factory.AddSignalTree    (sigTree)
     factory.AddBackgroundTree(bkgTree)
-    factory.SetBackgroundWeightExpression("")
-    factory.SetSignalWeightExpression("")
     factory.PrepareTrainingAndTestTree(sigCut, bkgCut,
                                        ":".join(["nTrain_Signal=0",
                                                  "nTrain_Background=0",
