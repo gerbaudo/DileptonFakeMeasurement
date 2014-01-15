@@ -150,8 +150,8 @@ treename = 'SusySel'
 tag = 'Jan_11' #'Jan_11'
 basedir = '/gdata/atlas/gerbaudo/wh/Susy2013_Nt_01_04_dev/SusyTest0/run/out/susysel/'
 
-bkgSamples = ['wjets', 'zjets', 'ttbar', 'diboson', 'heavyflavor']
-bkgSamples = ['ttbar']
+bkgSamples = ['wjets', 'zjets', 'ttbar', 'diboson', 'heavyflavor', 'fake']
+#bkgSamples = ['ttbar']
 sigSamples = ["Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_%d"%d for d in range(1,1+1)]
 
 bkgFilenanes = buildFnamesDict(bkgSamples, basedir+'/merged/', tag)
