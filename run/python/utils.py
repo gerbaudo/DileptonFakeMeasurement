@@ -105,6 +105,9 @@ def enumFromHeader(filename, enumName) :
 def dictKeysSortedByValue(aDict={}) :
     "Given a dict, return its keys sorted by their values"
     return [x[0] for x in sorted(aDict.iteritems(), key=operator.itemgetter(1))]
+def dictSum(d0, d1) :
+    "see http://stackoverflow.com/questions/6005066/adding-dictionaries-together-python"
+    return dict(d0, **d1)
 def first(listOrDict) :
     lod = listOrDict
     return lod.itervalues().next() if type(lod) is dict else lod[0] if lod else None
