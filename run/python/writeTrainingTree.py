@@ -110,7 +110,9 @@ def train(sigFiles=[], bkgFiles=[], dilepChan='', nJetChan='') :
                                        "Transformations=I;D;P;G,D",
                                        "AnalysisType=Classification"]
                                       ))
-    mvaVars = [l for l in leafNames if l not in ['pt0', 'pt1']]
+    excludedVars = ['pt0', 'pt1']
+    excludedVars += ['mt2j', 'mljj', 'dphijj', 'detajj'] if nJetChan=='eq1j' else []
+    mvaVars = [l for l in leafNames if l not in excludedVars]
     for v in mvaVars : factory.AddVariable(v, 'F')
     sigCut = r.TCut("")
     bkgCut = r.TCut("")
