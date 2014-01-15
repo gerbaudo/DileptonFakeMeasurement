@@ -124,6 +124,18 @@ def mkdirIfNeeded(dirname) :
 def verticalSlice(list2d) :
     "http://stackoverflow.com/questions/6253586/python-vertical-array-slicing"
     return zip(*list2d)
+def linearTransform(values, targetRange=[0.0,1.0]) :
+    xLoT, xHiT = targetRange[0], targetRange[1]
+    xLoO, xHiO = min(values), max(values)
+    oriRange, tarRange = (xHiO-xLoO), (xHiT-xLoT)
+    return [(xLoT + (x-xLoO)*tarRange/oriRange) if oriRange else 0.0
+            for x in values]
+def cumsum(l, leftToRight=True) :
+    #return numpy.cumsum(l) # not available ?
+    return [sum(l[:i]) for i in range(1,len(l)+1)] if leftToRight else [sum(l[-i:]) for i in range(1,len(l)+1)][::-1]
+def mergeOuter(bc, nOuter=2) : # add over/underflow in the first/last bin
+    return [sum(bc[:nOuter])] + bc[nOuter:-nOuter] + [sum(bc[-nOuter:])]
+
 #
 # testing
 #

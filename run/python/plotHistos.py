@@ -14,7 +14,7 @@ r.gStyle.SetPadTickY(1)
 
 from NavUtils import getAllHistoNames, HistoNameClassifier, organizeHistosByType, setHistoType, setHistoSample
 from SampleUtils import colors, guessSampleFromFilename
-
+from utils import cumsum, mergeOuter
 #########
 # default parameters [begin]
 defaultTag      = 'Feb21_n0115'
@@ -67,12 +67,6 @@ for fname, infile in zip(inputFileNames, inputFiles) :
 
 def isSignal(sampleName) : return 'WH_' in sampleName
 
-def cumsum(l, leftToRight=True) :
-    #return numpy.cumsum(l) # not available ?
-    return [sum(l[:i]) for i in range(1,len(l)+1)] if leftToRight \
-           else [sum(l[-i:]) for i in range(1,len(l)+1)][::-1]
-def mergeOuter(bc, nOuter=2) : # add over/underflow in the first/last bin
-    return [sum(bc[:nOuter])] + bc[nOuter:-nOuter] + [sum(bc[-nOuter:])]
 
 def cumSumHisto(histo, leftToRight=True) :
     hCs = histo.Clone(histo.GetName()+'_cs')
