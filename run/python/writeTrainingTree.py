@@ -127,7 +127,7 @@ def train(sigFiles=[], bkgFiles=[], dilepChan='', nJetChan='') :
                                                  "NormMode=NumEvents",
                                                  "V"
                                                  ]))
-    method = factory.BookMethod(r.TMVA.Types.kBDT, "BDT",
+    method = factory.BookMethod(r.TMVA.Types.kBDT, "BDT_%s_%s"%(dilepChan, nJetChan),
                                 ":".join(["!H",
                                           "V",
                                           "NTrees=200",
