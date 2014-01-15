@@ -139,9 +139,6 @@ def train(sigFiles=[], bkgFiles=[], dilepChan='', nJetChan='') :
                                           "nCuts=20",
                                           "PruneMethod=NoPruning",
                                           ]))
-    methodC = factory.BookMethod( r.TMVA.Types.kCuts, "Cuts",
-                                  ":".join(["!H","!V","FitMethod=GA","EffSel"]))
-
     factory.TrainAllMethods()
     factory.TestAllMethods()
     factory.EvaluateAllMethods()
