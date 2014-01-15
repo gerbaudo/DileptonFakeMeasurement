@@ -6,9 +6,13 @@
 # 2013-08-26
 
 
-import ROOT as r
-r.gROOT.SetBatch(True)                     # no windows popping up
-r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
+def importRoot() :
+    import ROOT as r
+    r.gROOT.SetBatch(True)                     # no windows popping up
+    r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
+    return r
+r = importRoot()
+
 import numpy as np
 from utils import verticalSlice
 

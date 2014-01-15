@@ -12,10 +12,8 @@ import optparse
 import os
 import re
 import subprocess
-import ROOT as r
-r.gROOT.SetBatch(True)                     # no windows popping up
-r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
-from rootUtils import referenceLine
+from rootUtils import importRoot, referenceLine
+r = importRoot()
 
 #from datasets import datasets
 from utils import getCommandOutput, guessMonthDayTag, longestCommonSubstring

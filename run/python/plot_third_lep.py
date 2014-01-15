@@ -16,10 +16,9 @@ import array
 import glob
 import math
 import os
-import ROOT as r
+from rootUtils import importRoot
+r = importRoot()
 r.gROOT.SetStyle('Plain')
-r.gROOT.SetBatch(True)                     # no windows popping up
-r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
 from kin import phi_mpi_pi, addTlv, lepIsSeparatedFromOther, lepPairIsZcand, deltaMZ0
 
 r.gROOT.LoadMacro('src/TupleMakerObjects.h+')

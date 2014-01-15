@@ -4,12 +4,10 @@
 import array
 import glob
 import os
-import ROOT as r
-r.gROOT.SetStyle('Plain')
-r.gROOT.SetBatch(True)                     # no windows popping up
-r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
 from utils import first
-from rootUtils import drawLegendWithDictKeys
+from rootUtils import drawLegendWithDictKeys, importRoot
+r = importRoot()
+r.gROOT.SetStyle('Plain')
 from SampleUtils import colors
 
 rootcoredir = os.environ['ROOTCOREDIR']

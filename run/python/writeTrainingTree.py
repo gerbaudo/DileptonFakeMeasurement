@@ -7,10 +7,8 @@
 
 import glob
 import os
-import ROOT as r
-r.gROOT.SetStyle('Plain')
-r.gROOT.SetBatch(True)                     # no windows popping up
-r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
+from rootUtils import importRoot
+r = importRoot()
 from math import fabs
 from kin import (phi_mpi_pi,
                  addTlv,

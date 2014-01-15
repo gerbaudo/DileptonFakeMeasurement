@@ -11,10 +11,8 @@
 
 
 import collections, optparse, os, sys, glob
-import ROOT as r
-r.PyConfig.IgnoreCommandLineOptions = True
-r.gROOT.SetBatch(1)
-
+from rootUtils import importRoot
+r = importRoot()
 from NavUtils import getAllHistoNames, HistoNameClassifier, HistoType, organizeHistosByType, setHistoType, setHistoSample
 from SampleUtils import colors, guessSampleFromFilename
 
