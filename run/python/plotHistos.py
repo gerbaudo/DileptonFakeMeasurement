@@ -7,7 +7,7 @@
 
 import collections, optparse, sys, glob
 #import numpy as np # not available, this hurts.
-from rootUtils import importRoot, binContentsWithUoflow
+from rootUtils import importRoot, binContentsWithUoflow, cloneAndFillHisto, cumEffHisto
 r = importRoot()
 r.gStyle.SetPadTickX(1)
 r.gStyle.SetPadTickY(1)
@@ -66,45 +66,6 @@ for fname, infile in zip(inputFileNames, inputFiles) :
     organizeHistosByType(histosByType, histos)
 
 def isSignal(sampleName) : return 'WH_' in sampleName
-
-
-def cumSumHisto(histo, leftToRight=True) :
-    hCs = histo.Clone(histo.GetName()+'_cs')
-    nBinsX = 1+hCs.GetNbinsX() # TH1 starts from 1 (0 underflow, N+1 overflow)
-    bc = [hCs.GetBinContent(0)] + [hCs.GetBinContent(i) for i in range(1, nBinsX)] + [hCs.GetBinContent(nBinsX+1)]
-    bc = cumsum(mergeOuter(bc), leftToRight)
-    tot = bc[-1] if leftToRight else bc[0]
-    for i, c in enumerate(bc) :
-        hCs.SetBinContent(i+1, c/tot if tot else 0.)
-        hCs.SetBinError(i+1, 0.)
-    hCs.SetMinimum(0.0)
-    hCs.SetMaximum(1.0)
-    hCs.SetTitle('')
-    hCs.SetFillStyle(0)
-    return hCs
-
-def cumEffHisto(histoTemplate, bincontents=[], leftToRight=True) :
-    h, bc= histoTemplate, bincontents
-    assert h.GetNbinsX()==len(bc),"%d bincontents for %d bins"%(len(bc), h.GetNbinsX())
-    h = h.Clone(h.GetName()+'_ce')
-    tot = bc[-1] if leftToRight else bc[0]
-    for i, c in enumerate(bc) :
-        h.SetBinContent(i+1, c/tot if tot else 0.)
-        h.SetBinError(i+1, 0.)
-    h.SetMinimum(0.0)
-    h.SetMaximum(1.0)
-    h.SetTitle('')
-    h.SetFillStyle(0)
-    return h
-
-def cloneAndFillHisto(histo, bincontents=[], suffix='', zeroErr=True) :
-    h, bc= histo, bincontents
-    assert h.GetNbinsX()==len(bc),"%d bincontents for %d bins"%(len(bc), h.GetNbinsX())
-    h = h.Clone(h.GetName()+suffix)
-    for i, c in enumerate(bc) :
-        h.SetBinContent(i+1, c)
-        if zeroErr : h.SetBinError(i+1, 0.)
-    return h
 
 def plotCumulativeEfficiencyHisto(pad, h, linecolor=r.kBlack, isPadMaster=True) :
     pad.cd()

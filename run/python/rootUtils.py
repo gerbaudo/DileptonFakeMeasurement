@@ -108,3 +108,26 @@ def summedHisto(histos) :
 def binContentsWithUoflow(h) :
     nBinsX = h.GetNbinsX()+1
     return [h.GetBinContent(0)] + [h.GetBinContent(i) for i in range(1, nBinsX)] + [h.GetBinContent(nBinsX+1)]
+
+def cloneAndFillHisto(histo, bincontents=[], suffix='', zeroErr=True) :
+    h, bc= histo, bincontents
+    assert h.GetNbinsX()==len(bc),"%d bincontents for %d bins"%(len(bc), h.GetNbinsX())
+    h = h.Clone(h.GetName()+suffix)
+    for i, c in enumerate(bc) :
+        h.SetBinContent(i+1, c)
+        if zeroErr : h.SetBinError(i+1, 0.)
+    return h
+
+def cumEffHisto(histoTemplate, bincontents=[], leftToRight=True) :
+    h, bc= histoTemplate, bincontents
+    assert h.GetNbinsX()==len(bc),"%d bincontents for %d bins"%(len(bc), h.GetNbinsX())
+    h = h.Clone(h.GetName()+'_ce')
+    tot = bc[-1] if leftToRight else bc[0]
+    for i, c in enumerate(bc) :
+        h.SetBinContent(i+1, c/tot if tot else 0.)
+        h.SetBinError(i+1, 0.)
+    h.SetMinimum(0.0)
+    h.SetMaximum(1.0)
+    h.SetTitle('')
+    h.SetFillStyle(0)
+    return h
