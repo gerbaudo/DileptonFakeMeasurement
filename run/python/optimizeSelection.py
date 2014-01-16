@@ -90,7 +90,7 @@ def pickTag(inputdir, options) :
 def getInputFilenames(inputdir, tag, options) :
     sig, bkg = dict(), dict()
     for f in glob.glob(inputdir+'/*'+tag+'.root') :
-        sample = os.path.splitext(os.path.basename(f))[0]
+        sample = os.path.splitext(os.path.basename(f))[0].replace(tag, '').strip('_')
         coll = sig if isSigSample(sample) else bkg
         assert sample not in coll,"%s already found\n%s\n%s"%(sample, f, coll[sample])
         coll[sample] = f
