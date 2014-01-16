@@ -218,7 +218,7 @@ def plotVar(bkgHistos, sigHistos, llnjvar) :
     allHistosEmpty = all([h.GetEntries()==0 for h in allHistos])
     if allHistosEmpty : return
     can = r.TCanvas('can_'+llnjvar, llnjvar, 800, 800)
-    botPad, topPad = buildBotTopPads(can, splitFraction=0.75)
+    botPad, topPad = buildBotTopPads(can, splitFraction=0.75, squeezeMargins=False)
     totBkg = summedHisto(bkgHistos.values())
     totBkg.SetDirectory(0)
     can._totBkg = totBkg
@@ -235,6 +235,8 @@ def plotVar(bkgHistos, sigHistos, llnjvar) :
 
 def drawBottom(pad, totBkg, bkgHistos, sigHisto, llnjvar) :
     pad.cd()
+    totBkg.SetStats(False)
+    totBkg.SetMinimum(0.) # force this to avoid negative fluct due to fake
     totBkg.Draw('axis')
     pad.Update() # necessary to fool root's dumb object ownership
     stack = r.THStack('stack_'+llnjvar,'')
