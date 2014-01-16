@@ -35,7 +35,8 @@ from kin import (phi_mpi_pi,
                  addTlv,
                  computeMt, computeHt, computeMetRel,
                  getDilepType,
-                 computeMt2, computeMt2j, computeMljj,
+                 computeMt2, computeMt2j,
+                 computeMljj, computeMlj,
                  thirdLepZcandidateIsInWindow)
 from utils import (getCommandOutput,
                    guessLatestTagFromLatestRootFiles,
@@ -168,9 +169,11 @@ def fillHistosAndCount(histos, files, lls, njs, testRun=False) :
             ll = getDilepType(l0, l1)
             nJets = len(jets)
             nj = 'eq1j' if nJets==1 else 'ge2j'
+            assert nJets>0,"messed something up in the selection upstream"
             if ll not in lls or nj not in njs : continue
             pt0 = l0.p4.Pt()
             pt1 = l1.p4.Pt()
+            j0  = jets[0]
             mll  = (l0.p4 + l1.p4).M()
             mtllmet = computeMt(l0.p4 + l1.p4, met.p4)
             ht      = computeHt(met.p4, [l0.p4, l1.p4]+[j.p4 for j in jets])
@@ -179,16 +182,20 @@ def fillHistosAndCount(histos, files, lls, njs, testRun=False) :
             mtl1    = computeMt(l1.p4, met.p4)
             mtmin   = min([mtl0, mtl1])
             mtmax   = max([mtl0, mtl1])
+            mlj     = computeMlj(l0.p4, l1.p4, j0.p4)
             dphill  = abs(phi_mpi_pi(l0.p4.DeltaPhi(l1.p4)))
             detall  = fabs(l0.p4.Eta() - l1.p4.Eta())
             l3Veto  =  not thirdLepZcandidateIsInWindow(l0, l1, lepts)
+            mljj = None
             if nJets >1 :
                 j0, j1 = jets[0], jets[1]
                 mt2j   = computeMt2j(l0.p4, l1.p4, j0.p4, j1.p4, met.p4)
                 mljj   = computeMljj(l0.p4, l1.p4, j0.p4, j1.p4)
                 dphijj = fabs(phi_mpi_pi(j0.p4.DeltaPhi(j1.p4)))
                 detajj = fabs(j0.p4.Eta() - j1.p4.Eta())
-            if passSelection(pt0, pt1, mll, mtllmet, ht, metrel, l3Veto, ll, nj) :
+            if passSelection(pt0, pt1, mll, mtllmet, ht, metrel, l3Veto,
+                             detall, mtmax, mlj, mljj,
+                             ll, nj) :
                 llnj = llnjKey(ll, nj)
                 weight = pars.weight
                 varHistos = histosSample[llnj]
@@ -200,39 +207,72 @@ def fillHistosAndCount(histos, files, lls, njs, testRun=False) :
         counts[sample] = countsSample
     return counts
 
-def passSelection(l0pt, l1pt, mll, mtllmet, ht, metrel, l3Veto, ll, nj) :
+def passSelection(l0pt, l1pt, mll, mtllmet, ht, metrel, l3Veto,
+                  detall, mtmax, mlj, mljj,
+                  ll, nj) :
 
-    if ll=='mm' :
-        return (    l0pt    > 30.0
-                and l1pt    > 20.0
-                and mtllmet > 100.0
-                and ht      > 200.0
-                and metrel  >   0.0
-                and l3Veto
-                    )
-    elif ll=='em' :
+    if ll=='mm' and nj=='eq1j':
         return (    l0pt    >  30.0
                 and l1pt    >  20.0
-                and mtllmet > 140.0
+                and detall  <   1.5
+                and mtmax   > 100.0
                 and ht      > 200.0
-                and metrel  >  50.0
+                and mlj     <  90.0
                 and l3Veto
                     )
-    elif ll=='ee' :
+    elif ll=='mm' and nj=='ge2j':
         return (    l0pt    >  30.0
                 and l1pt    >  20.0
+                and detall  <   1.5
+                and ht      > 220.0
+                and mljj    < 120.0
+                and l3Veto
+                    )
+    elif ll=='em' and nj=='eq1j':
+        return (    l0pt    >  30.0
+                and l1pt    >  30.0
+                and detall  <   1.5
+                and mtmax   > 110.0
+                and mlj     <  90.0
+                and mtllmet > 110.0
+                and l3Veto
+                    )
+    elif ll=='em' and nj=='ge2j':
+        return (    l0pt    >  30.0
+                and l1pt    >  30.0
+                and detall  <   1.5
+                and mljj    < 120.0
+                and mtllmet > 110.0
+                and l3Veto
+                    )
+    elif ll=='ee' and nj=='eq1j':
+        return (    l0pt    >  30.0
+                and l1pt    >  30.0
                 and fabs(mll-91.2) > 10.0
-                and mtllmet > 150.0
+                and mtllmet > 100.0
+                and detall  <   1.5
+                and mtmax   > 100.0
                 and ht      > 200.0
-                and metrel  >  50.0
+                and mlj     <  90.0
+                and l3Veto
+                    )
+    elif ll=='ee' and nj=='ge2j':
+        return (    l0pt    >  30.0
+                and l1pt    >  30.0
+                and fabs(mll-91.2) > 10.0
+                and detall  <   1.5
+                and mtllmet > 150.0
+                and mljj    < 120.0
+                and ht      > 200.0
                 and l3Veto
                     )
 
 def fillVarHistos(varHistos, varValues, weight, nj) :
-    exclVars = ['mt2j','mljj','dphijj','detajj'] if nj < 2 else []
+    assert nj in ['eq1j', 'ge2j']
+    exclVars = ['mt2j','mljj','dphijj','detajj'] if nj=='eq1j' else ['mlj']
     vars = [v for v in varHistos.keys() if v not in exclVars]
     for v in vars :
-            varHistos[v].Fill(varValues[v], weight)
+        varHistos[v].Fill(varValues[v], weight)
 
 def plotHistos(bkgHistos, sigHistos, plotdir) :
     llnjs = first      (sigHistos).keys()
