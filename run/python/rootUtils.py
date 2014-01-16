@@ -82,20 +82,20 @@ def getNumDenHistos(f, baseHname='base_histo_name', suffNum='_num', suffDen='_de
     num = f.Get(baseHname+suffNum)
     den = f.Get(baseHname+suffDen)
     return {'num':num, 'den':den}
-def buildBotTopPads(canvas, splitFraction=0.275) :
+def buildBotTopPads(canvas, splitFraction=0.275, squeezeMargins=True) :
     canvas.cd()
     botPad = r.TPad(canvas.GetName()+'_bot', 'bot pad', 0.0, 0.0, 1.0, splitFraction, 0, 0, 0)
     interPadMargin = 0.5*0.05
     botPad.SetTopMargin(interPadMargin)
     botPad.SetBottomMargin(botPad.GetBottomMargin()/splitFraction)
-    botPad.SetRightMargin(0.20*botPad.GetRightMargin())
+    if squeezeMargins : botPad.SetRightMargin(0.20*botPad.GetRightMargin())
     r.SetOwnership(botPad, False)
     canvas.cd()
     canvas.Update()
     topPad = r.TPad(canvas.GetName()+'_top', 'top pad', 0.0, splitFraction, 1.0, 1.0, 0, 0)
     topPad.SetBottomMargin(interPadMargin)
-    topPad.SetTopMargin(0.20*topPad.GetTopMargin())
-    topPad.SetRightMargin(0.20*topPad.GetRightMargin())
+    if squeezeMargins : topPad.SetTopMargin(0.20*topPad.GetTopMargin())
+    if squeezeMargins : topPad.SetRightMargin(0.20*topPad.GetRightMargin())
     r.SetOwnership(topPad, False)
     canvas._pads = [topPad, botPad]
     return botPad, topPad
