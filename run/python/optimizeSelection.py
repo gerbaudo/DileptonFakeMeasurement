@@ -17,6 +17,9 @@ from rootUtils import importRoot, buildBotTopPads, summedHisto, binContentsWithU
 r = importRoot()
 r.gStyle.SetPadTickX(1)
 r.gStyle.SetPadTickY(1)
+#r.TH1.AddDirectory(False)
+#from  RootUtils.PyROOTFixes import enable_tree_speedups
+#enable_tree_speedups() # not working with these trees...stuck at 1st event...investigate
 
 from kin import (phi_mpi_pi,
                  addTlv,
