@@ -47,7 +47,7 @@ def optimizeSelection() :
     allSamples = dictSum(sigFiles, bkgFiles)
     vars = variablesToPlot()
     histos = bookHistos(vars, allSamples.keys(), options.ll, options.nj)
-    fillHistos(histos, dictSum(sigFiles, bkgFiles), options.ll, options.nj)
+    fillHistos(histos, dictSum(sigFiles, bkgFiles), options.ll, options.nj, options.quicktest)
     bkgHistos = dict((s, h) for s, h in histos.iteritems() if s in bkgFiles.keys())
     sigHistos = dict((s, h) for s, h in histos.iteritems() if s in sigFiles.keys())
     plotHistos(bkgHistos, sigHistos)
@@ -65,6 +65,7 @@ def parseOptions() :
     parser.add_option("-s", "--sample-regexp", dest="samples", default='.*', help="consider only matching samples (default '.*')")
     parser.add_option("-e", "--exclude-regexp", dest="exclude", default=None, help="exclude matching samples")
     parser.add_option('-t', '--tag', help='production tag; by default the latest one')
+    parser.add_option('--quicktest', action='store_true', help='run only on a fraction of the events')
     parser.add_option('-v', '--verbose', action='store_true', help='print details')
     parser.add_option('-d', "--debug", action='store_true', help='print even more details')
     (options, args) = parser.parse_args()
@@ -133,14 +134,17 @@ def bookHistos(variables, samples, lls, njs) :
                          for ll in lls for nj in njs]))
                  for s in samples])
 
-def fillHistos(histos, files, lls, njs) :
+def fillHistos(histos, files, lls, njs, testRun=False) :
     treename = 'SusySel'
     for sample, filename in files.iteritems() :
         histosSample = histos[sample]
         file = r.TFile.Open(filename)
         tree = file.Get(treename)
-        print "processing %s (%d entries) %s"%(sample, tree.GetEntries(), datetime.datetime.now())
-        for event in tree :
+        nEvents = tree.GetEntries()
+        nEventsToProcess = nEvents if not testRun else nEvents/10
+        print "processing %s (%d entries %s) %s"%(sample, nEventsToProcess, ", 10% test" if testRun else "", datetime.datetime.now())
+        for iEvent, event in enumerate(tree) :
+            if iEvent > nEventsToProcess : break
             l0, l1, met, pars = addTlv(event.l0), addTlv(event.l1), addTlv(event.met), event.pars
             jets, lepts = [addTlv(j) for j in event.jets], [addTlv(l) for l in event.lepts]
             ll = getDilepType(l0, l1)
