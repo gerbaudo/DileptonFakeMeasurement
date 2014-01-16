@@ -86,3 +86,6 @@ def computeMljj(l0, l1, j0, j1) :
     jj = j0+j1
     dr0, dr1 = jj.DeltaR(l0), jj.DeltaR(l1)
     return (jj+l0).M() if dr0<dr1 else (jj+l1).M()
+def computeMlj(l0, l1, j) :
+    dr0, dr1 = j.DeltaR(l0), j.DeltaR(l1)
+    return (j+l0).M() if dr0<dr1 else (j+l1).M()
