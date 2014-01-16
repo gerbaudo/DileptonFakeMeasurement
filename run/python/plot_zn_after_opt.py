@@ -33,7 +33,7 @@ def convertDsidDict2points(dsidDict={'177501': 0.0, }) :
 
 def dsid2mc1mn1(dsid) :
     dsInfo="""
-    177501  WH_2Lep_1   130.0  10.0 ;
+    177501  WH_2Lep_1   130.0   0.0 ;
     177502  WH_2Lep_2   140.0  10.0 ;
     177503  WH_2Lep_3   150.0  0.0  ;
     177504  WH_2Lep_4   152.5  22.5 ;
