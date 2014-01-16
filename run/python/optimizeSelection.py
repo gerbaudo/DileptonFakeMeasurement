@@ -13,7 +13,15 @@ import math
 fabs = math.fabs
 import optparse
 import os
-from rootUtils import importRoot, buildBotTopPads, summedHisto, binContentsWithUoflow, cloneAndFillHisto, cumEffHisto, maxSepVerticalLine
+from rootUtils import (importRoot,
+                       buildBotTopPads,
+                       summedHisto,
+                       binContentsWithUoflow,
+                       cloneAndFillHisto,
+                       cumEffHisto,
+                       maxSepVerticalLine,
+                       topRightLabel
+                       )
 r = importRoot()
 r.gStyle.SetPadTickX(1)
 r.gStyle.SetPadTickY(1)
@@ -253,14 +261,7 @@ def drawBottom(pad, totBkg, bkgHistos, sigHisto, llnjvar) :
     sigHisto.SetLineWidth(2*sigHisto.GetLineWidth())
     sigHisto.Draw('same')
     pad.Update()
-    # legend todo
-    def writeLabel(can, label) :
-        tex = r.TLatex(0.0, 0.0, '')
-        tex.SetNDC()
-        tex.SetTextAlign(33)
-        tex.DrawLatex(1.0-pad.GetTopMargin(), 1.0-pad.GetRightMargin(), label)
-        return tex
-    pad._lab = writeLabel(pad, llnjvar)
+    pad._lab = topRightLabel(pad, llnjvar, xpos=0.5)
     pad._stack = stack
     pad._histos = [h for h in stack.GetHists()]
     pad.Update()

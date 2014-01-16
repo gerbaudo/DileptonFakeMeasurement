@@ -143,3 +143,10 @@ def maxSepVerticalLine(hSig, hBkg, yMin=0.0, yMax=1.0) :
     xPos = hSig.GetBinCenter(iMax+1)
     sep = [abs(a-b) for a,b in zip(bcS, bcB)]
     return r.TLine(xPos, yMin, xPos, yMax)
+
+def topRightLabel(pad, label, xpos=None, ypos=None, align=33) :
+    tex = r.TLatex(0.0, 0.0, '')
+    tex.SetNDC()
+    tex.SetTextAlign(33)
+    tex.DrawLatex(1.0-pad.GetRightMargin(), 1.0-pad.GetTopMargin(), label)
+    return tex
