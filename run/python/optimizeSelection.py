@@ -20,7 +20,8 @@ from rootUtils import (importRoot,
                        cloneAndFillHisto,
                        cumEffHisto,
                        maxSepVerticalLine,
-                       topRightLabel
+                       topRightLabel,
+                       drawLegendWithDictKeys
                        )
 r = importRoot()
 r.gStyle.SetPadTickX(1)
@@ -261,7 +262,9 @@ def drawBottom(pad, totBkg, bkgHistos, sigHisto, llnjvar) :
     sigHisto.SetLineWidth(2*sigHisto.GetLineWidth())
     sigHisto.Draw('same')
     pad.Update()
-    pad._lab = topRightLabel(pad, llnjvar, xpos=0.5)
+    topRightLabel(pad, llnjvar, xpos=0.125, align=13)
+    drawLegendWithDictKeys(pad, dictSum(bkgHistos, {'signal' : sigHisto}), opt='f')
+    pad.RedrawAxis()
     pad._stack = stack
     pad._histos = [h for h in stack.GetHists()]
     pad.Update()
@@ -325,11 +328,12 @@ def plotZnHisto(pad, h, linecolor=r.kBlack, minY=0.0, maxY=1.0) :
     h.SetLineStyle(2)
     bc = [h.GetBinContent(i+1) for i in range(h.GetNbinsX())]
     minZn, maxZn = min(bc), max(bc)
+    invalidRange = not minZn and not maxZn
     bc = linearTransform(bc+[0.], [minY, maxY])[:-1] # add one 0 so that the min is at least 0
     for i,b in enumerate(bc) : h.SetBinContent(i+1, b)
     h.Draw('lsame')
     x = h.GetXaxis().GetXmax()
-    ax = r.TGaxis(x, minY, x, maxY, minZn, maxZn, 001, "+L")
+    ax = r.TGaxis(x, minY, x, maxY, 0.0 if invalidRange else minZn, 1.0 if invalidRange else maxZn, 001, "+L")
     ax.SetTitle('Z_{n}')
     ax.CenterTitle()
     ax.SetLabelSize(ax.GetLabelSize()*1.0/pad.GetHNDC())
