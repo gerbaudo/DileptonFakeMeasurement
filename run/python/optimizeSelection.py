@@ -49,15 +49,20 @@ from utils import (getCommandOutput,
                    cumsum,
                    mergeOuter,
                    renameDictKey,
-                   mkdirIfNeeded
+                   mkdirIfNeeded,
+                   filterWithRegexp
                    )
 from SampleUtils import isSigSample, colors
 from CutflowTable import CutflowTable
 
 def optimizeSelection() :
     inputdir, options = parseOptions()
+
+
+    print 'sigreg ',options.sigreg
     tag = pickTag(inputdir, options)
-    sigFiles, bkgFiles = getInputFilenames(inputdir, tag, options)
+    sigFiles, bkgFiles = getInputFilenames(inputdir, tag, options) # todo: filter with regexp
+    sigFiles = dict([(s, k) for s, k in sigFiles.iteritems() if s in filterWithRegexp(sigFiles.keys(), options.sigreg)])
     allSamples = dictSum(sigFiles, bkgFiles)
     vars = variablesToPlot()
     histos = bookHistos(vars, allSamples.keys(), options.ll, options.nj)
@@ -77,6 +82,7 @@ def parseOptions() :
     parser.add_option('--ll', help='dilepton (default all)')
     parser.add_option('--nj', help='njet multiplicity (default all)')
     parser.add_option("-s", "--sample-regexp", dest="samples", default='.*', help="consider only matching samples (default '.*')")
+    parser.add_option("-S", "--signal-regexp", dest="sigreg", default='.*', help="consider only matching signal samples (default '.*', example 'WH_2Lep_1$')")
     parser.add_option("-e", "--exclude-regexp", dest="exclude", default=None, help="exclude matching samples")
     parser.add_option('-t', '--tag', help='production tag; by default the latest one')
     parser.add_option('--quicktest', action='store_true', help='run only on a fraction of the events')
