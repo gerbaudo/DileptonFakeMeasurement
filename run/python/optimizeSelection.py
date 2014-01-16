@@ -201,21 +201,32 @@ def fillHistosAndCount(histos, files, lls, njs, testRun=False) :
     return counts
 
 def passSelection(l0pt, l1pt, mll, mtllmet, ht, metrel, l3Veto, ll, nj) :
-    def passLepPT(l0pt, l1pt, ll) :
-        return l0pt > 30.0 and l1pt > (20.0 if ll=='mm' else 0.0)
-    def passZveto(mll, ll) :
-        return True if ll!='ee' else fabs(mll - 91.2) > 10.0
-    def passMtLlMetMin(mtllmet) :
-        return mtllmet > (150.0 if ll=='ee' else 140.0 if ll=='em' else 100 if ll=='mm' else 0.0)
-    def passHtMin(ht) : return  ht > 200.0
-    def passMetRelMin(metrel, ll) : return metrel > (50.0 if ll!='mm' else 0.0)
-    return (passLepPT(l0pt, l1pt, ll)
-            and passZveto(mll, ll)
-            and passMtLlMetMin(mtllmet)
-            and passHtMin(ht)
-            and passMetRelMin(metrel, ll)
-            and l3Veto
-            )
+
+    if ll=='mm' :
+        return (    l0pt    > 30.0
+                and l1pt    > 20.0
+                and mtllmet > 100.0
+                and ht      > 200.0
+                and metrel  >   0.0
+                and l3Veto
+                    )
+    elif ll=='em' :
+        return (    l0pt    >  30.0
+                and l1pt    >  20.0
+                and mtllmet > 140.0
+                and ht      > 200.0
+                and metrel  >  50.0
+                and l3Veto
+                    )
+    elif ll=='ee' :
+        return (    l0pt    >  30.0
+                and l1pt    >  20.0
+                and fabs(mll-91.2) > 10.0
+                and mtllmet > 150.0
+                and ht      > 200.0
+                and metrel  >  50.0
+                and l3Veto
+                    )
 
 def fillVarHistos(varHistos, varValues, weight, nj) :
     exclVars = ['mt2j','mljj','dphijj','detajj'] if nj < 2 else []
