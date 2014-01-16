@@ -216,14 +216,15 @@ def plotVar(bkgHistos, sigHistos, llnjvar) :
     can = r.TCanvas('can_'+llnjvar, llnjvar, 800, 800)
     botPad, topPad = buildBotTopPads(can, splitFraction=0.75)
     totBkg = summedHisto(bkgHistos.values())
+    totBkg.SetDirectory(0)
     can._totBkg = totBkg
+    can._histos = [bkgHistos, sigHistos]
     can.cd()
     botPad.Draw()
     drawBottom(botPad, totBkg, bkgHistos, sigHistos[signalSample], llnjvar)
     can.cd()
     topPad.Draw()
     drawTop(topPad, totBkg, sigHistos[signalSample])
-    can.Update()
     outFilename = llnjvar+'.png'
     rmIfExists(outFilename) # avoid root warnings
     can.SaveAs(outFilename)
@@ -231,26 +232,31 @@ def plotVar(bkgHistos, sigHistos, llnjvar) :
 def drawBottom(pad, totBkg, bkgHistos, sigHisto, llnjvar) :
     pad.cd()
     totBkg.Draw('axis')
+    pad.Update() # necessary to fool root's dumb object ownership
     stack = r.THStack('stack_'+llnjvar,'')
+    pad.Update()
+    r.SetOwnership(stack, False)
     for s, h in bkgHistos.iteritems() :
         h.SetFillColor(colors[s] if s in colors else r.kOrange)
         h.SetDrawOption('bar')
+        h.SetDirectory(0)
         stack.Add(h)
     stack.Draw('hist same')
-    hTot = stack.GetHistogram()
+    pad.Update()
     sigHisto.SetLineColor(r.kRed)
     sigHisto.SetLineWidth(2*sigHisto.GetLineWidth())
-    # legend todo
     sigHisto.Draw('same')
-    def writeLabel(can, label, font='') :
+    pad.Update()
+    # legend todo
+    def writeLabel(can, label) :
         tex = r.TLatex(0.0, 0.0, '')
         tex.SetNDC()
-        if font : tex.SetTextFont(font)
-        tex.SetTextAlign(31)
+        tex.SetTextAlign(33)
         tex.DrawLatex(1.0-pad.GetTopMargin(), 1.0-pad.GetRightMargin(), label)
         return tex
-    pad._lab = writeLabel(llnjvar)
-    pad._histos = [stack]
+    pad._lab = writeLabel(pad, llnjvar)
+    pad._stack = stack
+    pad._histos = [h for h in stack.GetHists()]
     pad.Update()
 
 def drawTop(pad, hBkg, hSig) :
