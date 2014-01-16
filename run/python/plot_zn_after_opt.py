@@ -18,10 +18,11 @@ def plot_zn_after_opt():
                     histoname=llnj, histotitle=llnj+' ;mc_{1}; mn_{1}')
         plotZns(ds2p(combineZn(znValues[ll])),
                 histoname=ll, histotitle=ll+' ;mc_{1}; mn_{1}')
+    plotZns(ds2p(combineZn(dict([(ll+'_'+nj, znValues[ll][nj])
+                                 for ll in ['ee', 'mm', 'em'] for nj in ['eq1j', 'ge2j']]))
+                 ),
+            histoname='ll', histotitle='ll'+' ;mc_{1}; mn_{1}')
 
-
-
-    padMaster = r.TH2F('pm', ';mc_{1}; mn_{1}', 50, 105.0, 300.0, 50, 0.0, 120.0)
 
 def convertDsidDict2points(dsidDict={'177501': 0.0, }) :
     values = []
