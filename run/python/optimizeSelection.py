@@ -98,8 +98,8 @@ def getInputFilenames(inputdir, tag, options) :
     return sig, bkg
 
 def variablesToPlot() :
-    return ['pt0','pt1'] #,'mll','mtmin',]#'mtmax','mtllmet','ht','metrel','dphill','detall',
-            #'mt2j','mljj','dphijj','detajj']
+    return ['pt0','pt1','mll','mtmin','mtmax','mtllmet','ht','metrel','dphill','detall',
+            'mt2j','mljj','dphijj','detajj']
 
 def llnjKey(ll, nj) : return "%s_%s"%(ll, nj)
 def histoSuffix(sample, ll, nj) : return "%s_%s_%s"%(sample, ll, nj)
@@ -113,17 +113,17 @@ def bookHistos(variables, samples, lls, njs) :
         if   v=='pt0'     : h = r.TH1F('h_pt0_'    +s, ';p_{T,l0} [GeV]; entries/bin',          25, 0.0, 250.0)
         elif v=='pt1'     : h = r.TH1F('h_pt1_'    +s, ';p_{T,l1} [GeV]; entries/bin',          25, 0.0, 250.0)
         elif v=='mll'     : h = r.TH1F('h_mll_'    +s, ';m_{l0,l1} [GeV]; entries/bin',         25, 0.0, 250.0)
-        elif v=='mtmin'   : h = r.TH1F('h_mtmin_'  +s, ';m_{T,min}(l, MET) [GeV]; entries/bin', 25, 0.0, 250.0)
-        elif v=='mtmax'   : h = r.TH1F('h_mtmax_'  +s, ';m_{T,max}(l, MET) [GeV]; entries/bin', 25, 0.0, 250.0)
-        elif v=='mtllmet' : h = r.TH1F('h_mtllmet_'+s, ';m_{T}(l+l, MET) [GeV]; entries/bin',   25, 0.0, 250.0)
-        elif v=='ht'      : h = r.TH1F('h_ht_'     +s, ';H_{T} [GeV]; entries/bin',             25, 0.0, 250.0)
-        elif v=='metrel'  : h = r.TH1F('h_metrel_' +s, ';MET_{rel} [GeV]; entries/bin',         25, 0.0, 250.0)
+        elif v=='mtmin'   : h = r.TH1F('h_mtmin_'  +s, ';m_{T,min}(l, MET) [GeV]; entries/bin', 25, 0.0, 400.0)
+        elif v=='mtmax'   : h = r.TH1F('h_mtmax_'  +s, ';m_{T,max}(l, MET) [GeV]; entries/bin', 25, 0.0, 400.0)
+        elif v=='mtllmet' : h = r.TH1F('h_mtllmet_'+s, ';m_{T}(l+l, MET) [GeV]; entries/bin',   25, 0.0, 600.0)
+        elif v=='ht'      : h = r.TH1F('h_ht_'     +s, ';H_{T} [GeV]; entries/bin',             25, 0.0, 800.0)
+        elif v=='metrel'  : h = r.TH1F('h_metrel_' +s, ';MET_{rel} [GeV]; entries/bin',         25, 0.0, 300.0)
         elif v=='dphill'  : h = r.TH1F('h_dphill_' +s, ';#Delta#phi(l, l) [rad]; entries/bin',  25, 0.0, twopi)
         elif v=='detall'  : h = r.TH1F('h_detall_' +s, ';#Delta#eta(l, l); entries/bin',        25, 0.0, +3.0 )
         elif v=='mt2j'    : h = r.TH1F('h_mt2j_'   +s, ';m^{J}_{T2} [GeV]; entries/bin',        25, 0.0, 500.0)
         elif v=='mljj'    : h = r.TH1F('h_mljj_'   +s, ';m_{ljj} [GeV]; entries/bin',           25, 0.0, 500.0)
-        elif v=='dphijj'  : h = r.TH1F('h_dphijj_' +s, ';#Delta#phi(j, j); entries/bin',        25, 0.0, twopi)
-        elif v=='detajj'  : h = r.TH1F('h_detajj_' +s, '#Delta#eta(j, j); entries/bin',         25, 0.0, +3.0 )
+        elif v=='dphijj'  : h = r.TH1F('h_dphijj_' +s, ';#Delta#phi(j, j) [rad]; entries/bin',  25, 0.0, twopi)
+        elif v=='detajj'  : h = r.TH1F('h_detajj_' +s, ';#Delta#eta(j, j); entries/bin',        25, 0.0, +3.0 )
         else : print "unknown variable %s"%v
         h.SetDirectory(0)
         return h
