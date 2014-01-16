@@ -63,7 +63,7 @@ def optimizeSelection() :
     bkgHistos = dict((s, h) for s, h in histos.iteritems() if s in bkgFiles.keys())
     sigHistos = dict((s, h) for s, h in histos.iteritems() if s in sigFiles.keys())
     plotHistos(bkgHistos, sigHistos)
-    printSummary(counts)
+    printSummary(counts, options.summary)
 
 def parseOptions() :
     usage="""%prog [options] dir
@@ -78,6 +78,7 @@ def parseOptions() :
     parser.add_option("-e", "--exclude-regexp", dest="exclude", default=None, help="exclude matching samples")
     parser.add_option('-t', '--tag', help='production tag; by default the latest one')
     parser.add_option('--quicktest', action='store_true', help='run only on a fraction of the events')
+    parser.add_option('--summary', default=None, help="write the summary txt to this file")
     parser.add_option('-v', '--verbose', action='store_true', help='print details')
     parser.add_option('-d', "--debug", action='store_true', help='print even more details')
     (options, args) = parser.parse_args()
@@ -356,23 +357,31 @@ def plotZnHisto(pad, h, linecolor=r.kBlack, minY=0.0, maxY=1.0) :
     ax.Draw()
     return [h, ax]
 
-def printSummary(counts) :
-    if 'totbkg' not in counts :
-        counts['totbkg'] = dict([(sel, sum(countsSample[sel]
-                                           for sam, countsSample in counts.iteritems() if not isSigSample(sam)))
-                                 for sel in first(counts).keys()])
+def printSummary(counts, outfilename='') :
     samples = counts.keys()
     signal = [s for s in samples if isSigSample(s)][0]
     counts = renameDictKey(counts, signal, 'signal')
     samples = counts.keys()
-    sels = sorted(first(counts).keys())
-    print
-    print CutflowTable(samples, sels, counts).latex()
+    selections = sorted(first(counts).keys())
 
-    print "--- Zn ---"
-    zn, bkgUnc = r.RooStats.NumberCountingUtils.BinomialExpZ, 0.30
-    for s in sels :
-        print "%s : %.2f" % (s, zn(counts['signal'][s], counts['totbkg'][s], bkgUnc))
+    if 'totbkg' not in counts :
+        counts['totbkg'] = dict([(sel, sum(countsSample[sel]
+                                           for sam, countsSample in counts.iteritems() if not isSigSample(sam)))
+                                 for sel in first(counts).keys()])
+    bkgUnc = 0.30
+    zn = r.RooStats.NumberCountingUtils.BinomialExpZ
+    counts['Zn'] = dict([(sel, zn(counts['signal'][sel], counts['totbkg'][sel], bkgUnc)) for sel in selections])
+    firstThreeColumns = ['Zn', 'signal', 'totbkg']
+    otherSamples = sorted([s for s in samples if s not in firstThreeColumns])
+    table = CutflowTable(firstThreeColumns + otherSamples, selections, counts)
+    table.nDecimal = 2
+    if outfilename :
+        with open(outfilename, 'w') as f :
+            f.write('\n'+table.latex()+'\n')
+    else :
+        print
+        print table.latex()
+
 
 if __name__=='__main__' :
     optimizeSelection()
