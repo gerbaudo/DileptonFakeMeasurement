@@ -137,7 +137,8 @@ def fillHistos(histos, files, lls, njs) :
     treename = 'SusySel'
     for sample, filename in files.iteritems() :
         histosSample = histos[sample]
-        tree = r.TFile.Open(filename).Get(treename)
+        file = r.TFile.Open(filename)
+        tree = file.Get(treename)
         print "processing %s (%d entries) %s"%(sample, tree.GetEntries(), datetime.datetime.now())
         for event in tree :
             l0, l1, met, pars = addTlv(event.l0), addTlv(event.l1), addTlv(event.met), event.pars
@@ -165,10 +166,12 @@ def fillHistos(histos, files, lls, njs) :
                 mljj   = computeMljj(l0.p4, l1.p4, j0.p4, j1.p4)
                 dphijj = fabs(phi_mpi_pi(j0.p4.DeltaPhi(j1.p4)))
                 detajj = fabs(j0.p4.Eta() - j1.p4.Eta())
-            if passSelection(pt0, pt1, mll, mtllmet, met, jets, lepts, ll, nj) :
+            if passSelection(pt0, pt1, mll, mtllmet, ht, metrel, l3Veto, ll, nj) :
                 varHistos = histosSample[llnjKey(ll, nj)]
                 varValues = dict([(v, eval(v)) for v in variablesToPlot()])
                 fillVarHistos(varHistos, varValues, pars.weight, nj)
+        file.Close()
+        file.Delete()
                 
 def passSelection(l0pt, l1pt, mll, mtllmet, ht, metrel, l3Veto, ll, nj) :
     def passLepPT(l0pt, l1pt, ll) :
