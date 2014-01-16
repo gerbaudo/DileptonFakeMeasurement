@@ -47,7 +47,8 @@ from utils import (getCommandOutput,
                    linearTransform,
                    cumsum,
                    mergeOuter,
-                   renameDictKey
+                   renameDictKey,
+                   mkdirIfNeeded
                    )
 from SampleUtils import isSigSample, colors
 from CutflowTable import CutflowTable
@@ -62,7 +63,7 @@ def optimizeSelection() :
     counts = fillHistosAndCount(histos, dictSum(sigFiles, bkgFiles), options.ll, options.nj, options.quicktest)
     bkgHistos = dict((s, h) for s, h in histos.iteritems() if s in bkgFiles.keys())
     sigHistos = dict((s, h) for s, h in histos.iteritems() if s in sigFiles.keys())
-    plotHistos(bkgHistos, sigHistos)
+    plotHistos(bkgHistos, sigHistos, options.plotdir)
     printSummary(counts, options.summary)
 
 def parseOptions() :
@@ -78,6 +79,7 @@ def parseOptions() :
     parser.add_option("-e", "--exclude-regexp", dest="exclude", default=None, help="exclude matching samples")
     parser.add_option('-t', '--tag', help='production tag; by default the latest one')
     parser.add_option('--quicktest', action='store_true', help='run only on a fraction of the events')
+    parser.add_option('--plotdir', default='./', help="save the plots to this directory")
     parser.add_option('--summary', default=None, help="write the summary txt to this file")
     parser.add_option('-v', '--verbose', action='store_true', help='print details')
     parser.add_option('-d', "--debug", action='store_true', help='print even more details')
@@ -221,16 +223,16 @@ def fillVarHistos(varHistos, varValues, weight, nj) :
     for v in vars :
             varHistos[v].Fill(varValues[v], weight)
 
-def plotHistos(bkgHistos, sigHistos) :
+def plotHistos(bkgHistos, sigHistos, plotdir) :
     llnjs = first      (sigHistos).keys()
     vars  = first(first(sigHistos)).keys()
     for llnj in llnjs :
         for var in vars :
             plotVar(dict((s, bkgHistos[s][llnj][var]) for s in bkgHistos.keys()),
                     dict((s, sigHistos[s][llnj][var]) for s in sigHistos.keys()),
-                    llnj+'_'+var)
+                    llnj+'_'+var, plotdir)
 
-def plotVar(bkgHistos, sigHistos, llnjvar) :
+def plotVar(bkgHistos, sigHistos, llnjvar, plotdir='./') :
     def preferredSignal(signals):
         pref = 'Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_1'
         return pref if pref in signals else first(sorted(signals))
@@ -250,7 +252,8 @@ def plotVar(bkgHistos, sigHistos, llnjvar) :
     can.cd()
     topPad.Draw()
     drawTop(topPad, totBkg, sigHistos[signalSample])
-    outFilename = llnjvar+'.png'
+    mkdirIfNeeded(plotdir)
+    outFilename = plotdir+'/'+llnjvar+'.png'
     rmIfExists(outFilename) # avoid root warnings
     can.SaveAs(outFilename)
 
