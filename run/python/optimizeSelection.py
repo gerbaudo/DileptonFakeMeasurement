@@ -377,10 +377,10 @@ def printSummary(counts, outfilename='') :
     counts = renameDictKey(counts, signal, 'signal')
     samples = counts.keys()
     selections = sorted(first(counts).keys())
-
+    def isSignal(s) : return isSigSample(s) or s=='signal'
     if 'totbkg' not in counts :
         counts['totbkg'] = dict([(sel, sum(countsSample[sel]
-                                           for sam, countsSample in counts.iteritems() if not isSigSample(sam)))
+                                           for sam, countsSample in counts.iteritems() if not isSignal(sam)))
                                  for sel in first(counts).keys()])
     bkgUnc = 0.30
     zn = r.RooStats.NumberCountingUtils.BinomialExpZ
