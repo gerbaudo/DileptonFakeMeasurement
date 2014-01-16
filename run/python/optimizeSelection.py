@@ -7,6 +7,7 @@
 # davide.gerbaudo@gmail.com
 # Jan 2014
 
+import collections
 import datetime
 import glob
 import math
@@ -45,9 +46,11 @@ from utils import (getCommandOutput,
                    rmIfExists,
                    linearTransform,
                    cumsum,
-                   mergeOuter
+                   mergeOuter,
+                   renameDictKey
                    )
 from SampleUtils import isSigSample, colors
+from CutflowTable import CutflowTable
 
 def optimizeSelection() :
     inputdir, options = parseOptions()
@@ -56,12 +59,12 @@ def optimizeSelection() :
     allSamples = dictSum(sigFiles, bkgFiles)
     vars = variablesToPlot()
     histos = bookHistos(vars, allSamples.keys(), options.ll, options.nj)
-    fillHistos(histos, dictSum(sigFiles, bkgFiles), options.ll, options.nj, options.quicktest)
+    counts = fillHistosAndCount(histos, dictSum(sigFiles, bkgFiles), options.ll, options.nj, options.quicktest)
     bkgHistos = dict((s, h) for s, h in histos.iteritems() if s in bkgFiles.keys())
     sigHistos = dict((s, h) for s, h in histos.iteritems() if s in sigFiles.keys())
     plotHistos(bkgHistos, sigHistos)
-    printSummary(histos)
-    
+    printSummary(counts)
+
 def parseOptions() :
     usage="""%prog [options] dir
     Example:
@@ -143,9 +146,12 @@ def bookHistos(variables, samples, lls, njs) :
                          for ll in lls for nj in njs]))
                  for s in samples])
 
-def fillHistos(histos, files, lls, njs, testRun=False) :
+def fillHistosAndCount(histos, files, lls, njs, testRun=False) :
+    "Fill the histograms, and provide a dict of event counters[sample][sel] for the summary"
     treename = 'SusySel'
+    counts = dict()
     for sample, filename in files.iteritems() :
+        countsSample = collections.defaultdict(float)
         histosSample = histos[sample]
         file = r.TFile.Open(filename)
         tree = file.Get(treename)
@@ -170,7 +176,7 @@ def fillHistos(histos, files, lls, njs, testRun=False) :
             mtl1    = computeMt(l1.p4, met.p4)
             mtmin   = min([mtl0, mtl1])
             mtmax   = max([mtl0, mtl1])
-            dphill  = abs(phi_mpi_pi(l0.p4.DeltaPhi(l1.p4))) 
+            dphill  = abs(phi_mpi_pi(l0.p4.DeltaPhi(l1.p4)))
             detall  = fabs(l0.p4.Eta() - l1.p4.Eta())
             l3Veto  =  not thirdLepZcandidateIsInWindow(l0, l1, lepts)
             if nJets >1 :
@@ -180,12 +186,17 @@ def fillHistos(histos, files, lls, njs, testRun=False) :
                 dphijj = fabs(phi_mpi_pi(j0.p4.DeltaPhi(j1.p4)))
                 detajj = fabs(j0.p4.Eta() - j1.p4.Eta())
             if passSelection(pt0, pt1, mll, mtllmet, ht, metrel, l3Veto, ll, nj) :
-                varHistos = histosSample[llnjKey(ll, nj)]
+                llnj = llnjKey(ll, nj)
+                weight = pars.weight
+                varHistos = histosSample[llnj]
                 varValues = dict([(v, eval(v)) for v in variablesToPlot()])
-                fillVarHistos(varHistos, varValues, pars.weight, nj)
+                fillVarHistos(varHistos, varValues, weight, nj)
+                countsSample[llnj] += weight
         file.Close()
         file.Delete()
-                
+        counts[sample] = countsSample
+    return counts
+
 def passSelection(l0pt, l1pt, mll, mtllmet, ht, metrel, l3Veto, ll, nj) :
     def passLepPT(l0pt, l1pt, ll) :
         return l0pt > 30.0 and l1pt > (20.0 if ll=='mm' else 0.0)
@@ -276,7 +287,7 @@ def drawTop(pad, hBkg, hSig) :
     bcS, bcB = binContentsWithUoflow(hSig), binContentsWithUoflow(hBkg)
     leftToRight = True
     bcLS, bcLB = cumsum(mergeOuter(bcS), leftToRight), cumsum(mergeOuter(bcB), leftToRight),
-    leftToRight = False    
+    leftToRight = False
     bcRS, bcRB = cumsum(mergeOuter(bcS), leftToRight), cumsum(mergeOuter(bcB), leftToRight)
     zn = r.RooStats.NumberCountingUtils.BinomialExpZ
     bkgUnc = 0.3
@@ -345,16 +356,23 @@ def plotZnHisto(pad, h, linecolor=r.kBlack, minY=0.0, maxY=1.0) :
     ax.Draw()
     return [h, ax]
 
-        
+def printSummary(counts) :
+    if 'totbkg' not in counts :
+        counts['totbkg'] = dict([(sel, sum(countsSample[sel]
+                                           for sam, countsSample in counts.iteritems() if not isSigSample(sam)))
+                                 for sel in first(counts).keys()])
+    samples = counts.keys()
+    signal = [s for s in samples if isSigSample(s)][0]
+    counts = renameDictKey(counts, signal, 'signal')
+    samples = counts.keys()
+    sels = sorted(first(counts).keys())
+    print
+    print CutflowTable(samples, sels, counts).latex()
 
-    
-def printSummary(histos) :
-    refVar = 'pt0'
-    for sample, hs in histos.iteritems() :
-        for sel, hss in hs.iteritems() :
-            print "%s %s %f"%(sample, sel, hss[refVar].Integral())
-            
-    
+    print "--- Zn ---"
+    zn, bkgUnc = r.RooStats.NumberCountingUtils.BinomialExpZ, 0.30
+    for s in sels :
+        print "%s : %.2f" % (s, zn(counts['signal'][s], counts['totbkg'][s], bkgUnc))
 
 if __name__=='__main__' :
     optimizeSelection()
