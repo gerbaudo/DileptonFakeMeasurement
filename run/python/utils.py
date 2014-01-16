@@ -135,7 +135,16 @@ def cumsum(l, leftToRight=True) :
     return [sum(l[:i]) for i in range(1,len(l)+1)] if leftToRight else [sum(l[-i:]) for i in range(1,len(l)+1)][::-1]
 def mergeOuter(bc, nOuter=2) : # add over/underflow in the first/last bin
     return [sum(bc[:nOuter])] + bc[nOuter:-nOuter] + [sum(bc[-nOuter:])]
-
+def transposeDict(d) :
+    "given a dict[key1][key2] return dict[key2][key1]"
+    possible_k2s = [sorted(row.keys()) for row in d.values()]
+    assert len(frozenset(possible_k2s[0]))==len(possible_k2s[0]),"ambigous keys, cannot transpose %s"%str(possible_k2s[0])
+    assert len(frozenset([frozenset(ks) for ks in possible_k2s])),"rows with different keys, cannot transpose %s"%str(possible_k2s)
+    k2s = first(possible_k2s)
+    return dict([(k2, dict([(k1, d[k1][k2]) for k1 in d.keys()])) for k2 in k2s])
+def renameDictKey(d, old, new) :
+    d[new] = d.pop(old)
+    return d
 #
 # testing
 #
