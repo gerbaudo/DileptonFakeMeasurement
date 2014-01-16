@@ -106,21 +106,24 @@ def bookHistos(variables, samples, lls, njs) :
     def histo(variable, suffix) :
         s = suffix
         twopi = +2.0*math.pi
-        if   v=='pt0'     : return r.TH1F('h_pt0_'    +s, ';p_{T,l0} [GeV]; entries/bin',          25, 0.0, 250.0)
-        elif v=='pt1'     : return r.TH1F('h_pt1_'    +s, ';p_{T,l1} [GeV]; entries/bin',          25, 0.0, 250.0)
-        elif v=='mll'     : return r.TH1F('h_mll_'    +s, ';m_{l0,l1} [GeV]; entries/bin',         25, 0.0, 250.0)
-        elif v=='mtmin'   : return r.TH1F('h_mtmin_'  +s, ';m_{T,min}(l, MET) [GeV]; entries/bin', 25, 0.0, 250.0)
-        elif v=='mtmax'   : return r.TH1F('h_mtmax_'  +s, ';m_{T,max}(l, MET) [GeV]; entries/bin', 25, 0.0, 250.0)
-        elif v=='mtllmet' : return r.TH1F('h_mtllmet_'+s, ';m_{T}(l+l, MET) [GeV]; entries/bin',   25, 0.0, 250.0)
-        elif v=='ht'      : return r.TH1F('h_ht_'     +s, ';H_{T} [GeV]; entries/bin',             25, 0.0, 250.0)
-        elif v=='metrel'  : return r.TH1F('h_metrel_' +s, ';MET_{rel} [GeV]; entries/bin',         25, 0.0, 250.0)
-        elif v=='dphill'  : return r.TH1F('h_dphill_' +s, ';#Delta#phi(l, l) [rad]; entries/bin',  25, 0.0, twopi)
-        elif v=='detall'  : return r.TH1F('h_detall_' +s, ';#Delta#eta(l, l); entries/bin',        25, 0.0, +3.0 )
-        elif v=='mt2j'    : return r.TH1F('h_mt2j_'   +s, ';m^{J}_{T2} [GeV]; entries/bin',        25, 0.0, 500.0)
-        elif v=='mljj'    : return r.TH1F('h_mljj_'   +s, ';m_{ljj} [GeV]; entries/bin',           25, 0.0, 500.0)
-        elif v=='dphijj'  : return r.TH1F('h_dphijj_' +s, ';#Delta#phi(j, j); entries/bin',        25, 0.0, twopi)
-        elif v=='detajj'  : return r.TH1F('h_detajj_' +s, '#Delta#eta(j, j); entries/bin',         25, 0.0, +3.0 )
+        h = None
+        if   v=='pt0'     : h = r.TH1F('h_pt0_'    +s, ';p_{T,l0} [GeV]; entries/bin',          25, 0.0, 250.0)
+        elif v=='pt1'     : h = r.TH1F('h_pt1_'    +s, ';p_{T,l1} [GeV]; entries/bin',          25, 0.0, 250.0)
+        elif v=='mll'     : h = r.TH1F('h_mll_'    +s, ';m_{l0,l1} [GeV]; entries/bin',         25, 0.0, 250.0)
+        elif v=='mtmin'   : h = r.TH1F('h_mtmin_'  +s, ';m_{T,min}(l, MET) [GeV]; entries/bin', 25, 0.0, 250.0)
+        elif v=='mtmax'   : h = r.TH1F('h_mtmax_'  +s, ';m_{T,max}(l, MET) [GeV]; entries/bin', 25, 0.0, 250.0)
+        elif v=='mtllmet' : h = r.TH1F('h_mtllmet_'+s, ';m_{T}(l+l, MET) [GeV]; entries/bin',   25, 0.0, 250.0)
+        elif v=='ht'      : h = r.TH1F('h_ht_'     +s, ';H_{T} [GeV]; entries/bin',             25, 0.0, 250.0)
+        elif v=='metrel'  : h = r.TH1F('h_metrel_' +s, ';MET_{rel} [GeV]; entries/bin',         25, 0.0, 250.0)
+        elif v=='dphill'  : h = r.TH1F('h_dphill_' +s, ';#Delta#phi(l, l) [rad]; entries/bin',  25, 0.0, twopi)
+        elif v=='detall'  : h = r.TH1F('h_detall_' +s, ';#Delta#eta(l, l); entries/bin',        25, 0.0, +3.0 )
+        elif v=='mt2j'    : h = r.TH1F('h_mt2j_'   +s, ';m^{J}_{T2} [GeV]; entries/bin',        25, 0.0, 500.0)
+        elif v=='mljj'    : h = r.TH1F('h_mljj_'   +s, ';m_{ljj} [GeV]; entries/bin',           25, 0.0, 500.0)
+        elif v=='dphijj'  : h = r.TH1F('h_dphijj_' +s, ';#Delta#phi(j, j); entries/bin',        25, 0.0, twopi)
+        elif v=='detajj'  : h = r.TH1F('h_detajj_' +s, '#Delta#eta(j, j); entries/bin',         25, 0.0, +3.0 )
         else : print "unknown variable %s"%v
+        h.SetDirectory(0)
+        return h
     return dict([(s,
                   dict([(llnjKey(ll, nj),
                          dict([(v, histo(v, histoSuffix(s, ll, nj))) for v in variables]))
