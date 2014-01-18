@@ -19,7 +19,7 @@ def plot_zn_after_opt():
         plotZns(ds2p(combineZn(znValues[ll])),
                 histoname=ll, histotitle=ll+' ;mc_{1}; mn_{1}')
     plotZns(ds2p(combineZn(dict([(ll+'_'+nj, znValues[ll][nj])
-                                 for ll in ['ee', 'mm', 'em'] for nj in ['eq1j', 'ge2j']]))
+                                 for ll in znValues.keys() for nj in ['eq1j', 'ge2j']]))
                  ),
             histoname='ll', histotitle='ll'+' ;mc_{1}; mn_{1}')
 
