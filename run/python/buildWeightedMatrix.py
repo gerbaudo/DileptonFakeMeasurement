@@ -28,17 +28,21 @@ from math import sqrt
 import operator
 import optparse
 import os
-from rootUtils import importRoot, buildRatioHistogram
+from rootUtils import importRoot, buildRatioHistogram, drawLegendWithDictKeys, getMinMax
 r = importRoot()
+r.gStyle.SetPadTickX(1)
+r.gStyle.SetPadTickY(1)
 from utils import (enumFromHeader
                    ,first
                    ,mkdirIfNeeded
                    ,json_write
+                   ,rmIfExists
                    )
 import matplotlib as mpl
 mpl.use('Agg') # render plots without X
 import matplotlib.pyplot as plt
 import numpy as np
+import SampleUtils
 
 usage="""
 Example usage:
@@ -186,6 +190,9 @@ def buildMuonRates(inputFiles, outputfile, outplotdir, verbose=False) :
     print "buildMuonRates: values to be fixed: ",' '.join(["%s: %s"%(v, eval(v)) for v in ['mu_qcdSF', 'mu_realSF']])
     eff_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_coarse',  iF[p], mu_qcdSF))  for p in processes)
     eff_real = dict((p, brsit('muon_realMC_all_l_pt_coarse', iF[p], mu_realSF)) for p in processes)
+    lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#varepsilon(T|L)'
+    plotUnweightedEfficiencies(eff_qcd,  'eff_mu_qcd',  outplotdir, lT+' qcd fake #mu'+';'+lX+';'+lY)
+    plotUnweightedEfficiencies(eff_real, 'eff_mu_real', outplotdir, lT+' real #mu'    +';'+lX+';'+lY)
     mu_frac = dict()
     for sr in selectionRegions() :
         frac_qcd  = buildPercentages(inputFiles, 'muon_'+sr+'_all_flavor_den', 'qcd')
@@ -213,6 +220,10 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, verbose=False) :
     eff_conv = dict((p, brsit('elec_convMC_all_l_pt_coarse', iF[p], el_convSF)) for p in processes)
     eff_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_coarse',  iF[p], el_qcdSF))  for p in processes)
     eff_real = dict((p, brsit('elec_realMC_all_l_pt_coarse', iF[p], el_realSF)) for p in processes)
+    lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#varepsilon(T|L)'
+    plotUnweightedEfficiencies(eff_conv, 'eff_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY)
+    plotUnweightedEfficiencies(eff_qcd,  'eff_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY)
+    plotUnweightedEfficiencies(eff_real, 'eff_el_real', outplotdir, lT+' real el'     +';'+lX+';'+lY)
     el_frac = dict()
     for sr in selectionRegions() :
         frac_conv, frac_qcd= buildPercentagesTwice(inputFiles, 'elec_'+sr+'_all_flavor_den',
@@ -294,6 +305,28 @@ def plotFractions(fractDict={}, outplotdir='./', prefix='') :
         leg.get_frame().set_alpha(0.5)
         fig.autofmt_xdate(bottom=0.25, rotation=90, ha='center')
         fig.savefig(outplotdir+prefix+'_'+lt+'.png')
+
+def plotUnweightedEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='title;p_{T} [GeV]; efficiency') :
+    can = r.TCanvas(canvasName, '', 800, 600)
+    can.cd()
+    padMaster = None
+    colors, markers = SampleUtils.colors, SampleUtils.markers
+    for s,h in effs.iteritems() :
+        h.SetLineColor(colors[s] if s in colors else r.kBlack)
+        h.SetMarkerColor(h.GetLineColor())
+        h.SetMarkerStyle(markers[s] if s in markers else r.kFullCircle)
+        drawOpt = 'ep same' if padMaster else 'ep'
+        h.Draw(drawOpt)
+        if not padMaster : padMaster = h
+    minY, maxY = getMinMax(effs.values())
+    padMaster.GetYaxis().SetRangeUser(min([0.0, minY]), 1.1*maxY)
+    padMaster.SetTitle(frameTitle)
+    padMaster.SetStats(False)
+    drawLegendWithDictKeys(can, effs)
+    can.Update()
+    outFilename = outputDir+canvasName+'.png'
+    rmIfExists(outFilename)
+    can.SaveAs(outFilename)
 
 if __name__=='__main__' :
     main()
