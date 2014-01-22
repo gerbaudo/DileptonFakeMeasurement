@@ -1,0 +1,4 @@
+SusySel \
+ -i filelist/Sherpa_CT10_lllnu_WZ.txt \
+ -s Sherpa_CT10_lllnu_WZ  \
+ >& /tmp/Sherpa_CT10_lllnu_WZ_`date +%F`.log
