@@ -20,6 +20,16 @@ colors = {
     'fake'        : r.kGray, # just another name for the same thing
     'heavyflavor' : r.kViolet+1
     }
+markers = {
+    'ttbar'       : r.kFullTriangleDown,
+    'zjets'       : r.kOpenSquare,
+    'wjets'       : r.kFullTriangleUp,
+    'diboson'     : r.kFullDiamond,
+    'singletop'   : r.kOpenCross,
+    'multijet'    : r.kFullCross,
+    'fake'        : r.kFullCircle, # just another name for the same thing
+    'heavyflavor' : r.kFullSquare
+    }
 
 allGroups, allDatasets, datasets = allGroups(datasets), allDatasets(datasets), activeDatasets(datasets)
 
