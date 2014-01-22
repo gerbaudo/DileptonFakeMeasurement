@@ -16,6 +16,7 @@ class CutflowTable :
         self.rawcnt          = isRawCount
         self.selRegexp       = selectionRegexp
         self.colWidth        = 12
+        self.nDecimal        = 1
     def latex(self) :
         rawcnt, colWidth = self.rawcnt, self.colWidth
         css = self.countsSampleSel
@@ -35,10 +36,10 @@ class CutflowTable :
                          +'\\end{center} \n'
                          +'\\end{table} \n'
                          +'\\FloatBarrier \n')
-                         
+        numFormat = "%.0f" if rawcnt else ('%.'+str(self.nDecimal)+'f')
         header = ' & '.join(fwidthField % t for t in ['selection']+samples) + endrow
         lines = [' & '.join([fwidthField % f
-                             for f in [sel]+[("%.0f" if rawcnt else "%.1f") % c
+                             for f in [sel]+[numFormat % c
                                              for c in [css[s][sel]
                                                        if s in css and sel in css[s] else None
                                                        for s in samples ]

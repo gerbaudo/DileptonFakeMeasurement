@@ -7,15 +7,14 @@
 
 import collections, optparse, sys, glob
 #import numpy as np # not available, this hurts.
-import ROOT as r
-r.PyConfig.IgnoreCommandLineOptions = True
-r.gROOT.SetBatch(1)
+from rootUtils import importRoot, binContentsWithUoflow, cloneAndFillHisto, cumEffHisto, maxSepVerticalLine
+r = importRoot()
 r.gStyle.SetPadTickX(1)
 r.gStyle.SetPadTickY(1)
 
 from NavUtils import getAllHistoNames, HistoNameClassifier, organizeHistosByType, setHistoType, setHistoSample
 from SampleUtils import colors, guessSampleFromFilename
-
+from utils import cumsum, mergeOuter
 #########
 # default parameters [begin]
 defaultTag      = 'Feb21_n0115'
@@ -68,51 +67,6 @@ for fname, infile in zip(inputFileNames, inputFiles) :
 
 def isSignal(sampleName) : return 'WH_' in sampleName
 
-def cumsum(l, leftToRight=True) :
-    #return numpy.cumsum(l) # not available ?
-    return [sum(l[:i]) for i in range(1,len(l)+1)] if leftToRight \
-           else [sum(l[-i:]) for i in range(1,len(l)+1)][::-1]
-def mergeOuter(bc, nOuter=2) : # add over/underflow in the first/last bin
-    return [sum(bc[:nOuter])] + bc[nOuter:-nOuter] + [sum(bc[-nOuter:])]
-
-def cumSumHisto(histo, leftToRight=True) :
-    hCs = histo.Clone(histo.GetName()+'_cs')
-    nBinsX = 1+hCs.GetNbinsX() # TH1 starts from 1 (0 underflow, N+1 overflow)
-    bc = [hCs.GetBinContent(0)] + [hCs.GetBinContent(i) for i in range(1, nBinsX)] + [hCs.GetBinContent(nBinsX+1)]
-    bc = cumsum(mergeOuter(bc), leftToRight)
-    tot = bc[-1] if leftToRight else bc[0]
-    for i, c in enumerate(bc) :
-        hCs.SetBinContent(i+1, c/tot if tot else 0.)
-        hCs.SetBinError(i+1, 0.)
-    hCs.SetMinimum(0.0)
-    hCs.SetMaximum(1.0)
-    hCs.SetTitle('')
-    hCs.SetFillStyle(0)
-    return hCs
-
-def cumEffHisto(histoTemplate, bincontents=[], leftToRight=True) :
-    h, bc= histoTemplate, bincontents
-    assert h.GetNbinsX()==len(bc),"%d bincontents for %d bins"%(len(bc), h.GetNbinsX())
-    h = h.Clone(h.GetName()+'_ce')
-    tot = bc[-1] if leftToRight else bc[0]
-    for i, c in enumerate(bc) :
-        h.SetBinContent(i+1, c/tot if tot else 0.)
-        h.SetBinError(i+1, 0.)
-    h.SetMinimum(0.0)
-    h.SetMaximum(1.0)
-    h.SetTitle('')
-    h.SetFillStyle(0)
-    return h
-
-def cloneAndFillHisto(histo, bincontents=[], suffix='', zeroErr=True) :
-    h, bc= histo, bincontents
-    assert h.GetNbinsX()==len(bc),"%d bincontents for %d bins"%(len(bc), h.GetNbinsX())
-    h = h.Clone(h.GetName()+suffix)
-    for i, c in enumerate(bc) :
-        h.SetBinContent(i+1, c)
-        if zeroErr : h.SetBinError(i+1, 0.)
-    return h
-
 def plotCumulativeEfficiencyHisto(pad, h, linecolor=r.kBlack, isPadMaster=True) :
     pad.cd()
     h.SetLineColor(linecolor)
@@ -162,25 +116,7 @@ def plotZnHisto(pad, h, linecolor=r.kBlack, minY=0.0, maxY=1.0) :
     ax.Draw()
     return [h, ax]
 
-def binContentsWithUoflow(h) :
-    nBinsX = h.GetNbinsX()+1
-    return [h.GetBinContent(0)] + \
-           [h.GetBinContent(i) for i in range(1, nBinsX)] + \
-           [h.GetBinContent(nBinsX+1)]
     
-def maxSepVerticalLine(hSig, hBkg, yMin=0.0, yMax=1.0) :
-    nxS, nxB = hSig.GetNbinsX(), hBkg.GetNbinsX()
-    assert nxS==nxB,"maxSepVerticalLine : histos with differen binning (%d!=%d)"%(nxS,nxB)
-    bcS = [hSig.GetBinContent(i) for i in range(1,1+nxS)]
-    bcB = [hBkg.GetBinContent(i) for i in range(1,1+nxB)]
-    def indexMaxDist(bcS, bcB) :
-        return sorted([(i,d) for i,d in enumerate([abs(a-b) for a,b in zip(bcS, bcB)])],
-                      key= lambda x : x[1])[-1][0]
-    iMax = indexMaxDist(bcS, bcB)
-    xPos = hSig.GetBinCenter(iMax+1)
-    sep = [abs(a-b) for a,b in zip(bcS, bcB)]
-    return r.TLine(xPos, yMin, xPos, yMax)
-
 def plotTopPad(pad, hSig, hBkg) :
     nxS, nxB = hSig.GetNbinsX()+1, hBkg.GetNbinsX()+1  # TH1 starts from 1
     assert nxS==nxB,"maxSepVerticalLine : histos with differen binning (%d!=%d)"%(nxS,nxB)

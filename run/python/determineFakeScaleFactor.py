@@ -12,18 +12,17 @@
 from math import sqrt
 import optparse
 from pdgRounding import pdgRound
-import ROOT as r
-r.gROOT.SetBatch(True)                     # no windows popping up
-r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
-r.gStyle.SetPadTickX(1)
-r.gStyle.SetPadTickY(1)
-r.gStyle.SetOptStat(0)
-r.gStyle.SetOptTitle(0)
 from rootUtils import (getNumDenHistos
                        ,buildRatioHistogram
                        ,buildBotTopPads
                        ,drawLegendWithDictKeys
+                       ,importRoot
                        )
+r = importRoot()
+r.gStyle.SetPadTickX(1)
+r.gStyle.SetPadTickY(1)
+r.gStyle.SetOptStat(0)
+r.gStyle.SetOptTitle(0)
 from utils import (first
                    ,rmIfExists
                    )

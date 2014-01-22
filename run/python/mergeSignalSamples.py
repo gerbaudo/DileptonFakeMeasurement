@@ -11,9 +11,8 @@ import os
 import optparse
 import re
 import sys
-import ROOT as r
-r.PyConfig.IgnoreCommandLineOptions = True
-r.gROOT.SetBatch(1)
+from rootUtils import importRoot
+r = importRoot()
 
 from NavUtils import getAllHistoNames
 from SampleUtils import guessSampleFromFilename, ModeAWhDbPar, ModeAWhDbReqid, ModeAWhDbMergedFake2Lreqid

@@ -28,10 +28,8 @@ from math import sqrt
 import operator
 import optparse
 import os
-import ROOT as r
-r.gROOT.SetBatch(True)                     # no windows popping up
-r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
-from rootUtils import buildRatioHistogram
+from rootUtils import importRoot, buildRatioHistogram
+r = importRoot()
 from utils import (enumFromHeader
                    ,first
                    ,mkdirIfNeeded

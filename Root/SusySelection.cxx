@@ -825,15 +825,16 @@ LeptonVector SusySelection::getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/
     // DG 2013-12-02:
     // todo1 : re-implement with std algo
     // todo2 : re-implement with syst
+    float minPt = 6.0;
     LeptonVector leptons;
     for(uint ie=0; ie<susyNt.ele()->size(); ++ie){
         if(Electron* e = & susyNt.ele()->at(ie)){ //e->setState(sys);
-            leptons.push_back(static_cast<Lepton*>(e));
+            if(e->Pt()>minPt) leptons.push_back(static_cast<Lepton*>(e));
         }
     }
     for(uint im=0; im<susyNt.muo()->size(); ++im){
         if(Muon* m = & susyNt.muo()->at(im)){ //m->setState(sys);
-            leptons.push_back(static_cast<Lepton*>(m));
+            if(m->Pt(),minPt) leptons.push_back(static_cast<Lepton*>(m));
         }
     }
     return leptons;

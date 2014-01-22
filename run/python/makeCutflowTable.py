@@ -6,9 +6,8 @@
 # Jan 2013
 
 import collections, optparse, sys, glob
-import ROOT as r
-r.PyConfig.IgnoreCommandLineOptions = True
-r.gROOT.SetBatch(1)
+from rootUtils import importRoot
+r = importRoot()
 
 from CutflowTable import CutflowTable
 from NavUtils import getAllHistoNames, HistoNameClassifier, organizeHistosByType, HistoType, HistoNameClassifier, setHistoType, setHistoSample

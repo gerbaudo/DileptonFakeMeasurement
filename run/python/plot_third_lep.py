@@ -16,13 +16,12 @@ import array
 import glob
 import math
 import os
-import ROOT as r
+from rootUtils import importRoot
+r = importRoot()
 r.gROOT.SetStyle('Plain')
-r.gROOT.SetBatch(True)                     # no windows popping up
-r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
+from kin import phi_mpi_pi, addTlv, lepIsSeparatedFromOther, lepPairIsZcand, deltaMZ0
 
 r.gROOT.LoadMacro('src/TupleMakerObjects.h+')
-tlv = r.TLorentzVector
 
 treename = 'SusySel'
 tag = 'Dec_09'
@@ -39,15 +38,6 @@ colors = {
     'heavyflavor' : r.kViolet+1
     }
 
-def FourMom2TLorentzVector(fm) :
-    l = tlv()
-    l.SetPxPyPzE(fm.px, fm.py, fm.pz, fm.E)
-    return l
-fm2tlv = FourMom2TLorentzVector
-def addTlv(l) :
-    l.p4 = fm2tlv(l)
-    return l
-
 def getInputFiles() :
     samples = ['diboson', 'WH_2Lep_3']
     filenames = dict((s, glob.glob(basedir+'/*'+s+'*'+tag+'.root')) for s in samples)
@@ -59,24 +49,6 @@ def first(listOrDict) :
     lod = listOrDict
     return lod.itervalues().next() if type(lod) is dict else lod[0] if lod else None
 
-def lepIsSeparatedFromOther(l, otherLeps, minDr=0.05) :
-    return all(l.p4.DeltaR(ol.p4)>minDr for ol in otherLeps)
-def lepFlavor(l) :
-    return 'el' if l.isEl else 'mu' if l.isMu else 'other'
-def lepPairIsZcand(l0, l1) :
-    l0Fl, l1Fl = lepFlavor(l0), lepFlavor(l1)
-    elOrMu = l0Fl in ['el','mu']
-    sameFlavor = l0Fl==l1Fl
-    oppCharge  = l0.charge*l1.charge < 0.0
-    return elOrMu and sameFlavor and oppCharge
-def deltaMZ0((la, lb)) :
-    "given a pair of leptons, return the abs difference m_ll - m_Z"
-    return abs((la.p4 + lb.p4).M() - 91.2)
-def phi_mpi_pi(phi) :
-    pi = math.pi
-    while phi < -pi : phi += pi
-    while phi > +pi : phi -= pi
-    return phi
 
 def topRightLegend(pad,  legWidth, legHeight, shift=0.0) :
     rMarg, lMarg, tMarg = pad.GetRightMargin(), pad.GetLeftMargin(), pad.GetTopMargin()
@@ -135,7 +107,7 @@ def fillHistos() :
             weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
             h_nlep.Fill(float(len(lepts)), weight)
             if len(lepts) < 1 : continue
-            lepts = filter(lambda l : lepIsSeparatedFromOther(l, [l0, l1]), lepts)
+            lepts = filter(lambda l : lepIsSeparatedFromOther(l.p4, [l0.p4, l1.p4]), lepts)
             h_nillep.Fill(float(len(lepts)), weight)
             validPairs = [(lh, ls) for lh in [l0, l1] for ls in lepts if lepPairIsZcand(lh, ls)]
             h_npairs.Fill(float(len(validPairs)), weight)

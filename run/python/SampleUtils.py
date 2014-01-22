@@ -7,8 +7,8 @@
 
 import glob, os, re, unittest
 from datasets import datasets, allGroups, allDatasets, activeDatasets
-import ROOT as r
-r.gROOT.SetBatch(1)
+from rootUtils import importRoot
+r = importRoot()
 
 colors = {
     'ttbar'       : r.kRed+1,

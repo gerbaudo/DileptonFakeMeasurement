@@ -35,11 +35,10 @@
 
 from math import sqrt
 import optparse
-import ROOT as r
-r.gROOT.SetBatch(True)                     # no windows popping up
-r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
 from rootUtils import (buildRatioHistogram,
-                       getNumDenHistos)
+                       getNumDenHistos,
+                       importRoot)
+r = importRoot()
 
 usage="""
 Example usage:

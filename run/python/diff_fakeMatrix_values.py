@@ -24,7 +24,8 @@ from utils import filterWithRegexp
 def main(filename1, filename2, outdir, regexp, verbose) :
     # there are too many histos; by default compare only the ones vs. pt for few selections
     relevantHistograms = ['l_pt_den','l_pt_num']
-    relevantSelections = ['CRPremT2','CR_SSInc','CR_WHSS','CRPremT2','CR_SSInc','CR_WHSS']
+    relevantHistograms += [l+'_'+fr+'_'+er  for l in ['mu','el'] for fr in ['fake','real'] for er in ['eff','rate']]
+    relevantSelections = ['CR8ee', 'CR8mm', 'CR_WHSS', 'SsEwkLoose']
     outdir = outdir if outdir else guessOutdirFromInputs(filename1, filename2)
     if verbose : print "saving output plots to '%s'"%outdir
     file1, file2 = r.TFile.Open(filename1), r.TFile.Open(filename2)
@@ -47,7 +48,7 @@ def main(filename1, filename2, outdir, regexp, verbose) :
     commonHistos = (filterWithRegexp(commonHistos, regexp) if regexp is not None
                     else filter(lambda h:
                                 any(s in h for s in relevantHistograms) and
-                                any(s in h for s in relevantSelections),
+                                any(h.endswith(s) for s in relevantSelections),
                                 commonHistos))
     canvas = r.TCanvas('diff_fakeMatrix','diff_fakeMatrix')
     for h in commonHistos :
@@ -67,7 +68,10 @@ def plotComparison(histo1, histo2, canvas, outname, label1, label2, verbose) :
     h2.SetMarkerColor(r.kRed)
     h1.SetMarkerStyle(r.kFullCircle)
     h2.SetMarkerStyle(r.kOpenCircle)
-    h1.SetMaximum(1.1*max([h.GetMaximum() for h in [h1, h2]]))
+#     h1.SetMaximum(1.1*max([h.GetMaximum() for h in [h1, h2]]))
+#     h1.SetMinimum(0.5*max([h.GetMinimum() for h in [h1, h2]]))
+    h1.SetMaximum(1.1)
+    h1.SetMinimum(0.0)
     h1.SetStats(0)
     h1.SetStats(0)
     h1.Draw()

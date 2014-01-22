@@ -6,9 +6,13 @@
 # 2013-08-26
 
 
-import ROOT as r
-r.gROOT.SetBatch(True)                     # no windows popping up
-r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
+def importRoot() :
+    import ROOT as r
+    r.gROOT.SetBatch(True)                     # no windows popping up
+    r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
+    return r
+r = importRoot()
+
 import numpy as np
 from utils import verticalSlice
 
@@ -78,20 +82,73 @@ def getNumDenHistos(f, baseHname='base_histo_name', suffNum='_num', suffDen='_de
     num = f.Get(baseHname+suffNum)
     den = f.Get(baseHname+suffDen)
     return {'num':num, 'den':den}
-def buildBotTopPads(canvas, splitFraction=0.275) :
+def buildBotTopPads(canvas, splitFraction=0.275, squeezeMargins=True) :
     canvas.cd()
     botPad = r.TPad(canvas.GetName()+'_bot', 'bot pad', 0.0, 0.0, 1.0, splitFraction, 0, 0, 0)
     interPadMargin = 0.5*0.05
     botPad.SetTopMargin(interPadMargin)
     botPad.SetBottomMargin(botPad.GetBottomMargin()/splitFraction)
-    botPad.SetRightMargin(0.20*botPad.GetRightMargin())
+    if squeezeMargins : botPad.SetRightMargin(0.20*botPad.GetRightMargin())
     r.SetOwnership(botPad, False)
     canvas.cd()
     canvas.Update()
     topPad = r.TPad(canvas.GetName()+'_top', 'top pad', 0.0, splitFraction, 1.0, 1.0, 0, 0)
     topPad.SetBottomMargin(interPadMargin)
-    topPad.SetTopMargin(0.20*topPad.GetTopMargin())
-    topPad.SetRightMargin(0.20*topPad.GetRightMargin())
+    if squeezeMargins : topPad.SetTopMargin(0.20*topPad.GetTopMargin())
+    if squeezeMargins : topPad.SetRightMargin(0.20*topPad.GetRightMargin())
     r.SetOwnership(topPad, False)
     canvas._pads = [topPad, botPad]
     return botPad, topPad
+def summedHisto(histos) :
+    "return an histogram that is the sum of the inputs"
+    hsum = histos[0].Clone(histos[0].GetName()+'_sum')
+    for h in histos[0:] : hsum.Add(h)
+    return hsum
+
+def binContentsWithUoflow(h) :
+    nBinsX = h.GetNbinsX()+1
+    return [h.GetBinContent(0)] + [h.GetBinContent(i) for i in range(1, nBinsX)] + [h.GetBinContent(nBinsX+1)]
+
+def cloneAndFillHisto(histo, bincontents=[], suffix='', zeroErr=True) :
+    h, bc= histo, bincontents
+    assert h.GetNbinsX()==len(bc),"%d bincontents for %d bins"%(len(bc), h.GetNbinsX())
+    h = h.Clone(h.GetName()+suffix)
+    for i, c in enumerate(bc) :
+        h.SetBinContent(i+1, c)
+        if zeroErr : h.SetBinError(i+1, 0.)
+    return h
+
+def cumEffHisto(histoTemplate, bincontents=[], leftToRight=True) :
+    h, bc= histoTemplate, bincontents
+    assert h.GetNbinsX()==len(bc),"%d bincontents for %d bins"%(len(bc), h.GetNbinsX())
+    h = h.Clone(h.GetName()+'_ce')
+    tot = bc[-1] if leftToRight else bc[0]
+    for i, c in enumerate(bc) :
+        h.SetBinContent(i+1, c/tot if tot else 0.)
+        h.SetBinError(i+1, 0.)
+    h.SetMinimum(0.0)
+    h.SetMaximum(1.0)
+    h.SetTitle('')
+    h.SetFillStyle(0)
+    return h
+def maxSepVerticalLine(hSig, hBkg, yMin=0.0, yMax=1.0) :
+    nxS, nxB = hSig.GetNbinsX(), hBkg.GetNbinsX()
+    assert nxS==nxB,"maxSepVerticalLine : histos with differen binning (%d!=%d)"%(nxS,nxB)
+    bcS = [hSig.GetBinContent(i) for i in range(1,1+nxS)]
+    bcB = [hBkg.GetBinContent(i) for i in range(1,1+nxB)]
+    def indexMaxDist(bcS, bcB) :
+        return sorted([(i,d) for i,d in enumerate([abs(a-b) for a,b in zip(bcS, bcB)])],
+                      key= lambda x : x[1])[-1][0]
+    iMax = indexMaxDist(bcS, bcB)
+    xPos = hSig.GetBinCenter(iMax+1)
+    sep = [abs(a-b) for a,b in zip(bcS, bcB)]
+    return r.TLine(xPos, yMin, xPos, yMax)
+
+def topRightLabel(pad, label, xpos=None, ypos=None, align=33) :
+    pad.cd()
+    tex = r.TLatex(0.0, 0.0, '')
+    tex.SetNDC()
+    tex.SetTextAlign(align)
+    tex.DrawLatex((1.0-pad.GetRightMargin()) if not xpos else xpos, (1.0-pad.GetTopMargin()) if not ypos else ypos, label)
+    pad._label = tex
+    return tex
