@@ -54,6 +54,10 @@ Example usage:
  >& log/fakerate/FinalFakeHist_${TAG}.log
 """
 
+# scale factors from determineFakeScaleFactor.py
+mu_qcdSF, mu_realSF = 0.79059, 0.99719
+el_convSF, el_qcdSF, el_realSF = 1.24359, 0.73345, 0.99729
+
 def main() :
     parser = optparse.OptionParser(usage=usage)
     parser.add_option('-t', '--tag')
@@ -186,7 +190,6 @@ def buildMuonRates(inputFiles, outputfile, outplotdir, verbose=False) :
     """
     processes = fakeProcesses()
     brsit, iF = buildRatioAndScaleIt, inputFiles
-    mu_qcdSF, mu_realSF = 0.79059, 0.99719
     print "buildMuonRates: values to be fixed: ",' '.join(["%s: %s"%(v, eval(v)) for v in ['mu_qcdSF', 'mu_realSF']])
     eff_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_coarse',  iF[p], mu_qcdSF))  for p in processes)
     eff_real = dict((p, brsit('muon_realMC_all_l_pt_coarse', iF[p], mu_realSF)) for p in processes)
@@ -215,7 +218,6 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, verbose=False) :
     """
     processes = fakeProcesses()
     brsit, iF = buildRatioAndScaleIt, inputFiles
-    el_convSF, el_qcdSF, el_realSF = 1.24359, 0.73345, 0.99729
     print "buildElectronRates: values to be fixed: ",' '.join(["%s: %s"%(v, eval(v)) for v in ['el_qcdSF', 'el_convSF', 'el_realSF']])
     eff_conv = dict((p, brsit('elec_convMC_all_l_pt_coarse', iF[p], el_convSF)) for p in processes)
     eff_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_coarse',  iF[p], el_qcdSF))  for p in processes)
