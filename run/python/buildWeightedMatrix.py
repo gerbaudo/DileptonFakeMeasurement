@@ -81,6 +81,7 @@ def main() :
 
     allInputFiles = getInputFiles(inputDirname, tag, verbose) # includes allBkg, which is used only for sys
     assert all(f for f in allInputFiles.values()), ("missing inputs: \n%s"%'\n'.join(["%s : %s"%kv for kv in allInputFiles.iteritems()]))
+    outputPlotDir = outputPlotDir+'/' if not outputPlotDir.endswith('/') else ''
     mkdirIfNeeded(outputPlotDir)
     outputFile = r.TFile.Open(outputFname, 'recreate')
     inputFiles = dict((k, v) for k, v in allInputFiles.iteritems() if k in fakeProcesses())
@@ -309,7 +310,7 @@ def plotFractions(fractDict={}, outplotdir='./', prefix='') :
         fig.autofmt_xdate(bottom=0.25, rotation=90, ha='center')
         fig.savefig(outplotdir+prefix+'_'+lt+'.png')
 
-def plotUnweightedEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='title;p_{T} [GeV]; efficiency') :
+def plotUnweightedEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='title;p_{T} [GeV]; efficiency', zoomIn=False) :
     can = r.TCanvas(canvasName, '', 800, 600)
     can.cd()
     padMaster = None
@@ -321,13 +322,13 @@ def plotUnweightedEfficiencies(effs={}, canvasName='', outputDir='./', frameTitl
         drawOpt = 'ep same' if padMaster else 'ep'
         h.Draw(drawOpt)
         if not padMaster : padMaster = h
-    minY, maxY = getMinMax(effs.values())
+    minY, maxY = getMinMax(effs.values()) if zoomIn else (0.0, 1.0)
     padMaster.GetYaxis().SetRangeUser(min([0.0, minY]), 1.1*maxY)
     padMaster.SetTitle(frameTitle)
     padMaster.SetStats(False)
     drawLegendWithDictKeys(can, effs)
     can.Update()
-    outFilename = outputDir+canvasName+'.png'
+    outFilename = outputDir+'/'+canvasName+'.png'
     rmIfExists(outFilename)
     can.SaveAs(outFilename)
 
