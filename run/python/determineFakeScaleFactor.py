@@ -9,6 +9,7 @@
 # outputs:
 # 5 scale float factors : mu_[real, hf], el[real, hf, conv]
 
+import datetime
 from math import sqrt
 import optparse
 from pdgRounding import pdgRound
@@ -68,11 +69,15 @@ def main() :
     assert fileMc,   "Missing input file mc   %s"%str(fileMc)
     assert fileHf,   "Missing input file hf   %s"%str(fileHf)
     assert fileIter, "Missing input file iter %s"%str(fileIter)
-    computeAndPlotConvSf(fileData, fileMc, 'elec', 'all_l_pt', outputDirname)
-    computeAndPlotHfSf  (fileIter, fileHf, 'elec', 'all_l_pt', outputDirname)
-    computeAndPlotHfSf  (fileIter, fileHf, 'muon', 'all_l_pt', outputDirname)
-    computeAndPlotRealSf(fileData, fileMc, 'elec', 'all_l_pt', outputDirname)
-    computeAndPlotRealSf(fileData, fileMc, 'muon', 'all_l_pt', outputDirname)
+    el_conv_sf = computeAndPlotConvSf(fileData, fileMc, 'elec', 'all_l_pt', outputDirname)
+    el_qcd_sf  = computeAndPlotHfSf  (fileIter, fileHf, 'elec', 'all_l_pt', outputDirname)
+    mu_qcd_sf  = computeAndPlotHfSf  (fileIter, fileHf, 'muon', 'all_l_pt', outputDirname)
+    el_real_sf = computeAndPlotRealSf(fileData, fileMc, 'elec', 'all_l_pt', outputDirname)
+    mu_real_sf = computeAndPlotRealSf(fileData, fileMc, 'muon', 'all_l_pt', outputDirname)
+    print "# --- paste the lines below in buildWeightedMatrix.py ---"
+    print "# %s, %s"%(tag, datetime.datetime.now())
+    print "mu_qcdSF, mu_realSF = %s, %s"%(mu_qcd_sf, mu_real_sf)
+    print "el_convSF, el_qcdSF, el_realSF = %s, %s, %s"%(el_conv_sf, el_qcd_sf, el_real_sf)
 
 def computeAndPlotConvSf(fileData, fileMc, lepton, variable_name, outdir) :
     "Electron conversion: simplest case, just data/mc"
@@ -91,6 +96,7 @@ def computeAndPlotConvSf(fileData, fileMc, lepton, variable_name, outdir) :
                             'mc'   : 'MC Comb: Conv CR'}}
     plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_fakeconv',
                         graphics)
+    return p0
 def computeAndPlotHfSf(fileIter, fileHf, lepton, variable_name, outdir) :
     "HF tag and probe; in this case we need to subract out the contamination"
     eff_da = fileIter.Get(lepton+'_corHFRate')
@@ -108,6 +114,7 @@ def computeAndPlotHfSf(fileIter, fileHf, lepton, variable_name, outdir) :
                             'mc'   : 'b#bar{b}/c#bar{c} MC: HF Tag and Probe'}}
     plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_fakehf',
                         graphics)
+    return p0
 def computeAndPlotRealSf(file_data, file_mc, lepton, variable_name, outdir) :
     "Scale factor from the real control region, Z tag and probe"
     eff_da = buildSideBandSubRate(file_data, lepton, variable_name)
@@ -125,6 +132,7 @@ def computeAndPlotRealSf(file_data, file_mc, lepton, variable_name, outdir) :
                             'mc'   : 'MC Comb: Z Tag and Probe'}}
     plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_real',
                         graphics)
+    return p0
 def buildRate(file, histo_basename) :
     hs = getNumDenHistos(file, histo_basename)
     return buildRatioHistogram(hs['num'], hs['den'])
