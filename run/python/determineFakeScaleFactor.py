@@ -25,6 +25,7 @@ r.gStyle.SetOptStat(0)
 r.gStyle.SetOptTitle(0)
 from utils import (first
                    ,rmIfExists
+                   ,mkdirIfNeeded
                    )
 
 usage="""
@@ -54,6 +55,7 @@ def main() :
     fnameInputIter = opts.input_iter
     outputDirname  = opts.output_dir
     outputDirname  = outputDirname+'/' if not outputDirname.endswith('/') else outputDirname
+    mkdirIfNeeded(outputDirname)
     verbose        = opts.verbose
     if verbose : print ('\nUsing the following options:\n'
                         +'\n'.join("%s : %s"%(o, str(getattr(opts, o))) for o in allOptions))
