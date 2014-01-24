@@ -55,7 +55,7 @@ Example usage:
 """
 
 # scale factors from determineFakeScaleFactor.py
-# Jan_22, 2014-01-22 19:07:27.379308
+# Jan_23, 2014-01-24 02:15:04.623855
 mu_qcdSF, mu_realSF = 0.79, 0.99719
 el_convSF, el_qcdSF, el_realSF = 1.22, 0.73, 0.99728
 
