@@ -107,7 +107,6 @@ def selectionRegions() :
             'CR_CR8mm',
             'CR_CR8mmMtww',
             'CR_CR8mmHt',
-            'CR_CR9lpt',
             'CR_SsEwk',
             'CR_SsEwkLoose',
             ]
