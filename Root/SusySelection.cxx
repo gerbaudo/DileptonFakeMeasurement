@@ -10,7 +10,9 @@
 #include "LeptonTruthTools/RecoTruthMatch.h" // provides RecoTruthMatch::
 #include "ChargeFlip/chargeFlip.h"
 #include "SusyTest0/criteria.h"
+#include "SusyTest0/kinematic.h"
 #include "SusyTest0/utils.h"
+
 
 using namespace std;
 using namespace Susy;
@@ -838,4 +840,55 @@ LeptonVector SusySelection::getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/
         }
     }
     return leptons;
+} 
+//-----------------------------------------
+bool SusySelection::passCrWhZVfakeEe(const susy::wh::kin::DilepVars &v)
+{
+    return (v.isEe
+            && fabs(v.mll - 91.2)>10.0
+            && v.metrel > 40.0
+            && ((v.numCentralLightJets==1 && v.mlj  > 90.0)
+                ||
+                (v.numCentralLightJets >1 && v.mljj >120.0)));
 }
+//-----------------------------------------
+bool SusySelection::passCrWhZVfakeEm(const susy::wh::kin::DilepVars &v)
+{
+    return (v.isEm
+            && v.pt0 > 30.0
+            && v.pt1 > 30.0
+            && ((v.numCentralLightJets==1 && v.mlj  > 90.0)
+                ||
+                (v.numCentralLightJets >1 && v.mljj >120.0)));
+}
+//-----------------------------------------
+bool SusySelection::passCrWhfakeEm  (const susy::wh::kin::DilepVars &v)
+{
+    return (v.isEm
+            && v.pt0 > 30.0
+            && v.pt1 < 30.0 // orthogonal to WhZVfake1jem
+            && ((v.numCentralLightJets==1 && v.mlj  > 90.0)
+                ||
+                (v.numCentralLightJets >1 && v.mljj >120.0)));
+}
+//-----------------------------------------
+bool SusySelection::passCrWhZVMm    (const susy::wh::kin::DilepVars &v)
+{
+    return (v.isMm
+            && v.pt0 > 30.0
+            && v.pt1 > 30.0
+            && ((v.numCentralLightJets==1 && v.mlj  > 90.0)
+                ||
+                (v.numCentralLightJets >1 && v.mljj >120.0)));
+}
+//-----------------------------------------
+bool SusySelection::passCrWhfakeMm  (const susy::wh::kin::DilepVars &v)
+{
+    return (v.isMm
+            // && v.pt0 > 30.0 // ?? 
+            && v.pt1 < 30.0
+            && ((v.numCentralLightJets==1 && v.mlj  > 90.0)
+                ||
+                (v.numCentralLightJets >1 && v.mljj >120.0)));
+}
+//-----------------------------------------

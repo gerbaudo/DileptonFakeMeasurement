@@ -49,6 +49,14 @@ enum WH_SR {
 // fw decl
 class chargeFlip;
 
+namespace susy {
+namespace wh {
+namespace kin {
+class DilepVars;
+}
+}
+}
+
 class SusySelection : public SusyNtAna
 {
  public:
@@ -123,6 +131,12 @@ class SusySelection : public SusyNtAna
     bool passMuonRelIso(const LeptonVector &leptons, float maxVal);
     static bool passEwkSs     (const LeptonVector& leptons, const JetVector& jets, const Met* met);
     static bool passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met);
+    static bool passCrWhZVfakeEe(const susy::wh::kin::DilepVars &v);
+    static bool passCrWhZVfakeEm(const susy::wh::kin::DilepVars &v);
+    static bool passCrWhfakeEm  (const susy::wh::kin::DilepVars &v);
+    static bool passCrWhZVMm    (const susy::wh::kin::DilepVars &v);
+    static bool passCrWhfakeMm  (const susy::wh::kin::DilepVars &v);
+
 
     void setUseXsReader(bool val){ m_useXsReader = val; };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
