@@ -56,7 +56,7 @@ Example usage:
 
 # scale factors from determineFakeScaleFactor.py
 # --- paste the lines below in buildWeightedMatrix.py ---
-# Jan_24, 2014-01-26 20:46:43.035169
+# Jan_26, 2014-01-28 12:00:51.277814
 mu_qcdSF, mu_realSF = 0.79, 0.99719
 el_convSF, el_qcdSF, el_realSF = 1.22, 0.73, 0.99728
 
@@ -107,8 +107,19 @@ def selectionRegions() :
             'CR_CR8mm',
             'CR_CR8mmMtww',
             'CR_CR8mmHt',
+            'CR_CR9lpt',
             'CR_SsEwk',
             'CR_SsEwkLoose',
+            'CR_WHZVfake1jee',
+            'CR_WHZVfake2jee',
+            'CR_WHZVfake1jem',
+            'CR_WHZVfake2jem',
+            'CR_WHfake1jem',
+            'CR_WHfake2jem',
+            'CR_WHZV1jmm',
+            'CR_WHZV2jmm',
+            'CR_WHfake1jmm',
+            'CR_WHfake2jmm',
             ]
 def extractionRegions() :
     return ['qcdMC', 'convMC', 'realMC']
