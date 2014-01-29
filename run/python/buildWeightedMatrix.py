@@ -56,9 +56,9 @@ Example usage:
 
 # scale factors from determineFakeScaleFactor.py
 # --- paste the lines below in buildWeightedMatrix.py ---
-# Jan_26, 2014-01-28 12:00:51.277814
-mu_qcdSF, mu_realSF = 0.79, 0.99719
-el_convSF, el_qcdSF, el_realSF = 1.22, 0.73, 0.99728
+# Jan_28, 2014-01-29 01:48:31.309773
+mu_qcdSF, mu_realSF = 0.86, 0.99589
+el_convSF, el_qcdSF, el_realSF = 1.09, 0.63, 0.99640
 
 def main() :
     parser = optparse.OptionParser(usage=usage)
