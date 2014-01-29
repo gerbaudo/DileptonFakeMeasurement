@@ -448,7 +448,9 @@ bool SusySelection::passEwkSsLoose(const LeptonVector& leptons, const JetVector&
     if(leptons.size()<2) return false;
     bool noBjets(numberOfCBJets(jets)==0), noFwJets(numberOfFJets(jets)==0);
     bool someCentralJets(numberOfCLJets(jets)>0);
-    return (noBjets && noFwJets && someCentralJets
+    bool isEe(leptons[0]->isEle() && leptons[1]->isEle());
+    bool passZeeVeto(isEe ? susy::passZllVeto(leptons, 91.2-10.0, 91.2+10.0) : true);
+    return (noBjets && noFwJets && someCentralJets && passZeeVeto
             && susy::sameSign(leptons)
             && (getMetRel(met, leptons, jets)>40.0));
 }
