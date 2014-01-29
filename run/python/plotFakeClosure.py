@@ -66,7 +66,18 @@ def main() :
     assert all(f for f in inputFiles.values()), ("missing inputs: \n%s"%'\n'.join(["%s : %s"%kv for kv in inputFiles.iteritems()]))
     mkdirIfNeeded(outputDir)
 
-    for region in ['cr8lptee', 'cr8lptmm', 'cr9lpt', 'sr8', 'sr9', 'srSsEwk', 'crSsEwkLoose'] :
+    for region in ['cr8lptee', 'cr8lptmm', 'cr9lpt', 'crSsEwkLoose'
+                   ,"crZVfake1jee"
+                   ,"crZVfake2jee"
+                   ,"crZVfake1jem"
+                   ,"crZVfake2jem"
+                   ,"crfake1jem"
+                   ,"crfake2jem"
+                   ,"crZV1jmm"
+                   ,"crZV2jmm"
+                   ,"crfake1jmm"
+                   ,"crfake2jmm"
+                   ] :
         for channel in ['ee', 'em', 'mm'] :
             for varname in ['l0_pt', 'l1_pt', 'll_M', 'metrel', 'met', 'njets', 'nbjets'] :
                 histo_basename = region+'_'+channel+'_'+varname
