@@ -6,12 +6,14 @@
 
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyTest0/criteria.h"
+#include "SusyTest0/kinematic.h"
 #include "SusyMatrixMethod/DiLeptonMatrixMethod.h"
 
 using namespace std;
 using namespace Susy;
 using namespace susy::wh;
 namespace swh = susy::wh;
+namespace swk = susy::wh::kin;
 
 // Histogram bins
 const float varptbins[] = {0,10,20,30,40,50,70,100,150,200,250};
@@ -121,6 +123,21 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
   if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     sys);
   if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,sys);
+  bool isEe(ll==ee), isMm(ll==mm), isOf(!isEe && !isMm);
+  const swk::DilepVars v(swk::compute2lVars(ncl, m, j));
+  bool is1j(j.size()==1), is2j(j.size()>1);
+
+  if(isEe && is1j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1jee, sys);
+  if(isEe && is2j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2jee, sys);
+  if(isOf && is1j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1jem, sys);
+  if(isOf && is2j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2jem, sys);
+  if(isOf && is1j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1jem  , sys);
+  if(isOf && is2j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2jem  , sys);
+  if(isMm && is1j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, weight, swh::CrZV1jmm    , sys);
+  if(isMm && is2j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, weight, swh::CrZV2jmm    , sys);
+  if(isMm && is1j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1jmm  , sys);
+  if(isMm && is2j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2jmm  , sys);
+
   return kTRUE;
 }
 //-----------------------------------------
