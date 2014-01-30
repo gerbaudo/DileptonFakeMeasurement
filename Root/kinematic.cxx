@@ -37,6 +37,7 @@ swk::DilepVars swk::compute2lVars(const LeptonVector &leptons, const Susy::Met *
         v.mt1 = swk::transverseMass(l1, met->lv());
         v.ht = swk::meff(l0, l1, met, jets);
         v.mtllmet = transverseMass(ll, met->lv());
+        // NB l3veto calculation should be moved here -- DG 2014-01-29
     }
     return v;
 }

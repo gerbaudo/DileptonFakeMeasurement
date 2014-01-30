@@ -87,8 +87,12 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   } else {
       for(uint s = 0; s<m_systs.size(); ++s){
           smm::SYSTEMATIC sys = static_cast<smm::SYSTEMATIC>(m_systs.at(s));
-          const swk::DilepVars v(swk::compute2lVars(l, m, j));
           bool is1j(j.size()==1), is2j(j.size()>1);
+          LeptonVector anyLeptons(getAnyElOrMu(nt));
+          LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
+          /*const*/ swk::DilepVars v(swk::compute2lVars(ncl, m, j));
+          v.l3veto = SusySelection::passThirdLeptonVeto(ncl[0], ncl[1], lowPtLep, m_debugThisEvent); // should go into compute2lVars
+
           if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
           if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8ee,     metRel,sys), PR_CR8ee,     sys);
           if(isMm && ssf.lepPt
@@ -117,6 +121,9 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
           if(is2j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHfake2j,   metRel,sys), swh::Crfake2j   , sys);
           if(is1j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZV1j,     metRel,sys), swh::CrZV1j     , sys);
           if(is2j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZV2j,     metRel,sys), swh::CrZV2j     , sys);
+
+          if(is1j && SusySelection::passSrWh1j    (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWH1j,     metRel,sys), swh::SrWh1j     , sys);
+          if(is2j && SusySelection::passSrWh2j    (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWH2j,     metRel,sys), swh::SrWh2j     , sys);
 
           bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
           bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));

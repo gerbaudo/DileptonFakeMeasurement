@@ -29,7 +29,11 @@ enum Region{
     Crfake1j,
     Crfake2j,
     CrZV1j,
-    CrZV2j
+    CrZV2j,
+
+    SrWh1j,
+    SrWh2j
+
 };
 
 const Region PlotRegions[] = {
@@ -54,7 +58,9 @@ const Region PlotRegions[] = {
     Crfake1j,
     Crfake2j,
     CrZV1j,
-    CrZV2j
+    CrZV2j,
+    SrWh1j,
+    SrWh2j
 };
 const size_t kNumberOfPlotRegions = sizeof(PlotRegions) / sizeof(PlotRegions[0]);
 const string RegionNames[] =
@@ -88,6 +94,8 @@ const string RegionNames[] =
   ,"crfake2j"
   ,"crZV1j"
   ,"crZV2j"
+  ,"srWh1j"
+  ,"srWh2j"
 };
 
 inline std::string region2str(const Region &r) {return RegionNames[r];}

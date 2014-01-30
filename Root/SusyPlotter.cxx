@@ -7,6 +7,7 @@
 #include "SusyNtuple/SusyDefs.h"
 #include "SusyTest0/criteria.h"
 #include "SusyTest0/kinematic.h"
+#include "SusyTest0/utils.h"
 #include "SusyMatrixMethod/DiLeptonMatrixMethod.h"
 
 using namespace std;
@@ -124,8 +125,11 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     sys);
   if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,sys);
   bool isEe(ll==ee), isMm(ll==mm), isOf(!isEe && !isMm);
-  const swk::DilepVars v(swk::compute2lVars(ncl, m, j));
   bool is1j(j.size()==1), is2j(j.size()>1);
+  LeptonVector anyLeptons(getAnyElOrMu(nt));
+  LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
+  /*const*/ swk::DilepVars v(swk::compute2lVars(ncl, m, j));
+  v.l3veto = SusySelection::passThirdLeptonVeto(ncl[0], ncl[1], lowPtLep, m_debugThisEvent); // should go into compute2lVars
 
   if(isEe && is1j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1jee, sys);
   if(isEe && is2j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2jee, sys);
@@ -144,6 +148,9 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   if(is2j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2j   , sys);
   if(is1j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV1j     , sys);
   if(is2j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV2j     , sys);
+
+  if(is1j && SusySelection::passSrWh1j(v)) fillHistos(ncl, j, m, weight, swh::SrWh1j , sys);
+  if(is2j && SusySelection::passSrWh2j(v)) fillHistos(ncl, j, m, weight, swh::SrWh2j , sys);
 
   return kTRUE;
 }

@@ -3,6 +3,7 @@
 #include "SusyTest0/FakeBinnings.h"
 #include "SusyTest0/SusySelection.h" // passEwkSs*
 #include "SusyTest0/kinematic.h"
+#include "SusyTest0/utils.h"
 
 #include "LeptonTruthTools/RecoTruthMatch.h"
 
@@ -45,7 +46,10 @@ const sf::Region signalRegions[] = {
   sf::CR_WHfake1j,
   sf::CR_WHfake2j,
   sf::CR_WHZV1j,
-  sf::CR_WHZV2j
+  sf::CR_WHZV2j,
+
+  sf::CR_SRWH1j,
+  sf::CR_SRWH2j
 };
 const size_t nSignalRegions = sizeof(signalRegions)/sizeof(signalRegions[0]);
 const MeasureFakeRate2::LeptonType leptonTypes[] = {MeasureFakeRate2::kElectron, MeasureFakeRate2::kMuon};
@@ -274,7 +278,6 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   if( leptons.size() != 2 ) return false;
   bool passSR = false;
   namespace swk = susy::wh::kin;
-  const swk::DilepVars v(swk::compute2lVars(leptons, met, jets));
         
   bool computeWhssPass(CR==susy::fake::CR_SRWHSS || CR==susy::fake::CR_CR8lpt
                        || CR==susy::fake::CR_CR8ee || CR==susy::fake::CR_CR8mm
@@ -282,8 +285,13 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   SsPassFlags whssFlags(computeWhssPass ? passWhSS(leptons,jets,met) : SsPassFlags());
   susy::wh::Chan ch(SusySelection::getChan(leptons));
   m_ch = SusySelection::getChan(leptons);
-  bool isEe(susy::wh::Ch_ee==ch), isMm(susy::wh::Ch_mm==ch), isSf(isEe||isMm), isOf(!isEe && !isMm);
+  bool isEe(susy::wh::Ch_ee==ch), isMm(susy::wh::Ch_mm==ch), isOf(!isEe && !isMm);
   bool is1j(jets.size()==1), is2j(jets.size()>1);
+  LeptonVector anyLeptons(getAnyElOrMu(nt));
+  LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
+  /*const*/ swk::DilepVars v(swk::compute2lVars(leptons, met, jets));
+  v.l3veto = SusySelection::passThirdLeptonVeto(leptons[0], leptons[1], lowPtLep, m_debugThisEvent); // should go into compute2lVars
+
   switch(CR) {
   case sf::CR_SSInc        : passSR = susy::sameSign(leptons);            break;
   case sf::CR_SRWHSS       : passSR =  whssFlags.metrel;                  break;
@@ -312,6 +320,9 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   case sf::CR_WHfake2j     : passSR = (is2j && passCrWhfake  (v)); break;
   case sf::CR_WHZV1j       : passSR = (is1j && passCrWhZV    (v)); break;
   case sf::CR_WHZV2j       : passSR = (is2j && passCrWhZV    (v)); break;
+
+  case sf::CR_SRWH1j       : passSR = (is1j && passSrWh1j    (v)); break;
+  case sf::CR_SRWH2j       : passSR = (is2j && passSrWh2j    (v)); break;
 
   default: cout<<"invalid ControlRegion "<<CR<<endl;
   }
