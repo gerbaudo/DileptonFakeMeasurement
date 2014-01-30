@@ -10,6 +10,7 @@
 #include "SusyNtuple/WhTruthExtractor.h"
 #include "LeptonTruthTools/RecoTruthMatch.h"
 #include "SusyTest0/DileptonAnalyticalSolver.h"
+#include "SusyTest0/kinematic.h"
 
 using Susy::Lepton;
 
@@ -243,7 +244,7 @@ int pdgIdFromLep(const Lepton *l)
 }
 //-----------------------------------------
 float transverseMass(const TLorentzVector &lep, const TLorentzVector &met)
-{
+{ // obsolete, prefer the one in susy::wh::kin
   return std::sqrt(2.0 * lep.Pt() * met.Et() *(1-cos(lep.DeltaPhi(met))) );
 }
 //-----------------------------------------

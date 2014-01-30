@@ -4,6 +4,8 @@
 
 #include "TLorentzVector.h"
 
+#include <cmath> // sqrt
+#include <math.h> // cos, fabs
 #include <cassert>
 
 namespace swk = susy::wh::kin;
@@ -22,15 +24,19 @@ swk::DilepVars swk::compute2lVars(const LeptonVector &leptons, const Susy::Met *
         v.isMm = isMu0 && isMu1;
         v.pt0 = l0.Pt();
         v.pt1 = l1.Pt();
-        v.mll = (l0+l1).M();
+        TLorentzVector ll(l0+l1);
+        v.mll = ll.M();
+        v.detall = fabs(l0.Eta() - l1.Eta());
         LeptonVector lepts;
         lepts.push_back(&l0);
         lepts.push_back(&l1);
         v.metrel = SusyNtTools::getMetRel(met, lepts, jets);
         if     (v.numCentralLightJets==1) v.mlj  = swk::mlj (l0, l1, *jets[0]);
         else if(v.numCentralLightJets >1) v.mljj = swk::mljj(l0, l1, *jets[0], *jets[1]);
-        v.mt0 = 0.0; //transverseMass(ll, met->lv()) // move from criteria to kin
-        v.mt1 = 0.0; //transverseMass(ll, met->lv()) // move from criteria to kin
+        v.mt0 = swk::transverseMass(l0, met->lv());
+        v.mt1 = swk::transverseMass(l1, met->lv());
+        v.ht = swk::meff(l0, l1, met, jets);
+        v.mtllmet = transverseMass(ll, met->lv());
     }
     return v;
 }
@@ -45,4 +51,19 @@ float swk::mljj(const TLorentzVector &l0, const TLorentzVector &l1, const TLoren
 {
     return swk::mlj(l0, l1, j0+j1);
 }
-
+//-----------------------------------------
+float swk::transverseMass(const TLorentzVector &lep, const TLorentzVector &met)
+{
+  return std::sqrt(2.0 * lep.Pt() * met.Et() *(1-cos(lep.DeltaPhi(met))) );
+}
+//-----------------------------------------
+float swk::meff(const TLorentzVector &l0, const TLorentzVector &l1, const Susy::Met* met, const JetVector &jets)
+{
+  float meff = 0;
+  meff += l0.Pt();
+  meff += l1.Pt();
+  for(size_t i=0; i<jets.size(); i++){ if(jets[i]->Pt() > 20.0) meff += jets[i]->Pt(); }
+  meff += met->Et;
+  return meff;
+}
+//-----------------------------------------
