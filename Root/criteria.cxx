@@ -195,14 +195,8 @@ bool passHtMin(const LeptonVector& leptons,
                const JetVector &jets,
                const Susy::Met* met,
                float minVal)
-{ // DG : static copy of SusyNtTools::Meff, which uses all leptons, all jets, and met; is this what we want?
-  float meff = 0;
-  for(uint i=0; i<leptons.size(); i++) meff += leptons[i]->Pt();
-  for(uint i=0; i<jets.size(); i++){
-    if(jets[i]->Pt() > 20.0) meff += jets[i]->Pt();
-  }
-  meff += met->Et;
-  return (minVal < meff);
+{ // DG : why do we call meff HT?
+    return (minVal < susy::wh::kin::meff(*leptons[0], *leptons[1], met, jets));
 }
 //----------------------------------------------------------
 bool passNlepMin(const LeptonVector &leptons, size_t minVal)
