@@ -913,3 +913,67 @@ bool SusySelection::passCrWhZV(const susy::wh::kin::DilepVars &v)
     return SusySelection::passCrWhZVMm(v);
 }
 //-----------------------------------------
+bool SusySelection::passSrWh1j(const susy::wh::kin::DilepVars &v)
+{
+    bool pass = false;
+    if(v.numCentralLightJets==1){
+        if(v.isMm)
+            pass = (v.pt0    >  30.0 &&
+                    v.pt1    >  20.0 &&
+                    v.detall <   1.5 &&
+                    v.mtmax()> 100.0 &&
+                    v.ht     > 200.0 &&
+                    v.mlj    <  90.0 &&
+                    v.l3veto);
+        else if(v.isEm)
+            pass = (v.pt0    >  30.0 &&
+                    v.pt1    >  30.0 &&
+                    v.detall <   1.5 &&
+                    v.ht     > 110.0 &&
+                    v.mlj    <  90.0 &&
+                    v.mtllmet> 110.0 &&
+                    v.l3veto);
+        else if(v.isEe)
+            pass = (v.pt0    >  30.0 &&
+                    v.pt1    >  30.0 &&
+                    fabs(v.mll-91.2) > 10.0 &&
+                    v.mtllmet> 100.0 &&
+                    v.detall <   1.5 &&
+                    v.ht     > 200.0 &&
+                v.mlj    <  90.0 &&
+                v.l3veto);
+    }
+    return pass;
+}
+//-----------------------------------------
+bool SusySelection::passSrWh2j(const susy::wh::kin::DilepVars &v)
+{
+    bool pass = false;
+    if(v.numCentralLightJets>1){
+        if(v.isMm)
+            pass = (v.pt0    >  30.0 &&
+                    v.pt1    >  20.0 &&
+                    v.detall <   1.5 &&
+                    v.ht     > 220.0 &&
+                    v.mljj   < 120.0 &&
+                    v.l3veto);
+        else if(v.isEm)
+            pass = (v.pt0    >  30.0 &&
+                    v.pt1    >  30.0 &&
+                    v.detall <   1.5 &&
+                    v.mljj   < 120.0 &&
+                    v.mtllmet> 110.0 &&
+                    v.l3veto);
+        else if(v.isEe)
+            pass = (v.pt0    >  30.0 &&
+                    v.pt1    >  30.0 &&
+                    fabs(v.mll-91.2) > 10.0 &&
+                    v.detall <   1.5 &&
+                    v.mtllmet> 150.0 &&
+                    v.mljj   < 120.0 &&
+                    v.ht     > 200.0 &&
+                    v.l3veto);
+    }
+    return pass;
+}
+//-----------------------------------------

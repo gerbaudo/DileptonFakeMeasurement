@@ -141,6 +141,9 @@ class SusySelection : public SusyNtAna
     static bool passCrWhfake    (const susy::wh::kin::DilepVars &v);
     static bool passCrWhZV    (const susy::wh::kin::DilepVars &v);
 
+    //
+    static bool passSrWh1j(const susy::wh::kin::DilepVars &v);
+    static bool passSrWh2j(const susy::wh::kin::DilepVars &v);
 
     void setUseXsReader(bool val){ m_useXsReader = val; };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
