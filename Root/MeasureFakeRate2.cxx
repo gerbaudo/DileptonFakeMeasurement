@@ -38,7 +38,14 @@ const sf::Region signalRegions[] = {
   sf::CR_WHZV1jmm,
   sf::CR_WHZV2jmm,
   sf::CR_WHfake1jmm,
-  sf::CR_WHfake2jmm
+  sf::CR_WHfake2jmm,
+
+  sf::CR_WHZVfake1j,
+  sf::CR_WHZVfake2j,
+  sf::CR_WHfake1j,
+  sf::CR_WHfake2j,
+  sf::CR_WHZV1j,
+  sf::CR_WHZV2j
 };
 const size_t nSignalRegions = sizeof(signalRegions)/sizeof(signalRegions[0]);
 const MeasureFakeRate2::LeptonType leptonTypes[] = {MeasureFakeRate2::kElectron, MeasureFakeRate2::kMuon};
@@ -298,6 +305,14 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   case sf::CR_WHZV2jmm     : passSR = (isMm && is2j && SusySelection::passCrWhZVMm(v)); break;
   case sf::CR_WHfake1jmm   : passSR = (isMm && is1j && SusySelection::passCrWhfakeMm(v)); break;
   case sf::CR_WHfake2jmm   : passSR = (isMm && is2j && SusySelection::passCrWhfakeMm(v)); break;
+  // trying to unify the ee/em/mm channels
+  case sf::CR_WHZVfake1j   : passSR = (is1j && passCrWhZVfake(v)); break;
+  case sf::CR_WHZVfake2j   : passSR = (is2j && passCrWhZVfake(v)); break;
+  case sf::CR_WHfake1j     : passSR = (is1j && passCrWhfake  (v)); break;
+  case sf::CR_WHfake2j     : passSR = (is2j && passCrWhfake  (v)); break;
+  case sf::CR_WHZV1j       : passSR = (is1j && passCrWhZV    (v)); break;
+  case sf::CR_WHZV2j       : passSR = (is2j && passCrWhZV    (v)); break;
+
   default: cout<<"invalid ControlRegion "<<CR<<endl;
   }
   for(uint i=0; i<leptons.size(); ++i) m_probes.push_back( leptons[i]);

@@ -894,3 +894,22 @@ bool SusySelection::passCrWhfakeMm  (const susy::wh::kin::DilepVars &v)
                 (v.numCentralLightJets >1 && v.mljj >120.0)));
 }
 //-----------------------------------------
+bool SusySelection::passCrWhZVfake(const susy::wh::kin::DilepVars &v)
+{
+    return (SusySelection::passCrWhZVfakeEe(v)
+            ||
+            SusySelection::passCrWhZVfakeEm(v));
+}
+//-----------------------------------------
+bool SusySelection::passCrWhfake(const susy::wh::kin::DilepVars &v)
+{
+    return (SusySelection::passCrWhfakeEm(v)
+            ||
+            SusySelection::passCrWhfakeMm(v));
+}
+//-----------------------------------------
+bool SusySelection::passCrWhZV(const susy::wh::kin::DilepVars &v)
+{
+    return SusySelection::passCrWhZVMm(v);
+}
+//-----------------------------------------

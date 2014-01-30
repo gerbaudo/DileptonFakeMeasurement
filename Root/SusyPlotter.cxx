@@ -138,6 +138,13 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   if(isMm && is1j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1jmm  , sys);
   if(isMm && is2j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2jmm  , sys);
 
+  if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1j , sys);
+  if(is2j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2j , sys);
+  if(is1j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1j   , sys);
+  if(is2j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2j   , sys);
+  if(is1j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV1j     , sys);
+  if(is2j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV2j     , sys);
+
   return kTRUE;
 }
 //-----------------------------------------

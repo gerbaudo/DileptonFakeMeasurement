@@ -136,6 +136,10 @@ class SusySelection : public SusyNtAna
     static bool passCrWhfakeEm  (const susy::wh::kin::DilepVars &v);
     static bool passCrWhZVMm    (const susy::wh::kin::DilepVars &v);
     static bool passCrWhfakeMm  (const susy::wh::kin::DilepVars &v);
+    // just wrapping the channel-specific functions above
+    static bool passCrWhZVfake(const susy::wh::kin::DilepVars &v);
+    static bool passCrWhfake    (const susy::wh::kin::DilepVars &v);
+    static bool passCrWhZV    (const susy::wh::kin::DilepVars &v);
 
 
     void setUseXsReader(bool val){ m_useXsReader = val; };

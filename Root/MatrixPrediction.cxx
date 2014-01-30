@@ -111,6 +111,13 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
           if(isMm && is1j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHfake1jmm  , metRel,sys), sw::Crfake1jmm  , sys);
           if(isMm && is2j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHfake2jmm  , metRel,sys), sw::Crfake2jmm  , sys);
 
+          if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZVfake1j, metRel,sys), swh::CrZVfake1j , sys);
+          if(is2j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZVfake2j, metRel,sys), swh::CrZVfake2j , sys);
+          if(is1j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHfake1j,   metRel,sys), swh::Crfake1j   , sys);
+          if(is2j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHfake2j,   metRel,sys), swh::Crfake2j   , sys);
+          if(is1j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZV1j,     metRel,sys), swh::CrZV1j     , sys);
+          if(is2j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZV2j,     metRel,sys), swh::CrZV2j     , sys);
+
           bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
           bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
           if(passEwkSs)      fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwk,     metRel,sys), PR_SsEwk,     sys);
