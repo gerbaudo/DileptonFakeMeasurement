@@ -77,6 +77,14 @@ def main() :
                    ,"crZV2jmm"
                    ,"crfake1jmm"
                    ,"crfake2jmm"
+
+                   ,"crZVfake1j"
+                   ,"crZVfake2j"
+                   ,"crfake1j"
+                   ,"crfake2j"
+                   ,"crZV1j"
+                   ,"crZV2j"
+
                    ] :
         for channel in ['ee', 'em', 'mm'] :
             for varname in ['l0_pt', 'l1_pt', 'll_M', 'metrel', 'met', 'njets', 'nbjets'] :
