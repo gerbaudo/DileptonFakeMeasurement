@@ -1,0 +1,22 @@
+
+% \usepackage{booktabs}
+% \usepackage{placeins}
+\begin{table}[htbp] 
+\begin{center} 
+\begin{tabular}{l} 
+\toprule 
+   selection &           Zn &       signal &       totbkg &      diboson &         fake &  heavyflavor &        higgs &        ttbar &        wjets &        zjets \\
+\midrule
+     ee_eq1j &         0.18 &         1.45 &         7.35 &         1.37 &         4.92 &         0.00 &         0.01 &         0.13 &         0.00 &         0.93 \\
+     ee_ge2j &         0.12 &         0.48 &         0.83 &         0.08 &         0.67 &         0.00 &         0.00 &         0.02 &         0.00 &         0.05 \\
+     em_eq1j &         1.21 &         5.16 &         6.34 &         2.98 &         3.19 &         0.00 &         0.07 &         0.10 &         0.00 &         0.00 \\
+     em_ge2j &         1.58 &         3.37 &         1.87 &         1.12 &         0.66 &         0.00 &         0.02 &         0.07 &         0.00 &         0.00 \\
+     mm_eq1j &         1.43 &         4.60 &         4.07 &         3.88 &         0.04 &         0.00 &         0.14 &         0.01 &         0.00 &         0.00 \\
+     mm_ge2j &         1.53 &         6.11 &         5.73 &         3.66 &         1.95 &         0.00 &         0.06 &         0.06 &         0.00 &         0.00 \\
+\bottomrule 
+\end{tabular} 
+\caption{Add a caption here} 
+\end{center} 
+\end{table} 
+\FloatBarrier 
+

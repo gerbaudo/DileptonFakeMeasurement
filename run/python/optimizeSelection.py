@@ -35,7 +35,8 @@ from kin import (phi_mpi_pi,
                  addTlv,
                  computeMt, computeHt, computeMetRel,
                  getDilepType,
-                 computeMt2, computeMt2j, computeMljj,
+                 computeMt2, computeMt2j,
+                 computeMljj, computeMlj,
                  thirdLepZcandidateIsInWindow)
 from utils import (getCommandOutput,
                    guessLatestTagFromLatestRootFiles,
@@ -48,15 +49,20 @@ from utils import (getCommandOutput,
                    cumsum,
                    mergeOuter,
                    renameDictKey,
-                   mkdirIfNeeded
+                   mkdirIfNeeded,
+                   filterWithRegexp
                    )
 from SampleUtils import isSigSample, colors
 from CutflowTable import CutflowTable
 
 def optimizeSelection() :
     inputdir, options = parseOptions()
+
+
+    print 'sigreg ',options.sigreg
     tag = pickTag(inputdir, options)
-    sigFiles, bkgFiles = getInputFilenames(inputdir, tag, options)
+    sigFiles, bkgFiles = getInputFilenames(inputdir, tag, options) # todo: filter with regexp
+    sigFiles = dict([(s, k) for s, k in sigFiles.iteritems() if s in filterWithRegexp(sigFiles.keys(), options.sigreg)])
     allSamples = dictSum(sigFiles, bkgFiles)
     vars = variablesToPlot()
     histos = bookHistos(vars, allSamples.keys(), options.ll, options.nj)
@@ -76,6 +82,7 @@ def parseOptions() :
     parser.add_option('--ll', help='dilepton (default all)')
     parser.add_option('--nj', help='njet multiplicity (default all)')
     parser.add_option("-s", "--sample-regexp", dest="samples", default='.*', help="consider only matching samples (default '.*')")
+    parser.add_option("-S", "--signal-regexp", dest="sigreg", default='.*', help="consider only matching signal samples (default '.*', example 'WH_2Lep_1$')")
     parser.add_option("-e", "--exclude-regexp", dest="exclude", default=None, help="exclude matching samples")
     parser.add_option('-t', '--tag', help='production tag; by default the latest one')
     parser.add_option('--quicktest', action='store_true', help='run only on a fraction of the events')
@@ -168,9 +175,11 @@ def fillHistosAndCount(histos, files, lls, njs, testRun=False) :
             ll = getDilepType(l0, l1)
             nJets = len(jets)
             nj = 'eq1j' if nJets==1 else 'ge2j'
+            assert nJets>0,"messed something up in the selection upstream"
             if ll not in lls or nj not in njs : continue
             pt0 = l0.p4.Pt()
             pt1 = l1.p4.Pt()
+            j0  = jets[0]
             mll  = (l0.p4 + l1.p4).M()
             mtllmet = computeMt(l0.p4 + l1.p4, met.p4)
             ht      = computeHt(met.p4, [l0.p4, l1.p4]+[j.p4 for j in jets])
@@ -179,16 +188,20 @@ def fillHistosAndCount(histos, files, lls, njs, testRun=False) :
             mtl1    = computeMt(l1.p4, met.p4)
             mtmin   = min([mtl0, mtl1])
             mtmax   = max([mtl0, mtl1])
+            mlj     = computeMlj(l0.p4, l1.p4, j0.p4)
             dphill  = abs(phi_mpi_pi(l0.p4.DeltaPhi(l1.p4)))
             detall  = fabs(l0.p4.Eta() - l1.p4.Eta())
             l3Veto  =  not thirdLepZcandidateIsInWindow(l0, l1, lepts)
+            mljj = None
             if nJets >1 :
                 j0, j1 = jets[0], jets[1]
                 mt2j   = computeMt2j(l0.p4, l1.p4, j0.p4, j1.p4, met.p4)
                 mljj   = computeMljj(l0.p4, l1.p4, j0.p4, j1.p4)
                 dphijj = fabs(phi_mpi_pi(j0.p4.DeltaPhi(j1.p4)))
                 detajj = fabs(j0.p4.Eta() - j1.p4.Eta())
-            if passSelection(pt0, pt1, mll, mtllmet, ht, metrel, l3Veto, ll, nj) :
+            if passSelection(pt0, pt1, mll, mtllmet, ht, metrel, l3Veto,
+                             detall, mtmax, mlj, mljj,
+                             ll, nj) :
                 llnj = llnjKey(ll, nj)
                 weight = pars.weight
                 varHistos = histosSample[llnj]
@@ -200,28 +213,72 @@ def fillHistosAndCount(histos, files, lls, njs, testRun=False) :
         counts[sample] = countsSample
     return counts
 
-def passSelection(l0pt, l1pt, mll, mtllmet, ht, metrel, l3Veto, ll, nj) :
-    def passLepPT(l0pt, l1pt, ll) :
-        return l0pt > 30.0 and l1pt > (20.0 if ll=='mm' else 0.0)
-    def passZveto(mll, ll) :
-        return True if ll!='ee' else fabs(mll - 91.2) > 10.0
-    def passMtLlMetMin(mtllmet) :
-        return mtllmet > (150.0 if ll=='ee' else 140.0 if ll=='em' else 100 if ll=='mm' else 0.0)
-    def passHtMin(ht) : return  ht > 200.0
-    def passMetRelMin(metrel, ll) : return metrel > (50.0 if ll!='mm' else 0.0)
-    return (passLepPT(l0pt, l1pt, ll)
-            and passZveto(mll, ll)
-            and passMtLlMetMin(mtllmet)
-            and passHtMin(ht)
-            and passMetRelMin(metrel, ll)
-            and l3Veto
-            )
+def passSelection(l0pt, l1pt, mll, mtllmet, ht, metrel, l3Veto,
+                  detall, mtmax, mlj, mljj,
+                  ll, nj) :
+
+    if ll=='mm' and nj=='eq1j':
+        return (    l0pt    >  30.0
+                and l1pt    >  20.0
+                and detall  <   1.5
+                and mtmax   > 100.0
+                and ht      > 200.0
+                and mlj     <  90.0
+                and l3Veto
+                    )
+    elif ll=='mm' and nj=='ge2j':
+        return (    l0pt    >  30.0
+                and l1pt    >  20.0
+                and detall  <   1.5
+                and ht      > 220.0
+                and mljj    < 120.0
+                and l3Veto
+                    )
+    elif ll=='em' and nj=='eq1j':
+        return (    l0pt    >  30.0
+                and l1pt    >  30.0
+                and detall  <   1.5
+                and mtmax   > 110.0
+                and mlj     <  90.0
+                and mtllmet > 110.0
+                and l3Veto
+                    )
+    elif ll=='em' and nj=='ge2j':
+        return (    l0pt    >  30.0
+                and l1pt    >  30.0
+                and detall  <   1.5
+                and mljj    < 120.0
+                and mtllmet > 110.0
+                and l3Veto
+                    )
+    elif ll=='ee' and nj=='eq1j':
+        return (    l0pt    >  30.0
+                and l1pt    >  30.0
+                and fabs(mll-91.2) > 10.0
+                and mtllmet > 100.0
+                and detall  <   1.5
+                and mtmax   > 100.0
+                and ht      > 200.0
+                and mlj     <  90.0
+                and l3Veto
+                    )
+    elif ll=='ee' and nj=='ge2j':
+        return (    l0pt    >  30.0
+                and l1pt    >  30.0
+                and fabs(mll-91.2) > 10.0
+                and detall  <   1.5
+                and mtllmet > 150.0
+                and mljj    < 120.0
+                and ht      > 200.0
+                and l3Veto
+                    )
 
 def fillVarHistos(varHistos, varValues, weight, nj) :
-    exclVars = ['mt2j','mljj','dphijj','detajj'] if nj < 2 else []
+    assert nj in ['eq1j', 'ge2j']
+    exclVars = ['mt2j','mljj','dphijj','detajj'] if nj=='eq1j' else ['mlj']
     vars = [v for v in varHistos.keys() if v not in exclVars]
     for v in vars :
-            varHistos[v].Fill(varValues[v], weight)
+        varHistos[v].Fill(varValues[v], weight)
 
 def plotHistos(bkgHistos, sigHistos, plotdir) :
     llnjs = first      (sigHistos).keys()
@@ -366,10 +423,10 @@ def printSummary(counts, outfilename='') :
     counts = renameDictKey(counts, signal, 'signal')
     samples = counts.keys()
     selections = sorted(first(counts).keys())
-
+    def isSignal(s) : return isSigSample(s) or s=='signal'
     if 'totbkg' not in counts :
         counts['totbkg'] = dict([(sel, sum(countsSample[sel]
-                                           for sam, countsSample in counts.iteritems() if not isSigSample(sam)))
+                                           for sam, countsSample in counts.iteritems() if not isSignal(sam)))
                                  for sel in first(counts).keys()])
     bkgUnc = 0.30
     zn = r.RooStats.NumberCountingUtils.BinomialExpZ
