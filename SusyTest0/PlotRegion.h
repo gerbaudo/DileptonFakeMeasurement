@@ -13,6 +13,27 @@ enum Region{
     PR_SR8, PR_SR9base, PR_CR9lpt, PR_SR9,
     PR_SsEwk,
     PR_SsEwkLoose,
+    CrZVfake1jee,
+    CrZVfake2jee,
+    CrZVfake1jem,
+    CrZVfake2jem,
+    Crfake1jem,
+    Crfake2jem,
+    CrZV1jmm,
+    CrZV2jmm,
+    Crfake1jmm,
+    Crfake2jmm,
+
+    CrZVfake1j,
+    CrZVfake2j,
+    Crfake1j,
+    Crfake2j,
+    CrZV1j,
+    CrZV2j,
+
+    SrWh1j,
+    SrWh2j
+
 };
 
 const Region PlotRegions[] = {
@@ -21,6 +42,25 @@ const Region PlotRegions[] = {
     PR_CR8mm, PR_CR8mmMtww, PR_CR8mmHt,
     PR_SR8, PR_SR9base, PR_CR9lpt, PR_SR9,
     PR_SsEwk, PR_SsEwkLoose,
+    CrZVfake1jee,
+    CrZVfake2jee,
+    CrZVfake1jem,
+    CrZVfake2jem,
+    Crfake1jem,
+    Crfake2jem,
+    CrZV1jmm,
+    CrZV2jmm,
+    Crfake1jmm,
+    Crfake2jmm,
+
+    CrZVfake1j,
+    CrZVfake2j,
+    Crfake1j,
+    Crfake2j,
+    CrZV1j,
+    CrZV2j,
+    SrWh1j,
+    SrWh2j
 };
 const size_t kNumberOfPlotRegions = sizeof(PlotRegions) / sizeof(PlotRegions[0]);
 const string RegionNames[] =
@@ -37,6 +77,25 @@ const string RegionNames[] =
   ,"sr9"
   ,"srSsEwk"
   ,"crSsEwkLoose"
+  ,"crZVfake1jee"
+  ,"crZVfake2jee"
+  ,"crZVfake1jem"
+  ,"crZVfake2jem"
+  ,"crfake1jem"
+  ,"crfake2jem"
+  ,"crZV1jmm"
+  ,"crZV2jmm"
+  ,"crfake1jmm"
+  ,"crfake2jmm"
+
+  ,"crZVfake1j"
+  ,"crZVfake2j"
+  ,"crfake1j"
+  ,"crfake2j"
+  ,"crZV1j"
+  ,"crZV2j"
+  ,"srWh1j"
+  ,"srWh2j"
 };
 
 inline std::string region2str(const Region &r) {return RegionNames[r];}

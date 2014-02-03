@@ -10,7 +10,9 @@
 #include "LeptonTruthTools/RecoTruthMatch.h" // provides RecoTruthMatch::
 #include "ChargeFlip/chargeFlip.h"
 #include "SusyTest0/criteria.h"
+#include "SusyTest0/kinematic.h"
 #include "SusyTest0/utils.h"
+
 
 using namespace std;
 using namespace Susy;
@@ -446,7 +448,9 @@ bool SusySelection::passEwkSsLoose(const LeptonVector& leptons, const JetVector&
     if(leptons.size()<2) return false;
     bool noBjets(numberOfCBJets(jets)==0), noFwJets(numberOfFJets(jets)==0);
     bool someCentralJets(numberOfCLJets(jets)>0);
-    return (noBjets && noFwJets && someCentralJets
+    bool isEe(leptons[0]->isEle() && leptons[1]->isEle());
+    bool passZeeVeto(isEe ? susy::passZllVeto(leptons, 91.2-10.0, 91.2+10.0) : true);
+    return (noBjets && noFwJets && someCentralJets && passZeeVeto
             && susy::sameSign(leptons)
             && (getMetRel(met, leptons, jets)>40.0));
 }
@@ -838,4 +842,138 @@ LeptonVector SusySelection::getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/
         }
     }
     return leptons;
+} 
+//-----------------------------------------
+bool SusySelection::passCrWhZVfakeEe(const susy::wh::kin::DilepVars &v)
+{
+    return (v.isEe
+            && fabs(v.mll - 91.2)>10.0
+            && v.metrel > 40.0
+            && ((v.numCentralLightJets==1 && v.mlj  > 90.0)
+                ||
+                (v.numCentralLightJets >1 && v.mljj >120.0)));
 }
+//-----------------------------------------
+bool SusySelection::passCrWhZVfakeEm(const susy::wh::kin::DilepVars &v)
+{
+    return (v.isEm
+            && v.pt0 > 30.0
+            && v.pt1 > 30.0
+            && ((v.numCentralLightJets==1 && v.mlj  > 90.0)
+                ||
+                (v.numCentralLightJets >1 && v.mljj >120.0)));
+}
+//-----------------------------------------
+bool SusySelection::passCrWhfakeEm  (const susy::wh::kin::DilepVars &v)
+{
+    return (v.isEm
+            && v.pt0 > 30.0
+            && v.pt1 < 30.0 // orthogonal to WhZVfake1jem
+            && ((v.numCentralLightJets==1 && v.mlj  > 90.0)
+                ||
+                (v.numCentralLightJets >1 && v.mljj >120.0)));
+}
+//-----------------------------------------
+bool SusySelection::passCrWhZVMm    (const susy::wh::kin::DilepVars &v)
+{
+    return (v.isMm
+            && v.pt0 > 30.0
+            && v.pt1 > 30.0
+            && ((v.numCentralLightJets==1 && v.mlj  > 90.0)
+                ||
+                (v.numCentralLightJets >1 && v.mljj >120.0)));
+}
+//-----------------------------------------
+bool SusySelection::passCrWhfakeMm  (const susy::wh::kin::DilepVars &v)
+{
+    return (v.isMm
+            // && v.pt0 > 30.0 // ?? 
+            && v.pt1 < 30.0
+            && ((v.numCentralLightJets==1 && v.mlj  > 90.0)
+                ||
+                (v.numCentralLightJets >1 && v.mljj >120.0)));
+}
+//-----------------------------------------
+bool SusySelection::passCrWhZVfake(const susy::wh::kin::DilepVars &v)
+{
+    return (SusySelection::passCrWhZVfakeEe(v)
+            ||
+            SusySelection::passCrWhZVfakeEm(v));
+}
+//-----------------------------------------
+bool SusySelection::passCrWhfake(const susy::wh::kin::DilepVars &v)
+{
+    return (SusySelection::passCrWhfakeEm(v)
+            ||
+            SusySelection::passCrWhfakeMm(v));
+}
+//-----------------------------------------
+bool SusySelection::passCrWhZV(const susy::wh::kin::DilepVars &v)
+{
+    return SusySelection::passCrWhZVMm(v);
+}
+//-----------------------------------------
+bool SusySelection::passSrWh1j(const susy::wh::kin::DilepVars &v)
+{
+    bool pass = false;
+    if(v.numCentralLightJets==1){
+        if(v.isMm)
+            pass = (v.pt0    >  30.0 &&
+                    v.pt1    >  20.0 &&
+                    v.detall <   1.5 &&
+                    v.mtmax()> 100.0 &&
+                    v.ht     > 200.0 &&
+                    v.mlj    <  90.0 &&
+                    v.l3veto);
+        else if(v.isEm)
+            pass = (v.pt0    >  30.0 &&
+                    v.pt1    >  30.0 &&
+                    v.detall <   1.5 &&
+                    v.ht     > 110.0 &&
+                    v.mlj    <  90.0 &&
+                    v.mtllmet> 110.0 &&
+                    v.l3veto);
+        else if(v.isEe)
+            pass = (v.pt0    >  30.0 &&
+                    v.pt1    >  30.0 &&
+                    fabs(v.mll-91.2) > 10.0 &&
+                    v.mtllmet> 100.0 &&
+                    v.detall <   1.5 &&
+                    v.ht     > 200.0 &&
+                v.mlj    <  90.0 &&
+                v.l3veto);
+    }
+    return pass;
+}
+//-----------------------------------------
+bool SusySelection::passSrWh2j(const susy::wh::kin::DilepVars &v)
+{
+    bool pass = false;
+    if(v.numCentralLightJets>1){
+        if(v.isMm)
+            pass = (v.pt0    >  30.0 &&
+                    v.pt1    >  20.0 &&
+                    v.detall <   1.5 &&
+                    v.ht     > 220.0 &&
+                    v.mljj   < 120.0 &&
+                    v.l3veto);
+        else if(v.isEm)
+            pass = (v.pt0    >  30.0 &&
+                    v.pt1    >  30.0 &&
+                    v.detall <   1.5 &&
+                    v.mljj   < 120.0 &&
+                    v.mtllmet> 110.0 &&
+                    v.l3veto);
+        else if(v.isEe)
+            pass = (v.pt0    >  30.0 &&
+                    v.pt1    >  30.0 &&
+                    fabs(v.mll-91.2) > 10.0 &&
+                    v.detall <   1.5 &&
+                    v.mtllmet> 150.0 &&
+                    v.mljj   < 120.0 &&
+                    v.ht     > 200.0 &&
+                    v.l3veto);
+    }
+    return pass;
+}
+//-----------------------------------------

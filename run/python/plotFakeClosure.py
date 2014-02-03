@@ -66,7 +66,26 @@ def main() :
     assert all(f for f in inputFiles.values()), ("missing inputs: \n%s"%'\n'.join(["%s : %s"%kv for kv in inputFiles.iteritems()]))
     mkdirIfNeeded(outputDir)
 
-    for region in ['cr8lptee', 'cr8lptmm', 'cr9lpt', 'sr8', 'sr9', 'srSsEwk', 'crSsEwkLoose'] :
+    for region in ['cr8lptee', 'cr8lptmm', 'cr9lpt', 'crSsEwkLoose'
+                   ,"crZVfake1jee"
+                   ,"crZVfake2jee"
+                   ,"crZVfake1jem"
+                   ,"crZVfake2jem"
+                   ,"crfake1jem"
+                   ,"crfake2jem"
+                   ,"crZV1jmm"
+                   ,"crZV2jmm"
+                   ,"crfake1jmm"
+                   ,"crfake2jmm"
+
+                   ,"crZVfake1j"
+                   ,"crZVfake2j"
+                   ,"crfake1j"
+                   ,"crfake2j"
+                   ,"crZV1j"
+                   ,"crZV2j"
+
+                   ] :
         for channel in ['ee', 'em', 'mm'] :
             for varname in ['l0_pt', 'l1_pt', 'll_M', 'metrel', 'met', 'njets', 'nbjets'] :
                 histo_basename = region+'_'+channel+'_'+varname
@@ -125,6 +144,7 @@ def buildHists(inputFiles={}, histo_basename='') :
     for sample, file in inputFiles.iteritems() :
         histoname = histo_basename+('_NONE' if isFake(sample) else '_NOM')
         h = file.Get(histoname)
+        assert h,"cannot get %s from %s"%(histoname, file.GetName())
         h.SetDirectory(0)
         if not h : print "=> missing %s from %s"%(histoname, file.GetName())
         assert h,"missing %s from %s"%(histoname, file.GetName())

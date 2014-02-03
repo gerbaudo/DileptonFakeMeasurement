@@ -55,8 +55,10 @@ Example usage:
 """
 
 # scale factors from determineFakeScaleFactor.py
-mu_qcdSF, mu_realSF = 0.79059, 0.99719
-el_convSF, el_qcdSF, el_realSF = 1.24359, 0.73345, 0.99729
+# --- paste the lines below in buildWeightedMatrix.py ---
+# Jan_31, 2014-02-01 02:46:45.290790
+mu_qcdSF, mu_realSF = 0.86, 0.99589
+el_convSF, el_qcdSF, el_realSF = 1.09, 0.63, 0.99640
 
 def main() :
     parser = optparse.OptionParser(usage=usage)
@@ -80,6 +82,7 @@ def main() :
 
     allInputFiles = getInputFiles(inputDirname, tag, verbose) # includes allBkg, which is used only for sys
     assert all(f for f in allInputFiles.values()), ("missing inputs: \n%s"%'\n'.join(["%s : %s"%kv for kv in allInputFiles.iteritems()]))
+    outputPlotDir = outputPlotDir+'/' if not outputPlotDir.endswith('/') else ''
     mkdirIfNeeded(outputPlotDir)
     outputFile = r.TFile.Open(outputFname, 'recreate')
     inputFiles = dict((k, v) for k, v in allInputFiles.iteritems() if k in fakeProcesses())
@@ -104,9 +107,33 @@ def selectionRegions() :
             'CR_CR8mm',
             'CR_CR8mmMtww',
             'CR_CR8mmHt',
+            'CR_CR9lpt',
             'CR_SsEwk',
             'CR_SsEwkLoose',
+            'CR_WHZVfake1jee',
+            'CR_WHZVfake2jee',
+            'CR_WHZVfake1jem',
+            'CR_WHZVfake2jem',
+            'CR_WHfake1jem',
+            'CR_WHfake2jem',
+            'CR_WHZV1jmm',
+            'CR_WHZV2jmm',
+            'CR_WHfake1jmm',
+            'CR_WHfake2jmm',
+
+            "CR_WHZVfake1j",
+            "CR_WHZVfake2j",
+            "CR_WHfake1j",
+            "CR_WHfake2j",
+            "CR_WHZV1j",
+            "CR_WHZV2j",
+
+            "CR_SRWH1j",
+            "CR_SRWH2j"
             ]
+def extractionRegions() :
+    return ['qcdMC', 'convMC', 'realMC']
+
 def getInputFiles(inputDirname, tag, verbose=False) :
     inDir = inputDirname
     tag = tag if tag.startswith('_') else '_'+tag
@@ -280,8 +307,8 @@ def plotFractions(fractDict={}, outplotdir='./', prefix='') :
     input : fractDict[sr][lep_type][sample] = float
     """
     outplotdir = outplotdir if outplotdir.endswith('/') else outplotdir+'/'
-    def isInterestingRegion(r) : return any(k in r for k in ['CR8', 'WHSS', 'SSInc', 'SsEwk'])
-    regions  = [r for r in selectionRegions() if isInterestingRegion(r)]
+    def isRegionToBePlotted(r) : return r in selectionRegions()+extractionRegions()
+    regions  = sorted(filter(isRegionToBePlotted, fractDict.keys()))
     leptypes = sorted(first(fractDict).keys())
     samples  = sorted(first(first(fractDict)).keys())
     ind = np.arange(len(regions))
@@ -308,7 +335,7 @@ def plotFractions(fractDict={}, outplotdir='./', prefix='') :
         fig.autofmt_xdate(bottom=0.25, rotation=90, ha='center')
         fig.savefig(outplotdir+prefix+'_'+lt+'.png')
 
-def plotUnweightedEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='title;p_{T} [GeV]; efficiency') :
+def plotUnweightedEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='title;p_{T} [GeV]; efficiency', zoomIn=False) :
     can = r.TCanvas(canvasName, '', 800, 600)
     can.cd()
     padMaster = None
@@ -320,13 +347,13 @@ def plotUnweightedEfficiencies(effs={}, canvasName='', outputDir='./', frameTitl
         drawOpt = 'ep same' if padMaster else 'ep'
         h.Draw(drawOpt)
         if not padMaster : padMaster = h
-    minY, maxY = getMinMax(effs.values())
+    minY, maxY = getMinMax(effs.values()) if zoomIn else (0.0, 1.0)
     padMaster.GetYaxis().SetRangeUser(min([0.0, minY]), 1.1*maxY)
     padMaster.SetTitle(frameTitle)
     padMaster.SetStats(False)
     drawLegendWithDictKeys(can, effs)
     can.Update()
-    outFilename = outputDir+canvasName+'.png'
+    outFilename = outputDir+'/'+canvasName+'.png'
     rmIfExists(outFilename)
     can.SaveAs(outFilename)
 

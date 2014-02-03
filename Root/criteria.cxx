@@ -10,6 +10,7 @@
 #include "SusyNtuple/WhTruthExtractor.h"
 #include "LeptonTruthTools/RecoTruthMatch.h"
 #include "SusyTest0/DileptonAnalyticalSolver.h"
+#include "SusyTest0/kinematic.h"
 
 using Susy::Lepton;
 
@@ -194,14 +195,8 @@ bool passHtMin(const LeptonVector& leptons,
                const JetVector &jets,
                const Susy::Met* met,
                float minVal)
-{ // DG : static copy of SusyNtTools::Meff, which uses all leptons, all jets, and met; is this what we want?
-  float meff = 0;
-  for(uint i=0; i<leptons.size(); i++) meff += leptons[i]->Pt();
-  for(uint i=0; i<jets.size(); i++){
-    if(jets[i]->Pt() > 20.0) meff += jets[i]->Pt();
-  }
-  meff += met->Et;
-  return (minVal < meff);
+{ // DG : why do we call meff HT?
+    return (minVal < susy::wh::kin::meff(*leptons[0], *leptons[1], met, jets));
 }
 //----------------------------------------------------------
 bool passNlepMin(const LeptonVector &leptons, size_t minVal)
@@ -243,7 +238,7 @@ int pdgIdFromLep(const Lepton *l)
 }
 //-----------------------------------------
 float transverseMass(const TLorentzVector &lep, const TLorentzVector &met)
-{
+{ // obsolete, prefer the one in susy::wh::kin
   return std::sqrt(2.0 * lep.Pt() * met.Et() *(1-cos(lep.DeltaPhi(met))) );
 }
 //-----------------------------------------
