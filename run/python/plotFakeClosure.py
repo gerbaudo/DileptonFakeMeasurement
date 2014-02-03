@@ -144,6 +144,7 @@ def buildHists(inputFiles={}, histo_basename='') :
     for sample, file in inputFiles.iteritems() :
         histoname = histo_basename+('_NONE' if isFake(sample) else '_NOM')
         h = file.Get(histoname)
+        assert h,"cannot get %s from %s"%(histoname, file.GetName())
         h.SetDirectory(0)
         if not h : print "=> missing %s from %s"%(histoname, file.GetName())
         assert h,"missing %s from %s"%(histoname, file.GetName())
