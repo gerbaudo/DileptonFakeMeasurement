@@ -254,8 +254,8 @@ bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
   m_ch = SusySelection::getChan(leptons);
   m_metRel = getMetRel(met,leptons,jets);
 //  if(m_metRel<40.0) return false;
-//  if(jets.size()<1) return false;
-  if(jets.size()<1 || m_metRel<20.0) return false;
+  if(jets.size()<1) return false;
+//  if(jets.size()<1 || m_metRel<20.0) return false;
   for(uint il=0; il<leptons.size(); ++il){
     Lepton* l=leptons[il];
     bool isQcdLepton(susy::isHFLepton(l) || susy::isLFLepton(l));
