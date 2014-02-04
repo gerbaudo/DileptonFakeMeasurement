@@ -47,7 +47,7 @@ def getGitSha(dir) :
     if not os.path.isdir("%s/.git"%dir) : return
     cmd = "git --git-dir=%s/.git --work-tree=%s describe"%(dir, dir)
     res = getCommandOutput(cmd)
-    return "%s @ %s "%(extrackPkg(dir), res['stdout'].strip())
+    return "%s @ %s"%(extrackPkg(dir), res['stdout'].strip())
 
 
 dirs = sorted([path+'/'+p for p in os.listdir(path)])
