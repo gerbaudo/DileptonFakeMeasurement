@@ -69,7 +69,7 @@ class MeasureFakeRate2 : public SusySelection
   float getBTagWeight(const Event* evt);
   // counter methods
   void dumpEventCounters();
-  void increment(float flag[], bool includeLepSF=false, bool includeBtag=false);
+  void increment(float flag[], bool includeLepSF=false, bool includeBtag=false); // DG Jan14 : get rid of this and use SusySelection::increment
   void printCounter(string cut, float counter[ET_N][WT_N], int weight);
   void resetCounters();
   // Miscellaneous
