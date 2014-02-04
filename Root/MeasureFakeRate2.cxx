@@ -8,6 +8,8 @@
 #include "LeptonTruthTools/RecoTruthMatch.h"
 
 #include <algorithm> // transform
+#include <cassert>
+
 using namespace susy::fake;
 using namespace susy::wh;
 namespace sf = susy::fake;

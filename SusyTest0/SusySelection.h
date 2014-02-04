@@ -19,7 +19,6 @@
 #include "SusyNtuple/SusyNtTools.h"
 #include "SusyNtuple/SusyDefs.h"
 
-#include "SUSYTools/SUSYObjDef.h"
 #include "SusyXSReader/XSReader.h"
 #include "SusyTest0/ProgressPrinter.h"
 #include "SusyTest0/SsPassFlags.h"
@@ -176,7 +175,6 @@ class SusySelection : public SusyNtAna
 
   protected:
 
-    SUSYObjDef* m_susyObj;            // susy obj
     XSReader* m_xsReader;
     susy::wh::TupleMaker m_tupleMaker;
     bool m_writeTuple;

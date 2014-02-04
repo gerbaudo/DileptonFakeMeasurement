@@ -7,7 +7,6 @@
 #include "SusyTest0/SusySelection.h"
 #include "SusyTest0/SusyPlotter.h"
 
-#include "LeptonTruthTools/RecoTruthMatch.h" // provides RecoTruthMatch::
 #include "ChargeFlip/chargeFlip.h"
 #include "SusyTest0/criteria.h"
 #include "SusyTest0/kinematic.h"
@@ -30,7 +29,6 @@ std::string SusySelection::WeightComponents::str() const
 }
 //-----------------------------------------
 SusySelection::SusySelection() :
-  m_susyObj(NULL),
   m_xsReader(NULL),
   m_tupleMaker("",""),
   m_writeTuple(false),
