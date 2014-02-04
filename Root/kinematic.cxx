@@ -20,7 +20,8 @@ swk::DilepVars swk::compute2lVars(const LeptonVector &leptons, const Susy::Met *
         bool isEl0(l0.isEle()), isEl1(l1.isEle()), isMu0(l0.isMu()), isMu1(l1.isMu());
         assert(isEl0!=isMu0 && isEl1!=isMu1); // assuming we're only dealing with electrons or muons
         v.isEe = isEl0 && isEl1;
-        v.isEm = (isEl0 && isMu0) || (isMu0 && isEl1);
+        v.isEm = ((isEl0 && isMu1) ||
+                  (isMu0 && isEl1)  );
         v.isMm = isMu0 && isMu1;
         v.pt0 = l0.Pt();
         v.pt1 = l1.Pt();
