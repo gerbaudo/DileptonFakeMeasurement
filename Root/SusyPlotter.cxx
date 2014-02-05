@@ -116,10 +116,6 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       if(ssf.ht     ) fillHistos(ncl, j, m, weight, swh::PR_CR8mmHt,   sys);
     } // end if(mm)
   } // end passLpt
-  if(ssf.passAll()) {
-      swh::Region pr = (sameFlav ? swh::PR_SR8    : swh::PR_SR9);
-      fillHistos(ncl, j, m, weight, pr, sys);
-  }
   bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
   bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
   if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     sys);
