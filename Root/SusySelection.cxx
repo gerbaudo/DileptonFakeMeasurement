@@ -238,11 +238,11 @@ SsPassFlags SusySelection::passSrSs(const WH_SR signalRegion,
   met = &ncmet; // after qflip, use potentially smeared lep and met
   increment(n_pass_muIso    [ll], wc);
   increment(n_pass_elD0Sig  [ll], wc);
-  f = assignNjetFlags(js, f);
   LeptonVector anyLeptons(getAnyElOrMu(nt));
   LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
-  /*const*/ swk::DilepVars v(swk::compute2lVars(leptons, met, jets));
-  v.l3veto = f.veto3rdL = passThirdLeptonVeto(ncls[0], ncls[1], lowPtLep, m_debugThisEvent);
+  const swk::DilepVars v(swk::compute2lVars(leptons, met, jets, lowPtLep));
+  f.veto3rdL = v.l3veto;
+  f = assignNjetFlags(js, f);
   if(f.veto3rdL) increment(n_pass_3rdLep [ll], wc); else return f;
   if(f.fjveto  ) increment(n_pass_fjVeto [ll], wc); else return f;
   if(f.bjveto  ) increment(n_pass_bjVeto [ll], wc); else return f;
@@ -663,45 +663,6 @@ SsPassFlags SusySelection::assignNjetFlags(const JetVector& jets, SsPassFlags f)
   return f;
 }
 //-----------------------------------------
-bool SusySelection::passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lepton* l1, const LeptonVector& otherLeptons, bool verbose)
-{
-    struct LepPair {
-        const Susy::Lepton *signal, *other;
-        LepPair(const Susy::Lepton *s, const Susy::Lepton *o) : signal(s), other(o) { assert(s!=0 && o!=0); }
-        static const bool unbiasedD0Z0() { return true; }
-        static bool lepIsFromPv(const Susy::Lepton* l, float maxD0sig, float maxZ0sinTheta) {
-            return (fabs(l->d0Sig(unbiasedD0Z0())) < maxD0sig && fabs(l->z0SinTheta(unbiasedD0Z0())) < maxZ0sinTheta);
-        }
-        bool otherLepIsElFromPv() { return other->isEle() && lepIsFromPv(other, ELECTRON_D0SIG_CUT_WH, ELECTRON_Z0_SINTHETA_CUT); }
-        bool otherLepIsMuFromPv() { return other->isMu()  && lepIsFromPv(other, MUON_D0SIG_CUT,        MUON_Z0_SINTHETA_CUT); }
-        bool otherLepIsFromPv() { return otherLepIsElFromPv() || otherLepIsMuFromPv(); }
-        bool haveOppositeSign() { return (signal->q * other->q) < 0; }
-        bool haveSameFlavor() { return (signal->isMu() && other->isMu()) || (signal->isEle() && other->isEle()); }
-        float dR() { return signal->DeltaR(*other); }
-        bool areSeparated() { return dR() > 0.05; }
-        bool isZcandidate() { return haveOppositeSign() && haveSameFlavor() && areSeparated() && otherLepIsFromPv(); }
-        float m() { return (*signal + *other).M(); }
-        bool isInZwindow(float maxDelta) { const float mz(91.2); return isZcandidate() && abs(m() - mz) < maxDelta; }
-    };
-    float maxDeltaMz(20.0);
-    size_t nCandInWindow(0);
-    for(size_t i=0; i<otherLeptons.size(); ++i) {
-        const Susy::Lepton* ol = otherLeptons[i];
-        if(verbose) cout<<" lep["<<i<<"] "<<(ol->isEle() ? "E" : ol->isMu() ? "M" : "?")<<" pt "<<ol->Pt()<<endl;
-        LepPair ll0(l0, ol), ll1(l1, ol);
-        if(ll0.isZcandidate() && ll0.isInZwindow(maxDeltaMz)) {
-            nCandInWindow++;
-            if(verbose) cout<<" Z candidate: m_ll "<<ll0.m()<<" l0 pt "<<l0->Pt()<<" ol pt "<<ol->Pt()<<" dR "<<ll0.dR()<<endl;
-        }
-        if(ll1.isZcandidate() && ll1.isInZwindow(maxDeltaMz)) {
-            nCandInWindow++;
-            if(verbose) cout<<" Z candidate: m_ll "<<ll1.m()<<" l1 pt "<<l1->Pt()<<" ol pt "<<ol->Pt()<<" dR "<<ll1.dR()<<endl;
-        }
-    }
-    if(verbose && nCandInWindow==0) cout<<" No Z candidate"<<endl;
-    return nCandInWindow == 0;
-}
-//-----------------------------------------
 void SusySelection::resetAllCounters()
 {
   for(int w=0; w<kWeightTypesN; ++w){// Loop over weight types
@@ -898,6 +859,7 @@ bool SusySelection::passSrWh1j(const susy::wh::kin::DilepVars &v, SsPassFlags &f
 {
     bool notApplied(true), pass(false);
     if(v.numCentralLightJets==1){
+        f.veto3rdL = v.l3veto;
         if(v.isMm) {
             f.lepPt   = (v.pt0 > 30.0 && v.pt1 > 20.0);
             f.zllVeto = notApplied;
@@ -926,7 +888,7 @@ bool SusySelection::passSrWh1j(const susy::wh::kin::DilepVars &v, SsPassFlags &f
             f.metrel  = v.metrel >  55.0;
             f.mtllmet = notApplied;
         }
-        pass = f.lepPt && f.zllVeto && f.dEtall && f.maxMt && f.ht && f.metrel && f.mljj && f.mtllmet;
+        pass = f.veto3rdL && f.lepPt && f.zllVeto && f.dEtall && f.maxMt && f.ht && f.metrel && f.mljj && f.mtllmet;
     }
     return pass;
 }
@@ -941,6 +903,7 @@ bool SusySelection::passSrWh2j(const susy::wh::kin::DilepVars &v, SsPassFlags &f
 {
     bool notApplied(true), pass(false);
     if(v.numCentralLightJets>1 && v.numCentralLightJets<4){
+        f.veto3rdL = v.l3veto;
         if(v.isMm) {
             f.lepPt = (v.pt0 > 30.0 && v.pt1 > 30.0);
             f.zllVeto = notApplied;
@@ -969,7 +932,7 @@ bool SusySelection::passSrWh2j(const susy::wh::kin::DilepVars &v, SsPassFlags &f
             f.metrel  = v.metrel >  30.0;
             f.mtllmet = notApplied;
         }
-    pass = f.lepPt && f.zllVeto && f.dEtall && f.maxMt && f.mljj && f.ht && f.metrel && f.mtllmet;
+    pass = f.veto3rdL && f.lepPt && f.zllVeto && f.dEtall && f.maxMt && f.mljj && f.ht && f.metrel && f.mtllmet;
     }
     return pass;
 }

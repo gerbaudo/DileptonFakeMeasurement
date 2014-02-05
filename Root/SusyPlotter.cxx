@@ -123,8 +123,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   bool is1j(j.size()==1), is2j(j.size()>1);
   LeptonVector anyLeptons(getAnyElOrMu(nt));
   LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
-  /*const*/ swk::DilepVars v(swk::compute2lVars(ncl, m, j));
-  v.l3veto = SusySelection::passThirdLeptonVeto(ncl[0], ncl[1], lowPtLep, m_debugThisEvent); // should go into compute2lVars
+  const swk::DilepVars v(swk::compute2lVars(ncl, m, j, lowPtLep));
 
   if(isEe && is1j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1jee, sys);
   if(isEe && is2j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2jee, sys);

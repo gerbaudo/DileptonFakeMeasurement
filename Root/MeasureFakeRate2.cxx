@@ -291,8 +291,7 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   bool is1j(jets.size()==1), is2j(jets.size()>1);
   LeptonVector anyLeptons(getAnyElOrMu(nt));
   LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
-  /*const*/ swk::DilepVars v(swk::compute2lVars(leptons, met, jets));
-  v.l3veto = SusySelection::passThirdLeptonVeto(leptons[0], leptons[1], lowPtLep, m_debugThisEvent); // should go into compute2lVars
+  const swk::DilepVars v(swk::compute2lVars(leptons, met, jets, lowPtLep));
 
   switch(CR) {
   case sf::CR_SSInc        : passSR = susy::sameSign(leptons);            break;

@@ -89,8 +89,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
           bool is1j(j.size()==1), is2j(j.size()>1);
           LeptonVector anyLeptons(getAnyElOrMu(nt));
           LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
-          /*const*/ swk::DilepVars v(swk::compute2lVars(ncl, m, j));
-          v.l3veto = SusySelection::passThirdLeptonVeto(ncl[0], ncl[1], lowPtLep, m_debugThisEvent); // should go into compute2lVars
+          const swk::DilepVars v(swk::compute2lVars(ncl, m, j, lowPtLep));
 
           if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
           if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8ee,     metRel,sys), PR_CR8ee,     sys);

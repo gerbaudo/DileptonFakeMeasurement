@@ -40,7 +40,10 @@ namespace kin
       l3veto = false;
     }
   };
-  DilepVars compute2lVars(const LeptonVector &leptons, const Susy::Met *met, const JetVector &jets);
+  DilepVars compute2lVars(const LeptonVector &leptons, const Susy::Met *met,
+                          const JetVector &jets, const LeptonVector &otherLeptons);
+  //! determine whether a third lepton makes a Z candidate with a signal lepton
+  bool passThirdLeptonVeto(const Susy::Lepton *l0, const Susy::Lepton *l1, const LeptonVector& otherLeptons);
   float mlj (const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &j);
   float mljj(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &j0,const TLorentzVector &j1);
   float transverseMass(const TLorentzVector &lep, const TLorentzVector &met);
