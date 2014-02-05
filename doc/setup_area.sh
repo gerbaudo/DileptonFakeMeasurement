@@ -16,7 +16,7 @@ SVN_PANA=svn+ssh://svn.cern.ch/reps/atlasoff/PhysicsAnalysis
 # -> now pulled in by SusyNtuple
 # susy packages
 svn co ${SVN_PHYS}/SUSY/Analyses/WeakProduction/ChargeFlip/tags/ChargeFlip-00-00-14                         ChargeFlip
-#svn co ${SVN_PHYS}/SUSY/Analyses/WeakProduction/HistFitterTree/tags/HistFitterTree-00-00-21                 HistFitterTree
+svn co ${SVN_PHYS}/SUSY/Analyses/WeakProduction/HistFitterTree/tags/HistFitterTree-00-00-30                 HistFitterTree
 svn co ${SVN_PHYS}/SUSY/Analyses/WeakProduction/LeptonTruthTools/tags/LeptonTruthTools-00-01-07             LeptonTruthTools
 # uci packages
 svn co ${SVN_INST}/UCIrvine/SUSYAnalysis/SusyNtuple/trunk  SusyNtuple
