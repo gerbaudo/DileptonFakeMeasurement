@@ -42,18 +42,25 @@ def getTagOrRev(dir) :
     rev = extractRev(revLine)
     assert tag or rev, "cannot extract info for %s"%dir
     return "%s @ %s"%(pkg, tag if tag else rev)
+def getGitSha(dir) :
+    def extrackPkg(dir) : return os.path.basename(dir.rstrip(' /'))
+    if not os.path.isdir("%s/.git"%dir) : return
+    cmd = "git --git-dir=%s/.git --work-tree=%s describe"%(dir, dir)
+    res = getCommandOutput(cmd)
+    return "%s @ %s"%(extrackPkg(dir), res['stdout'].strip())
 
 
 dirs = sorted([path+'/'+p for p in os.listdir(path)])
 dirs = filter(os.path.isdir, dirs)
-dirs = filter(lambda x : 'SusyTest0' not in x, dirs) # we use git!
 labels = []
 for d in dirs :
     label = getTagOrRev(d)
-    # fallback for the pkgs that appear as 'not a working copy'
-    if not label : label = getTagOrRev(d+'/cmt')
+    if not label : label = getTagOrRev(d+'/cmt') # fallback for the pkgs that appear as 'not a working copy'
+    if not label : label = getGitSha(d)
+    if not label :
+        print 'Warning, cannot extract any info for ',d
+        label = "%s @ unknown"%os.path.basename(d.rstrip(' /'))
     labels.append(label)
-
 with open(outFname, 'w') as outfile :
     outfile.write('\n'.join(labels)+'\n')
 

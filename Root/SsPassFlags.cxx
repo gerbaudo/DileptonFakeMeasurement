@@ -12,6 +12,7 @@ std::string SsPassFlags::str() const
      <<" trig2lmatch: "<<trig2lmatch
      <<" true2l: "<<true2l
      <<" sameSign: "<<sameSign
+     <<" veto3rdL: "<<veto3rdL
      <<" fjveto: "<<fjveto
      <<" bjveto: "<<bjveto
      <<" ge1j: "<<ge1j
@@ -19,9 +20,11 @@ std::string SsPassFlags::str() const
      <<" ge2j: "<<ge2j
      <<" lepPt: "<<lepPt
      <<" zllVeto: "<<zllVeto
-     <<" mtllmet: "<<mtllmet
+     <<" dEtall: "<<dEtall
+     <<" maxMt: "<<maxMt
+     <<" mljj: "<<mljj
      <<" ht: "<<ht
      <<" metrel: "<<metrel
-     <<" veto3rdL: "<<veto3rdL;
+     <<" mtllmet: "<<mtllmet;
   return oss.str();
 }

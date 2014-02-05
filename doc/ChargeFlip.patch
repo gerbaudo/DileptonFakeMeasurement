@@ -1,0 +1,13 @@
+Index: ChargeFlip/Root/chargeFlip.cxx
+===================================================================
+--- ChargeFlip/Root/chargeFlip.cxx	(revision 114478)
++++ ChargeFlip/Root/chargeFlip.cxx	(working copy)
+@@ -295,7 +295,7 @@
+ 
+   /** Use the the leading electron (phi * 1.+5) as the random number seed
+       to ensure reproducability */
+-  setSeed( ele0->Phi() * 1.e+5 ); 
++  //setSeed( ele0->Phi() * 1.e+5 ); 
+   
+   pTShift(pT0, eta0, pT1, eta1); 
+ 

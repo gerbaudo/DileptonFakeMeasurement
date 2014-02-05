@@ -711,12 +711,9 @@ void MeasureFakeRate2::increment(float flag[], bool includeLepSF, bool includeBt
                                     NtSys_NOM) : 1;
     //cout<<"\tTrigger weight: "<<trig<<endl;
     flag[WT_Trig] += trig * nt.evt()->w;
+    bool useSumwMap(true);
     
-    float all = getEventWeightAB3() * btag * trig;
-    all = includeLepSF ? all * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : all;      
-    flag[WT_AllAB3] += all;
-    
-    float allAE = getEventWeight(LUMI_A_L,true) * btag * trig;
+    float allAE = SusyNtAna::getEventWeight(LUMI_A_L, useSumwMap) * btag * trig;
     allAE = includeLepSF ? allAE * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : allAE;
     flag[WT_AllAE] += allAE;
 }

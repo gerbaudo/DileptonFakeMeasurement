@@ -74,7 +74,6 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   bool allowQflip(false), passMinMet(m->Et > 40.0);
   bool isEe(ll==ee), isMm(ll==mm), isSf(isEe||isMm), isOf(!isEe && !isMm);
   SsPassFlags ssf(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
-  if(m_dbg>3) cout<<eventDetails(ssf.passAll(), *nt.evt(), ll, l)<<endl;
   if(!ssf.passLpt()) return false;
   if(m_writeTuple && ssf.lepPt) {
       double weight(getFakeWeight(l, sf::CR_CR8lpt, metRel, smm::SYS_NONE));
@@ -101,8 +100,6 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
           if(isMm && ssf.ht       ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mmHt,   metRel,sys), PR_CR8mmHt,   sys);
           if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_CR8lpt,    sys);
           if(isOf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR9lpt,    metRel,sys), PR_CR9lpt,    sys);
-          if(isSf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_SR8,       sys);
-          if(isOf && ssf.passAll()) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_SR9,       sys);
 
           if(isEe && is1j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZVfake1j, metRel,sys), sw::CrZVfake1jee, sys);
           if(isEe && is2j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZVfake2j, metRel,sys), sw::CrZVfake2jee, sys);
@@ -131,7 +128,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
           if(passEwkSsLoose) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwkLoose,metRel,sys), PR_SsEwkLoose,sys);
       } // end for(s)
   }
-  return ssf.passAll();
+  return true;
 }
 //----------------------------------------------------------
 void MatrixPrediction::Terminate()
