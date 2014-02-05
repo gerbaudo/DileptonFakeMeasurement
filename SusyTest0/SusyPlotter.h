@@ -24,7 +24,9 @@ class SusyPlotter : public SusySelection
   float Mt(TLorentzVector p1, TLorentzVector met) {
     return sqrt(2*p1.Pt()*met.Et()*(1-cos(p1.DeltaPhi(met))));
   };
-  void setSysts(); // get list of systematics to consider; override in SusyMatrixMethod
+  void toggleNominal(); //!< create and fill the nominal histos
+  void toggleStdSystematics(); //!< create and fill the nominal histos and the ones for the systematic variations
+  void toggleFakeSystematics(); //!< create and fill the histos needed for the fake systematic
   void initHistos();
  public:
   SusyPlotter& setOutputFilename(const std::string &name);
@@ -36,7 +38,6 @@ class SusyPlotter : public SusySelection
   std::vector<string> m_systNames;          // systematics to process
   std::string         m_histFileName;       // output histo file name
   TFile*              m_histFile;           // output histo file
-  bool                m_doFake;             // do Fake estimate
 
   // preprocessor convenience - add more indices later
 #define DEFHIST( name ) h_ ## name[susy::wh::Ch_N][susy::wh::kNumberOfPlotRegions][40/*Guess for # of sys*/];

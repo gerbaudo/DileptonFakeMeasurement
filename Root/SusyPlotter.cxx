@@ -67,8 +67,7 @@ const int     nOrigin = 43;
 SusyPlotter::SusyPlotter() :
   SusySelection(),
   m_histFileName("susyPlotterOut.root"),
-  m_histFile(0),
-  m_doFake(false)
+  m_histFile(0)
 {
 }
 //-----------------------------------------
@@ -76,7 +75,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 {
   SusySelection::Begin(0);
   if(m_dbg) cout << "SusyPlotter::Begin" << endl;
-  setSysts();
+  toggleNominal();
   initHistos();
 }
 //-----------------------------------------
@@ -301,14 +300,43 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
   #undef FILL2
 }
 //-----------------------------------------
-void SusyPlotter::setSysts()
+void SusyPlotter::toggleNominal()
 {
-  if(!m_doFake) {
     m_systs.push_back(NtSys_NOM);  m_systNames.push_back(SusyNtSystNames[NtSys_NOM]);
-  } else {
-    // DG 2013-10-18: for now we are not doing any syst loop. However,
-    // we need to book the histograms for the systematic variations
-    // used to determine the uncertainty on the fake estimate (-> m_doFake toggle).
+}
+//-----------------------------------------
+void SusyPlotter::toggleStdSystematics()
+{
+    toggleNominal();
+    m_systs.push_back(NtSys_EES_Z_UP    ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_Z_UP    ]);
+    m_systs.push_back(NtSys_EES_Z_DN    ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_Z_DN    ]);
+    m_systs.push_back(NtSys_EES_MAT_UP  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_MAT_UP  ]);
+    m_systs.push_back(NtSys_EES_MAT_DN  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_MAT_DN  ]);
+    m_systs.push_back(NtSys_EES_PS_UP   ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_PS_UP   ]);
+    m_systs.push_back(NtSys_EES_PS_DN   ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_PS_DN   ]);
+    m_systs.push_back(NtSys_EES_LOW_UP  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_LOW_UP  ]);
+    m_systs.push_back(NtSys_EES_LOW_DN  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_LOW_DN  ]);
+    m_systs.push_back(NtSys_EER_UP      ); m_systNames.push_back(SusyNtSystNames[NtSys_EER_UP      ]);
+    m_systs.push_back(NtSys_EER_DN      ); m_systNames.push_back(SusyNtSystNames[NtSys_EER_DN      ]);
+    m_systs.push_back(NtSys_MS_UP       ); m_systNames.push_back(SusyNtSystNames[NtSys_MS_UP       ]);
+    m_systs.push_back(NtSys_MS_DN       ); m_systNames.push_back(SusyNtSystNames[NtSys_MS_DN       ]);
+    m_systs.push_back(NtSys_ID_UP       ); m_systNames.push_back(SusyNtSystNames[NtSys_ID_UP       ]);
+    m_systs.push_back(NtSys_ID_DN       ); m_systNames.push_back(SusyNtSystNames[NtSys_ID_DN       ]);
+    m_systs.push_back(NtSys_JES_UP      ); m_systNames.push_back(SusyNtSystNames[NtSys_JES_UP      ]);
+    m_systs.push_back(NtSys_JES_DN      ); m_systNames.push_back(SusyNtSystNames[NtSys_JES_DN      ]);
+    m_systs.push_back(NtSys_JER         ); m_systNames.push_back(SusyNtSystNames[NtSys_JER         ]);
+    m_systs.push_back(NtSys_SCALEST_UP  ); m_systNames.push_back(SusyNtSystNames[NtSys_SCALEST_UP  ]);
+    m_systs.push_back(NtSys_SCALEST_DN  ); m_systNames.push_back(SusyNtSystNames[NtSys_SCALEST_DN  ]);
+    m_systs.push_back(NtSys_RESOST      ); m_systNames.push_back(SusyNtSystNames[NtSys_RESOST      ]);
+    m_systs.push_back(NtSys_TRIGSF_EL_UP); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_EL_UP]);
+    m_systs.push_back(NtSys_TRIGSF_EL_DN); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_EL_DN]);
+    m_systs.push_back(NtSys_TRIGSF_MU_UP); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_MU_UP]);
+    m_systs.push_back(NtSys_TRIGSF_MU_DN); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_MU_DN]);
+}
+//-----------------------------------------
+void SusyPlotter::toggleFakeSystematics()
+{
+    // DG 2013-10-18:
     // This implementation is really confusing and not safe because
     // here we are potentially mixing two enums
     // (SusyMatrixMethod::SYSTEMATIC and SusyNtSys from
@@ -316,24 +344,23 @@ void SusyPlotter::setSysts()
     // 'single-enum' implementation.
     namespace smm = SusyMatrixMethod;
     const std::string *sns = smm::systematic_names;
-    m_systs.push_back(smm::SYS_NONE);        m_systNames.push_back(sns[smm::SYS_NONE]);
-    m_systs.push_back(smm::SYS_EL_RE_UP);    m_systNames.push_back(sns[smm::SYS_EL_RE_UP]);
+    m_systs.push_back(smm::SYS_NONE      );  m_systNames.push_back(sns[smm::SYS_NONE      ]);
+    m_systs.push_back(smm::SYS_EL_RE_UP  );  m_systNames.push_back(sns[smm::SYS_EL_RE_UP  ]);
     m_systs.push_back(smm::SYS_EL_RE_DOWN);  m_systNames.push_back(sns[smm::SYS_EL_RE_DOWN]);
-    m_systs.push_back(smm::SYS_MU_RE_UP);    m_systNames.push_back(sns[smm::SYS_MU_RE_UP]);
+    m_systs.push_back(smm::SYS_MU_RE_UP  );  m_systNames.push_back(sns[smm::SYS_MU_RE_UP  ]);
     m_systs.push_back(smm::SYS_MU_RE_DOWN);  m_systNames.push_back(sns[smm::SYS_MU_RE_DOWN]);
-    m_systs.push_back(smm::SYS_EL_FR_UP);    m_systNames.push_back(sns[smm::SYS_EL_FR_UP]);
+    m_systs.push_back(smm::SYS_EL_FR_UP  );  m_systNames.push_back(sns[smm::SYS_EL_FR_UP  ]);
     m_systs.push_back(smm::SYS_EL_FR_DOWN);  m_systNames.push_back(sns[smm::SYS_EL_FR_DOWN]);
-    m_systs.push_back(smm::SYS_MU_FR_UP);    m_systNames.push_back(sns[smm::SYS_MU_FR_UP]);
+    m_systs.push_back(smm::SYS_MU_FR_UP  );  m_systNames.push_back(sns[smm::SYS_MU_FR_UP  ]);
     m_systs.push_back(smm::SYS_MU_FR_DOWN);  m_systNames.push_back(sns[smm::SYS_MU_FR_DOWN]);
-  }
 }
 //-----------------------------------------
 void SusyPlotter::initHistos()
 {
+    if(m_systs.size()==0) cout<<"SusyPlotter::initHistos() : Warning, you should at least call toggleNominal()"<<endl;
   m_histFile = new TFile(m_histFileName.c_str(), "recreate");
   TH1::SetDefaultSumw2(true);
   m_histFile->cd();
-  //m_histFile->mkdir( sysNames[sys].c_str() ) -> cd();
   for(size_t iPR=0; iPR<swh::kNumberOfPlotRegions; ++iPR){   // for(Plot Region)
       string PR(swh::region2str(swh::PlotRegions[iPR]));
     for(uint iCh=0; iCh<susy::wh::Ch_N; ++iCh){ // for(lepton channel)

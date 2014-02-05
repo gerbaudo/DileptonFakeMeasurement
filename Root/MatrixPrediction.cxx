@@ -35,15 +35,15 @@ MatrixPrediction::MatrixPrediction() :
 //----------------------------------------------------------
 void MatrixPrediction::Begin(TTree* /*tree*/)
 {
-  m_doFake = true;
-  if(m_dbg) cout << "MatrixPrediction::Begin" << endl;
-  if(m_writeTuple) {
-      SusySelection::Begin(0);
-      m_allconfigured = initMatrixTool();
-  } else {
-      SusyPlotter::Begin(0);
-      m_allconfigured = (initMatrixTool() && bookFakeHisto());
-  }
+    if(m_dbg) cout<<"MatrixPrediction::Begin"<<endl;
+    SusySelection::Begin(0);
+    if(m_writeTuple) {
+        m_allconfigured = initMatrixTool();
+    } else {
+        toggleFakeSystematics();
+        SusyPlotter::initHistos();
+        m_allconfigured = (initMatrixTool() && bookFakeHisto());
+    }
 }
 //----------------------------------------------------------
 Bool_t MatrixPrediction::Process(Long64_t entry)
