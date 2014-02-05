@@ -136,13 +136,15 @@ class SusySelection : public SusyNtAna
     static bool passCrWhZVMm    (const susy::wh::kin::DilepVars &v);
     static bool passCrWhfakeMm  (const susy::wh::kin::DilepVars &v);
     // just wrapping the channel-specific functions above
-    static bool passCrWhZVfake(const susy::wh::kin::DilepVars &v);
+    static bool passCrWhZVfake  (const susy::wh::kin::DilepVars &v);
     static bool passCrWhfake    (const susy::wh::kin::DilepVars &v);
-    static bool passCrWhZV    (const susy::wh::kin::DilepVars &v);
+    static bool passCrWhZV      (const susy::wh::kin::DilepVars &v);
 
     //
     static bool passSrWh1j(const susy::wh::kin::DilepVars &v);
+    static bool passSrWh1j(const susy::wh::kin::DilepVars &v, SsPassFlags &f); //! same as above, but also toggle kin flags
     static bool passSrWh2j(const susy::wh::kin::DilepVars &v);
+    static bool passSrWh2j(const susy::wh::kin::DilepVars &v, SsPassFlags &f); //! same as above, but also toggle kin flags
 
     void setUseXsReader(bool val){ m_useXsReader = val; };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };

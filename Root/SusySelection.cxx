@@ -919,67 +919,89 @@ bool SusySelection::passCrWhZV(const susy::wh::kin::DilepVars &v)
     return SusySelection::passCrWhZVMm(v);
 }
 //-----------------------------------------
+bool SusySelection::passSrWh1j(const susy::wh::kin::DilepVars &v, SsPassFlags &f)
+{
+    bool notApplied(true), pass(false);
+    if(v.numCentralLightJets==1){
+        if(v.isMm) {
+            f.lepPt   = (v.pt0 > 30.0 && v.pt1 > 20.0);
+            f.zllVeto = notApplied;
+            f.dEtall  = v.detall <   1.5;
+            f.maxMt   = v.mtmax()> 100.0;
+            f.mljj    = v.mlj    <  90.0;
+            f.ht      = v.ht     > 200.0;
+            f.metrel  = notApplied;
+            f.mtllmet = notApplied;
+        } else if(v.isEm) {
+            f.lepPt   = (v.pt0 > 30.0 && v.pt1 > 30.0);
+            f.zllVeto = notApplied;
+            f.dEtall  = v.detall <   1.5;
+            f.maxMt   = v.mtmax()> 110.0;
+            f.mljj    = v.mlj    <  90.0;
+            f.ht      = notApplied;
+            f.metrel  = notApplied;
+            f.mtllmet = v.mtllmet> 120.0;
+        } else if(v.isEe) {
+            f.lepPt   = (v.pt0 > 30.0 && v.pt1 > 20.0);
+            f.zllVeto = fabs(v.mll-91.2) > 10.0;
+            f.dEtall  = notApplied;
+            f.maxMt   = notApplied;
+            f.mljj    = v.mlj    <  90.0;
+            f.ht      = v.ht     > 200.0;
+            f.metrel  = v.metrel >  55.0;
+            f.mtllmet = notApplied;
+        }
+        pass = f.lepPt && f.zllVeto && f.dEtall && f.maxMt && f.ht && f.metrel && f.mljj && f.mtllmet;
+    }
+    return pass;
+}
+//-----------------------------------------
 bool SusySelection::passSrWh1j(const susy::wh::kin::DilepVars &v)
 {
-    bool pass = false;
-    if(v.numCentralLightJets==1){
-        if(v.isMm)
-            pass = (v.pt0    >  30.0 &&
-                    v.pt1    >  20.0 &&
-                    v.detall <   1.5 &&
-                    v.mtmax()> 100.0 &&
-                    v.ht     > 200.0 &&
-                    v.mlj    <  90.0 &&
-                    v.l3veto);
-        else if(v.isEm)
-            pass = (v.pt0    >  30.0 &&
-                    v.pt1    >  30.0 &&
-                    v.detall <   1.5 &&
-                    v.ht     > 110.0 &&
-                    v.mlj    <  90.0 &&
-                    v.mtllmet> 110.0 &&
-                    v.l3veto);
-        else if(v.isEe)
-            pass = (v.pt0    >  30.0 &&
-                    v.pt1    >  30.0 &&
-                    fabs(v.mll-91.2) > 10.0 &&
-                    v.mtllmet> 100.0 &&
-                    v.detall <   1.5 &&
-                    v.ht     > 200.0 &&
-                v.mlj    <  90.0 &&
-                v.l3veto);
+    SsPassFlags f;
+    return SusySelection::passSrWh1j(v, f);
+}
+//-----------------------------------------
+bool SusySelection::passSrWh2j(const susy::wh::kin::DilepVars &v, SsPassFlags &f)
+{
+    bool notApplied(true), pass(false);
+    if(v.numCentralLightJets>1 && v.numCentralLightJets<4){
+        if(v.isMm) {
+            f.lepPt = (v.pt0 > 30.0 && v.pt1 > 30.0);
+            f.zllVeto = notApplied;
+            f.dEtall  = v.detall <   1.5;
+            f.maxMt   = notApplied;
+            f.mljj    = v.mljj   < 120.0;
+            f.ht      = v.ht     > 220.0;
+            f.metrel  = notApplied;
+            f.mtllmet = notApplied;
+        } else if(v.isEm) {
+            f.lepPt   = (v.pt0 > 30.0 && v.pt1 > 30.0);
+            f.zllVeto = notApplied;
+            f.dEtall  = v.detall <   1.5;
+            f.maxMt   = notApplied;
+            f.mljj    = v.mljj   < 120.0;
+            f.ht      = notApplied;
+            f.metrel  = notApplied;
+            f.mtllmet = v.mtllmet> 110.0;
+        } else if(v.isEe) {
+            f.lepPt   = (v.pt0 > 30.0 && v.pt1 > 20.0);
+            f.zllVeto = fabs(v.mll-91.2) > 10.0;
+            f.dEtall  = notApplied;
+            f.maxMt   = v.mtmax()> 100.0;
+            f.mljj    = v.mljj   < 120.0;
+            f.ht      = notApplied;
+            f.metrel  = v.metrel >  30.0;
+            f.mtllmet = notApplied;
+        }
+    pass = f.lepPt && f.zllVeto && f.dEtall && f.maxMt && f.mljj && f.ht && f.metrel && f.mtllmet;
     }
     return pass;
 }
 //-----------------------------------------
 bool SusySelection::passSrWh2j(const susy::wh::kin::DilepVars &v)
 {
-    bool pass = false;
-    if(v.numCentralLightJets>1){
-        if(v.isMm)
-            pass = (v.pt0    >  30.0 &&
-                    v.pt1    >  20.0 &&
-                    v.detall <   1.5 &&
-                    v.ht     > 220.0 &&
-                    v.mljj   < 120.0 &&
-                    v.l3veto);
-        else if(v.isEm)
-            pass = (v.pt0    >  30.0 &&
-                    v.pt1    >  30.0 &&
-                    v.detall <   1.5 &&
-                    v.mljj   < 120.0 &&
-                    v.mtllmet> 110.0 &&
-                    v.l3veto);
-        else if(v.isEe)
-            pass = (v.pt0    >  30.0 &&
-                    v.pt1    >  30.0 &&
-                    fabs(v.mll-91.2) > 10.0 &&
-                    v.detall <   1.5 &&
-                    v.mtllmet> 150.0 &&
-                    v.mljj   < 120.0 &&
-                    v.ht     > 200.0 &&
-                    v.l3veto);
-    }
-    return pass;
+    SsPassFlags f;
+    return SusySelection::passSrWh2j(v, f);
 }
 //-----------------------------------------
