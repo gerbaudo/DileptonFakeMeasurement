@@ -28,8 +28,10 @@ class SusyPlotter : public SusySelection
   void toggleStdSystematics(); //!< create and fill the nominal histos and the ones for the systematic variations
   void toggleFakeSystematics(); //!< create and fill the histos needed for the fake systematic
   void initHistos();
+  
  public:
   SusyPlotter& setOutputFilename(const std::string &name);
+  SusyPlotter& toggleSystematics();
   
   ClassDef(SusyPlotter, 1);
 
@@ -38,7 +40,7 @@ class SusyPlotter : public SusySelection
   std::vector<string> m_systNames;          // systematics to process
   std::string         m_histFileName;       // output histo file name
   TFile*              m_histFile;           // output histo file
-
+  bool                m_doProcessSystematics;
   // preprocessor convenience - add more indices later
 #define DEFHIST( name ) h_ ## name[susy::wh::Ch_N][susy::wh::kNumberOfPlotRegions][40/*Guess for # of sys*/];
 

@@ -67,7 +67,8 @@ const int     nOrigin = 43;
 SusyPlotter::SusyPlotter() :
   SusySelection(),
   m_histFileName("susyPlotterOut.root"),
-  m_histFile(0)
+  m_histFile(0),
+  m_doProcessSystematics(false)
 {
 }
 //-----------------------------------------
@@ -76,6 +77,7 @@ void SusyPlotter::Begin(TTree* /*tree*/)
   SusySelection::Begin(0);
   if(m_dbg) cout << "SusyPlotter::Begin" << endl;
   toggleNominal();
+  if(m_doProcessSystematics) toggleStdSystematics();
   initHistos();
 }
 //-----------------------------------------
@@ -87,65 +89,66 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   cacheStaticWeightComponents();
   increment(n_readin, m_weightComponents);
   bool removeLepsFromIso(false);
-  const SusyNtSys sys = NtSys_NOM; // for now we don't do any sys loop; see also setSysts
-  selectObjects(sys, removeLepsFromIso, TauID_medium);
-  if(!selectEvent())    return kTRUE;
-  const Met*          m = m_met;
-  const JetVector&    j = m_signalJets2Lep;
-  const JetVector&   bj = m_baseJets;     // DG don't know why, but we use these for the btag w
-  const LeptonVector& l = m_signalLeptons;
-  LeptonVector&     ncl = m_signalLeptons; // non-const leptons: can be modified by qflip
-  Met ncmet(*m_met); // non-const met
-  const TauVector&    t = m_signalTaus;
-  if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
-  bool allowQflip(true);
-  SsPassFlags ssf(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
-  if(!ssf.passLpt()) return false;
-  float weight(m_weightComponents.product());
-  const DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
-  bool sameFlav(ll==ee||ll==mm);
-  if(ssf.passLpt()) {
-    swh::Region pr = (sameFlav ? swh::PR_CR8lpt : swh::PR_CR9lpt);
-    fillHistos(ncl, j, m, weight, pr, sys);
-    if     (ll==ee && ssf.zllVeto) fillHistos(ncl, j, m, weight, PR_CR8ee, sys);
-    else if(ll==mm) {
-      bool passMinMet(m->Et > 40.0);
-      if(passMinMet ) fillHistos(ncl, j, m, weight, swh::PR_CR8mm,     sys);
-      if(ssf.mtllmet) fillHistos(ncl, j, m, weight, swh::PR_CR8mmMtww, sys);
-      if(ssf.ht     ) fillHistos(ncl, j, m, weight, swh::PR_CR8mmHt,   sys);
-    } // end if(mm)
-  } // end passLpt
-  bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
-  bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
-  if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     sys);
-  if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,sys);
-  bool isEe(ll==ee), isMm(ll==mm), isOf(!isEe && !isMm);
-  bool is1j(j.size()==1), is2j(j.size()>1);
-  LeptonVector anyLeptons(getAnyElOrMu(nt));
-  LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
-  const swk::DilepVars v(swk::compute2lVars(ncl, m, j, lowPtLep));
+  for(size_t iSys=0; iSys<m_systs.size(); ++iSys) {
+      const SusyNtSys sys = static_cast<SusyNtSys>(m_systs[iSys]);
+      selectObjects(sys, removeLepsFromIso, TauID_medium);
+      if(!selectEvent()) continue;
+      const Met*          m = m_met;
+      const JetVector&    j = m_signalJets2Lep;
+      const JetVector&   bj = m_baseJets;     // DG don't know why, but we use these for the btag w
+      const LeptonVector& l = m_signalLeptons;
+      LeptonVector&     ncl = m_signalLeptons; // non-const leptons: can be modified by qflip
+      Met ncmet(*m_met); // non-const met
+      const TauVector&    t = m_signalTaus;
+      if(l.size()>1) computeNonStaticWeightComponents(l, bj); else continue;
+      bool allowQflip(true);
+      SsPassFlags ssf(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
+      if(!ssf.passLpt()) continue;
+      float weight(m_weightComponents.product());
+      const DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
+      bool sameFlav(ll==ee||ll==mm);
+      if(ssf.passLpt()) {
+          swh::Region pr = (sameFlav ? swh::PR_CR8lpt : swh::PR_CR9lpt);
+          fillHistos(ncl, j, m, weight, pr, iSys);
+          if     (ll==ee && ssf.zllVeto) fillHistos(ncl, j, m, weight, PR_CR8ee, iSys);
+          else if(ll==mm) {
+              bool passMinMet(m->Et > 40.0);
+              if(passMinMet ) fillHistos(ncl, j, m, weight, swh::PR_CR8mm,     iSys);
+              if(ssf.mtllmet) fillHistos(ncl, j, m, weight, swh::PR_CR8mmMtww, iSys);
+              if(ssf.ht     ) fillHistos(ncl, j, m, weight, swh::PR_CR8mmHt,   iSys);
+          } // end if(mm)
+      } // end passLpt
+      bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
+      bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
+      if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     iSys);
+      if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,iSys);
+      bool isEe(ll==ee), isMm(ll==mm), isOf(!isEe && !isMm);
+      bool is1j(j.size()==1), is2j(j.size()>1);
+      LeptonVector anyLeptons(getAnyElOrMu(nt));
+      LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
+      const swk::DilepVars v(swk::compute2lVars(ncl, m, j, lowPtLep));
 
-  if(isEe && is1j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1jee, sys);
-  if(isEe && is2j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2jee, sys);
-  if(isOf && is1j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1jem, sys);
-  if(isOf && is2j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2jem, sys);
-  if(isOf && is1j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1jem  , sys);
-  if(isOf && is2j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2jem  , sys);
-  if(isMm && is1j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, weight, swh::CrZV1jmm    , sys);
-  if(isMm && is2j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, weight, swh::CrZV2jmm    , sys);
-  if(isMm && is1j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1jmm  , sys);
-  if(isMm && is2j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2jmm  , sys);
+      if(isEe && is1j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1jee, iSys);
+      if(isEe && is2j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2jee, iSys);
+      if(isOf && is1j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1jem, iSys);
+      if(isOf && is2j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2jem, iSys);
+      if(isOf && is1j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1jem  , iSys);
+      if(isOf && is2j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2jem  , iSys);
+      if(isMm && is1j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, weight, swh::CrZV1jmm    , iSys);
+      if(isMm && is2j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, weight, swh::CrZV2jmm    , iSys);
+      if(isMm && is1j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1jmm  , iSys);
+      if(isMm && is2j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2jmm  , iSys);
 
-  if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1j , sys);
-  if(is2j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2j , sys);
-  if(is1j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1j   , sys);
-  if(is2j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2j   , sys);
-  if(is1j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV1j     , sys);
-  if(is2j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV2j     , sys);
+      if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1j , iSys);
+      if(is2j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2j , iSys);
+      if(is1j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1j   , iSys);
+      if(is2j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2j   , iSys);
+      if(is1j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV1j     , iSys);
+      if(is2j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV2j     , iSys);
 
-  if(is1j && SusySelection::passSrWh1j(v)) fillHistos(ncl, j, m, weight, swh::SrWh1j , sys);
-  if(is2j && SusySelection::passSrWh2j(v)) fillHistos(ncl, j, m, weight, swh::SrWh2j , sys);
-
+      if(is1j && SusySelection::passSrWh1j(v)) fillHistos(ncl, j, m, weight, swh::SrWh1j , iSys);
+      if(is2j && SusySelection::passSrWh2j(v)) fillHistos(ncl, j, m, weight, swh::SrWh2j , iSys);
+  } // for(iSys)
   return kTRUE;
 }
 //-----------------------------------------
@@ -167,6 +170,14 @@ SusyPlotter& SusyPlotter::setOutputFilename(const std::string &name)
         <<"\t using default value '"<<m_histFile<<"'"<<endl;
   else m_histFileName = name;
   return *this;
+}
+//-----------------------------------------
+SusyPlotter& SusyPlotter::toggleSystematics()
+{
+    bool alreadyInitialized(m_histFile!=0);
+    if(alreadyInitialized) cout<<"SusyPlotter::toggleSystematics: cannot toggle systematics after histogram initialization"<<endl;
+    else m_doProcessSystematics = true;
+    return *this;
 }
 //-----------------------------------------
 void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
@@ -306,31 +317,30 @@ void SusyPlotter::toggleNominal()
 //-----------------------------------------
 void SusyPlotter::toggleStdSystematics()
 {
-    toggleNominal();
     m_systs.push_back(NtSys_EES_Z_UP    ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_Z_UP    ]);
     m_systs.push_back(NtSys_EES_Z_DN    ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_Z_DN    ]);
-    m_systs.push_back(NtSys_EES_MAT_UP  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_MAT_UP  ]);
-    m_systs.push_back(NtSys_EES_MAT_DN  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_MAT_DN  ]);
-    m_systs.push_back(NtSys_EES_PS_UP   ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_PS_UP   ]);
-    m_systs.push_back(NtSys_EES_PS_DN   ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_PS_DN   ]);
-    m_systs.push_back(NtSys_EES_LOW_UP  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_LOW_UP  ]);
-    m_systs.push_back(NtSys_EES_LOW_DN  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_LOW_DN  ]);
-    m_systs.push_back(NtSys_EER_UP      ); m_systNames.push_back(SusyNtSystNames[NtSys_EER_UP      ]);
-    m_systs.push_back(NtSys_EER_DN      ); m_systNames.push_back(SusyNtSystNames[NtSys_EER_DN      ]);
-    m_systs.push_back(NtSys_MS_UP       ); m_systNames.push_back(SusyNtSystNames[NtSys_MS_UP       ]);
-    m_systs.push_back(NtSys_MS_DN       ); m_systNames.push_back(SusyNtSystNames[NtSys_MS_DN       ]);
-    m_systs.push_back(NtSys_ID_UP       ); m_systNames.push_back(SusyNtSystNames[NtSys_ID_UP       ]);
-    m_systs.push_back(NtSys_ID_DN       ); m_systNames.push_back(SusyNtSystNames[NtSys_ID_DN       ]);
-    m_systs.push_back(NtSys_JES_UP      ); m_systNames.push_back(SusyNtSystNames[NtSys_JES_UP      ]);
-    m_systs.push_back(NtSys_JES_DN      ); m_systNames.push_back(SusyNtSystNames[NtSys_JES_DN      ]);
-    m_systs.push_back(NtSys_JER         ); m_systNames.push_back(SusyNtSystNames[NtSys_JER         ]);
-    m_systs.push_back(NtSys_SCALEST_UP  ); m_systNames.push_back(SusyNtSystNames[NtSys_SCALEST_UP  ]);
-    m_systs.push_back(NtSys_SCALEST_DN  ); m_systNames.push_back(SusyNtSystNames[NtSys_SCALEST_DN  ]);
-    m_systs.push_back(NtSys_RESOST      ); m_systNames.push_back(SusyNtSystNames[NtSys_RESOST      ]);
-    m_systs.push_back(NtSys_TRIGSF_EL_UP); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_EL_UP]);
-    m_systs.push_back(NtSys_TRIGSF_EL_DN); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_EL_DN]);
-    m_systs.push_back(NtSys_TRIGSF_MU_UP); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_MU_UP]);
-    m_systs.push_back(NtSys_TRIGSF_MU_DN); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_MU_DN]);
+//     m_systs.push_back(NtSys_EES_MAT_UP  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_MAT_UP  ]);
+//     m_systs.push_back(NtSys_EES_MAT_DN  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_MAT_DN  ]);
+//     m_systs.push_back(NtSys_EES_PS_UP   ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_PS_UP   ]);
+//     m_systs.push_back(NtSys_EES_PS_DN   ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_PS_DN   ]);
+//     m_systs.push_back(NtSys_EES_LOW_UP  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_LOW_UP  ]);
+//     m_systs.push_back(NtSys_EES_LOW_DN  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_LOW_DN  ]);
+//     m_systs.push_back(NtSys_EER_UP      ); m_systNames.push_back(SusyNtSystNames[NtSys_EER_UP      ]);
+//     m_systs.push_back(NtSys_EER_DN      ); m_systNames.push_back(SusyNtSystNames[NtSys_EER_DN      ]);
+//     m_systs.push_back(NtSys_MS_UP       ); m_systNames.push_back(SusyNtSystNames[NtSys_MS_UP       ]);
+//     m_systs.push_back(NtSys_MS_DN       ); m_systNames.push_back(SusyNtSystNames[NtSys_MS_DN       ]);
+//     m_systs.push_back(NtSys_ID_UP       ); m_systNames.push_back(SusyNtSystNames[NtSys_ID_UP       ]);
+//     m_systs.push_back(NtSys_ID_DN       ); m_systNames.push_back(SusyNtSystNames[NtSys_ID_DN       ]);
+//     m_systs.push_back(NtSys_JES_UP      ); m_systNames.push_back(SusyNtSystNames[NtSys_JES_UP      ]);
+//     m_systs.push_back(NtSys_JES_DN      ); m_systNames.push_back(SusyNtSystNames[NtSys_JES_DN      ]);
+//     m_systs.push_back(NtSys_JER         ); m_systNames.push_back(SusyNtSystNames[NtSys_JER         ]);
+//     m_systs.push_back(NtSys_SCALEST_UP  ); m_systNames.push_back(SusyNtSystNames[NtSys_SCALEST_UP  ]);
+//     m_systs.push_back(NtSys_SCALEST_DN  ); m_systNames.push_back(SusyNtSystNames[NtSys_SCALEST_DN  ]);
+//     m_systs.push_back(NtSys_RESOST      ); m_systNames.push_back(SusyNtSystNames[NtSys_RESOST      ]);
+//     m_systs.push_back(NtSys_TRIGSF_EL_UP); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_EL_UP]);
+//     m_systs.push_back(NtSys_TRIGSF_EL_DN); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_EL_DN]);
+//     m_systs.push_back(NtSys_TRIGSF_MU_UP); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_MU_UP]);
+//     m_systs.push_back(NtSys_TRIGSF_MU_DN); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_MU_DN]);
 }
 //-----------------------------------------
 void SusyPlotter::toggleFakeSystematics()
