@@ -37,14 +37,6 @@ enum WeightTypes {
   kWeightTypesN
 };
 
-enum WH_SR {
-  WH_SRSS1=0,
-  WH_SRSS2,
-  WH_SRSS3,
-  WH_SRSS4,
-  WH_SRN
-};
-
 // fw decl
 class chargeFlip;
 
