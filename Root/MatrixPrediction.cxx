@@ -73,7 +73,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
   bool allowQflip(false), passMinMet(m->Et > 40.0);
   bool isEe(ll==ee), isMm(ll==mm), isSf(isEe||isMm), isOf(!isEe && !isMm);
-  SsPassFlags ssf(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
+  SsPassFlags ssf(SusySelection::passSrSs(ncl, t, j, m, allowQflip));
   if(!ssf.passLpt()) return false;
   if(m_writeTuple && ssf.lepPt) {
       double weight(getFakeWeight(l, sf::CR_CR8lpt, metRel, smm::SYS_NONE));

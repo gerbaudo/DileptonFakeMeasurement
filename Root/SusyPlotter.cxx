@@ -102,7 +102,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       const TauVector&    t = m_signalTaus;
       if(l.size()>1) computeNonStaticWeightComponents(l, bj); else continue;
       bool allowQflip(true);
-      SsPassFlags ssf(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
+      SsPassFlags ssf(SusySelection::passSrSs(ncl, t, j, m, allowQflip));
       if(!ssf.passLpt()) continue;
       float weight(m_weightComponents.product());
       const DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);

@@ -96,8 +96,7 @@ class SusySelection : public SusyNtAna
     // std SR7 has at least 2jets + the requirements below
     // (but no counters, just so that the fit on one line)
     bool passSrSsBase();
-    SsPassFlags passSrSs(const WH_SR signalRegion,
-                         vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
+    SsPassFlags passSrSs(vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
     // Cut methods
     bool passHfor() { return passHfor(nt); }
     static bool passHfor(Susy::SusyNtObject &nto);

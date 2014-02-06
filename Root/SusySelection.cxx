@@ -91,8 +91,7 @@ Bool_t SusySelection::Process(Long64_t entry)
   const JetVector&   bj = m_baseJets;
   const LeptonVector& l = m_signalLeptons;
   if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
-  if(passSrSs(WH_SRSS1,
-              m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip)
+  if(passSrSs(m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip)
      .lepPt) {
       if(m_writeTuple) {
           double weight(m_weightComponents.product());
@@ -208,8 +207,7 @@ bool SusySelection::passSrSsBase()
   return false;
 }
 //-----------------------------------------
-SsPassFlags SusySelection::passSrSs(const WH_SR signalRegion,
-                                    LeptonVector& leptons,
+SsPassFlags SusySelection::passSrSs(LeptonVector& leptons,
                                     const TauVector& taus,
                                     const JetVector& jets,
                                     const Met *met,
