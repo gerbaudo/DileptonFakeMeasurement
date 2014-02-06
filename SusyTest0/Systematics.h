@@ -153,10 +153,10 @@ const std::string SystematicNames[] = {
 };
 
 
-inline std::string syst2str(const Systematic &s) {return ""; } //SystematicNames[s];}
 inline bool isValid(const Systematic &s) { return s>=WH_CENTRAL && s<=WH_FakeTauBGSyst; }
 inline bool isValid(const SusyNtSys &s)  { return s>=NtSys_NOM  && s< NtSys_N; }
-inline std::string sys2str(const SusyNtSys &s) { return isValid(s) ? SusyNtSystNames[s] : "unknown"; }
+inline std::string syst2str(const Systematic &s) { return isValid(s) ? SystematicNames[s] : "unknown"; }
+inline std::string syst2str(const SusyNtSys &s)  { return isValid(s) ? SusyNtSystNames[s] : "unknown"; }
 SusyNtSys sys2ntsys(const Systematic &s);
 Systematic ntsys2sys(const SusyNtSys &s);
 

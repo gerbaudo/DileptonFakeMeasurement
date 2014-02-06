@@ -1,51 +1,58 @@
 #include "SusyTest0/Systematics.h"
 
+#include <cassert>
+
 namespace susy {
 namespace wh {
 
-
-SusyNtSys sys2ntsys(const Systematic &s)
+//-----------------------------------------
+Systematic ntsys2sys(const SusyNtSys &s)
 {
-    SusyNtSys r = NtSys_N;
+    Systematic r = WH_CENTRAL;
     switch(s) {
-    case WH_CENTRAL          :  r =  NtSys_NOM         ; break;
-    case WH_JESUP            :  r =  NtSys_JES_UP      ; break;
-    case WH_JESDOWN          :  r =  NtSys_JES_DN      ; break;
-    case WH_JER              :  r =  NtSys_JER         ; break;
-    case WH_EESLOWUP         :  r =  NtSys_EES_LOW_UP  ; break;
-    case WH_EESLOWDOWN       :  r =  NtSys_EES_LOW_DN  ; break;
-    case WH_EESMATUP         :  r =  NtSys_EES_MAT_UP  ; break;
-    case WH_EESMATDOWN       :  r =  NtSys_EES_MAT_DN  ; break;
-    case WH_EESPSUP          :  r =  NtSys_EES_PS_UP   ; break;
-    case WH_EESPSDOWN        :  r =  NtSys_EES_PS_DN   ; break;
-    case WH_EERUP            :  r =  NtSys_EER_UP      ; break;
-    case WH_EERDOWN          :  r =  NtSys_EER_DN      ; break;
-    case WH_MESUP            :  r =  NtSys_MS_UP       ; break;
-    case WH_MESDOWN          :  r =  NtSys_MS_DN       ; break;
-    case WH_MIDUP            :  r =  NtSys_ID_UP       ; break;
-    case WH_MIDDOWN          :  r =  NtSys_ID_DN       ; break;
-    case WH_MEFFDOWN         :  r =  NtSys_EES_Z_DN    ; break;
-    case WH_SCALESTUP        :  r =  NtSys_SCALEST_UP  ; break;
-    case WH_SCALESTDOWN      :  r =  NtSys_SCALEST_DN  ; break;
-    case WH_RESOST           :  r =  NtSys_RESOST      ; break;
-    case WH_TESUP            :  r =  NtSys_TES_UP      ; break;
-    case WH_TESDOWN          :  r =  NtSys_TES_DN      ; break;
-    case WH_TTRIGSFUP        :  r =  NtSys_TRIGSF_EL_UP; break; // ? NtSys_TRIGSF_MU_UP
-    case WH_TTRIGSFDOWN      :  r =  NtSys_TRIGSF_EL_DN; break; // ? NtSys_TRIGSF_MU_DN
-    default : std::cout<<"cannot convert Systematic '"<<syst2str(s)<<"' to SusyNtSys; returning invalid NtSys_N"<<std::endl;
+    case NtSys_NOM             :  r =  WH_CENTRAL      ; break;
+    case NtSys_EES_Z_UP        :  r =  WH_EESZUP       ; break;
+    case NtSys_EES_Z_DN        :  r =  WH_EESZDOWN     ; break;
+    case NtSys_EES_MAT_UP      :  r =  WH_EESMATUP     ; break;
+    case NtSys_EES_MAT_DN      :  r =  WH_EESMATDOWN   ; break;
+    case NtSys_EES_PS_UP       :  r =  WH_EESPSUP      ; break;
+    case NtSys_EES_PS_DN       :  r =  WH_EESPSDOWN    ; break; 
+    case NtSys_EES_LOW_UP      :  r =  WH_EESLOWUP     ; break;
+    case NtSys_EES_LOW_DN      :  r =  WH_EESLOWDOWN   ; break;
+    case NtSys_EER_UP          :  r =  WH_EERUP        ; break;
+    case NtSys_EER_DN          :  r =  WH_EERDOWN      ; break; 
+    case NtSys_MS_UP           :  r =  WH_MESUP        ; break;
+    case NtSys_MS_DN           :  r =  WH_MESDOWN      ; break;
+    case NtSys_ID_UP           :  r =  WH_MIDUP        ; break;
+    case NtSys_ID_DN           :  r =  WH_MIDDOWN      ; break;
+    case NtSys_JES_UP          :  r =  WH_JESUP        ; break;
+    case NtSys_JES_DN          :  r =  WH_JESDOWN      ; break;
+    case NtSys_JER             :  r =  WH_JER          ; break;
+    case NtSys_SCALEST_UP      :  r =  WH_SCALESTUP    ; break;
+    case NtSys_SCALEST_DN      :  r =  WH_SCALESTDOWN  ; break;
+    case NtSys_RESOST          :  r =  WH_RESOST       ; break;
+    case NtSys_TRIGSF_EL_UP    :  r =  WH_TTRIGSFUP    ; break;
+    case NtSys_TRIGSF_EL_DN    :  r =  WH_TTRIGSFDOWN  ; break;
+    case NtSys_TRIGSF_MU_UP    :  /* undefined ?? */   ; break;
+    case NtSys_TRIGSF_MU_DN    :  /* undefined ?? */   ; break;
+    case NtSys_TES_UP          :  r =  WH_TESUP        ; break;
+    case NtSys_TES_DN          :  r =  WH_TESDOWN      ; break;
+    case NtSys_N               : assert(false)         ; break; // perhaps throw an exception instead
+        // no default, so that the compiler will warn us of un-handled cases
     }
     return r;
 }
 //-----------------------------------------
-Systematic ntsys2sys(const SusyNtSys &s)
+SusyNtSys sys2ntsys(const Systematic &s)
 {
     int r=0;
-    // here we assume that NtSys_N <= N(Systematic), which in general
+    // Here we assume that NtSys_N <= N(Systematic); in general this
     // is true because we have other syst (eg. fakes) in addition to
     // the SusyNt ones.
-    while(r<NtSys_N) { if(s==sys2ntsys(static_cast<Systematic>(r))) break; else r++;}
-    return static_cast<Systematic>(r);
+    while(r<NtSys_N) { if(s==ntsys2sys(static_cast<SusyNtSys>(r))) break; else r++;}
+    return static_cast<SusyNtSys>(r);
 }
+//-----------------------------------------
 
 } // wh
 } // susy
