@@ -202,11 +202,6 @@ bool SusySelection::passSR9(const LeptonVector& leptons, const JetVector& jets, 
   return false; // now obsolete
 }
 //-----------------------------------------
-bool SusySelection::passSrSsBase()
-{
-  return false;
-}
-//-----------------------------------------
 SsPassFlags SusySelection::passSrSs(LeptonVector& leptons,
                                     const TauVector& taus,
                                     const JetVector& jets,

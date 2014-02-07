@@ -87,7 +87,6 @@ class SusySelection : public SusyNtAna
     bool passSR9(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
     // std SR7 has at least 2jets + the requirements below
     // (but no counters, just so that the fit on one line)
-    bool passSrSsBase();
     SsPassFlags passSrSs(vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
     // Cut methods
     bool passHfor() { return passHfor(nt); }
