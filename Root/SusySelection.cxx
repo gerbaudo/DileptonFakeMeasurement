@@ -162,46 +162,6 @@ bool SusySelection::selectEvent()
   return true;
 }
 //-----------------------------------------
-bool SusySelection::passSR6base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
-{
-  return susy::oppositeSign(leptons) && susy::sameFlavor(leptons);
-}
-//-----------------------------------------
-bool SusySelection::passSR7base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
-{
-  return susy::oppositeSign(leptons) && susy::oppositeFlavor(leptons);
-}
-//-----------------------------------------
-bool SusySelection::passSR8base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
-{
-  return susy::sameSign(leptons) && susy::sameFlavor(leptons);
-}
-//-----------------------------------------
-bool SusySelection::passSR9base(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
-{
-  return susy::sameSign(leptons) && susy::oppositeFlavor(leptons);
-}
-//-----------------------------------------
-bool SusySelection::passSR6(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
-{
-  return false; // now obsolete
-}
-//-----------------------------------------
-bool SusySelection::passSR7(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
-{
-  return false; // now obsolete
-}
-//-----------------------------------------
-bool SusySelection::passSR8(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
-{
-  return false; // now obsolete
-}
-//-----------------------------------------
-bool SusySelection::passSR9(const LeptonVector& leptons, const JetVector& jets, const Met *met, bool count)
-{
-  return false; // now obsolete
-}
-//-----------------------------------------
 SsPassFlags SusySelection::passSrSs(LeptonVector& leptons,
                                     const TauVector& taus,
                                     const JetVector& jets,

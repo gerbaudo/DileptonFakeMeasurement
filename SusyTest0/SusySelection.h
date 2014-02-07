@@ -77,16 +77,6 @@ class SusySelection : public SusyNtAna
     virtual void dumpEventCounters();
     bool selectEvent(); //!< event selection  based on event qtities (mostly...)
     // Signal regions
-    bool passSR6base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    bool passSR7base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    bool passSR8base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    bool passSR9base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    bool passSR6(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    bool passSR7(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    bool passSR8(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    bool passSR9(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    // std SR7 has at least 2jets + the requirements below
-    // (but no counters, just so that the fit on one line)
     SsPassFlags passSrSs(vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
     // Cut methods
     bool passHfor() { return passHfor(nt); }
