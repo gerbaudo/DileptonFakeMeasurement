@@ -92,7 +92,9 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   for(size_t iSys=0; iSys<m_systs.size(); ++iSys) {
       const SusyNtSys sys = static_cast<SusyNtSys>(m_systs[iSys]);
       selectObjects(sys, removeLepsFromIso, TauID_medium);
-      if(!selectEvent()) continue;
+      swh::EventFlags eventFlags(computeEventFlags());
+      if(sys==NtSys_NOM) incrementCounters(eventFlags, m_weightComponents);
+      if(eventFlags.failAny()) continue;
       const Met*          m = m_met;
       const JetVector&    j = m_signalJets2Lep;
       const JetVector&   bj = m_baseJets;     // DG don't know why, but we use these for the btag w
@@ -102,8 +104,8 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       const TauVector&    t = m_signalTaus;
       if(l.size()>1) computeNonStaticWeightComponents(l, bj); else continue;
       bool allowQflip(true);
-      SsPassFlags ssf(SusySelection::passSrSs(ncl, t, j, m, allowQflip));
-      if(!ssf.passLpt()) continue;
+      SsPassFlags ssf(SusySelection::computeSsFlags(ncl, t, j, m, allowQflip));
+      if(sys==NtSys_NOM) incrementSsCounters(ssf, m_weightComponents);
       float weight(m_weightComponents.product());
       const DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
       bool sameFlav(ll==ee||ll==mm);

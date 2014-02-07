@@ -8,6 +8,7 @@
 #include "SusyTest0/SusyPlotter.h"
 
 #include "ChargeFlip/chargeFlip.h"
+#include "SusyTest0/EventFlags.h"
 #include "SusyTest0/criteria.h"
 #include "SusyTest0/kinematic.h"
 #include "SusyTest0/utils.h"
@@ -15,6 +16,7 @@
 
 using namespace std;
 using namespace Susy;
+namespace swh = susy::wh;
 namespace swk = susy::wh::kin;
 
 std::string SusySelection::WeightComponents::str() const
@@ -87,12 +89,17 @@ Bool_t SusySelection::Process(Long64_t entry)
   increment(n_readin, m_weightComponents);
   bool removeLepsFromIso(false), allowQflip(true);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
-  if(!selectEvent()) return kTRUE;
+  swh::EventFlags eventFlags(computeEventFlags());
+  incrementCounters(eventFlags, m_weightComponents);
+  if(eventFlags.failAny()) return kTRUE;
+  m_debugThisEvent = susy::isEventInList(nt.evt()->event);
+
   const JetVector&   bj = m_baseJets;
   const LeptonVector& l = m_signalLeptons;
   if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
-  if(passSrSs(m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip)
-     .lepPt) {
+  SsPassFlags ssf = computeSsFlags(m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip);
+  incrementSsCounters(ssf, m_weightComponents);
+  if(ssf.lepPt) {
       if(m_writeTuple) {
           double weight(m_weightComponents.product());
           unsigned int run(nt.evt()->run), event(nt.evt()->event);
@@ -128,57 +135,75 @@ void SusySelection::increment(float counters[], const WeightComponents &wc)
   counters[kAll ] += wc.product();
 }
 //-----------------------------------------
-bool SusySelection::selectEvent()
+susy::wh::EventFlags SusySelection::computeEventFlags()
 {
-  if(m_dbg) cout << "SusySelection::selectEvent" << endl;
-  // Basic event cuts
-  int flag = nt.evt()->cutFlags[NtSys_NOM];
-  //int hdec = nt.evt()->hDecay;
-  const LeptonVector& bleps = m_baseLeptons;
-  const JetVector &jets = m_baseJets;
-  const JetVector &pjets = m_preJets;
-  const Susy::Met *met = m_met;
-  uint run = nt.evt()->run;
-  bool mc = nt.evt()->isMC;
-  m_debugThisEvent = susy::isEventInList(nt.evt()->event);
-  float mllMin(20);
-  WeightComponents &wc = m_weightComponents;
-  if(passGRL        (flag           ))  { increment(n_pass_Grl     , wc);} else { return false; }
-  if(passLarErr     (flag           ))  { increment(n_pass_LarErr  , wc);} else { return false; }
-  if(passTileErr    (flag           ))  { increment(n_pass_TileErr , wc);} else { return false; }
-  if(passTTCVeto    (flag           ))  { increment(n_pass_TTCVeto , wc);} else { return false; }
-  if(passGoodVtx    (flag           ))  { increment(n_pass_GoodVtx , wc);} else { return false; }
-  if(passTileTripCut(flag           ))  { increment(n_pass_TileTrip, wc);} else { return false; }
-  if(passLAr        (flag           ))  { increment(n_pass_LAr     , wc);} else { return false; }
-  if(!hasBadJet     (jets           ))  { increment(n_pass_BadJet  , wc);} else { return false; }
-  if(passDeadRegions(pjets,met,run,mc)) { increment(n_pass_FEBCut  , wc);} else { return false; }
-  if(!hasBadMuon    (m_preMuons     ))  { increment(n_pass_BadMuon , wc);} else { return false; }
-  if(!hasCosmicMuon (m_baseMuons    ))  { increment(n_pass_Cosmic  , wc);} else { return false; }
-  if(passHfor       (               ))  { increment(n_pass_hfor    , wc);} else { return false; }
-  //if(passHtautauVeto(hdec)) { increment(n_pass_HttVeto ); } else { return false; }
-  if(bleps.size() >= 2               )  { increment(n_pass_ge2l    , wc);} else { return false; }
-  if(bleps.size() == 2               )  { increment(n_pass_eq2l    , wc);} else { return false; }
-  if(susy::passMllMin(bleps, mllMin ))  { increment(n_pass_mll     , wc);} else { return false; }
-  return true;
+    swh::EventFlags f;
+    if(m_dbg) cout << "SusySelection::selectEvent" << endl;
+    int flag = nt.evt()->cutFlags[NtSys_NOM];
+    const LeptonVector &bleps = m_baseLeptons;
+    const JetVector     &jets = m_baseJets;
+    const JetVector    &pjets = m_preJets;
+    const Susy::Met      *met = m_met;
+    uint run = nt.evt()->run;
+    bool mc = nt.evt()->isMC;
+    float mllMin(20);
+    if(passGRL        (flag           ))  f.grl         = true;
+    if(passLarErr     (flag           ))  f.larErr      = true;
+    if(passTileErr    (flag           ))  f.tileErr     = true;
+    if(passTTCVeto    (flag           ))  f.ttcVeto     = true;
+    if(passGoodVtx    (flag           ))  f.goodVtx     = true;
+    if(passTileTripCut(flag           ))  f.tileTrip    = true;
+    if(passLAr        (flag           ))  f.lAr         = true;
+    if(!hasBadJet     (jets           ))  f.badJet      = true;
+    if(passDeadRegions(pjets,met,run,mc)) f.deadRegions = true;
+    if(!hasBadMuon    (m_preMuons     ))  f.badMuon     = true;
+    if(!hasCosmicMuon (m_baseMuons    ))  f.cosmicMuon  = true;
+    if(passHfor       (               ))  f.hfor        = true;
+    if(bleps.size() >= 2               )  f.ge2blep     = true;
+    if(bleps.size() == 2               )  f.eq2blep     = true;
+    if(susy::passMllMin(bleps, mllMin ))  f.mllMin      = true;
+    return f;
 }
 //-----------------------------------------
-SsPassFlags SusySelection::passSrSs(LeptonVector& leptons,
-                                    const TauVector& taus,
-                                    const JetVector& jets,
-                                    const Met *met,
-                                    bool allowQflip)
+void SusySelection::incrementCounters(const susy::wh::EventFlags &f, const WeightComponents &w)
+{
+  if(f.grl        ) increment(n_pass_Grl     , w); else return;
+  if(f.larErr     ) increment(n_pass_LarErr  , w); else return;
+  if(f.tileErr    ) increment(n_pass_TileErr , w); else return;
+  if(f.ttcVeto    ) increment(n_pass_TTCVeto , w); else return;
+  if(f.goodVtx    ) increment(n_pass_GoodVtx , w); else return;
+  if(f.tileTrip   ) increment(n_pass_TileTrip, w); else return;
+  if(f.lAr        ) increment(n_pass_LAr     , w); else return;
+  if(f.badJet     ) increment(n_pass_BadJet  , w); else return;
+  if(f.deadRegions) increment(n_pass_FEBCut  , w); else return;
+  if(f.badMuon    ) increment(n_pass_BadMuon , w); else return;
+  if(f.cosmicMuon ) increment(n_pass_Cosmic  , w); else return;
+  if(f.hfor       ) increment(n_pass_hfor    , w); else return;
+  if(f.ge2blep    ) increment(n_pass_ge2l    , w); else return;
+  if(f.eq2blep    ) increment(n_pass_eq2l    , w); else return;
+  if(f.mllMin     ) increment(n_pass_mll     , w); else return;
+}
+//-----------------------------------------
+SsPassFlags SusySelection::computeSsFlags(LeptonVector& leptons,
+                                          const TauVector& taus,
+                                          const JetVector& jets,
+                                          const Met *met,
+                                          bool allowQflip)
 {
   SsPassFlags f;
-  if(leptons.size()<2) return f;
-  DiLepEvtType ll(getDiLepEvtType(leptons));
-  if(ll==ET_me) ll = ET_em;
-  bool update4mom(true); // charge flip
-  bool mc(nt.evt()->isMC), data(!mc);
   const LeptonVector &ls = leptons;
-  LeptonVector &ncls = leptons; // non-const leptons: can be modified by qflip
-  Met ncmet(*m_met); // non-const met \todo: should modify a non-const input
+  LeptonVector     &ncls = leptons; // non-const leptons: can be modified by qflip
   const JetVector    &js = jets;
   WeightComponents &wc = m_weightComponents;
+  Met ncmet(*m_met); // non-const met \todo: should modify a non-const input
+  if(leptons.size()<2) return f;
+  f.updateLlFlags(*leptons[0], *leptons[1]);
+  f = assignNjetFlags(js, f);
+  DiLepEvtType ll(getDiLepEvtType(leptons));
+  if(ll==ET_me) ll = ET_em;
+
+  bool update4mom(true); // charge flip
+  bool mc(nt.evt()->isMC), data(!mc);
 
   increment(n_pass_category[ll], wc);
   if(susy::passNlepMin(ls, 2))                  { increment(n_pass_nSigLep  [ll], wc); f.eq2l       =true;} else return f;
@@ -195,33 +220,30 @@ SsPassFlags SusySelection::passSrSs(LeptonVector& leptons,
   LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
   const swk::DilepVars v(swk::compute2lVars(leptons, met, jets, lowPtLep));
   f.veto3rdL = v.l3veto;
-  f = assignNjetFlags(js, f);
-  if(f.veto3rdL) increment(n_pass_3rdLep [ll], wc); else return f;
-  if(f.fjveto  ) increment(n_pass_fjVeto [ll], wc); else return f;
-  if(f.bjveto  ) increment(n_pass_bjVeto [ll], wc); else return f;
-  if(f.ge1j    ) increment(n_pass_ge1j   [ll], wc); else return f;
-  if(f.eq1j    ) increment(n_pass_eq1j   [ll], wc);
-  else           increment(n_pass_ge2j   [ll], wc);
-  assert(f.eq1j != f.ge2j); // from here on count separately eq1j and ge2j
-  if(f.eq1j) SusySelection::passSrWh1j(v, f);
-  else       SusySelection::passSrWh2j(v, f);
-  float *cnt_lepPt    = f.eq1j ? n_pass_eq1jlepPt    [ll] : n_pass_ge2jlepPt    [ll];
-  float *cnt_mllZveto = f.eq1j ? n_pass_eq1jmllZveto [ll] : n_pass_ge2jmllZveto [ll];
-  float *cnt_detall   = f.eq1j ? n_pass_eq1jDetall   [ll] : n_pass_ge2jDetall   [ll];
-  float *cnt_mtmax    = f.eq1j ? n_pass_eq1jMtMax    [ll] : n_pass_ge2jMtMax    [ll];
-  float *cnt_mljj     = f.eq1j ? n_pass_eq1jMlj      [ll] : n_pass_ge2jMljj     [ll];
-  float *cnt_ht       = f.eq1j ? n_pass_eq1jht       [ll] : n_pass_ge2jht       [ll];
-  float *cnt_metRel   = f.eq1j ? n_pass_eq1jmetRel   [ll] : n_pass_ge2jmetRel   [ll];
-  float *cnt_mWwt     = f.eq1j ? n_pass_eq1jmWwt     [ll] : n_pass_ge2jmWwt     [ll];
-  if(f.lepPt   ) increment(cnt_lepPt   , wc); else return f;
-  if(f.zllVeto ) increment(cnt_mllZveto, wc); else return f;
-  if(f.dEtall  ) increment(cnt_detall  , wc); else return f;
-  if(f.maxMt   ) increment(cnt_mtmax   , wc); else return f;
-  if(f.mljj    ) increment(cnt_mljj    , wc); else return f;
-  if(f.ht      ) increment(cnt_ht      , wc); else return f;
-  if(f.metrel  ) increment(cnt_metRel  , wc); else return f;
-  if(f.mtllmet ) increment(cnt_mWwt    , wc); else return f;
+  if     (f.eq1j) SusySelection::passSrWh1j(v, f);
+  else if(f.ge2j) SusySelection::passSrWh2j(v, f);
   return f;
+}
+//-----------------------------------------
+void SusySelection::incrementSsCounters(const SsPassFlags &f, const WeightComponents &wc)
+{
+    assert((f.ee != f.em) || (f.em != f.mm));
+    DiLepEvtType ll(f.ee ? ET_ee : f.em ? ET_em : ET_mm);
+    if(f.veto3rdL) increment(n_pass_3rdLep [ll], wc); else return;
+    if(f.fjveto  ) increment(n_pass_fjVeto [ll], wc); else return;
+    if(f.bjveto  ) increment(n_pass_bjVeto [ll], wc); else return;
+    if(f.ge1j    ) increment(n_pass_ge1j   [ll], wc); else return;
+    if(f.ge1j) {
+        if(f.ge1j    ) increment((f.eq1j ? n_pass_eq1j         [ll] : n_pass_ge2j         [ll]), wc);
+        if(f.lepPt   ) increment((f.eq1j ? n_pass_eq1jlepPt    [ll] : n_pass_ge2jlepPt    [ll]), wc); else return;
+        if(f.zllVeto ) increment((f.eq1j ? n_pass_eq1jmllZveto [ll] : n_pass_ge2jmllZveto [ll]), wc); else return;
+        if(f.dEtall  ) increment((f.eq1j ? n_pass_eq1jDetall   [ll] : n_pass_ge2jDetall   [ll]), wc); else return;
+        if(f.maxMt   ) increment((f.eq1j ? n_pass_eq1jMtMax    [ll] : n_pass_ge2jMtMax    [ll]), wc); else return;
+        if(f.mljj    ) increment((f.eq1j ? n_pass_eq1jMlj      [ll] : n_pass_ge2jMljj     [ll]), wc); else return;
+        if(f.ht      ) increment((f.eq1j ? n_pass_eq1jht       [ll] : n_pass_ge2jht       [ll]), wc); else return;
+        if(f.metrel  ) increment((f.eq1j ? n_pass_eq1jmetRel   [ll] : n_pass_ge2jmetRel   [ll]), wc); else return;
+        if(f.mtllmet ) increment((f.eq1j ? n_pass_eq1jmWwt     [ll] : n_pass_ge2jmWwt     [ll]), wc); else return;
+    }
 }
 //-----------------------------------------
 bool SusySelection::passHfor(Susy::SusyNtObject &nto)

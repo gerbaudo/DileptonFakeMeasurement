@@ -22,6 +22,7 @@
 #include "SusyXSReader/XSReader.h"
 #include "SusyTest0/ProgressPrinter.h"
 #include "SusyTest0/SsPassFlags.h"
+#include "SusyTest0/EventFlags.h"
 #include "SusyTest0/DileptonChannel.h"
 
 #include <fstream>
@@ -42,6 +43,7 @@ class chargeFlip;
 
 namespace susy {
 namespace wh {
+class EventFlags;
 namespace kin {
 class DilepVars;
 }
@@ -75,9 +77,12 @@ class SusySelection : public SusyNtAna
     virtual void    Terminate(); //!< called after looping is finished
     virtual Bool_t  Process(Long64_t entry); //!< called at each event
     virtual void dumpEventCounters();
-    bool selectEvent(); //!< event selection  based on event qtities (mostly...)
-    // Signal regions
-    SsPassFlags passSrSs(vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
+    susy::wh::EventFlags computeEventFlags();
+    void incrementCounters(const susy::wh::EventFlags &f, const WeightComponents &w);
+    // compute the selection flags for the same-sign signal region; note that the charge flip can modify leptons and met
+    SsPassFlags computeSsFlags(vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
+    //! increment counters that are specific to the same-sign selection
+    void incrementSsCounters(const SsPassFlags &f, const WeightComponents &w);
     // Cut methods
     bool passHfor() { return passHfor(nt); }
     static bool passHfor(Susy::SusyNtObject &nto);

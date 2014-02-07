@@ -60,21 +60,22 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   increment(n_readin, m_weightComponents);
   bool removeLepsFromIso(false);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
-  if( !selectEvent() )              return kTRUE;
+  swh::EventFlags eventFlags = computeEventFlags();
+  incrementCounters(eventFlags, m_weightComponents);
+  if(eventFlags.failAny()) return kTRUE;
   const Met*          m = m_met;
   const JetVector&    j = m_signalJets2Lep;
-  const JetVector&   bj = m_baseJets;     // DG don't know why, but we use these for the btag w
   const LeptonVector& l = m_baseLeptons;
   LeptonVector&     ncl = m_baseLeptons;
   const TauVector&    t = m_signalTaus;
-  if(l.size()>1) computeNonStaticWeightComponents(l, bj);  // DG is this needed? just use the fake w
-  else return false;
+  if(l.size()<2) return false; // otherwise cannot compute some of the variables
   float metRel = getMetRel(m, l, j);
   DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
   bool allowQflip(false), passMinMet(m->Et > 40.0);
   bool isEe(ll==ee), isMm(ll==mm), isSf(isEe||isMm), isOf(!isEe && !isMm);
-  SsPassFlags ssf(SusySelection::passSrSs(ncl, t, j, m, allowQflip));
-  if(!ssf.passLpt()) return false;
+  SsPassFlags ssf(SusySelection::computeSsFlags(ncl, t, j, m, allowQflip));
+  m_weightComponents.fake = getFakeWeight(l,sf::CR_SRWHSS, metRel, smm::SYS_NONE); // just for the counters, use generic CR_SRWHSS
+  incrementSsCounters(ssf, m_weightComponents);
   if(m_writeTuple && ssf.lepPt) {
       double weight(getFakeWeight(l, sf::CR_CR8lpt, metRel, smm::SYS_NONE));
       unsigned int run(nt.evt()->run), event(nt.evt()->event);
