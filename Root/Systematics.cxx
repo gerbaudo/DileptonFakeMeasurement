@@ -33,8 +33,8 @@ Systematic ntsys2sys(const SusyNtSys &s)
     case NtSys_RESOST          :  r =  WH_RESOST       ; break;
     case NtSys_TRIGSF_EL_UP    :  r =  WH_TTRIGSFUP    ; break;
     case NtSys_TRIGSF_EL_DN    :  r =  WH_TTRIGSFDOWN  ; break;
-    case NtSys_TRIGSF_MU_UP    :  /* undefined ?? */   ; break;
-    case NtSys_TRIGSF_MU_DN    :  /* undefined ?? */   ; break;
+//     case NtSys_TRIGSF_MU_UP    :   undefined ??    ; break;
+//     case NtSys_TRIGSF_MU_DN    :   undefined ??    ; break;
     case NtSys_TES_UP          :  r =  WH_TESUP        ; break;
     case NtSys_TES_DN          :  r =  WH_TESDOWN      ; break;
     case NtSys_N               : assert(false)         ; break; // perhaps throw an exception instead
