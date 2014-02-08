@@ -204,18 +204,18 @@ SsPassFlags SusySelection::computeSsFlags(LeptonVector& leptons,
 
   bool update4mom(true); // charge flip
   bool mc(nt.evt()->isMC), data(!mc);
+  bool sameSign = allowQflip ? sameSignOrQflip(ncls, ncmet, ll, update4mom, mc) : susy::sameSign(ncls);
+  met = &ncmet; // after qflip, use potentially smeared lep and met
+  LeptonVector anyLeptons(getAnyElOrMu(nt));
+  LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
+  const swk::DilepVars v(swk::compute2lVars(leptons, met, jets, lowPtLep));
 
   if(susy::passNlepMin(ls, 2))                  { increment(n_pass_nSigLep  [ll], wc); f.eq2l       =true;} else return f;
   if(m_signalTaus.size()==0)                    { increment(n_pass_tauVeto  [ll], wc); f.tauVeto    =true;} else return f;
   if(passTrig2L     (ls))                       { increment(n_pass_tr2L     [ll], wc); f.trig2l     =true;} else return f;
   if(passTrig2LMatch(ls))                       { increment(n_pass_tr2LMatch[ll], wc); f.trig2lmatch=true;} else return f;
   if(data || susy::isTrueDilepton(ls))          { increment(n_pass_mcTrue2l [ll], wc); f.true2l     =true;} else return f;
-  bool sameSign = allowQflip ? sameSignOrQflip(ncls, ncmet, ll, update4mom, mc) : susy::sameSign(ncls);
   if(sameSign)                                  { increment(n_pass_ss       [ll], wc); f.sameSign   =true;} else return f;
-  met = &ncmet; // after qflip, use potentially smeared lep and met
-  LeptonVector anyLeptons(getAnyElOrMu(nt));
-  LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
-  const swk::DilepVars v(swk::compute2lVars(leptons, met, jets, lowPtLep));
   f.veto3rdL = v.l3veto;
   if     (f.eq1j) SusySelection::passSrWh1j(v, f);
   else if(f.ge2j) SusySelection::passSrWh2j(v, f);
