@@ -130,17 +130,6 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
       const swk::DilepVars v(swk::compute2lVars(ncl, m, j, lowPtLep));
 
-      if(isEe && is1j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1jee, iSys);
-      if(isEe && is2j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2jee, iSys);
-      if(isOf && is1j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1jem, iSys);
-      if(isOf && is2j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2jem, iSys);
-      if(isOf && is1j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1jem  , iSys);
-      if(isOf && is2j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2jem  , iSys);
-      if(isMm && is1j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, weight, swh::CrZV1jmm    , iSys);
-      if(isMm && is2j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, weight, swh::CrZV2jmm    , iSys);
-      if(isMm && is1j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1jmm  , iSys);
-      if(isMm && is2j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2jmm  , iSys);
-
       if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1j , iSys);
       if(is2j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2j , iSys);
       if(is1j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1j   , iSys);
