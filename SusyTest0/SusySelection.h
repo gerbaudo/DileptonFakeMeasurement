@@ -263,8 +263,6 @@ class SusySelection : public SusyNtAna
     float n_pass_nSigLep    [ET_N][kWeightTypesN];
     float n_pass_tauVeto    [ET_N][kWeightTypesN];
     float n_pass_mllMin     [ET_N][kWeightTypesN];
-    float n_pass_muIso      [ET_N][kWeightTypesN];
-    float n_pass_elD0Sig    [ET_N][kWeightTypesN];
     float n_pass_fjVeto     [ET_N][kWeightTypesN];
     float n_pass_bjVeto     [ET_N][kWeightTypesN];
     float n_pass_ge1j       [ET_N][kWeightTypesN];

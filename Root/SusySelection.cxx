@@ -213,8 +213,6 @@ SsPassFlags SusySelection::computeSsFlags(LeptonVector& leptons,
   bool sameSign = allowQflip ? sameSignOrQflip(ncls, ncmet, ll, update4mom, mc) : susy::sameSign(ncls);
   if(sameSign)                                  { increment(n_pass_ss       [ll], wc); f.sameSign   =true;} else return f;
   met = &ncmet; // after qflip, use potentially smeared lep and met
-  increment(n_pass_muIso    [ll], wc);
-  increment(n_pass_elD0Sig  [ll], wc);
   LeptonVector anyLeptons(getAnyElOrMu(nt));
   LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
   const swk::DilepVars v(swk::compute2lVars(leptons, met, jets, lowPtLep));
@@ -523,8 +521,6 @@ void SusySelection::dumpEventCounters()
     cout<<"trig match:      : "<<lcpet(n_pass_tr2LMatch      , w, cw)<<endl;
     cout<<"mc prompt2l      : "<<lcpet(n_pass_mcTrue2l       , w, cw)<<endl;
     cout<<"SS:              : "<<lcpet(n_pass_ss             , w, cw)<<endl;
-    cout<<"muIso            : "<<lcpet(n_pass_muIso          , w, cw)<<endl;
-    cout<<"elD0Sig          : "<<lcpet(n_pass_elD0Sig        , w, cw)<<endl;
     cout<<"3rdLepVeto       : "<<lcpet(n_pass_3rdLep         , w, cw)<<endl;
     cout<<"fjVeto           : "<<lcpet(n_pass_fjVeto         , w, cw)<<endl;
     cout<<"bjVeto           : "<<lcpet(n_pass_bjVeto         , w, cw)<<endl;
@@ -695,8 +691,6 @@ void SusySelection::resetAllCounters()
       n_pass_nSigLep        [i][w] = 0;
       n_pass_tauVeto        [i][w] = 0;
       n_pass_mllMin         [i][w] = 0;
-      n_pass_muIso          [i][w] = 0;
-      n_pass_elD0Sig        [i][w] = 0;
       n_pass_fjVeto         [i][w] = 0;
       n_pass_bjVeto         [i][w] = 0;
       n_pass_ge1j           [i][w] = 0;
