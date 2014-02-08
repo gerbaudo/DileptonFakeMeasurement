@@ -124,7 +124,6 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
       if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     iSys);
       if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,iSys);
-      bool isEe(ll==ee), isMm(ll==mm), isOf(!isEe && !isMm);
       bool is1j(j.size()==1), is2j(j.size()>1);
       LeptonVector anyLeptons(getAnyElOrMu(nt));
       LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
