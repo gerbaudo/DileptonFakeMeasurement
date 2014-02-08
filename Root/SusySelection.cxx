@@ -205,7 +205,6 @@ SsPassFlags SusySelection::computeSsFlags(LeptonVector& leptons,
   bool update4mom(true); // charge flip
   bool mc(nt.evt()->isMC), data(!mc);
 
-  increment(n_pass_category[ll], wc);
   if(susy::passNlepMin(ls, 2))                  { increment(n_pass_nSigLep  [ll], wc); f.eq2l       =true;} else return f;
   if(m_signalTaus.size()==0)                    { increment(n_pass_tauVeto  [ll], wc); f.tauVeto    =true;} else return f;
   if(passTrig2L     (ls))                       { increment(n_pass_tr2L     [ll], wc); f.trig2l     =true;} else return f;
@@ -229,6 +228,7 @@ void SusySelection::incrementSsCounters(const SsPassFlags &f, const WeightCompon
 {
     assert((f.ee != f.em) || (f.em != f.mm));
     DiLepEvtType ll(f.ee ? ET_ee : f.em ? ET_em : ET_mm);
+    increment(n_pass_category[ll], wc);
     if(f.veto3rdL) increment(n_pass_3rdLep [ll], wc); else return;
     if(f.fjveto  ) increment(n_pass_fjVeto [ll], wc); else return;
     if(f.bjveto  ) increment(n_pass_bjVeto [ll], wc); else return;
