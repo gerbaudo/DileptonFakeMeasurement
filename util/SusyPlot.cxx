@@ -28,6 +28,8 @@ void usage(const char *exeName) {
       <<"\t"<<"-i [--input]       (file, list, or dir)"  <<endl
       <<"\t"<<"-o [--output]      samplename"            <<endl
       <<"\t"<<"-s [--sample]      output file"           <<endl
+      <<"\t"<<"-S [--with-syst]   fill also syst histos" <<endl
+      <<"\t"<<"-T [--with-hft]    fill also HFT trees"   <<endl
       <<"\t"<<"-d [--debug]     : debug (>0 print stuff)"<<endl
       <<"\t"<<"-h [--help]      : print help"            <<endl
       <<"\t"<<"--WH-sample      : xsec from SusyXSReader"<<endl
@@ -50,6 +52,8 @@ int main(int argc, char** argv)
   string input;
   string output;
   bool useSusyXSReader = false;
+  bool doSyst = false;
+  bool doHft = false;
 
   int optind(1);
   while ((optind < argc)) {
@@ -65,6 +69,8 @@ int main(int argc, char** argv)
     else if(sw=="-i"||sw=="--input"      ) { input = argv[++optind]; }
     else if(sw=="-o"||sw=="--output"     ) { output = argv[++optind]; }
     else if(sw=="-s"||sw=="--sample"     ) { sample = argv[++optind]; }
+    else if(sw=="-S"||sw=="--with-syst"  ) { doSyst = true; }
+    else if(sw=="-T"||sw=="--with-hft"   ) { doHft = true; }
     else if(sw=="-h"||sw=="--help"       ) { usage(argv[0]); return 0; }
     else if(sw=="--WH-sample"            ) { useSusyXSReader = true; }
     else cout<<"Unknown switch "<<sw<<endl;
@@ -76,6 +82,8 @@ int main(int argc, char** argv)
       <<"  nEvt    "<<nEvt   <<endl
       <<"  nSkip   "<<nSkip  <<endl
       <<"  dbg     "<<dbg    <<endl
+      <<"  doSyst  "<<doSyst <<endl
+      <<"  doHft   "<<doHft <<endl
       <<"  input   "<<input  <<endl
       <<"  output  "<<output <<endl
       <<endl;
@@ -93,6 +101,8 @@ int main(int argc, char** argv)
   susyPlot->setDebug(dbg);
   susyPlot->setSampleName(sample);
   susyPlot->setUseXsReader(useSusyXSReader);
+  if(doSyst) susyPlot->toggleSystematics();
+  if(doHft) susyPlot->toggleHistFitterTrees();
   if(output.length()) susyPlot->setOutputFilename(output);
   susyPlot->buildSumwMap(chain);
   nEvt = (nEvt>0 ? nEvt : nEntries);

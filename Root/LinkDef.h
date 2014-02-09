@@ -8,6 +8,7 @@
 #include "SusyTest0/SsPassFlags.h"
 #include "SusyTest0/SelectionRegions.h" 
 #include "SusyTest0/TupleMakerObjects.h"
+#include "SusyTest0/kinematic.h"
 
 #ifdef __CINT__
 
@@ -34,4 +35,6 @@
 #pragma link C++ struct susy::wh::FourMom+;
 #pragma link C++ struct susy::wh::EventParameters+;
 #pragma link C++ class vector<susy::wh::FourMom>+;
+#pragma link C++ namespace susy::wh::kin;
+#pragma link C++ struct susy::wh::kin::DilepVars+;
 #endif

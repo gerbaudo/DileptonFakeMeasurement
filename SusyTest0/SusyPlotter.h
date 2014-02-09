@@ -3,6 +3,7 @@
 
 #include "SusyTest0/SusySelection.h"
 #include "SusyTest0/PlotRegion.h"
+#include "SusyTest0/HftFiller.h"
 
 #include "TH1F.h"
 #include "TH2F.h"
@@ -24,19 +25,32 @@ class SusyPlotter : public SusySelection
   float Mt(TLorentzVector p1, TLorentzVector met) {
     return sqrt(2*p1.Pt()*met.Et()*(1-cos(p1.DeltaPhi(met))));
   };
-  void setSysts(); // get list of systematics to consider; override in SusyMatrixMethod
+  void toggleNominal(); //!< create and fill the nominal histos
+  void toggleStdSystematics(); //!< create and fill the nominal histos and the ones for the systematic variations
+  void toggleFakeSystematics(); //!< create and fill the histos needed for the fake systematic
   void initHistos();
+  
  public:
   SusyPlotter& setOutputFilename(const std::string &name);
+  SusyPlotter& toggleSystematics();
+  SusyPlotter& toggleHistFitterTrees(); //!< create and fill the histos needed for the fake systematic
   
   ClassDef(SusyPlotter, 1);
+
+ protected:
+  bool isHftFillerInitialized() const { return m_systNames.size() == m_hftFiller.nTrees(); }
+  void initHftFiller();
+  void fillHft(const size_t sys, const susy::wh::kin::DilepVars &v);
+  void closeHftFiller();
 
  protected:
   std::vector<uint>   m_systs;              // systematics to process
   std::vector<string> m_systNames;          // systematics to process
   std::string         m_histFileName;       // output histo file name
   TFile*              m_histFile;           // output histo file
-  bool                m_doFake;             // do Fake estimate
+  bool                m_doProcessSystematics;
+  bool                m_fillHft;
+  susy::wh::HftFiller m_hftFiller;
 
   // preprocessor convenience - add more indices later
 #define DEFHIST( name ) h_ ## name[susy::wh::Ch_N][susy::wh::kNumberOfPlotRegions][40/*Guess for # of sys*/];

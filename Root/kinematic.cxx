@@ -10,7 +10,8 @@
 
 namespace swk = susy::wh::kin;
 
-swk::DilepVars swk::compute2lVars(const LeptonVector &leptons, const Susy::Met *met, const JetVector &jets)
+swk::DilepVars swk::compute2lVars(const LeptonVector &leptons, const Susy::Met *met,
+                                  const JetVector &jets, const LeptonVector &otherLeptons)
 {
     DilepVars v;
     v.numCentralLightJets = jets.size();
@@ -38,10 +39,42 @@ swk::DilepVars swk::compute2lVars(const LeptonVector &leptons, const Susy::Met *
         v.mt1 = swk::transverseMass(l1, met->lv());
         v.ht = swk::meff(l0, l1, met, jets);
         v.mtllmet = transverseMass(ll, met->lv());
-        // NB l3veto calculation should be moved here -- DG 2014-01-29
+        v.l3veto = swk::passThirdLeptonVeto(&l0, &l1, otherLeptons);
     }
     return v;
 }
+//-----------------------------------------
+bool swk::passThirdLeptonVeto(const Susy::Lepton *l0, const Susy::Lepton *l1, const LeptonVector& otherLeptons)
+{
+    struct LepPair {
+        const Susy::Lepton *signal, *other;
+        LepPair(const Susy::Lepton *s, const Susy::Lepton *o) : signal(s), other(o) { assert(s!=0 && o!=0); }
+        static const bool unbiasedD0Z0() { return true; }
+        static bool lepIsFromPv(const Susy::Lepton* l, float maxD0sig, float maxZ0sinTheta) {
+            return (fabs(l->d0Sig(unbiasedD0Z0())) < maxD0sig && fabs(l->z0SinTheta(unbiasedD0Z0())) < maxZ0sinTheta);
+        }
+        bool otherLepIsElFromPv() { return other->isEle() && lepIsFromPv(other, ELECTRON_D0SIG_CUT_WH, ELECTRON_Z0_SINTHETA_CUT); }
+        bool otherLepIsMuFromPv() { return other->isMu()  && lepIsFromPv(other, MUON_D0SIG_CUT,        MUON_Z0_SINTHETA_CUT); }
+        bool otherLepIsFromPv() { return otherLepIsElFromPv() || otherLepIsMuFromPv(); }
+        bool haveOppositeSign() { return (signal->q * other->q) < 0; }
+        bool haveSameFlavor() { return (signal->isMu() && other->isMu()) || (signal->isEle() && other->isEle()); }
+        float dR() { return signal->DeltaR(*other); }
+        bool areSeparated() { return dR() > 0.05; }
+        bool isZcandidate() { return haveOppositeSign() && haveSameFlavor() && areSeparated() && otherLepIsFromPv(); }
+        float m() { return (*signal + *other).M(); }
+        bool isInZwindow(float maxDelta) { const float mz(91.2); return isZcandidate() && abs(m() - mz) < maxDelta; }
+    };
+    float maxDeltaMz(20.0);
+    size_t nCandInWindow(0);
+    for(size_t i=0; i<otherLeptons.size(); ++i) {
+        const Susy::Lepton* ol = otherLeptons[i];
+        LepPair ll0(l0, ol), ll1(l1, ol);
+        if(ll0.isZcandidate() && ll0.isInZwindow(maxDeltaMz)) { nCandInWindow++; }
+        if(ll1.isZcandidate() && ll1.isInZwindow(maxDeltaMz)) { nCandInWindow++; }
+    }
+    return nCandInWindow == 0;
+}
+//-----------------------------------------
 
 float swk::mlj(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &j)
 {

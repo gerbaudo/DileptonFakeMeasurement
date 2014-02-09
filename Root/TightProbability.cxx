@@ -6,6 +6,7 @@
 #include "TH1F.h"
 #include "TAxis.h"
 
+#include "SusyTest0/EventFlags.h"
 #include "SusyTest0/criteria.h"
 
 using std::cout;
@@ -131,7 +132,7 @@ Bool_t TightProbability::Process(Long64_t entry) {
   const Met *met = m_met;
   bool isMc(nt.evt()->isMC);
   int nVtx(nt.evt()->nVtx);
-  bool passEvent(selectEvent());
+  bool passEvent(computeEventFlags().allTrue());
   //  cout<<(passEvent ? " passEvent " : "!passEvent\n");
   if(!passEvent) return true;
   //float metRel = getMetRel(met,leps,jets);
