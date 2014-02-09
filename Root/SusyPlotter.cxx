@@ -169,6 +169,13 @@ SusyPlotter& SusyPlotter::toggleSystematics()
     return *this;
 }
 //-----------------------------------------
+SusyPlotter& SusyPlotter::toggleHistFitterTrees()
+{
+    if(m_dbg) cout<<"SusyPlotter::toggleHistFitterTree: HftFiller will be initialized on the first event"<<endl;
+    m_fillHft = true;
+    return *this;
+}
+//-----------------------------------------
 void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
                              const Met* met, const float weight,
                              size_t regionIndex, uint sys)
