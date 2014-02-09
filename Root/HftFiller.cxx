@@ -28,16 +28,22 @@ bool HftFiller::fill(size_t systIndex, const susy::wh::kin::DilepVars &v)
     bool someBytesWritten(false);
     const float gev2mev = 1.0e3;
     if(HistFitterTree *t = m_hftTrees[systIndex]) {
+        t->eventweight = v.weight;
+        t->L2qFlipWeight = v.qflipWeight;
+        t->isEE = v.isEe;
+        t->isEMU = v.isEm;
+        t->isMUMU = v.isMm;
+        t->L2nCentralLightJets = v.numCentralLightJets;
         t->lept1Pt = v.pt0*gev2mev;
         t->lept2Pt = v.pt1*gev2mev;
-        // todo: all the other variables.
-//         = v.mll;
-//         = v.detall;
-//         = v.metrel;
-//         = v.mlj;
-//         = v.mljj;
-//         = v.mtmax();
-//         = v.mtllmet;
+        t->L2Mll = v.mll;
+        t->deltaEtaLl = v.detall;
+        t->L2METrel = v.metrel;
+        t->Ht = v.ht;
+        t->mlj = v.mlj;
+        t->mljj = v.mljj;
+        t->mtmax = v.mtmax();
+        t->mtllmet = v.mtllmet;
         t->WriteTree();
         someBytesWritten = true;
     }

@@ -22,6 +22,7 @@ namespace kin
   struct DilepVars { //! container for dilepton variables we want to compute once per event
     DilepVars() { reset(); }
     bool isEe, isEm, isMm;
+    float weight, qflipWeight;
     size_t numCentralLightJets;
     float pt0, pt1;
     float mll, detall;
@@ -34,12 +35,14 @@ namespace kin
     float mtmax() const { return mt0>mt1 ? mt0 : mt1; }
     void reset() {
       isEe = isEm = isMm = false;
+      weight = qflipWeight = 0.0;
       numCentralLightJets = 0;
       pt0 = pt1 =  mll = detall = metrel = mlj = mljj = mt0 = mt1 = mtllmet = 0.0;
       ht = 0.0;
       l3veto = false;
     }
   };
+  //! compute and assign all DilepVars attributes, except for the weights
   DilepVars compute2lVars(const LeptonVector &leptons, const Susy::Met *met,
                           const JetVector &jets, const LeptonVector &otherLeptons);
   //! determine whether a third lepton makes a Z candidate with a signal lepton

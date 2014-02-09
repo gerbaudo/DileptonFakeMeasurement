@@ -209,6 +209,8 @@ SusySelection::VarFlag_t SusySelection::computeSsFlags(LeptonVector& leptons,
       LeptonVector anyLeptons(getAnyElOrMu(nt));
       LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
       v = swk::compute2lVars(ncls, met, jets, lowPtLep);
+      v.weight = m_weightComponents.product();
+      v.qflipWeight = m_weightComponents.qflip;
       if(susy::passNlepMin(ls, 2))         f.eq2l       =true;
       if(m_signalTaus.size()==0)           f.tauVeto    =true;
       if(passTrig2L     (ls))              f.trig2l     =true;
