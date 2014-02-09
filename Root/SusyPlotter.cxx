@@ -104,7 +104,9 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       const TauVector&    t = m_signalTaus;
       if(l.size()>1) computeNonStaticWeightComponents(l, bj); else continue;
       bool allowQflip(true);
-      SsPassFlags ssf(SusySelection::computeSsFlags(ncl, t, j, m, allowQflip));
+      VarFlag_t varsFlags(SusySelection::computeSsFlags(ncl, t, j, m, allowQflip));
+      const swk::DilepVars &v = varsFlags.first;
+      const SsPassFlags &ssf = varsFlags.second;
       if(sys==NtSys_NOM) incrementSsCounters(ssf, m_weightComponents);
       float weight(m_weightComponents.product());
       const DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
@@ -125,9 +127,6 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     iSys);
       if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,iSys);
       bool is1j(j.size()==1), is2j(j.size()>1);
-      LeptonVector anyLeptons(getAnyElOrMu(nt));
-      LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
-      const swk::DilepVars v(swk::compute2lVars(ncl, m, j, lowPtLep));
 
       if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1j , iSys);
       if(is2j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2j , iSys);

@@ -97,7 +97,8 @@ Bool_t SusySelection::Process(Long64_t entry)
   const JetVector&   bj = m_baseJets;
   const LeptonVector& l = m_signalLeptons;
   if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
-  SsPassFlags ssf = computeSsFlags(m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip);
+  VarFlag_t varsFlags = computeSsFlags(m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip);
+  const SsPassFlags &ssf = varsFlags.second;
   incrementSsCounters(ssf, m_weightComponents);
   if(ssf.lepPt) {
       if(m_writeTuple) {
@@ -184,13 +185,14 @@ void SusySelection::incrementCounters(const susy::wh::EventFlags &f, const Weigh
   if(f.mllMin     ) increment(n_pass_mll     , w); else return;
 }
 //-----------------------------------------
-SsPassFlags SusySelection::computeSsFlags(LeptonVector& leptons,
-                                          const TauVector& taus,
-                                          const JetVector& jets,
-                                          const Met *met,
-                                          bool allowQflip)
+SusySelection::VarFlag_t SusySelection::computeSsFlags(LeptonVector& leptons,
+                                        const TauVector& taus,
+                                        const JetVector& jets,
+                                        const Met *met,
+                                        bool allowQflip)
 {
   SsPassFlags f;
+  swk::DilepVars v;
   const LeptonVector &ls = leptons;
   LeptonVector     &ncls = leptons; // non-const leptons: can be modified by qflip
   const JetVector    &js = jets;
@@ -206,7 +208,7 @@ SsPassFlags SusySelection::computeSsFlags(LeptonVector& leptons,
       met = &ncmet; // after qflip, use potentially smeared lep and met
       LeptonVector anyLeptons(getAnyElOrMu(nt));
       LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
-      const swk::DilepVars v(swk::compute2lVars(leptons, met, jets, lowPtLep));
+      v = swk::compute2lVars(ncls, met, jets, lowPtLep);
       if(susy::passNlepMin(ls, 2))         f.eq2l       =true;
       if(m_signalTaus.size()==0)           f.tauVeto    =true;
       if(passTrig2L     (ls))              f.trig2l     =true;
@@ -217,7 +219,7 @@ SsPassFlags SusySelection::computeSsFlags(LeptonVector& leptons,
       if     (f.eq1j) SusySelection::passSrWh1j(v, f);
       else if(f.ge2j) SusySelection::passSrWh2j(v, f);
   }
-  return f;
+  return std::make_pair(v, f);
 }
 //-----------------------------------------
 void SusySelection::incrementSsCounters(const SsPassFlags &f, const WeightComponents &wc)

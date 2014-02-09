@@ -73,7 +73,9 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
   bool allowQflip(false), passMinMet(m->Et > 40.0);
   bool isEe(ll==ee), isMm(ll==mm), isSf(isEe||isMm), isOf(!isEe && !isMm);
-  SsPassFlags ssf(SusySelection::computeSsFlags(ncl, t, j, m, allowQflip));
+  const VarFlag_t varsFlags(SusySelection::computeSsFlags(ncl, t, j, m, allowQflip));
+  const swk::DilepVars &v = varsFlags.first;
+  const SsPassFlags &ssf = varsFlags.second;
   m_weightComponents.fake = getFakeWeight(l,sf::CR_SRWHSS, metRel, smm::SYS_NONE); // just for the counters, use generic CR_SRWHSS
   incrementSsCounters(ssf, m_weightComponents);
   if(m_writeTuple && ssf.lepPt) {
@@ -88,9 +90,6 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
       for(uint s = 0; s<m_systs.size(); ++s){
           smm::SYSTEMATIC sys = static_cast<smm::SYSTEMATIC>(m_systs.at(s));
           bool is1j(j.size()==1), is2j(j.size()>1);
-          LeptonVector anyLeptons(getAnyElOrMu(nt));
-          LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
-          const swk::DilepVars v(swk::compute2lVars(ncl, m, j, lowPtLep));
 
           if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
           if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8ee,     metRel,sys), PR_CR8ee,     sys);

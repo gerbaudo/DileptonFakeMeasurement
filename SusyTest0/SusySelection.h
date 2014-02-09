@@ -26,6 +26,7 @@
 #include "SusyTest0/DileptonChannel.h"
 
 #include <fstream>
+#include <utility> // std::pair
 
 enum WeightTypes {
   kRaw = 0,   // raw counts
@@ -58,6 +59,7 @@ class SusySelection : public SusyNtAna
   typedef const TauVector    cvt_t;  //!< just to make some decl shorter
   typedef const JetVector    cvj_t;  //!< just to make some decl shorter
   typedef const Met          cmet_t; //!< just to make some decl shorter
+  typedef std::pair<susy::wh::kin::DilepVars, SsPassFlags> VarFlag_t;
   struct WeightComponents {
     WeightComponents() { reset(); }
     double product() const { return susynt * lepSf * btag * trigger * qflip * fake; }
@@ -80,7 +82,7 @@ class SusySelection : public SusyNtAna
     susy::wh::EventFlags computeEventFlags();
     void incrementCounters(const susy::wh::EventFlags &f, const WeightComponents &w);
     // compute the selection flags for the same-sign signal region; note that the charge flip can modify leptons and met
-    SsPassFlags computeSsFlags(vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
+    VarFlag_t computeSsFlags(vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
     //! increment counters that are specific to the same-sign selection
     void incrementSsCounters(const SsPassFlags &f, const WeightComponents &w);
     // Cut methods
