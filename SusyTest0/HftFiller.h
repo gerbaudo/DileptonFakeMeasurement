@@ -20,17 +20,16 @@ namespace wh
 */
 class HftFiller {
 public:
-    HftFiller(const std::string &mcid, float sumw);
+    HftFiller();
     ~HftFiller();
-    bool init(const std::vector<std::string> &systematics);
-    bool close();
+    bool init(const std::string &mcid, const std::vector<std::string> &systematics);
+    bool close(float sumw);
     bool fill(size_t systIndex, const susy::wh::kin::DilepVars &v);
+    size_t nTrees() const { return m_hftTrees.size(); }
 private: // rule of three 
     HftFiller(const HftFiller&);
     HftFiller& operator=(const HftFiller&);
 private:
-    std::string m_mcid;
-    float m_sumw;
     std::vector<HistFitterTree*> m_hftTrees;
 }; // end HftFiller
 
