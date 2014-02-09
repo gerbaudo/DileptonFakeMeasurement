@@ -194,31 +194,29 @@ SsPassFlags SusySelection::computeSsFlags(LeptonVector& leptons,
   const LeptonVector &ls = leptons;
   LeptonVector     &ncls = leptons; // non-const leptons: can be modified by qflip
   const JetVector    &js = jets;
-  WeightComponents &wc = m_weightComponents;
   Met ncmet(*m_met); // non-const met \todo: should modify a non-const input
-  if(leptons.size()<2) return f;
-  f.updateLlFlags(*leptons[0], *leptons[1]);
-  f = assignNjetFlags(js, f);
-  DiLepEvtType ll(getDiLepEvtType(leptons));
-  if(ll==ET_me) ll = ET_em;
-
-  bool update4mom(true); // charge flip
-  bool mc(nt.evt()->isMC), data(!mc);
-  bool sameSign = allowQflip ? sameSignOrQflip(ncls, ncmet, ll, update4mom, mc) : susy::sameSign(ncls);
-  met = &ncmet; // after qflip, use potentially smeared lep and met
-  LeptonVector anyLeptons(getAnyElOrMu(nt));
-  LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
-  const swk::DilepVars v(swk::compute2lVars(leptons, met, jets, lowPtLep));
-
-  if(susy::passNlepMin(ls, 2))                  { increment(n_pass_nSigLep  [ll], wc); f.eq2l       =true;} else return f;
-  if(m_signalTaus.size()==0)                    { increment(n_pass_tauVeto  [ll], wc); f.tauVeto    =true;} else return f;
-  if(passTrig2L     (ls))                       { increment(n_pass_tr2L     [ll], wc); f.trig2l     =true;} else return f;
-  if(passTrig2LMatch(ls))                       { increment(n_pass_tr2LMatch[ll], wc); f.trig2lmatch=true;} else return f;
-  if(data || susy::isTrueDilepton(ls))          { increment(n_pass_mcTrue2l [ll], wc); f.true2l     =true;} else return f;
-  if(sameSign)                                  { increment(n_pass_ss       [ll], wc); f.sameSign   =true;} else return f;
-  f.veto3rdL = v.l3veto;
-  if     (f.eq1j) SusySelection::passSrWh1j(v, f);
-  else if(f.ge2j) SusySelection::passSrWh2j(v, f);
+  if(leptons.size()>1) {
+      f.updateLlFlags(*leptons[0], *leptons[1]);
+      f = assignNjetFlags(js, f);
+      DiLepEvtType ll(getDiLepEvtType(leptons));
+      if(ll==ET_me) ll = ET_em;
+      bool update4mom(true); // charge flip
+      bool mc(nt.evt()->isMC), data(!mc);
+      bool sameSign = allowQflip ? sameSignOrQflip(ncls, ncmet, ll, update4mom, mc) : susy::sameSign(ncls);
+      met = &ncmet; // after qflip, use potentially smeared lep and met
+      LeptonVector anyLeptons(getAnyElOrMu(nt));
+      LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
+      const swk::DilepVars v(swk::compute2lVars(leptons, met, jets, lowPtLep));
+      if(susy::passNlepMin(ls, 2))         f.eq2l       =true;
+      if(m_signalTaus.size()==0)           f.tauVeto    =true;
+      if(passTrig2L     (ls))              f.trig2l     =true;
+      if(passTrig2LMatch(ls))              f.trig2lmatch=true;
+      if(data || susy::isTrueDilepton(ls)) f.true2l     =true;
+      if(sameSign)                         f.sameSign   =true;
+      f.veto3rdL = v.l3veto;
+      if     (f.eq1j) SusySelection::passSrWh1j(v, f);
+      else if(f.ge2j) SusySelection::passSrWh2j(v, f);
+  }
   return f;
 }
 //-----------------------------------------
@@ -227,10 +225,17 @@ void SusySelection::incrementSsCounters(const SsPassFlags &f, const WeightCompon
     assert((f.ee != f.em) || (f.em != f.mm));
     DiLepEvtType ll(f.ee ? ET_ee : f.em ? ET_em : ET_mm);
     increment(n_pass_category[ll], wc);
-    if(f.veto3rdL) increment(n_pass_3rdLep [ll], wc); else return;
-    if(f.fjveto  ) increment(n_pass_fjVeto [ll], wc); else return;
-    if(f.bjveto  ) increment(n_pass_bjVeto [ll], wc); else return;
-    if(f.ge1j    ) increment(n_pass_ge1j   [ll], wc); else return;
+
+    if(f.eq2l       ) increment(n_pass_nSigLep  [ll], wc); else return;
+    if(f.tauVeto    ) increment(n_pass_tauVeto  [ll], wc); else return;
+    if(f.trig2l     ) increment(n_pass_tr2L     [ll], wc); else return;
+    if(f.trig2lmatch) increment(n_pass_tr2LMatch[ll], wc); else return;
+    if(f.true2l     ) increment(n_pass_mcTrue2l [ll], wc); else return;
+    if(f.sameSign   ) increment(n_pass_ss       [ll], wc); else return;
+    if(f.veto3rdL   ) increment(n_pass_3rdLep   [ll], wc); else return;
+    if(f.fjveto     ) increment(n_pass_fjVeto   [ll], wc); else return;
+    if(f.bjveto     ) increment(n_pass_bjVeto   [ll], wc); else return;
+    if(f.ge1j       ) increment(n_pass_ge1j     [ll], wc); else return;
     if(f.ge1j) {
         if(f.ge1j    ) increment((f.eq1j ? n_pass_eq1j         [ll] : n_pass_ge2j         [ll]), wc);
         if(f.lepPt   ) increment((f.eq1j ? n_pass_eq1jlepPt    [ll] : n_pass_ge2jlepPt    [ll]), wc); else return;
@@ -272,18 +277,18 @@ bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
                                     const DiLepEvtType eventType,
                                     bool update4mom, bool isMc)
 {
-  bool isSS(susy::sameSign(leptons));
-  if(isSS) return true;
-  if(!isMc) return isSS;
-  bool isOS(!isSS);
-  bool canBeQflip(isOS && (eventType==ET_ee || eventType==ET_em || eventType==ET_me));
-  if (!canBeQflip){ return false; }
-  if(canBeQflip){
-    uint systematic=NtSys_NOM; // DG sys todo
-    m_qflipProb = computeChargeFlipProb(leptons, met, systematic, update4mom);
-    m_weightComponents.qflip = m_qflipProb;
-  }
-  return true;
+    if(leptons.size()>1) {
+        bool isSS(susy::sameSign(leptons)), isOS(!isSS);
+        bool canBeQflip(isMc && isOS && (leptons[0]->isEle() || leptons[1]->isEle()));
+        if(canBeQflip) {
+            uint systematic=NtSys_NOM; // DG sys todo
+            m_qflipProb = computeChargeFlipProb(leptons, met, systematic, update4mom);
+            m_weightComponents.qflip = m_qflipProb;
+            return true;
+        }
+        else return isSS;
+    }
+    return false;
 }
 //-----------------------------------------
 bool SusySelection::passJetVeto(const JetVector& jets)
