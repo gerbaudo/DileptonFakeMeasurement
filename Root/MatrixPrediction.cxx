@@ -38,6 +38,7 @@ void MatrixPrediction::Begin(TTree* /*tree*/)
     if(m_dbg) cout<<"MatrixPrediction::Begin"<<endl;
     SusySelection::Begin(0);
     if(m_writeTuple) {
+        // shouldn't we SusyPlotter::toggleNominal() here?
         m_allconfigured = initMatrixTool();
     } else {
         toggleFakeSystematics();
