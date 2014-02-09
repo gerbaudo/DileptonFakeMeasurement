@@ -3,6 +3,7 @@
 
 #include "SusyTest0/SusySelection.h"
 #include "SusyTest0/PlotRegion.h"
+#include "SusyTest0/HftFiller.h"
 
 #include "TH1F.h"
 #include "TH2F.h"
@@ -32,8 +33,15 @@ class SusyPlotter : public SusySelection
  public:
   SusyPlotter& setOutputFilename(const std::string &name);
   SusyPlotter& toggleSystematics();
+  SusyPlotter& toggleHistFitterTrees(); //!< create and fill the histos needed for the fake systematic
   
   ClassDef(SusyPlotter, 1);
+
+ protected:
+  bool isHftFillerInitialized() const { return m_systNames.size() == m_hftFiller.nTrees(); }
+  void initHftFiller();
+  void fillHft(const size_t sys, const susy::wh::kin::DilepVars &v);
+  void closeHftFiller();
 
  protected:
   std::vector<uint>   m_systs;              // systematics to process
@@ -41,6 +49,9 @@ class SusyPlotter : public SusySelection
   std::string         m_histFileName;       // output histo file name
   TFile*              m_histFile;           // output histo file
   bool                m_doProcessSystematics;
+  bool                m_fillHft;
+  susy::wh::HftFiller m_hftFiller;
+
   // preprocessor convenience - add more indices later
 #define DEFHIST( name ) h_ ## name[susy::wh::Ch_N][susy::wh::kNumberOfPlotRegions][40/*Guess for # of sys*/];
 

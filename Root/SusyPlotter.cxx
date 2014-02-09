@@ -1,6 +1,9 @@
-#include <cassert>
-
 #include "SusyTest0/SusyPlotter.h"
+
+#include <algorithm>
+#include <cassert>
+#include <iterator>
+#include <sstream>
 
 #include "TLorentzVector.h"
 
@@ -137,6 +140,10 @@ Bool_t SusyPlotter::Process(Long64_t entry)
 
       if(is1j && SusySelection::passSrWh1j(v)) fillHistos(ncl, j, m, weight, swh::SrWh1j , iSys);
       if(is2j && SusySelection::passSrWh2j(v)) fillHistos(ncl, j, m, weight, swh::SrWh2j , iSys);
+      if(m_fillHft) {
+          if(!isHftFillerInitialized()) initHftFiller();
+          fillHft(iSys, v);
+      }
   } // for(iSys)
   return kTRUE;
 }
@@ -147,6 +154,7 @@ void SusyPlotter::Terminate()
   if(m_dbg) cout << "SusyPlotter::Terminate" << endl;
   dumpEventCounters();
   // Save the output
+  if(m_fillHft) closeHftFiller();
   m_histFile->Write();
   m_histFile->Close();
 }
@@ -502,5 +510,33 @@ void SusyPlotter::initHistos()
       }// end loop over systematics
     }// end loop over channels
   }// end loop over Plot regions
+}
+//-----------------------------------------
+void SusyPlotter::initHftFiller()
+{
+    if(isHftFillerInitialized()) {
+        cout<<"SusyPlotter::initHftFiller: warning, HftFiller already initialized...skipping"<<endl;
+    } else {
+        ostringstream oss;
+        oss<<nt.evt()->mcChannel;
+        string mcid(oss.str());
+        m_hftFiller.init(mcid, m_systNames);
+        if(m_dbg) {
+            std::copy(m_systNames.begin(), m_systNames.end(), ostream_iterator<string>(oss, "\n"));
+            cout<<"SusyPlotter::initHftFiller : initializing mcid "<<oss.str()<<endl;
+        }
+    }
+}
+//-----------------------------------------
+void SusyPlotter::fillHft(const size_t sys, const susy::wh::kin::DilepVars &v)
+{
+    size_t todo_________ImplementFakeIndices;
+    m_hftFiller.fill(sys, v);
+}
+//-----------------------------------------
+void SusyPlotter::closeHftFiller()
+{
+    float sumw = nt.evt()->sumw;
+    m_hftFiller.close(sumw);
 }
 //-----------------------------------------
