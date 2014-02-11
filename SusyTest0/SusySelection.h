@@ -311,6 +311,14 @@ class SusySelection : public SusyNtAna
     float n_pass_ge2jht         [ET_N][kWeightTypesN];
     float n_pass_ge2jmetRel     [ET_N][kWeightTypesN];
     float n_pass_ge2jmWwt       [ET_N][kWeightTypesN];
+
+    float n_pass_cr1jzv         [ET_N][kWeightTypesN];
+    float n_pass_cr1jfake       [ET_N][kWeightTypesN];
+    float n_pass_cr1jzvfake     [ET_N][kWeightTypesN];
+    float n_pass_cr2jzv         [ET_N][kWeightTypesN];
+    float n_pass_cr2jfake       [ET_N][kWeightTypesN];
+    float n_pass_cr2jzvfake     [ET_N][kWeightTypesN];
+
 };
 
 #endif // SusySelection_h

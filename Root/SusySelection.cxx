@@ -575,6 +575,15 @@ void SusySelection::dumpEventCounters()
     cout<<"metRel           : "<<lcpet(n_pass_ge2jmetRel     , w, cw)<<endl;
     cout<<"mWwt             : "<<lcpet(n_pass_ge2jmWwt       , w, cw)<<endl;
     cout<<midRule                                                    <<endl;
+    cout<<"   ------  Control regions ------ "                       <<endl;
+    cout<<"cr1jzv           : "<<lcpet(n_pass_cr1jzv         , w, cw)<<endl;
+    cout<<"cr1jfake         : "<<lcpet(n_pass_cr1jfake       , w, cw)<<endl;
+    cout<<"cr1jzvfake       : "<<lcpet(n_pass_cr1jzvfake     , w, cw)<<endl;
+    cout<<midRule                                                    <<endl;
+    cout<<"cr2jzv           : "<<lcpet(n_pass_cr2jzv         , w, cw)<<endl;
+    cout<<"cr2jfake         : "<<lcpet(n_pass_cr2jfake       , w, cw)<<endl;
+    cout<<"cr2jzvfake       : "<<lcpet(n_pass_cr2jzvfake     , w, cw)<<endl;
+    cout<<midRule                                                    <<endl;
   }// end for(w)
 }
 //-----------------------------------------
@@ -788,6 +797,12 @@ void SusySelection::resetAllCounters()
       n_pass_ge2jht         [i][w] = 0;
       n_pass_ge2jmetRel     [i][w] = 0;
       n_pass_ge2jmWwt       [i][w] = 0;
+      n_pass_cr1jzv         [i][w] = 0;
+      n_pass_cr1jfake       [i][w] = 0;
+      n_pass_cr1jzvfake     [i][w] = 0;
+      n_pass_cr2jzv         [i][w] = 0;
+      n_pass_cr2jfake       [i][w] = 0;
+      n_pass_cr2jzvfake     [i][w] = 0;
     } // end for(i)
   } // end for(w)
 }
