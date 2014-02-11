@@ -281,9 +281,7 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   bool passSR = false;
   namespace swk = susy::wh::kin;
         
-  bool computeWhssPass(CR==susy::fake::CR_SRWHSS || CR==susy::fake::CR_CR8lpt
-                       || CR==susy::fake::CR_CR8ee || CR==susy::fake::CR_CR8mm
-                       || CR==susy::fake::CR_CR8mmMtww || CR==susy::fake::CR_CR8mmHt);
+  bool computeWhssPass(true);
   SsPassFlags whssFlags(computeWhssPass ? passWhSS(leptons,jets,met) : SsPassFlags());
   susy::wh::Chan ch(SusySelection::getChan(leptons));
   m_ch = SusySelection::getChan(leptons);
@@ -292,10 +290,11 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   LeptonVector anyLeptons(getAnyElOrMu(nt));
   LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
   /*const*/ swk::DilepVars v(swk::compute2lVars(leptons, met, jets));
-  v.l3veto = SusySelection::passThirdLeptonVeto(leptons[0], leptons[1], lowPtLep, m_debugThisEvent); // should go into compute2lVars
-
+  v.l3veto = whssFlags.veto3rdL;
+  if(CR==sf::CR_SSInc) passSR = susy::sameSign(leptons);
+  else {
+  if(!whssFlags.passCommonCriteria()) return false;
   switch(CR) {
-  case sf::CR_SSInc        : passSR = susy::sameSign(leptons);            break;
   case sf::CR_SRWHSS       : passSR =  whssFlags.metrel;                  break;
   case sf::CR_CR8lpt       : passSR =  whssFlags.lepPt;                   break;
   case sf::CR_CR8ee        : passSR = (whssFlags.lepPt   && isEe);        break;
@@ -327,6 +326,7 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   case sf::CR_SRWH2j       : passSR = (is2j && passSrWh2j    (v)); break;
 
   default: cout<<"invalid ControlRegion "<<CR<<endl;
+  }
   }
   for(uint i=0; i<leptons.size(); ++i) m_probes.push_back( leptons[i]);
   if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(leptons);
