@@ -101,7 +101,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
   bool allowQflip(true);
   SsPassFlags ssf(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
-  if(!ssf.passLpt()) return false;
+  if(!ssf.passCommonCriteria()) return false;
   float weight(m_weightComponents.product());
   const DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
   bool sameFlav(ll==ee||ll==mm);

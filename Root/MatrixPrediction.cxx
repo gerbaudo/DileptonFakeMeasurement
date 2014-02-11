@@ -74,7 +74,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   bool allowQflip(false), passMinMet(m->Et > 40.0);
   bool isEe(ll==ee), isMm(ll==mm), isSf(isEe||isMm), isOf(!isEe && !isMm);
   SsPassFlags ssf(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
-  if(!ssf.passLpt()) return false;
+  if(!ssf.passCommonCriteria()) return false;
   if(m_writeTuple && ssf.lepPt) {
       double weight(getFakeWeight(l, sf::CR_CR8lpt, metRel, smm::SYS_NONE));
       unsigned int run(nt.evt()->run), event(nt.evt()->event);
