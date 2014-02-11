@@ -139,6 +139,10 @@ class SusySelection : public SusyNtAna
     static bool passCrWhZVfake  (const susy::wh::kin::DilepVars &v);
     static bool passCrWhfake    (const susy::wh::kin::DilepVars &v);
     static bool passCrWhZV      (const susy::wh::kin::DilepVars &v);
+    // same as above, but also increment the counters
+    bool passAndIncrementCrWhZVfake(const susy::wh::kin::DilepVars &v);
+    bool passAndIncrementCrWhfake  (const susy::wh::kin::DilepVars &v);
+    bool passAndIncrementCrWhZV    (const susy::wh::kin::DilepVars &v);
 
     //
     static bool passSrWh1j(const susy::wh::kin::DilepVars &v);

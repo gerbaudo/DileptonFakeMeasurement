@@ -909,6 +909,48 @@ bool SusySelection::passCrWhZV(const susy::wh::kin::DilepVars &v)
     return SusySelection::passCrWhZVMm(v);
 }
 //-----------------------------------------
+DiLepEvtType vars2type(const susy::wh::kin::DilepVars &v)
+{
+    DiLepEvtType et = ET_Unknown;
+    if     (v.isEe) et = ET_ee;
+    else if(v.isEm) et = ET_em;
+    else if(v.isMm) et = ET_mm;
+    return et;
+}
+//-----------------------------------------
+bool SusySelection::passAndIncrementCrWhZVfake(const susy::wh::kin::DilepVars &v)
+{
+    bool pass(passCrWhZVfake(v));
+    if(pass) {
+        DiLepEvtType ll = vars2type(v);
+        float* counters = v.numCentralLightJets==1 ? n_pass_cr1jzvfake[ll] : n_pass_cr2jzvfake[ll];
+        increment(counters, m_weightComponents);
+    }
+    return pass;
+}
+//-----------------------------------------
+bool SusySelection::passAndIncrementCrWhfake(const susy::wh::kin::DilepVars &v)
+{
+    bool pass(passCrWhfake(v));
+    if(pass) {
+        DiLepEvtType ll = vars2type(v);
+        float* counters = v.numCentralLightJets==1 ? n_pass_cr1jfake[ll] : n_pass_cr2jfake[ll];
+        increment(counters, m_weightComponents);
+    }
+    return pass;
+}
+//-----------------------------------------
+bool SusySelection::passAndIncrementCrWhZV(const susy::wh::kin::DilepVars &v)
+{
+    bool pass(passCrWhZV(v));
+    if(pass) {
+        DiLepEvtType ll = vars2type(v);
+        float* counters = v.numCentralLightJets==1 ? n_pass_cr1jzv[ll] : n_pass_cr2jzv[ll];
+        increment(counters, m_weightComponents);
+    }
+    return pass;
+}
+//-----------------------------------------
 bool SusySelection::passSrWh1j(const susy::wh::kin::DilepVars &v, SsPassFlags &f)
 {
     bool notApplied(true), pass(false);
