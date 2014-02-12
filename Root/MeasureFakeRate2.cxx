@@ -11,8 +11,10 @@
 #include <cassert>
 
 using namespace susy::fake;
-using namespace susy::wh;
 namespace sf = susy::fake;
+using namespace susy::wh;
+namespace swk = susy::wh::kin;
+
 
 const sf::Region controlRegions[] = {
     sf::CR_Real, sf::CR_SideLow, sf::CR_SideHigh, sf::CR_HF, sf::CR_HF_high,
