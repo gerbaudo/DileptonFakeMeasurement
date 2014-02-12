@@ -140,6 +140,7 @@ void MeasureFakeRate2::initHistos(string outName)
         h_l_pt_true    [il][icr][ich] = new TH1F     ((bn+"l_pt_true").c_str(), "", nFakePtbins, FakePtbins);
         h_l_pt_fake    [il][icr][ich] = new TH1F     ((bn+"l_pt_fake").c_str(), "", nFakePtbins, FakePtbins);
         for(int lbl=0; lbl<LS_N; ++lbl) h_flavor[il][icr][ich]->SetXLabel(lbl+1, LSNames[lbl]);
+        h_l_pt_eta     [il][icr][ich] = new EffObject2(bn+"l_pt_eta",    nCoarseFakePtbins, coarseFakePtbins, nCoarseEtabins, CoarseEtabins);
       } // end for(ich)
     } // end for(icr)
   } // end for(il)
@@ -215,25 +216,39 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
                 if(EffObject* eff = eff_array[l_][r_][Ch_all]) eff->Fill(n_, w_, value);
         }
     };
+    struct Fill2dEffHistos {
+        bool n_; double w_;
+        LeptonType l_; size_t r_; Chan c_;
+        Fill2dEffHistos(bool alsoNum, double weight, LeptonType l, size_t r, Chan c)
+            : n_(alsoNum), w_(weight), l_(l), r_(r), c_(c) {}
+        void operator () (EffObject2* eff_array[kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N],
+                          double valueX, double valueY) {
+            if(EffObject2* eff = eff_array[l_][r_][c_])         eff->Fill(n_, w_, valueX, valueY);
+            if(c_ != Ch_all)
+                if(EffObject2* eff = eff_array[l_][r_][Ch_all]) eff->Fill(n_, w_, valueX, valueY);
+        }
+    };
 
     bool isElOrMu(lep->isEle() || lep->isMu());
     assert(isElOrMu);
     LeptonType lt(lep->isEle() ? kElectron : kMuon);
     bool pass(isSignalLepton(lep, m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC));
-    FillEffHistos fillEff(pass, m_evtWeight, lt, regionIndex, static_cast<Chan>(m_ch));    
-    fillEff(h_l_pt        , lep->Pt());
-    fillEff(h_l_pt_coarse , lep->Pt());
-    fillEff(h_l_eta       , fabs(lep->Eta()));
-    fillEff(h_l_eta_coarse, fabs(lep->Eta()));
-    fillEff(h_metrel      , m_metRel);
-    fillEff(h_met         , met->Et);
-    fillEff(h_njets       , jets.size());
-    fillEff(h_onebin      , 0.0);
+    FillEffHistos   fill1dEff(pass, m_evtWeight, lt, regionIndex, static_cast<Chan>(m_ch));
+    Fill2dEffHistos fill2dEff(pass, m_evtWeight, lt, regionIndex, static_cast<Chan>(m_ch));
+    fill1dEff(h_l_pt        , lep->Pt());
+    fill1dEff(h_l_pt_coarse , lep->Pt());
+    fill1dEff(h_l_eta       , fabs(lep->Eta()));
+    fill1dEff(h_l_eta_coarse, fabs(lep->Eta()));
+    fill1dEff(h_metrel      , m_metRel);
+    fill1dEff(h_met         , met->Et);
+    fill1dEff(h_njets       , jets.size());
+    fill1dEff(h_onebin      , 0.0);
+    fill2dEff(h_l_pt_eta    , lep->Pt(), fabs(lep->Eta()));
     if( nt.evt()->isMC ){ // If the event is MC, save the flavor
         LeptonSource ls(getLeptonSource(lep));
         bool isQcd(ls==LS_HF||ls==LS_LF);
-        fillEff(h_flavor, ls);
-        if(isQcd) fillEff(h_flavor, LS_QCD);
+        fill1dEff(h_flavor, ls);
+        if(isQcd) fill1dEff(h_flavor, LS_QCD);
         TH1F *hlpt = (ls==LS_Real ? h_l_pt_true[lt][regionIndex][m_ch] : h_l_pt_fake[lt][regionIndex][m_ch]);
         if(hlpt) hlpt->Fill(lep->Pt(), m_evtWeight);
     }
@@ -703,13 +718,13 @@ void MeasureFakeRate2::increment(float flag[], bool includeLepSF, bool includeBt
     flag[WT_Evt]   += nt.evt()->w;
     flag[WT_PU]    += nt.evt()->w * nt.evt()->wPileup;
     flag[WT_PU1fb] += nt.evt()->w * nt.evt()->wPileupAB3;
-    flag[WT_LSF]   += (includeLepSF ? 
+    flag[WT_LSF]   += (includeLepSF ?
                        nt.evt()->w * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF :
                        nt.evt()->w);
     float btag = includeBtag ? getBTagWeight(nt.evt()) : 1.0;
     flag[WT_Btag]  += nt.evt()->w * btag;
-    
-    float trig = m_baseLeptons.size() == 2 && nt.evt()->isMC && !m_useMCTrig ? 
+
+    float trig = m_baseLeptons.size() == 2 && nt.evt()->isMC && !m_useMCTrig ?
         m_trigObj->getTriggerWeight(m_baseLeptons,
                                     nt.evt()->isMC,
                                     m_met->Et,
@@ -719,7 +734,7 @@ void MeasureFakeRate2::increment(float flag[], bool includeLepSF, bool includeBt
     //cout<<"\tTrigger weight: "<<trig<<endl;
     flag[WT_Trig] += trig * nt.evt()->w;
     bool useSumwMap(true);
-    
+
     float allAE = SusyNtAna::getEventWeight(LUMI_A_L, useSumwMap) * btag * trig;
     allAE = includeLepSF ? allAE * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : allAE;
     flag[WT_AllAE] += allAE;
