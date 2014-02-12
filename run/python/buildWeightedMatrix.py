@@ -56,9 +56,9 @@ Example usage:
 
 # scale factors from determineFakeScaleFactor.py
 # --- paste the lines below in buildWeightedMatrix.py ---
-# Feb_10, 2014-02-11 09:47:00.205494
-mu_qcdSF, mu_realSF = 0.82, 0.99611
-el_convSF, el_qcdSF, el_realSF = 1.14, 0.60, 0.9976
+# Feb_11, 2014-02-12 00:18:40.140345
+mu_qcdSF, mu_realSF = 0.86, 0.99590
+el_convSF, el_qcdSF, el_realSF = 1.09, 0.63, 0.99633
 
 def main() :
     parser = optparse.OptionParser(usage=usage)
@@ -101,6 +101,7 @@ def frac2str(frac) :
 def selectionRegions() :
     print "hardcoded selectionRegions, should match what's in FakeRegions.h; fix DiLeptonMatrixMethod"
     return ['CR_SSInc',
+            'CR_SSInc1j',
             'CR_WHSS',
             'CR_CR8lpt',
             'CR_CR8ee',
@@ -110,6 +111,7 @@ def selectionRegions() :
             'CR_CR9lpt',
             'CR_SsEwk',
             'CR_SsEwkLoose',
+            'CR_SsEwkLea',
             'CR_WHZVfake1jee',
             'CR_WHZVfake2jee',
             'CR_WHZVfake1jem',
