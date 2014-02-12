@@ -440,7 +440,6 @@ bool SusySelection::passEwkSsLea(const LeptonVector& leptons, const JetVector& j
         bool passZeeVeto(isEe ? fabs(mll- 91.2)>10.0 : true);
         pass= (noBjets && noFwJets && someCentralJets && passZeeVeto
                && susy::sameSign(leptons)
-               && (mll < 20.0)
                && (met->Et<40.0));
     }
     return pass;
