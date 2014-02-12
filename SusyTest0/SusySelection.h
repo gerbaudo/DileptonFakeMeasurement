@@ -130,6 +130,8 @@ class SusySelection : public SusyNtAna
     bool passMuonRelIso(const LeptonVector &leptons, float maxVal);
     static bool passEwkSs     (const LeptonVector& leptons, const JetVector& jets, const Met* met);
     static bool passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met);
+    static bool passEwkSsLea  (const LeptonVector& leptons, const JetVector& jets, const Met* met);
+    void checkAndIncrementEwk(const LeptonVector& leptons, const JetVector& jets, const Met* met);
     static bool passCrWhZVfakeEe(const susy::wh::kin::DilepVars &v);
     static bool passCrWhZVfakeEm(const susy::wh::kin::DilepVars &v);
     static bool passCrWhfakeEm  (const susy::wh::kin::DilepVars &v);
@@ -323,6 +325,9 @@ class SusySelection : public SusyNtAna
     float n_pass_cr2jfake       [ET_N][kWeightTypesN];
     float n_pass_cr2jzvfake     [ET_N][kWeightTypesN];
 
+    float n_pass_ewkSs          [ET_N][kWeightTypesN];
+    float n_pass_ewkSsLoose     [ET_N][kWeightTypesN];
+    float n_pass_ewkSsLea       [ET_N][kWeightTypesN];
 };
 
 #endif // SusySelection_h
