@@ -105,6 +105,7 @@ Bool_t SusySelection::Process(Long64_t entry)
           m_tupleMaker.fill(weight, run, event, *l0, *l1, *m_met, lowPtLep, clJets);
       }
   }
+  checkAndIncrementEwk(m_signalLeptons, m_signalJets2Lep, m_met);
   return kTRUE;
 }
 //-----------------------------------------
@@ -427,6 +428,33 @@ bool SusySelection::passEwkSsLoose(const LeptonVector& leptons, const JetVector&
             && (getMetRel(met, leptons, jets)>40.0));
 }
 //-----------------------------------------
+bool SusySelection::passEwkSsLea(const LeptonVector& leptons, const JetVector& jets, const Met* met)
+{
+    bool pass=false;
+    if(leptons.size()>=2) {
+        bool noBjets(numberOfCBJets(jets)==0), noFwJets(numberOfFJets(jets)==0);
+        bool someCentralJets(numberOfCLJets(jets)>0);
+        const Susy::Lepton &l0 = *leptons[0], &l1 = *leptons[1];
+        float mll = (l0+l1).M();
+        bool isEe(l0.isEle() && l1.isEle());
+        bool passZeeVeto(isEe ? fabs(mll- 91.2)>10.0 : true);
+        pass= (noBjets && noFwJets && someCentralJets && passZeeVeto
+               && susy::sameSign(leptons)
+               && (mll < 20.0)
+               && (met->Et<40.0));
+    }
+    return pass;
+}
+//-----------------------------------------
+void SusySelection::checkAndIncrementEwk(const LeptonVector& leptons, const JetVector& jets, const Met* met)
+{
+  DiLepEvtType ll(getDiLepEvtType(leptons));
+  if(ll==ET_me) ll = ET_em;
+  if(SusySelection::passEwkSs     (leptons, jets, met)) increment(n_pass_ewkSs      [ll], m_weightComponents);
+  if(SusySelection::passEwkSsLoose(leptons, jets, met)) increment(n_pass_ewkSsLoose [ll], m_weightComponents);
+  if(SusySelection::passEwkSsLea  (leptons, jets, met)) increment(n_pass_ewkSsLea   [ll], m_weightComponents);
+}
+//-----------------------------------------
 void SusySelection::cacheStaticWeightComponents()
 {
   m_weightComponents.reset();
@@ -574,6 +602,10 @@ void SusySelection::dumpEventCounters()
     cout<<"ht               : "<<lcpet(n_pass_ge2jht         , w, cw)<<endl;
     cout<<"metRel           : "<<lcpet(n_pass_ge2jmetRel     , w, cw)<<endl;
     cout<<"mWwt             : "<<lcpet(n_pass_ge2jmWwt       , w, cw)<<endl;
+    cout<<midRule                                                    <<endl;
+    cout<<"ewkSs            : "<<lcpet(n_pass_ewkSs          , w, cw)<<endl;
+    cout<<"ewkSsLoose       : "<<lcpet(n_pass_ewkSsLoose     , w, cw)<<endl;
+    cout<<"ewkSsLea         : "<<lcpet(n_pass_ewkSsLea       , w, cw)<<endl;
     cout<<midRule                                                    <<endl;
   }// end for(w)
 }
@@ -788,6 +820,10 @@ void SusySelection::resetAllCounters()
       n_pass_ge2jht         [i][w] = 0;
       n_pass_ge2jmetRel     [i][w] = 0;
       n_pass_ge2jmWwt       [i][w] = 0;
+
+      n_pass_ewkSs          [i][w] = 0;
+      n_pass_ewkSsLoose     [i][w] = 0;
+      n_pass_ewkSsLea       [i][w] = 0;
     } // end for(i)
   } // end for(w)
 }
