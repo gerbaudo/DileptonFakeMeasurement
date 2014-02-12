@@ -291,43 +291,45 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   LeptonVector anyLeptons(getAnyElOrMu(nt));
   LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
   /*const*/ swk::DilepVars v(swk::compute2lVars(leptons, met, jets));
-  v.l3veto = whssFlags.veto3rdL;
+  v.l3veto = whssFlags.veto3rdL = SusySelection::passThirdLeptonVeto(leptons[0], leptons[1], lowPtLep, m_debugThisEvent);
   if(CR==sf::CR_SSInc) passSR = susy::sameSign(leptons);
   else {
-  if(!whssFlags.passCommonCriteria()) return false;
-  switch(CR) {
-  case sf::CR_SRWHSS       : passSR =  whssFlags.metrel;                  break;
-  case sf::CR_CR8lpt       : passSR =  whssFlags.lepPt;                   break;
-  case sf::CR_CR8ee        : passSR = (whssFlags.lepPt   && isEe);        break;
-  case sf::CR_CR8mm        : passSR = (whssFlags.lepPt   && isMm);        break;
-  case sf::CR_CR8mmMtww    : passSR = (whssFlags.mtllmet && isMm);        break;
-  case sf::CR_CR8mmHt      : passSR = (whssFlags.ht      && isMm);        break;
-  case sf::CR_CR9lpt       : passSR = (isOf && whssFlags.lepPt);          break;
-  case sf::CR_SsEwk        : passSR = SusySelection::passEwkSs     (leptons, jets, met); break;
-  case sf::CR_SsEwkLoose   : passSR = SusySelection::passEwkSsLoose(leptons, jets, met); break;
-  case sf::CR_WHZVfake1jee : passSR = (isEe && is1j && SusySelection::passCrWhZVfakeEe(v)); break;
-  case sf::CR_WHZVfake2jee : passSR = (isEe && is2j && SusySelection::passCrWhZVfakeEe(v)); break;
-  case sf::CR_WHZVfake1jem : passSR = (isOf && is1j && SusySelection::passCrWhZVfakeEm(v)); break;
-  case sf::CR_WHZVfake2jem : passSR = (isOf && is2j && SusySelection::passCrWhZVfakeEm(v)); break;
-  case sf::CR_WHfake1jem   : passSR = (isOf && is1j && SusySelection::passCrWhfakeEm(v)); break;
-  case sf::CR_WHfake2jem   : passSR = (isOf && is2j && SusySelection::passCrWhfakeEm(v)); break;
-  case sf::CR_WHZV1jmm     : passSR = (isMm && is1j && SusySelection::passCrWhZVMm(v)); break;
-  case sf::CR_WHZV2jmm     : passSR = (isMm && is2j && SusySelection::passCrWhZVMm(v)); break;
-  case sf::CR_WHfake1jmm   : passSR = (isMm && is1j && SusySelection::passCrWhfakeMm(v)); break;
-  case sf::CR_WHfake2jmm   : passSR = (isMm && is2j && SusySelection::passCrWhfakeMm(v)); break;
-  // trying to unify the ee/em/mm channels
-  case sf::CR_WHZVfake1j   : passSR = (is1j && passCrWhZVfake(v)); break;
-  case sf::CR_WHZVfake2j   : passSR = (is2j && passCrWhZVfake(v)); break;
-  case sf::CR_WHfake1j     : passSR = (is1j && passCrWhfake  (v)); break;
-  case sf::CR_WHfake2j     : passSR = (is2j && passCrWhfake  (v)); break;
-  case sf::CR_WHZV1j       : passSR = (is1j && passCrWhZV    (v)); break;
-  case sf::CR_WHZV2j       : passSR = (is2j && passCrWhZV    (v)); break;
+      bool passCommonCriteria (whssFlags.sameSign && whssFlags.tauVeto && whssFlags.fjveto && whssFlags.bjveto && whssFlags.ge1j);
+      if(passCommonCriteria) {
+          switch(CR) {
+          case sf::CR_SRWHSS       : passSR =  whssFlags.metrel;                  break;
+          case sf::CR_CR8lpt       : passSR =  whssFlags.lepPt;                   break;
+          case sf::CR_CR8ee        : passSR = (whssFlags.lepPt   && isEe);        break;
+          case sf::CR_CR8mm        : passSR = (whssFlags.lepPt   && isMm);        break;
+          case sf::CR_CR8mmMtww    : passSR = (whssFlags.mtllmet && isMm);        break;
+          case sf::CR_CR8mmHt      : passSR = (whssFlags.ht      && isMm);        break;
+          case sf::CR_CR9lpt       : passSR = (isOf && whssFlags.lepPt);          break;
+          case sf::CR_SsEwk        : passSR = SusySelection::passEwkSs     (leptons, jets, met); break;
+          case sf::CR_SsEwkLoose   : passSR = SusySelection::passEwkSsLoose(leptons, jets, met); break;
+          case sf::CR_WHZVfake1jee : passSR = (isEe && is1j && SusySelection::passCrWhZVfakeEe(v)); break;
+          case sf::CR_WHZVfake2jee : passSR = (isEe && is2j && SusySelection::passCrWhZVfakeEe(v)); break;
+          case sf::CR_WHZVfake1jem : passSR = (isOf && is1j && SusySelection::passCrWhZVfakeEm(v)); break;
+          case sf::CR_WHZVfake2jem : passSR = (isOf && is2j && SusySelection::passCrWhZVfakeEm(v)); break;
+          case sf::CR_WHfake1jem   : passSR = (isOf && is1j && SusySelection::passCrWhfakeEm(v)); break;
+          case sf::CR_WHfake2jem   : passSR = (isOf && is2j && SusySelection::passCrWhfakeEm(v)); break;
+          case sf::CR_WHZV1jmm     : passSR = (isMm && is1j && SusySelection::passCrWhZVMm(v)); break;
+          case sf::CR_WHZV2jmm     : passSR = (isMm && is2j && SusySelection::passCrWhZVMm(v)); break;
+          case sf::CR_WHfake1jmm   : passSR = (isMm && is1j && SusySelection::passCrWhfakeMm(v)); break;
+          case sf::CR_WHfake2jmm   : passSR = (isMm && is2j && SusySelection::passCrWhfakeMm(v)); break;
+              // trying to unify the ee/em/mm channels
+          case sf::CR_WHZVfake1j   : passSR = (is1j && passCrWhZVfake(v)); break;
+          case sf::CR_WHZVfake2j   : passSR = (is2j && passCrWhZVfake(v)); break;
+          case sf::CR_WHfake1j     : passSR = (is1j && passCrWhfake  (v)); break;
+          case sf::CR_WHfake2j     : passSR = (is2j && passCrWhfake  (v)); break;
+          case sf::CR_WHZV1j       : passSR = (is1j && passCrWhZV    (v)); break;
+          case sf::CR_WHZV2j       : passSR = (is2j && passCrWhZV    (v)); break;
 
-  case sf::CR_SRWH1j       : passSR = (is1j && passSrWh1j    (v)); break;
-  case sf::CR_SRWH2j       : passSR = (is2j && passSrWh2j    (v)); break;
+          case sf::CR_SRWH1j       : passSR = (is1j && passSrWh1j    (v)); break;
+          case sf::CR_SRWH2j       : passSR = (is2j && passSrWh2j    (v)); break;
 
-  default: cout<<"invalid ControlRegion "<<CR<<endl;
-  }
+          default: cout<<"invalid ControlRegion "<<CR<<endl;
+          } // switch
+      } // passCommonCriteria
   }
   for(uint i=0; i<leptons.size(); ++i) m_probes.push_back( leptons[i]);
   if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(leptons);
