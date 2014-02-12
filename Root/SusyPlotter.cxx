@@ -129,6 +129,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   /*const*/ swk::DilepVars v(swk::compute2lVars(ncl, m, j));
   v.l3veto = ssf.veto3rdL; // already computed in passSrSs
 
+  if(ssf.sameSign && ssf.ge1j)                           fillHistos(ncl, j, m, weight, swh::PR_CRSsInc1j, sys);
   if(isEe && is1j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1jee, sys);
   if(isEe && is2j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2jee, sys);
   if(isOf && is1j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1jem, sys);

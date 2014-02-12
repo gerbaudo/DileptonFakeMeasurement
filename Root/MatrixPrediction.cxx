@@ -92,6 +92,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
           /*const*/ swk::DilepVars v(swk::compute2lVars(ncl, m, j));
           v.l3veto = ssf.veto3rdL; // already computed in passSrSs
 
+          if(ssf.sameSign && ssf.ge1j) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SSInc1j,metRel,sys), PR_CRSsInc1j, sys);
           if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
           if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8ee,     metRel,sys), PR_CR8ee,     sys);
           if(isMm && ssf.lepPt

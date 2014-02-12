@@ -25,6 +25,7 @@ const sf::Region controlRegions[] = {
 const size_t nControlRegions = sizeof(controlRegions)/sizeof(controlRegions[0]);
 const sf::Region signalRegions[] = {
   sf::CR_SSInc,
+  sf::CR_SSInc1j,
   sf::CR_SRWHSS,
   sf::CR_CR8lpt,
   sf::CR_CR8ee,
@@ -298,6 +299,7 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
       bool passCommonCriteria (whssFlags.sameSign && whssFlags.tauVeto && whssFlags.fjveto && whssFlags.bjveto && whssFlags.ge1j);
       if(passCommonCriteria) {
           switch(CR) {
+          case sf::CR_SSInc1j      : passSR =  whssFlags.ge1j;                    break;
           case sf::CR_SRWHSS       : passSR =  whssFlags.metrel;                  break;
           case sf::CR_CR8lpt       : passSR =  whssFlags.lepPt;                   break;
           case sf::CR_CR8ee        : passSR = (whssFlags.lepPt   && isEe);        break;
