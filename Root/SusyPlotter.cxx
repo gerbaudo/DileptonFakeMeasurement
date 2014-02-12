@@ -118,8 +118,10 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   } // end passLpt
   bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
   bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
+  bool passEwkSsLea  (SusySelection::passEwkSsLea  (ncl,j,m));
   if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     sys);
   if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,sys);
+  if(passEwkSsLea)   fillHistos(ncl, j, m, weight, swh::PR_SsEwkLea,  sys);
   bool isEe(ll==ee), isMm(ll==mm), isOf(!isEe && !isMm);
   bool is1j(j.size()==1), is2j(j.size()>1);
   LeptonVector anyLeptons(getAnyElOrMu(nt));

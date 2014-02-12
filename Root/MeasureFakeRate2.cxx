@@ -34,6 +34,7 @@ const sf::Region signalRegions[] = {
   sf::CR_CR9lpt,
   sf::CR_SsEwk,
   sf::CR_SsEwkLoose,
+  sf::CR_SsEwkLea,
   sf::CR_WHZVfake1jee,
   sf::CR_WHZVfake2jee,
   sf::CR_WHZVfake1jem,
@@ -306,6 +307,7 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
           case sf::CR_CR9lpt       : passSR = (isOf && whssFlags.lepPt);          break;
           case sf::CR_SsEwk        : passSR = SusySelection::passEwkSs     (leptons, jets, met); break;
           case sf::CR_SsEwkLoose   : passSR = SusySelection::passEwkSsLoose(leptons, jets, met); break;
+          case sf::CR_SsEwkLea     : passSR = SusySelection::passEwkSsLea  (leptons, jets, met); break;
           case sf::CR_WHZVfake1jee : passSR = (isEe && is1j && SusySelection::passCrWhZVfakeEe(v)); break;
           case sf::CR_WHZVfake2jee : passSR = (isEe && is2j && SusySelection::passCrWhZVfakeEe(v)); break;
           case sf::CR_WHZVfake1jem : passSR = (isOf && is1j && SusySelection::passCrWhZVfakeEm(v)); break;

@@ -124,8 +124,10 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
 
           bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
           bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
+          bool passEwkSsLea  (SusySelection::passEwkSsLea  (ncl,j,m));
           if(passEwkSs)      fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwk,     metRel,sys), PR_SsEwk,     sys);
           if(passEwkSsLoose) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwkLoose,metRel,sys), PR_SsEwkLoose,sys);
+          if(passEwkSsLea)   fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwkLea,  metRel,sys), PR_SsEwkLea,  sys);
       } // end for(s)
   }
   return true;

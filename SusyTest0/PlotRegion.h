@@ -13,6 +13,7 @@ enum Region{
     PR_SR8, PR_SR9base, PR_CR9lpt, PR_SR9,
     PR_SsEwk,
     PR_SsEwkLoose,
+    PR_SsEwkLea,
     CrZVfake1jee,
     CrZVfake2jee,
     CrZVfake1jem,
@@ -41,7 +42,7 @@ const Region PlotRegions[] = {
     PR_CR8lpt, PR_CR8ee,
     PR_CR8mm, PR_CR8mmMtww, PR_CR8mmHt,
     PR_SR8, PR_SR9base, PR_CR9lpt, PR_SR9,
-    PR_SsEwk, PR_SsEwkLoose,
+    PR_SsEwk, PR_SsEwkLoose, PR_SsEwkLea,
     CrZVfake1jee,
     CrZVfake2jee,
     CrZVfake1jem,
@@ -77,6 +78,7 @@ const string RegionNames[] =
   ,"sr9"
   ,"srSsEwk"
   ,"crSsEwkLoose"
+  ,"crSsEwkLea"
   ,"crZVfake1jee"
   ,"crZVfake2jee"
   ,"crZVfake1jem"
