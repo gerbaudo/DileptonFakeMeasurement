@@ -268,7 +268,7 @@ bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
     if(CR==CR_MCQCD && isQcdLepton)            m_probes.push_back( l ); // QCD
     if(CR==CR_MCReal && isRealLepton(l, dsid)) m_probes.push_back( l ); // Real
   }
-  m_evtWeight = getEvtWeight(leptons);
+  m_evtWeight = MeasureFakeRate2::getEvtWeight(leptons);
   return true;
 }
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
@@ -279,12 +279,11 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
                                         const Met* met,
                                         sf::Region CR)
 {
-  if( leptons.size() != 2 ) return false;
   bool passSR = false;
-  namespace swk = susy::wh::kin;
-        
-  bool computeWhssPass(true);
-  SsPassFlags whssFlags(computeWhssPass ? passWhSS(leptons,jets,met) : SsPassFlags());
+  // all the signal regions below require 2L SS
+  if( leptons.size() != 2 ) return passSR;
+  if(!susy::sameSign(leptons)) return passSR;
+  SsPassFlags whssFlags = MeasureFakeRate2::passWhSS(leptons,jets,met); // NB this is not the method from SusySelection. Refactor
   susy::wh::Chan ch(SusySelection::getChan(leptons));
   m_ch = SusySelection::getChan(leptons);
   bool isEe(susy::wh::Ch_ee==ch), isMm(susy::wh::Ch_mm==ch), isOf(!isEe && !isMm);
