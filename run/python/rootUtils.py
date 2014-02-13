@@ -5,6 +5,10 @@
 # davide.gerbaudo@gmail.com
 # 2013-08-26
 
+try:
+    import numpy as np
+except ImportError:
+    print "missing numpy: some functions will not be available"
 
 def importRoot() :
     import ROOT as r
@@ -13,7 +17,6 @@ def importRoot() :
     return r
 r = importRoot()
 
-import numpy as np
 from utils import verticalSlice
 
 def referenceLine(xmin=0., xmax=100.0, ymin=1.0, ymax=1.0) :
