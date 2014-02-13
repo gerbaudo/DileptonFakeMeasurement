@@ -4,4 +4,4 @@
 #PBS -l nodes=1:ppn=1
 
 cd $PBS_O_WORKDIR
-FakePred -i ${inp} -o ${out} -s ${sample} --matrix-file ${ROOTCOREDIR}/../SusyMatrixMethod/data/FinalFakeHist_Feb_10.root ${opt}
+FakePred --etapt -i ${inp} -o ${out} -s ${sample} --matrix-file ${ROOTCOREDIR}/../SusyMatrixMethod/data/FinalFakeHist_Feb_12.root ${opt}
