@@ -29,6 +29,7 @@ const int  nmassbins = 30;
 MatrixPrediction::MatrixPrediction() :
   SusyPlotter(),
   m_matrix(0),
+  m_use2dparametrization(false),
   m_allconfigured(false)
 {
 }
@@ -297,12 +298,8 @@ bool MatrixPrediction::initMatrixTool()
 {
   // Load the matrix method package
   m_matrix = new SusyMatrixMethod::DiLeptonMatrixMethod();
-  return m_matrix->configure(m_matrixFilename,
-                             SusyMatrixMethod::PT,     // Electron Real
-                             SusyMatrixMethod::PT,     // Electron Fake
-                             SusyMatrixMethod::PT,     // Muon Real
-                             SusyMatrixMethod::PT      // Muon Fake
-                             );
+  SusyMatrixMethod::RATE_PARAM pm = (m_use2dparametrization ? SusyMatrixMethod::PT_ETA : SusyMatrixMethod::PT);
+  return m_matrix->configure(m_matrixFilename, pm, pm, pm, pm);
 }
 //----------------------------------------------------------
 std::string MatrixPrediction::dilepDetails(const Susy::Event &event,

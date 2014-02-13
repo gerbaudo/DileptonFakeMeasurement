@@ -28,6 +28,7 @@ void usage(const char *exeName, const char *defaultMatrixFile) {
       <<"\t"<<"-o [--output]      output file"           <<endl
       <<"\t"<<"-t [--tuple-out] fname.root (out ntuple file)"<<endl
       <<"\t"<<"-s [--sample]      samplename"            <<endl
+      <<"\t"<<"-e [--etapt]     : use eta-pt (default pt only)"<<endl
       <<"\t"<<"-d [--debug]     : debug (>0 print stuff)"<<endl
       <<"\t"<<"-h [--help]      : print help"            <<endl
       <<endl;
@@ -43,6 +44,7 @@ int main(int argc, char** argv)
   string input;
   string output;
   bool writeTuple = false;
+  bool etapt = false;
   string matrixFile(getRootCoreDir()+"/../SusyMatrixMethod/data/forDavide_Sep11_2013.root");
   int optind(1);
   while ((optind < argc)) {
@@ -51,6 +53,7 @@ int main(int argc, char** argv)
     if     (sw=="-m"||sw=="--matrix-file") { matrixFile = argv[++optind]; }
     else if(sw=="-n"||sw=="--num-event"  ) { nEvt = atoi(argv[++optind]); }
     else if(sw=="-k"||sw=="--num-skip"   ) { nSkip = atoi(argv[++optind]); }
+    else if(sw=="-e"||sw=="--etapt"      ) { etapt = true;}
     else if(sw=="-d"||sw=="--debug"      ) { dbg = atoi(argv[++optind]); }
     else if(sw=="-i"||sw=="--input"      ) { input = argv[++optind]; }
     else if(sw=="-o"||sw=="--output"     ) { output = argv[++optind]; }
@@ -64,6 +67,7 @@ int main(int argc, char** argv)
       <<"  sample  "<<sample    <<endl
       <<"  nEvt    "<<nEvt      <<endl
       <<"  nSkip   "<<nSkip     <<endl
+      <<"  etapt   "<<etapt     <<endl
       <<"  dbg     "<<dbg       <<endl
       <<"  input   "<<input     <<endl
       <<"  output  "<<output    <<endl
@@ -94,6 +98,7 @@ int main(int argc, char** argv)
   fakePred.setMatrixFilename(matrixFile);
   fakePred.setDebug(dbg);
   fakePred.setSampleName(sample);
+  if(etapt) fakePred.use2dParametrization();
   if(writeTuple) fakePred.setTupleFile(output);
   else           fakePred.setOutputFilename(output);
 
