@@ -3,5 +3,7 @@
 #PBS -q atlas
 #PBS -l nodes=1:ppn=1
 
+echo "Starting on `hostname`, `date`"
 cd $PBS_O_WORKDIR
 FakePred -i ${inp} -o ${out} -s ${sample} --matrix-file ${ROOTCOREDIR}/../SusyMatrixMethod/data/FinalFakeHist_Feb_02.root ${opt}
+echo "Done, `date`"
