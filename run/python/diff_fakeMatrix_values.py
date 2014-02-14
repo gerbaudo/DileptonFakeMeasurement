@@ -26,6 +26,25 @@ def main(filename1, filename2, outdir, regexp, verbose) :
     relevantHistograms = ['l_pt_den','l_pt_num']
     relevantHistograms += [l+'_'+fr+'_'+er  for l in ['mu','el'] for fr in ['fake','real'] for er in ['eff','rate']]
     relevantSelections = ['CR8ee', 'CR8mm', 'CR_WHSS', 'SsEwkLoose']
+    relevantSelections = ['CR_WHZVfake1jee',
+                          'CR_WHZVfake2jee',
+                          'CR_WHZVfake1jem',
+                          'CR_WHZVfake2jem',
+                          'CR_WHfake1jem',
+                          'CR_WHfake2jem',
+                          'CR_WHZV1jmm',
+                          'CR_WHZV2jmm',
+                          'CR_WHfake1jmm',
+                          'CR_WHfake2jmm',
+
+                          "CR_WHZVfake1j",
+                          "CR_WHZVfake2j",
+                          "CR_WHfake1j",
+                          "CR_WHfake2j",
+                          "CR_WHZV1j",
+                          "CR_WHZV2j",
+                          ]
+
     outdir = outdir if outdir else guessOutdirFromInputs(filename1, filename2)
     if verbose : print "saving output plots to '%s'"%outdir
     file1, file2 = r.TFile.Open(filename1), r.TFile.Open(filename2)
