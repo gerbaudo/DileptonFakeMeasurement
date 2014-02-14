@@ -56,7 +56,7 @@ Example usage:
 
 # scale factors from determineFakeScaleFactor.py
 # --- paste the lines below in buildWeightedMatrix.py ---
-# Feb_12, 2014-02-12 18:20:20.650121
+# Feb_13, 2014-02-13 15:21:21.138759
 mu_qcdSF, mu_realSF = 0.86, 0.99590
 el_convSF, el_qcdSF, el_realSF = 1.09, 0.63, 0.99633
 
