@@ -74,6 +74,9 @@ def main() :
     mu_qcd_sf  = computeAndPlotHfSf  (fileIter, fileHf, 'muon', 'all_l_pt', outputDirname)
     el_real_sf = computeAndPlotRealSf(fileData, fileMc, 'elec', 'all_l_pt', outputDirname)
     mu_real_sf = computeAndPlotRealSf(fileData, fileMc, 'muon', 'all_l_pt', outputDirname)
+
+    el_conv_sf2d = computeAndPlotConvSf2d(fileData, fileMc, 'elec', 'all_l_pt', outputDirname)
+
     print "# --- paste the lines below in buildWeightedMatrix.py ---"
     print "# %s, %s"%(tag, datetime.datetime.now())
     print "mu_qcdSF, mu_realSF = %s, %s"%(mu_qcd_sf, mu_real_sf)
@@ -97,6 +100,55 @@ def computeAndPlotConvSf(fileData, fileMc, lepton, variable_name, outdir) :
     plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_fakeconv',
                         graphics)
     return p0
+
+def computeAndPlotConvSf2d(fileData, fileMc, lepton, variable_name, outdir) :
+    "Electron conversion: simplest case, just data/mc"
+    histoname = 'elec_fakeConv_all_l_pt_eta'
+    eff_da = buildRate(fileData, histoname)
+    eff_mc = buildRate(fileMc,   histoname)
+    print 'SF conversion: using histo ',histoname
+    ratio  = buildRatioHistogram(eff_da, eff_mc)
+    ratio.Print()
+    xAx, yAx = ratio.GetXaxis(), ratio.GetYaxis()
+    print ratio.GetName(),": bins (%d, %d)"%(ratio.GetNbinsX(), ratio.GetNbinsY())
+    print 'xtitle : ',xAx.GetTitle()
+    print 'ytitle : ',yAx.GetTitle()
+    #pt_eta : check that x is pt, y is eta
+    nEtaBins = yAx.GetNbins()
+    print 'nEtaBins: ',nEtaBins
+    xMin, xMax = xAx.GetXmin(), xAx.GetXmax()
+    fitFunc = r.TF1('fit_func_const_'+ratio.GetName(), '[0]', xMin, xMax)
+    etaBins = range(1, 1+nEtaBins)
+    slices = [ratio.ProjectionX("%s_bin%d"%(ratio.GetName(), b), b, b, 'e') for b in etaBins]
+    for b, s in zip(etaBins, slices) :
+        s.SetTitle("data/mc conversion : eta bin %d"%b)
+        s.Fit(fitFunc.GetName(), '0RQ') # do not draw, range, quiet
+        p0, p0Err, chi2, ndf = fitResults(fitFunc)
+        p0, p0Err = pdgRound(p0, p0Err)
+        print "bin %d :  %s +/- %s"%(b, p0, p0Err)
+        can = r.TCanvas('')
+        s.Draw('ep')
+        fitFunc.Draw('same')
+        tex = r.TLatex()
+        tex.SetNDC(True)
+        fitParLabel = "Const. fit : %s #pm %s"%(p0, p0Err)
+        fitGoodLabel = "#chi^{2}/DOF : %.2f / %d"%(chi2, ndf)
+        tex.SetTextSize(yAx.GetTitleSize())
+        tex.SetTextFont(yAx.GetTitleFont())
+        tex.DrawLatex(0.15, 0.45, s.GetTitle())
+        tex.DrawLatex(0.15, 0.40, "#splitline{%s}{%s}"%(fitParLabel, fitGoodLabel))
+        can.Update()
+        can.SaveAs(outdir+"/fit_el_conf_etabin%d.png"%b)
+#     graphics = {'xtitle' : xTitle(lepton, variable_name),
+#                 'ytitle' : lepton+' p(tight | fake conv)',
+#                 'colors' : {'data' : r.kBlack, 'mc' : mcColor(lepton)},
+#                 'markers': {'data' : r.kFullCircle, 'mc' : mcMarker(lepton)},
+#                 'labels' : {'data' : 'Data: Conversion CR',
+#                             'mc'   : 'MC Comb: Conv CR'}}
+#     plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_fakeconv',
+#                         graphics)
+    return p0
+
 def computeAndPlotHfSf(fileIter, fileHf, lepton, variable_name, outdir) :
     "HF tag and probe; in this case we need to subract out the contamination"
     eff_da = fileIter.Get(lepton+'_corHFRate')
@@ -133,6 +185,7 @@ def computeAndPlotRealSf(file_data, file_mc, lepton, variable_name, outdir) :
     plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_real',
                         graphics)
     return p0
+
 def buildRate(file, histo_basename) :
     hs = getNumDenHistos(file, histo_basename)
     return buildRatioHistogram(hs['num'], hs['den'])
