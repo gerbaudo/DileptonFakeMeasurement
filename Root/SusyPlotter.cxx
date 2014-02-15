@@ -127,10 +127,13 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       } // end passLpt
       bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
       bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
+      bool passEwkSsLea  (SusySelection::passEwkSsLea  (ncl,j,m));
       if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     iSys);
       if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,iSys);
+      if(passEwkSsLea)   fillHistos(ncl, j, m, weight, swh::PR_SsEwkLea,  iSys);
       bool is1j(j.size()==1), is2j(j.size()>1);
 
+      if(ssf.sameSign && ssf.ge1j)                 fillHistos(ncl, j, m, weight, swh::PR_CRSsInc1j,iSys);
       if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1j , iSys);
       if(is2j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2j , iSys);
       if(is1j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1j   , iSys);

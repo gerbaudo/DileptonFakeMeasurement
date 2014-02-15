@@ -422,7 +422,6 @@ bool SusySelection::passEwkSsLea(const LeptonVector& leptons, const JetVector& j
         bool passZeeVeto(isEe ? fabs(mll- 91.2)>10.0 : true);
         pass= (noBjets && noFwJets && someCentralJets && passZeeVeto
                && susy::sameSign(leptons)
-               && (mll < 20.0)
                && (met->Et<40.0));
     }
     return pass;
@@ -577,6 +576,15 @@ void SusySelection::dumpEventCounters()
     cout<<"ht               : "<<lcpet(n_pass_ge2jht         , w, cw)<<endl;
     cout<<"metRel           : "<<lcpet(n_pass_ge2jmetRel     , w, cw)<<endl;
     cout<<"mWwt             : "<<lcpet(n_pass_ge2jmWwt       , w, cw)<<endl;
+    cout<<midRule                                                    <<endl;
+    cout<<"   ------  Control regions ------ "                       <<endl;
+    cout<<"cr1jzv           : "<<lcpet(n_pass_cr1jzv         , w, cw)<<endl;
+    cout<<"cr1jfake         : "<<lcpet(n_pass_cr1jfake       , w, cw)<<endl;
+    cout<<"cr1jzvfake       : "<<lcpet(n_pass_cr1jzvfake     , w, cw)<<endl;
+    cout<<midRule                                                    <<endl;
+    cout<<"cr2jzv           : "<<lcpet(n_pass_cr2jzv         , w, cw)<<endl;
+    cout<<"cr2jfake         : "<<lcpet(n_pass_cr2jfake       , w, cw)<<endl;
+    cout<<"cr2jzvfake       : "<<lcpet(n_pass_cr2jzvfake     , w, cw)<<endl;
     cout<<midRule                                                    <<endl;
     cout<<"ewkSs            : "<<lcpet(n_pass_ewkSs          , w, cw)<<endl;
     cout<<"ewkSsLoose       : "<<lcpet(n_pass_ewkSsLoose     , w, cw)<<endl;
@@ -754,6 +762,12 @@ void SusySelection::resetAllCounters()
       n_pass_ge2jht         [i][w] = 0;
       n_pass_ge2jmetRel     [i][w] = 0;
       n_pass_ge2jmWwt       [i][w] = 0;
+      n_pass_cr1jzv         [i][w] = 0;
+      n_pass_cr1jfake       [i][w] = 0;
+      n_pass_cr1jzvfake     [i][w] = 0;
+      n_pass_cr2jzv         [i][w] = 0;
+      n_pass_cr2jfake       [i][w] = 0;
+      n_pass_cr2jzvfake     [i][w] = 0;
 
       n_pass_ewkSs          [i][w] = 0;
       n_pass_ewkSsLoose     [i][w] = 0;
@@ -862,6 +876,48 @@ bool SusySelection::passCrWhfake(const susy::wh::kin::DilepVars &v)
 bool SusySelection::passCrWhZV(const susy::wh::kin::DilepVars &v)
 {
     return SusySelection::passCrWhZVMm(v);
+}
+//-----------------------------------------
+DiLepEvtType vars2type(const susy::wh::kin::DilepVars &v)
+{
+    DiLepEvtType et = ET_Unknown;
+    if     (v.isEe) et = ET_ee;
+    else if(v.isEm) et = ET_em;
+    else if(v.isMm) et = ET_mm;
+    return et;
+}
+//-----------------------------------------
+bool SusySelection::passAndIncrementCrWhZVfake(const susy::wh::kin::DilepVars &v)
+{
+    bool pass(passCrWhZVfake(v));
+    if(pass) {
+        DiLepEvtType ll = vars2type(v);
+        float* counters = v.numCentralLightJets==1 ? n_pass_cr1jzvfake[ll] : n_pass_cr2jzvfake[ll];
+        increment(counters, m_weightComponents);
+    }
+    return pass;
+}
+//-----------------------------------------
+bool SusySelection::passAndIncrementCrWhfake(const susy::wh::kin::DilepVars &v)
+{
+    bool pass(passCrWhfake(v));
+    if(pass) {
+        DiLepEvtType ll = vars2type(v);
+        float* counters = v.numCentralLightJets==1 ? n_pass_cr1jfake[ll] : n_pass_cr2jfake[ll];
+        increment(counters, m_weightComponents);
+    }
+    return pass;
+}
+//-----------------------------------------
+bool SusySelection::passAndIncrementCrWhZV(const susy::wh::kin::DilepVars &v)
+{
+    bool pass(passCrWhZV(v));
+    if(pass) {
+        DiLepEvtType ll = vars2type(v);
+        float* counters = v.numCentralLightJets==1 ? n_pass_cr1jzv[ll] : n_pass_cr2jzv[ll];
+        increment(counters, m_weightComponents);
+    }
+    return pass;
 }
 //-----------------------------------------
 bool SusySelection::passSrWh1j(const susy::wh::kin::DilepVars &v, SsPassFlags &f)

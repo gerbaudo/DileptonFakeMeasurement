@@ -11,8 +11,10 @@
 #include <cassert>
 
 using namespace susy::fake;
-using namespace susy::wh;
 namespace sf = susy::fake;
+using namespace susy::wh;
+namespace swk = susy::wh::kin;
+
 
 const sf::Region controlRegions[] = {
     sf::CR_Real, sf::CR_SideLow, sf::CR_SideHigh, sf::CR_HF, sf::CR_HF_high,
@@ -23,6 +25,7 @@ const sf::Region controlRegions[] = {
 const size_t nControlRegions = sizeof(controlRegions)/sizeof(controlRegions[0]);
 const sf::Region signalRegions[] = {
   sf::CR_SSInc,
+  sf::CR_SSInc1j,
   sf::CR_SRWHSS,
   sf::CR_CR8lpt,
   sf::CR_CR8ee,
@@ -32,6 +35,7 @@ const sf::Region signalRegions[] = {
   sf::CR_CR9lpt,
   sf::CR_SsEwk,
   sf::CR_SsEwkLoose,
+  sf::CR_SsEwkLea,
   sf::CR_WHZVfake1jee,
   sf::CR_WHZVfake2jee,
   sf::CR_WHZVfake1jem,
@@ -136,6 +140,7 @@ void MeasureFakeRate2::initHistos(string outName)
         h_l_pt_true    [il][icr][ich] = new TH1F     ((bn+"l_pt_true").c_str(), "", nFakePtbins, FakePtbins);
         h_l_pt_fake    [il][icr][ich] = new TH1F     ((bn+"l_pt_fake").c_str(), "", nFakePtbins, FakePtbins);
         for(int lbl=0; lbl<LS_N; ++lbl) h_flavor[il][icr][ich]->SetXLabel(lbl+1, LSNames[lbl]);
+        h_l_pt_eta     [il][icr][ich] = new EffObject2(bn+"l_pt_eta",    nCoarseFakePtbins, coarseFakePtbins, nCoarseEtabins, CoarseEtabins);
       } // end for(ich)
     } // end for(icr)
   } // end for(il)
@@ -211,25 +216,39 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
                 if(EffObject* eff = eff_array[l_][r_][Ch_all]) eff->Fill(n_, w_, value);
         }
     };
+    struct Fill2dEffHistos {
+        bool n_; double w_;
+        LeptonType l_; size_t r_; Chan c_;
+        Fill2dEffHistos(bool alsoNum, double weight, LeptonType l, size_t r, Chan c)
+            : n_(alsoNum), w_(weight), l_(l), r_(r), c_(c) {}
+        void operator () (EffObject2* eff_array[kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N],
+                          double valueX, double valueY) {
+            if(EffObject2* eff = eff_array[l_][r_][c_])         eff->Fill(n_, w_, valueX, valueY);
+            if(c_ != Ch_all)
+                if(EffObject2* eff = eff_array[l_][r_][Ch_all]) eff->Fill(n_, w_, valueX, valueY);
+        }
+    };
 
     bool isElOrMu(lep->isEle() || lep->isMu());
     assert(isElOrMu);
     LeptonType lt(lep->isEle() ? kElectron : kMuon);
     bool pass(isSignalLepton(lep, m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC));
-    FillEffHistos fillEff(pass, m_evtWeight, lt, regionIndex, static_cast<Chan>(m_ch));    
-    fillEff(h_l_pt        , lep->Pt());
-    fillEff(h_l_pt_coarse , lep->Pt());
-    fillEff(h_l_eta       , fabs(lep->Eta()));
-    fillEff(h_l_eta_coarse, fabs(lep->Eta()));
-    fillEff(h_metrel      , m_metRel);
-    fillEff(h_met         , met->Et);
-    fillEff(h_njets       , jets.size());
-    fillEff(h_onebin      , 0.0);
+    FillEffHistos   fill1dEff(pass, m_evtWeight, lt, regionIndex, static_cast<Chan>(m_ch));
+    Fill2dEffHistos fill2dEff(pass, m_evtWeight, lt, regionIndex, static_cast<Chan>(m_ch));
+    fill1dEff(h_l_pt        , lep->Pt());
+    fill1dEff(h_l_pt_coarse , lep->Pt());
+    fill1dEff(h_l_eta       , fabs(lep->Eta()));
+    fill1dEff(h_l_eta_coarse, fabs(lep->Eta()));
+    fill1dEff(h_metrel      , m_metRel);
+    fill1dEff(h_met         , met->Et);
+    fill1dEff(h_njets       , jets.size());
+    fill1dEff(h_onebin      , 0.0);
+    fill2dEff(h_l_pt_eta    , lep->Pt(), fabs(lep->Eta()));
     if( nt.evt()->isMC ){ // If the event is MC, save the flavor
         LeptonSource ls(getLeptonSource(lep));
         bool isQcd(ls==LS_HF||ls==LS_LF);
-        fillEff(h_flavor, ls);
-        if(isQcd) fillEff(h_flavor, LS_QCD);
+        fill1dEff(h_flavor, ls);
+        if(isQcd) fill1dEff(h_flavor, LS_QCD);
         TH1F *hlpt = (ls==LS_Real ? h_l_pt_true[lt][regionIndex][m_ch] : h_l_pt_fake[lt][regionIndex][m_ch]);
         if(hlpt) hlpt->Fill(lep->Pt(), m_evtWeight);
     }
@@ -266,7 +285,7 @@ bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
     if(CR==CR_MCQCD && isQcdLepton)            m_probes.push_back( l ); // QCD
     if(CR==CR_MCReal && isRealLepton(l, dsid)) m_probes.push_back( l ); // Real
   }
-  m_evtWeight = getEvtWeight(leptons);
+  m_evtWeight = MeasureFakeRate2::getEvtWeight(leptons);
   return true;
 }
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
@@ -277,14 +296,11 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
                                         const Met* met,
                                         sf::Region CR)
 {
-  if( leptons.size() != 2 ) return false;
   bool passSR = false;
-  namespace swk = susy::wh::kin;
-        
-  bool computeWhssPass(CR==susy::fake::CR_SRWHSS || CR==susy::fake::CR_CR8lpt
-                       || CR==susy::fake::CR_CR8ee || CR==susy::fake::CR_CR8mm
-                       || CR==susy::fake::CR_CR8mmMtww || CR==susy::fake::CR_CR8mmHt);
-  SsPassFlags whssFlags(computeWhssPass ? passWhSS(leptons,jets,met) : SsPassFlags());
+  // all the signal regions below require 2L SS
+  if( leptons.size() != 2 ) return passSR;
+  if(!susy::sameSign(leptons)) return passSR;
+  SsPassFlags whssFlags = MeasureFakeRate2::passWhSS(leptons,jets,met); // NB this is not the method from SusySelection. Refactor
   susy::wh::Chan ch(SusySelection::getChan(leptons));
   m_ch = SusySelection::getChan(leptons);
   bool isEe(susy::wh::Ch_ee==ch), isMm(susy::wh::Ch_mm==ch), isOf(!isEe && !isMm);
@@ -292,40 +308,46 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   LeptonVector anyLeptons(getAnyElOrMu(nt));
   LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
   const swk::DilepVars v(swk::compute2lVars(leptons, met, jets, lowPtLep));
+  if(CR==sf::CR_SSInc) passSR = susy::sameSign(leptons);
+  else {
+      bool passCommonCriteria (whssFlags.sameSign && whssFlags.tauVeto && whssFlags.fjveto && whssFlags.bjveto && whssFlags.ge1j);
+      if(passCommonCriteria) {
+          switch(CR) {
+          case sf::CR_SSInc1j      : passSR =  whssFlags.ge1j;                    break;
+          case sf::CR_SRWHSS       : passSR =  whssFlags.metrel;                  break;
+          case sf::CR_CR8lpt       : passSR =  whssFlags.lepPt;                   break;
+          case sf::CR_CR8ee        : passSR = (whssFlags.lepPt   && isEe);        break;
+          case sf::CR_CR8mm        : passSR = (whssFlags.lepPt   && isMm);        break;
+          case sf::CR_CR8mmMtww    : passSR = (whssFlags.mtllmet && isMm);        break;
+          case sf::CR_CR8mmHt      : passSR = (whssFlags.ht      && isMm);        break;
+          case sf::CR_CR9lpt       : passSR = (isOf && whssFlags.lepPt);          break;
+          case sf::CR_SsEwk        : passSR = SusySelection::passEwkSs     (leptons, jets, met); break;
+          case sf::CR_SsEwkLoose   : passSR = SusySelection::passEwkSsLoose(leptons, jets, met); break;
+          case sf::CR_SsEwkLea     : passSR = SusySelection::passEwkSsLea  (leptons, jets, met); break;
+          case sf::CR_WHZVfake1jee : passSR = (isEe && is1j && SusySelection::passCrWhZVfakeEe(v)); break;
+          case sf::CR_WHZVfake2jee : passSR = (isEe && is2j && SusySelection::passCrWhZVfakeEe(v)); break;
+          case sf::CR_WHZVfake1jem : passSR = (isOf && is1j && SusySelection::passCrWhZVfakeEm(v)); break;
+          case sf::CR_WHZVfake2jem : passSR = (isOf && is2j && SusySelection::passCrWhZVfakeEm(v)); break;
+          case sf::CR_WHfake1jem   : passSR = (isOf && is1j && SusySelection::passCrWhfakeEm(v)); break;
+          case sf::CR_WHfake2jem   : passSR = (isOf && is2j && SusySelection::passCrWhfakeEm(v)); break;
+          case sf::CR_WHZV1jmm     : passSR = (isMm && is1j && SusySelection::passCrWhZVMm(v)); break;
+          case sf::CR_WHZV2jmm     : passSR = (isMm && is2j && SusySelection::passCrWhZVMm(v)); break;
+          case sf::CR_WHfake1jmm   : passSR = (isMm && is1j && SusySelection::passCrWhfakeMm(v)); break;
+          case sf::CR_WHfake2jmm   : passSR = (isMm && is2j && SusySelection::passCrWhfakeMm(v)); break;
+              // trying to unify the ee/em/mm channels
+          case sf::CR_WHZVfake1j   : passSR = (is1j && passCrWhZVfake(v)); break;
+          case sf::CR_WHZVfake2j   : passSR = (is2j && passCrWhZVfake(v)); break;
+          case sf::CR_WHfake1j     : passSR = (is1j && passCrWhfake  (v)); break;
+          case sf::CR_WHfake2j     : passSR = (is2j && passCrWhfake  (v)); break;
+          case sf::CR_WHZV1j       : passSR = (is1j && passCrWhZV    (v)); break;
+          case sf::CR_WHZV2j       : passSR = (is2j && passCrWhZV    (v)); break;
 
-  switch(CR) {
-  case sf::CR_SSInc        : passSR = susy::sameSign(leptons);            break;
-  case sf::CR_SRWHSS       : passSR =  whssFlags.metrel;                  break;
-  case sf::CR_CR8lpt       : passSR =  whssFlags.lepPt;                   break;
-  case sf::CR_CR8ee        : passSR = (whssFlags.lepPt   && isEe);        break;
-  case sf::CR_CR8mm        : passSR = (whssFlags.lepPt   && isMm);        break;
-  case sf::CR_CR8mmMtww    : passSR = (whssFlags.mtllmet && isMm);        break;
-  case sf::CR_CR8mmHt      : passSR = (whssFlags.ht      && isMm);        break;
-  case sf::CR_CR9lpt       : passSR = (isOf && whssFlags.lepPt);          break;
-  case sf::CR_SsEwk        : passSR = SusySelection::passEwkSs     (leptons, jets, met); break;
-  case sf::CR_SsEwkLoose   : passSR = SusySelection::passEwkSsLoose(leptons, jets, met); break;
-  case sf::CR_WHZVfake1jee : passSR = (isEe && is1j && SusySelection::passCrWhZVfakeEe(v)); break;
-  case sf::CR_WHZVfake2jee : passSR = (isEe && is2j && SusySelection::passCrWhZVfakeEe(v)); break;
-  case sf::CR_WHZVfake1jem : passSR = (isOf && is1j && SusySelection::passCrWhZVfakeEm(v)); break;
-  case sf::CR_WHZVfake2jem : passSR = (isOf && is2j && SusySelection::passCrWhZVfakeEm(v)); break;
-  case sf::CR_WHfake1jem   : passSR = (isOf && is1j && SusySelection::passCrWhfakeEm(v)); break;
-  case sf::CR_WHfake2jem   : passSR = (isOf && is2j && SusySelection::passCrWhfakeEm(v)); break;
-  case sf::CR_WHZV1jmm     : passSR = (isMm && is1j && SusySelection::passCrWhZVMm(v)); break;
-  case sf::CR_WHZV2jmm     : passSR = (isMm && is2j && SusySelection::passCrWhZVMm(v)); break;
-  case sf::CR_WHfake1jmm   : passSR = (isMm && is1j && SusySelection::passCrWhfakeMm(v)); break;
-  case sf::CR_WHfake2jmm   : passSR = (isMm && is2j && SusySelection::passCrWhfakeMm(v)); break;
-  // trying to unify the ee/em/mm channels
-  case sf::CR_WHZVfake1j   : passSR = (is1j && passCrWhZVfake(v)); break;
-  case sf::CR_WHZVfake2j   : passSR = (is2j && passCrWhZVfake(v)); break;
-  case sf::CR_WHfake1j     : passSR = (is1j && passCrWhfake  (v)); break;
-  case sf::CR_WHfake2j     : passSR = (is2j && passCrWhfake  (v)); break;
-  case sf::CR_WHZV1j       : passSR = (is1j && passCrWhZV    (v)); break;
-  case sf::CR_WHZV2j       : passSR = (is2j && passCrWhZV    (v)); break;
+          case sf::CR_SRWH1j       : passSR = (is1j && passSrWh1j    (v)); break;
+          case sf::CR_SRWH2j       : passSR = (is2j && passSrWh2j    (v)); break;
 
-  case sf::CR_SRWH1j       : passSR = (is1j && passSrWh1j    (v)); break;
-  case sf::CR_SRWH2j       : passSR = (is2j && passSrWh2j    (v)); break;
-
-  default: cout<<"invalid ControlRegion "<<CR<<endl;
+          default: cout<<"invalid ControlRegion "<<CR<<endl;
+          } // switch
+      } // passCommonCriteria
   }
   for(uint i=0; i<leptons.size(); ++i) m_probes.push_back( leptons[i]);
   if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(leptons);
@@ -695,13 +717,13 @@ void MeasureFakeRate2::increment(float flag[], bool includeLepSF, bool includeBt
     flag[WT_Evt]   += nt.evt()->w;
     flag[WT_PU]    += nt.evt()->w * nt.evt()->wPileup;
     flag[WT_PU1fb] += nt.evt()->w * nt.evt()->wPileupAB3;
-    flag[WT_LSF]   += (includeLepSF ? 
+    flag[WT_LSF]   += (includeLepSF ?
                        nt.evt()->w * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF :
                        nt.evt()->w);
     float btag = includeBtag ? getBTagWeight(nt.evt()) : 1.0;
     flag[WT_Btag]  += nt.evt()->w * btag;
-    
-    float trig = m_baseLeptons.size() == 2 && nt.evt()->isMC && !m_useMCTrig ? 
+
+    float trig = m_baseLeptons.size() == 2 && nt.evt()->isMC && !m_useMCTrig ?
         m_trigObj->getTriggerWeight(m_baseLeptons,
                                     nt.evt()->isMC,
                                     m_met->Et,
@@ -711,7 +733,7 @@ void MeasureFakeRate2::increment(float flag[], bool includeLepSF, bool includeBt
     //cout<<"\tTrigger weight: "<<trig<<endl;
     flag[WT_Trig] += trig * nt.evt()->w;
     bool useSumwMap(true);
-    
+
     float allAE = SusyNtAna::getEventWeight(LUMI_A_L, useSumwMap) * btag * trig;
     allAE = includeLepSF ? allAE * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : allAE;
     flag[WT_AllAE] += allAE;

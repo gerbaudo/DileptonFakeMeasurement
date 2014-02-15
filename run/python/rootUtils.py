@@ -5,6 +5,10 @@
 # davide.gerbaudo@gmail.com
 # 2013-08-26
 
+try:
+    import numpy as np
+except ImportError:
+    print "missing numpy: some functions will not be available"
 
 def importRoot() :
     import ROOT as r
@@ -13,7 +17,6 @@ def importRoot() :
     return r
 r = importRoot()
 
-import numpy as np
 from utils import verticalSlice
 
 def referenceLine(xmin=0., xmax=100.0, ymin=1.0, ymax=1.0) :
@@ -152,3 +155,19 @@ def topRightLabel(pad, label, xpos=None, ypos=None, align=33) :
     tex.DrawLatex((1.0-pad.GetRightMargin()) if not xpos else xpos, (1.0-pad.GetTopMargin()) if not ypos else ypos, label)
     pad._label = tex
     return tex
+def getBinIndices(h) :
+    "Return a list of the internal indices used by TH1/TH2/TH3; see TH1::GetBin for info on internal mapping"
+    cname = h.Class().GetName()
+    if   cname.startswith('TH1') :
+        return [h.GetBin(i)
+                for i in range(1, 1+h.GetNbinsX())]
+    elif cname.startswith('TH2') :
+        return [h.GetBin(i, j)
+                for i in range(1, 1+h.GetNbinsX())
+                for j in range(1, 1+h.GetNbinsY())]
+    elif cname.startswith('TH3') :
+        return [h.GetBin(i, j, k)
+                for i in range(1, 1+h.GetNbinsX())
+                for j in range(1, 1+h.GetNbinsY())
+                for k in range(1, 1+h.GetNbinsZ())]
+    else : return []

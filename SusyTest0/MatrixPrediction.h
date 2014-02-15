@@ -67,6 +67,7 @@ class MatrixPrediction : public SusyPlotter
     float getRFWeight(const LeptonVector &baseLeps, susy::fake::Region region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NONE);
     MatrixPair getMatrixPair(const LeptonVector &baseLeps); //!< Get the Matrix Pair type
     MatrixPrediction& setMatrixFilename(const std::string filename); // to be called before Begin
+    MatrixPrediction& use2dParametrization() { m_use2dparametrization = true; return *this; }
     static std::string dilepDetails(const Susy::Event &event, const DiLepEvtType &ll,
                                     const LeptonVector &ls);
     std::string eventDetails(bool passSrSs, const Susy::Event &event, const DiLepEvtType &ll,
@@ -77,6 +78,7 @@ class MatrixPrediction : public SusyPlotter
     std::vector<uint> m_matrixSys;      // systematics to process
     SusyMatrixMethod::DiLeptonMatrixMethod* m_matrix;
     std::string m_matrixFilename;
+    bool m_use2dparametrization;
     bool m_allconfigured;
     bool initMatrixTool();
     // Histograms

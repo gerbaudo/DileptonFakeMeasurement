@@ -128,6 +128,10 @@ class SusySelection : public SusyNtAna
     static bool passCrWhZVfake  (const susy::wh::kin::DilepVars &v);
     static bool passCrWhfake    (const susy::wh::kin::DilepVars &v);
     static bool passCrWhZV      (const susy::wh::kin::DilepVars &v);
+    // same as above, but also increment the counters
+    bool passAndIncrementCrWhZVfake(const susy::wh::kin::DilepVars &v);
+    bool passAndIncrementCrWhfake  (const susy::wh::kin::DilepVars &v);
+    bool passAndIncrementCrWhZV    (const susy::wh::kin::DilepVars &v);
 
     //
     static bool passSrWh1j(const susy::wh::kin::DilepVars &v);
@@ -296,6 +300,13 @@ class SusySelection : public SusyNtAna
     float n_pass_ge2jht         [ET_N][kWeightTypesN];
     float n_pass_ge2jmetRel     [ET_N][kWeightTypesN];
     float n_pass_ge2jmWwt       [ET_N][kWeightTypesN];
+
+    float n_pass_cr1jzv         [ET_N][kWeightTypesN];
+    float n_pass_cr1jfake       [ET_N][kWeightTypesN];
+    float n_pass_cr1jzvfake     [ET_N][kWeightTypesN];
+    float n_pass_cr2jzv         [ET_N][kWeightTypesN];
+    float n_pass_cr2jfake       [ET_N][kWeightTypesN];
+    float n_pass_cr2jzvfake     [ET_N][kWeightTypesN];
 
     float n_pass_ewkSs          [ET_N][kWeightTypesN];
     float n_pass_ewkSsLoose     [ET_N][kWeightTypesN];

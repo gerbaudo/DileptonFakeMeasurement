@@ -28,7 +28,7 @@ from math import sqrt
 import operator
 import optparse
 import os
-from rootUtils import importRoot, buildRatioHistogram, drawLegendWithDictKeys, getMinMax
+from rootUtils import importRoot, buildRatioHistogram, drawLegendWithDictKeys, getMinMax, getBinIndices
 r = importRoot()
 r.gStyle.SetPadTickX(1)
 r.gStyle.SetPadTickY(1)
@@ -56,9 +56,9 @@ Example usage:
 
 # scale factors from determineFakeScaleFactor.py
 # --- paste the lines below in buildWeightedMatrix.py ---
-# Feb_02, 2014-02-04 09:06:51.809678
-mu_qcdSF, mu_realSF = 0.86, 0.99589
-el_convSF, el_qcdSF, el_realSF = 1.09, 0.63, 0.99640
+# Feb_12, 2014-02-12 18:20:20.650121
+mu_qcdSF, mu_realSF = 0.86, 0.99590
+el_convSF, el_qcdSF, el_realSF = 1.09, 0.63, 0.99633
 
 def main() :
     parser = optparse.OptionParser(usage=usage)
@@ -101,6 +101,7 @@ def frac2str(frac) :
 def selectionRegions() :
     print "hardcoded selectionRegions, should match what's in FakeRegions.h; fix DiLeptonMatrixMethod"
     return ['CR_SSInc',
+            'CR_SSInc1j',
             'CR_WHSS',
             'CR_CR8lpt',
             'CR_CR8ee',
@@ -110,6 +111,7 @@ def selectionRegions() :
             'CR_CR9lpt',
             'CR_SsEwk',
             'CR_SsEwkLoose',
+            'CR_SsEwkLea',
             'CR_WHZVfake1jee',
             'CR_WHZVfake2jee',
             'CR_WHZVfake1jem',
@@ -192,7 +194,7 @@ def buildWeightedHisto(histos={}, fractions={}, histoName='', histoTitle='') :
     hout = first(histos).Clone(histoName if histoName else 'final_rate') # should pick a better default
     hout.SetTitle(histoTitle)
     hout.Reset()
-    for b in range(1, 1+hout.GetNbinsX()) :
+    for b in getBinIndices(hout) :
         tot, err2 = binWeightedSum(histos, fractions, b)
         hout.SetBinContent(b, tot)
         hout.SetBinError(b, sqrt(err2))
@@ -204,7 +206,7 @@ def buildWeightedHistoTwice(histosA={}, fractionsA={}, histosB={}, fractionsB={}
     hout = first(histosA).Clone(histoName if histoName else 'final_rate') # should pick a better default
     hout.SetTitle(histoTitle)
     hout.Reset()
-    for b in range(1, 1+hout.GetNbinsX()) :
+    for b in getBinIndices(hout) :
         totA, errA2 = binWeightedSum(histosA, fractionsA, b)
         totB, errB2 = binWeightedSum(histosB, fractionsB, b)
         hout.SetBinContent(b, totA + totB)
@@ -220,20 +222,29 @@ def buildMuonRates(inputFiles, outputfile, outplotdir, verbose=False) :
     print "buildMuonRates: values to be fixed: ",' '.join(["%s: %s"%(v, eval(v)) for v in ['mu_qcdSF', 'mu_realSF']])
     eff_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_coarse',  iF[p], mu_qcdSF))  for p in processes)
     eff_real = dict((p, brsit('muon_realMC_all_l_pt_coarse', iF[p], mu_realSF)) for p in processes)
+    eff2d_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_eta',  iF[p], mu_qcdSF))  for p in processes)
+    eff2d_real = dict((p, brsit('muon_realMC_all_l_pt_eta', iF[p], mu_realSF)) for p in processes)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#varepsilon(T|L)'
     plotUnweightedEfficiencies(eff_qcd,  'eff_mu_qcd',  outplotdir, lT+' qcd fake #mu'+';'+lX+';'+lY)
     plotUnweightedEfficiencies(eff_real, 'eff_mu_real', outplotdir, lT+' real #mu'    +';'+lX+';'+lY)
+    lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#eta'
+    plotUnweighted2dEfficiencies(eff2d_qcd,  'eff2d_mu_qcd', outplotdir, lT+' qcd fake #mu'+';'+lX+';'+lY)
+    plotUnweighted2dEfficiencies(eff2d_real, 'eff2d_mu_real', outplotdir, lT+' real #mu'   +';'+lX+';'+lY)
     mu_frac = dict()
     for sr in selectionRegions() :
         frac_qcd  = buildPercentages(inputFiles, 'muon_'+sr+'_all_flavor_den', 'qcd')
         frac_real = buildPercentages(inputFiles, 'muon_'+sr+'_all_flavor_den', 'real')
         if verbose : print "mu : sr ",sr,"\n frac_qcd  : ",frac2str(frac_qcd )
         if verbose : print "mu : sr ",sr,"\n frac_real : ",frac2str(frac_real)
-        fake = buildWeightedHisto(eff_qcd,  frac_qcd, 'mu_fake_rate_'+sr, 'Muon fake rate '+sr)
-        real = buildWeightedHisto(eff_real, frac_real, 'mu_real_eff_'+sr, 'Muon real eff '+sr)
+        fake1d = buildWeightedHisto(eff_qcd,  frac_qcd, 'mu_fake_rate_'+sr, 'Muon fake rate '+sr)
+        real1d = buildWeightedHisto(eff_real, frac_real, 'mu_real_eff_'+sr, 'Muon real eff ' +sr)
+        fake2d = buildWeightedHisto(eff2d_qcd,  frac_qcd, 'mu_fake_rate2d_'+sr, 'Muon fake rate #eta vs. p_{T}'+sr)
+        real2d = buildWeightedHisto(eff2d_real, frac_real, 'mu_real_eff2d_'+sr, 'Muon real eff  #eta vs. p_{T}'+sr)
         outputfile.cd()
-        fake.Write()
-        real.Write()
+        fake1d.Write()
+        real1d.Write()
+        fake2d.Write()
+        real2d.Write()
         mu_frac[sr] = {'qcd' : frac_qcd, 'real' : frac_real}
     #json_write(mu_frac, outplotdir+/outFracFilename)
     plotFractions(mu_frac, outplotdir, 'mu')
@@ -249,10 +260,17 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, verbose=False) :
     eff_conv = dict((p, brsit('elec_convMC_all_l_pt_coarse', iF[p], el_convSF)) for p in processes)
     eff_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_coarse',  iF[p], el_qcdSF))  for p in processes)
     eff_real = dict((p, brsit('elec_realMC_all_l_pt_coarse', iF[p], el_realSF)) for p in processes)
+    eff2d_conv = dict((p, brsit('elec_convMC_all_l_pt_eta', iF[p], el_convSF)) for p in processes)
+    eff2d_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_eta',  iF[p], el_qcdSF))  for p in processes)
+    eff2d_real = dict((p, brsit('elec_realMC_all_l_pt_eta', iF[p], el_realSF)) for p in processes)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#varepsilon(T|L)'
     plotUnweightedEfficiencies(eff_conv, 'eff_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY)
     plotUnweightedEfficiencies(eff_qcd,  'eff_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY)
     plotUnweightedEfficiencies(eff_real, 'eff_el_real', outplotdir, lT+' real el'     +';'+lX+';'+lY)
+    lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#eta'
+    plotUnweighted2dEfficiencies(eff2d_conv, 'eff2d_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY)
+    plotUnweighted2dEfficiencies(eff2d_qcd,  'eff2d_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY)
+    plotUnweighted2dEfficiencies(eff2d_real, 'eff2d_el_real', outplotdir, lT+' real el'     +';'+lX+';'+lY)
     el_frac = dict()
     for sr in selectionRegions() :
         frac_conv, frac_qcd= buildPercentagesTwice(inputFiles, 'elec_'+sr+'_all_flavor_den',
@@ -261,11 +279,15 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, verbose=False) :
         if verbose : print "el : sr ",sr,"\n frac_conv : ",frac2str(frac_conv)
         if verbose : print "el : sr ",sr,"\n frac_qcd  : ",frac2str(frac_qcd )
         if verbose : print "el : sr ",sr,"\n frac_real : ",frac2str(frac_real)
-        real = buildWeightedHisto     (eff_real, frac_real,                     'el_real_eff_'+sr, 'Electron real eff '+sr)
-        fake = buildWeightedHistoTwice(eff_conv, frac_conv, eff_qcd,  frac_qcd, 'el_fake_rate_'+sr, 'Electron fake rate '+sr)
+        real1d = buildWeightedHisto     (eff_real, frac_real,                     'el_real_eff_'+sr, 'Electron real eff '+sr)
+        fake1d = buildWeightedHistoTwice(eff_conv, frac_conv, eff_qcd,  frac_qcd, 'el_fake_rate_'+sr, 'Electron fake rate '+sr)
+        real2d = buildWeightedHisto     (eff2d_real, frac_real,                     'el_real_eff2d_'+sr, 'Electron real eff  #eta vs. p_{T}'+sr)
+        fake2d = buildWeightedHistoTwice(eff2d_conv, frac_conv, eff2d_qcd,  frac_qcd, 'el_fake_rate2d_'+sr, 'Electron fake rate  #eta vs. p_{T}'+sr)
         outputfile.cd()
-        fake.Write()
-        real.Write()
+        fake1d.Write()
+        real1d.Write()
+        fake2d.Write()
+        real2d.Write()
         el_frac[sr] = {'conv' : frac_conv, 'qcd' : frac_qcd, 'real' : frac_real}
     #json_write(el_frac, outFracFilename)
     plotFractions(el_frac, outplotdir, 'el')
@@ -356,6 +378,28 @@ def plotUnweightedEfficiencies(effs={}, canvasName='', outputDir='./', frameTitl
     outFilename = outputDir+'/'+canvasName+'.png'
     rmIfExists(outFilename)
     can.SaveAs(outFilename)
+def plotUnweighted2dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='efficiency; #eta; p_{T} [GeV]', zoomIn=False) :
+    can = r.TCanvas(canvasName, '', 800, 600)
+    can.cd()
+    origTextFormat = r.gStyle.GetPaintTextFormat()
+    r.gStyle.SetPaintTextFormat('.2f')
+    for s,h in effs.iteritems() :
+        can.Clear()
+        # todo minZ, maxZ = getMinMax(effs.values()) if zoomIn else (0.0, 1.0)
+        minZ, maxZ = (0.0, 1.0)
+        h.SetMarkerSize(1.5*h.GetMarkerSize())
+        h.Draw('colz')
+        h.Draw('text same')
+        h.GetZaxis().SetRangeUser(min([0.0, minZ]), maxZ)
+        h.SetTitle(s+' : '+frameTitle)
+        h.SetStats(False)
+        can.Update()
+        outFilename = outputDir+'/'+canvasName+'_'+s+'.png'
+        rmIfExists(outFilename)
+        can.SaveAs(outFilename)
+    r.gStyle.SetPaintTextFormat(origTextFormat)
+
+
 
 if __name__=='__main__' :
     main()

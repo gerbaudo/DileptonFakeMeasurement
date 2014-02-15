@@ -20,6 +20,10 @@ struct SsPassFlags {
     return (eq2l & tauVeto & trig2l & trig2lmatch & true2l & sameSign
             & veto3rdL & fjveto & bjveto & ge1j & lepPt);
   }
+  bool passCommonCriteria() const {
+    return (eq2l & tauVeto & trig2l & trig2lmatch & true2l & sameSign
+            & veto3rdL & fjveto & bjveto & ge1j);
+  }
   SsPassFlags& updateLlFlags(const Susy::Lepton &l0, const Susy::Lepton &l1);
   bool ee, em, mm;
   bool eq2l, tauVeto, trig2l, trig2lmatch, true2l, sameSign, veto3rdL, fjveto, bjveto;

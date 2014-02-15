@@ -29,6 +29,7 @@ const int  nmassbins = 30;
 MatrixPrediction::MatrixPrediction() :
   SusyPlotter(),
   m_matrix(0),
+  m_use2dparametrization(false),
   m_allconfigured(false)
 {
 }
@@ -79,6 +80,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   const SsPassFlags &ssf = varsFlags.second;
   m_weightComponents.fake = getFakeWeight(l,sf::CR_SRWHSS, metRel, smm::SYS_NONE); // just for the counters, use generic CR_SRWHSS
   incrementSsCounters(ssf, m_weightComponents);
+  if(!ssf.passCommonCriteria()) return false;
   if(m_writeTuple && ssf.lepPt) {
       double weight(getFakeWeight(l, sf::CR_CR8lpt, metRel, smm::SYS_NONE));
       unsigned int run(nt.evt()->run), event(nt.evt()->event);
@@ -92,6 +94,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
           smm::SYSTEMATIC sys = static_cast<smm::SYSTEMATIC>(m_systs.at(s));
           bool is1j(j.size()==1), is2j(j.size()>1);
 
+          if(ssf.sameSign && ssf.ge1j) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SSInc1j,metRel,sys), PR_CRSsInc1j, sys);
           if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
           if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8ee,     metRel,sys), PR_CR8ee,     sys);
           if(isMm && ssf.lepPt
@@ -113,8 +116,10 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
 
           bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
           bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
+          bool passEwkSsLea  (SusySelection::passEwkSsLea  (ncl,j,m));
           if(passEwkSs)      fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwk,     metRel,sys), PR_SsEwk,     sys);
           if(passEwkSsLoose) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwkLoose,metRel,sys), PR_SsEwkLoose,sys);
+          if(passEwkSsLea)   fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwkLea,  metRel,sys), PR_SsEwkLea,  sys);
       } // end for(s)
   }
   return true;
@@ -283,12 +288,8 @@ bool MatrixPrediction::initMatrixTool()
 {
   // Load the matrix method package
   m_matrix = new SusyMatrixMethod::DiLeptonMatrixMethod();
-  return m_matrix->configure(m_matrixFilename,
-                             SusyMatrixMethod::PT,     // Electron Real
-                             SusyMatrixMethod::PT,     // Electron Fake
-                             SusyMatrixMethod::PT,     // Muon Real
-                             SusyMatrixMethod::PT      // Muon Fake
-                             );
+  SusyMatrixMethod::RATE_PARAM pm = (m_use2dparametrization ? SusyMatrixMethod::PT_ETA : SusyMatrixMethod::PT);
+  return m_matrix->configure(m_matrixFilename, pm, pm, pm, pm);
 }
 //----------------------------------------------------------
 std::string MatrixPrediction::dilepDetails(const Susy::Event &event,

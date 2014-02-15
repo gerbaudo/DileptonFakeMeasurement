@@ -152,7 +152,7 @@ def buildSideBandSubRate(file, lepton, variable_name) :
     hSideHi  = getNumDenHistos(file, lepton+'_realSideHigh_'+variable_name)
     def sbErr(el, ew, eh) :
         "SidebandError; DG this doesn't make any sense to me; ask Matt"
-        return sqrt(ew*ew - (el*el + eh*eh))
+        return sqrt(ew*ew + (el*el + eh*eh))
     def be(h) : return [h.GetBinError(b) for b in range(1, 1+h.GetNbinsX())]
     errs = dict([(k, [sbErr(l,w,h)
                       for l, w, h in zip(be(hSideLo[k]), be(hZwindow[k]), be(hSideHi[k]))])

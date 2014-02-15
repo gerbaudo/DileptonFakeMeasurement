@@ -8,11 +8,13 @@ namespace wh {
 
 enum Region{
     PR_SR8base,
+    PR_CRSsInc1j,
     PR_CR8lpt, PR_CR8ee, // looser regions for fake control plots, same for SR9lpt
     PR_CR8mm, PR_CR8mmMtww, PR_CR8mmHt,
     PR_SR8, PR_SR9base, PR_CR9lpt, PR_SR9,
     PR_SsEwk,
     PR_SsEwkLoose,
+    PR_SsEwkLea,
 
     CrZVfake1j,
     CrZVfake2j,
@@ -20,18 +22,17 @@ enum Region{
     Crfake2j,
     CrZV1j,
     CrZV2j,
-
     SrWh1j,
     SrWh2j
-
 };
 
 const Region PlotRegions[] = {
     PR_SR8base,
+    PR_CRSsInc1j,
     PR_CR8lpt, PR_CR8ee,
     PR_CR8mm, PR_CR8mmMtww, PR_CR8mmHt,
     PR_SR8, PR_SR9base, PR_CR9lpt, PR_SR9,
-    PR_SsEwk, PR_SsEwkLoose,
+    PR_SsEwk, PR_SsEwkLoose, PR_SsEwkLea,
 
     CrZVfake1j,
     CrZVfake2j,
@@ -46,6 +47,7 @@ const size_t kNumberOfPlotRegions = sizeof(PlotRegions) / sizeof(PlotRegions[0])
 const string RegionNames[] =
 {
   "sr8base"
+  ,"crSsInc1j"
   ,"cr8lpt"
   ,"cr8lptee"
   ,"cr8lptmm"
@@ -57,7 +59,7 @@ const string RegionNames[] =
   ,"sr9"
   ,"srSsEwk"
   ,"crSsEwkLoose"
-
+  ,"crSsEwkLea"
   ,"crZVfake1j"
   ,"crZVfake2j"
   ,"crfake1j"
