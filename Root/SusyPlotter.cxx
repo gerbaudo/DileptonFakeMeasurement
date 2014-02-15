@@ -1,6 +1,9 @@
-#include <cassert>
-
 #include "SusyTest0/SusyPlotter.h"
+
+#include <algorithm>
+#include <cassert>
+#include <iterator>
+#include <sstream>
 
 #include "TLorentzVector.h"
 
@@ -68,7 +71,7 @@ SusyPlotter::SusyPlotter() :
   SusySelection(),
   m_histFileName("susyPlotterOut.root"),
   m_histFile(0),
-  m_doFake(false)
+  m_doProcessSystematics(false)
 {
 }
 //-----------------------------------------
@@ -76,7 +79,8 @@ void SusyPlotter::Begin(TTree* /*tree*/)
 {
   SusySelection::Begin(0);
   if(m_dbg) cout << "SusyPlotter::Begin" << endl;
-  setSysts();
+  toggleNominal();
+  if(m_doProcessSystematics) toggleStdSystematics();
   initHistos();
 }
 //-----------------------------------------
@@ -88,69 +92,63 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   cacheStaticWeightComponents();
   increment(n_readin, m_weightComponents);
   bool removeLepsFromIso(false);
-  const SusyNtSys sys = NtSys_NOM; // for now we don't do any sys loop; see also setSysts
-  selectObjects(sys, removeLepsFromIso, TauID_medium);
-  if(!selectEvent())    return kTRUE;
-  const Met*          m = m_met;
-  const JetVector&    j = m_signalJets2Lep;
-  const JetVector&   bj = m_baseJets;     // DG don't know why, but we use these for the btag w
-  const LeptonVector& l = m_signalLeptons;
-  LeptonVector&     ncl = m_signalLeptons; // non-const leptons: can be modified by qflip
-  Met ncmet(*m_met); // non-const met
-  const TauVector&    t = m_signalTaus;
-  if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
-  bool allowQflip(true);
-  SsPassFlags ssf(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
-  if(!ssf.passCommonCriteria()) return false;
-  float weight(m_weightComponents.product());
-  const DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
-  bool sameFlav(ll==ee||ll==mm);
-  if(ssf.passLpt()) {
-    swh::Region pr = (sameFlav ? swh::PR_CR8lpt : swh::PR_CR9lpt);
-    fillHistos(ncl, j, m, weight, pr, sys);
-    if     (ll==ee && ssf.zllVeto) fillHistos(ncl, j, m, weight, PR_CR8ee, sys);
-    else if(ll==mm) {
-      bool passMinMet(m->Et > 40.0);
-      if(passMinMet ) fillHistos(ncl, j, m, weight, swh::PR_CR8mm,     sys);
-      if(ssf.mtllmet) fillHistos(ncl, j, m, weight, swh::PR_CR8mmMtww, sys);
-      if(ssf.ht     ) fillHistos(ncl, j, m, weight, swh::PR_CR8mmHt,   sys);
-    } // end if(mm)
-  } // end passLpt
-  bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
-  bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
-  bool passEwkSsLea  (SusySelection::passEwkSsLea  (ncl,j,m));
-  if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     sys);
-  if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,sys);
-  if(passEwkSsLea)   fillHistos(ncl, j, m, weight, swh::PR_SsEwkLea,  sys);
-  bool isEe(ll==ee), isMm(ll==mm), isOf(!isEe && !isMm);
-  bool is1j(j.size()==1), is2j(j.size()>1);
-  LeptonVector anyLeptons(getAnyElOrMu(nt));
-  LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
-  /*const*/ swk::DilepVars v(swk::compute2lVars(ncl, m, j));
-  v.l3veto = ssf.veto3rdL; // already computed in passSrSs
+  for(size_t iSys=0; iSys<m_systs.size(); ++iSys) {
+      const SusyNtSys sys = static_cast<SusyNtSys>(m_systs[iSys]);
+      selectObjects(sys, removeLepsFromIso, TauID_medium);
+      swh::EventFlags eventFlags(computeEventFlags());
+      if(sys==NtSys_NOM) incrementCounters(eventFlags, m_weightComponents);
+      if(eventFlags.failAny()) continue;
+      const Met*          m = m_met;
+      const JetVector&    j = m_signalJets2Lep;
+      const JetVector&   bj = m_baseJets;     // DG don't know why, but we use these for the btag w
+      const LeptonVector& l = m_signalLeptons;
+      LeptonVector&     ncl = m_signalLeptons; // non-const leptons: can be modified by qflip
+      Met ncmet(*m_met); // non-const met
+      const TauVector&    t = m_signalTaus;
+      if(l.size()>1) computeNonStaticWeightComponents(l, bj); else continue;
+      bool allowQflip(true);
+      VarFlag_t varsFlags(SusySelection::computeSsFlags(ncl, t, j, m, allowQflip));
+      const swk::DilepVars &v = varsFlags.first;
+      const SsPassFlags &ssf = varsFlags.second;
+      if(sys==NtSys_NOM) incrementSsCounters(ssf, m_weightComponents);
+      float weight(m_weightComponents.product());
+      const DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
+      bool sameFlav(ll==ee||ll==mm);
+      if(ssf.passLpt()) {
+          swh::Region pr = (sameFlav ? swh::PR_CR8lpt : swh::PR_CR9lpt);
+          fillHistos(ncl, j, m, weight, pr, iSys);
+          if     (ll==ee && ssf.zllVeto) fillHistos(ncl, j, m, weight, PR_CR8ee, iSys);
+          else if(ll==mm) {
+              bool passMinMet(m->Et > 40.0);
+              if(passMinMet ) fillHistos(ncl, j, m, weight, swh::PR_CR8mm,     iSys);
+              if(ssf.mtllmet) fillHistos(ncl, j, m, weight, swh::PR_CR8mmMtww, iSys);
+              if(ssf.ht     ) fillHistos(ncl, j, m, weight, swh::PR_CR8mmHt,   iSys);
+          } // end if(mm)
+      } // end passLpt
+      bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
+      bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
+      bool passEwkSsLea  (SusySelection::passEwkSsLea  (ncl,j,m));
+      if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     iSys);
+      if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,iSys);
+      if(passEwkSsLea)   fillHistos(ncl, j, m, weight, swh::PR_SsEwkLea,  iSys);
+      bool is1j(j.size()==1), is2j(j.size()>1);
 
-  if(ssf.sameSign && ssf.ge1j)                           fillHistos(ncl, j, m, weight, swh::PR_CRSsInc1j, sys);
-  if(isEe && is1j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1jee, sys);
-  if(isEe && is2j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2jee, sys);
-  if(isOf && is1j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1jem, sys);
-  if(isOf && is2j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2jem, sys);
-  if(isOf && is1j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1jem  , sys);
-  if(isOf && is2j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2jem  , sys);
-  if(isMm && is1j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, weight, swh::CrZV1jmm    , sys);
-  if(isMm && is2j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, weight, swh::CrZV2jmm    , sys);
-  if(isMm && is1j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1jmm  , sys);
-  if(isMm && is2j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2jmm  , sys);
+      if(ssf.sameSign && ssf.ge1j)                 fillHistos(ncl, j, m, weight, swh::PR_CRSsInc1j,iSys);
+      if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1j , iSys);
+      if(is2j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2j , iSys);
+      if(is1j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1j   , iSys);
+      if(is2j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2j   , iSys);
+      if(is1j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV1j     , iSys);
+      if(is2j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV2j     , iSys);
 
-  if(is1j && SusySelection::passAndIncrementCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1j , sys);
-  if(is2j && SusySelection::passAndIncrementCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2j , sys);
-  if(is1j && SusySelection::passAndIncrementCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1j   , sys);
-  if(is2j && SusySelection::passAndIncrementCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2j   , sys);
-  if(is1j && SusySelection::passAndIncrementCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV1j     , sys);
-  if(is2j && SusySelection::passAndIncrementCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV2j     , sys);
-
-  if(is1j && SusySelection::passSrWh1j(v)) fillHistos(ncl, j, m, weight, swh::SrWh1j , sys);
-  if(is2j && SusySelection::passSrWh2j(v)) fillHistos(ncl, j, m, weight, swh::SrWh2j , sys);
-
+      if(is1j && SusySelection::passSrWh1j(v)) fillHistos(ncl, j, m, weight, swh::SrWh1j , iSys);
+      if(is2j && SusySelection::passSrWh2j(v)) fillHistos(ncl, j, m, weight, swh::SrWh2j , iSys);
+      if(m_fillHft) {
+          bool storeEvent(SusySelection::passSrWh1j(v) || SusySelection::passSrWh2j(v));
+          if(!isHftFillerInitialized()) initHftFiller();
+          if(storeEvent) fillHft(iSys, v);
+      }
+  } // for(iSys)
   return kTRUE;
 }
 //-----------------------------------------
@@ -160,6 +158,7 @@ void SusyPlotter::Terminate()
   if(m_dbg) cout << "SusyPlotter::Terminate" << endl;
   dumpEventCounters();
   // Save the output
+  if(m_fillHft) closeHftFiller();
   m_histFile->Write();
   m_histFile->Close();
 }
@@ -172,6 +171,21 @@ SusyPlotter& SusyPlotter::setOutputFilename(const std::string &name)
         <<"\t using default value '"<<m_histFile<<"'"<<endl;
   else m_histFileName = name;
   return *this;
+}
+//-----------------------------------------
+SusyPlotter& SusyPlotter::toggleSystematics()
+{
+    bool alreadyInitialized(m_histFile!=0);
+    if(alreadyInitialized) cout<<"SusyPlotter::toggleSystematics: cannot toggle systematics after histogram initialization"<<endl;
+    else m_doProcessSystematics = true;
+    return *this;
+}
+//-----------------------------------------
+SusyPlotter& SusyPlotter::toggleHistFitterTrees()
+{
+    if(m_dbg) cout<<"SusyPlotter::toggleHistFitterTree: HftFiller will be initialized on the first event"<<endl;
+    m_fillHft = true;
+    return *this;
 }
 //-----------------------------------------
 void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
@@ -304,14 +318,42 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
   #undef FILL2
 }
 //-----------------------------------------
-void SusyPlotter::setSysts()
+void SusyPlotter::toggleNominal()
 {
-  if(!m_doFake) {
     m_systs.push_back(NtSys_NOM);  m_systNames.push_back(SusyNtSystNames[NtSys_NOM]);
-  } else {
-    // DG 2013-10-18: for now we are not doing any syst loop. However,
-    // we need to book the histograms for the systematic variations
-    // used to determine the uncertainty on the fake estimate (-> m_doFake toggle).
+}
+//-----------------------------------------
+void SusyPlotter::toggleStdSystematics()
+{
+    m_systs.push_back(NtSys_EES_Z_UP    ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_Z_UP    ]);
+    m_systs.push_back(NtSys_EES_Z_DN    ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_Z_DN    ]);
+//     m_systs.push_back(NtSys_EES_MAT_UP  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_MAT_UP  ]);
+//     m_systs.push_back(NtSys_EES_MAT_DN  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_MAT_DN  ]);
+//     m_systs.push_back(NtSys_EES_PS_UP   ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_PS_UP   ]);
+//     m_systs.push_back(NtSys_EES_PS_DN   ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_PS_DN   ]);
+//     m_systs.push_back(NtSys_EES_LOW_UP  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_LOW_UP  ]);
+//     m_systs.push_back(NtSys_EES_LOW_DN  ); m_systNames.push_back(SusyNtSystNames[NtSys_EES_LOW_DN  ]);
+//     m_systs.push_back(NtSys_EER_UP      ); m_systNames.push_back(SusyNtSystNames[NtSys_EER_UP      ]);
+//     m_systs.push_back(NtSys_EER_DN      ); m_systNames.push_back(SusyNtSystNames[NtSys_EER_DN      ]);
+//     m_systs.push_back(NtSys_MS_UP       ); m_systNames.push_back(SusyNtSystNames[NtSys_MS_UP       ]);
+//     m_systs.push_back(NtSys_MS_DN       ); m_systNames.push_back(SusyNtSystNames[NtSys_MS_DN       ]);
+//     m_systs.push_back(NtSys_ID_UP       ); m_systNames.push_back(SusyNtSystNames[NtSys_ID_UP       ]);
+//     m_systs.push_back(NtSys_ID_DN       ); m_systNames.push_back(SusyNtSystNames[NtSys_ID_DN       ]);
+//     m_systs.push_back(NtSys_JES_UP      ); m_systNames.push_back(SusyNtSystNames[NtSys_JES_UP      ]);
+//     m_systs.push_back(NtSys_JES_DN      ); m_systNames.push_back(SusyNtSystNames[NtSys_JES_DN      ]);
+//     m_systs.push_back(NtSys_JER         ); m_systNames.push_back(SusyNtSystNames[NtSys_JER         ]);
+//     m_systs.push_back(NtSys_SCALEST_UP  ); m_systNames.push_back(SusyNtSystNames[NtSys_SCALEST_UP  ]);
+//     m_systs.push_back(NtSys_SCALEST_DN  ); m_systNames.push_back(SusyNtSystNames[NtSys_SCALEST_DN  ]);
+//     m_systs.push_back(NtSys_RESOST      ); m_systNames.push_back(SusyNtSystNames[NtSys_RESOST      ]);
+//     m_systs.push_back(NtSys_TRIGSF_EL_UP); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_EL_UP]);
+//     m_systs.push_back(NtSys_TRIGSF_EL_DN); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_EL_DN]);
+//     m_systs.push_back(NtSys_TRIGSF_MU_UP); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_MU_UP]);
+//     m_systs.push_back(NtSys_TRIGSF_MU_DN); m_systNames.push_back(SusyNtSystNames[NtSys_TRIGSF_MU_DN]);
+}
+//-----------------------------------------
+void SusyPlotter::toggleFakeSystematics()
+{
+    // DG 2013-10-18:
     // This implementation is really confusing and not safe because
     // here we are potentially mixing two enums
     // (SusyMatrixMethod::SYSTEMATIC and SusyNtSys from
@@ -319,24 +361,23 @@ void SusyPlotter::setSysts()
     // 'single-enum' implementation.
     namespace smm = SusyMatrixMethod;
     const std::string *sns = smm::systematic_names;
-    m_systs.push_back(smm::SYS_NONE);        m_systNames.push_back(sns[smm::SYS_NONE]);
-    m_systs.push_back(smm::SYS_EL_RE_UP);    m_systNames.push_back(sns[smm::SYS_EL_RE_UP]);
+    m_systs.push_back(smm::SYS_NONE      );  m_systNames.push_back(sns[smm::SYS_NONE      ]);
+    m_systs.push_back(smm::SYS_EL_RE_UP  );  m_systNames.push_back(sns[smm::SYS_EL_RE_UP  ]);
     m_systs.push_back(smm::SYS_EL_RE_DOWN);  m_systNames.push_back(sns[smm::SYS_EL_RE_DOWN]);
-    m_systs.push_back(smm::SYS_MU_RE_UP);    m_systNames.push_back(sns[smm::SYS_MU_RE_UP]);
+    m_systs.push_back(smm::SYS_MU_RE_UP  );  m_systNames.push_back(sns[smm::SYS_MU_RE_UP  ]);
     m_systs.push_back(smm::SYS_MU_RE_DOWN);  m_systNames.push_back(sns[smm::SYS_MU_RE_DOWN]);
-    m_systs.push_back(smm::SYS_EL_FR_UP);    m_systNames.push_back(sns[smm::SYS_EL_FR_UP]);
+    m_systs.push_back(smm::SYS_EL_FR_UP  );  m_systNames.push_back(sns[smm::SYS_EL_FR_UP  ]);
     m_systs.push_back(smm::SYS_EL_FR_DOWN);  m_systNames.push_back(sns[smm::SYS_EL_FR_DOWN]);
-    m_systs.push_back(smm::SYS_MU_FR_UP);    m_systNames.push_back(sns[smm::SYS_MU_FR_UP]);
+    m_systs.push_back(smm::SYS_MU_FR_UP  );  m_systNames.push_back(sns[smm::SYS_MU_FR_UP  ]);
     m_systs.push_back(smm::SYS_MU_FR_DOWN);  m_systNames.push_back(sns[smm::SYS_MU_FR_DOWN]);
-  }
 }
 //-----------------------------------------
 void SusyPlotter::initHistos()
 {
+    if(m_systs.size()==0) cout<<"SusyPlotter::initHistos() : Warning, you should at least call toggleNominal()"<<endl;
   m_histFile = new TFile(m_histFileName.c_str(), "recreate");
   TH1::SetDefaultSumw2(true);
   m_histFile->cd();
-  //m_histFile->mkdir( sysNames[sys].c_str() ) -> cd();
   for(size_t iPR=0; iPR<swh::kNumberOfPlotRegions; ++iPR){   // for(Plot Region)
       string PR(swh::region2str(swh::PlotRegions[iPR]));
     for(uint iCh=0; iCh<susy::wh::Ch_N; ++iCh){ // for(lepton channel)
@@ -473,5 +514,33 @@ void SusyPlotter::initHistos()
       }// end loop over systematics
     }// end loop over channels
   }// end loop over Plot regions
+}
+//-----------------------------------------
+void SusyPlotter::initHftFiller()
+{
+    if(isHftFillerInitialized()) {
+        cout<<"SusyPlotter::initHftFiller: warning, HftFiller already initialized...skipping"<<endl;
+    } else {
+        ostringstream oss;
+        oss<<nt.evt()->mcChannel;
+        string mcid(oss.str());
+        m_hftFiller.init(mcid, m_systNames);
+        if(m_dbg) {
+            std::copy(m_systNames.begin(), m_systNames.end(), ostream_iterator<string>(oss, "\n"));
+            cout<<"SusyPlotter::initHftFiller : initializing mcid "<<oss.str()<<endl;
+        }
+    }
+}
+//-----------------------------------------
+void SusyPlotter::fillHft(const size_t sys, const susy::wh::kin::DilepVars &v)
+{
+    size_t todo_________ImplementFakeIndices;
+    m_hftFiller.fill(sys, v);
+}
+//-----------------------------------------
+void SusyPlotter::closeHftFiller()
+{
+    float sumw = nt.evt()->sumw;
+    m_hftFiller.close(sumw);
 }
 //-----------------------------------------

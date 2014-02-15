@@ -36,15 +36,16 @@ MatrixPrediction::MatrixPrediction() :
 //----------------------------------------------------------
 void MatrixPrediction::Begin(TTree* /*tree*/)
 {
-  m_doFake = true;
-  if(m_dbg) cout << "MatrixPrediction::Begin" << endl;
-  if(m_writeTuple) {
-      SusySelection::Begin(0);
-      m_allconfigured = initMatrixTool();
-  } else {
-      SusyPlotter::Begin(0);
-      m_allconfigured = (initMatrixTool() && bookFakeHisto());
-  }
+    if(m_dbg) cout<<"MatrixPrediction::Begin"<<endl;
+    SusySelection::Begin(0);
+    if(m_writeTuple) {
+        // shouldn't we SusyPlotter::toggleNominal() here?
+        m_allconfigured = initMatrixTool();
+    } else {
+        toggleFakeSystematics();
+        SusyPlotter::initHistos();
+        m_allconfigured = (initMatrixTool() && bookFakeHisto());
+    }
 }
 //----------------------------------------------------------
 Bool_t MatrixPrediction::Process(Long64_t entry)
@@ -61,20 +62,24 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   increment(n_readin, m_weightComponents);
   bool removeLepsFromIso(false);
   selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
-  if( !selectEvent() )              return kTRUE;
+  swh::EventFlags eventFlags = computeEventFlags();
+  incrementCounters(eventFlags, m_weightComponents);
+  if(eventFlags.failAny()) return kTRUE;
   const Met*          m = m_met;
   const JetVector&    j = m_signalJets2Lep;
-  const JetVector&   bj = m_baseJets;     // DG don't know why, but we use these for the btag w
   const LeptonVector& l = m_baseLeptons;
   LeptonVector&     ncl = m_baseLeptons;
   const TauVector&    t = m_signalTaus;
-  if(l.size()>1) computeNonStaticWeightComponents(l, bj);  // DG is this needed? just use the fake w
-  else return false;
+  if(l.size()<2) return false; // otherwise cannot compute some of the variables
   float metRel = getMetRel(m, l, j);
   DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
   bool allowQflip(false), passMinMet(m->Et > 40.0);
   bool isEe(ll==ee), isMm(ll==mm), isSf(isEe||isMm), isOf(!isEe && !isMm);
-  SsPassFlags ssf(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
+  const VarFlag_t varsFlags(SusySelection::computeSsFlags(ncl, t, j, m, allowQflip));
+  const swk::DilepVars &v = varsFlags.first;
+  const SsPassFlags &ssf = varsFlags.second;
+  m_weightComponents.fake = getFakeWeight(l,sf::CR_SRWHSS, metRel, smm::SYS_NONE); // just for the counters, use generic CR_SRWHSS
+  incrementSsCounters(ssf, m_weightComponents);
   if(!ssf.passCommonCriteria()) return false;
   if(m_writeTuple && ssf.lepPt) {
       double weight(getFakeWeight(l, sf::CR_CR8lpt, metRel, smm::SYS_NONE));
@@ -88,10 +93,6 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
       for(uint s = 0; s<m_systs.size(); ++s){
           smm::SYSTEMATIC sys = static_cast<smm::SYSTEMATIC>(m_systs.at(s));
           bool is1j(j.size()==1), is2j(j.size()>1);
-          LeptonVector anyLeptons(getAnyElOrMu(nt));
-          LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
-          /*const*/ swk::DilepVars v(swk::compute2lVars(ncl, m, j));
-          v.l3veto = ssf.veto3rdL; // already computed in passSrSs
 
           if(ssf.sameSign && ssf.ge1j) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SSInc1j,metRel,sys), PR_CRSsInc1j, sys);
           if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8lpt,    metRel,sys), PR_CR8lpt,    sys);
@@ -102,17 +103,6 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
           if(isMm && ssf.ht       ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR8mmHt,   metRel,sys), PR_CR8mmHt,   sys);
           if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SRWHSS,    metRel,sys), PR_CR8lpt,    sys);
           if(isOf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_CR9lpt,    metRel,sys), PR_CR9lpt,    sys);
-
-          if(isEe && is1j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZVfake1j, metRel,sys), sw::CrZVfake1jee, sys);
-          if(isEe && is2j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZVfake2j, metRel,sys), sw::CrZVfake2jee, sys);
-          if(isOf && is1j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZVfake1j, metRel,sys), sw::CrZVfake1jem, sys);
-          if(isOf && is2j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZVfake2j, metRel,sys), sw::CrZVfake2jem, sys);
-          if(isOf && is1j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHfake1j  , metRel,sys), sw::Crfake1jem  , sys);
-          if(isOf && is2j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHfake2j  , metRel,sys), sw::Crfake2jem  , sys);
-          if(isMm && is1j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZV1j    , metRel,sys), sw::CrZV1jmm    , sys);
-          if(isMm && is2j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZV2j    , metRel,sys), sw::CrZV2jmm    , sys);
-          if(isMm && is1j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHfake1j  , metRel,sys), sw::Crfake1jmm  , sys);
-          if(isMm && is2j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHfake2j  , metRel,sys), sw::Crfake2jmm  , sys);
 
           if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZVfake1j, metRel,sys), swh::CrZVfake1j , sys);
           if(is2j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_WHZVfake2j, metRel,sys), swh::CrZVfake2j , sys);

@@ -22,9 +22,11 @@
 #include "SusyXSReader/XSReader.h"
 #include "SusyTest0/ProgressPrinter.h"
 #include "SusyTest0/SsPassFlags.h"
+#include "SusyTest0/EventFlags.h"
 #include "SusyTest0/DileptonChannel.h"
 
 #include <fstream>
+#include <utility> // std::pair
 
 enum WeightTypes {
   kRaw = 0,   // raw counts
@@ -37,19 +39,12 @@ enum WeightTypes {
   kWeightTypesN
 };
 
-enum WH_SR {
-  WH_SRSS1=0,
-  WH_SRSS2,
-  WH_SRSS3,
-  WH_SRSS4,
-  WH_SRN
-};
-
 // fw decl
 class chargeFlip;
 
 namespace susy {
 namespace wh {
+class EventFlags;
 namespace kin {
 class DilepVars;
 }
@@ -64,6 +59,7 @@ class SusySelection : public SusyNtAna
   typedef const TauVector    cvt_t;  //!< just to make some decl shorter
   typedef const JetVector    cvj_t;  //!< just to make some decl shorter
   typedef const Met          cmet_t; //!< just to make some decl shorter
+  typedef std::pair<susy::wh::kin::DilepVars, SsPassFlags> VarFlag_t;
   struct WeightComponents {
     WeightComponents() { reset(); }
     double product() const { return susynt * lepSf * btag * trigger * qflip * fake; }
@@ -83,21 +79,12 @@ class SusySelection : public SusyNtAna
     virtual void    Terminate(); //!< called after looping is finished
     virtual Bool_t  Process(Long64_t entry); //!< called at each event
     virtual void dumpEventCounters();
-    bool selectEvent(); //!< event selection  based on event qtities (mostly...)
-    // Signal regions
-    bool passSR6base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    bool passSR7base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    bool passSR8base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    bool passSR9base(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    bool passSR6(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    bool passSR7(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    bool passSR8(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    bool passSR9(cvl_t& leptons, cvj_t& jets, const Met* met, bool count=false);
-    // std SR7 has at least 2jets + the requirements below
-    // (but no counters, just so that the fit on one line)
-    bool passSrSsBase();
-    SsPassFlags passSrSs(const WH_SR signalRegion,
-                         vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
+    susy::wh::EventFlags computeEventFlags();
+    void incrementCounters(const susy::wh::EventFlags &f, const WeightComponents &w);
+    // compute the selection flags for the same-sign signal region; note that the charge flip can modify leptons and met
+    VarFlag_t computeSsFlags(vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
+    //! increment counters that are specific to the same-sign selection
+    void incrementSsCounters(const SsPassFlags &f, const WeightComponents &w);
     // Cut methods
     bool passHfor() { return passHfor(nt); }
     static bool passHfor(Susy::SusyNtObject &nto);
@@ -164,8 +151,6 @@ class SusySelection : public SusyNtAna
     static vl_t getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/);
     static susy::wh::Chan getChan(const LeptonVector& leps); //!< compute lepton channel
     static SsPassFlags assignNjetFlags(const JetVector& jets, SsPassFlags f);
-    //! determine whether a third lepton makes a Z candidate with a signal lepton
-    static bool passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lepton* l1, const LeptonVector& otherLeptons, bool verbose=false);
     //! ugly hack function : utils::filter seems not to work properly with SusyNtTools::isCentralLightJet...
     static JetVector filterClJets(const JetVector &jets);
 
@@ -286,8 +271,6 @@ class SusySelection : public SusyNtAna
     float n_pass_nSigLep    [ET_N][kWeightTypesN];
     float n_pass_tauVeto    [ET_N][kWeightTypesN];
     float n_pass_mllMin     [ET_N][kWeightTypesN];
-    float n_pass_muIso      [ET_N][kWeightTypesN];
-    float n_pass_elD0Sig    [ET_N][kWeightTypesN];
     float n_pass_fjVeto     [ET_N][kWeightTypesN];
     float n_pass_bjVeto     [ET_N][kWeightTypesN];
     float n_pass_ge1j       [ET_N][kWeightTypesN];

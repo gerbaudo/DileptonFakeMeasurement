@@ -15,16 +15,6 @@ enum Region{
     PR_SsEwk,
     PR_SsEwkLoose,
     PR_SsEwkLea,
-    CrZVfake1jee,
-    CrZVfake2jee,
-    CrZVfake1jem,
-    CrZVfake2jem,
-    Crfake1jem,
-    Crfake2jem,
-    CrZV1jmm,
-    CrZV2jmm,
-    Crfake1jmm,
-    Crfake2jmm,
 
     CrZVfake1j,
     CrZVfake2j,
@@ -32,10 +22,8 @@ enum Region{
     Crfake2j,
     CrZV1j,
     CrZV2j,
-
     SrWh1j,
     SrWh2j
-
 };
 
 const Region PlotRegions[] = {
@@ -45,16 +33,6 @@ const Region PlotRegions[] = {
     PR_CR8mm, PR_CR8mmMtww, PR_CR8mmHt,
     PR_SR8, PR_SR9base, PR_CR9lpt, PR_SR9,
     PR_SsEwk, PR_SsEwkLoose, PR_SsEwkLea,
-    CrZVfake1jee,
-    CrZVfake2jee,
-    CrZVfake1jem,
-    CrZVfake2jem,
-    Crfake1jem,
-    Crfake2jem,
-    CrZV1jmm,
-    CrZV2jmm,
-    Crfake1jmm,
-    Crfake2jmm,
 
     CrZVfake1j,
     CrZVfake2j,
@@ -82,17 +60,6 @@ const string RegionNames[] =
   ,"srSsEwk"
   ,"crSsEwkLoose"
   ,"crSsEwkLea"
-  ,"crZVfake1jee"
-  ,"crZVfake2jee"
-  ,"crZVfake1jem"
-  ,"crZVfake2jem"
-  ,"crfake1jem"
-  ,"crfake2jem"
-  ,"crZV1jmm"
-  ,"crZV2jmm"
-  ,"crfake1jmm"
-  ,"crfake2jmm"
-
   ,"crZVfake1j"
   ,"crZVfake2j"
   ,"crfake1j"
