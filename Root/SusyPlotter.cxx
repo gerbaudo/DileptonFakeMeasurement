@@ -522,7 +522,8 @@ void SusyPlotter::initHftFiller()
         cout<<"SusyPlotter::initHftFiller: warning, HftFiller already initialized...skipping"<<endl;
     } else {
         ostringstream oss;
-        oss<<nt.evt()->mcChannel;
+        if(nt.evt()->isMC) oss<<nt.evt()->mcChannel;
+        else               oss<<sampleName();
         string mcid(oss.str());
         struct { string operator () (const string &f) { return basedir(f.c_str()); } } guessOutputDir;
         m_hftFiller.setOutputDir(guessOutputDir(m_histFileName));
