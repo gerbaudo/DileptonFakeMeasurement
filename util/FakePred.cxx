@@ -28,6 +28,7 @@ void usage(const char *exeName, const char *defaultMatrixFile) {
       <<"\t"<<"-o [--output]      output file"           <<endl
       <<"\t"<<"-t [--tuple-out] fname.root (out ntuple file)"<<endl
       <<"\t"<<"-s [--sample]      samplename"            <<endl
+      <<"\t"<<"-T [--with-hft]    fill also HFT trees"   <<endl
       <<"\t"<<"-e [--etapt]     : use eta-pt (default pt only)"<<endl
       <<"\t"<<"-d [--debug]     : debug (>0 print stuff)"<<endl
       <<"\t"<<"-h [--help]      : print help"            <<endl
@@ -45,6 +46,7 @@ int main(int argc, char** argv)
   string output;
   bool writeTuple = false;
   bool etapt = false;
+  bool doHft = false;
   string matrixFile(getRootCoreDir()+"/../SusyMatrixMethod/data/forDavide_Sep11_2013.root");
   int optind(1);
   while ((optind < argc)) {
@@ -59,6 +61,7 @@ int main(int argc, char** argv)
     else if(sw=="-o"||sw=="--output"     ) { output = argv[++optind]; }
     else if(sw=="-s"||sw=="--sample"     ) { sample = argv[++optind]; }
     else if(sw=="-t"||sw=="--tuple-out")   { writeTuple = true; output = argv[++optind]; }
+    else if(sw=="-T"||sw=="--with-hft"   ) { doHft = true; }
     else if(sw=="-h"||sw=="--help"       ) { usage(argv[0], matrixFile.c_str()); return 0; }
     else cout<<"Unknown switch "<<sw<<endl;
     optind++;
@@ -68,6 +71,7 @@ int main(int argc, char** argv)
       <<"  nEvt    "<<nEvt      <<endl
       <<"  nSkip   "<<nSkip     <<endl
       <<"  etapt   "<<etapt     <<endl
+      <<"  doHft   "<<doHft     <<endl
       <<"  dbg     "<<dbg       <<endl
       <<"  input   "<<input     <<endl
       <<"  output  "<<output    <<endl
@@ -101,6 +105,7 @@ int main(int argc, char** argv)
   if(etapt) fakePred.use2dParametrization();
   if(writeTuple) fakePred.setTupleFile(output);
   else           fakePred.setOutputFilename(output);
+  if(doHft) fakePred.toggleHistFitterTrees();
 
   fakePred.buildSumwMap(chain);
   chain->Process(&fakePred, sample.c_str(), nEvt, nSkip);

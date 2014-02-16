@@ -120,6 +120,11 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
           if(passEwkSs)      fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwk,     metRel,sys), PR_SsEwk,     sys);
           if(passEwkSsLoose) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwkLoose,metRel,sys), PR_SsEwkLoose,sys);
           if(passEwkSsLea)   fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwkLea,  metRel,sys), PR_SsEwkLea,  sys);
+          if(m_fillHft) {
+              bool storeEvent(SusySelection::passSrWh1j(v) || SusySelection::passSrWh2j(v));
+              if(!isHftFillerInitialized()) initHftFiller();
+              if(storeEvent) fillHft(sys, v);
+          }
       } // end for(s)
   }
   return true;
