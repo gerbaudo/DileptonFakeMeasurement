@@ -536,7 +536,6 @@ void SusyPlotter::initHftFiller()
 //-----------------------------------------
 void SusyPlotter::fillHft(const size_t sys, const susy::wh::kin::DilepVars &v)
 {
-    size_t todo_________ImplementFakeIndices;
     m_hftFiller.fill(sys, v);
 }
 //-----------------------------------------
