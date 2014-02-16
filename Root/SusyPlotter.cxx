@@ -524,6 +524,8 @@ void SusyPlotter::initHftFiller()
         ostringstream oss;
         oss<<nt.evt()->mcChannel;
         string mcid(oss.str());
+        struct { string operator () (const string &f) { return basedir(f.c_str()); } } guessOutputDir;
+        m_hftFiller.setOutputDir(guessOutputDir(m_histFileName));
         m_hftFiller.init(mcid, m_systNames);
         if(m_dbg) {
             std::copy(m_systNames.begin(), m_systNames.end(), ostream_iterator<string>(oss, "\n"));

@@ -26,11 +26,13 @@ public:
     bool close(float sumw);
     bool fill(size_t systIndex, const susy::wh::kin::DilepVars &v);
     size_t nTrees() const { return m_hftTrees.size(); }
+    HftFiller& setOutputDir(const std::string dir);
 private: // rule of three 
     HftFiller(const HftFiller&);
     HftFiller& operator=(const HftFiller&);
 private:
     std::vector<HistFitterTree*> m_hftTrees;
+    std::string m_outdir;
 }; // end HftFiller
 
 } // namespace wh

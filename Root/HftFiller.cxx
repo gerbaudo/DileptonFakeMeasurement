@@ -1,6 +1,7 @@
 #include "SusyTest0/HftFiller.h"
 
 #include "SusyTest0/kinematic.h"
+#include "SusyTest0/utils.h"
 #include "HistFitterTree/HistFitterTree.h"
 
 #include <cassert>
@@ -52,10 +53,11 @@ bool HftFiller::fill(size_t systIndex, const susy::wh::kin::DilepVars &v)
 //----------------------------------------------------------
 bool HftFiller::init(const std::string &mcid, const std::vector<std::string> &systematics)
 {
-    for(size_t i=0; i<systematics.size(); ++i)
-        {
-            cout<<"initializing "<<mcid<<" -> "<<systematics[i].c_str()<<endl;
-        m_hftTrees.push_back(new HistFitterTree(mcid.c_str(), systematics[i].c_str()));
+    for(size_t i=0; i<systematics.size(); ++i) {
+            const string &sysname = systematics[i];
+            string filename = m_outdir+"/"+sysname+"_"+mcid+".root";
+            cout<<"initializing "<<mcid<<" -> "<<sysname<<endl;
+            m_hftTrees.push_back(new HistFitterTree(mcid.c_str(), sysname.c_str(), filename));
         }
     return m_hftTrees.size()>0;
 }
@@ -68,5 +70,19 @@ bool HftFiller::close(float sumw)
     }
     m_hftTrees.clear();
     return true; // anything we should check?
+}
+//----------------------------------------------------------
+HftFiller& HftFiller::setOutputDir(const std::string dir)
+{
+    if(dirExists(dir)) m_outdir = dir;
+    else {
+        bool validDir(mkdirIfNeeded(dir).length()>0);
+        if(validDir) m_outdir = dir;
+        else {
+            cout<<"HftFiller::setOutputDir: cannot set to '"<<dir<<"', using './'"<<endl;
+            m_outdir = "./";
+        }
+    }
+    return *this;
 }
 //----------------------------------------------------------
