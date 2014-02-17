@@ -13,22 +13,23 @@ r.gROOT.SetBatch(True)
 r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
 from NavUtils import getAllHistoNames
 
+anyObject = True # any object, not only histograms
+
 def main(filenameOrig, filenameDest, substr1, substr2) :
     s1, s2 = substr1, substr2
     input = r.TFile.Open(filenameOrig)
-    histonames = getAllHistoNames(input)
+    objnames = [k.GetName() for k in input.GetListOfKeys()] if anyObject else getAllHistoNames(input)
     output = r.TFile.Open(filenameDest, 'recreate')
     output.cd()
-    nhFixed = 0
-    for hn in histonames :
-        h = input.Get(hn)
-        hnn = hn.replace(s1,s2) if s1 in hn else hn.replace(s2,s1) # avoid swapping twice s1->s2->s1
-        h.Write(hnn)
-        if hn!=hnn : nhFixed += 1
-    print "renamed %d histograms"%nhFixed
+    noFixed = 0
+    for on in objnames :
+        o = input.Get(on)
+        onn = on.replace(s1,s2) if s1 in on else on.replace(s2,s1) # avoid swapping twice s1->s2->s1
+        o.Write(onn)
+        if on!=onn : noFixed += 1
+    print "renamed %d objects"%noFixed
     output.Close()
     input.Close()
-
 
 if __name__=='__main__' :
     if len(sys.argv)<5 :
