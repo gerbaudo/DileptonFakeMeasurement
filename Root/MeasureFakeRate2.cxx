@@ -140,7 +140,7 @@ void MeasureFakeRate2::initHistos(string outName)
         h_l_pt_true    [il][icr][ich] = new TH1F     ((bn+"l_pt_true").c_str(), "", nFakePtbins, FakePtbins);
         h_l_pt_fake    [il][icr][ich] = new TH1F     ((bn+"l_pt_fake").c_str(), "", nFakePtbins, FakePtbins);
         for(int lbl=0; lbl<LS_N; ++lbl) h_flavor[il][icr][ich]->SetXLabel(lbl+1, LSNames[lbl]);
-        h_l_pt_eta     [il][icr][ich] = new EffObject2(bn+"l_pt_eta",    nCoarseFakePtbins, coarseFakePtbins, nEtabins, Etabins);
+        h_l_pt_eta     [il][icr][ich] = new EffObject2(bn+"l_pt_eta",    nCoarseFakePtbins, coarseFakePtbins, nCoarseEtabins, CoarseEtabins);
       } // end for(ich)
     } // end for(icr)
   } // end for(il)
