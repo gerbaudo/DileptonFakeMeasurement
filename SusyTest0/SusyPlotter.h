@@ -42,6 +42,7 @@ class SusyPlotter : public SusySelection
   void initHftFiller();
   void fillHft(const size_t sys, const susy::wh::kin::DilepVars &v);
   void closeHftFiller();
+  virtual std::string hftTreeName() const;
 
  protected:
   std::vector<uint>   m_systs;              // systematics to process

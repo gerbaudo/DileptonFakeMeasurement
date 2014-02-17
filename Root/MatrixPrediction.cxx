@@ -325,3 +325,10 @@ std::string MatrixPrediction::eventDetails(bool passSrSs, const Susy::Event &eve
   return oss.str();
 }
 //----------------------------------------------------------
+std::string MatrixPrediction::hftTreeName() const
+{
+    std::string sn=sampleName();
+    replace(sn, "period", "fake.period"); // avoid conflict with data trees
+    return sn;
+}
+//----------------------------------------------------------

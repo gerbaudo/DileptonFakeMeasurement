@@ -521,16 +521,14 @@ void SusyPlotter::initHftFiller()
     if(isHftFillerInitialized()) {
         cout<<"SusyPlotter::initHftFiller: warning, HftFiller already initialized...skipping"<<endl;
     } else {
-        ostringstream oss;
-        if(nt.evt()->isMC) oss<<nt.evt()->mcChannel;
-        else               oss<<sampleName();
-        string mcid(oss.str());
         struct { string operator () (const string &f) { return basedir(f.c_str()); } } guessOutputDir;
         m_hftFiller.setOutputDir(guessOutputDir(m_histFileName));
-        m_hftFiller.init(mcid, m_systNames);
+        m_hftFiller.init(hftTreeName(), m_systNames);
         if(m_dbg) {
+            ostringstream oss;
+            oss<<hftTreeName()<<" :\n";
             std::copy(m_systNames.begin(), m_systNames.end(), ostream_iterator<string>(oss, "\n"));
-            cout<<"SusyPlotter::initHftFiller : initializing mcid "<<oss.str()<<endl;
+            cout<<"SusyPlotter::initHftFiller : initializing "<<oss.str()<<endl;
         }
     }
 }
@@ -544,5 +542,13 @@ void SusyPlotter::closeHftFiller()
 {
     float sumw = nt.evt()->sumw;
     m_hftFiller.close(sumw);
+}
+//-----------------------------------------
+std::string SusyPlotter::hftTreeName() const
+{
+    ostringstream oss;
+    if(nt.evt()->isMC) oss<<nt.evt()->mcChannel;
+    else               oss<<sampleName();
+    return string(oss.str());
 }
 //-----------------------------------------

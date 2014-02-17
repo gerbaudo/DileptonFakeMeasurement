@@ -81,6 +81,7 @@ class MatrixPrediction : public SusyPlotter
     bool m_use2dparametrization;
     bool m_allconfigured;
     bool initMatrixTool();
+    virtual std::string hftTreeName() const;
     // Histograms
 #define FAKEHIST( name ) hf_ ## name[susy::wh::Ch_N][susy::wh::kNumberOfPlotRegions][MP_N][WTog_N][SusyMatrixMethod::SYS_N_USER];
     TH1F* FAKEHIST( ll_M );
