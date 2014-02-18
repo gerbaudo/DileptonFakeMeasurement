@@ -44,6 +44,7 @@ def main() :
     parser.add_option('-i', '--input_dir')
     parser.add_option('-c', '--input_iter')
     parser.add_option('-o', '--output_dir')
+    parser.add_option('-O', '--output_file',help='store ratio histograms here')
     parser.add_option('-v','--verbose', action='store_true', default=False)
     (opts, args) = parser.parse_args()
     requiredOptions = ['tag', 'input_dir', 'input_iter', 'output_dir']
@@ -56,6 +57,7 @@ def main() :
     fnameInputIter = opts.input_iter
     outputDirname  = opts.output_dir
     outputDirname  = outputDirname+'/' if not outputDirname.endswith('/') else outputDirname
+    outputFilename = opts.output_file
     mkdirIfNeeded(outputDirname)
     verbose        = opts.verbose
     if verbose : print ('\nUsing the following options:\n'
@@ -69,9 +71,10 @@ def main() :
     assert fileMc,   "Missing input file mc   %s"%str(fileMc)
     assert fileHf,   "Missing input file hf   %s"%str(fileHf)
     assert fileIter, "Missing input file iter %s"%str(fileIter)
-    el_conv_sf = computeAndPlotConvSf(fileData, fileMc, 'elec', 'all_l_pt', outputDirname)
-    el_qcd_sf  = computeAndPlotHfSf  (fileIter, fileHf, 'elec', 'all_l_pt', outputDirname)
-    mu_qcd_sf  = computeAndPlotHfSf  (fileIter, fileHf, 'muon', 'all_l_pt', outputDirname)
+    outputFile = r.TFile.Open(outputFilename, 'recreate') if outputFilename else None
+    el_conv_sf = computeAndPlotConvSf(fileData, fileMc, 'elec', 'all_l_pt', outputDirname, outputFile)
+    el_qcd_sf  = computeAndPlotHfSf  (fileIter, fileHf, 'elec', 'all_l_pt', outputDirname, outputFile)
+    mu_qcd_sf  = computeAndPlotHfSf  (fileIter, fileHf, 'muon', 'all_l_pt', outputDirname, outputFile)
     el_real_sf = computeAndPlotRealSf(fileData, fileMc, 'elec', 'all_l_pt', outputDirname)
     mu_real_sf = computeAndPlotRealSf(fileData, fileMc, 'muon', 'all_l_pt', outputDirname)
 
@@ -83,8 +86,9 @@ def main() :
     print "# %s, %s"%(tag, datetime.datetime.now())
     print "mu_qcdSF, mu_realSF = %s, %s"%(mu_qcd_sf, mu_real_sf)
     print "el_convSF, el_qcdSF, el_realSF = %s, %s, %s"%(el_conv_sf, el_qcd_sf, el_real_sf)
+    if outputFile : outputFile.Close()
 
-def computeAndPlotConvSf(fileData, fileMc, lepton, variable_name, outdir) :
+def computeAndPlotConvSf(fileData, fileMc, lepton, variable_name, outdir, outfile=None) :
     "Electron conversion: simplest case, just data/mc"
     eff_da = buildRate(fileData, lepton+'_fakeConv_'+variable_name)
     eff_mc = buildRate(fileMc,   lepton+'_fakeConv_'+variable_name)
@@ -99,8 +103,8 @@ def computeAndPlotConvSf(fileData, fileMc, lepton, variable_name, outdir) :
                 'markers': {'data' : r.kFullCircle, 'mc' : mcMarker(lepton)},
                 'labels' : {'data' : 'Data: Conversion CR',
                             'mc'   : 'MC Comb: Conv CR'}}
-    plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_fakeconv',
-                        graphics)
+    plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_fakeconv', graphics)
+    if outfile : saveObject(outfile, ratio, 'el_convSF_pt')
     return p0
 
 def computeAndPlotConvSf2d(fileData, fileMc, lepton, variable_name, outdir) :
@@ -147,7 +151,7 @@ def computeAndPlotConvSf2d(fileData, fileMc, lepton, variable_name, outdir) :
 #                         graphics)
     return p0
 
-def computeAndPlotHfSf(fileIter, fileHf, lepton, variable_name, outdir) :
+def computeAndPlotHfSf(fileIter, fileHf, lepton, variable_name, outdir, outfile=None) :
     "HF tag and probe; in this case we need to subract out the contamination"
     eff_da = fileIter.Get(lepton+'_corHFRate')
     eff_mc = buildRate(fileHf, lepton+'_fakeHF_'+variable_name)
@@ -164,6 +168,7 @@ def computeAndPlotHfSf(fileIter, fileHf, lepton, variable_name, outdir) :
                             'mc'   : 'b#bar{b}/c#bar{c} MC: HF Tag and Probe'}}
     plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_fakehf',
                         graphics)
+    if outfile : saveObject(outfile, ratio, lepton+'_qcdSF_pt')
     return p0
 def computeAndPlotHfSf2d(fileIter, fileHf, lepton, variable_name, outdir) :
     eff_da = fileIter.Get(lepton+'_corHFRate_eta')
@@ -314,6 +319,11 @@ def mcColor(lepton) : return {'elec':r.kRed, 'muon':r.kBlue}[lepton]
 def mcMarker(lepton) : return {'elec':r.kOpenSquare, 'muon':r.kOpenTriangleUp}[lepton]
 def xTitle(lepton, variable_name) :
     return lepton +' p_{T} [GeV]' if 'l_pt' in variable_name else ''
+def saveObject(dest, obj, name) :
+    oPwd = r.gDirectory
+    dest.cd()
+    obj.Write(name)
+    oPwd.cd()
 
 if __name__=='__main__' :
     main()
