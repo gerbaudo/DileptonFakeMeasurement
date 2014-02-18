@@ -56,7 +56,7 @@ Example usage:
 
 # scale factors from determineFakeScaleFactor.py
 # --- paste the lines below in buildWeightedMatrix.py ---
-# Feb_13, 2014-02-13 15:21:21.138759
+# Feb_12, 2014-02-12 18:20:20.650121
 mu_qcdSF, mu_realSF = 0.86, 0.99590
 el_convSF, el_qcdSF, el_realSF = 1.09, 0.63, 0.99633
 
@@ -89,7 +89,7 @@ def main() :
 
     buildMuonRates    (inputFiles, outputFile, outputPlotDir, verbose)
     buildElectronRates(inputFiles, outputFile, outputPlotDir, verbose)
-    buildSystematics  (allInputFiles['allBkg'], outputFile)
+    buildSystematics  (allInputFiles['allBkg'], outputFile, verbose)
     outputFile.Close()
     if verbose : print "output saved to \n%s"%'\n'.join([outputFname, outputPlotDir])
 
@@ -291,7 +291,7 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, verbose=False) :
         el_frac[sr] = {'conv' : frac_conv, 'qcd' : frac_qcd, 'real' : frac_real}
     #json_write(el_frac, outFracFilename)
     plotFractions(el_frac, outplotdir, 'el')
-def buildEtaSyst(inputFileTotMc, inputHistoBaseName='(elec|muon)_qcdMC_all', outputHistoName='') :
+def buildEtaSyst(inputFileTotMc, inputHistoBaseName='(elec|muon)_qcdMC_all', outputHistoName='', verbose=False) :
     """
     Take the eta distribution and normalize it to the average fake
     rate (taken from one bin rate); use the differences from 1 as the
@@ -300,10 +300,17 @@ def buildEtaSyst(inputFileTotMc, inputHistoBaseName='(elec|muon)_qcdMC_all', out
     rate = buildRatio(inputFileTotMc, inputHistoBaseName+'_l_eta_coarse').Clone(outputHistoName)
     norm = buildRatio(inputFileTotMc, inputHistoBaseName+'_onebin').GetBinContent(1)
     rate.Scale(1.0/norm if norm else 1.0)
-    for b in range(1, 1+rate.GetNbinsX()) : rate.AddBinContent(b, -1.0) # DG there must be a better way to do this
+    bins = range(1, 1+rate.GetNbinsX())
+    for b in bins : rate.AddBinContent(b, -1.0) # DG there must be a better way to do this
+    scaleUpForward, fwFact, maxCentralEta = True, 2.0, 1.5
+    if scaleUpForward :
+        for b in bins :
+            bCon, bCen = rate.GetBinContent(b), rate.GetBinCenter(b)
+            rate.SetBinContent(b, bCon*(fwFact if abs(bCen)>maxCentralEta else 1.0))
     if inputHistoBaseName.startswith('mu') : rate.Reset() # mu consistent with 0.
+    if verbose : print "eta syst ",inputHistoBaseName," : ",["%.2f"%rate.GetBinContent(b) for b in range(1, 1+rate.GetNbinsX())]
     return rate
-def buildSystematics(inputFileTotMc, outputfile) :
+def buildSystematics(inputFileTotMc, outputfile, verbose=False) :
     "Hardcoded values from FinalNewFake.h; might not be used at all...ask Matt"
     print "build syst might be droppped...check this with Matt"
     print "rename *_down to *_do"
@@ -317,8 +324,8 @@ def buildSystematics(inputFileTotMc, outputfile) :
     mu_datamc  = r.TParameter('double')('mu_datamc',  0.05) #Right now taking the Pt variation into account
     el_region  = r.TParameter('double')('el_region',  0.05)
     mu_region  = r.TParameter('double')('mu_region',  0.10)
-    el_eta     = buildEtaSyst(inputFileTotMc, 'elec_qcdMC_all', 'el_eta_sys')
-    mu_eta     = buildEtaSyst(inputFileTotMc, 'muon_qcdMC_all', 'mu_eta_sys')
+    el_eta     = buildEtaSyst(inputFileTotMc, 'elec_qcdMC_all', 'el_eta_sys', verbose)
+    mu_eta     = buildEtaSyst(inputFileTotMc, 'muon_qcdMC_all', 'mu_eta_sys', verbose)
     allSys = [el_real_up, el_real_dn, mu_real_up, mu_real_dn,
               el_HFLFerr, mu_HFLFerr, el_datamc , mu_datamc,
               el_region, mu_region, el_eta, mu_eta ]
