@@ -112,12 +112,8 @@ def computeAndPlotConvSf2d(fileData, fileMc, lepton, variable_name, outdir) :
     ratio  = buildRatioHistogram(eff_da, eff_mc)
     ratio.Print()
     xAx, yAx = ratio.GetXaxis(), ratio.GetYaxis()
-    print ratio.GetName(),": bins (%d, %d)"%(ratio.GetNbinsX(), ratio.GetNbinsY())
-    print 'xtitle : ',xAx.GetTitle()
-    print 'ytitle : ',yAx.GetTitle()
     #pt_eta : check that x is pt, y is eta
     nEtaBins = yAx.GetNbins()
-    print 'nEtaBins: ',nEtaBins
     xMin, xMax = xAx.GetXmin(), xAx.GetXmax()
     fitFunc = r.TF1('fit_func_const_'+ratio.GetName(), '[0]', xMin, xMax)
     etaBins = range(1, 1+nEtaBins)
