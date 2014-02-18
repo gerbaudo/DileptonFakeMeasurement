@@ -76,6 +76,8 @@ def main() :
     mu_real_sf = computeAndPlotRealSf(fileData, fileMc, 'muon', 'all_l_pt', outputDirname)
 
     el_conv_sf2d = computeAndPlotConvSf2d(fileData, fileMc, 'elec', 'all_l_pt', outputDirname)
+    el_qcd_sf2d  = computeAndPlotHfSf2d  (fileIter, fileHf, 'elec', 'all_l_pt', outputDirname)
+    mu_qcd_sf2d  = computeAndPlotHfSf2d  (fileIter, fileHf, 'muon', 'all_l_pt', outputDirname)
 
     print "# --- paste the lines below in buildWeightedMatrix.py ---"
     print "# %s, %s"%(tag, datetime.datetime.now())
@@ -167,6 +169,40 @@ def computeAndPlotHfSf(fileIter, fileHf, lepton, variable_name, outdir) :
     plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_fakehf',
                         graphics)
     return p0
+def computeAndPlotHfSf2d(fileIter, fileHf, lepton, variable_name, outdir) :
+    eff_da = fileIter.Get(lepton+'_corHFRate_eta')
+    eff_mc = buildRate(fileHf, lepton+'_fakeHF_all_l_pt_eta')
+    ratio = buildRatioHistogram(eff_da, eff_mc)
+    ratio.Print()
+    xAx, yAx = ratio.GetXaxis(), ratio.GetYaxis()
+    print ratio.GetName(),": bins (%d, %d)"%(ratio.GetNbinsX(), ratio.GetNbinsY())
+    nEtaBins = yAx.GetNbins()
+    print 'nEtaBins: ',nEtaBins
+    xMin, xMax = xAx.GetXmin(), xAx.GetXmax()
+    fitFunc = r.TF1('fit_func_const_'+ratio.GetName(), '[0]', xMin, xMax)
+    etaBins = range(1, 1+nEtaBins)
+    slices = [ratio.ProjectionX("%s_bin%d"%(ratio.GetName(), b), b, b, 'e') for b in etaBins]
+    for b, s in zip(etaBins, slices) :
+        s.SetTitle(lepton+" data/mc heavyflavor : eta bin %d"%b)
+        s.Fit(fitFunc.GetName(), '0RQ') # do not draw, range, quiet
+        p0, p0Err, chi2, ndf = fitResults(fitFunc)
+        p0, p0Err = pdgRound(p0, p0Err)
+        print "bin %d :  %s +/- %s"%(b, p0, p0Err)
+        can = r.TCanvas('')
+        s.Draw('ep')
+        fitFunc.Draw('same')
+        tex = r.TLatex()
+        tex.SetNDC(True)
+        fitParLabel = "Const. fit : %s #pm %s"%(p0, p0Err)
+        fitGoodLabel = "#chi^{2}/DOF : %.2f / %d"%(chi2, ndf)
+        tex.SetTextSize(yAx.GetTitleSize())
+        tex.SetTextFont(yAx.GetTitleFont())
+        tex.DrawLatex(0.15, 0.45, s.GetTitle())
+        tex.DrawLatex(0.15, 0.40, "#splitline{%s}{%s}"%(fitParLabel, fitGoodLabel))
+        can.Update()
+        can.SaveAs(outdir+'/fit_'+lepton+"_heavyflavor_etabin%d.png"%b)
+    return p0
+
 def computeAndPlotRealSf(file_data, file_mc, lepton, variable_name, outdir) :
     "Scale factor from the real control region, Z tag and probe"
     eff_da = buildSideBandSubRate(file_data, lepton, variable_name)
