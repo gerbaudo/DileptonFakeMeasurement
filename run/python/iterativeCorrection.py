@@ -36,9 +36,14 @@
 from math import sqrt
 import optparse
 from rootUtils import (buildRatioHistogram,
+                       getBinIndices,
                        getNumDenHistos,
                        importRoot)
 r = importRoot()
+r.gStyle.SetPadTickX(1)
+r.gStyle.SetPadTickY(1)
+r.gStyle.SetOptStat(0)
+from utils import mkdirIfNeeded
 
 usage="""
 Example usage:
@@ -67,12 +72,13 @@ def main() :
     fnameInputMc = opts.input_mc
     fnameInputDa = opts.input_data
     fnameOutput  = opts.output
-    plot         = opts.plot
+    plotdir         = opts.plot
     verbose      = opts.verbose
     if verbose : print ('\nUsing the following options:\n'
                         +'\n'.join("%s : %s"%(o, str(getattr(opts, o))) for o in allOptions))
     fileData = r.TFile.Open(fnameInputDa)
     fileMc   = r.TFile.Open(fnameInputMc)
+    if plotdir : mkdirIfNeeded(plotdir)
     assert fileData and fileMc, "Missing input files: data %s, mc %s"%(str(fileData), str(fileMc))
     correctionHistos = {}
     for lep in ['muon', 'elec'] :
@@ -82,50 +88,139 @@ def main() :
         hFakeDataHi = getNumDenHistos(fileData, lep+'_fakeHF_high_all_l_pt')
         hFakeMcLo   = getNumDenHistos(fileMc,   lep+'_fakeHF_all_l_pt')
         hFakeMcHi   = getNumDenHistos(fileMc,   lep+'_fakeHF_high_all_l_pt')
-        if plot :
+        if plotdir :
             hNumDen = [hFakeDataLo, hFakeDataHi, hFakeMcLo, hFakeMcHi]
-            for nd in ['num','den'] : plotHistos([h[nd] for h in hNumDen], 'c_'+lep+'_'+nd)
-            plotHistosRatio(hNumDen, 'c_'+lep+'_ratio')
+            for nd in ['num','den'] : plotHistos([h[nd] for h in hNumDen], 'c_'+lep+'_'+nd, plotdir)
+            plotHistosRatio(hNumDen, 'c_'+lep+'_ratio', plotdir)
+        h2dRealDataCr = getNumDenHistos(fileData, lep+'_realCR_all_l_pt_eta')
+        h2dFakeDataLo = getNumDenHistos(fileData, lep+'_fakeHF_all_l_pt_eta')
+        h2dFakeDataHi = getNumDenHistos(fileData, lep+'_fakeHF_high_all_l_pt_eta')
+        h2dFakeMcLo   = getNumDenHistos(fileMc,   lep+'_fakeHF_all_l_pt_eta')
+        h2dFakeMcHi   = getNumDenHistos(fileMc,   lep+'_fakeHF_high_all_l_pt_eta')
+
+
         def missingInputHisto(ndHistos) : return any(not h for h in ndHistos.values())
         histoCollToBeChecked = ['hRealDataCr','hFakeDataLo','hFakeDataHi','hFakeMcLo','hFakeMcHi']
         missingHistos = dict([(nhc,hp) for nhc,hp in [(hc, eval(hc)) for hc in histoCollToBeChecked]
                               if missingInputHisto(hp)])
+        for v in histoCollToBeChecked :
+            print "entries 1d %s : num %d den %d (%s)"%(v, eval(v)['num'].GetEntries(), eval(v)['den'].GetEntries(), str(eval(v)['den']))
+
+        histoCollToBeChecked = ['h2dRealDataCr','h2dFakeDataLo','h2dFakeDataHi','h2dFakeMcLo','h2dFakeMcHi']
+        missingHistos = dict([(nhc,hp) for nhc,hp in [(hc, eval(hc)) for hc in histoCollToBeChecked]
+                              if missingInputHisto(hp)])
+
+        for v in histoCollToBeChecked :
+            print "entries 2d %s : num %d den %d (%s)"%(v, eval(v)['num'].GetEntries(), eval(v)['den'].GetEntries(), str( eval(v)['den']))
+        print histoCollToBeChecked
+        print missingHistos
+
         if len(missingHistos) :
             print (lep+' : missing histograms: \n'
                    +'\n'.join(["%s: num %s den %s"%(k, v['num'], v['den'])
                                for k,v in missingHistos.iteritems()]))
             continue
-        hRealEff = buildRatioHistogram(hRealDataCr['num'], hRealDataCr['den'], 'real_eff')
-        corrected = dict([(nd, hFakeDataLo[nd].Clone('corrected_'+nd)) for nd in ['num', 'den']])
-        for iteration in range(nIter) :
-            rate = buildRatioHistogram(corrected['num'], corrected['den']) # temporary rate (?)
-            if verbose :
-                def lf2s(l) : return ', '.join(["%.3f"%e for e in l])
-                print "Iteration %d, corrected values:"%iteration
-                print "  num   %s"%lf2s(binContents(corrected['num']))
-                print "  den   %s"%lf2s(binContents(corrected['den']))
-                print "  ratio %s"%lf2s(binContents(rate))
-            dataNum, dataDen = hFakeDataHi['num'], hFakeDataHi['den']
-            for nd,tl in [('num','tight'), ('den','loose')] :
-                corr, dataLow = corrected[nd], hFakeDataLo[nd]
-                mcLow, mcHi = hFakeMcLo[nd], hFakeMcHi[nd]
-                corrFact = getCorrFactors(hRealEff, rate, dataNum, dataDen, mcHi, tl)
-                corr = correctRate(corr, dataLow, mcLow, corrFact)
-        ratio = buildRatioHistogram(corrected['num'], corrected['den'], lep+'_corHFRate')
-        correctionHistos[lep] = ratio
+
+
+        correctionHistos[lep] = buildCorrectionHisto(hRealDataCr,
+                                                     hFakeDataLo, hFakeDataHi,
+                                                     hFakeMcLo, hFakeMcHi,
+                                                     nIter=nIter, verbose=verbose,
+                                                     histoname=lep+'_corHFRate')
+
+        # here do the 2d ones
+        print 10*"--"," now doing the 2d ones ",10*"--"
+        dummy = h2dRealDataCr['num']
+        xAx, yAx = dummy.GetXaxis(), dummy.GetYaxis()
+        print dummy.GetName(),": bins (%d, %d)"%(dummy.GetNbinsX(), dummy.GetNbinsY())
+        nEtaBins = yAx.GetNbins()
+        print 'nEtaBins: ',nEtaBins
+        xMin, xMax = xAx.GetXmin(), xAx.GetXmax()
+        etaBins = range(1, 1+nEtaBins)
+        for eb in etaBins :
+            def etaSlice(h, b, p) : return h.ProjectionX(p+h.GetName()+"_eta%d"%b, b, b) # prefix needed to avoid overwriting
+            hRealDataCr = dict((k, etaSlice(h, eb, 'rdc')) for k,h in h2dRealDataCr.iteritems())
+            hFakeDataLo = dict((k, etaSlice(h, eb, 'fdl')) for k,h in h2dFakeDataLo.iteritems())
+            hFakeDataHi = dict((k, etaSlice(h, eb, 'fdh')) for k,h in h2dFakeDataHi.iteritems())
+            hFakeMcLo   = dict((k, etaSlice(h, eb, 'fml')) for k,h in h2dFakeMcLo.iteritems())
+            hFakeMcHi   = dict((k, etaSlice(h, eb, 'fmh')) for k,h in h2dFakeMcHi.iteritems())
+            print "eta bin ",eb
+            for k,h in hFakeDataLo.iteritems() :
+                print "fakeDataLo %s : %s"%(k, lf2s(binContents(h)))
+
+            correctionHistos[lep+"_eta%d"%eb] = buildCorrectionHisto(hRealDataCr,
+                                                                     hFakeDataLo, hFakeDataHi,
+                                                                     hFakeMcLo, hFakeMcHi,
+                                                                     nIter=nIter, verbose=verbose,
+                                                                     histoname=lep+'_corHFRate'+"_eta_bin%d"%eb)
+        correctionHistos[lep+"_eta"] = combineEtaSlices(template2d=h2dRealDataCr['num'],
+                                                        etaSlicedRates=dict((k,h) for k,h in correctionHistos.iteritems()
+                                                                            if (lep+'_eta') in k),
+                                                        histoname=lep+'_corHFRate_eta')
+
+        print 10*"--","    done               ",10*"--"
     if verbose : print "saving output to ",fnameOutput
     fileOut = r.TFile.Open(fnameOutput, 'recreate')
     fileOut.cd()
+    print 'keys ',correctionHistos.keys()
     for l,h in correctionHistos.iteritems() :
         if verbose : print "%s : writing %s\n%s"%(l, h.GetName(),histo1dToTxt(h))
         h.Write()
     fileOut.Close()
 
+
+
+# here be dragons
+def buildCorrectionHisto(hndRealDataCr, hndFakeDataLo, hndFakeDataHi, hndFakeMcLo, hndFakeMcHi,
+                         histoname='lep_corHFRate', nIter=1, verbose=False) :
+    hRealEff = buildRatioHistogram(hndRealDataCr['num'], hndRealDataCr['den'], 'real_eff')
+    corrected = dict([(nd, hndFakeDataLo[nd].Clone('corrected_'+nd)) for nd in ['num', 'den']])
+    print "buildCorrectionHisto with nIter ",nIter
+    can = r.TCanvas('c_'+histoname, '')
+    can.Draw()
+    can.cd()
+    hRealEff.GetYaxis().SetRangeUser(0.0, 1.0)
+    hRealEff.Draw('axis')
+    tex = r.TLatex()
+    tex.SetNDC(True)
+    tex.DrawLatex(0.15, 0.915, histoname)
+    can._tex = tex
+    can._histos = [hRealEff]
+    can._leg = r.TLegend(0.925, 0.25, 1.0, 0.9, "iter")
+    can._leg.SetBorderSize(0)
+    can._leg.SetFillColor(0)
+    for iteration in range(nIter) :
+        print 'iter ',iteration
+        rate = buildRatioHistogram(corrected['num'], corrected['den']) # temporary rate (?)
+        if verbose :
+            print "Iteration %d, corrected values:"%iteration
+            print "  num   %s"%lf2s(binContents(corrected['num']))
+            print "  den   %s"%lf2s(binContents(corrected['den']))
+            print "  ratio %s"%lf2s(binContents(rate))
+            dataNum, dataDen = hndFakeDataHi['num'], hndFakeDataHi['den']
+        for nd,tl in [('num','tight'), ('den','loose')] :
+            corr, dataLow = corrected[nd], hndFakeDataLo[nd]
+            mcLow, mcHi = hndFakeMcLo[nd], hndFakeMcHi[nd]
+            corrFact = getCorrFactors(hRealEff, rate, dataNum, dataDen, mcHi, tl)
+            corr = correctRate(corr, dataLow, mcLow, corrFact)
+        rate.SetLineColor(20+iteration)
+        rate.SetMarkerColor(20+iteration)
+        rate.SetLineWidth(4)
+        rate.SetMarkerStyle(r.kFullCross)
+        can._histos.append(rate.DrawClone('el same'))
+        can._leg.AddEntry(can._histos[-1], "%d"%iteration, 'lp')
+    ratio = buildRatioHistogram(corrected['num'], corrected['den'], histoname)
+    can._leg.Draw()
+    can.Update()
+    can.SaveAs(histoname+'_iterations.png')
+    return ratio
+
 def assertSameNbins(histos=[]) :
     nbins = dict([(h.GetName(), h.GetNbinsX()) for h in histos])
     assert len(set(nbins.values()))==1, "different nbin: \n%s"%'\n'.join(["%s : %d"%(kv) for kv in nbin.iteritems()])
+def lf2s(l) : return ', '.join(["%.3f"%e for e in l])
 def bc(h, b) : return h.GetBinContent(b)
-def binContents(h) : return [h.GetBinContent(b) for b in range(1, 1+h.GetNbinsX())]
+def binContents(h) : return [h.GetBinContent(b) for b in getBinIndices(h)]
 def be(h, b) : return h.GetBinError(b)
 def getCorrFactors(hRealEff, hRate, hDataNum, hDataDen, hMc, tightOrLoose) :
     """
@@ -159,19 +254,19 @@ def correctRate(hRate, hData, hMc, corrections) :
     return hRate
 def histo1dToTxt(h) :
     "represent a TH1 as a string with name, bin edges, contents, and errors"
-    bins = range(1, 1+h.GetNbinsX())
+    bins = getBinIndices(h)
     hisName = h.GetName()
     binEdge = [h.GetBinLowEdge(b) for b in bins]
     binEdge.append(binEdge[-1] + h.GetBinWidth(bins[-1]))
     binCont = binContents(h)
     binErr  = [be(h, b) for b in bins]
     def lf2s(l) : return ', '.join(["%.3f"%e for e in l])
-    
+
     return '\n'.join(["%s : %s"%(n,v)
                       for n,v in [('hisName',hisName)] + [(l, lf2s(eval(l)))
                                                           for l in ['binEdge', 'binCont', 'binErr']]])
 
-def plotHistos(histos=[], canvasName='c1') :
+def plotHistos(histos=[], canvasName='c1', outdir='./') :
     c = r.TCanvas(canvasName)
     c.cd()
     maximum = max([h.GetMaximum() for h in histos])
@@ -189,11 +284,27 @@ def plotHistos(histos=[], canvasName='c1') :
     leg.SetFillColor(0)
     leg.SetFillStyle(0)
     c.Update()
-    c.SaveAs(canvasName+'.png')
+    print "saving ",outdir+'/'+canvasName
+    c.SaveAs(outdir+'/'+canvasName+'.png')
 
-def plotHistosRatio(histosPairs=[], canvasName='') :
+def plotHistosRatio(histosPairs=[], canvasName='', outdir='./') :
     histosRatio = [buildRatioHistogram(hh['num'], hh['den']) for hh in histosPairs]
-    plotHistos(histosRatio, canvasName)
+    print histosRatio
+    for h in histosRatio : h.SetTitle('ratio '+h.GetTitle())
+    plotHistos(histosRatio, canvasName, outdir)
+def combineEtaSlices(template2d, etaSlicedRates={}, histoname=''):
+    res = template2d.Clone(histoname)
+    xAx, yAx = res.GetXaxis(), res.GetYaxis()
+    nPtBins, nEtaBins = xAx.GetNbins(), yAx.GetNbins()
+    assert nEtaBins==len(etaSlicedRates),"%d eta bins, %d slice histos"%(nEtaBins, len(etaSlicedRates))
+    etaBins = range(1, 1+nEtaBins)
+    etaHists = [h for k,h in sorted(etaSlicedRates.items())]
+    for ie, he in zip(etaBins, etaHists) :
+        for b in range(1, 1+nPtBins) :
+            res.SetBinContent(b, ie, he.GetBinContent(b))
+            res.SetBinError(b, ie, he.GetBinError(b))
+    return res
+
 
 if __name__=='__main__' :
     main()
