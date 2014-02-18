@@ -87,7 +87,7 @@ def main() :
 
                    ] :
         for channel in ['ee', 'em', 'mm'] :
-            for varname in ['l0_pt', 'l1_pt', 'll_M', 'metrel', 'met', 'njets', 'nbjets'] :
+            for varname in varnames() :
                 histo_basename = region+'_'+channel+'_'+varname
                 hists, err2s = buildHists(inputFiles, histo_basename)
                 if not hists[dataSample()].GetEntries() : continue
@@ -122,9 +122,17 @@ def getInputFiles(inputDirname, tag, verbose=False) :
     files = dict(zip(samples, [r.TFile.Open(inDir+'/'+s+'_'+tag+'.root') for s in samples]))
     if verbose : print "getInputFiles('%s'):\n\t%s"%(inputDirname, '\n\t'.join("%s : %s"%(k, f.GetName()) for k, f in files.iteritems()))
     return files
+def varnames() :
+    "variables that we will plot"
+    return ['l0_pt', 'l1_pt', 'll_M', 'metrel', 'met', 'njets', 'nbjets', 'l0_eta', 'e_eta', 'm_eta']
 def xaxisLabel(varname) :
     return {'l0_pt'   : 'l_{0} P_{T} [GeV]'
             ,'l1_pt'  : 'l_{1} P_{T} [GeV]'
+            ,'l_eta_coarse'  : 'l #eta (coarse)'
+            ,'l0_eta'  : 'l_{0} #eta'
+            ,'l1_eta'  : 'l_{1} #eta'
+            ,'e_eta'  : 'e #eta'
+            ,'m_eta'  : '#mu #eta'
             ,'ll_M'   : 'm(ll) [GeV]'
             ,'met'    : '#slash{E}_{T} [GeV]'
             ,'metrel' : '#slash{E}^{rel}_{T} [GeV]'
@@ -163,10 +171,8 @@ def addErr2s(current_err2={}, add_err2={}) :
 
 def computeFakeSysErr2(input_fake_file=None, nominal_histo=None) :
     "Compute the bin-by-bin sum2 err including up&down fake systematic variations + stat. unc."
-    variations = ['_'+l+'_'+s+'_'+ud # 2x2x2=8 syst variations for the fake estimate
-                  for l in ['EL', 'MU'] for s in ['FR', 'RE'] for ud in ['UP','DOWN']]
-    variations = ['_EL_RE_UP', '_EL_RE_DOWN', '_MU_RE_UP', '_MU_RE_DOWN', '_EL_FR_UP',
-                  '_EL_FR_DOWN', '_MU_FR_UP', '_MU_FR_DOWN']
+    variations = ['_EL_RE_UP', '_EL_RE_DOWN', '_MU_RE_UP', '_MU_RE_DOWN', # 2x2x2=8 syst variations for the fake estimate
+                  '_EL_FR_UP', '_EL_FR_DOWN', '_MU_FR_UP', '_MU_FR_DOWN']
     nom_hname = nominal_histo.GetName()
     vars_histos = dict([(v, input_fake_file.Get(nom_hname.replace('_NONE',v))) for v in variations])
     def bc(h) : return [h.GetBinContent(b) for b in range(1, 1+h.GetNbinsX())]
