@@ -64,17 +64,19 @@ def main() :
     parser = optparse.OptionParser(usage=usage)
     parser.add_option('-t', '--tag')
     parser.add_option('-i', '--input_dir')
+    parser.add_option('-s', '--input_sf (will toggle bin-by-bin scale factors for conv and qcd)')
     parser.add_option('-o', '--output_file')
     parser.add_option('-p', '--output_plot')
     parser.add_option('-v','--verbose', action='store_true', default=False)
     (opts, args) = parser.parse_args()
     requiredOptions = ['tag', 'input_dir', 'output_file', 'output_plot']
-    otherOptions = ['verbose']
+    otherOptions = ['input_sf', 'verbose']
     allOptions = requiredOptions + otherOptions
     def optIsNotSpecified(o) : return not hasattr(opts, o) or getattr(opts,o) is None
     if any(optIsNotSpecified(o) for o in requiredOptions) : parser.error('Missing required option')
     tag = opts.tag
     inputDirname  = opts.input_dir
+    inputSfFname  = opts.input_sf
     outputFname   = opts.output_file
     outputPlotDir = opts.output_plot
     verbose       = opts.verbose
@@ -86,9 +88,10 @@ def main() :
     mkdirIfNeeded(outputPlotDir)
     outputFile = r.TFile.Open(outputFname, 'recreate')
     inputFiles = dict((k, v) for k, v in allInputFiles.iteritems() if k in fakeProcesses())
+    inputSfFile = r.TFile.Open(inputSfFname) if inputSfFname else None
 
-    buildMuonRates    (inputFiles, outputFile, outputPlotDir, verbose)
-    buildElectronRates(inputFiles, outputFile, outputPlotDir, verbose)
+    buildMuonRates    (inputFiles, outputFile, outputPlotDir, inputSfFile, verbose)
+    buildElectronRates(inputFiles, outputFile, outputPlotDir, inputSfFile, verbose)
     buildSystematics  (allInputFiles['allBkg'], outputFile, verbose)
     outputFile.Close()
     if verbose : print "output saved to \n%s"%'\n'.join([outputFname, outputPlotDir])
@@ -150,9 +153,14 @@ def getRealEff(lepton='electron|muon', inputFile=None, scaleFactor=1.0) :
     effHisto = buildRatio(inputFile, histoName)
     effHisto.Scale(scaleFactor)
     return effHisto
-def buildRatioAndScaleIt(histoPrefix='', inputFile=None, scaleFactor=1.0) :
+def buildRatioAndScaleIt(histoPrefix='', inputFile=None, scaleFactor=1.0, verbose=False) :
     ratioHisto = buildRatio(inputFile, histoPrefix)
-    ratioHisto.Scale(scaleFactor)
+    def lf2s(l) : return ', '.join(["%.3f"%e for e in l])
+    if verbose: print "before scaling: ",lf2s(getBinContents(ratioHisto))
+    if   type(scaleFactor)==float : ratioHisto.Scale(scaleFactor)
+    elif type(scaleFactor)==r.TH1F : ratioHisto.Multiply(scaleFactor)
+    else : raise TypeError("unknown SF type %s"%type(scaleFactor))
+    if verbose: print "after scaling: ",lf2s(getBinContents(ratioHisto))
     return ratioHisto
 def buildPercentages(inputFiles, histoName, binLabel) :
     "build a dictionary (process, fraction of counts) for a given bin"
@@ -212,15 +220,16 @@ def buildWeightedHistoTwice(histosA={}, fractionsA={}, histosB={}, fractionsB={}
         hout.SetBinContent(b, totA + totB)
         hout.SetBinError(b, sqrt(errA2 + errB2))
     return hout
-def buildMuonRates(inputFiles, outputfile, outplotdir, verbose=False) :
+def buildMuonRates(inputFiles, outputfile, outplotdir, inputSfFile=None, verbose=False) :
     """
     For each selection region, build the real eff and fake rate
     histo as a weighted sum of the corresponding fractions.
     """
     processes = fakeProcesses()
     brsit, iF = buildRatioAndScaleIt, inputFiles
+    mu_qcdSF_pt = inputSfFile.Get('muon_qcdSF_pt') if inputSfFile else mu_qcdSF
     print "buildMuonRates: values to be fixed: ",' '.join(["%s: %s"%(v, eval(v)) for v in ['mu_qcdSF', 'mu_realSF']])
-    eff_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_coarse',  iF[p], mu_qcdSF))  for p in processes)
+    eff_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_coarse',  iF[p], mu_qcdSF_pt))  for p in processes)
     eff_real = dict((p, brsit('muon_realMC_all_l_pt_coarse', iF[p], mu_realSF)) for p in processes)
     eff2d_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_eta',  iF[p], mu_qcdSF))  for p in processes)
     eff2d_real = dict((p, brsit('muon_realMC_all_l_pt_eta', iF[p], mu_realSF)) for p in processes)
@@ -248,7 +257,7 @@ def buildMuonRates(inputFiles, outputfile, outplotdir, verbose=False) :
         mu_frac[sr] = {'qcd' : frac_qcd, 'real' : frac_real}
     #json_write(mu_frac, outplotdir+/outFracFilename)
     plotFractions(mu_frac, outplotdir, 'mu')
-def buildElectronRates(inputFiles, outputfile, outplotdir, verbose=False) :
+def buildElectronRates(inputFiles, outputfile, outplotdir, inputSfFile=None, verbose=False) :
     """
     For each selection region, build the real eff and fake rate
     histo as a weighted sum of the corresponding fractions.
@@ -256,9 +265,11 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, verbose=False) :
     """
     processes = fakeProcesses()
     brsit, iF = buildRatioAndScaleIt, inputFiles
+    el_qcdSF_pt  = inputSfFile.Get('elec_qcdSF_pt') if inputSfFile else el_qcdSF
+    el_convSF_pt = inputSfFile.Get('elec_convSF_pt') if inputSfFile else el_convSF
     print "buildElectronRates: values to be fixed: ",' '.join(["%s: %s"%(v, eval(v)) for v in ['el_qcdSF', 'el_convSF', 'el_realSF']])
-    eff_conv = dict((p, brsit('elec_convMC_all_l_pt_coarse', iF[p], el_convSF)) for p in processes)
-    eff_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_coarse',  iF[p], el_qcdSF))  for p in processes)
+    eff_conv = dict((p, brsit('elec_convMC_all_l_pt_coarse', iF[p], el_convSF_pt)) for p in processes)
+    eff_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_coarse',  iF[p], el_qcdSF_pt))  for p in processes)
     eff_real = dict((p, brsit('elec_realMC_all_l_pt_coarse', iF[p], el_realSF)) for p in processes)
     eff2d_conv = dict((p, brsit('elec_convMC_all_l_pt_eta', iF[p], el_convSF)) for p in processes)
     eff2d_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_eta',  iF[p], el_qcdSF))  for p in processes)
