@@ -64,7 +64,7 @@ def main() :
     parser = optparse.OptionParser(usage=usage)
     parser.add_option('-t', '--tag')
     parser.add_option('-i', '--input_dir')
-    parser.add_option('-s', '--input_sf (will toggle bin-by-bin scale factors for conv and qcd)')
+    parser.add_option('-s', '--input_sf', help='will toggle bin-by-bin scale factors for conv and qcd')
     parser.add_option('-o', '--output_file')
     parser.add_option('-p', '--output_plot')
     parser.add_option('-v','--verbose', action='store_true', default=False)
@@ -155,12 +155,22 @@ def getRealEff(lepton='electron|muon', inputFile=None, scaleFactor=1.0) :
     return effHisto
 def buildRatioAndScaleIt(histoPrefix='', inputFile=None, scaleFactor=1.0, verbose=False) :
     ratioHisto = buildRatio(inputFile, histoPrefix)
+
     def lf2s(l) : return ', '.join(["%.3f"%e for e in l])
-    if verbose: print "before scaling: ",lf2s(getBinContents(ratioHisto))
+    if verbose: print ratioHisto.GetName()," before scaling: ",lf2s(getBinContents(ratioHisto))
     if   type(scaleFactor)==float : ratioHisto.Scale(scaleFactor)
-    elif type(scaleFactor)==r.TH1F : ratioHisto.Multiply(scaleFactor)
+    elif type(scaleFactor)==r.TH1F :
+        if type(scaleFactor)==r.TH1F and type(ratioHisto)==r.TH2F :
+            tmpH = ratioHisto.Clone(scaleFactor.GetName()+'_vs_eta')
+            ptBins, etaBins = range(1, 1+ratioHisto.GetNbinsX()), range(1, 1+ratioHisto.GetNbinsY()),
+            for p in ptBins :
+                for e in etaBins :
+                    tmpH.SetBinContent(p, e, scaleFactor.GetBinContent(p))
+                    tmpH.SetBinError(p, e, scaleFactor.GetBinError(p))
+            scaleFactor = tmpH
+        ratioHisto.Multiply(scaleFactor)
     else : raise TypeError("unknown SF type %s"%type(scaleFactor))
-    if verbose: print "after scaling: ",lf2s(getBinContents(ratioHisto))
+    if verbose: print ratioHisto.GetName()," after scaling: ",lf2s(getBinContents(ratioHisto))
     return ratioHisto
 def buildPercentages(inputFiles, histoName, binLabel) :
     "build a dictionary (process, fraction of counts) for a given bin"
@@ -226,13 +236,13 @@ def buildMuonRates(inputFiles, outputfile, outplotdir, inputSfFile=None, verbose
     histo as a weighted sum of the corresponding fractions.
     """
     processes = fakeProcesses()
-    brsit, iF = buildRatioAndScaleIt, inputFiles
+    brsit, iF, v = buildRatioAndScaleIt, inputFiles, verbose
     mu_qcdSF_pt = inputSfFile.Get('muon_qcdSF_pt') if inputSfFile else mu_qcdSF
     print "buildMuonRates: values to be fixed: ",' '.join(["%s: %s"%(v, eval(v)) for v in ['mu_qcdSF', 'mu_realSF']])
-    eff_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_coarse',  iF[p], mu_qcdSF_pt))  for p in processes)
-    eff_real = dict((p, brsit('muon_realMC_all_l_pt_coarse', iF[p], mu_realSF)) for p in processes)
-    eff2d_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_eta',  iF[p], mu_qcdSF))  for p in processes)
-    eff2d_real = dict((p, brsit('muon_realMC_all_l_pt_eta', iF[p], mu_realSF)) for p in processes)
+    eff_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_coarse',  iF[p], mu_qcdSF_pt, v))  for p in processes)
+    eff_real = dict((p, brsit('muon_realMC_all_l_pt_coarse', iF[p], mu_realSF, v)) for p in processes)
+    eff2d_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_eta',  iF[p], mu_qcdSF_pt, v))  for p in processes)
+    eff2d_real = dict((p, brsit('muon_realMC_all_l_pt_eta', iF[p], mu_realSF, v)) for p in processes)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#varepsilon(T|L)'
     plotUnweightedEfficiencies(eff_qcd,  'eff_mu_qcd',  outplotdir, lT+' qcd fake #mu'+';'+lX+';'+lY)
     plotUnweightedEfficiencies(eff_real, 'eff_mu_real', outplotdir, lT+' real #mu'    +';'+lX+';'+lY)
@@ -264,16 +274,16 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, inputSfFile=None, ver
     Note that the fake has two components (conversion and qcd).
     """
     processes = fakeProcesses()
-    brsit, iF = buildRatioAndScaleIt, inputFiles
+    brsit, iF, v = buildRatioAndScaleIt, inputFiles, verbose
     el_qcdSF_pt  = inputSfFile.Get('elec_qcdSF_pt') if inputSfFile else el_qcdSF
     el_convSF_pt = inputSfFile.Get('elec_convSF_pt') if inputSfFile else el_convSF
     print "buildElectronRates: values to be fixed: ",' '.join(["%s: %s"%(v, eval(v)) for v in ['el_qcdSF', 'el_convSF', 'el_realSF']])
-    eff_conv = dict((p, brsit('elec_convMC_all_l_pt_coarse', iF[p], el_convSF_pt)) for p in processes)
-    eff_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_coarse',  iF[p], el_qcdSF_pt))  for p in processes)
-    eff_real = dict((p, brsit('elec_realMC_all_l_pt_coarse', iF[p], el_realSF)) for p in processes)
-    eff2d_conv = dict((p, brsit('elec_convMC_all_l_pt_eta', iF[p], el_convSF)) for p in processes)
-    eff2d_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_eta',  iF[p], el_qcdSF))  for p in processes)
-    eff2d_real = dict((p, brsit('elec_realMC_all_l_pt_eta', iF[p], el_realSF)) for p in processes)
+    eff_conv = dict((p, brsit('elec_convMC_all_l_pt_coarse', iF[p], el_convSF_pt, v)) for p in processes)
+    eff_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_coarse',  iF[p], el_qcdSF_pt, v))  for p in processes)
+    eff_real = dict((p, brsit('elec_realMC_all_l_pt_coarse', iF[p], el_realSF, v)) for p in processes)
+    eff2d_conv = dict((p, brsit('elec_convMC_all_l_pt_eta', iF[p], el_convSF_pt, v)) for p in processes)
+    eff2d_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_eta',  iF[p], el_qcdSF_pt, v))  for p in processes)
+    eff2d_real = dict((p, brsit('elec_realMC_all_l_pt_eta', iF[p], el_realSF, v)) for p in processes)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#varepsilon(T|L)'
     plotUnweightedEfficiencies(eff_conv, 'eff_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY)
     plotUnweightedEfficiencies(eff_qcd,  'eff_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY)
@@ -407,7 +417,7 @@ def plotUnweighted2dEfficiencies(effs={}, canvasName='', outputDir='./', frameTi
         minZ, maxZ = (0.0, 1.0)
         h.SetMarkerSize(1.5*h.GetMarkerSize())
         h.Draw('colz')
-        h.Draw('text same')
+        h.Draw('text e same')
         h.GetZaxis().SetRangeUser(min([0.0, minZ]), maxZ)
         h.SetTitle(s+' : '+frameTitle)
         h.SetStats(False)
