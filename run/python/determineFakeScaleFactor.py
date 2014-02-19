@@ -104,7 +104,7 @@ def computeAndPlotConvSf(fileData, fileMc, lepton, variable_name, outdir, outfil
                 'labels' : {'data' : 'Data: Conversion CR',
                             'mc'   : 'MC Comb: Conv CR'}}
     plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_fakeconv', graphics)
-    if outfile : saveObject(outfile, ratio, 'el_convSF_pt')
+    if outfile : saveObject(outfile, ratio, 'elec_convSF_pt')
     return p0
 
 def computeAndPlotConvSf2d(fileData, fileMc, lepton, variable_name, outdir) :
