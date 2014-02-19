@@ -2,7 +2,11 @@
 ./python/submitJobs.py --susyplot -o  -t ${TAG}             --other-opt "--with-hft"
 ./python/submitJobs.py --fakepred -o  -t ${TAG} -s 'period' --other-opt "--with-hft"
 
-# fix tree names (data and fake conflict)
-for X in out/fakepred/merged/*.root; do ./python/fix_histogram_names.py ${X} `echo ${X} | sed 's/merged/merged\_renamed/g'` period fake.period; done
-mv out/fakepred/merged out/fakepred/merged_renamed
+
+for X in $(ls out/fakepred/*fake.periodB.physics_Egamma.PhysCont.root | cut -d '.' -f 1  | cut -d '/' -f 3 | sed 's/fake//1')
+do
+        rm out/fakepred/merged/${X}*root
+        hadd out/fakepred/merged/${X}Feb_12.root out/fakepred/${X}*root
+done
+
 tar czf ~/tmp/hft_Feb_14.tgz `find out/susyplot/  -name "*NOM_1*root" ` out/susyplot/merged/NOM_period_PhysCont_Feb_14.root out/fakepred/merged/*root
