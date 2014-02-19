@@ -28,7 +28,7 @@ from math import sqrt
 import operator
 import optparse
 import os
-from rootUtils import importRoot, buildRatioHistogram, drawLegendWithDictKeys, getMinMax, getBinIndices
+from rootUtils import importRoot, buildRatioHistogram, drawLegendWithDictKeys, getMinMax, getBinContents, getBinIndices
 r = importRoot()
 r.gStyle.SetPadTickX(1)
 r.gStyle.SetPadTickY(1)

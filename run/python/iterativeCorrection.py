@@ -36,6 +36,7 @@
 from math import sqrt
 import optparse
 from rootUtils import (buildRatioHistogram,
+                       getBinContents,
                        getBinIndices,
                        getNumDenHistos,
                        importRoot)
@@ -146,7 +147,7 @@ def main() :
             hFakeMcHi   = dict((k, etaSlice(h, eb, 'fmh')) for k,h in h2dFakeMcHi.iteritems())
             print "eta bin ",eb
             for k,h in hFakeDataLo.iteritems() :
-                print "fakeDataLo %s : %s"%(k, lf2s(binContents(h)))
+                print "fakeDataLo %s : %s"%(k, lf2s(getBinContents(h)))
 
             correctionHistos[lep+"_eta%d"%eb] = buildCorrectionHisto(hRealDataCr,
                                                                      hFakeDataLo, hFakeDataHi,
@@ -194,9 +195,9 @@ def buildCorrectionHisto(hndRealDataCr, hndFakeDataLo, hndFakeDataHi, hndFakeMcL
         rate = buildRatioHistogram(corrected['num'], corrected['den']) # temporary rate (?)
         if verbose :
             print "Iteration %d, corrected values:"%iteration
-            print "  num   %s"%lf2s(binContents(corrected['num']))
-            print "  den   %s"%lf2s(binContents(corrected['den']))
-            print "  ratio %s"%lf2s(binContents(rate))
+            print "  num   %s"%lf2s(getBinContents(corrected['num']))
+            print "  den   %s"%lf2s(getBinContents(corrected['den']))
+            print "  ratio %s"%lf2s(getBinContents(rate))
             dataNum, dataDen = hndFakeDataHi['num'], hndFakeDataHi['den']
         for nd,tl in [('num','tight'), ('den','loose')] :
             corr, dataLow = corrected[nd], hndFakeDataLo[nd]
@@ -220,7 +221,6 @@ def assertSameNbins(histos=[]) :
     assert len(set(nbins.values()))==1, "different nbin: \n%s"%'\n'.join(["%s : %d"%(kv) for kv in nbin.iteritems()])
 def lf2s(l) : return ', '.join(["%.3f"%e for e in l])
 def bc(h, b) : return h.GetBinContent(b)
-def binContents(h) : return [h.GetBinContent(b) for b in getBinIndices(h)]
 def be(h, b) : return h.GetBinError(b)
 def getCorrFactors(hRealEff, hRate, hDataNum, hDataDen, hMc, tightOrLoose) :
     """

@@ -171,3 +171,5 @@ def getBinIndices(h) :
                 for j in range(1, 1+h.GetNbinsY())
                 for k in range(1, 1+h.GetNbinsZ())]
     else : return []
+def getBinContents(h) :
+    return [h.GetBinContent(b) for b in getBinIndices(h)]
