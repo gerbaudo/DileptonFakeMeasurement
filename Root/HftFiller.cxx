@@ -34,17 +34,18 @@ bool HftFiller::fill(size_t systIndex, const susy::wh::kin::DilepVars &v)
         t->isEE = v.isEe;
         t->isEMU = v.isEm;
         t->isMUMU = v.isMm;
+        t->isOS = !v.isSs;
         t->L2nCentralLightJets = v.numCentralLightJets;
         t->lept1Pt = v.pt0*gev2mev;
         t->lept2Pt = v.pt1*gev2mev;
-        t->L2Mll = v.mll;
+        t->L2Mll = v.mll*gev2mev;
         t->deltaEtaLl = v.detall;
-        t->L2METrel = v.metrel;
-        t->Ht = v.ht;
-        t->mlj = v.mlj;
-        t->mljj = v.mljj;
-        t->mtmax = v.mtmax();
-        t->mtllmet = v.mtllmet;
+        t->L2METrel = v.metrel*gev2mev;
+        t->Ht = v.ht*gev2mev;
+        t->mlj = v.mlj*gev2mev;
+        t->mljj = v.mljj*gev2mev;
+        t->mtmax = v.mtmax()*gev2mev;
+        t->mtllmet = v.mtllmet*gev2mev;
         t->WriteTree();
         someBytesWritten = true;
     }
