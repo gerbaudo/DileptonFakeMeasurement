@@ -121,9 +121,14 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
           if(passEwkSsLoose) fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwkLoose,metRel,sys), PR_SsEwkLoose,sys);
           if(passEwkSsLea)   fillHistos(ncl, j, m, getFakeWeight(l,sf::CR_SsEwkLea,  metRel,sys), PR_SsEwkLea,  sys);
           if(m_fillHft) {
-              bool storeEvent(SusySelection::passSrWh1j(v) || SusySelection::passSrWh2j(v));
+              bool passWh1j(SusySelection::passSrWh1j(v)), passWh2j(SusySelection::passSrWh2j(v));
+              bool storeEvent(passWh1j||passWh2j);
               if(!isHftFillerInitialized()) initHftFiller();
-              if(storeEvent) fillHft(sys, v);
+              if(storeEvent) {
+                  swh::kin::DilepVars vv(v); // non-const
+                  vv.weight = getFakeWeight(l, passWh1j ? sf::CR_SRWH1j : sf::CR_SRWH2j, metRel,sys);
+                  fillHft(sys, vv);
+              }
           }
       } // end for(s)
   }
