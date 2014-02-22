@@ -102,9 +102,10 @@ def main() :
                 botPad.Draw()
                 drawBot(botPad, hists[dataSample()], hists['sm'], err_band_r, xaxisLabel(varname))
                 can.Update()
-                outFilename = outputDir+histo_basename+'.png'
-                rmIfExists(outFilename) # avoid root warnings
-                can.SaveAs(outFilename)
+                for ext in ['eps','png'] :
+                    outFilename = outputDir+histo_basename+'.'+ext
+                    rmIfExists(outFilename) # avoid root warnings
+                    can.SaveAs(outFilename)
     if verbose : print "output saved to \n%s"%outputDir
 
 def mcSamples() : return ['ttbar', 'wjets', 'zjets', 'diboson', 'heavyflavor']
