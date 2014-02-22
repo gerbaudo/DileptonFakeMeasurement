@@ -136,6 +136,10 @@ def selectionRegions() :
             "CR_SRWH1j",
             "CR_SRWH2j"
             ]
+def isRegionToBePlotted(sr) :
+    "regions for which we plot the weighted matrices"
+    return sr in ['CR_WHZVfake1j', 'CR_WHZVfake2j', 'CR_WHfake1j', 'CR_WHfake2j', 'CR_WHZV1j', 'CR_WHZV2j', 'CR_SRWH1j', 'CR_SRWH2j']
+
 def extractionRegions() :
     return ['qcdMC', 'convMC', 'realMC']
 
@@ -244,11 +248,11 @@ def buildMuonRates(inputFiles, outputfile, outplotdir, inputSfFile=None, verbose
     eff2d_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_eta',  iF[p], mu_qcdSF_pt, v))  for p in processes)
     eff2d_real = dict((p, brsit('muon_realMC_all_l_pt_eta', iF[p], mu_realSF, v)) for p in processes)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#varepsilon(T|L)'
-    plotUnweightedEfficiencies(eff_qcd,  'eff_mu_qcd',  outplotdir, lT+' qcd fake #mu'+';'+lX+';'+lY)
-    plotUnweightedEfficiencies(eff_real, 'eff_mu_real', outplotdir, lT+' real #mu'    +';'+lX+';'+lY)
+    plot1dEfficiencies(eff_qcd,  'eff_mu_qcd',  outplotdir, lT+' qcd fake #mu'+';'+lX+';'+lY)
+    plot1dEfficiencies(eff_real, 'eff_mu_real', outplotdir, lT+' real #mu'    +';'+lX+';'+lY)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#eta'
-    plotUnweighted2dEfficiencies(eff2d_qcd,  'eff2d_mu_qcd', outplotdir, lT+' qcd fake #mu'+';'+lX+';'+lY)
-    plotUnweighted2dEfficiencies(eff2d_real, 'eff2d_mu_real', outplotdir, lT+' real #mu'   +';'+lX+';'+lY)
+    plot2dEfficiencies(eff2d_qcd,  'eff2d_mu_qcd', outplotdir, lT+' qcd fake #mu'+';'+lX+';'+lY)
+    plot2dEfficiencies(eff2d_real, 'eff2d_mu_real', outplotdir, lT+' real #mu'   +';'+lX+';'+lY)
     mu_frac = dict()
     for sr in selectionRegions() :
         frac_qcd  = buildPercentages(inputFiles, 'muon_'+sr+'_all_flavor_den', 'qcd')
@@ -265,8 +269,12 @@ def buildMuonRates(inputFiles, outputfile, outplotdir, inputSfFile=None, verbose
         fake2d.Write()
         real2d.Write()
         mu_frac[sr] = {'qcd' : frac_qcd, 'real' : frac_real}
+        if isRegionToBePlotted(sr) :
+            lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#eta'
+            plot2dEfficiencies({sr : fake2d}, 'eff2d_mu_fake', outplotdir, lT+' fake #mu'+';'+lX+';'+lY)
+            plot2dEfficiencies({sr : real2d}, 'eff2d_mu_real', outplotdir, lT+' real #mu'+';'+lX+';'+lY)
     #json_write(mu_frac, outplotdir+/outFracFilename)
-    plotFractions(mu_frac, outplotdir, 'mu')
+    plotFractions(mu_frac, outplotdir, 'frac_mu')
 def buildElectronRates(inputFiles, outputfile, outplotdir, inputSfFile=None, verbose=False) :
     """
     For each selection region, build the real eff and fake rate
@@ -285,13 +293,13 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, inputSfFile=None, ver
     eff2d_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_eta',  iF[p], el_qcdSF_pt, v))  for p in processes)
     eff2d_real = dict((p, brsit('elec_realMC_all_l_pt_eta', iF[p], el_realSF, v)) for p in processes)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#varepsilon(T|L)'
-    plotUnweightedEfficiencies(eff_conv, 'eff_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY)
-    plotUnweightedEfficiencies(eff_qcd,  'eff_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY)
-    plotUnweightedEfficiencies(eff_real, 'eff_el_real', outplotdir, lT+' real el'     +';'+lX+';'+lY)
+    plot1dEfficiencies(eff_conv, 'eff_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY)
+    plot1dEfficiencies(eff_qcd,  'eff_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY)
+    plot1dEfficiencies(eff_real, 'eff_el_real', outplotdir, lT+' real el'     +';'+lX+';'+lY)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#eta'
-    plotUnweighted2dEfficiencies(eff2d_conv, 'eff2d_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY)
-    plotUnweighted2dEfficiencies(eff2d_qcd,  'eff2d_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY)
-    plotUnweighted2dEfficiencies(eff2d_real, 'eff2d_el_real', outplotdir, lT+' real el'     +';'+lX+';'+lY)
+    plot2dEfficiencies(eff2d_conv, 'eff2d_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY)
+    plot2dEfficiencies(eff2d_qcd,  'eff2d_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY)
+    plot2dEfficiencies(eff2d_real, 'eff2d_el_real', outplotdir, lT+' real el'     +';'+lX+';'+lY)
     el_frac = dict()
     for sr in selectionRegions() :
         frac_conv, frac_qcd= buildPercentagesTwice(inputFiles, 'elec_'+sr+'_all_flavor_den',
@@ -310,8 +318,12 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, inputSfFile=None, ver
         fake2d.Write()
         real2d.Write()
         el_frac[sr] = {'conv' : frac_conv, 'qcd' : frac_qcd, 'real' : frac_real}
+        if isRegionToBePlotted(sr) :
+            lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#eta'
+            plot2dEfficiencies({sr : fake2d}, 'eff2d_el_fake', outplotdir, lT+' fake e'+';'+lX+';'+lY)
+            plot2dEfficiencies({sr : real2d}, 'eff2d_el_real', outplotdir, lT+' real e'+';'+lX+';'+lY)
     #json_write(el_frac, outFracFilename)
-    plotFractions(el_frac, outplotdir, 'el')
+    plotFractions(el_frac, outplotdir, 'frac_el')
 def buildEtaSyst(inputFileTotMc, inputHistoBaseName='(elec|muon)_qcdMC_all', outputHistoName='', verbose=False) :
     """
     Take the eta distribution and normalize it to the average fake
@@ -357,7 +369,7 @@ def plotFractions(fractDict={}, outplotdir='./', prefix='') :
     input : fractDict[sr][lep_type][sample] = float
     """
     outplotdir = outplotdir if outplotdir.endswith('/') else outplotdir+'/'
-    def isRegionToBePlotted(r) : return r in selectionRegions()+extractionRegions()
+    #def isRegionToBePlotted(r) : return r in selectionRegions()+extractionRegions()
     regions  = sorted(filter(isRegionToBePlotted, fractDict.keys()))
     leptypes = sorted(first(fractDict).keys())
     samples  = sorted(first(first(fractDict)).keys())
@@ -384,8 +396,9 @@ def plotFractions(fractDict={}, outplotdir='./', prefix='') :
         leg.get_frame().set_alpha(0.5)
         fig.autofmt_xdate(bottom=0.25, rotation=90, ha='center')
         fig.savefig(outplotdir+prefix+'_'+lt+'.png')
+        fig.savefig(outplotdir+prefix+'_'+lt+'.eps')
 
-def plotUnweightedEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='title;p_{T} [GeV]; efficiency', zoomIn=False) :
+def plot1dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='title;p_{T} [GeV]; efficiency', zoomIn=False) :
     can = r.TCanvas(canvasName, '', 800, 600)
     can.cd()
     padMaster = None
@@ -403,10 +416,11 @@ def plotUnweightedEfficiencies(effs={}, canvasName='', outputDir='./', frameTitl
     padMaster.SetStats(False)
     drawLegendWithDictKeys(can, effs)
     can.Update()
-    outFilename = outputDir+'/'+canvasName+'.png'
-    rmIfExists(outFilename)
-    can.SaveAs(outFilename)
-def plotUnweighted2dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='efficiency; #eta; p_{T} [GeV]', zoomIn=False) :
+    for ext in ['png','eps'] :
+        outFilename = outputDir+'/'+canvasName+'.'+ext
+        rmIfExists(outFilename)
+        can.SaveAs(outFilename)
+def plot2dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='efficiency; #eta; p_{T} [GeV]', zoomIn=False) :
     can = r.TCanvas(canvasName, '', 800, 600)
     can.cd()
     origTextFormat = r.gStyle.GetPaintTextFormat()
@@ -419,12 +433,14 @@ def plotUnweighted2dEfficiencies(effs={}, canvasName='', outputDir='./', frameTi
         h.Draw('colz')
         h.Draw('text e same')
         h.GetZaxis().SetRangeUser(min([0.0, minZ]), maxZ)
-        h.SetTitle(s+' : '+frameTitle)
+        def dropCrPrefix(sr) : return sr.replace('CR_', '')
+        h.SetTitle(dropCrPrefix(s)+' : '+frameTitle)
         h.SetStats(False)
         can.Update()
-        outFilename = outputDir+'/'+canvasName+'_'+s+'.png'
-        rmIfExists(outFilename)
-        can.SaveAs(outFilename)
+        for ext in ['png','eps'] :
+            outFilename = outputDir+'/'+canvasName+'_'+s+'.'+ext
+            rmIfExists(outFilename)
+            can.SaveAs(outFilename)
     r.gStyle.SetPaintTextFormat(origTextFormat)
 
 
