@@ -103,7 +103,7 @@ def computeAndPlotConvSf(fileData, fileMc, lepton, variable_name, outdir, outfil
                 'markers': {'data' : r.kFullCircle, 'mc' : mcMarker(lepton)},
                 'labels' : {'data' : 'Data: Conversion CR',
                             'mc'   : 'MC Comb: Conv CR'}}
-    plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_fakeconv', graphics)
+    plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+'/fit_'+lepton+'_conv', graphics)
     if outfile : saveObject(outfile, ratio, 'elec_convSF_pt')
     return p0
 
@@ -140,7 +140,7 @@ def computeAndPlotConvSf2d(fileData, fileMc, lepton, variable_name, outdir) :
         tex.DrawLatex(0.15, 0.45, s.GetTitle())
         tex.DrawLatex(0.15, 0.40, "#splitline{%s}{%s}"%(fitParLabel, fitGoodLabel))
         can.Update()
-        can.SaveAs(outdir+"/fit_el_conf_etabin%d.png"%b)
+        for ext in ['eps','png'] : can.SaveAs(outdir+"/fit_el_conv_etabin%d.%s"%(b, ext))
 #     graphics = {'xtitle' : xTitle(lepton, variable_name),
 #                 'ytitle' : lepton+' p(tight | fake conv)',
 #                 'colors' : {'data' : r.kBlack, 'mc' : mcColor(lepton)},
@@ -166,7 +166,7 @@ def computeAndPlotHfSf(fileIter, fileHf, lepton, variable_name, outdir, outfile=
                 'markers': {'data' : r.kFullCircle, 'mc' : mcMarker(lepton)},
                 'labels' : {'data' : 'Data HF Tag and Probe (Iterative Subtraction)',
                             'mc'   : 'b#bar{b}/c#bar{c} MC: HF Tag and Probe'}}
-    plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_fakehf',
+    plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+'/fit_'+lepton+'_fakehf',
                         graphics)
     if outfile : saveObject(outfile, ratio, lepton+'_qcdSF_pt')
     return p0
@@ -201,7 +201,7 @@ def computeAndPlotHfSf2d(fileIter, fileHf, lepton, variable_name, outdir) :
         tex.DrawLatex(0.15, 0.45, s.GetTitle())
         tex.DrawLatex(0.15, 0.40, "#splitline{%s}{%s}"%(fitParLabel, fitGoodLabel))
         can.Update()
-        can.SaveAs(outdir+'/fit_'+lepton+"_heavyflavor_etabin%d.png"%b)
+        for ext in ['eps','png'] : can.SaveAs(outdir+'/fit_'+lepton+"_heavyflavor_etabin%d.%s"%(b, ext))
     return p0
 
 def computeAndPlotRealSf(file_data, file_mc, lepton, variable_name, outdir) :
@@ -219,7 +219,7 @@ def computeAndPlotRealSf(file_data, file_mc, lepton, variable_name, outdir) :
                 'markers': {'data' : r.kFullCircle, 'mc' : mcMarker(lepton)},
                 'labels' : {'data' : 'Data: Z Tag and Probe',
                             'mc'   : 'MC Comb: Z Tag and Probe'}}
-    plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+lepton+'_real',
+    plotHistRatioAndFit({'data':eff_da, 'mc':eff_mc}, ratio, fitFunc, outdir+'/fit_'+lepton+'_real',
                         graphics)
     return p0
 
@@ -312,9 +312,9 @@ def plotHistRatioAndFit(histos, ratio, fitfunc, outfname, graphics_attributes={}
     tex.SetTextFont(yAx.GetTitleFont())
     tex.DrawLatex(0.15, 0.40, "#splitline{%s}{%s}"%(fitParLabel, fitGoodLabel))
     can.Update()
-    outfname = outfname+'.png'
-    rmIfExists(outfname) # avoid root warnings
-    can.SaveAs(outfname)
+    for ext in ['eps','png'] :
+        rmIfExists(outfname+'.'+ext) # avoid root warnings
+        can.SaveAs(outfname+'.'+ext)
 def mcColor(lepton) : return {'elec':r.kRed, 'muon':r.kBlue}[lepton]
 def mcMarker(lepton) : return {'elec':r.kOpenSquare, 'muon':r.kOpenTriangleUp}[lepton]
 def xTitle(lepton, variable_name) :
