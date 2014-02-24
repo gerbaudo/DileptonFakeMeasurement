@@ -74,6 +74,32 @@ datasets += [Dataset(sampleType, dsid, group, n, process)
 sampleType = 'mc'
 
 group = 'zjets'
+nps = ['0Excl', '1Excl', '2Excl', '3Excl', '4Incl']
+template, process = "AlpgenPythia_P2011C_Z%(ll)sNp%(np)s_Mll10to40_2L5", 'ZlljetsMll10to40'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
+             for ll, dsids in [('ee',     range(178354, 178358+1)),
+                               ('mumu',   range(178359, 178363+1)),
+                               ('tautau', range(178364, 178368+1))]
+             for d, np in rzip(dsids, nps)]
+template, process = "AlpgenPythia_P2011C_Z%(ll)sNp%(np)s_Mll40to60_2L5", 'ZlljetsMll40to60'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
+             for ll, dsids in [('ee',     range(178369, 178373+1)),
+                               ('mumu',   range(178374, 178378+1)),
+                               ('tautau', range(178379, 178383+1))]
+             for d, np in rzip(dsids, nps)]
+nps = [0, 1, 2, 3]
+template, process = "AlpgenPythia_P2011C_Z%(ll)sccNp%(np)d_Mll10to60_2L5", 'ZccjetsMll10to60'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
+             for ll, dsids in [('ee',     range(178384, 178387+1)),
+                               ('mumu',   range(178388, 178391+1)),
+                               ('tautau', range(178392, 178395+1))]
+             for d, np in rzip(dsids, nps)]
+template, process = "AlpgenPythia_P2011C_Z%(ll)sbbNp%(np)d_Mll10to60_2L5", 'ZbbjetsMll10to60'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
+             for ll, dsids in [('ee',     range(178396, 178399+1)),
+                               ('mumu',   range(178400, 178403+1)),
+                               ('tautau', range(178404, 178407+1))]
+             for d, np in rzip(dsids, nps)]
 nps = [0, 1, 2, 3, 4, 5]
 template, process = "AlpgenPythia_P2011C_Z%(ll)sNp%(np)d", 'Zlljets'
 datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
@@ -88,7 +114,6 @@ datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
                                ('mumu',   range(110821, 110824+1)),
                                ('tautau', range(110825, 110828+1))]
              for d, np in rzip(dsids, nps)]
-nps = [0, 1, 2, 3]
 template, process = "AlpgenPythia_P2011C_Z%(ll)sccNp%(np)d", 'Zccjets'
 datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
              for ll, dsids in [('ee',     range(110805, 110808+1)),
@@ -102,12 +127,12 @@ datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process, placehol
                            ('tautau', 147772)]]
 nps = ['0Excl', '1Excl', '2Excl', '3Excl', '4Excl', '5Incl']
 template, process = "AlpgenJimmy_Auto_AUET2CTEQ6L1_Z%(ll)sNp%(np)s_Mll10to60", 'Zlljets_Mll10to60'
-datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process, placeholder)
              for ll, dsids in [('ee', range(146830, 146835+1))]
              for d, np in rzip(dsids, nps)]
 nps = ['0Excl', '1Excl', '2Excl', '3Excl', '4Excl', '5Incl']
 template, process = "AlpgenJimmy_Auto_Z%(ll)sNp%(np)s_Mll10to60", 'Zlljets_Mll10to60'
-datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process)
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process, placeholder)
              for ll, dsids in [('mumu', range(146840,   146845+1)),
                                ('tautau', range(146850, 146855+1))]
              for d, np in rzip(dsids, nps)]
@@ -120,8 +145,7 @@ datasets += [Dataset(sampleType, d, group, template%{'lv':lv}, process, placehol
                            ('taunu', 147776)]]
 nps = [0, 1, 2, 3, 4, 5]
 template, process = "AlpgenJimmy_AUET2CTEQ6L1_W%(lv)sNp%(np)d", 'Wlvjets'
-datasets += [Dataset(sampleType, d, group, template%{'lv':lv, 'np':np}, process,
-                     placeholder)
+datasets += [Dataset(sampleType, d, group, template%{'lv':lv, 'np':np}, process, placeholder)
              for lv, dsids in [('enu',   range(107680, 107685+1)),
                                ('munu',  range(107690, 107695+1)),
                                ('taunu', range(107700, 107705+1))]
@@ -135,16 +159,14 @@ datasets += [Dataset(sampleType, d, group, template%{'lv':lv, 'np':np}, process)
              for d, np in rzip(dsids, nps)]
 nps = ['0', '1', '2', '3', '4', '5incl']
 template, process = "AlpgenPythia_Auto_P2011C_W%(lv)sNp%(np)s", 'Wlvjets'
-datasets += [Dataset(sampleType, d, group, template%{'lv':lv, 'np':np}, process,
-                     placeholder)
+datasets += [Dataset(sampleType, d, group, template%{'lv':lv, 'np':np}, process, placeholder)
              for lv, dsids in [('enu',   range(147025, 147030+1)),
                                ('munu',  range(147033, 147038+1)),
                                ('taunu', range(147041, 147046+1))]
              for d, np in rzip(dsids, nps)]
 npsBase = [0, 1, 2, 3]
 template, process = "AlpgenJimmy_AUET2CTEQ6L1_W%(qq)sNp%(np)d", 'Wqqjets'
-datasets += [Dataset(sampleType, d, group, template%{'qq':qq, 'np':np}, process,
-                     placeholder)
+datasets += [Dataset(sampleType, d, group, template%{'qq':qq, 'np':np}, process, placeholder)
              for qq, dsids, nps in [('bb', range(107280, 107283+1), npsBase),
                                     ('cc', range(117284, 117287+1), npsBase),
                                     ('c',  range(117293, 117297+1), npsBase+[4])]
