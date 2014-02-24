@@ -260,6 +260,9 @@ datasets += [Dataset(sampleType, d, group, template%{'l4':l4}, process)
 template, process = "PowhegPythia8_AU2CT10_ZZllnunu_%(ll)s_mll4", 'PowhegPythia8_ZZ'
 datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process)
              for d, ll in [(126949, 'ee'), (126950, 'mm'), (126951, 'tt')]]
+template, process = "PowhegPythia8_AU2CT10_ZZ_%(ll)s_mll4_taufilter", 'PowhegPythia8_ZZ_taufilter'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process)
+             for d, ll in [(178411, '2e2tau'), (178412, '2mu2tau'), (178413, '4tau')]]
 template, process = "PowhegPythia8_AU2CT10_WZ_%(lvll)s_mll%(mll)s_2L5", 'PowhegPythia8_WZ'
 datasets += [Dataset(sampleType, d, group, template%{'lvll':lvll, 'mll':mll}, process)
              for d, lvll, mll in [(129477, 'Wm11Z11', '0p250d0'),
