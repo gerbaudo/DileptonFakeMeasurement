@@ -49,6 +49,7 @@ if verbose :
                      for o in ['mode','outdir','regexp', 'tag',]])
 
 datasets = [d for d in datasets if re.search(regexp, d.name)]
+datasets = [d for d in datasets if not d.placeholder or alsoPh]
 
 # Directory where files are
 basedirs = {'data' : '/gdata/atlas/ucintprod/SusyNt/data12_'+tag+'/', # data
