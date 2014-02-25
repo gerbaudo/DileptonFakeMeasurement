@@ -207,6 +207,10 @@ datasets += [Dataset(sampleType, d, group, template%{'ttX':ttX}, process)
                             (119355, 'Z' ), (174832, 'ZjExcl'), (174833, 'ZjjIncl')]]
 name, process = 'MadgraphPythia_AUET2B_CTEQ6L1_ttbarWW', 'ttbarWW'
 datasets += [Dataset(sampleType, 119583, group, name, process)]
+name, process = 'MadGraphPythia_ttbargammaPt80_noAllHad', 'ttbargam'
+datasets += [Dataset(sampleType, 164439, group, name, process)]
+name, process = 'Pythia8_Madgraph_AU2MSTW2008LO_4top_SM', '4top'
+datasets += [Dataset(sampleType, 158344, group, name, process)]
 
 #- ["singletop_tchan_%s" % l for l in ['e', 'mu', 'tau']]
 #- ["Ttbar%s" % ttd for ttd in ["LeptLept", "LeptTaulept", "TauleptTaulept",
