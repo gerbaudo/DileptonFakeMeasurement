@@ -263,10 +263,11 @@ datasets += [Dataset(sampleType, d, group, template%{'VV':VV, 'll':ll}, process)
                                (183734, 'WW', 'enuqq'),    (183735, 'WZ', 'enuqq'),
                                (183736, 'WW', 'munuqq'),   (183737, 'WZ', 'munuqq'),
                                (183738, 'WW', 'taunuqq'),  (183739, 'WZ', 'taunuqq')]]
-template, process = "Sherpa_CT10_llnunu_%(VV)s_MassiveCB
-Sherpa_CT10_%(ll)s_(VV)%s_MassiveCB", 'Sherpa_llnunu_MassiveCB'
+template, process = "Sherpa_CT10_%(ll)s_%(VV)s_MassiveCB", 'Sherpa_llnunu_MassiveCB'
 datasets += [Dataset(sampleType, d, group, template%{'VV':VV, 'll':ll}, process)
-             for d, VV in [(177997, 'WW'), (177999, 'ZZ')]]
+             for d, VV, ll in [(177997, 'WW', 'llnunu'), (177999, 'ZZ', 'llnunu'),
+                               (179974, 'WZ', 'lllnu'),  (179975, 'WZ', 'lnununu')]]
+
 template, process = "MadGraphPythia_AUET2BCTEQ6L1_%(VVV)sStar_%(fs)s", 'Triboson'
 datasets += [Dataset(sampleType, d, group, template%{'VVV':VVV, 'fs':fs}, process)
              for d, VVV, fs in [(167006, 'WWW', 'lnulnulnu'),
