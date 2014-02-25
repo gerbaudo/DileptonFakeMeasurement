@@ -198,7 +198,9 @@ template, process = 'AcerMCPythia_AUET2BCTEQ6L1_singletop_tchan_%(l)s', 'singlet
 datasets += [Dataset(sampleType, d, group, template%{'l':l}, process)
              for d, l in [(117360, 'e'), (117361, 'mu'), (117362, 'tau')]]
 name, process = 'McAtNloJimmy_CT10_ttbar_LeptonFilter', 'ttbar'
-datasets += [Dataset(sampleType, 105200, group, name, process)]
+datasets += [Dataset(sampleType, 105200, group, name, process, placeholder)]
+name, process = 'McAtNloJimmy_CT10_ttbar_dilepton', 'ttbar'
+datasets += [Dataset(sampleType, 110001, group, name, process)]
 template, process = "MadGraphPythia_AUET2BCTEQ6L1_ttbar%(ttX)s", 'ttbarV'
 datasets += [Dataset(sampleType, d, group, template%{'ttX':ttX}, process)
              for d, ttX in [(119353, 'W' ), (119354, 'Wj'),
