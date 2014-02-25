@@ -203,7 +203,7 @@ name, process = 'McAtNloJimmy_CT10_ttbar_dilepton', 'ttbar'
 datasets += [Dataset(sampleType, 110001, group, name, process)]
 template, process = "MadGraphPythia_AUET2BCTEQ6L1_ttbar%(ttX)s", 'ttbarV'
 datasets += [Dataset(sampleType, d, group, template%{'ttX':ttX}, process)
-             for d, ttX in [(119353, 'W' ), (174830, 'WjExcl'), (174831, 'WjjIncl')
+             for d, ttX in [(119353, 'W' ), (174830, 'WjExcl'), (174831, 'WjjIncl'),
                             (119355, 'Z' ), (174832, 'ZjExcl'), (174833, 'ZjjIncl')]]
 name, process = 'MadgraphPythia_AUET2B_CTEQ6L1_ttbarWW', 'ttbarWW'
 datasets += [Dataset(sampleType, 119583, group, name, process)]
