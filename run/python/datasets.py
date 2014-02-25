@@ -254,7 +254,7 @@ datasets += [Dataset(sampleType, d, group, template%{'l':l}, process)
 template, process = "Sherpa_CT10_VVto%(ll)sqq", 'Sherpa_VVtollqq'
 datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process, placeholder)
              for d, ll in [(157814, 'ee'), (157815, 'mumu'), (157816, 'tautau')]]
-template, process = "Sherpa_CT10_%(ll)s_(VV)%s_MassiveCB", 'Sherpa_VV_qqMassiveCB'
+template, process = "Sherpa_CT10_%(VV)sto%(ll)s_MassiveCB", 'Sherpa_VVtollqq_MassiveCB'
 datasets += [Dataset(sampleType, d, group, template%{'VV':VV, 'll':ll}, process)
              for d, VV, ll in [(183585, 'ZW', 'eeqq'),     (183586, 'ZZ', 'eeqq'),
                                (183587, 'ZW', 'mumuqq'),   (183588, 'ZZ', 'mumuqq'),
