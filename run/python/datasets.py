@@ -313,6 +313,9 @@ template, process = "PowhegPythia8_AU2CT10_ggH125_%(fs)s", 'ggH125'
 datasets += [Dataset(sampleType, d, group, template%{'fs':fs}, process)
              for d, fs in [(160155, 'ZZ4lep'), (160655, 'ZZllnunu'),
                            (161005, 'WW2lep_EF_15_5')]]
+template, process = "PowHegPythia8_AU2CT10_ggH125_tautau%(td)s", 'ggH125'
+datasets += [Dataset(sampleType, d, group, template%{'td':td}, process)
+             for d, td in [(161555, 'll'), (161566, 'lh'),(161577, 'hh')]]
 template, process = "PowhegPythia8_AU2CT10_VBFH125_%(fs)s", 'VBFH125'
 datasets += [Dataset(sampleType, d, group, template%{'fs':fs}, process)
              for d, fs in [(160205, 'ZZ4lep'), (160705, 'ZZllnunu'),
