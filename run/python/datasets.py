@@ -152,7 +152,7 @@ datasets += [Dataset(sampleType, d, group, template%{'lv':lv, 'np':np}, process,
              for d, np in rzip(dsids, nps)]
 nps = [0, 1, 2, 3, 4, 5]
 template, process = "AlpgenPythia_P2011C_W%(lv)sNp%(np)d", 'Wlvjets'
-datasets += [Dataset(sampleType, d, group, template%{'lv':lv, 'np':np}, process)
+datasets += [Dataset(sampleType, d, group, template%{'lv':lv, 'np':np}, process, placeholder)
              for lv, dsids in [('enu',   range(117680, 117685+1)),
                                ('munu',  range(117690, 117695+1)),
                                ('taunu', range(117700, 117705+1))]
@@ -173,7 +173,7 @@ datasets += [Dataset(sampleType, d, group, template%{'qq':qq, 'np':np}, process,
              for d, np in rzip(dsids, nps)]
 npsBase = [0, 1, 2, 3]
 template, process = "AlpgenPythia_P2011C_W%(qq)sNp%(np)d", 'Wqqjets'
-datasets += [Dataset(sampleType, d, group, template%{'qq':qq, 'np':np}, process)
+datasets += [Dataset(sampleType, d, group, template%{'qq':qq, 'np':np}, process, placeholder)
              for qq, dsids, nps in [('bb', range(110801, 110804+1), npsBase),
                                     ('cc', range(126606, 126609+1), npsBase),
                                     ('c',  range(126601, 126605+1), npsBase+[4])]
@@ -230,7 +230,7 @@ datasets += [Dataset(sampleType, d, group, template%{'lvlv':lvlv}, process)
                              (169474, 'munumunu'),   (169475, 'munuenu'),  (169476, 'munutaunu'),
                              (169477, 'taunutaunu'), (169478, 'taunuenu'), (169479, 'taunumunu')]]
 template, process = "gg2ZZJimmy_AUET2CT10_ZZ%(l4)s", 'gg2ZZJimmy'
-datasets += [Dataset(sampleType, d, group, template%{'l4':l4}, process)
+datasets += [Dataset(sampleType, d, group, template%{'l4':l4}, process, placeholder)
              for d, l4 in [(116600, '4lep'),
                            (116601, '4e'),
                            (116602, '4mu'),
@@ -249,7 +249,7 @@ template, process = "Sherpa_CT10_%(llss)s", 'Sherpa_llnunu'
 datasets += [Dataset(sampleType, d, group, template%{'llss':llss}, process)
              for d, llss in [(126988, 'llnunu_SS_EW6'), (126989, 'llnunujj_SS')]]
 template, process = "Sherpa_CT10_VVto%(l)snuqq", 'Sherpa_VVtolnuqq'
-datasets += [Dataset(sampleType, d, group, template%{'l':l}, process)
+datasets += [Dataset(sampleType, d, group, template%{'l':l}, process, placeholder)
              for d, l in [(157817, 'e'), (157818, 'mu'), (157819, 'tau')]]
 template, process = "Sherpa_CT10_VVto%(ll)sqq", 'Sherpa_VVtollqq'
 datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process, placeholder)
