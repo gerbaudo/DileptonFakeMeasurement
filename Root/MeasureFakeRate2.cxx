@@ -55,7 +55,8 @@ const sf::Region signalRegions[] = {
   sf::CR_WHZV2j,
 
   sf::CR_SRWH1j,
-  sf::CR_SRWH2j
+  sf::CR_SRWH2j,
+  sf::CR_SRWHnoMlj
 };
 const size_t nSignalRegions = sizeof(signalRegions)/sizeof(signalRegions[0]);
 const MeasureFakeRate2::LeptonType leptonTypes[] = {MeasureFakeRate2::kElectron, MeasureFakeRate2::kMuon};
@@ -369,6 +370,7 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
 
           case sf::CR_SRWH1j       : passSR = (is1j && passSrWh1j    (v)); break;
           case sf::CR_SRWH2j       : passSR = (is2j && passSrWh2j    (v)); break;
+          case sf::CR_SRWHnoMlj    : passSR =  passSrWhNoMlj         (v);  break;
 
           default: cout<<"invalid ControlRegion "<<CR<<endl;
           } // switch
