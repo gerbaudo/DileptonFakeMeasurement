@@ -110,12 +110,11 @@ void MeasureFakeRate2::Terminate()
 void MeasureFakeRate2::initHistos(string outName)
 {
   size_t nRegions(allRegions().size()), nLeptonTypes(m_leptonTypes.size());
-  if(nRegions > kNmaxControlRegions)
-    cout<<" Trying book histos for "<<nRegions<<" regions "<<" >= "<<kNmaxControlRegions<<endl<<" Exiting."<<endl;
-  if(nLeptonTypes > kNmaxLeptonTypes)
-    cout<<" Trying book histos for "<<nLeptonTypes<<" lepton types >= "<<kNmaxLeptonTypes<<endl<<" Exiting."<<endl;
+  if(nRegions > kNmaxControlRegions)  cout<<" Trying book histos for "<<nRegions<<" regions "<<" >= "<<kNmaxControlRegions<<endl<<" Exiting."<<endl;
+  if(nLeptonTypes > kNmaxLeptonTypes) cout<<" Trying book histos for "<<nLeptonTypes<<" lepton types >= "<<kNmaxLeptonTypes<<endl<<" Exiting."<<endl;
   assert(nRegions <= kNmaxControlRegions);
   assert(nLeptonTypes <= kNmaxLeptonTypes);
+  assert(nFlavBins==LS_N);
   cout<<"Creating file: "<<outName<<endl;
   m_outFile = new TFile((outName).c_str(),"recreate");
   m_outFile->cd();
