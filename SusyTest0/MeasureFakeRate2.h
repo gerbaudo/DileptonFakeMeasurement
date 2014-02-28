@@ -97,7 +97,12 @@ class MeasureFakeRate2 : public SusySelection
   TH1F*      h_l_pt_true    [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
   TH1F*      h_l_pt_fake    [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
   // 2d parametrization
-  EffObject2* h_l_pt_eta    [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject2* h_l_pt_eta       [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject2* h_flavor_pt      [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject2* h_flavor_pt_etaC [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject2* h_flavor_pt_etaF [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject2* h_flavor_eta     [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject2* h_flavor_metrel  [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
  protected:
   std::string  m_fileName;          // Outname file name
   TFile*       m_outFile;           // Output file

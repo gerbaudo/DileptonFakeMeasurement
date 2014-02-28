@@ -138,8 +138,21 @@ void MeasureFakeRate2::initHistos(string outName)
         h_flavor       [il][icr][ich] = new EffObject(bn+"flavor",       LS_N, -0.5, LS_N-0.5);
         h_l_pt_true    [il][icr][ich] = new TH1F     ((bn+"l_pt_true").c_str(), "", nFakePtbins, FakePtbins);
         h_l_pt_fake    [il][icr][ich] = new TH1F     ((bn+"l_pt_fake").c_str(), "", nFakePtbins, FakePtbins);
-        for(int lbl=0; lbl<LS_N; ++lbl) h_flavor[il][icr][ich]->SetXLabel(lbl+1, LSNames[lbl]);
-        h_l_pt_eta     [il][icr][ich] = new EffObject2(bn+"l_pt_eta",    nCoarseFakePtbins, coarseFakePtbins, nCoarseEtabins, CoarseEtabins);
+        h_l_pt_eta     [il][icr][ich]   = new EffObject2(bn+"l_pt_eta",       nCoarseFakePtbins, coarseFakePtbins, nCoarseEtabins, CoarseEtabins);
+        h_flavor_pt      [il][icr][ich] = new EffObject2(bn+"flavor_pt",      nFlavBins, flavBins, nCoarseFakePtbins, coarseFakePtbins);
+        h_flavor_pt_etaC [il][icr][ich] = new EffObject2(bn+"flavor_pt_etaC", nFlavBins, flavBins, nCoarseFakePtbins, coarseFakePtbins);
+        h_flavor_pt_etaF [il][icr][ich] = new EffObject2(bn+"flavor_pt_etaF", nFlavBins, flavBins, nCoarseFakePtbins, coarseFakePtbins);
+        h_flavor_eta     [il][icr][ich] = new EffObject2(bn+"flavor_eta",     nFlavBins, flavBins, nCoarseEtabins,    CoarseEtabins);
+        h_flavor_metrel  [il][icr][ich] = new EffObject2(bn+"flavor_metrel",  nFlavBins, flavBins, nMetbins,          Metbins);
+        for(int lbl=0; lbl<nFlavBins; ++lbl) {
+            const std::string &label = LSNames[lbl];
+            h_flavor         [il][icr][ich]->SetXLabel(lbl+1, label);
+            h_flavor_pt      [il][icr][ich]->SetXLabel(lbl+1, label);
+            h_flavor_pt_etaC [il][icr][ich]->SetXLabel(lbl+1, label);
+            h_flavor_pt_etaF [il][icr][ich]->SetXLabel(lbl+1, label);
+            h_flavor_eta     [il][icr][ich]->SetXLabel(lbl+1, label);
+            h_flavor_metrel  [il][icr][ich]->SetXLabel(lbl+1, label);
+        }
       } // end for(ich)
     } // end for(icr)
   } // end for(il)
@@ -234,22 +247,34 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
     bool pass(isSignalLepton(lep, m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC));
     FillEffHistos   fill1dEff(pass, m_evtWeight, lt, regionIndex, static_cast<Chan>(m_ch));
     Fill2dEffHistos fill2dEff(pass, m_evtWeight, lt, regionIndex, static_cast<Chan>(m_ch));
-    fill1dEff(h_l_pt        , lep->Pt());
-    fill1dEff(h_l_pt_coarse , lep->Pt());
-    fill1dEff(h_l_eta       , fabs(lep->Eta()));
-    fill1dEff(h_l_eta_coarse, fabs(lep->Eta()));
+    float pt(lep->Pt()), eta(fabs(lep->Eta()));
+    fill1dEff(h_l_pt        , pt);
+    fill1dEff(h_l_pt_coarse , pt);
+    fill1dEff(h_l_eta       , eta);
+    fill1dEff(h_l_eta_coarse, eta);
     fill1dEff(h_metrel      , m_metRel);
     fill1dEff(h_met         , met->Et);
     fill1dEff(h_njets       , jets.size());
     fill1dEff(h_onebin      , 0.0);
-    fill2dEff(h_l_pt_eta    , lep->Pt(), fabs(lep->Eta()));
+    fill2dEff(h_l_pt_eta    , pt, eta);
     if( nt.evt()->isMC ){ // If the event is MC, save the flavor
         LeptonSource ls(getLeptonSource(lep));
         bool isQcd(ls==LS_HF||ls==LS_LF);
-        fill1dEff(h_flavor, ls);
-        if(isQcd) fill1dEff(h_flavor, LS_QCD);
+        bool isCentralEta(eta<1.37); // see FakeBinnings.h
+        fill1dEff(h_flavor        , ls);
+        fill2dEff(h_flavor_pt     , ls, pt);
+        fill2dEff(h_flavor_eta    , ls, eta);
+        fill2dEff(h_flavor_metrel , ls, m_metRel);
+        fill2dEff(isCentralEta ? h_flavor_pt_etaC : h_flavor_pt_etaF, ls, pt);
+        if(isQcd) {
+            fill1dEff(h_flavor        , LS_QCD);
+            fill2dEff(h_flavor_pt     , LS_QCD, pt);
+            fill2dEff(h_flavor_eta    , LS_QCD, eta);
+            fill2dEff(h_flavor_metrel , LS_QCD, m_metRel);
+            fill2dEff(isCentralEta ? h_flavor_pt_etaC : h_flavor_pt_etaF, LS_QCD, pt);
+        }
         TH1F *hlpt = (ls==LS_Real ? h_l_pt_true[lt][regionIndex][m_ch] : h_l_pt_fake[lt][regionIndex][m_ch]);
-        if(hlpt) hlpt->Fill(lep->Pt(), m_evtWeight);
+        if(hlpt) hlpt->Fill(pt, m_evtWeight);
     }
 }
 /*--------------------------------------------------------------------------------*/
