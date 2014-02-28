@@ -1072,3 +1072,15 @@ bool SusySelection::passSrWh2j(const susy::wh::kin::DilepVars &v)
     return SusySelection::passSrWh2j(v, f);
 }
 //-----------------------------------------
+bool SusySelection::passSrWhNoMlj(const susy::wh::kin::DilepVars &v)
+{
+    SsPassFlags f1j, f2j;
+    passSrWh1j(v, f1j);
+    passSrWh2j(v, f2j);
+    f1j.mljj = true;
+    f2j.mljj = true;
+    bool pass1j(f1j.lepPt && f1j.zllVeto && f1j.dEtall && f1j.maxMt && f1j.mljj && f1j.ht && f1j.metrel && f1j.mtllmet);
+    bool pass2j(f2j.lepPt && f2j.zllVeto && f2j.dEtall && f2j.maxMt && f2j.mljj && f2j.ht && f2j.metrel && f2j.mtllmet);
+    return (pass1j || pass2j);
+}
+//-----------------------------------------

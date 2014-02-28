@@ -151,6 +151,7 @@ class SusySelection : public SusyNtAna
     static bool passSrWh1j(const susy::wh::kin::DilepVars &v, SsPassFlags &f); //! same as above, but also toggle kin flags
     static bool passSrWh2j(const susy::wh::kin::DilepVars &v);
     static bool passSrWh2j(const susy::wh::kin::DilepVars &v, SsPassFlags &f); //! same as above, but also toggle kin flags
+    static bool passSrWhNoMlj(const susy::wh::kin::DilepVars &v);
 
     void setUseXsReader(bool val){ m_useXsReader = val; };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
