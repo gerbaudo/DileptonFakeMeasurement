@@ -131,7 +131,8 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     iSys);
       if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,iSys);
       if(passEwkSsLea)   fillHistos(ncl, j, m, weight, swh::PR_SsEwkLea,  iSys);
-      bool is1j(j.size()==1), is2j(j.size()>1);
+      if(!ssf.passCommonCriteria()) return kTRUE; // note to self: here the fj and bj veto are implicitly being applied. refactor
+      bool is1j(ssf.eq1j), is2j(ssf.ge2j);
 
       if(ssf.sameSign && ssf.ge1j)                 fillHistos(ncl, j, m, weight, swh::PR_CRSsInc1j,iSys);
       if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1j , iSys);
@@ -144,7 +145,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       if(is1j && SusySelection::passSrWh1j(v)) fillHistos(ncl, j, m, weight, swh::SrWh1j , iSys);
       if(is2j && SusySelection::passSrWh2j(v)) fillHistos(ncl, j, m, weight, swh::SrWh2j , iSys);
       if(m_fillHft) {
-          bool storeEvent(SusySelection::passSrWh1j(v) || SusySelection::passSrWh2j(v));
+          bool storeEvent(ssf.ge1j && (SusySelection::passSrWh1j(v) || SusySelection::passSrWh2j(v)));
           if(!isHftFillerInitialized()) initHftFiller();
           if(storeEvent) fillHft(iSys, v);
       }
@@ -535,7 +536,8 @@ void SusyPlotter::initHftFiller()
 //-----------------------------------------
 void SusyPlotter::fillHft(const size_t sys, const susy::wh::kin::DilepVars &v)
 {
-    m_hftFiller.fill(sys, v);
+    unsigned int run(nt.evt()->run), event(nt.evt()->event);
+    m_hftFiller.fill(sys, v, run, event);
 }
 //-----------------------------------------
 void SusyPlotter::closeHftFiller()
