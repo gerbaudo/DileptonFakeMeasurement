@@ -52,6 +52,17 @@ bool HftFiller::fill(size_t systIndex, const susy::wh::kin::DilepVars &v)
     return someBytesWritten;
 }
 //----------------------------------------------------------
+bool HftFiller::fill(size_t systIndex, const susy::wh::kin::DilepVars &v, unsigned int run, unsigned int event)
+{
+    bool someBytesWritten(false);
+    if(HistFitterTree *t = m_hftTrees[systIndex]) {
+        t->runNumber = run;
+        t->eventNumber = event;
+        someBytesWritten = true;
+    }
+    return fill(systIndex, v) && someBytesWritten;
+}
+//----------------------------------------------------------
 bool HftFiller::init(const std::string &mcid, const std::vector<std::string> &systematics)
 {
     for(size_t i=0; i<systematics.size(); ++i) {
