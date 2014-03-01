@@ -38,6 +38,12 @@ from utils import (enumFromHeader
                    ,json_write
                    ,rmIfExists
                    )
+from fakeUtils import (samples
+                       ,fakeProcesses
+                       ,getInputFiles
+                       ,buildRatio
+                       )
+
 import matplotlib as mpl
 mpl.use('Agg') # render plots without X
 import matplotlib.pyplot as plt
@@ -96,8 +102,6 @@ def main() :
     outputFile.Close()
     if verbose : print "output saved to \n%s"%'\n'.join([outputFname, outputPlotDir])
 
-def samples() : return ['allBkg', 'ttbar', 'wjets', 'zjets', 'diboson', 'heavyflavor']
-def fakeProcesses() : return ['ttbar', 'wjets', 'zjets', 'diboson', 'heavyflavor']
 def frac2str(frac) :
     return '\n'.join([''.join("%12s"%s for s in fakeProcesses()),
                       ''.join("%12s"%("%.3f"%frac[s]) for s in fakeProcesses())])
@@ -143,15 +147,6 @@ def isRegionToBePlotted(sr) :
 def extractionRegions() :
     return ['qcdMC', 'convMC', 'realMC']
 
-def getInputFiles(inputDirname, tag, verbose=False) :
-    inDir = inputDirname
-    tag = tag if tag.startswith('_') else '_'+tag
-    files = dict(zip(samples(), [r.TFile.Open(inDir+'/'+s+tag+'.root') for s in samples()]))
-    if verbose : print "getInputFiles('%s'):\n\t%s"%(inputDirname, '\n\t'.join("%s : %s"%(k, f.GetName()) for k, f in files.iteritems()))
-    return files
-def buildRatio(inputFile=None, histoBaseName='') :
-    num, den = inputFile.Get(histoBaseName+'_num'), inputFile.Get(histoBaseName+'_den')
-    return buildRatioHistogram(num, den, histoBaseName +'_rat')
 def getRealEff(lepton='electron|muon', inputFile=None, scaleFactor=1.0) :
     histoName = lepton+'_realMC_all_l_pt_coarse'
     effHisto = buildRatio(inputFile, histoName)
