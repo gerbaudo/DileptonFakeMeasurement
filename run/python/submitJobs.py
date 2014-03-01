@@ -16,6 +16,7 @@ import os
 import re
 import datasets
 from utils import getCommandOutput, filterWithRegexp
+from SampleUtils import isSigSample
 from datasets import datasets
 
 defaultBatchTag = '_Jul25_n0145'
@@ -101,7 +102,7 @@ sampleNames   = [s for s in sampleNames if s not in excludedNames]
 def listExists(dset='', flistDir='./filelist') : return os.path.exists(flistDir+'/'+dset+'.txt')
 def fillInScriptTemplate(sample, input, output, otherOptions, outScript, scriptTemplate) :
     options  = otherOptions
-    options += ' --WH-sample' if 'WH' in sample else ''
+    options += ' --WH-sample' if isSigSample(sample) else ''
     outFile = open(outScript, 'w')
     for line in open(scriptTemplate).readlines() :
         line = line.replace('${inp}', input)
