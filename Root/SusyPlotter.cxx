@@ -91,9 +91,10 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   clearObjects();
   cacheStaticWeightComponents();
   increment(n_readin, m_weightComponents);
-  bool removeLepsFromIso(false);
   for(size_t iSys=0; iSys<m_systs.size(); ++iSys) {
       const SusyNtSys sys = static_cast<SusyNtSys>(m_systs[iSys]);
+      bool removeLepsFromIso(false);
+      clearObjects();
       selectObjects(sys, removeLepsFromIso, TauID_medium);
       swh::EventFlags eventFlags(computeEventFlags());
       if(sys==NtSys_NOM) incrementCounters(eventFlags, m_weightComponents);
