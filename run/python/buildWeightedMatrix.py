@@ -113,7 +113,7 @@ def frac2str(frac) :
 
 def selectionRegions() :
     print "hardcoded selectionRegions, should match what's in FakeRegions.h; fix DiLeptonMatrixMethod"
-    return  ['CR_SRWHnoMlj', 'CR_SRWH1j']
+    return  ['CR_SRWHnoMlj', 'CR_SRWH1j', 'CR_SSInc1j']
 #--tmp--    return ['CR_SSInc',
 #--tmp--            'CR_SSInc1j',
 #--tmp--            'CR_WHSS',
@@ -151,7 +151,7 @@ def selectionRegions() :
 def isRegionToBePlotted(sr) :
     "regions for which we plot the weighted matrices"
     srs = ['CR_WHZVfake1j', 'CR_WHZVfake2j', 'CR_WHfake1j', 'CR_WHfake2j', 'CR_WHZV1j', 'CR_WHZV2j', 'CR_SRWH1j', 'CR_SRWH2j']
-    srs = ['CR_SRWHnoMlj', 'CR_SRWH1j']
+    srs = ['CR_SRWHnoMlj', 'CR_SRWH1j', 'CR_SSInc1j']
     return sr in srs
 
 def extractionRegions() :
