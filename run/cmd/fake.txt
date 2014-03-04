@@ -16,6 +16,7 @@ TAG="Oct_10"
  --input_data out/fakerate/merged/data_${TAG}.root \
  --input_mc   out/fakerate/merged/allBkgButHf_${TAG}.root \
  --output     out/fakerate/merged/iterative_out_${TAG}.root \
+ --plot       out/fakerate/merged/iterative_plots_${TAG} \
  >& log/fakerate/IterFake_${TAG}.log
 
 # Determine the scale factors (p_T dep flat fit).
