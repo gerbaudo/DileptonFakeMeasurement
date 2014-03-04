@@ -198,7 +198,7 @@ def buildCorrectionHisto(hndRealDataCr, hndFakeDataLo, hndFakeDataHi, hndFakeMcL
             print "  num   %s"%lf2s(getBinContents(corrected['num']))
             print "  den   %s"%lf2s(getBinContents(corrected['den']))
             print "  ratio %s"%lf2s(getBinContents(rate))
-            dataNum, dataDen = hndFakeDataHi['num'], hndFakeDataHi['den']
+        dataNum, dataDen = hndFakeDataHi['num'], hndFakeDataHi['den']
         for nd,tl in [('num','tight'), ('den','loose')] :
             corr, dataLow = corrected[nd], hndFakeDataLo[nd]
             mcLow, mcHi = hndFakeMcLo[nd], hndFakeMcHi[nd]
