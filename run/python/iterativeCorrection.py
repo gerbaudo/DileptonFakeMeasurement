@@ -258,7 +258,7 @@ def histo1dToTxt(h) :
     hisName = h.GetName()
     binEdge = [h.GetBinLowEdge(b) for b in bins]
     binEdge.append(binEdge[-1] + h.GetBinWidth(bins[-1]))
-    binCont = binContents(h)
+    binCont = getBinContents(h)
     binErr  = [be(h, b) for b in bins]
     def lf2s(l) : return ', '.join(["%.3f"%e for e in l])
 
