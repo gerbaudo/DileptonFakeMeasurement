@@ -62,7 +62,7 @@ def main() :
     parser.add_option('-d', '--input_data')
     parser.add_option('-o', '--output')
     parser.add_option('-p', '--plot', help='plot inputs') # todo: implement sanity plot vs. n_iter
-    parser.add_option('-v','--verbose', action='store_true', default=False)
+    parser.add_option('-v', '--verbose', action='store_true', default=False)
     (opts, args) = parser.parse_args()
     requiredOptions = ['n_iter', 'input_mc', 'input_data', 'output']
     otherOptions = ['plot', 'verbose']
@@ -73,7 +73,7 @@ def main() :
     fnameInputMc = opts.input_mc
     fnameInputDa = opts.input_data
     fnameOutput  = opts.output
-    plotdir         = opts.plot
+    plotdir      = opts.plot
     verbose      = opts.verbose
     if verbose : print ('\nUsing the following options:\n'
                         +'\n'.join("%s : %s"%(o, str(getattr(opts, o))) for o in allOptions))
@@ -127,7 +127,8 @@ def main() :
                                                      hFakeDataLo, hFakeDataHi,
                                                      hFakeMcLo, hFakeMcHi,
                                                      nIter=nIter, verbose=verbose,
-                                                     histoname=lep+'_corHFRate')
+                                                     histoname=lep+'_corHFRate',
+                                                     plotdir=plotdir)
 
         # here do the 2d ones
         print 10*"--"," now doing the 2d ones ",10*"--"
@@ -173,7 +174,7 @@ def main() :
 
 # here be dragons
 def buildCorrectionHisto(hndRealDataCr, hndFakeDataLo, hndFakeDataHi, hndFakeMcLo, hndFakeMcHi,
-                         histoname='lep_corHFRate', nIter=1, verbose=False) :
+                         histoname='lep_corHFRate', nIter=1, verbose=False, plotdir=None) :
     hRealEff = buildRatioHistogram(hndRealDataCr['num'], hndRealDataCr['den'], 'real_eff')
     corrected = dict([(nd, hndFakeDataLo[nd].Clone('corrected_'+nd)) for nd in ['num', 'den']])
     print "buildCorrectionHisto with nIter ",nIter
@@ -213,7 +214,7 @@ def buildCorrectionHisto(hndRealDataCr, hndFakeDataLo, hndFakeDataHi, hndFakeMcL
     ratio = buildRatioHistogram(corrected['num'], corrected['den'], histoname)
     can._leg.Draw()
     can.Update()
-    can.SaveAs(histoname+'_iterations.png')
+    if plotdir : can.SaveAs(plotdir+'/'+histoname+'_iterations.png')
     return ratio
 
 def assertSameNbins(histos=[]) :
