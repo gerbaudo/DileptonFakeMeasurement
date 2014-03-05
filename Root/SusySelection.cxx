@@ -954,7 +954,7 @@ bool SusySelection::passSrWh1j(const susy::wh::kin::DilepVars &v, SsPassFlags &f
             f.metrel  = v.metrel >  55.0;
             f.mtllmet = notApplied;
         }
-        pass = f.veto3rdL && f.lepPt && f.zllVeto && f.dEtall && f.maxMt && f.ht && f.metrel && f.mljj && f.mtllmet;
+        pass = f.passKinCriteria();
     }
     return pass;
 }
@@ -998,7 +998,7 @@ bool SusySelection::passSrWh2j(const susy::wh::kin::DilepVars &v, SsPassFlags &f
             f.metrel  = v.metrel >  30.0;
             f.mtllmet = notApplied;
         }
-    pass = f.veto3rdL && f.lepPt && f.zllVeto && f.dEtall && f.maxMt && f.mljj && f.ht && f.metrel && f.mtllmet;
+        pass = f.passKinCriteria();
     }
     return pass;
 }
