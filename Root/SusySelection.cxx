@@ -1009,3 +1009,24 @@ bool SusySelection::passSrWh2j(const susy::wh::kin::DilepVars &v)
     return SusySelection::passSrWh2j(v, f);
 }
 //-----------------------------------------
+bool SusySelection::isEventForHft(const susy::wh::kin::DilepVars &vars, const SsPassFlags &flags)
+{
+    const susy::wh::kin::DilepVars &v = vars;
+    SsPassFlags f = flags;
+    bool onejet(v.numCentralLightJets==1);
+    if(onejet) passSrWh1j(v, f);
+    else       passSrWh2j(v, f);
+    bool dropThisRequirement = true;
+    if(v.isEe) {
+        if(onejet) { f.mljj = f.ht = dropThisRequirement; }
+        else       { f.mljj = f.maxMt = dropThisRequirement; }
+    } else if(v.isEm) {
+        if(onejet) { f.mljj = f.mtllmet = dropThisRequirement; }
+        else       { f.mljj = f.mtllmet = dropThisRequirement; }
+    } else if(v.isMm) {
+        if(onejet) { f.mljj = f.ht = dropThisRequirement; }
+        else       { f.mljj = f.ht = dropThisRequirement; }
+    }
+    return f.passKinCriteria();
+}
+//-----------------------------------------

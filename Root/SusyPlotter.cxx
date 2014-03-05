@@ -146,9 +146,8 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       if(is1j && SusySelection::passSrWh1j(v)) fillHistos(ncl, j, m, weight, swh::SrWh1j , iSys);
       if(is2j && SusySelection::passSrWh2j(v)) fillHistos(ncl, j, m, weight, swh::SrWh2j , iSys);
       if(m_fillHft) {
-          bool storeEvent(ssf.ge1j && (SusySelection::passSrWh1j(v) || SusySelection::passSrWh2j(v)));
           if(!isHftFillerInitialized()) initHftFiller();
-          if(storeEvent) fillHft(iSys, v);
+          if(SusySelection::isEventForHft(v, ssf)) fillHft(iSys, v);
       }
   } // for(iSys)
   return kTRUE;
