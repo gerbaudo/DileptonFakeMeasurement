@@ -635,8 +635,9 @@ float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
       <<" met px: "<<smearedMet.Px()<<" py: "<<smearedMet.Py()
       <<endl;
   */
+  bool isData=false;
   m_chargeFlip->setSeed(nt.evt()->event);
-  float flipProb(m_chargeFlip->OS2SS(pdg0, &smearedLv0, pdg1, &smearedLv1, &smearedMet, sys));
+  float flipProb(m_chargeFlip->OS2SS(pdg0, &smearedLv0, pdg1, &smearedLv1, sys, isData, chargeFlip::dataonly));
   float overlapFrac(m_chargeFlip->overlapFrac().first);
   if(update4mom) {
     m_unsmeared_lv0 = (*l0);
@@ -784,7 +785,7 @@ void SusySelection::initChargeFlipTool()
     return;
   }
   string chargeFlipInput(rcdir);
-  chargeFlipInput += "/../ChargeFlip/data/d0_chargeflip_map.root";
+  chargeFlipInput += "/../ChargeFlip/data/d0_new2d_chargeflip_map.root";
   m_chargeFlip = new chargeFlip(chargeFlipInput);
   if(m_dbg) m_chargeFlip->printSettings();
 }
