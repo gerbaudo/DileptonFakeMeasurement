@@ -190,13 +190,21 @@ datasets += [Dataset(sampleType, d, group, template%{'qq':qq, 'np':np}, process,
 
 group = 'ttbar'
 template, process = 'McAtNloJimmy_AUET2CT10_SingleTopSChanW%(lv)s', 'singletop'
-datasets += [Dataset(sampleType, d, group, template%{'lv':lv}, process)
+datasets += [Dataset(sampleType, d, group, template%{'lv':lv}, process, placeholder)
              for d, lv in [(108343, 'enu'), (108344, 'munu'), (108345, 'taunu')]]
 name, process = 'McAtNloJimmy_AUET2CT10_SingleTopWtChanIncl', 'singletop'
 datasets += [Dataset(sampleType, 108346, group, name, process)]
 template, process = 'AcerMCPythia_AUET2BCTEQ6L1_singletop_tchan_%(l)s', 'singletop'
 datasets += [Dataset(sampleType, d, group, template%{'l':l}, process)
              for d, l in [(117360, 'e'), (117361, 'mu'), (117362, 'tau')]]
+name, process = 'MadGraphPythia_AUET2B_CTEQ6L1_tZ_Wtchan_Zll_PythiaDecays', 'singletop'
+datasets += [Dataset(sampleType, 179991, group, name, process)]
+name, process = 'MadGraphPythia_AUET2B_CTEQ6L1_tZ_stchan_Zll_PythiaDecays', 'singletop'
+datasets += [Dataset(sampleType, 179992, group, name, process)]
+template, process = 'MadgraphPythia_AUET2B_CTEQ6L1_ttgam_%(fs)s_fullme', 'singletop'
+datasets += [Dataset(sampleType, d, group, template%{'fs':fs}, process)
+             for d, fs in [(169704, 'jjbjjb'), (169705, 'lvblvb'), (169706, 'lvbjjb')]]
+
 name, process = 'McAtNloJimmy_CT10_ttbar_LeptonFilter', 'ttbar'
 datasets += [Dataset(sampleType, 105200, group, name, process, placeholder)]
 name, process = 'McAtNloJimmy_CT10_ttbar_dilepton', 'ttbar'
@@ -235,6 +243,9 @@ datasets += [Dataset(sampleType, d, group, template%{'l4':l4}, process, placehol
                            (116601, '4e'),
                            (116602, '4mu'),
                            (116603, '2e2mu')]]
+template, process = "gg2ZZJimmy_AUET2CT10_ZZ%(l4)s_2lepFilt", 'gg2ZZJimmy'
+datasets += [Dataset(sampleType, d, group, template%{'l4':l4}, process)
+             for d, l4 in [(179396, '4lep')]]
 template, process = "Sherpa_CT10_%(lepVV)s", 'Sherpa_VV_lep'
 datasets += [Dataset(sampleType, d, group, template%{'lepVV':lepVV}, process, placeholder)
              for d, lepVV in [(126892, 'llnunu_WW'), (126893, 'lllnu_WZ'),
@@ -247,7 +258,7 @@ datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process, placehol
              for d, ll in [(145161, 'ee'),    (145162, 'mumu'), (126854, 'tautau')]]
 template, process = "Sherpa_CT10_%(llss)s", 'Sherpa_llnunu'
 datasets += [Dataset(sampleType, d, group, template%{'llss':llss}, process)
-             for d, llss in [(126988, 'llnunu_SS_EW6'), (126989, 'llnunujj_SS')]]
+             for d, llss in [(126988, 'llnunu_SS_EW6'), (126989, 'llnunujj_SS'), (126894, 'llll_ZZ')]]
 template, process = "Sherpa_CT10_VVto%(l)snuqq", 'Sherpa_VVtolnuqq'
 datasets += [Dataset(sampleType, d, group, template%{'l':l}, process, placeholder)
              for d, l in [(157817, 'e'), (157818, 'mu'), (157819, 'tau')]]
