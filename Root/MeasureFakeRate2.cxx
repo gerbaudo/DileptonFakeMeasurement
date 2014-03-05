@@ -607,15 +607,15 @@ bool MeasureFakeRate2::passHFCR_testSs(const LeptonVector &leptons,
 // low-met mu(tag)+l(probe)
     Muon* tag=0;
     size_t nTags=0;
-    bool passSingleMu(false), passDilepMuMu(false), passDilepMuEm(false);
+    bool passDilepMuMu(false), passDilepMuEm(false), passDilepEmMu(false);
     for(size_t iTag=0; iTag<m_signalMuons.size(); ++iTag){
         const Muon *m = m_signalMuons[iTag];
         uint tf = m->trigFlags;
-        passSingleMu  = (tf & TRIG_mu18_tight);
         passDilepMuMu = (tf & TRIG_mu18_tight_mu8_EFFS);
         passDilepMuEm = (tf & TRIG_mu18_tight_e7_medium1);
-        bool passDilep(passDilepMuMu || passDilepMuEm);
-        if(m->isMu() && m->Pt() > 20.0 && passSingleMu && passDilep) { tag = m_signalMuons.at(iTag); nTags++; }
+        passDilepEmMu = (tf & TRIG_e12Tvh_medium1_mu8);
+        bool passDilep(passDilepMuMu || passDilepMuEm || passDilepEmMu);
+        if(m->isMu() && passDilep) { tag = m_signalMuons.at(iTag); nTags++; }
     } // for(iTag)
     Lepton *probe=0;
     size_t nProbes=0;
@@ -624,14 +624,14 @@ bool MeasureFakeRate2::passHFCR_testSs(const LeptonVector &leptons,
         if(l!=tag) { probe=leptons.at(iP); nProbes++; }
     } // for(iP)
     if(nTags==1 && nProbes==1) {
-        bool passMet(met->Et < 40);
+        //bool passMet(met->Et < 40);
         bool sameSign(tag->q * probe->q > 0.0);
-        bool passTrig((probe->isMu()  && passDilepMuMu) || (probe->isEle() && passDilepMuEm));
+        bool passTrig((probe->isMu()  && passDilepMuMu) || (probe->isEle() && (passDilepMuEm || passDilepEmMu)));
         float mt = Mt(probe,met);
         bool passIterativeSideband = false;
-        if(CR == CR_HF)      passIterativeSideband = mt >  40.0;
-        if(CR == CR_HF_high) passIterativeSideband = mt > 100.0;
-        if(sameSign && passMet && passTrig && passIterativeSideband) {
+        if(CR == CR_HF)      passIterativeSideband = mt <  40.0;
+        if(CR == CR_HF_high) passIterativeSideband = mt < 100.0;
+        if(sameSign && passTrig && passIterativeSideband) {
             m_tags.push_back(tag);
             m_probes.push_back(probe);
             LeptonVector temp; temp.push_back(tag); temp.push_back(probe);
