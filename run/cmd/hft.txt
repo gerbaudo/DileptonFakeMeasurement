@@ -1,5 +1,6 @@
 
-./python/submitJobs.py --susyplot -o  -t ${TAG}             --other-opt "--with-hft"
+./python/submitJobs.py --susyplot -o  -t ${TAG} -e 'period' --other-opt "--with-hft --with-syst"
+./python/submitJobs.py --susyplot -o  -t ${TAG} -s 'period' --other-opt "--with-hft"
 ./python/submitJobs.py --fakepred -o  -t ${TAG} -s 'period' --other-opt "--with-hft"
 
 
