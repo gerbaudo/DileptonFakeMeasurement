@@ -137,6 +137,11 @@ void MeasureFakeRate2::initHistos(string outName)
         h_njets        [il][icr][ich] = new EffObject(bn+"njets",        nJetbins,          Jetbins);
         h_onebin       [il][icr][ich] = new EffObject(bn+"onebin",       1,    -0.5, 0.5);
         h_flavor       [il][icr][ich] = new EffObject(bn+"flavor",       LS_N, -0.5, LS_N-0.5);
+        h_l_pt_real    [il][icr][ich] = new EffObject(bn+"l_pt_real",    nFakePtbins,       FakePtbins);
+        h_l_pt_conv    [il][icr][ich] = new EffObject(bn+"l_pt_conv",    nFakePtbins,       FakePtbins);
+        h_l_pt_hf      [il][icr][ich] = new EffObject(bn+"l_pt_hf",      nFakePtbins,       FakePtbins);
+        h_l_pt_lf      [il][icr][ich] = new EffObject(bn+"l_pt_lf",      nFakePtbins,       FakePtbins);
+        h_l_pt_hflf    [il][icr][ich] = new EffObject(bn+"l_pt_hflf",    nFakePtbins,       FakePtbins);
         h_l_pt_true    [il][icr][ich] = new TH1F     ((bn+"l_pt_true").c_str(), "", nFakePtbins, FakePtbins);
         h_l_pt_fake    [il][icr][ich] = new TH1F     ((bn+"l_pt_fake").c_str(), "", nFakePtbins, FakePtbins);
         h_l_pt_eta     [il][icr][ich]   = new EffObject2(bn+"l_pt_eta",       nCoarseFakePtbins, coarseFakePtbins, nCoarseEtabins, CoarseEtabins);
@@ -260,13 +265,19 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
     fill2dEff(h_l_pt_eta    , pt, eta);
     if( nt.evt()->isMC ){ // If the event is MC, save the flavor
         LeptonSource ls(getLeptonSource(lep));
-        bool isQcd(ls==LS_HF||ls==LS_LF);
+        bool isReal(ls==LS_Real), isHf(ls==LS_HF), isLf(ls==LS_LF), isConv(ls==LS_Conv);
+        bool isQcd(isHf||isLf);
         bool isCentralEta(eta<1.37); // see FakeBinnings.h
         fill1dEff(h_flavor        , ls);
         fill2dEff(h_flavor_pt     , ls, pt);
         fill2dEff(h_flavor_eta    , ls, eta);
         fill2dEff(h_flavor_metrel , ls, m_metRel);
         fill2dEff(isCentralEta ? h_flavor_pt_etaC : h_flavor_pt_etaF, ls, pt);
+        if(isReal) fill1dEff(h_l_pt_real, pt);
+        if(isConv) fill1dEff(h_l_pt_conv, pt);
+        if(isHf)   fill1dEff(h_l_pt_hf,   pt);
+        if(isLf)   fill1dEff(h_l_pt_lf,   pt);
+        if(isQcd)  fill1dEff(h_l_pt_hflf, pt);
         if(isQcd) {
             fill1dEff(h_flavor        , LS_QCD);
             fill2dEff(h_flavor_pt     , LS_QCD, pt);

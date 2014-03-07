@@ -94,6 +94,11 @@ class MeasureFakeRate2 : public SusySelection
   EffObject* h_njets        [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
   EffObject* h_onebin       [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
   EffObject* h_flavor       [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_l_pt_real    [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_l_pt_conv    [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_l_pt_hf      [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_l_pt_lf      [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_l_pt_hflf    [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
   TH1F*      h_l_pt_true    [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
   TH1F*      h_l_pt_fake    [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
   // 2d parametrization
