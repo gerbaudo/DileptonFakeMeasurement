@@ -306,7 +306,7 @@ def plotFractionsStacked(histos={}, canvasName='', outputDir='./', frameTitle='t
         stack.Add(histos2[p])
     stack.Draw('hist')
     if h1Label or h2Label:
-        leg.SetHeader(', '.join(["%s : %s"%(f,l) if l else '' for f,l in [('solid',h1Label), ('opaque',h2Label)]]))
+        leg.SetHeader(', '.join(["%s : %s"%(f,l) if l else '' for f,l in [('darker',h1Label), ('lighter',h2Label)]]))
     leg.Draw('same')
     tex = r.TLatex()
     tex.SetNDC(True)
