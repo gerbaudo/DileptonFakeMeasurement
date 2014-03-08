@@ -48,13 +48,37 @@ void HftFiller::assignDilepVars(HistFitterTree* const tree, const susy::wh::kin:
     }
 }
 //----------------------------------------------------------
+void HftFiller::assignWeightVars(HistFitterTree* const tree, const susy::wh::HftFiller::WeightVariations &wv)
+{
+    if(tree) {
+        tree->syst_BKGMETHODUP   = wv.qflipUp_;
+        tree->syst_BKGMETHODDOWN = wv.qflipDo_;
+        tree->syst_ETRIGREWUP   = wv.elTrigUp_;
+        tree->syst_ETRIGREWDOWN = wv.elTrigDo_;
+        tree->syst_MTRIGREWUP   = wv.muTrigUp_;
+        tree->syst_MTRIGREWDOWN = wv.muTrigDo_;
+        tree->syst_BJETUP   = wv.bTagUp_;
+        tree->syst_BJETDOWN = wv.bTagDo_;
+        tree->syst_XSUP   = wv.xsecUp_;
+        tree->syst_XSDOWN = wv.xsecDo_;
+    }
+}
+//----------------------------------------------------------
 bool HftFiller::fill(size_t systIndex, const susy::wh::kin::DilepVars &v, unsigned int run, unsigned int event)
+{
+    WeightVariations wv;
+    return fill(systIndex, v, run, event, wv);
+}
+//----------------------------------------------------------
+bool HftFiller::fill(size_t systIndex, const susy::wh::kin::DilepVars &v, unsigned int run, unsigned int event,
+                     const WeightVariations &wv)
 {
     bool someBytesWritten(false);
     if(HistFitterTree *t = m_hftTrees[systIndex]) {
         t->runNumber = run;
         t->eventNumber = event;
         assignDilepVars(t, v);
+        assignWeightVars(t, wv);
         t->WriteTree();
         someBytesWritten = true;
     }

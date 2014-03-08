@@ -43,10 +43,12 @@ public:
     bool init(const std::string &mcid, const std::vector<std::string> &systematics);
     bool close(float sumw);
     bool fill(size_t systIndex, const susy::wh::kin::DilepVars &v, unsigned int run, unsigned int event);
+    bool fill(size_t systIndex, const susy::wh::kin::DilepVars &v, unsigned int run, unsigned int event, const WeightVariations &wv);
     size_t nTrees() const { return m_hftTrees.size(); }
     HftFiller& setOutputDir(const std::string dir);
 private:
     void assignDilepVars(HistFitterTree* const tree, const susy::wh::kin::DilepVars &v);
+    void assignWeightVars(HistFitterTree* const tree, const susy::wh::HftFiller::WeightVariations &wv);
 private: // rule of three 
     HftFiller(const HftFiller&);
     HftFiller& operator=(const HftFiller&);
