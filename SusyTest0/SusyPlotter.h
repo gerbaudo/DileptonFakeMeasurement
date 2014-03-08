@@ -39,6 +39,7 @@ class SusyPlotter : public SusySelection
   ClassDef(SusyPlotter, 1);
 
  protected:
+  susy::wh::HftFiller::WeightVariations  computeWeightVariations(); //!< compute the weight syst variations
   bool isHftFillerInitialized() const { return m_systNames.size() == m_hftFiller.nTrees(); }
   void initHftFiller();
   void fillHft(const size_t sys, const susy::wh::kin::DilepVars &v);

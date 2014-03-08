@@ -518,6 +518,24 @@ void SusyPlotter::initHistos()
   }// end loop over Plot regions
 }
 //-----------------------------------------
+swh::HftFiller::WeightVariations  SusyPlotter::computeWeightVariations()
+{
+    swh::HftFiller::WeightVariations wv;
+    /* TODO
+    wv.qflipUp_ = 1.0;
+    wv.qflipDo_ = 1.0;
+    wv.elTrigUp_ = 1.0;
+    wv.elTrigDo_ = 1.0;
+    wv.muTrigUp_ = 1.0;
+    wv.muTrigDo_ = 1.0;
+    wv.bTagUp_ = 1.0;
+    wv.bTagDo_ = 1.0;
+    wv.xsecUp_ = 1.0;
+    wv.xsecDo_ = 1.0;
+    */
+    return wv;
+}
+//-----------------------------------------
 void SusyPlotter::initHftFiller()
 {
     if(isHftFillerInitialized()) {
@@ -538,7 +556,12 @@ void SusyPlotter::initHftFiller()
 void SusyPlotter::fillHft(const size_t sys, const susy::wh::kin::DilepVars &v)
 {
     unsigned int run(nt.evt()->run), event(nt.evt()->event);
-    m_hftFiller.fill(sys, v, run, event);
+    if(sys==NtSys_NOM) {
+        swh::HftFiller::WeightVariations wv = computeWeightVariations();
+        m_hftFiller.fill(sys, v, run, event, wv);
+    } else {
+        m_hftFiller.fill(sys, v, run, event);
+    }
 }
 //-----------------------------------------
 void SusyPlotter::closeHftFiller()
