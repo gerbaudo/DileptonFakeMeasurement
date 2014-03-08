@@ -8,6 +8,7 @@
 
 #include "SusyTest0/EventFlags.h"
 #include "SusyTest0/criteria.h"
+#include "SusyTest0/Systematics.h"
 
 using std::cout;
 using std::endl;
@@ -142,7 +143,7 @@ Bool_t TightProbability::Process(Long64_t entry) {
   bool pass2l(2==leps.size());
   bool passSr(passMet && pass2l);
   if(!passSr) return true;
-  computeNonStaticWeightComponents(leps, jets);
+  assignNonStaticWeightComponents(computeNonStaticWeightComponents(leps, jets, susy::wh::WH_CENTRAL));
   float weight = isMc ? m_weightComponents.product() : 1.0;
   vector<float> pts(leps.size());
   for(size_t iL=0; iL<leps.size(); ++iL) {

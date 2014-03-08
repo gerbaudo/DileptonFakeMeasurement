@@ -106,7 +106,8 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       LeptonVector&     ncl = m_signalLeptons; // non-const leptons: can be modified by qflip
       Met ncmet(*m_met); // non-const met
       const TauVector&    t = m_signalTaus;
-      if(l.size()>1) computeNonStaticWeightComponents(l, bj); else continue;
+      if(l.size()>1) assignNonStaticWeightComponents(computeNonStaticWeightComponents(l, bj, swh::ntsys2sys(sys)));
+      else continue;
       bool allowQflip(true);
       VarFlag_t varsFlags(SusySelection::computeSsFlags(ncl, t, j, m, allowQflip));
       const swk::DilepVars &v = varsFlags.first;

@@ -24,6 +24,7 @@
 #include "SusyTest0/SsPassFlags.h"
 #include "SusyTest0/EventFlags.h"
 #include "SusyTest0/DileptonChannel.h"
+#include "SusyTest0/Systematics.h"
 
 #include <fstream>
 #include <utility> // std::pair
@@ -159,12 +160,15 @@ class SusySelection : public SusyNtAna
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
     float computeEventWeightXsFromReader(float lumi);
     float getXsFromReader();     //!< cache xsec from xsreader
-    float getBTagWeight(cvj_t& jets, const Event* evt);
-    float getTriggerWeight2Lep(const LeptonVector &leptons);
+    float getBTagWeight(cvj_t& jets, const Event* evt, const BTagSys sys);
+    float getTriggerWeight2Lep(const LeptonVector &leptons, const susy::wh::Systematic sys);
     void resetAllCounters();
     void initChargeFlipTool();
     void cacheStaticWeightComponents(); //! cache those weight components that do not depend on sel
-    void computeNonStaticWeightComponents(cvl_t& leptons, cvj_t& jets);
+    //! compute lepton, trigger, and btag scale factors
+    WeightComponents computeNonStaticWeightComponents(cvl_t& leptons, cvj_t& jets, const susy::wh::Systematic sys);
+    //! store weight components that will be used to increment counters and fill histos
+    void assignNonStaticWeightComponents(const WeightComponents &wc);
     ClassDef(SusySelection, 2);
 
   protected:

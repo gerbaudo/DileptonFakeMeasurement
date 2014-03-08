@@ -1,3 +1,4 @@
+// emacs -*- C++ -*-
 #ifndef SusyAna_SusyPlotter_h
 #define SusyAna_SusyPlotter_h
 

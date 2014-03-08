@@ -96,7 +96,8 @@ Bool_t SusySelection::Process(Long64_t entry)
 
   const JetVector&   bj = m_baseJets;
   const LeptonVector& l = m_signalLeptons;
-  if(l.size()>1) computeNonStaticWeightComponents(l, bj); else return false;
+  if(l.size()>1) assignNonStaticWeightComponents(computeNonStaticWeightComponents(l, bj, susy::wh::WH_CENTRAL));
+  else return false;
   VarFlag_t varsFlags = computeSsFlags(m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip);
   const SsPassFlags &ssf = varsFlags.second;
   incrementSsCounters(ssf, m_weightComponents);
@@ -450,32 +451,53 @@ void SusySelection::cacheStaticWeightComponents()
   m_weightComponents.norm = (genpu != 0.0 ? m_weightComponents.susynt/genpu : 1.0);
 }
 //-----------------------------------------
-void SusySelection::computeNonStaticWeightComponents(cvl_t& leptons, cvj_t& jets)
+SusySelection::WeightComponents SusySelection::computeNonStaticWeightComponents(cvl_t& leptons, cvj_t& jets, const susy::wh::Systematic sys)
 {
-  if(!nt.evt()->isMC) {m_weightComponents.reset(); return;}
-  m_weightComponents.lepSf = susy::getLeptonEff2Lep(leptons);
-  m_weightComponents.trigger = getTriggerWeight2Lep(leptons);
-  m_weightComponents.btag = getBTagWeight(jets, nt.evt());
+    WeightComponents wc;
+    if(nt.evt()->isMC) { // some of these calls are expensive; compute only what's needed
+        bool trigSfNeeded(sys==swh::WH_CENTRAL ||
+                          sys==swh::WH_ETRIGREWUP   || sys==swh::WH_MTRIGREWUP ||
+                          sys==swh::WH_ETRIGREWDOWN || sys==swh::WH_MTRIGREWDOWN);
+        bool btagSfNeeded(sys==swh::WH_CENTRAL || sys==swh::WH_BJETUP || sys==swh::WH_BJETDOWN);
+        BTagSys bsys(sys==swh::WH_BJETUP   ? BTag_BJet_UP :
+                     sys==swh::WH_BJETDOWN ? BTag_BJet_DN : BTag_NOM);
+        wc.lepSf = susy::getLeptonEff2Lep(leptons); // DG 2014-03-07: do we have a syst here?
+        wc.trigger = (trigSfNeeded ? getTriggerWeight2Lep(leptons, sys) : 1.0);
+        wc.btag    = (btagSfNeeded ? getBTagWeight(jets, nt.evt(), bsys) : 1.0);
+    }
+    return wc;
 }
 //-----------------------------------------
-float SusySelection::getBTagWeight(cvj_t& jets, const Event* evt)
+void SusySelection::assignNonStaticWeightComponents(const WeightComponents &wc)
+{
+    bool isData(!nt.evt()->isMC);
+    if(isData) m_weightComponents.reset(); // DG 2014-03-07: not sure we actually need to reset (all?) components
+    else{
+        m_weightComponents.lepSf = wc.lepSf;
+        m_weightComponents.trigger = wc.trigger;
+        m_weightComponents.btag = wc.btag;
+    }
+}
+//-----------------------------------------
+float SusySelection::getBTagWeight(cvj_t& jets, const Event* evt, const BTagSys sys)
 {
     JetVector tempJets = SusyNtTools::getBTagSFJets2Lep(jets);
-    return bTagSF(evt, tempJets, evt->mcChannel, BTag_NOM);
+    return bTagSF(evt, tempJets, evt->mcChannel, sys);
 }
 //-----------------------------------------
-float SusySelection::getTriggerWeight2Lep(const LeptonVector &leptons)
+float SusySelection::getTriggerWeight2Lep(const LeptonVector &leptons, const susy::wh::Systematic sys)
 {
   float trigW = 1.0;
   // if m_useMCTrig, then we are dropping evts with DilTrigLogic::passDil*, not weighting them
   // DG Jun2013 : verify this with Matt & Josephine
   if(!m_useMCTrig){
-    if(leptons.size()==2) trigW = m_trigObj->getTriggerWeight(leptons,
-                                                              nt.evt()->isMC,
-                                                              m_met->Et,
-                                                              m_signalJets2Lep.size(),
-                                                              nt.evt()->nVtx,
-                                                              NtSys_NOM);
+      const SusyNtSys ntsys = susy::wh::sys2ntsys(sys);
+      if(leptons.size()==2) trigW = m_trigObj->getTriggerWeight(leptons,
+                                                                nt.evt()->isMC,
+                                                                m_met->Et,
+                                                                m_signalJets2Lep.size(),
+                                                                nt.evt()->nVtx,
+                                                                ntsys);
     bool twIsInvalid(isnan(trigW) || trigW<0.0);
     assert(!twIsInvalid);
     if(twIsInvalid){
