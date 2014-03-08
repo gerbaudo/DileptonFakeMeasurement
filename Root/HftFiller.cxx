@@ -24,32 +24,28 @@ HftFiller::~HftFiller()
     }
 }
 //----------------------------------------------------------
-bool HftFiller::fill(size_t systIndex, const susy::wh::kin::DilepVars &v)
+void HftFiller::assignDilepVars(HistFitterTree* const tree, const susy::wh::kin::DilepVars &v)
 {
-    bool someBytesWritten(false);
-    const float gev2mev = 1.0e3;
-    if(HistFitterTree *t = m_hftTrees[systIndex]) {
-        t->eventweight = v.weight;
-        t->L2qFlipWeight = v.qflipWeight;
-        t->isEE = v.isEe;
-        t->isEMU = v.isEm;
-        t->isMUMU = v.isMm;
-        t->isOS = !v.isSs;
-        t->L2nCentralLightJets = v.numCentralLightJets;
-        t->lept1Pt = v.pt0*gev2mev;
-        t->lept2Pt = v.pt1*gev2mev;
-        t->L2Mll = v.mll*gev2mev;
-        t->deltaEtaLl = v.detall;
-        t->L2METrel = v.metrel*gev2mev;
-        t->Ht = v.ht*gev2mev;
-        t->mlj = v.mlj*gev2mev;
-        t->mljj = v.mljj*gev2mev;
-        t->mtmax = v.mtmax()*gev2mev;
-        t->mtllmet = v.mtllmet*gev2mev;
-        t->WriteTree();
-        someBytesWritten = true;
+    if(tree) {
+        const float gev2mev = 1.0e3;
+        tree->eventweight = v.weight;
+        tree->L2qFlipWeight = v.qflipWeight;
+        tree->isEE = v.isEe;
+        tree->isEMU = v.isEm;
+        tree->isMUMU = v.isMm;
+        tree->isOS = !v.isSs;
+        tree->L2nCentralLightJets = v.numCentralLightJets;
+        tree->lept1Pt = v.pt0*gev2mev;
+        tree->lept2Pt = v.pt1*gev2mev;
+        tree->L2Mll = v.mll*gev2mev;
+        tree->deltaEtaLl = v.detall;
+        tree->L2METrel = v.metrel*gev2mev;
+        tree->Ht = v.ht*gev2mev;
+        tree->mlj = v.mlj*gev2mev;
+        tree->mljj = v.mljj*gev2mev;
+        tree->mtmax = v.mtmax()*gev2mev;
+        tree->mtllmet = v.mtllmet*gev2mev;
     }
-    return someBytesWritten;
 }
 //----------------------------------------------------------
 bool HftFiller::fill(size_t systIndex, const susy::wh::kin::DilepVars &v, unsigned int run, unsigned int event)
@@ -58,9 +54,11 @@ bool HftFiller::fill(size_t systIndex, const susy::wh::kin::DilepVars &v, unsign
     if(HistFitterTree *t = m_hftTrees[systIndex]) {
         t->runNumber = run;
         t->eventNumber = event;
+        assignDilepVars(t, v);
+        t->WriteTree();
         someBytesWritten = true;
     }
-    return fill(systIndex, v) && someBytesWritten;
+    return someBytesWritten;
 }
 //----------------------------------------------------------
 bool HftFiller::init(const std::string &mcid, const std::vector<std::string> &systematics)
