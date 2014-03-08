@@ -225,6 +225,7 @@ bool passZtautauVeto(const LeptonVector& l, const JetVector& j, const Susy::Met*
 float getLeptonEff2Lep(const LeptonVector &leptons)
 {
   assert(leptons.size()>1);
+  // DG 2014-03-07 note to self: syst variations here seem to be (lep->effSF +/- lep->errEffSF), see original import
   return leptons[0]->effSF * leptons[1]->effSF;
 }
 //-----------------------------------------
