@@ -65,6 +65,11 @@ class SusySelection : public SusyNtAna
     WeightComponents() { reset(); }
     double product() const { return susynt * lepSf * btag * trigger * qflip * fake; }
     void reset() { susynt = gen = pileup = norm = lepSf = btag = trigger = qflip = fake = 1.0; }
+    WeightComponents& replaceLepSf(double v) { lepSf = v; return *this; }
+    WeightComponents& replaceBtag(double v) { btag = v; return *this; }
+    WeightComponents& replaceTrig(double v) { trigger = v; return *this; }
+    WeightComponents& replaceQflip(double v) { qflip = v; return *this; }
+    WeightComponents& replaceFake(double v) { fake = v; return *this; }
     double susynt; // from SusyNtTools::getEventWeight: includes gen, pu, xs, lumi, sumw
     double gen, pileup, norm; // breakdown of the above; norm is xs*lumi/sumw
     double lepSf, btag, trigger, qflip, fake; // factors that we compute, not from upstream

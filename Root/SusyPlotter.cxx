@@ -518,21 +518,22 @@ void SusyPlotter::initHistos()
   }// end loop over Plot regions
 }
 //-----------------------------------------
-swh::HftFiller::WeightVariations  SusyPlotter::computeWeightVariations()
+swh::HftFiller::WeightVariations  SusyPlotter::computeWeightVariations(cvl_t& leptons, cvj_t& jets)
 {
+    cvl_t& l = leptons;
+    cvj_t& j = jets;
+    const WeightComponents &w = m_weightComponents;
     swh::HftFiller::WeightVariations wv;
-    /* TODO
     wv.qflipUp_ = 1.0;
     wv.qflipDo_ = 1.0;
-    wv.elTrigUp_ = 1.0;
-    wv.elTrigDo_ = 1.0;
-    wv.muTrigUp_ = 1.0;
-    wv.muTrigDo_ = 1.0;
-    wv.bTagUp_ = 1.0;
-    wv.bTagDo_ = 1.0;
-    wv.xsecUp_ = 1.0;
+    wv.elTrigUp_ = WeightComponents(w).replaceTrig(computeNonStaticWeightComponents(l, j, swh::WH_ETRIGREWUP  ).trigger).product();
+    wv.elTrigDo_ = WeightComponents(w).replaceTrig(computeNonStaticWeightComponents(l, j, swh::WH_ETRIGREWDOWN).trigger).product();
+    wv.muTrigUp_ = WeightComponents(w).replaceTrig(computeNonStaticWeightComponents(l, j, swh::WH_MTRIGREWUP  ).trigger).product();
+    wv.muTrigDo_ = WeightComponents(w).replaceTrig(computeNonStaticWeightComponents(l, j, swh::WH_MTRIGREWDOWN).trigger).product();
+    wv.bTagUp_   = WeightComponents(w).replaceBtag(computeNonStaticWeightComponents(l, j, swh::WH_BJETUP      ).btag   ).product();
+    wv.bTagDo_   = WeightComponents(w).replaceBtag(computeNonStaticWeightComponents(l, j, swh::WH_BJETDOWN    ).btag   ).product();
+    wv.xsecUp_ = 1.0; float _______todo__;
     wv.xsecDo_ = 1.0;
-    */
     return wv;
 }
 //-----------------------------------------

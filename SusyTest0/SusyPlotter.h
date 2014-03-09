@@ -39,9 +39,10 @@ class SusyPlotter : public SusySelection
   ClassDef(SusyPlotter, 1);
 
  protected:
-  susy::wh::HftFiller::WeightVariations  computeWeightVariations(); //!< compute the weight syst variations
+  susy::wh::HftFiller::WeightVariations  computeWeightVariations(cvl_t& leptons, cvj_t& jets); //!< compute the weight syst variations
   bool isHftFillerInitialized() const { return m_systNames.size() == m_hftFiller.nTrees(); }
   void initHftFiller();
+  void fillHftNominal(const susy::wh::kin::DilepVars &v, cvl_t& leptons, cvj_t& jets);
   void fillHft(const size_t sys, const susy::wh::kin::DilepVars &v);
   void closeHftFiller();
   virtual std::string hftTreeName() const;
