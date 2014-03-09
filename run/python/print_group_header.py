@@ -79,6 +79,7 @@ def groupFromDiboson(d) :
     return g
 
 def arrayName(group) : return "kDsidFor%(group)s"%{'group':group}
+def arraySizeName(group) : return "kNdsidFor%(group)s"%{'group':group}
 def printHeader(dsPerGroup={}) :
     print "#ifndef SUSY_WH_DSIDGROUPS_H"
     print "#define SUSY_WH_DSIDGROUPS_H"
@@ -94,9 +95,14 @@ def printHeader(dsPerGroup={}) :
     
     def intlist2cArray(l) : return "{ %s }"%','.join([str(i) for i in l])
     templateArrayLine = "const int %(arrayName)s [] = %(array)s ;"
+    templateSizeLine = "const size_t %(arraySizeName)s  = sizeof(%(arrayName)s)/sizeof(%(arrayName)s[0]);"
     print '\n'.join([templateArrayLine % {'arrayName':arrayName(g),
                                           'array':intlist2cArray([d.dsid for d in dsets])
                                           }
+                     for g, dsets in dsPerGroup.iteritems()])
+    print '\n'
+    print '\n'.join([templateSizeLine% {'arrayName' : arrayName(g),
+                                        'arraySizeName' : arraySizeName(g)}
                      for g, dsets in dsPerGroup.iteritems()])
     print '\n'
     declareFindFunc()
@@ -111,18 +117,20 @@ def defineGroupFromDsid(dsPerGroup={}) :
     print tab+"XsecUncertainty::McGroup group = XsecUncertainty::kUnknown;"
 
     groups = sorted(dsPerGroup.keys())
-    templateLine = (tab+"if(dsidInArray(dsid, %(arrayName)s)) group = XsecUncertainty::%(groupName)s;")
-    print templateLine % {'groupName' : groups[0], 'arrayName' : arrayName(groups[0]) }
+    templateLine = (tab+"if(dsidInArray(dsid, %(arrayName)s, %(arraySizeName)s)) group = XsecUncertainty::%(groupName)s;")
+    print templateLine % {'groupName' : groups[0],
+                          'arrayName' : arrayName(groups[0]),
+                          'arraySizeName' : arraySizeName(groups[0]) }
     templateLine = (tab+"else "+templateLine.lstrip())
-    print '\n'.join([templateLine % {'groupName' : g, 'arrayName' : arrayName(g) } for g in groups[1:]])
+    print '\n'.join([templateLine % {'groupName' : g, 'arrayName' : arrayName(g), 'arraySizeName' : arraySizeName(g) }
+                     for g in groups[1:]])
     print tab+"return group;"
     print "}"
 
 def declareFindFunc() :
     print """
-bool dsidInArray(const int dsid, const int* dsidList)
+bool dsidInArray(const int dsid, const int* dsidList, const size_t nElements)
 {
-   size_t nElements = sizeof(dsidList)/sizeof(dsidList[0]);
    const int* begin = dsidList;
    const int* end   = dsidList + nElements;
    const int* it    = std::find(begin, end, dsid);
