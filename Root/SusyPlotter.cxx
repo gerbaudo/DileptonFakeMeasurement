@@ -148,7 +148,10 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       if(is2j && SusySelection::passSrWh2j(v)) fillHistos(ncl, j, m, weight, swh::SrWh2j , iSys);
       if(m_fillHft) {
           if(!isHftFillerInitialized()) initHftFiller();
-          if(SusySelection::isEventForHft(v, ssf)) fillHft(iSys, v);
+          if(SusySelection::isEventForHft(v, ssf)) {
+              if(sys==NtSys_NOM) fillHftNominal(v, ncl, j);
+              else               fillHft       (iSys, v);
+          }
       }
   } // for(iSys)
   return kTRUE;
@@ -554,15 +557,17 @@ void SusyPlotter::initHftFiller()
     }
 }
 //-----------------------------------------
+void SusyPlotter::fillHftNominal(const susy::wh::kin::DilepVars &v, cvl_t& leptons, cvj_t& jets)
+{
+    unsigned int run(nt.evt()->run), event(nt.evt()->event);
+    swh::HftFiller::WeightVariations wv = computeWeightVariations(leptons, jets);
+    m_hftFiller.fill(NtSys_NOM, v, run, event, wv);
+}
+//-----------------------------------------
 void SusyPlotter::fillHft(const size_t sys, const susy::wh::kin::DilepVars &v)
 {
     unsigned int run(nt.evt()->run), event(nt.evt()->event);
-    if(sys==NtSys_NOM) {
-        swh::HftFiller::WeightVariations wv = computeWeightVariations();
-        m_hftFiller.fill(sys, v, run, event, wv);
-    } else {
-        m_hftFiller.fill(sys, v, run, event);
-    }
+    m_hftFiller.fill(sys, v, run, event);
 }
 //-----------------------------------------
 void SusyPlotter::closeHftFiller()
