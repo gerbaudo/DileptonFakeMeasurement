@@ -5,5 +5,5 @@
 
 echo "Starting on `hostname`, `date`"
 cd $PBS_O_WORKDIR
-FakePred -i ${inp} -o ${out} -s ${sample} --matrix-file ${ROOTCOREDIR}/../SusyMatrixMethod/data/FinalFakeHist_Feb_12.root ${opt}
+FakePred --etapt -i ${inp} -o ${out} -s ${sample} --matrix-file ${ROOTCOREDIR}/../SusyMatrixMethod/data/FinalFakeHist_Feb_27.root ${opt}
 echo "Done, `date`"
