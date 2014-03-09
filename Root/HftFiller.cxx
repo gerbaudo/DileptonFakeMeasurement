@@ -128,8 +128,9 @@ bool HftFiller::determineXsecUncertainty(const int dsid)
     XsecUncertainty xsecUnc;
     bool groupFound = xsecUnc.determineGroup(dsid);
     if(!groupFound)
-        cout<<"HftFiller::determineXsecUncertainty : cannot determine group"<<endl
+        cout<<"HftFiller::determineXsecUncertainty : cannot determine group for dsid "<<dsid<<endl
             <<"  will use "<<xsecUnc.str()<<endl;
+    cout<<"HftFiller::determineXsecUncertainty : using "<<xsecUnc.str()<<" for dsid "<<dsid<<endl;
     xsecRelativeUncertainty_ = xsecUnc.fractionalUncertainty();
     return groupFound;
 }

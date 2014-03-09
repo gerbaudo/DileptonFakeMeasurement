@@ -10,8 +10,8 @@ using susy::wh::XsecUncertainty;
 bool XsecUncertainty::determineGroup(const int dsid)
 {
     float unc = 1.0;
-    const McGroup group = susy::wh::groupFromDsid(dsid);
-    switch(group) {
+    m_group = susy::wh::groupFromDsid(dsid);
+    switch(m_group) {
     case kUnknown   : unc = 1.00; break;
     case kTtbar     : unc = 0.5*(13.3+14.5)/252.9; break;
     case kSingleTop : unc = 1.5/22.4; break;
@@ -27,7 +27,7 @@ bool XsecUncertainty::determineGroup(const int dsid)
         // no default, so that the compiler will warn us of un-handled cases
     }
     m_uncertainty = unc;
-    bool groupFound(group!=kUnknown);
+    bool groupFound(m_group!=kUnknown);
     return groupFound;
 }
 //----------------------------------------------------------
