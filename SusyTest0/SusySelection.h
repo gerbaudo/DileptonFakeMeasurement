@@ -106,7 +106,7 @@ class SusySelection : public SusyNtAna
       electron is modified if update4mom==true.
      */
     bool sameSignOrQflip(LeptonVector &leptons, Met &met,
-                         const DiLepEvtType eventType,
+                         const susy::wh::Systematic sys,
                          bool update4mom, bool isMC);
     // Signal Region Cuts
     bool passJetVeto(const JetVector& jets);
@@ -153,7 +153,9 @@ class SusySelection : public SusyNtAna
     //! increment the counters for the all event weight types
     void increment(float counters[], const WeightComponents &wc);
     float computeChargeFlipProb(LeptonVector &leptons, Met &met,
-                                uint systematic, bool update4mom);
+                                const susy::wh::Systematic sys,
+                                bool update4mom);
+    float computeChargeFlipProb(const LeptonVector &leptons, const Met &met, const susy::wh::Systematic sys);
     //! any electron or muon, before pt cuts, before overlap removal
     static vl_t getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/);
     static susy::wh::Chan getChan(const LeptonVector& leps); //!< compute lepton channel

@@ -149,7 +149,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       if(m_fillHft) {
           if(!isHftFillerInitialized()) initHftFiller();
           if(SusySelection::isEventForHft(v, ssf)) {
-              if(sys==NtSys_NOM) fillHftNominal(v, ncl, j);
+              if(sys==NtSys_NOM) fillHftNominal(v, ncl, j, *m);
               else               fillHft       (iSys, v);
           }
       }
@@ -521,14 +521,15 @@ void SusyPlotter::initHistos()
   }// end loop over Plot regions
 }
 //-----------------------------------------
-swh::HftFiller::WeightVariations  SusyPlotter::computeWeightVariations(cvl_t& leptons, cvj_t& jets)
+swh::HftFiller::WeightVariations  SusyPlotter::computeWeightVariations(cvl_t& leptons, cvj_t& jets, const Met &m)
 {
     cvl_t& l = leptons;
     cvj_t& j = jets;
     const WeightComponents &w = m_weightComponents;
     swh::HftFiller::WeightVariations wv;
-    wv.qflipUp_ = 1.0;
-    wv.qflipDo_ = 1.0;
+    bool isQflip(w.qflip!=1.0);
+    wv.qflipUp_ = WeightComponents(w).replaceQflip(isQflip ? computeChargeFlipProb(l, m, swh::WH_BKGMETHODUP  ) : 1.0).product();
+    wv.qflipDo_ = WeightComponents(w).replaceQflip(isQflip ? computeChargeFlipProb(l, m, swh::WH_BKGMETHODDOWN) : 1.0).product();
     wv.elTrigUp_ = WeightComponents(w).replaceTrig(computeNonStaticWeightComponents(l, j, swh::WH_ETRIGREWUP  ).trigger).product();
     wv.elTrigDo_ = WeightComponents(w).replaceTrig(computeNonStaticWeightComponents(l, j, swh::WH_ETRIGREWDOWN).trigger).product();
     wv.muTrigUp_ = WeightComponents(w).replaceTrig(computeNonStaticWeightComponents(l, j, swh::WH_MTRIGREWUP  ).trigger).product();
@@ -557,10 +558,10 @@ void SusyPlotter::initHftFiller()
     }
 }
 //-----------------------------------------
-void SusyPlotter::fillHftNominal(const susy::wh::kin::DilepVars &v, cvl_t& leptons, cvj_t& jets)
+void SusyPlotter::fillHftNominal(const susy::wh::kin::DilepVars &v, cvl_t& leptons, cvj_t& jets, const Met &met)
 {
     unsigned int run(nt.evt()->run), event(nt.evt()->event);
-    swh::HftFiller::WeightVariations wv = computeWeightVariations(leptons, jets);
+    swh::HftFiller::WeightVariations wv = computeWeightVariations(leptons, jets, met);
     m_hftFiller.fill(NtSys_NOM, v, run, event, wv);
 }
 //-----------------------------------------

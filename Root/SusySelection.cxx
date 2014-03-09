@@ -206,7 +206,7 @@ SusySelection::VarFlag_t SusySelection::computeSsFlags(LeptonVector& leptons,
       if(ll==ET_me) ll = ET_em;
       bool update4mom(true); // charge flip
       bool mc(nt.evt()->isMC), data(!mc);
-      bool sameSign = allowQflip ? sameSignOrQflip(ncls, ncmet, ll, update4mom, mc) : susy::sameSign(ncls);
+      bool sameSign = allowQflip ? sameSignOrQflip(ncls, ncmet, susy::wh::WH_CENTRAL, update4mom, mc) : susy::sameSign(ncls);
       met = &ncmet; // after qflip, use potentially smeared lep and met
       LeptonVector anyLeptons(getAnyElOrMu(nt));
       LeptonVector lowPtLep(subtract_vector(anyLeptons, m_baseLeptons));
@@ -280,15 +280,14 @@ bool SusySelection::passTrig2LwithMatch(const LeptonVector& leptons, DilTrigLogi
 }
 //-----------------------------------------
 bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
-                                    const DiLepEvtType eventType,
+                                    const susy::wh::Systematic sys,
                                     bool update4mom, bool isMc)
 {
     if(leptons.size()>1) {
         bool isSS(susy::sameSign(leptons)), isOS(!isSS);
         bool canBeQflip(isMc && isOS && (leptons[0]->isEle() || leptons[1]->isEle()));
         if(canBeQflip) {
-            uint systematic=NtSys_NOM; // DG sys todo
-            m_qflipProb = computeChargeFlipProb(leptons, met, systematic, update4mom);
+            m_qflipProb = computeChargeFlipProb(leptons, met, sys, update4mom);
             m_weightComponents.qflip = m_qflipProb;
             return true;
         }
@@ -634,8 +633,27 @@ float SusySelection::computeEventWeightXsFromReader(float lumi)
   return (getEventWeight(lumi) * getXsFromReader() / defaultXsec);
 }
 //-----------------------------------------
+float SusySelection::computeChargeFlipProb(const LeptonVector &leptons, const Met &met,
+                                           const susy::wh::Systematic systematic)
+{ // todo: avoid duplication with method below (this one doesn't modify inputs)
+  cvl_t &ls = leptons;
+  if(ls.size()<2 || !ls[0] || !ls[1] || !m_chargeFlip) return 0.0;
+  Lepton *l0(ls[0]), *l1(ls[1]);
+  int pdg0(susy::pdgIdFromLep(l0)), pdg1(susy::pdgIdFromLep(l1));
+  TLorentzVector smearedLv0(*l0), smearedLv1(*l1);
+  TVector2 smearedMet(met.lv().Px(), met.lv().Py());
+  int sys = (systematic==swh::WH_BKGMETHODUP   ? +1 :
+             systematic==swh::WH_BKGMETHODDOWN ? -1 :
+             0); // convert to the convention used in ChargeFlip
+  bool isData=false;
+  m_chargeFlip->setSeed(nt.evt()->event);
+  float flipProb(m_chargeFlip->OS2SS(pdg0, &smearedLv0, pdg1, &smearedLv1, sys, isData, chargeFlip::dataonly));
+  float overlapFrac(m_chargeFlip->overlapFrac().first);
+  return flipProb*overlapFrac;
+}
+//-----------------------------------------
 float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
-                                           uint systematic, // DG todo
+                                           const susy::wh::Systematic systematic,
                                            bool update4mom)
 {
   cvl_t &ls = leptons;
@@ -644,9 +662,9 @@ float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
   int pdg0(susy::pdgIdFromLep(l0)), pdg1(susy::pdgIdFromLep(l1));
   TLorentzVector smearedLv0(*l0), smearedLv1(*l1);
   TVector2 smearedMet(met.lv().Px(), met.lv().Py());
-  int sys(NtSys_NOM==systematic ? 0 : 0);
-  //(DGSys_BKGMETHOD_UP==systematic ? +1 : // DG todo : implement syst
-  // (DGSys_BKGMETHOD_DN==systematic ? -1 : 0)));
+  int sys = (systematic==swh::WH_BKGMETHODUP   ? +1 :
+             systematic==swh::WH_BKGMETHODDOWN ? -1 :
+             0); // convert to the convention used in ChargeFlip
   /*
   cout<<"OS2SS args: "
       <<" event   "<<nt.evt()->event
