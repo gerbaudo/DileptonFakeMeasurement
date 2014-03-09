@@ -30,13 +30,13 @@ bool XsecUncertainty::determineGroup(const int dsid)
     bool groupFound(group!=kUnknown);
     return groupFound;
 }
+//----------------------------------------------------------
 float XsecUncertainty::fractionalUncertainty() const
 {
     if(!m_keepQuiet && m_group==kUnknown)
         std::cout<<"XsecUncertainty::fractionalUncertainty() Warning! unknown group "<<std::endl;
     return m_uncertainty;
 }
-
 //----------------------------------------------------------
 std::string XsecUncertainty::McGroup2str(const McGroup g)
 {

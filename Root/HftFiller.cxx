@@ -2,6 +2,8 @@
 
 #include "SusyTest0/kinematic.h"
 #include "SusyTest0/utils.h"
+#include "SusyTest0/XsecUncertainty.h"
+
 #include "HistFitterTree/HistFitterTree.h"
 
 #include <cassert>
@@ -12,7 +14,8 @@ using std::string;
 using susy::wh::HftFiller;
 
 //----------------------------------------------------------
-HftFiller::HftFiller()
+HftFiller::HftFiller() :
+    xsecRelativeUncertainty_(1.0)
 {
 }
 //----------------------------------------------------------
@@ -118,5 +121,16 @@ HftFiller& HftFiller::setOutputDir(const std::string dir)
         }
     }
     return *this;
+}
+//----------------------------------------------------------
+bool HftFiller::determineXsecUncertainty(const int dsid)
+{
+    XsecUncertainty xsecUnc;
+    bool groupFound = xsecUnc.determineGroup(dsid);
+    if(!groupFound)
+        cout<<"HftFiller::determineXsecUncertainty : cannot determine group"<<endl
+            <<"  will use "<<xsecUnc.str()<<endl;
+    xsecRelativeUncertainty_ = xsecUnc.fractionalUncertainty();
+    return groupFound;
 }
 //----------------------------------------------------------

@@ -46,6 +46,8 @@ public:
     bool fill(size_t systIndex, const susy::wh::kin::DilepVars &v, unsigned int run, unsigned int event, const WeightVariations &wv);
     size_t nTrees() const { return m_hftTrees.size(); }
     HftFiller& setOutputDir(const std::string dir);
+    bool determineXsecUncertainty(const int dsid);
+    float xsecRelativeUncertainty() const { return xsecRelativeUncertainty_; }
 private:
     void assignDilepVars(HistFitterTree* const tree, const susy::wh::kin::DilepVars &v);
     void assignWeightVars(HistFitterTree* const tree, const susy::wh::HftFiller::WeightVariations &wv);
@@ -55,6 +57,7 @@ private: // rule of three
 private:
     std::vector<HistFitterTree*> m_hftTrees;
     std::string m_outdir;
+    float xsecRelativeUncertainty_;
 }; // end HftFiller
 
 } // namespace wh

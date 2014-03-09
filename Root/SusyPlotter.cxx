@@ -536,8 +536,8 @@ swh::HftFiller::WeightVariations  SusyPlotter::computeWeightVariations(cvl_t& le
     wv.muTrigDo_ = WeightComponents(w).replaceTrig(computeNonStaticWeightComponents(l, j, swh::WH_MTRIGREWDOWN).trigger).product();
     wv.bTagUp_   = WeightComponents(w).replaceBtag(computeNonStaticWeightComponents(l, j, swh::WH_BJETUP      ).btag   ).product();
     wv.bTagDo_   = WeightComponents(w).replaceBtag(computeNonStaticWeightComponents(l, j, swh::WH_BJETDOWN    ).btag   ).product();
-    wv.xsecUp_ = 1.0; float _______todo__;
-    wv.xsecDo_ = 1.0;
+    wv.xsecUp_ = w.product()*(1.0 + m_hftFiller.xsecRelativeUncertainty());
+    wv.xsecDo_ = w.product()*(1.0 - m_hftFiller.xsecRelativeUncertainty());
     return wv;
 }
 //-----------------------------------------
@@ -549,6 +549,8 @@ void SusyPlotter::initHftFiller()
         struct { string operator () (const string &f) { return basedir(f.c_str()); } } guessOutputDir;
         m_hftFiller.setOutputDir(guessOutputDir(m_histFileName));
         m_hftFiller.init(hftTreeName(), m_systNames);
+        if(nt.evt()->isMC)
+            m_hftFiller.determineXsecUncertainty(nt.evt()->mcChannel);
         if(m_dbg) {
             ostringstream oss;
             oss<<hftTreeName()<<" :\n";
@@ -561,8 +563,13 @@ void SusyPlotter::initHftFiller()
 void SusyPlotter::fillHftNominal(const susy::wh::kin::DilepVars &v, cvl_t& leptons, cvj_t& jets, const Met &met)
 {
     unsigned int run(nt.evt()->run), event(nt.evt()->event);
-    swh::HftFiller::WeightVariations wv = computeWeightVariations(leptons, jets, met);
-    m_hftFiller.fill(NtSys_NOM, v, run, event, wv);
+    const size_t systIndex=0;
+    if(nt.evt()->isMC) {
+        const swh::HftFiller::WeightVariations wv = computeWeightVariations(leptons, jets, met);
+        m_hftFiller.fill(systIndex, v, run, event, wv);
+    } else {
+        m_hftFiller.fill(systIndex, v, run, event);
+    }
 }
 //-----------------------------------------
 void SusyPlotter::fillHft(const size_t sys, const susy::wh::kin::DilepVars &v)
