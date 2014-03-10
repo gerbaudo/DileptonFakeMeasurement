@@ -1,13 +1,34 @@
 
-./python/submitJobs.py --susyplot -o  -t ${TAG} -e 'period' --other-opt "--with-hft --with-syst"
-./python/submitJobs.py --susyplot -o  -t ${TAG} -s 'period' --other-opt "--with-hft"
-./python/submitJobs.py --fakepred -o  -t ${TAG} -s 'period' --other-opt "--with-hft"
+# ./python/submitJobs.py --susyplot -o  -t ${TAG} -e 'period' --other-opt "--with-hft --with-syst"
+# ./python/submitJobs.py --susyplot -o  -t ${TAG} -s 'period' --other-opt "--with-hft"
+# ./python/submitJobs.py --fakepred -o  -t ${TAG} -s 'period' --other-opt "--with-hft"
+#
 
+FAKE_SYSTEMATICS="NONE EL_FR_DOWN EL_FR_UP EL_RE_DOWN EL_RE_UP MU_FR_DOWN MU_FR_UP MU_RE_DOWN MU_RE_UP"
+MC_SYSTEMATICS="NOM EER_DN EER_UP EES_LOW_DN EES_LOW_UP EES_MAT_DN EES_MAT_UP EES_PS_DN EES_PS_UP EES_Z_DN EES_Z_UP ID_DN ID_UP JER JES_DN JES_UP MS_DN MS_UP RESOST SCALEST_DN SCALEST_UP"
 
-for X in $(ls out/fakepred/*fake.periodB.physics_Egamma.PhysCont.root | cut -d '.' -f 1  | cut -d '/' -f 3 | sed 's/fake//1')
+# prepare the list of files for tar
+HFT_FILE_LIST="hft_files_${TAG}.txt"
+echo "" > ${HFT_FILE_LIST}
+
+# merge fake files
+for S in ${FAKE_SYSTEMATICS}
 do
-        rm out/fakepred/merged/${X}*root
-        hadd out/fakepred/merged/${X}Feb_12.root out/fakepred/${X}*root
+        rm   out/fakepred/merged/${S}_${TAG}.root
+        hadd out/fakepred/merged/${S}_${TAG}.root out/fakepred/${S}_*root
+        echo "out/fakepred/merged/${S}_${TAG}.root" >> ${HFT_FILE_LIST}
 done
 
-tar czf ~/tmp/hft_Feb_14.tgz `find out/susyplot/  -name "*NOM_1*root" ` out/susyplot/merged/NOM_period_PhysCont_Feb_14.root out/fakepred/merged/*root
+# merge the data
+rm    out/susyplot/merged/NOM_period_PhysCont_${TAG}.root
+hadd  out/susyplot/merged/NOM_period_PhysCont_${TAG}.root out/susyplot/NOM_period*.root
+echo "out/susyplot/merged/NOM_period_PhysCont_${TAG}.root" >> ${HFT_FILE_LIST}
+
+# add mc to the list
+for S in ${MC_SYSTEMATICS}
+do
+        find out/susyplot/ -maxdepth 1 -name "${S}_*.root" >> ${HFT_FILE_LIST}
+done
+
+echo "creating tar file ~/tmp/hft_${TAG}.tgz"
+tar czf ~/tmp/hft_${TAG}.tgz --files-from ${HFT_FILE_LIST}
