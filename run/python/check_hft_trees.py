@@ -22,12 +22,10 @@ r.gStyle.SetPadTickX(1)
 r.gStyle.SetPadTickY(1)
 r.gStyle.SetOptStat(0)
 r.gStyle.SetOptTitle(0)
-from utils import (first
-                   ,rmIfExists
-                   ,mkdirIfNeeded
-                   )
-from SampleUtils import colors
+from utils import first
 
+from SampleUtils import colors
+from CutflowTable import CutflowTable
 
 def main():
     print "check_hft_trees.py"
@@ -53,12 +51,23 @@ def main():
                 print "missing tree '%s' from '%s'"%(getTreename(group, sample), getFilename(group, sample))
                 continue
             fillAndCount(hsGroup, cntsGroup, tree)
-    print 4*'-',' counters ',4*'-'
-    pprint.pprint(counters)
+    if verbose : print 'done'
+    countTotalBkg(counters)
+    blindGroups  =  [g for g in counters.keys() if g!='data']
+    unblindGroups = [g for g in counters.keys()]
+    tableSr  = CutflowTable(samples=blindGroups,   selections=signalRegions(), countsSampleSel=counters)
+    tablePre = CutflowTable(samples=blindGroups,   selections=controlRegions(), countsSampleSel=counters)
+    tableBld = CutflowTable(samples=unblindGroups, selections=blindRegions(), countsSampleSel=counters)
+    print 4*'-',' sig regions ',4*'-'
+    print tableSr.csv()
+    print 4*'-',' pre regions ',4*'-'
+    print tablePre.csv()
+    print 4*'-',' blind regions ',4*'-'
+    print tableBld.csv()
 
-def allGroups(noData=True, noSignal=True) :
+def allGroups(noData=False, noSignal=True) :
     return ([k for k in mcDatasetids().keys() if k!='signal' or not noSignal]
-            + [] if noData else ['data'] 
+            + ([] if noData else ['data'])
             + ['fake']
             )
 
@@ -67,9 +76,11 @@ def njetSelections() : return ['1jet', '23jets']
 def signalRegions() :
     return ["%(ll)sSR%(nj)s"%{'ll':ll, 'nj':nj} for ll in llPairs() for nj in njetSelections()]
 def controlRegions() :
-    return [] # todo
+    return ['pre'+r for r in signalRegions()]
+def blindRegions() :
+    return ['bld'+r for r in signalRegions()]
 def allRegions() :
-    return signalRegions() + controlRegions()
+    return signalRegions() + controlRegions() + blindRegions()
 
 def dataFilename(samplename, inputdir='out/susyplot', syst='NOM') :
     return "%(d)s/%(sys)s_%(s)s.PhysCont.root"%{'d':inputdir, 's':samplename, 'sys':syst}
@@ -102,14 +113,20 @@ def selectionFormulas(sel) :
     ss    = '(!isOS || L2qFlipWeight!=1.0)' # ssOrQflip
     mlj1  = 'mlj < 90000.0'
     mlj2  = 'mljj<120000.0'
-    return {
+    formulas = {
         'eeSR1jet'   : '('+ee+' && '+ss+' && '+j1 +' && '+pt32+' && '+vetoZ+' && '+mlj1+' && L2METrel>55000.0 && Ht>200000.0)',
         'eeSR23jets' : '('+ee+' && '+ss+' && '+j23+' && '+pt32+' && '+vetoZ+' && '+mlj2+' && L2METrel>30000.0 &&                mtmax>100000.0)',
         'mmSR1jet'   : '('+mm+' && '+ss+' && '+j1 +' && '+pt32+' && '+dEll +' && '+mlj1+' &&                     Ht>200000.0 && mtmax>100000.0)',
         'mmSR23jets' : '('+mm+' && '+ss+' && '+j23+' && '+pt33+' && '+dEll +' && '+mlj2+' &&                     Ht>220000.0)',
         'emSR1jet'   : '('+em+' && '+ss+' && '+j1 +' && '+pt33+' && '+dEll +' && '+mlj1+' && mtllmet>120000.0 &&                mtmax>110000.0)',
         'emSR23jets' : '('+em+' && '+ss+' && '+j23+' && '+pt33+' && '+dEll +' && '+mlj2+' && mtllmet>110000.0 )',
-        }[sel]
+        }
+    for f in formulas.keys() :
+        formulas['pre'+f] = formulas[f].replace(mlj1, '1').replace(mlj2, '1')
+    mlj1Not, mlj2Not = mlj1.replace('<','>'), mlj2.replace('<','>')
+    for f in formulas.keys() :
+        formulas['bld'+f] = formulas[f].replace(mlj1, mlj1Not).replace(mlj2, mlj2Not)
+    return formulas[sel]
 def fillAndCount(histos, counters, tree) :
     selections = allRegions()
     selWeights = dict((s, r.TTreeFormula(s, selectionFormulas(s), tree)) for s in selections)
@@ -214,6 +231,10 @@ def bookHistos(variables, samples, selections) :
 def bookCounters(samples, selections) :
     "book a dict of counters with keys [sample][selection]"
     return dict((s, dict((sel, 0.0) for sel in selections)) for s in samples)
+def countTotalBkg(counters={'sample' : {'sel':0.0}}) :
+    backgrounds = [g for g in allSamplesAllGroups().keys() if g!='signal' and g!='data']
+    selections = first(counters).keys()
+    counters['totBkg'] = dict((s, sum(counters[b][s] for b in backgrounds)) for s in selections)
 
 if __name__=='__main__' :
     main()
