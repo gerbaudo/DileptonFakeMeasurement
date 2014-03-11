@@ -122,10 +122,8 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
           if(passEwkSsLoose) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), PR_SsEwkLoose,sys);
           if(passEwkSsLea)   fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), PR_SsEwkLea,  sys);
           if(m_fillHft) {
-              bool passWh1j(SusySelection::passSrWh1j(v)), passWh2j(SusySelection::passSrWh2j(v));
-              bool storeEvent(passWh1j||passWh2j);
               if(!isHftFillerInitialized()) initHftFiller();
-              if(storeEvent) {
+              if(SusySelection::isEventForHft(v, ssf)) {
                   swh::kin::DilepVars vv(v); // non-const
                   vv.weight = getFakeWeight(l,fakeR, metRel,sys);
                   fillHft(sys, vv);
