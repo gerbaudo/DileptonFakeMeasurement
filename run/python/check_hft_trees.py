@@ -58,6 +58,7 @@ def main():
     tableSr  = CutflowTable(samples=blindGroups,   selections=signalRegions(), countsSampleSel=counters)
     tablePre = CutflowTable(samples=blindGroups,   selections=controlRegions(), countsSampleSel=counters)
     tableBld = CutflowTable(samples=unblindGroups, selections=blindRegions(), countsSampleSel=counters)
+    for table in [tableSr, tablePre, tableBld] : table.nDecimal = 6
     print 4*'-',' sig regions ',4*'-'
     print tableSr.csv()
     print 4*'-',' pre regions ',4*'-'
