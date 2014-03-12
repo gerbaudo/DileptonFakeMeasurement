@@ -87,7 +87,7 @@ def dataFilename(samplename, inputdir='out/susyplot', syst='NOM') :
     return "%(d)s/%(sys)s_%(s)s.PhysCont.root"%{'d':inputdir, 's':samplename, 'sys':syst}
 def dataTreename(samplename) :
     return "id_%(s)s.PhysCont" % {'s' : samplename}
-def fakeFilename(samplename='periodX.physics_Astream', inputdir='out/fakepred/', syst='NONE') :
+def fakeFilename(samplename='periodX.physics_Astream', inputdir='out/fakepred/', syst='NOM') :
     return "%(d)s/%(sys)s_fake.%(s)s.PhysCont.root"%{'d':inputdir, 's':samplename, 'sys':syst}
 def fakeTreename(samplename) :
     return "id_fake.%(s)s.PhysCont"%{'s':samplename}
@@ -144,9 +144,8 @@ def mcSystematics() :
             'JES_UP', 'MS_DN', 'MS_UP', 'RESOST', 'SCALEST_DN',
             'SCALEST_UP',]
 def fakeSystematics() :
-    return ['NONE', 'EL_FR_DOWN', 'EL_FR_UP', 'EL_RE_DOWN',
-            'EL_RE_UP', 'MU_FR_DOWN', 'MU_FR_UP', 'MU_RE_DOWN',
-            'MU_RE_UP',]
+    return ['NOM', 'EL_FR_DOWN', 'EL_FR_UP', 'EL_RE_DOWN', 'EL_RE_UP',
+            'MU_FR_DOWN', 'MU_FR_UP', 'MU_RE_DOWN', 'MU_RE_UP',]
 def dataSampleNames() :
     return ["period%(period)s.physics_%(stream)s"%{'period':p, 'stream':s}
             for p in ['A','B','C','D','E','G','H','I','J','L']

@@ -366,7 +366,7 @@ void SusyPlotter::toggleFakeSystematics()
     // 'single-enum' implementation.
     namespace smm = SusyMatrixMethod;
     const std::string *sns = smm::systematic_names;
-    m_systs.push_back(smm::SYS_NONE      );  m_systNames.push_back(sns[smm::SYS_NONE      ]);
+    m_systs.push_back(smm::SYS_NOM      );  m_systNames.push_back(sns[smm::SYS_NOM      ]);
     m_systs.push_back(smm::SYS_EL_RE_UP  );  m_systNames.push_back(sns[smm::SYS_EL_RE_UP  ]);
     m_systs.push_back(smm::SYS_EL_RE_DOWN);  m_systNames.push_back(sns[smm::SYS_EL_RE_DOWN]);
     m_systs.push_back(smm::SYS_MU_RE_UP  );  m_systNames.push_back(sns[smm::SYS_MU_RE_UP  ]);

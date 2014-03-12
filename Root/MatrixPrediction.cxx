@@ -78,11 +78,11 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   const VarFlag_t varsFlags(SusySelection::computeSsFlags(ncl, t, j, m, allowQflip));
   const swk::DilepVars &v = varsFlags.first;
   const SsPassFlags &ssf = varsFlags.second;
-  m_weightComponents.fake = getFakeWeight(l,sf::CR_SSInc1j, metRel, smm::SYS_NONE); // just for the counters, use generic CR_SRWHSS
+  m_weightComponents.fake = getFakeWeight(l,sf::CR_SSInc1j, metRel, smm::SYS_NOM); // just for the counters, use generic CR_SRWHSS
   incrementSsCounters(ssf, m_weightComponents);
   if(!ssf.passCommonCriteria()) return false;
   if(m_writeTuple && ssf.lepPt) {
-      double weight(getFakeWeight(l, sf::CR_CR8lpt, metRel, smm::SYS_NONE));
+      double weight(getFakeWeight(l, sf::CR_CR8lpt, metRel, smm::SYS_NOM));
       unsigned int run(nt.evt()->run), event(nt.evt()->event);
       LeptonVector anyLep(getAnyElOrMu(nt));
       LeptonVector lowPtLep(subtract_vector(anyLep, m_baseLeptons));
