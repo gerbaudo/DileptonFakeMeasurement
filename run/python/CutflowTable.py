@@ -62,7 +62,7 @@ class CutflowTable :
         ncols = 1+len(self.samples)
         header = ', '.join(fwidthField % t for t in ['selection']+samples)
         lines = [', '.join([fwidthField % f
-                            for f in [sel]+[("%.0f" if rawcnt else "%.1f") % c
+                            for f in [sel]+[("%.0f" if rawcnt else ('%.'+str(self.nDecimal)+'f')) % c
                                             for c in [css[s][sel]
                                                       if s in css and sel in css[s] else None
                                                       for s in samples ]
