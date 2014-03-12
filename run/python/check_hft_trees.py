@@ -149,12 +149,11 @@ def fakeSystematics() :
             'MU_RE_UP',]
 def dataSampleNames() :
     return ["period%(period)s.physics_%(stream)s"%{'period':p, 'stream':s}
-            for p in ['A','B','C','D','E','G','H','J','L']
+            for p in ['A','B','C','D','E','G','H','I','J','L']
             for s in ['Egamma','Muons']]
 def mcDatasetids() :
     "encode the grouping we use to make HFT plots; from HistFitter_TreeCreator.py"
     return {
-
         'Higgs' : [160155, 160205, 160255, 160305, 160505, 160555,
                    160655, 160705, 160755, 160805, 161005, 161055,
                    161105, 161155, 161305, 161555, 161566, 161577,
