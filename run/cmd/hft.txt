@@ -9,7 +9,8 @@ MC_SYSTEMATICS="NOM EER_DN EER_UP EES_LOW_DN EES_LOW_UP EES_MAT_DN EES_MAT_UP EE
 
 # prepare the list of files for tar
 HFT_FILE_LIST="hft_files_${TAG}.txt"
-echo "" > ${HFT_FILE_LIST}
+rm    ${HFT_FILE_LIST}
+touch ${HFT_FILE_LIST}
 
 # merge fake files
 for S in ${FAKE_SYSTEMATICS}
