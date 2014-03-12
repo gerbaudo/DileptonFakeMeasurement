@@ -42,15 +42,7 @@ def main():
         cntsGroup = counters[group]
         for sample in samplesGroup :
             if verbose : print 2*' ',sample
-            file = r.TFile.Open(getFilename(group, sample))
-            if not file or not file.IsOpen() :
-                print "misssing '%s'"%getFilename(group, sample)
-                continue
-            tree = file.Get(getTreename(group, sample))
-            if not tree :
-                print "missing tree '%s' from '%s'"%(getTreename(group, sample), getFilename(group, sample))
-                continue
-            fillAndCount(hsGroup, cntsGroup, tree)
+            fillAndCount(hsGroup, cntsGroup, group, sample)
     if verbose : print 'done'
     countTotalBkg(counters)
     blindGroups  =  [g for g in counters.keys() if g!='data']
@@ -128,14 +120,29 @@ def selectionFormulas(sel) :
     for f in formulas.keys() :
         formulas['bld'+f] = formulas[f].replace(mlj1, mlj1Not).replace(mlj2, mlj2Not)
     return formulas[sel]
-def fillAndCount(histos, counters, tree) :
+def fillAndCount(histos, counters, group, sample, blind=True) :
+    file = r.TFile.Open(getFilename(group, sample))
+    if not file or not file.IsOpen() :
+        print "misssing '%s'"%getFilename(group, sample)
+        return
+    tree = file.Get(getTreename(group, sample))
+    if not tree :
+        print "missing tree '%s' from '%s'"%(getTreename(group, sample), getFilename(group, sample))
+        return
     selections = allRegions()
     selWeights = dict((s, r.TTreeFormula(s, selectionFormulas(s), tree)) for s in selections)
     for ev in tree :
         weight = tree.eventweight
         passSels = dict((s, selWeights[s].EvalInstance()) for s in selections)
-        for s in selections :
-            counters[s] += (weight if passSels[s] else 0.0)
+        for s in selections : counters[s] += (weight if passSels[s] else 0.0)
+        for sr, pr in zip(signalRegions(), controlRegions()) :
+            passPre, passSig = passSels[pr], passSels[sr]
+            fillHisto = passPre and not passSig if (group=='data' and blind) else passPre
+            oneJet = tree.L2nCentralLightJets==1
+            mev2gev = 1.0e-3
+            mljj = mev2gev*(tree.mlj if oneJet else tree.mljj)
+            if fillHisto : histos[pr]['mljj'].Fill(mljj, weight)
+
 
 def mcSystematics() :
     return ['NOM', 'EER_DN', 'EER_UP', 'EES_LOW_DN', 'EES_LOW_UP',
