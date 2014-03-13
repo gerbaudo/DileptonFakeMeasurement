@@ -194,14 +194,14 @@ class BaseSampleGroup(object) :
                 or (self.isFake and sys in systUtils.fakeSystVariations()))
     def setSyst(self, sys='NOM') :
         nominal = 'NOM' # do we have differnt names for nom (mc vs fake)?
-        isObjSys    = sys in systUtils.mcObjectVariations()
-        isWeightSys = sys in systUtils.mcWeightVariations()
-        isFakeSys   = sys in systUtils.fakeSystVariations()
+        self.isObjSys    = sys in systUtils.mcObjectVariations()
+        self.isWeightSys = sys in systUtils.mcWeightVariations()
+        self.isFakeSys   = sys in systUtils.fakeSystVariations()
         def nameObjectSys(s) : return s if self.isMc else nominal
         def nameWeightSys(s) : return s if self.isMc else nominal
         def nameFakeSys(s) : return s if self.isFake else nominal
         def identity(s) : return s
-        sysNameFunc = nameObjectSys if isObjSys else nameWeightSys if isWeightSys else nameFakeSys if isFakeSys else identity
+        sysNameFunc = nameObjectSys if self.isObjSys else nameWeightSys if self.isWeightSys else nameFakeSys if self.isFakeSys else identity
         self.syst = sysNameFunc(sys)
         return self
 #___________________________________________________________
@@ -216,12 +216,15 @@ class Sample(BaseSampleGroup) :
         self.hftInputDir = defaultDir if useDefaults else dir
         return self
     @property
+    def weightLeafname(self) : return 'eventweight' if not self.isWeightSys else systUtils.mcWeightBranchname(self.syst)
+    @property
     def filenameHftTree(self) :
         def dataFilename(sample, dir, sys) : return "%(dir)s/%(sys)s_%(sam)s.PhysCont.root" % {'dir':dir, 'sam':sample, 'sys':sys}
         def fakeFilename(sample, dir, sys) : return "%(dir)s/%(sys)s_fake.%(sam)s.PhysCont.root" % {'dir':dir, 'sam':sample, 'sys':sys}
         def mcFilename  (sample, dir, sys) : return "%(dir)s/%(sys)s_%(dsid)s.root" % {'dir':dir, 'sys':sys, 'dsid':sample}
         fnameFunc = dataFilename if self.isData else fakeFilename if self.isFake else mcFilename
-        return fnameFunc(self.name, self.hftInputDir, self.syst)
+        sys = self.syst if self.isMc and self.isObjSys else 'NOM'
+        return fnameFunc(self.name, self.hftInputDir, sys)
     @property
     def hftTreename(self) :
         def dataTreename(samplename) : return "id_%(s)s.PhysCont" % {'s' : samplename}
@@ -314,8 +317,9 @@ def fillAndCount(histos, counters, sample, blind=True) :
     tree = file.Get(treename)
     selections = allRegions()
     selWeights = dict((s, r.TTreeFormula(s, selectionFormulas(s), tree)) for s in selections)
+    weightFormula = r.TTreeFormula('weightFormula', sample.weightLeafname, tree)
     for ev in tree :
-        weight = tree.eventweight
+        weight = weightFormula.EvalInstance()
         passSels = dict((s, selWeights[s].EvalInstance()) for s in selections)
         for s in selections : counters[s] += (weight if passSels[s] else 0.0)
         for sr, pr in zip(signalRegions(), controlRegions()) :
