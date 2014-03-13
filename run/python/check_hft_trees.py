@@ -16,28 +16,96 @@ import pprint
 from rootUtils import (getMinMax
                        ,topRightLegend
                        ,importRoot
+                       ,setWhPlotStyle
                        )
 r = importRoot()
-r.gStyle.SetPadTickX(1)
-r.gStyle.SetPadTickY(1)
-r.gStyle.SetOptStat(0)
-r.gStyle.SetOptTitle(0)
-from utils import first
+from utils import (first
+                   ,mkdirIfNeeded
+                   )
 
 import SampleUtils
 from CutflowTable import CutflowTable
+import systUtils
 
-def main():
-    print "check_hft_trees.py"
-    verbose = True
+usage="""
+
+This code is used either (1) to fill the histos, or (2) to make plots
+and tables. The output of (1) is used as input of (2).
+
+Required inputs: HFT trees produced with `submitJobs.py ... --with-hft`
+See cmd/hft.txt for details.
+
+Example usage ('fill' mode):
+%prog \\
+ --syst EES_Z_UP
+ --input-gen  out/susyplot/merged/ \\
+ --input-fake out/fakepred/merged/ \\
+ --output_dir     out/hft/             \\
+ --verbose
+ >& log/hft/check_hft_trees_fill.log
+
+Example usage ('plot' mode):
+%prog \\
+ --syst ANY            \\
+ --input-dir out/hft/  \\
+ --verbose             \\
+ >& log/hft/check_hft_trees_plot.log"""
+
+def main() :
+    parser = optparse.OptionParser(usage=usage)
+    parser.add_option('-f', '--input-fake', help='location hft trees for fake')
+    parser.add_option('-g', '--input-gen', help='location hft trees for everything else')
+    parser.add_option('-i', '--input-dir')
+    parser.add_option('-o', '--output-dir')
+    parser.add_option('-s', '--syst', help="variations to process (default all). Give a list or say 'weight', 'object', or 'fake'")
+    parser.add_option('-e', '--exclude', help="skip some systematics, example 'EL_FR_.*'")
+    parser.add_option('-v', '--verbose', action='store_true', default=False)
+    parser.add_option('-l', '--list-systematics', action='store_true', default=False, help='list what is already in output_dir')
+    parser.add_option('-L', '--list-all-systematics', action='store_true', default=False, help='list all possible systematics')
+
+    (opts, args) = parser.parse_args()
+    if opts.list_all_systematics :
+        print "All systematics:\n\t%s"%'\n\t'.join(systUtils.getAllVariations())
+        return
+    if opts.list_systematics :
+        print listExistingSyst(opts.input_dir)
+        return
+    inGenSpecified, inDirSpecified = opts.input_gen!=None, opts.input_dir!=None
+    eitherMode = inGenSpecified != inDirSpecified
+    if not eitherMode : parser.error("Run either in 'fill' or 'plot' mode")
+    mode = 'fill' if inGenSpecified else 'plot' if inDirSpecified else None
+    requiredOptions = (['input_fake', 'input_gen', 'output_dir'] if mode=='fill' else ['input_dir', 'output_dir'])
+    allOptions = [x.dest for x in parser._get_all_options()[1:]]
+    def optIsNotSpecified(o) : return not hasattr(opts, o) or getattr(opts,o) is None
+    if any(optIsNotSpecified(o) for o in requiredOptions) :
+        parser.error('Missing required option\n'+'\n'.join(["%s : %s"%(o, getattr(opts, o)) for o in requiredOptions]))
+    if opts.verbose : print '\nUsing the following options:\n'+'\n'.join("%s : %s"%(o, str(getattr(opts, o))) for o in allOptions)
+
+    if   mode=='fill' : runFill(opts)
+    elif mode=='plot' : runPlot(opts)
+
+def runFill(opts) :
+    inputFakeDir = opts.input_fake
+    inputGenDir  = opts.input_gen
+    outputDir    = opts.output_dir
+    systematics  = opts.syst
+    excludedSyst = opts.exclude
+    verbose      = opts.verbose
+
+    mkdirIfNeeded(outputDir)
+    fillHistos(verbose=verbose)
+
+def fillHistos(samplesPerGroup={}, syst='', verbose=False) :
     groups = allGroups()
     selections = allRegions()
     variables = variablesToPlot()
     counters = bookCounters(groups, selections)
     histos = bookHistos(variables, groups, selections)
     samplesPerGroup = allSamplesAllGroups()
-    samplesPerGroup = dict((g, [s for s in samples if s.hasInputTree(verbose=True, msg='Warning! ')])
-                           for g, samples in samplesPerGroup.iteritems())
+    def dropSamplesWithoutTree(samples) : return [s for s in samples if s.hasInputHftTree(msg='Warning! ')]
+    samplesPerGroup = dict((g, dropSamplesWithoutTree(samples)) for g, samples in samplesPerGroup.iteritems())
+    def dropGroupsWithoutSamples(groups) : return dict((g, samples) for g, samples in groups.iteritems() if len(samples))
+    samplesPerGroup = dropGroupsWithoutSamples(samplesPerGroup)
     for group, samplesGroup in samplesPerGroup.iteritems() :
         if verbose : print 1*' ',group
         hsGroup   = histos  [group]
@@ -74,52 +142,64 @@ class Sample :
     def __init__(self, name, group) :
         self.name = name # this is either the name (for data and fake) or the dsid (for mc)
         self.group = group
+        self.setSyst()
+        self.setHftInputDir()
+        self.setHistosInputDir()
+    def setSyst(self, sys='NOM') :
+        nominal = 'NOM' # do we have differnt names for nom (mc vs fake)?
+        isObjSys    = sys in systUtils.mcObjectVariations()
+        isWeightSys = sys in systUtils.mcWeightVariations()
+        isFakeSys   = sys in systUtils.fakeSystVariations()
+        def nameObjectSys(s) : return s if self.isMc else nominal
+        def nameWeightSys(s) : return s if self.isMc else nominal
+        def nameFakeSys(s) : return s if self.isFake else nominal
+        def identity(s) : return s
+        sysNameFunc = nameObjectSys if isObjSys else nameWeightSys if isWeightSys else nameFakeSys if isFakeSys else identity
+        self.syst = sysNameFunc(sys)
+        return self
+    def setHftInputDir(self, dir='') :
+        useDefaults = not dir
+        defaultDir = 'out/fakepred' if self.isFake else 'out/susyplot'
+        self.hftInputDir = defaultDir if useDefaults else dir
+        return self
+    def setHistosInputDir(self, dir='') :
+        self.histoInputDir = dir if dir else 'out/hft'
+        return self
     @property
-    def filename(self) :
-        def dataFilename(samplename, inputdir='out/susyplot', syst='NOM') :
-            return "%(d)s/%(sys)s_%(s)s.PhysCont.root"%{'d':inputdir, 's':samplename, 'sys':syst}
-        def fakeFilename(samplename='periodX.physics_Astream', inputdir='out/fakepred/', syst='NOM') :
-            return "%(d)s/%(sys)s_fake.%(s)s.PhysCont.root"%{'d':inputdir, 's':samplename, 'sys':syst}
-        def mcFilename(dsid=123456, inputdir='out/susyplot', syst='NOM') :
-            return "%(d)s/%(sys)s_%(s)s.root"%{'d':inputdir, 's':dsid, 'sys':syst}
-        def getFilename(group, sample) :
-            if   group=='data' : return dataFilename(sample)
-            elif group=='fake' : return fakeFilename(sample)
-            else : return mcFilename(sample)
-        return getFilename(self.group, self.name)
+    def isFake(self) : return self.group=='fake'
     @property
-    def treename(self) :
-        def dataTreename(samplename) :
-            return "id_%(s)s.PhysCont" % {'s' : samplename}
-        def fakeTreename(samplename) :
-            return "id_fake.%(s)s.PhysCont"%{'s':samplename}
-        def mcTreename(dsid=123456) :
-            return "id_%d"%dsid
-        def getTreename(group, sample) :
-            if   group=='data' : return dataTreename(sample)
-            elif group=='fake' : return fakeTreename(sample)
-            else : return mcTreename(sample)
-        return getTreename(self.group, self.name)
+    def isData(self) : return self.group=='data'
     @property
-    def inputFileExists(self, msg='') :
-        alreadyCached = hasattr(self, '_hasfile')
-        self._hasfile = self.hasInputFile(verbose=False, msg=msg) if not alreadyCached  else self._hasfile
-        return self._hasfile
-    def hasInputTree(self, verbose=True, msg='') :
+    def isMc(self) : return not (self.isFake or self.isData)
+    @property
+    def filenameHftTree(self) :
+        def dataFilename(sample, dir, sys) : return "%(dir)s/%(sys)s_%(sam)s.PhysCont.root" % {'dir':dir, 'sam':sample, 'sys':sys}
+        def fakeFilename(sample, dir, sys) : return "%(dir)s/%(sys)s_fake.%(sam)s.PhysCont.root" % {'dir':dir, 'sam':sample, 'sys':sys}
+        def mcFilename  (sample, dir, sys) : return "%(dir)s/%(sys)s_%(dsid)s.root" % {'dir':dir, 'sys':sys, 'dsid':sample}
+        fnameFunc = dataFilename if self.isData else fakeFilename if self.isFake else mcFilename
+        return fnameFunc(self.name, self.hftInputDir, self.syst)
+    @property
+    def hftTreename(self) :
+        def dataTreename(samplename) : return "id_%(s)s.PhysCont" % {'s' : samplename}
+        def fakeTreename(samplename) : return "id_fake.%(s)s.PhysCont"%{'s':samplename}
+        def mcTreename(dsid=123456) :  return "id_%d"%dsid
+        getTreename = dataTreename if self.isData else fakeTreename if self.isFake else mcTreename
+        return getTreename(self.name)
+    def hasInputHftFile(self, msg) :
+        filename = self.filenameHftTree
+        isThere = os.path.exists(filename)
+        if not isThere : print msg+"%s %s missing : %s"%(self.group, self.name, filename)
+        return isThere
+    def hasInputHftTree(self, msg='') :
         treeIsThere = False
-        if self.hasInputFile(verbose, msg) :
-            filename, treename = self.filename, self.treename
-            inputFile = r.TFile.Open(filename) if self.inputFileExists else None
+        if self.hasInputHftFile(msg) :
+            filename, treename = self.filenameHftTree, self.hftTreename
+            inputFile = r.TFile.Open(filename) if self.hasInputHftFile(msg) else None
             if inputFile :
                 if inputFile.Get(treename) : treeIsThere = True
                 else : print msg+"%s %s missing tree '%s' from %s"%(self.group, self.name, treename, filename)
             inputFile.Close()
         return treeIsThere
-    def hasInputFile(self, verbose=True, msg='') :
-        filename = self.filename
-        isThere = os.path.exists(filename)
-        if not isThere : print msg+"%s %s missing : %s"%(self.group, self.name, filename)
-        return isThere
 #___________________________________________________________
 def allGroups(noData=False, noSignal=True) :
     return ([k for k in mcDatasetids().keys() if k!='signal' or not noSignal]
@@ -165,8 +245,8 @@ def selectionFormulas(sel) :
 
 def fillAndCount(histos, counters, sample, blind=True) :
     group    = sample.group
-    filename = sample.filename
-    treename = sample.treename
+    filename = sample.filenameHftTree
+    treename = sample.hftTreename
     file = r.TFile.Open(filename)
     tree = file.Get(treename)
     selections = allRegions()
@@ -295,6 +375,7 @@ def getGroupColor(g) :
     return colors[g]
 
 def plotHistos(selection='', histos={}, outdir='./') :
+    setWhPlotStyle()
     padMaster = first(histos)
     can = r.TCanvas('can_'+padMaster.GetName(), padMaster.GetTitle(), 800, 600)
     can.cd()
@@ -324,6 +405,9 @@ def plotHistos(selection='', histos={}, outdir='./') :
     can.Update()
     for ext in ['png'] : can.SaveAs(outdir+'/'+can.GetName()+'.'+ext)
 
+def listExistingSyst(dir) :
+    print "listing systematics from ",dir
+    print "...not implemented..."
 
 if __name__=='__main__' :
     main()
