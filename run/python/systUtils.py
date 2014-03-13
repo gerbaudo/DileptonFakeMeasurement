@@ -28,13 +28,16 @@ def mcObjectVariations() :
             'RESOST',
             ]
 def mcWeightVariations() :
-    "See list at SusyPlotter::computeWeightVariations()"
-    return ['qflipUp', 'qflipDo',
-            'elTrigUp', 'elTrigDo',
-            'muTrigUp', 'muTrigDo',
-            'bTagUp', 'bTagDo',
-            'xsecUp', 'xsecDo'
+    "See list at HftFiller::assignWeightVars()"
+    return ['BKGMETHODUP', 'BKGMETHODDOWN'
+            ,'ETRIGREWUP', 'ETRIGREWDOWN'
+            ,'MTRIGREWUP', 'MTRIGREWDOWN'
+            ,'BJETUP', 'BJETDOWN'
+            ,'XSUP', 'XSDOWN'
             ]
+def mcWeightBranchname(mcWeightVariation='') : return 'syst_'+mcWeightVariation
+def mcWeightBranches() : return [mcWeightBranchname(v) for v in mcWeightVariations()]
+
 def getAllVariations() :
     return ['NOM'] + fakeSystVariations() + mcObjectVariations() + mcWeightVariations()
 
