@@ -102,9 +102,9 @@ bool passZllVeto(const LeptonVector& l, float mllLo, float mllHi)
   return (mll<mllLo || mllHi<mll);
 }
 //----------------------------------------------------------
-void swap(float &a, float &b) { float c(a); a=b; b=c; };
 bool pass2LepPt(const LeptonVector& l, float minPt0, float minPt1)
 {
+  struct SwapFunc{float c; void operator()(float &a, float &b) { float c=a; a=b; b=c; } } swap;
   if(l.size()<2) return false;
   float pt0(l[0]->Pt()), pt1(l[1]->Pt());
   if(pt0 < pt1) swap(pt0, pt1);
