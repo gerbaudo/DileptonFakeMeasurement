@@ -54,16 +54,23 @@ void HftFiller::assignDilepVars(HistFitterTree* const tree, const susy::wh::kin:
 void HftFiller::assignWeightVars(HistFitterTree* const tree, const susy::wh::HftFiller::WeightVariations &wv)
 {
     if(tree) {
-        tree->syst_BKGMETHODUP   = wv.qflipUp_;
-        tree->syst_BKGMETHODDOWN = wv.qflipDo_;
-        tree->syst_ETRIGREWUP   = wv.elTrigUp_;
-        tree->syst_ETRIGREWDOWN = wv.elTrigDo_;
-        tree->syst_MTRIGREWUP   = wv.muTrigUp_;
-        tree->syst_MTRIGREWDOWN = wv.muTrigDo_;
-        tree->syst_BJETUP   = wv.bTagUp_;
-        tree->syst_BJETDOWN = wv.bTagDo_;
-        tree->syst_XSUP   = wv.xsecUp_;
-        tree->syst_XSDOWN = wv.xsecDo_;
+        susy::wh::HftFiller::WeightVariations w(wv); // Hft wants up above 1, do below; need to modify WeightVariations
+        struct SwapFunc{ float tmp_; void operator()(float &a, float &b) {tmp_=a; a=b; b=tmp_;} } swap;
+        if(w.qflipUp_  < w.qflipDo_ ) swap(w.qflipUp_,  w.qflipDo_);
+        if(w.elTrigUp_ < w.elTrigDo_) swap(w.elTrigUp_, w.elTrigDo_);
+        if(w.muTrigUp_ < w.muTrigDo_) swap(w.muTrigUp_, w.muTrigDo_);
+        if(w.bTagUp_   < w.bTagDo_  ) swap(w.bTagUp_,   w.bTagDo_);
+        if(w.xsecUp_   < w.xsecDo_  ) swap(w.xsecUp_,   w.xsecDo_);
+        tree->syst_BKGMETHODUP   = w.qflipUp_;
+        tree->syst_BKGMETHODDOWN = w.qflipDo_;
+        tree->syst_ETRIGREWUP    = w.elTrigUp_;
+        tree->syst_ETRIGREWDOWN  = w.elTrigDo_;
+        tree->syst_MTRIGREWUP    = w.muTrigUp_;
+        tree->syst_MTRIGREWDOWN  = w.muTrigDo_;
+        tree->syst_BJETUP        = w.bTagUp_;
+        tree->syst_BJETDOWN      = w.bTagDo_;
+        tree->syst_XSUP          = w.xsecUp_;
+        tree->syst_XSDOWN        = w.xsecDo_;
     }
 }
 //----------------------------------------------------------
