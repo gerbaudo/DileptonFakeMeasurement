@@ -24,7 +24,7 @@ r.gStyle.SetOptStat(0)
 r.gStyle.SetOptTitle(0)
 from utils import first
 
-from SampleUtils import colors
+import SampleUtils
 from CutflowTable import CutflowTable
 
 def main():
@@ -237,12 +237,16 @@ def mcDatasetids() :
                     177525, 177526]
         }
 def allSamplesAllGroups() :
-    asg = dict([(k,v) for k,v in mcDatasetids().iteritems()]
-               +[('data', dataSampleNames())]
-               +[('fake', dataSampleNames())])
+    asg = dict( [(k, [Sample(group=k, name=d) for d in v]) for k,v in mcDatasetids().iteritems()]
+               +[('data', [Sample(group='data', name=s) for s in dataSampleNames()])]
+               +[('fake', [Sample(group='fake', name=s) for s in dataSampleNames()])])
     asg = dict((k,v) for k,v in asg.iteritems() if k in allGroups())
     return asg
+def stackedGroups() :
+    return [g for g in allSamplesAllGroups().keys() if g not in ['data', 'signal']]
+
 def variablesToPlot() :
+    return ['mljj']
     return ['pt0','pt1','mll','mtmin','mtmax','mtllmet','ht','metrel','dphill','detall',
             'mt2j','mljj','dphijj','detajj']
 def histoSuffix(sample, selection) : return "%s_%s"%(sample, selection)
@@ -281,6 +285,45 @@ def countTotalBkg(counters={'sample' : {'sel':0.0}}) :
     backgrounds = [g for g in allSamplesAllGroups().keys() if g!='signal' and g!='data']
     selections = first(counters).keys()
     counters['totBkg'] = dict((s, sum(counters[b][s] for b in backgrounds)) for s in selections)
+def getGroupColor(g) :
+    oldColors = SampleUtils.colors
+    colors = dict((g,c) for g,c in [(k,v) for k,v in oldColors.iteritems()] + [('signal',r.kRed), ('WW',r.kBlue), ('Higgs',r.kYellow)])
+    def hftGroup2stdGroup(_) :
+        fromTo = {'Zjets':'zjets', 'Top':'ttbar', 'ZV':'diboson',}
+        return fromTo[_] if _ in fromTo else _
+    g = hftGroup2stdGroup(g)
+    return colors[g]
+
+def plotHistos(selection='', histos={}, outdir='./') :
+    padMaster = first(histos)
+    can = r.TCanvas('can_'+padMaster.GetName(), padMaster.GetTitle(), 800, 600)
+    can.cd()
+    can._hists = [padMaster]
+    padMaster.Draw('axis')
+    stack = r.THStack('stack_'+padMaster.GetName(), '')
+    can._hists.append(stack)
+    leg = topRightLegend(can, 0.275, 0.475, shift=-0.025)
+    can._leg = leg
+    leg.SetBorderSize(0)
+#     leg.AddEntry(h_data, dataSample(), 'P')
+#     leg.AddEntry(h_bkg, 'sm', 'L')
+    for g in stackedGroups() :
+        if g not in histos : continue
+        h = histos[g]
+        h.SetFillColor(getGroupColor(g))
+        h.SetLineColor(h.GetFillColor())
+        stack.Add(h)
+        can._hists.append(h)
+    for g in stackedGroups()[::-1] : leg.AddEntry(histos[g], g, 'F') # stack goes b-t, legend goes t-b
+    stack.Draw('hist')
+#     leg.AddEntry(err_band, 'Uncertainty', 'F')
+    leg.Draw('same')
+    can.Update() # force stack to create padMaster
+    hStack = stack.GetHistogram()
+    padMaster.SetMaximum(1.1*max([h.GetMaximum() for h in [hStack]+histos.values()]))
+    can.Update()
+    for ext in ['png'] : can.SaveAs(outdir+'/'+can.GetName()+'.'+ext)
+
 
 if __name__=='__main__' :
     main()
