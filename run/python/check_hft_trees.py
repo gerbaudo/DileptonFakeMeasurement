@@ -21,6 +21,7 @@ from rootUtils import (getMinMax
 r = importRoot()
 from utils import (first
                    ,mkdirIfNeeded
+                   ,filterWithRegexp
                    )
 
 import SampleUtils
@@ -88,20 +89,51 @@ def runFill(opts) :
     inputFakeDir = opts.input_fake
     inputGenDir  = opts.input_gen
     outputDir    = opts.output_dir
-    systematics  = opts.syst
+    sysOption    = opts.syst
     excludedSyst = opts.exclude
     verbose      = opts.verbose
 
     mkdirIfNeeded(outputDir)
-    fillHistos(verbose=verbose)
+    systematics = ['NOM']
+    anySys = sysOption==None
+    if   sysOption=='fake'   or anySys : systematics += systUtils.fakeSystVariations()
+    elif sysOption=='object' or anySys : systematics += systUtils.mcObjectVariations()
+    elif sysOption=='weight' or anySys : systematics += systUtils.mcWeightVariations()
+    elif sysOption in systUtils.getAllVariations() : systematics = [sysOption]
+    else : raise ValueError("Invalid syst %s"%sysOption)
+    if excludedSyst : systematics = [s for s in systematics if s not in filterWithRegexp(systematics, excludedSyst)]
 
-def fillHistos(samplesPerGroup={}, syst='', verbose=False) :
-    groups = allGroups()
+    for syst in systematics :
+        if verbose : print '---- filling ',syst
+        samplesPerGroup = allSamplesAllGroups()
+        counters, histos = countAndFillHistos(samplesPerGroup=samplesPerGroup, syst=syst, verbose=verbose, outdir=outputDir)
+        printCounters(counters)
+        saveHistos(histos, outputDir)
+
+def runPlot(opts) :
+    inputDir   = opts.input_dir
+    outputDir  = opts.output_dir
+
+    mkdirIfNeeded(outputDir)
+    histos = fetchHistos(inputDir)
+    plotHistos(histos, outputDir)
+
+def countAndFillHistos(samplesPerGroup={}, syst='', verbose=False, outdir='./') :
+
     selections = allRegions()
     variables = variablesToPlot()
+    groups = samplesPerGroup.keys()
     counters = bookCounters(groups, selections)
     histos = bookHistos(variables, groups, selections)
-    samplesPerGroup = allSamplesAllGroups()
+
+    mcGroups, fakeGroups = mcDatasetids().keys(), ['fake']
+    objVariations, weightVariations, fakeVariations = systUtils.mcObjectVariations(), systUtils.mcWeightVariations(), systUtils.fakeSystVariations()
+    def groupIsRelevantForSys(g, s) :
+        isRelevant = (s=='NOM' or (g in mcGroups and s in objVariations+weightVariations) or (g in fakeGroups and s in fakeVariations))
+        if verbose and not isRelevant : print "skipping %s for %s"%(g, s)
+        return isRelevant
+    def dropIrrelevantGroupsForThisSys(groups, sys) : return dict((g, samples) for g, samples in groups.iteritems() if groupIsRelevantForSys(g, syst))
+    samplesPerGroup = dropIrrelevantGroupsForThisSys(samplesPerGroup, syst)
     def dropSamplesWithoutTree(samples) : return [s for s in samples if s.hasInputHftTree(msg='Warning! ')]
     samplesPerGroup = dict((g, dropSamplesWithoutTree(samples)) for g, samples in samplesPerGroup.iteritems())
     def dropGroupsWithoutSamples(groups) : return dict((g, samples) for g, samples in groups.iteritems() if len(samples))
@@ -114,6 +146,8 @@ def fillHistos(samplesPerGroup={}, syst='', verbose=False) :
             if verbose : print 2*' ',sample.name
             fillAndCount(hsGroup, cntsGroup, sample)
     if verbose : print 'done'
+    return counters, histos
+def printCounters(counters):
     countTotalBkg(counters)
     blindGroups   = [g for g in counters.keys() if g!='data']
     unblindGroups = [g for g in counters.keys()]
@@ -127,15 +161,15 @@ def fillHistos(samplesPerGroup={}, syst='', verbose=False) :
     print tablePre.csv()
     print 4*'-',' blind regions ',4*'-'
     print tableBld.csv()
-
-    blindGroups = [g for g in blindGroups if g!='totBkg'] # totBkg histo not defined
+def plotHistos(histos, plotdir='./') :
+    blindGroups = [g for g in histos.keys() if g!='data']
     countersFromHist = dict((g, dict((s, histos[g][s]['mljj'].Integral()) for s in controlRegions())) for g in blindGroups)
     tableHist = CutflowTable(samples=blindGroups, selections=controlRegions(), countsSampleSel=countersFromHist)
     tableHist.nDecimal = 6
     print 4*'-',' mljj histograms ',4*'-'
     print tableHist.csv()
     histosPerSel = dict((s, dict((g, histos[g][s]['mljj']) for g in histos.keys())) for s in first(histos).keys())
-    for s, hs in histosPerSel.iteritems() : plotHistos(s, hs)
+    for s, hs in histosPerSel.iteritems() : plotHistos(s, hs, plotdir)
 
 #___________________________________________________________
 class Sample :
@@ -200,6 +234,11 @@ class Sample :
                 else : print msg+"%s %s missing tree '%s' from %s"%(self.group, self.name, treename, filename)
             inputFile.Close()
         return treeIsThere
+    def isNeededForSys(sys) :
+        return (sys=='NOM'
+                or (self.isMc and sys in systUtils.mcWeightVariations())
+                or (self.isMc and sys in systUtils.mcObjectVariations())
+                or (self.isFake and sys in systUtils.fakeSystVariations()))
 #___________________________________________________________
 def allGroups(noData=False, noSignal=True) :
     return ([k for k in mcDatasetids().keys() if k!='signal' or not noSignal]
@@ -408,6 +447,11 @@ def plotHistos(selection='', histos={}, outdir='./') :
 def listExistingSyst(dir) :
     print "listing systematics from ",dir
     print "...not implemented..."
+def saveHistos(histos, outputDir) :
+    print "not implemented"
+
+def fetchHistos(dir) :
+    return "to be implemented"
 
 if __name__=='__main__' :
     main()
