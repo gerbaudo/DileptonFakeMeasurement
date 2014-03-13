@@ -3,15 +3,15 @@
 # Sanity checks on the hft trees: yields and basic plots
 #
 # todo:
-# - plot histos
-# - blind sr and sr-within-pre
-# - add data
+# - fill syst histos
+# - combine errors
 # davide.gerbaudo@gmail.com
 # March 2014
 
 import datetime
 import math
 import optparse
+import os
 import pprint
 from rootUtils import (getMinMax
                        ,topRightLegend
@@ -36,16 +36,18 @@ def main():
     counters = bookCounters(groups, selections)
     histos = bookHistos(variables, groups, selections)
     samplesPerGroup = allSamplesAllGroups()
+    samplesPerGroup = dict((g, [s for s in samples if s.hasInputTree(verbose=True, msg='Warning! ')])
+                           for g, samples in samplesPerGroup.iteritems())
     for group, samplesGroup in samplesPerGroup.iteritems() :
         if verbose : print 1*' ',group
         hsGroup   = histos  [group]
         cntsGroup = counters[group]
         for sample in samplesGroup :
-            if verbose : print 2*' ',sample
-            fillAndCount(hsGroup, cntsGroup, group, sample)
+            if verbose : print 2*' ',sample.name
+            fillAndCount(hsGroup, cntsGroup, sample)
     if verbose : print 'done'
     countTotalBkg(counters)
-    blindGroups  =  [g for g in counters.keys() if g!='data']
+    blindGroups   = [g for g in counters.keys() if g!='data']
     unblindGroups = [g for g in counters.keys()]
     tableSr  = CutflowTable(samples=blindGroups,   selections=signalRegions(), countsSampleSel=counters)
     tablePre = CutflowTable(samples=blindGroups,   selections=controlRegions(), countsSampleSel=counters)
@@ -58,6 +60,67 @@ def main():
     print 4*'-',' blind regions ',4*'-'
     print tableBld.csv()
 
+    blindGroups = [g for g in blindGroups if g!='totBkg'] # totBkg histo not defined
+    countersFromHist = dict((g, dict((s, histos[g][s]['mljj'].Integral()) for s in controlRegions())) for g in blindGroups)
+    tableHist = CutflowTable(samples=blindGroups, selections=controlRegions(), countsSampleSel=countersFromHist)
+    tableHist.nDecimal = 6
+    print 4*'-',' mljj histograms ',4*'-'
+    print tableHist.csv()
+    histosPerSel = dict((s, dict((g, histos[g][s]['mljj']) for g in histos.keys())) for s in first(histos).keys())
+    for s, hs in histosPerSel.iteritems() : plotHistos(s, hs)
+
+#___________________________________________________________
+class Sample :
+    def __init__(self, name, group) :
+        self.name = name # this is either the name (for data and fake) or the dsid (for mc)
+        self.group = group
+    @property
+    def filename(self) :
+        def dataFilename(samplename, inputdir='out/susyplot', syst='NOM') :
+            return "%(d)s/%(sys)s_%(s)s.PhysCont.root"%{'d':inputdir, 's':samplename, 'sys':syst}
+        def fakeFilename(samplename='periodX.physics_Astream', inputdir='out/fakepred/', syst='NOM') :
+            return "%(d)s/%(sys)s_fake.%(s)s.PhysCont.root"%{'d':inputdir, 's':samplename, 'sys':syst}
+        def mcFilename(dsid=123456, inputdir='out/susyplot', syst='NOM') :
+            return "%(d)s/%(sys)s_%(s)s.root"%{'d':inputdir, 's':dsid, 'sys':syst}
+        def getFilename(group, sample) :
+            if   group=='data' : return dataFilename(sample)
+            elif group=='fake' : return fakeFilename(sample)
+            else : return mcFilename(sample)
+        return getFilename(self.group, self.name)
+    @property
+    def treename(self) :
+        def dataTreename(samplename) :
+            return "id_%(s)s.PhysCont" % {'s' : samplename}
+        def fakeTreename(samplename) :
+            return "id_fake.%(s)s.PhysCont"%{'s':samplename}
+        def mcTreename(dsid=123456) :
+            return "id_%d"%dsid
+        def getTreename(group, sample) :
+            if   group=='data' : return dataTreename(sample)
+            elif group=='fake' : return fakeTreename(sample)
+            else : return mcTreename(sample)
+        return getTreename(self.group, self.name)
+    @property
+    def inputFileExists(self, msg='') :
+        alreadyCached = hasattr(self, '_hasfile')
+        self._hasfile = self.hasInputFile(verbose=False, msg=msg) if not alreadyCached  else self._hasfile
+        return self._hasfile
+    def hasInputTree(self, verbose=True, msg='') :
+        treeIsThere = False
+        if self.hasInputFile(verbose, msg) :
+            filename, treename = self.filename, self.treename
+            inputFile = r.TFile.Open(filename) if self.inputFileExists else None
+            if inputFile :
+                if inputFile.Get(treename) : treeIsThere = True
+                else : print msg+"%s %s missing tree '%s' from %s"%(self.group, self.name, treename, filename)
+            inputFile.Close()
+        return treeIsThere
+    def hasInputFile(self, verbose=True, msg='') :
+        filename = self.filename
+        isThere = os.path.exists(filename)
+        if not isThere : print msg+"%s %s missing : %s"%(self.group, self.name, filename)
+        return isThere
+#___________________________________________________________
 def allGroups(noData=False, noSignal=True) :
     return ([k for k in mcDatasetids().keys() if k!='signal' or not noSignal]
             + ([] if noData else ['data'])
@@ -74,27 +137,6 @@ def blindRegions() :
     return ['bld'+r for r in signalRegions()]
 def allRegions() :
     return signalRegions() + controlRegions() + blindRegions()
-
-def dataFilename(samplename, inputdir='out/susyplot', syst='NOM') :
-    return "%(d)s/%(sys)s_%(s)s.PhysCont.root"%{'d':inputdir, 's':samplename, 'sys':syst}
-def dataTreename(samplename) :
-    return "id_%(s)s.PhysCont" % {'s' : samplename}
-def fakeFilename(samplename='periodX.physics_Astream', inputdir='out/fakepred/', syst='NOM') :
-    return "%(d)s/%(sys)s_fake.%(s)s.PhysCont.root"%{'d':inputdir, 's':samplename, 'sys':syst}
-def fakeTreename(samplename) :
-    return "id_fake.%(s)s.PhysCont"%{'s':samplename}
-def mcFilename(dsid=123456, inputdir='out/susyplot', syst='NOM') :
-    return "%(d)s/%(sys)s_%(s)s.root"%{'d':inputdir, 's':dsid, 'sys':syst}
-def mcTreename(dsid=123456) :
-    return "id_%d"%dsid
-def getFilename(group, sample) :
-    if   group=='data' : return dataFilename(sample)
-    elif group=='fake' : return fakeFilename(sample)
-    else : return mcFilename(sample)
-def getTreename(group, sample) :
-    if   group=='data' : return dataTreename(sample)
-    elif group=='fake' : return fakeTreename(sample)
-    else : return mcTreename(sample)
 def selectionFormulas(sel) :
     ee, em, mm = 'isEE', 'isEMU', 'isMUMU'
     pt32  = '(lept1Pt>30000.0 && lept2Pt>20000.0)'
@@ -120,15 +162,13 @@ def selectionFormulas(sel) :
     for f in formulas.keys() :
         formulas['bld'+f] = formulas[f].replace(mlj1, mlj1Not).replace(mlj2, mlj2Not)
     return formulas[sel]
-def fillAndCount(histos, counters, group, sample, blind=True) :
-    file = r.TFile.Open(getFilename(group, sample))
-    if not file or not file.IsOpen() :
-        print "misssing '%s'"%getFilename(group, sample)
-        return
-    tree = file.Get(getTreename(group, sample))
-    if not tree :
-        print "missing tree '%s' from '%s'"%(getTreename(group, sample), getFilename(group, sample))
-        return
+
+def fillAndCount(histos, counters, sample, blind=True) :
+    group    = sample.group
+    filename = sample.filename
+    treename = sample.treename
+    file = r.TFile.Open(filename)
+    tree = file.Get(treename)
     selections = allRegions()
     selWeights = dict((s, r.TTreeFormula(s, selectionFormulas(s), tree)) for s in selections)
     for ev in tree :
@@ -142,7 +182,7 @@ def fillAndCount(histos, counters, group, sample, blind=True) :
             mev2gev = 1.0e-3
             mljj = mev2gev*(tree.mlj if oneJet else tree.mljj)
             if fillHisto : histos[pr]['mljj'].Fill(mljj, weight)
-
+    file.Close()
 
 def mcSystematics() :
     return ['NOM', 'EER_DN', 'EER_UP', 'EES_LOW_DN', 'EES_LOW_UP',
