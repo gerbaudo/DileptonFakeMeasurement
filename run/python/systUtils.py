@@ -10,12 +10,35 @@ from rootUtils import importRoot
 r = importRoot()
 
 def fakeSystVariations() :
-    "2x2x2=8 syst variations for the fake estimate"
+    "2x2x2=8 syst variations for the fake estimate, see DiLeptonMatrixMethod::systematic_names"
     return ['EL_RE_UP', 'EL_RE_DOWN', 'MU_RE_UP', 'MU_RE_DOWN',
             'EL_FR_UP', 'EL_FR_DOWN', 'MU_FR_UP', 'MU_FR_DOWN']
-    
-def fetchVariationHistos(input_fake_file=None, nominal_histo=None) :
-    variations = fakeSystVariations()
+def mcObjectVariations() :
+    "See definitions in SusyDefs.h:SusyNtSystNames, and active list in SusyPlotter::toggleStdSystematics()"
+    return ['EES_Z_UP', 'EES_Z_DN',
+            'EES_MAT_UP','EES_MAT_DN',
+            'EES_PS_UP', 'EES_PS_DN',
+            'EES_LOW_UP', 'EES_LOW_DN',
+            'EER_UP', 'EER_DN',
+            'MS_UP', 'MS_DN',
+            'ID_UP', 'ID_DN',
+            'JES_UP', 'JES_DN',
+            'JER',
+            'SCALEST_UP', 'SCALEST_DN',
+            'RESOST',
+            ]
+def mcWeightVariations() :
+    "See list at SusyPlotter::computeWeightVariations()"
+    return ['qflipUp', 'qflipDo',
+            'elTrigUp', 'elTrigDo',
+            'muTrigUp', 'muTrigDo',
+            'bTagUp', 'bTagDo',
+            'xsecUp', 'xsecDo'
+            ]
+def getAllVariations() :
+    return fakeSystVariations() + mcObjectVariations() + mcWeightVariations()
+
+def fetchVariationHistos(input_fake_file=None, nominal_histo=None, variations=fakeSystVariations()) :
     nom_hname = nominal_histo.GetName()
     return dict([(v, input_fake_file.Get(nom_hname.replace('_NONE','_'+v))) for v in variations])
 def computeFakeSysErr2(nominal_histo=None, vars_histos={}) :
