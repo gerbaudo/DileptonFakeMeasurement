@@ -106,9 +106,10 @@ def runFill(opts) :
     for syst in systematics :
         if verbose : print '---- filling ',syst
         samplesPerGroup = allSamplesAllGroups()
+        [s.setSyst(syst) for g, samples in samplesPerGroup.iteritems() for s in samples]
         counters, histos = countAndFillHistos(samplesPerGroup=samplesPerGroup, syst=syst, verbose=verbose, outdir=outputDir)
         printCounters(counters)
-        saveHistos(histos, outputDir)
+        saveHistos(samplesPerGroup, histos, outputDir, verbose)
 
 def runPlot(opts) :
     inputDir   = opts.input_dir
@@ -122,9 +123,6 @@ def countAndFillHistos(samplesPerGroup={}, syst='', verbose=False, outdir='./') 
 
     selections = allRegions()
     variables = variablesToPlot()
-    groups = samplesPerGroup.keys()
-    counters = bookCounters(groups, selections)
-    histos = bookHistos(variables, groups, selections)
 
     mcGroups, fakeGroups = mcDatasetids().keys(), ['fake']
     objVariations, weightVariations, fakeVariations = systUtils.mcObjectVariations(), systUtils.mcWeightVariations(), systUtils.fakeSystVariations()
@@ -138,6 +136,10 @@ def countAndFillHistos(samplesPerGroup={}, syst='', verbose=False, outdir='./') 
     samplesPerGroup = dict((g, dropSamplesWithoutTree(samples)) for g, samples in samplesPerGroup.iteritems())
     def dropGroupsWithoutSamples(groups) : return dict((g, samples) for g, samples in groups.iteritems() if len(samples))
     samplesPerGroup = dropGroupsWithoutSamples(samplesPerGroup)
+
+    groups = samplesPerGroup.keys()
+    counters = bookCounters(groups, selections)
+    histos = bookHistos(variables, groups, selections)
     for group, samplesGroup in samplesPerGroup.iteritems() :
         if verbose : print 1*' ',group
         hsGroup   = histos  [group]
@@ -147,6 +149,7 @@ def countAndFillHistos(samplesPerGroup={}, syst='', verbose=False, outdir='./') 
             fillAndCount(hsGroup, cntsGroup, sample)
     if verbose : print 'done'
     return counters, histos
+
 def printCounters(counters):
     countTotalBkg(counters)
     blindGroups   = [g for g in counters.keys() if g!='data']
@@ -172,13 +175,23 @@ def plotHistos(histos, plotdir='./') :
     for s, hs in histosPerSel.iteritems() : plotHistos(s, hs, plotdir)
 
 #___________________________________________________________
-class Sample :
-    def __init__(self, name, group) :
-        self.name = name # this is either the name (for data and fake) or the dsid (for mc)
-        self.group = group
+class BaseSampleGroup(object) :
+    def __init__(self, name) :
+        self.name = name
         self.setSyst()
-        self.setHftInputDir()
-        self.setHistosInputDir()
+    @property
+    def label(self) : return self.groupname if hasattr(self, 'groupname') else self.name
+    @property
+    def isFake(self) : return self.label=='fake'
+    @property
+    def isData(self) : return self.label=='data'
+    @property
+    def isMc(self) : return not (self.isFake or self.isData)
+    def isNeededForSys(self, sys) :
+        return (sys=='NOM'
+                or (self.isMc and sys in systUtils.mcWeightVariations())
+                or (self.isMc and sys in systUtils.mcObjectVariations())
+                or (self.isFake and sys in systUtils.fakeSystVariations()))
     def setSyst(self, sys='NOM') :
         nominal = 'NOM' # do we have differnt names for nom (mc vs fake)?
         isObjSys    = sys in systUtils.mcObjectVariations()
@@ -191,20 +204,17 @@ class Sample :
         sysNameFunc = nameObjectSys if isObjSys else nameWeightSys if isWeightSys else nameFakeSys if isFakeSys else identity
         self.syst = sysNameFunc(sys)
         return self
+#___________________________________________________________
+class Sample(BaseSampleGroup) :
+    def __init__(self, name, groupname) :
+        super(Sample, self).__init__(name) # this is either the name (for data and fake) or the dsid (for mc)
+        self.groupname = groupname
+        self.setHftInputDir()
     def setHftInputDir(self, dir='') :
         useDefaults = not dir
         defaultDir = 'out/fakepred' if self.isFake else 'out/susyplot'
         self.hftInputDir = defaultDir if useDefaults else dir
         return self
-    def setHistosInputDir(self, dir='') :
-        self.histoInputDir = dir if dir else 'out/hft'
-        return self
-    @property
-    def isFake(self) : return self.group=='fake'
-    @property
-    def isData(self) : return self.group=='data'
-    @property
-    def isMc(self) : return not (self.isFake or self.isData)
     @property
     def filenameHftTree(self) :
         def dataFilename(sample, dir, sys) : return "%(dir)s/%(sys)s_%(sam)s.PhysCont.root" % {'dir':dir, 'sam':sample, 'sys':sys}
@@ -222,7 +232,7 @@ class Sample :
     def hasInputHftFile(self, msg) :
         filename = self.filenameHftTree
         isThere = os.path.exists(filename)
-        if not isThere : print msg+"%s %s missing : %s"%(self.group, self.name, filename)
+        if not isThere : print msg+"%s %s missing : %s"%(self.groupname, self.name, filename)
         return isThere
     def hasInputHftTree(self, msg='') :
         treeIsThere = False
@@ -231,14 +241,28 @@ class Sample :
             inputFile = r.TFile.Open(filename) if self.hasInputHftFile(msg) else None
             if inputFile :
                 if inputFile.Get(treename) : treeIsThere = True
-                else : print msg+"%s %s missing tree '%s' from %s"%(self.group, self.name, treename, filename)
+                else : print msg+"%s %s missing tree '%s' from %s"%(self.groupname, self.name, treename, filename)
             inputFile.Close()
         return treeIsThere
-    def isNeededForSys(sys) :
-        return (sys=='NOM'
-                or (self.isMc and sys in systUtils.mcWeightVariations())
-                or (self.isMc and sys in systUtils.mcObjectVariations())
-                or (self.isFake and sys in systUtils.fakeSystVariations()))
+    def group(self) :
+        return Group(self.groupname).setSyst(self.syst)
+#___________________________________________________________
+class Group(BaseSampleGroup) :
+    def __init__(self, name) :
+        super(Group, self).__init__(name)
+        self.setSyst()
+        self.setHistosDir()
+    def setHistosDir(self, dir='') :
+        self.histosDir = dir if dir else 'out/hft'
+        return self
+    @property
+    def filenameHisto(self) :
+        def dataFilename(group, dir, sys) : return "%(dir)s/%(sys)s_%(gr)s.PhysCont.root" % {'dir':dir, 'gr':group, 'sys':sys}
+        def fakeFilename(group, dir, sys) : return "%(dir)s/%(sys)s_fake.%(gr)s.PhysCont.root" % {'dir':dir, 'gr':group, 'sys':sys}
+        def mcFilename  (group, dir, sys) : return "%(dir)s/%(sys)s_%(gr)s.root" % {'dir':dir, 'sys':sys, 'gr':group}
+        fnameFunc = dataFilename if self.isData else fakeFilename if self.isFake else mcFilename
+        return fnameFunc(self.name, self.histosDir, self.syst)
+
 #___________________________________________________________
 def allGroups(noData=False, noSignal=True) :
     return ([k for k in mcDatasetids().keys() if k!='signal' or not noSignal]
@@ -356,9 +380,9 @@ def mcDatasetids() :
                     177525, 177526]
         }
 def allSamplesAllGroups() :
-    asg = dict( [(k, [Sample(group=k, name=d) for d in v]) for k,v in mcDatasetids().iteritems()]
-               +[('data', [Sample(group='data', name=s) for s in dataSampleNames()])]
-               +[('fake', [Sample(group='fake', name=s) for s in dataSampleNames()])])
+    asg = dict( [(k, [Sample(groupname=k, name=d) for d in v]) for k,v in mcDatasetids().iteritems()]
+               +[('data', [Sample(groupname='data', name=s) for s in dataSampleNames()])]
+               +[('fake', [Sample(groupname='fake', name=s) for s in dataSampleNames()])])
     asg = dict((k,v) for k,v in asg.iteritems() if k in allGroups())
     return asg
 def stackedGroups() :
@@ -401,7 +425,7 @@ def bookCounters(samples, selections) :
     "book a dict of counters with keys [sample][selection]"
     return dict((s, dict((sel, 0.0) for sel in selections)) for s in samples)
 def countTotalBkg(counters={'sample' : {'sel':0.0}}) :
-    backgrounds = [g for g in allSamplesAllGroups().keys() if g!='signal' and g!='data']
+    backgrounds = [g for g in counters.keys() if g!='signal' and g!='data']
     selections = first(counters).keys()
     counters['totBkg'] = dict((s, sum(counters[b][s] for b in backgrounds)) for s in selections)
 def getGroupColor(g) :
@@ -447,8 +471,17 @@ def plotHistos(selection='', histos={}, outdir='./') :
 def listExistingSyst(dir) :
     print "listing systematics from ",dir
     print "...not implemented..."
-def saveHistos(histos, outputDir) :
-    print "not implemented"
+def saveHistos(samplesPerGroup={}, histosPerGroup={}, outdir='./', verbose=False) :
+    for groupname, histos in histosPerGroup.iteritems() :
+        group = first(samplesPerGroup[groupname]).group().setHistosDir(outdir)
+        outFilename = group.filenameHisto
+        if verbose : print "creating file %s"%outFilename
+        file = r.TFile.Open(outFilename, 'recreate')
+        file.cd()
+        for g, histosPerSel in histosPerGroup.iteritems() :
+            for sel, histos in histosPerSel.iteritems() :
+                for var, h in histos.iteritems() : h.Write()
+        file.Close()
 
 def fetchHistos(dir) :
     return "to be implemented"
