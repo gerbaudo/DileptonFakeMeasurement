@@ -36,7 +36,7 @@ def mcWeightVariations() :
             'xsecUp', 'xsecDo'
             ]
 def getAllVariations() :
-    return fakeSystVariations() + mcObjectVariations() + mcWeightVariations()
+    return ['NOM'] + fakeSystVariations() + mcObjectVariations() + mcWeightVariations()
 
 def fetchVariationHistos(input_fake_file=None, nominal_histo=None, variations=fakeSystVariations()) :
     nom_hname = nominal_histo.GetName()
