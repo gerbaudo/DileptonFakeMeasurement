@@ -9,6 +9,7 @@ try:
     import numpy as np
 except ImportError:
     print "missing numpy: some functions will not be available"
+from utils import verticalSlice
 
 def importRoot() :
     import ROOT as r
@@ -17,7 +18,11 @@ def importRoot() :
     return r
 r = importRoot()
 
-from utils import verticalSlice
+def setWhPlotStyle() :
+    r.gStyle.SetPadTickX(1)
+    r.gStyle.SetPadTickY(1)
+    r.gStyle.SetOptStat(0)
+    r.gStyle.SetOptTitle(0)
 
 def referenceLine(xmin=0., xmax=100.0, ymin=1.0, ymax=1.0) :
     l1 = r.TLine(xmin, ymin, xmax, ymax)
