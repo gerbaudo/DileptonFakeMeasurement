@@ -114,10 +114,16 @@ def runFill(opts) :
 def runPlot(opts) :
     inputDir   = opts.input_dir
     outputDir  = opts.output_dir
-
+    verbose    = opts.verbose
     mkdirIfNeeded(outputDir)
-    histos = fetchHistos(inputDir)
-    plotHistos(histos, outputDir)
+
+    groups = allGroups()
+    for g in groups :
+        g.setHistosDir(inputDir)
+        g.exploreAvailableSystematics(verbose)
+    print groups
+#     histos = fetchHistos(inputDir)
+#     plotHistos(histos, outputDir)
 
 def countAndFillHistos(samplesPerGroup={}, syst='', verbose=False, outdir='./') :
 
@@ -259,12 +265,25 @@ class Group(BaseSampleGroup) :
         self.histosDir = dir if dir else 'out/hft'
         return self
     @property
-    def filenameHisto(self) :
+    def filenameHisto(self, sys='') :
         def dataFilename(group, dir, sys) : return "%(dir)s/%(sys)s_%(gr)s.PhysCont.root" % {'dir':dir, 'gr':group, 'sys':sys}
         def fakeFilename(group, dir, sys) : return "%(dir)s/%(sys)s_fake.%(gr)s.PhysCont.root" % {'dir':dir, 'gr':group, 'sys':sys}
         def mcFilename  (group, dir, sys) : return "%(dir)s/%(sys)s_%(gr)s.root" % {'dir':dir, 'sys':sys, 'gr':group}
         fnameFunc = dataFilename if self.isData else fakeFilename if self.isFake else mcFilename
-        return fnameFunc(self.name, self.histosDir, self.syst)
+        return fnameFunc(self.name, self.histosDir, sys if sys else self.syst)
+    def exploreAvailableSystematics(self, verbose=False) :
+        systs = ['NOM']
+        if self.isFake :
+            systs += systUtils.fakeSystVariations()
+        elif self.isMc :
+            systs += systUtils.mcObjectVariations()
+            systs += systUtils.mcWeightVariations()
+        self.systematics = []
+        for sys in systs :
+            self.sys = sys
+            if os.path.exists(self.filenameHisto) :
+                self.systematics.append(sys)
+        if verbose : print "%s : found %d variations : %s"%(self.name, len(self.systematics), str(self.systematics))
 
 #___________________________________________________________
 def allGroups(noData=False, noSignal=True) :
@@ -389,6 +408,9 @@ def allSamplesAllGroups() :
                +[('fake', [Sample(groupname='fake', name=s) for s in dataSampleNames()])])
     asg = dict((k,v) for k,v in asg.iteritems() if k in allGroups())
     return asg
+def allGroups() :
+    return [Group(g) for g in mcDatasetids().keys()+['data']+['fake']]
+
 def stackedGroups() :
     return [g for g in allSamplesAllGroups().keys() if g not in ['data', 'signal']]
 
@@ -488,6 +510,7 @@ def saveHistos(samplesPerGroup={}, histosPerGroup={}, outdir='./', verbose=False
         file.Close()
 
 def fetchHistos(dir) :
+
     return "to be implemented"
 
 if __name__=='__main__' :
