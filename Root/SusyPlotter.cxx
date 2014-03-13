@@ -528,16 +528,16 @@ swh::HftFiller::WeightVariations  SusyPlotter::computeWeightVariations(cvl_t& le
     const WeightComponents &w = m_weightComponents;
     swh::HftFiller::WeightVariations wv;
     bool isQflip(w.qflip!=1.0);
-    wv.qflipUp_ = WeightComponents(w).replaceQflip(isQflip ? computeChargeFlipProb(l, m, swh::WH_BKGMETHODUP  ) : 1.0).product();
-    wv.qflipDo_ = WeightComponents(w).replaceQflip(isQflip ? computeChargeFlipProb(l, m, swh::WH_BKGMETHODDOWN) : 1.0).product();
-    wv.elTrigUp_ = WeightComponents(w).replaceTrig(computeNonStaticWeightComponents(l, j, swh::WH_ETRIGREWUP  ).trigger).product();
-    wv.elTrigDo_ = WeightComponents(w).replaceTrig(computeNonStaticWeightComponents(l, j, swh::WH_ETRIGREWDOWN).trigger).product();
-    wv.muTrigUp_ = WeightComponents(w).replaceTrig(computeNonStaticWeightComponents(l, j, swh::WH_MTRIGREWUP  ).trigger).product();
-    wv.muTrigDo_ = WeightComponents(w).replaceTrig(computeNonStaticWeightComponents(l, j, swh::WH_MTRIGREWDOWN).trigger).product();
-    wv.bTagUp_   = WeightComponents(w).replaceBtag(computeNonStaticWeightComponents(l, j, swh::WH_BJETUP      ).btag   ).product();
-    wv.bTagDo_   = WeightComponents(w).replaceBtag(computeNonStaticWeightComponents(l, j, swh::WH_BJETDOWN    ).btag   ).product();
-    wv.xsecUp_ = w.product()*(1.0 + m_hftFiller.xsecRelativeUncertainty());
-    wv.xsecDo_ = w.product()*(1.0 - m_hftFiller.xsecRelativeUncertainty());
+    wv.qflipUp_  = isQflip ? w.relativeQflip(computeChargeFlipProb(l, m, swh::WH_BKGMETHODUP  )) : 1.0;
+    wv.qflipDo_  = isQflip ? w.relativeQflip(computeChargeFlipProb(l, m, swh::WH_BKGMETHODDOWN)) : 1.0;
+    wv.elTrigUp_ = w.relativeTrig(computeNonStaticWeightComponents(l, j, swh::WH_ETRIGREWUP  ));
+    wv.elTrigDo_ = w.relativeTrig(computeNonStaticWeightComponents(l, j, swh::WH_ETRIGREWDOWN));
+    wv.muTrigUp_ = w.relativeTrig(computeNonStaticWeightComponents(l, j, swh::WH_MTRIGREWUP  ));
+    wv.muTrigDo_ = w.relativeTrig(computeNonStaticWeightComponents(l, j, swh::WH_MTRIGREWDOWN));
+    wv.bTagUp_   = w.relativeBtag(computeNonStaticWeightComponents(l, j, swh::WH_BJETUP      ));
+    wv.bTagDo_   = w.relativeBtag(computeNonStaticWeightComponents(l, j, swh::WH_BJETDOWN    ));
+    wv.xsecUp_   = (1.0 + m_hftFiller.xsecRelativeUncertainty());
+    wv.xsecDo_   = (1.0 - m_hftFiller.xsecRelativeUncertainty());
     return wv;
 }
 //-----------------------------------------
