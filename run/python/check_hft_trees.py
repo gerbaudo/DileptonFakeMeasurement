@@ -112,16 +112,28 @@ def runFill(opts) :
         saveHistos(samplesPerGroup, histos, outputDir, verbose)
 
 def runPlot(opts) :
-    inputDir   = opts.input_dir
-    outputDir  = opts.output_dir
-    verbose    = opts.verbose
+    inputDir     = opts.input_dir
+    outputDir    = opts.output_dir
+    sysOption    = opts.syst
+    excludedSyst = opts.exclude
+    verbose      = opts.verbose
     mkdirIfNeeded(outputDir)
 
     groups = allGroups()
-    for g in groups :
-        g.setHistosDir(inputDir)
-        g.exploreAvailableSystematics(verbose)
-    print groups
+    selections = allRegions()
+    variables = variablesToPlot()
+    for group in groups :
+        group.setHistosDir(inputDir)
+        group.exploreAvailableSystematics(verbose)
+        group.filterAndDropSystematics(sysOption, excludedSyst, verbose)
+        # you are here: now build error bands for [selection][group][variable] for s in [systs]
+        # ----> reuse systUtils.computeFakeSysErr2
+
+#                   dict([(sel,
+#                          dict([(v, histo(v, histoSuffix(s, sel))) for v in variables]))
+#                          for sel in selections]))
+
+#     for hname in
 #     histos = fetchHistos(inputDir)
 #     plotHistos(histos, outputDir)
 
@@ -284,7 +296,17 @@ class Group(BaseSampleGroup) :
             if os.path.exists(self.filenameHisto) :
                 self.systematics.append(sys)
         if verbose : print "%s : found %d variations : %s"%(self.name, len(self.systematics), str(self.systematics))
-
+    def filterAndDropSystematics(self, include='.*', exclude=None, verbose=False) :
+        nBefore = len(self.systematics)
+        anyFilter = include or exclude
+        toBeExcluded = filter(self,systematics, exclude) if exclude else []
+        systs = ['NOM'] if 'NOM' in self.systematics else []
+        if include : systs += filterWithRegexp(self.systematics, include)
+        if exclude : systs  = [s for s in systs if toBeExcluded and s not in toBeExcluded]
+        self.systematics = systs if anyFilter else self.systematics
+        nAfter = len(self.systematics)
+        if verbose : print "%s : dropped %d systematics, left with %s"%(self.name, nBefore-nAfter, str(self.systematics))
+        assert self.systematics.count('NOM')==1 or not nBefore, "%s : 'NOM' required %s"%(self.name, str(self.systematics))
 #___________________________________________________________
 def allGroups(noData=False, noSignal=True) :
     return ([k for k in mcDatasetids().keys() if k!='signal' or not noSignal]
