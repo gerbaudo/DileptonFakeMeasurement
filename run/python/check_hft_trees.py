@@ -238,7 +238,10 @@ class Sample(BaseSampleGroup) :
         self.hftInputDir = defaultDir if useDefaults else dir
         return self
     @property
-    def weightLeafname(self) : return 'eventweight' if not self.isWeightSys else systUtils.mcWeightBranchname(self.syst)
+    def weightLeafname(self) :
+        leafname = 'eventweight'
+        if  self.isWeightSys : leafname += " * %s"%systUtils.mcWeightBranchname(self.syst)
+        return leafname
     @property
     def filenameHftTree(self) :
         def dataFilename(sample, dir, sys) : return "%(dir)s/%(sys)s_%(sam)s.PhysCont.root" % {'dir':dir, 'sam':sample, 'sys':sys}
