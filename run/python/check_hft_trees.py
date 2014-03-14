@@ -161,12 +161,14 @@ def countAndFillHistos(samplesPerGroup={}, syst='', verbose=False, outdir='./') 
     counters = bookCounters(groups, selections)
     histos = bookHistos(variables, groups, selections)
     for group, samplesGroup in samplesPerGroup.iteritems() :
+        logLine = "---->"
         if verbose : print 1*' ',group
         hsGroup   = histos  [group]
         cntsGroup = counters[group]
         for sample in samplesGroup :
-            if verbose : print 2*' ',sample.name
+            if verbose : logLine +=" %s"%sample.name
             fillAndCount(hsGroup, cntsGroup, sample)
+        if verbose : print logLine
     if verbose : print 'done'
     return counters, histos
 
