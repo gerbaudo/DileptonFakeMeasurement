@@ -29,11 +29,15 @@ def mcObjectVariations() :
             ]
 def mcWeightVariations() :
     "See list at HftFiller::assignWeightVars()"
-    return ['BKGMETHODUP', 'BKGMETHODDOWN'
-            ,'ETRIGREWUP', 'ETRIGREWDOWN'
-            ,'MTRIGREWUP', 'MTRIGREWDOWN'
-            ,'BJETUP', 'BJETDOWN'
-            ,'XSUP', 'XSDOWN'
+    return ['BKGMETHODUP' ,'BKGMETHODDOWN'
+            ,'ETRIGREWUP' ,'ETRIGREWDOWN'
+            ,'MTRIGREWUP' ,'MTRIGREWDOWN'
+            ,'ESFUP'      ,'ESFDOWN'
+            ,'MEFFUP'     ,'MEFFDOWN'
+            ,'BJETUP'     ,'BJETDOWN'
+            ,'CJETUP'     ,'CJETDOWN'
+            ,'BMISTAGUP'  ,'BMISTAGDOWN'
+            ,'XSUP'       ,'XSDOWN'
             ]
 def mcWeightBranchname(mcWeightVariation='') : return 'syst_'+mcWeightVariation
 def mcWeightBranches() : return [mcWeightBranchname(v) for v in mcWeightVariations()]
