@@ -27,6 +27,8 @@ public:
             qflipUp_ = qflipDo_ = 1.0;
             elTrigUp_ = elTrigDo_ = 1.0;
             muTrigUp_ = muTrigDo_ = 1.0;
+            elEffUp_ = elEffDo_ = 1.0;
+            muEffUp_ = muEffDo_ = 1.0;
             bTagUp_ = bTagDo_ = 1.0;
             xsecUp_ = xsecDo_ = 1.0;
             return *this;
@@ -34,6 +36,8 @@ public:
         float qflipUp_, qflipDo_;
         float elTrigUp_, elTrigDo_;
         float muTrigUp_, muTrigDo_;
+        float elEffUp_, elEffDo_;
+        float muEffUp_, muEffDo_;
         float bTagUp_, bTagDo_;
         float xsecUp_, xsecDo_;
     };

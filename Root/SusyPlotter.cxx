@@ -537,6 +537,10 @@ swh::HftFiller::WeightVariations  SusyPlotter::computeWeightVariations(cvl_t& le
     wv.muTrigDo_ = w.relativeTrig(computeNonStaticWeightComponents(l, j, swh::WH_MTRIGREWDOWN));
     wv.bTagUp_   = w.relativeBtag(computeNonStaticWeightComponents(l, j, swh::WH_BJETUP      ));
     wv.bTagDo_   = w.relativeBtag(computeNonStaticWeightComponents(l, j, swh::WH_BJETDOWN    ));
+    wv.elEffUp_  = w.relativeLepSf(susy::getLeptonEff2Lep(l, swh::WH_ESFUP));
+    wv.elEffDo_  = w.relativeLepSf(susy::getLeptonEff2Lep(l, swh::WH_ESFDOWN));
+    wv.muEffUp_  = w.relativeLepSf(susy::getLeptonEff2Lep(l, swh::WH_MEFFUP));
+    wv.muEffDo_  = w.relativeLepSf(susy::getLeptonEff2Lep(l, swh::WH_MEFFDOWN));
     wv.xsecUp_   = (1.0 + m_hftFiller.xsecRelativeUncertainty());
     wv.xsecDo_   = (1.0 - m_hftFiller.xsecRelativeUncertainty());
     return wv;
