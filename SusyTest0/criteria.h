@@ -11,6 +11,8 @@
 #include "SusyNtuple/SusyNt.h"
 #include "SusyNtuple/SusyDefs.h"
 
+#include "SusyTest0/Systematics.h"
+
 class TLorentzVector;
 
 namespace susy
@@ -42,7 +44,7 @@ namespace susy
   bool passHtMin(const LeptonVector& l, const JetVector &j, const Susy::Met* met, float minVal);
   bool passNlepMin(const LeptonVector &leptons, size_t minVal);
   bool passZtautauVeto(const LeptonVector& l, const JetVector& j, const Susy::Met* m, float widthZpeak=40.0);
-  float getLeptonEff2Lep(const LeptonVector &leptons);
+  float getLeptonEff2Lep(const LeptonVector &leptons, const susy::wh::Systematic sys);
   int pdgIdFromLep(const Susy::Lepton *l);
   float transverseMass(const TLorentzVector &lep, const TLorentzVector &met);
   //! redundant? mt with non-zero m_vv? see https://svnweb.cern.ch/trac/atlasinst/browser/Institutes/UCIrvine/ataffard/SusyWeakProdAna/trunk/Root/PhysicsTools.cxx

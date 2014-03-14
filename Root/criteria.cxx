@@ -13,6 +13,7 @@
 #include "SusyTest0/kinematic.h"
 
 using Susy::Lepton;
+namespace swh = susy::wh;
 
 namespace susy
 {
@@ -222,11 +223,34 @@ bool passZtautauVeto(const LeptonVector& l, const JetVector& j, const Susy::Met*
   return abs(mZTauTau(*l[0], *l[1], m->lv()) - mZ0) > widthZpeak;
 }
 //-----------------------------------------
-float getLeptonEff2Lep(const LeptonVector &leptons)
+float getLeptonEff2Lep(const LeptonVector &leptons, const susy::wh::Systematic sys)
 {
   assert(leptons.size()>1);
-  // DG 2014-03-07 note to self: syst variations here seem to be (lep->effSF +/- lep->errEffSF), see original import
-  return leptons[0]->effSF * leptons[1]->effSF;
+  const Lepton *l0=leptons[0], *l1=leptons[1];
+  float effFactor = 1.0;
+  if(l0 && l1){
+      struct EffSfFunc {
+          bool pos, neg, elUD, muUD;
+          EffSfFunc(const susy::wh::Systematic sys) {
+              bool muUp(sys==swh::WH_MEFFUP), muDo(sys==swh::WH_MEFFDOWN), elUp(swh::WH_ESFUP), elDo(swh::WH_ESFDOWN);
+              pos  = (muUp || elUp);
+              neg  = (muDo || elDo);
+              elUD = (elUp || elDo);
+              muUD = (muUp || muDo);
+          }
+          float operator()(const Lepton *l) const {
+              float sf(l->effSF), delta(0.0);
+              bool el(elUD && l->isEle()), mu(muUD && l->isMu());
+              if((el && pos) || (mu && pos)) delta = +l->errEffSF;
+              if((el && neg) || (mu && neg)) delta = -l->errEffSF;
+              return sf + delta;
+          }
+      } scaleFactor(sys);
+      effFactor = scaleFactor(l0) * scaleFactor(l1);
+  } else {
+      std::cout<<"getLeptonEff2Lep: invalid lepton l0 "<<l0<<", l1 "<<l1<<"... returning "<<effFactor<<std::endl;
+  }
+  return effFactor;
 }
 //-----------------------------------------
 int pdgIdFromLep(const Lepton *l)

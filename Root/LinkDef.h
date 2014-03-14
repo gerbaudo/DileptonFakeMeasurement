@@ -34,6 +34,7 @@
 #pragma link C++ namespace susy::wh;
 #pragma link C++ struct susy::wh::FourMom+;
 #pragma link C++ struct susy::wh::EventParameters+;
+#pragma link C++ enum susy::wh::Systematic;
 #pragma link C++ class vector<susy::wh::FourMom>+;
 #pragma link C++ namespace susy::wh::kin;
 #pragma link C++ struct susy::wh::kin::DilepVars+;

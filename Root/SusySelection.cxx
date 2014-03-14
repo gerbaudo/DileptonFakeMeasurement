@@ -460,7 +460,7 @@ SusySelection::WeightComponents SusySelection::computeNonStaticWeightComponents(
         bool btagSfNeeded(sys==swh::WH_CENTRAL || sys==swh::WH_BJETUP || sys==swh::WH_BJETDOWN);
         BTagSys bsys(sys==swh::WH_BJETUP   ? BTag_BJet_UP :
                      sys==swh::WH_BJETDOWN ? BTag_BJet_DN : BTag_NOM);
-        wc.lepSf = susy::getLeptonEff2Lep(leptons); // DG 2014-03-07: do we have a syst here?
+        wc.lepSf   = susy::getLeptonEff2Lep(leptons, sys);
         wc.trigger = (trigSfNeeded ? getTriggerWeight2Lep(leptons, sys) : 1.0);
         wc.btag    = (btagSfNeeded ? getBTagWeight(jets, nt.evt(), bsys) : 1.0);
     }
