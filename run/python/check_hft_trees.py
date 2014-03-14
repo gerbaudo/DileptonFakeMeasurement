@@ -432,10 +432,9 @@ def mcDatasetids() :
                     177525, 177526]
         }
 def allSamplesAllGroups() :
-    asg = dict( [(k, [Sample(groupname=k, name=d) for d in v]) for k,v in mcDatasetids().iteritems()]
+    asg = dict( [(group, [Sample(groupname=group, name=dsid) for dsid in dsids]) for group, dsids in mcDatasetids().iteritems()]
                +[('data', [Sample(groupname='data', name=s) for s in dataSampleNames()])]
                +[('fake', [Sample(groupname='fake', name=s) for s in dataSampleNames()])])
-    asg = dict((k,v) for k,v in asg.iteritems() if k in allGroups())
     return asg
 def allGroups() :
     return [Group(g) for g in mcDatasetids().keys()+['data']+['fake']]
