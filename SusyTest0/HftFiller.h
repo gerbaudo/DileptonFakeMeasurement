@@ -30,6 +30,8 @@ public:
             elEffUp_ = elEffDo_ = 1.0;
             muEffUp_ = muEffDo_ = 1.0;
             bTagUp_ = bTagDo_ = 1.0;
+            cTagUp_ = cTagDo_ = 1.0;
+            lTagUp_ = lTagDo_ = 1.0;
             xsecUp_ = xsecDo_ = 1.0;
             return *this;
         }
@@ -39,6 +41,8 @@ public:
         float elEffUp_, elEffDo_;
         float muEffUp_, muEffDo_;
         float bTagUp_, bTagDo_;
+        float cTagUp_, cTagDo_;
+        float lTagUp_, lTagDo_;
         float xsecUp_, xsecDo_;
     };
 public:

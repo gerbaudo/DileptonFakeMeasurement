@@ -62,6 +62,8 @@ void HftFiller::assignWeightVars(HistFitterTree* const tree, const susy::wh::Hft
         if(w.elEffUp_  < w.elEffDo_)  swap(w.elEffUp_,  w.elEffDo_);
         if(w.muEffUp_  < w.muEffDo_)  swap(w.muEffUp_,  w.muEffDo_);
         if(w.bTagUp_   < w.bTagDo_  ) swap(w.bTagUp_,   w.bTagDo_);
+        if(w.cTagUp_   < w.cTagDo_  ) swap(w.cTagUp_,   w.cTagDo_);
+        if(w.lTagUp_   < w.lTagDo_  ) swap(w.lTagUp_,   w.lTagDo_);
         if(w.xsecUp_   < w.xsecDo_  ) swap(w.xsecUp_,   w.xsecDo_);
         tree->syst_BKGMETHODUP   = w.qflipUp_;
         tree->syst_BKGMETHODDOWN = w.qflipDo_;
@@ -75,6 +77,10 @@ void HftFiller::assignWeightVars(HistFitterTree* const tree, const susy::wh::Hft
         tree->syst_MEFFDOWN      = w.muEffDo_;
         tree->syst_BJETUP        = w.bTagUp_;
         tree->syst_BJETDOWN      = w.bTagDo_;
+        tree->syst_CJETUP        = w.cTagUp_;
+        tree->syst_CJETDOWN      = w.cTagDo_;
+        tree->syst_BMISTAGUP     = w.lTagUp_;
+        tree->syst_BMISTAGDOWN   = w.lTagDo_;
         tree->syst_XSUP          = w.xsecUp_;
         tree->syst_XSDOWN        = w.xsecDo_;
     }
