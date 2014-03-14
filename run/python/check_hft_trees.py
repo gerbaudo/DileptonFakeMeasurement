@@ -93,16 +93,18 @@ def runFill(opts) :
     excludedSyst = opts.exclude
     verbose      = opts.verbose
 
+    if verbose : print "filling histos"
     mkdirIfNeeded(outputDir)
     systematics = ['NOM']
     anySys = sysOption==None
-    if   sysOption=='fake'   or anySys : systematics += systUtils.fakeSystVariations()
-    elif sysOption=='object' or anySys : systematics += systUtils.mcObjectVariations()
-    elif sysOption=='weight' or anySys : systematics += systUtils.mcWeightVariations()
+    if   sysOption=='fake' or anySys : systematics += systUtils.fakeSystVariations()
+    if sysOption=='object' or anySys : systematics += systUtils.mcObjectVariations()
+    if sysOption=='weight' or anySys : systematics += systUtils.mcWeightVariations()
     elif sysOption in systUtils.getAllVariations() : systematics = [sysOption]
     else : raise ValueError("Invalid syst %s"%sysOption)
     if excludedSyst : systematics = [s for s in systematics if s not in filterWithRegexp(systematics, excludedSyst)]
 
+    if verbose : print "about to loop over these systematics:\n %s"%str(systematics)
     for syst in systematics :
         if verbose : print '---- filling ',syst
         samplesPerGroup = allSamplesAllGroups()
