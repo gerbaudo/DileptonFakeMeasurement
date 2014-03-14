@@ -58,7 +58,7 @@ def main() :
     parser.add_option('-g', '--input-gen', help='location hft trees for everything else')
     parser.add_option('-i', '--input-dir')
     parser.add_option('-o', '--output-dir')
-    parser.add_option('-s', '--syst', help="variations to process (default all). Give a list or say 'weight', 'object', or 'fake'")
+    parser.add_option('-s', '--syst', help="variations to process (default all). Give a comma-sep list or say 'weight', 'object', or 'fake'")
     parser.add_option('-e', '--exclude', help="skip some systematics, example 'EL_FR_.*'")
     parser.add_option('-v', '--verbose', action='store_true', default=False)
     parser.add_option('-l', '--list-systematics', action='store_true', default=False, help='list what is already in output_dir')
@@ -97,14 +97,16 @@ def runFill(opts) :
     mkdirIfNeeded(outputDir)
     systematics = ['NOM']
     anySys = sysOption==None
-    if   sysOption=='fake' or anySys : systematics += systUtils.fakeSystVariations()
+    if sysOption=='fake'   or anySys : systematics += systUtils.fakeSystVariations()
     if sysOption=='object' or anySys : systematics += systUtils.mcObjectVariations()
     if sysOption=='weight' or anySys : systematics += systUtils.mcWeightVariations()
+    if sysOption.count(',') : systematics = [s for s in systUtils.getAllVariations() if s in sysOption.split(',')]
     elif sysOption in systUtils.getAllVariations() : systematics = [sysOption]
-    else : raise ValueError("Invalid syst %s"%sysOption)
+    if not anySys and len(systematics)==1 and sysOption!='NOM' : raise ValueError("Invalid syst %s"%str(sysOption))
     if excludedSyst : systematics = [s for s in systematics if s not in filterWithRegexp(systematics, excludedSyst)]
 
     if verbose : print "about to loop over these systematics:\n %s"%str(systematics)
+    return
     for syst in systematics :
         if verbose : print '---- filling ',syst
         samplesPerGroup = allSamplesAllGroups()
