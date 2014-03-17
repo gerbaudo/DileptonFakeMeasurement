@@ -103,3 +103,22 @@ def buildErrBandRatioGraph(errband_graph) :
         gr.SetPointEYhigh(p, ey_hi)
     return gr
 
+#___________________________________________________________
+# todo : move Group here (fake and simBkgs are Group objects)
+def buildStatisticalErrorBand(fake=None, simBkgs=[], variable='', selection='') :
+    "Just get the histos and let ROOT add up the stat uncertainties"
+    for g in [fake] + simBkgs :
+        g.setSystNominal()
+    fakeHisto = fake.getHistogram(variable, selection)
+    if not fakeHisto :
+        print "buildStatisticalErrorBand: no fake"
+        return
+    totBkg = fakeHisto.Clone(fakeHisto.GetName().replace('_fake','_totbkg'))
+    for b in simBkgs :
+        h = b.getHistogram(variable, selection)
+        if h : totBkg.Add(h)
+        else : print "buildStatisticalErrorBand: missing %s"%b.name
+    return buildErrBandGraph(totBkg, computeStatErr2(totBkg))
+#___________________________________________________________
+def buildSystematicErrorBand(fake=None, simBkgs=[], variable='', selection='') :
+    print "to be implemented"
