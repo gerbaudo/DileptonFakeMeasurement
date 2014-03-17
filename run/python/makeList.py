@@ -81,10 +81,10 @@ for dsdir in dirlist :
         continue
     nMatching += 1
     if dsname in processedDsets :
-        if debug : print "%s already processed...skip it\n%s"%(dsname,
-                                                               '\n'.join([dsdir,
-                                                                          processedDsets[dsname]]))
-        continue
+        if verbose :
+            print "%s already processed...overwriting with the latest one"%dsname
+            print "--> %s" % processedDsets[dsname]
+            print "--> %s" % dsdir
     if verbose : print dsdir
     flistname = outdir+'/'+dsname+'.txt'
     makeFile(dsdir, flistname)
