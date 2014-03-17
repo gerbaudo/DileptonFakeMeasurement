@@ -152,7 +152,11 @@ def sortedAs(d={}, sortedKeys=[]) :
     keys = [k for k in sortedKeys if k in allKeys] + [k for k in allKeys if k not in sortedKeys]
     #return collections.OrderedDict([(k, d[k]) for k in keys]) # OrderedDict not available in 2.6.5 ??
     return [(k, d[k]) for k in keys]
-
+def remove_duplicates(seq=[]) :
+    "see http://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-python-whilst-preserving-order"
+    seen = set()
+    seen_add = seen.add
+    return [ x for x in seq if x not in seen and not seen_add(x)]
 #
 # testing
 #

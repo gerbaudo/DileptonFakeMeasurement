@@ -24,6 +24,7 @@ r = importRoot()
 from utils import (first
                    ,mkdirIfNeeded
                    ,filterWithRegexp
+                   ,remove_duplicates
                    ,sortedAs
                    )
 
@@ -169,10 +170,10 @@ def countAndFillHistos(samplesPerGroup={}, syst='', verbose=False, outdir='./') 
         if verbose and not isRelevant : print "skipping %s for %s"%(g, s)
         return isRelevant
     def dropIrrelevantGroupsForThisSys(groups, sys) : return dict((g, samples) for g, samples in groups.iteritems() if groupIsRelevantForSys(g, syst))
-    samplesPerGroup = dropIrrelevantGroupsForThisSys(samplesPerGroup, syst)
     def dropSamplesWithoutTree(samples) : return [s for s in samples if s.hasInputHftTree(msg='Warning! ')]
-    samplesPerGroup = dict((g, dropSamplesWithoutTree(samples)) for g, samples in samplesPerGroup.iteritems())
     def dropGroupsWithoutSamples(groups) : return dict((g, samples) for g, samples in groups.iteritems() if len(samples))
+    samplesPerGroup = dropIrrelevantGroupsForThisSys(samplesPerGroup, syst)
+    samplesPerGroup = dict((g, dropSamplesWithoutTree(samples)) for g, samples in samplesPerGroup.iteritems())
     samplesPerGroup = dropGroupsWithoutSamples(samplesPerGroup)
 
     groups = samplesPerGroup.keys()
@@ -337,6 +338,7 @@ class Group(BaseSampleGroup) :
         if include : systs += filterWithRegexp(self.systematics, include)
         if exclude : systs  = [s for s in systs if toBeExcluded and s not in toBeExcluded]
         self.systematics = systs if anyFilter else self.systematics
+        self.systematics = remove_duplicates(self.systematics)
         nAfter = len(self.systematics)
         if verbose : print "%s : dropped %d systematics, left with %s"%(self.name, nBefore-nAfter, str(self.systematics))
         assert self.systematics.count('NOM')==1 or not nBefore, "%s : 'NOM' required %s"%(self.name, str(self.systematics))
