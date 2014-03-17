@@ -3,17 +3,19 @@
 # Sanity checks on the hft trees: yields and basic plots
 #
 # todo:
-# - fill syst histos
 # - combine errors
+# - nicefy plots
 # davide.gerbaudo@gmail.com
 # March 2014
 
+import collections
 import datetime
 import math
 import optparse
 import os
 import pprint
-from rootUtils import (getMinMax
+from rootUtils import (getBinContents
+                       ,getMinMax
                        ,topRightLegend
                        ,importRoot
                        ,setWhPlotStyle
@@ -22,6 +24,7 @@ r = importRoot()
 from utils import (first
                    ,mkdirIfNeeded
                    ,filterWithRegexp
+                   ,sortedAs
                    )
 
 import SampleUtils
@@ -41,15 +44,16 @@ Example usage ('fill' mode):
  --syst EES_Z_UP
  --input-gen  out/susyplot/merged/ \\
  --input-fake out/fakepred/merged/ \\
- --output_dir     out/hft/             \\
+ --output-dir     out/hft/         \\
  --verbose
  >& log/hft/check_hft_trees_fill.log
 
 Example usage ('plot' mode):
 %prog \\
- --syst ANY            \\
- --input-dir out/hft/  \\
- --verbose             \\
+ --syst ANY                 \\
+ --input-dir out/hft/       \\
+ --output-dir out/hft/plots \\
+ --verbose                  \\
  >& log/hft/check_hft_trees_plot.log"""
 
 def main() :
@@ -100,13 +104,12 @@ def runFill(opts) :
     if sysOption=='fake'   or anySys : systematics += systUtils.fakeSystVariations()
     if sysOption=='object' or anySys : systematics += systUtils.mcObjectVariations()
     if sysOption=='weight' or anySys : systematics += systUtils.mcWeightVariations()
-    if sysOption.count(',') : systematics = [s for s in systUtils.getAllVariations() if s in sysOption.split(',')]
+    if sysOption and sysOption.count(',') : systematics = [s for s in systUtils.getAllVariations() if s in sysOption.split(',')]
     elif sysOption in systUtils.getAllVariations() : systematics = [sysOption]
     if not anySys and len(systematics)==1 and sysOption!='NOM' : raise ValueError("Invalid syst %s"%str(sysOption))
     if excludedSyst : systematics = [s for s in systematics if s not in filterWithRegexp(systematics, excludedSyst)]
 
     if verbose : print "about to loop over these systematics:\n %s"%str(systematics)
-    return
     for syst in systematics :
         if verbose : print '---- filling ',syst
         samplesPerGroup = allSamplesAllGroups()
@@ -122,6 +125,8 @@ def runPlot(opts) :
     excludedSyst = opts.exclude
     verbose      = opts.verbose
     mkdirIfNeeded(outputDir)
+    buildStat = systUtils.buildStatisticalErrorBand
+    buildSyst = systUtils.buildSystematicErrorBand
 
     groups = allGroups()
     selections = allRegions()
@@ -130,16 +135,27 @@ def runPlot(opts) :
         group.setHistosDir(inputDir)
         group.exploreAvailableSystematics(verbose)
         group.filterAndDropSystematics(sysOption, excludedSyst, verbose)
+    simBkgs = [g for g in groups if g.isMcBkg]
+    data, fake, signal = findByName(groups, 'data'), findByName(groups, 'fake'), findByName(groups, 'signal')
+    for sel in selections :
+        for var in variables :
+            for g in groups : g.setSystNominal()
+            nominalHistoData    = data.getHistogram(variable=var, selection=sel, cacheIt=True)
+            nominalHistoSign    = signal.getHistogram(variable=var, selection=sel, cacheIt=True)
+            nominalHistoFakeBkg = fake.getHistogram(variable=var, selection=sel, cacheIt=True)
+            nominalHistosSimBkg = dict([(g.name, g.getHistogram(variable=var, selection=sel, cacheIt=True)) for g in simBkgs])
+            nominalHistosBkg = dict([('fake', nominalHistoFakeBkg)] + [(g, h) for g, h in nominalHistosSimBkg.iteritems()])
+            statErrBand = buildStat(fake=fake, simBkgs=simBkgs, variable=var, selection=sel)
+            systErrBand = buildSyst(fake=fake, simBkgs=simBkgs, variable=var, selection=sel)
+
+            plotHistos(histoData=nominalHistoData, histoSignal=nominalHistoSign, histosBkg=nominalHistosBkg,
+                       statErrBand=statErrBand, systErrBand=systErrBand,
+                       canvasName=(sel+'_'+var), outdir=outputDir, verbose=verbose)
+
         # you are here: now build error bands for [selection][group][variable] for s in [systs]
         # ----> reuse systUtils.computeFakeSysErr2
 
-#                   dict([(sel,
-#                          dict([(v, histo(v, histoSuffix(s, sel))) for v in variables]))
-#                          for sel in selections]))
 
-#     for hname in
-#     histos = fetchHistos(inputDir)
-#     plotHistos(histos, outputDir)
 
 def countAndFillHistos(samplesPerGroup={}, syst='', verbose=False, outdir='./') :
 
@@ -188,15 +204,15 @@ def printCounters(counters):
     print tablePre.csv()
     print 4*'-',' blind regions ',4*'-'
     print tableBld.csv()
-def plotHistos(histos, plotdir='./') :
-    blindGroups = [g for g in histos.keys() if g!='data']
-    countersFromHist = dict((g, dict((s, histos[g][s]['mljj'].Integral()) for s in controlRegions())) for g in blindGroups)
-    tableHist = CutflowTable(samples=blindGroups, selections=controlRegions(), countsSampleSel=countersFromHist)
-    tableHist.nDecimal = 6
-    print 4*'-',' mljj histograms ',4*'-'
-    print tableHist.csv()
-    histosPerSel = dict((s, dict((g, histos[g][s]['mljj']) for g in histos.keys())) for s in first(histos).keys())
-    for s, hs in histosPerSel.iteritems() : plotHistos(s, hs, plotdir)
+# def plotHistos(histos, plotdir='./') :
+#     blindGroups = [g for g in histos.keys() if g!='data']
+#     countersFromHist = dict((g, dict((s, histos[g][s]['mljj'].Integral()) for s in controlRegions())) for g in blindGroups)
+#     tableHist = CutflowTable(samples=blindGroups, selections=controlRegions(), countsSampleSel=countersFromHist)
+#     tableHist.nDecimal = 6
+#     print 4*'-',' mljj histograms ',4*'-'
+#     print tableHist.csv()
+#     histosPerSel = dict((s, dict((g, histos[g][s]['mljj']) for g in histos.keys())) for s in first(histos).keys())
+#     for s, hs in histosPerSel.iteritems() : plotHistos(s, hs, plotdir)
 
 #___________________________________________________________
 class BaseSampleGroup(object) :
@@ -211,11 +227,16 @@ class BaseSampleGroup(object) :
     def isData(self) : return self.label=='data'
     @property
     def isMc(self) : return not (self.isFake or self.isData)
+    @property
+    def isSignal(self) : return self.label=='signal'
+    @property
+    def isMcBkg(self) : return self.isMc and not self.isSignal
     def isNeededForSys(self, sys) :
         return (sys=='NOM'
                 or (self.isMc and sys in systUtils.mcWeightVariations())
                 or (self.isMc and sys in systUtils.mcObjectVariations())
                 or (self.isFake and sys in systUtils.fakeSystVariations()))
+    def setSystNominal(self) : self.setSyst()
     def setSyst(self, sys='NOM') :
         nominal = 'NOM' # do we have differnt names for nom (mc vs fake)?
         self.isObjSys    = sys in systUtils.mcObjectVariations()
@@ -228,6 +249,7 @@ class BaseSampleGroup(object) :
         sysNameFunc = nameObjectSys if self.isObjSys else nameWeightSys if self.isWeightSys else nameFakeSys if self.isFakeSys else identity
         self.syst = sysNameFunc(sys)
         return self
+def findByName(bsgs=[], name='') : return [b for b in bsgs if b.name==name][0]
 #___________________________________________________________
 class Sample(BaseSampleGroup) :
     def __init__(self, name, groupname) :
@@ -282,16 +304,18 @@ class Group(BaseSampleGroup) :
         super(Group, self).__init__(name)
         self.setSyst()
         self.setHistosDir()
+        self._histoCache = collections.defaultdict(dict) # [syst][histoname]
     def setHistosDir(self, dir='') :
         self.histosDir = dir if dir else 'out/hft'
         return self
     @property
-    def filenameHisto(self, sys='') :
+    def filenameHisto(self) :
+        "file containig the histograms for the current syst"
         def dataFilename(group, dir, sys) : return "%(dir)s/%(sys)s_%(gr)s.PhysCont.root" % {'dir':dir, 'gr':group, 'sys':sys}
         def fakeFilename(group, dir, sys) : return "%(dir)s/%(sys)s_fake.%(gr)s.PhysCont.root" % {'dir':dir, 'gr':group, 'sys':sys}
         def mcFilename  (group, dir, sys) : return "%(dir)s/%(sys)s_%(gr)s.root" % {'dir':dir, 'sys':sys, 'gr':group}
         fnameFunc = dataFilename if self.isData else fakeFilename if self.isFake else mcFilename
-        return fnameFunc(self.name, self.histosDir, sys if sys else self.syst)
+        return fnameFunc(self.name, self.histosDir, self.syst)
     def exploreAvailableSystematics(self, verbose=False) :
         systs = ['NOM']
         if self.isFake :
@@ -301,7 +325,7 @@ class Group(BaseSampleGroup) :
             systs += systUtils.mcWeightVariations()
         self.systematics = []
         for sys in systs :
-            self.sys = sys
+            self.setSyst(sys)
             if os.path.exists(self.filenameHisto) :
                 self.systematics.append(sys)
         if verbose : print "%s : found %d variations : %s"%(self.name, len(self.systematics), str(self.systematics))
@@ -316,6 +340,23 @@ class Group(BaseSampleGroup) :
         nAfter = len(self.systematics)
         if verbose : print "%s : dropped %d systematics, left with %s"%(self.name, nBefore-nAfter, str(self.systematics))
         assert self.systematics.count('NOM')==1 or not nBefore, "%s : 'NOM' required %s"%(self.name, str(self.systematics))
+    def getHistogram(self, variable, selection, cacheIt=False) :
+        hname = histoName(sample=self.name, selection=selection, variable=variable)
+        histo = None
+        try :
+            histo = self._histoCache[self.syst][hname]
+        except KeyError :
+            file = r.TFile.Open(self.filenameHisto)
+            hname = histoName(sample=self.name, selection=selection, variable=variable)
+            histo = file.Get(hname)
+            if not histo : print "%s : cannot get histo %s"%(self.name, hname)
+            elif cacheIt :
+                histo.SetDirectory(0)
+#                 if self.syst not in self._histoCache : self._histoCache[self.syst] = dict()
+                self._histoCache[self.syst][hname] = histo
+        return histo
+    def getBinContents(self, variable, selection) :
+        return getBinContents(self.getHistogram)
 #___________________________________________________________
 def allGroups(noData=False, noSignal=True) :
     return ([k for k in mcDatasetids().keys() if k!='signal' or not noSignal]
@@ -445,38 +486,36 @@ def stackedGroups() :
     return [g for g in allSamplesAllGroups().keys() if g not in ['data', 'signal']]
 
 def variablesToPlot() :
-    return ['mljj']
+    return ['onebin','mljj']
     return ['pt0','pt1','mll','mtmin','mtmax','mtllmet','ht','metrel','dphill','detall',
             'mt2j','mljj','dphijj','detajj']
-def histoSuffix(sample, selection) : return "%s_%s"%(sample, selection)
+def histoName(sample, selection, variable) : return "h_%s_%s_%s"%(variable, sample, selection)
 def bookHistos(variables, samples, selections) :
     "book a dict of histograms with keys [sample][selection][var]"
-    def histo(variable, suffix) :
-        s = suffix
+    def histo(variable, sam, sel) :
         twopi = +2.0*math.pi
         h = None
-        if   v=='pt0'     : h = r.TH1F('h_pt0_'    +s, ';p_{T,l0} [GeV]; entries/bin',          25, 0.0, 250.0)
-        elif v=='pt1'     : h = r.TH1F('h_pt1_'    +s, ';p_{T,l1} [GeV]; entries/bin',          25, 0.0, 250.0)
-        elif v=='mll'     : h = r.TH1F('h_mll_'    +s, ';m_{l0,l1} [GeV]; entries/bin',         25, 0.0, 250.0)
-        elif v=='mtmin'   : h = r.TH1F('h_mtmin_'  +s, ';m_{T,min}(l, MET) [GeV]; entries/bin', 25, 0.0, 400.0)
-        elif v=='mtmax'   : h = r.TH1F('h_mtmax_'  +s, ';m_{T,max}(l, MET) [GeV]; entries/bin', 25, 0.0, 400.0)
-        elif v=='mtllmet' : h = r.TH1F('h_mtllmet_'+s, ';m_{T}(l+l, MET) [GeV]; entries/bin',   25, 0.0, 600.0)
-        elif v=='ht'      : h = r.TH1F('h_ht_'     +s, ';H_{T} [GeV]; entries/bin',             25, 0.0, 800.0)
-        elif v=='metrel'  : h = r.TH1F('h_metrel_' +s, ';MET_{rel} [GeV]; entries/bin',         25, 0.0, 300.0)
-        elif v=='dphill'  : h = r.TH1F('h_dphill_' +s, ';#Delta#phi(l, l) [rad]; entries/bin',  25, 0.0, twopi)
-        elif v=='detall'  : h = r.TH1F('h_detall_' +s, ';#Delta#eta(l, l); entries/bin',        25, 0.0, +3.0 )
-        elif v=='mt2j'    : h = r.TH1F('h_mt2j_'   +s, ';m^{J}_{T2} [GeV]; entries/bin',        25, 0.0, 500.0)
-        elif v=='mljj'    : h = r.TH1F('h_mljj_'   +s, ';m_{ljj} [GeV]; entries/bin',           25, 0.0, 500.0)
-        elif v=='dphijj'  : h = r.TH1F('h_dphijj_' +s, ';#Delta#phi(j, j) [rad]; entries/bin',  25, 0.0, twopi)
-        elif v=='detajj'  : h = r.TH1F('h_detajj_' +s, ';#Delta#eta(j, j); entries/bin',        25, 0.0, +3.0 )
+        if   v=='onebin'  : h = r.TH1F(histoName(sam, sel, 'onebin' ), ';; entries',                             1, 0.5,   1.5)
+        elif v=='pt0'     : h = r.TH1F(histoName(sam, sel, 'pt0'    ), ';p_{T,l0} [GeV]; entries/bin',          25, 0.0, 250.0)
+        elif v=='pt1'     : h = r.TH1F(histoName(sam, sel, 'pt1'    ), ';p_{T,l1} [GeV]; entries/bin',          25, 0.0, 250.0)
+        elif v=='mll'     : h = r.TH1F(histoName(sam, sel, 'mll'    ), ';m_{l0,l1} [GeV]; entries/bin',         25, 0.0, 250.0)
+        elif v=='mtmin'   : h = r.TH1F(histoName(sam, sel, 'mtmin'  ), ';m_{T,min}(l, MET) [GeV]; entries/bin', 25, 0.0, 400.0)
+        elif v=='mtmax'   : h = r.TH1F(histoName(sam, sel, 'mtmax'  ), ';m_{T,max}(l, MET) [GeV]; entries/bin', 25, 0.0, 400.0)
+        elif v=='mtllmet' : h = r.TH1F(histoName(sam, sel, 'mtllmet'), ';m_{T}(l+l, MET) [GeV]; entries/bin',   25, 0.0, 600.0)
+        elif v=='ht'      : h = r.TH1F(histoName(sam, sel, 'ht'     ), ';H_{T} [GeV]; entries/bin',             25, 0.0, 800.0)
+        elif v=='metrel'  : h = r.TH1F(histoName(sam, sel, 'metrel' ), ';MET_{rel} [GeV]; entries/bin',         25, 0.0, 300.0)
+        elif v=='dphill'  : h = r.TH1F(histoName(sam, sel, 'dphill' ), ';#Delta#phi(l, l) [rad]; entries/bin',  25, 0.0, twopi)
+        elif v=='detall'  : h = r.TH1F(histoName(sam, sel, 'detall' ), ';#Delta#eta(l, l); entries/bin',        25, 0.0, +3.0 )
+        elif v=='mt2j'    : h = r.TH1F(histoName(sam, sel, 'mt2j'   ), ';m^{J}_{T2} [GeV]; entries/bin',        25, 0.0, 500.0)
+        elif v=='mljj'    : h = r.TH1F(histoName(sam, sel, 'mljj'   ), ';m_{ljj} [GeV]; entries/bin',           25, 0.0, 500.0)
+        elif v=='dphijj'  : h = r.TH1F(histoName(sam, sel, 'dphijj' ), ';#Delta#phi(j, j) [rad]; entries/bin',  25, 0.0, twopi)
+        elif v=='detajj'  : h = r.TH1F(histoName(sam, sel, 'detajj' ), ';#Delta#eta(j, j); entries/bin',        25, 0.0, +3.0 )
         else : print "unknown variable %s"%v
         h.SetDirectory(0)
         return h
-    return dict([(s,
-                  dict([(sel,
-                         dict([(v, histo(v, histoSuffix(s, sel))) for v in variables]))
+    return dict([(sam, dict([(sel, dict([(v, histo(v, sam, sel)) for v in variables]))
                          for sel in selections]))
-                 for s in samples])
+                 for sam in samples])
 def bookCounters(samples, selections) :
     "book a dict of counters with keys [sample][selection]"
     return dict((s, dict((sel, 0.0) for sel in selections)) for s in samples)
@@ -493,35 +532,48 @@ def getGroupColor(g) :
     g = hftGroup2stdGroup(g)
     return colors[g]
 
-def plotHistos(selection='', histos={}, outdir='./') :
+def plotHistos(histoData=None, histoSignal=None, histosBkg={},
+               statErrBand=None, systErrBand=None, # these are TGraphAsymmErrors
+               canvasName='canvas', outdir='./', verbose=False) :
+    "Note: blinding can be required for only a subrange of the histo, so it is taken care of when filling"
     setWhPlotStyle()
-    padMaster = first(histos)
-    can = r.TCanvas('can_'+padMaster.GetName(), padMaster.GetTitle(), 800, 600)
+    padMaster = histoData
+    if verbose : print "plotting ",padMaster.GetName()
+    can = r.TCanvas(canvasName, padMaster.GetTitle(), 800, 600)
     can.cd()
     can._hists = [padMaster]
     padMaster.Draw('axis')
+    can.Update() # necessary to fool root's dumb object ownership of the stack
     stack = r.THStack('stack_'+padMaster.GetName(), '')
+    r.SetOwnership(stack, False)
     can._hists.append(stack)
     leg = topRightLegend(can, 0.275, 0.475, shift=-0.025)
     can._leg = leg
     leg.SetBorderSize(0)
+    leg._reversedEntries = []
 #     leg.AddEntry(h_data, dataSample(), 'P')
 #     leg.AddEntry(h_bkg, 'sm', 'L')
-    for g in stackedGroups() :
-        if g not in histos : continue
-        h = histos[g]
-        h.SetFillColor(getGroupColor(g))
-        h.SetLineColor(h.GetFillColor())
-        stack.Add(h)
-        can._hists.append(h)
-    for g in stackedGroups()[::-1] : leg.AddEntry(histos[g], g, 'F') # stack goes b-t, legend goes t-b
-    stack.Draw('hist')
-#     leg.AddEntry(err_band, 'Uncertainty', 'F')
+    for group, histo in sortedAs(histosBkg, stackedGroups()) :
+        histo.SetFillColor(getGroupColor(group))
+        histo.SetLineColor(histo.GetFillColor())
+        stack.Add(histo)
+        can._hists.append(histo)
+        leg._reversedEntries.append((histo, group, 'F'))
+    for h, g, o in leg._reversedEntries[::-1] : leg.AddEntry(h, g, o) # stack goes b-t, legend goes t-b
+#     stack.Draw()
+    stack.Draw('hist same')
+    histoData.Draw('same')
+    if histoSignal : histoSignal.Draw('same')
+    #leg.AddEntry(err_band, 'Uncertainty', 'F')
+    if statErrBand : statErrBand.Draw('E2 same')
+    if systErrBand : systErrBand.Draw('E2 same')
+    totErrBand = None # todo: build from statErrBand, systErrBand
+    if totErrBand : totErrBand.Draw('E2 same')
     leg.Draw('same')
     can.Update() # force stack to create padMaster
-    hStack = stack.GetHistogram()
-    padMaster.SetMaximum(1.1*max([h.GetMaximum() for h in [hStack]+histos.values()]))
-    can.Update()
+#     hStack = stack.GetHistogram()
+#     padMaster.SetMaximum(1.1*max([h.GetMaximum() for h in [hStack]+histos.values()]))
+#     can.Update()
     for ext in ['png'] : can.SaveAs(outdir+'/'+can.GetName()+'.'+ext)
 
 def listExistingSyst(dir) :
@@ -539,9 +591,6 @@ def saveHistos(samplesPerGroup={}, histosPerGroup={}, outdir='./', verbose=False
                 for var, h in histos.iteritems() : h.Write()
         file.Close()
 
-def fetchHistos(dir) :
-
-    return "to be implemented"
 
 if __name__=='__main__' :
     main()
