@@ -373,9 +373,18 @@ def signalRegions() :
 def controlRegions() :
     return ['pre'+r for r in signalRegions()]
 def blindRegions() :
-    return ['bld'+r for r in signalRegions()]
+    "blind regions, where the mlj/mljj cut has been reversed"
+    return [blindRegionFromAnyRegion(r) for r in signalRegions()]
 def allRegions() :
     return signalRegions() + controlRegions() + blindRegions()
+def blindRegionFromAnyRegion(sr) :
+    "given any selection region, provide the corresponding blind region"
+    if   'bld' in sr : return sr
+    elif 'pre' in sr : return sr.replace('pre', 'bld')
+    else             : return 'bld'+sr
+def signalRegionFromAnyRegion(sr) :
+    "given any selection region, provide the corresponding signal region"
+    return sr.replace('pre','').replace('bld','')
 def selectionFormulas(sel) :
     ee, em, mm = 'isEE', 'isEMU', 'isMUMU'
     pt32  = '(lept1Pt>30000.0 && lept2Pt>20000.0)'
@@ -414,14 +423,23 @@ def fillAndCount(histos, counters, sample, blind=True) :
     for ev in tree :
         weight = weightFormula.EvalInstance()
         passSels = dict((s, selWeights[s].EvalInstance()) for s in selections)
-        for s in selections : counters[s] += (weight if passSels[s] else 0.0)
-        for sr, pr in zip(signalRegions(), controlRegions()) :
-            passPre, passSig = passSels[pr], passSels[sr]
-            fillHisto = passPre and not passSig if (group=='data' and blind) else passPre
+        for sel in selections : counters[sel] += (weight if passSels[sel] else 0.0)
+        for sel in selections :
+            fillHisto = passSels[sel]
+            if blind and sample.isData and (sel not in blindRegions()) :
+                fillHisto = passSels[blindRegionFromAnyRegion(sel)] and not passSels[signalRegionFromAnyRegion(sel)]
             oneJet = tree.L2nCentralLightJets==1
             mev2gev = 1.0e-3
             mljj = mev2gev*(tree.mlj if oneJet else tree.mljj)
-            if fillHisto : histos[pr]['mljj'].Fill(mljj, weight)
+            if fillHisto :
+                histos[sel]['mljj'  ].Fill(mljj, weight)
+                histos[sel]['onebin'].Fill(1.0,  weight)
+            # checks
+            if (fillHisto
+                and sel in signalRegions()
+                and sample.isFake ) :
+                channel = 'ee' if tree.isEE else 'mm' if tree.isMUMU else 'em'
+                print "ev %d run %d channel %s sel %s weight %f"%(tree.runNumber, tree.eventNumber, channel, sel, weight)
     file.Close()
 
 def mcSystematics() :
