@@ -5,6 +5,7 @@
 # davide.gerbaudo@gmail.com
 # 2013-07-25
 
+import collections
 import difflib
 from functools import wraps
 import glob
@@ -145,6 +146,13 @@ def transposeDict(d) :
 def renameDictKey(d, old, new) :
     d[new] = d.pop(old)
     return d
+def sortedAs(d={}, sortedKeys=[]) :
+    "take a dictionary and access its item with a specified order; unspecified keys go at the end"
+    allKeys = d.keys()
+    keys = [k for k in sortedKeys if k in allKeys] + [k for k in allKeys if k not in sortedKeys]
+    #return collections.OrderedDict([(k, d[k]) for k in keys]) # OrderedDict not available in 2.6.5 ??
+    return [(k, d[k]) for k in keys]
+
 #
 # testing
 #
