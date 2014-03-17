@@ -113,10 +113,6 @@ def summedHisto(histos) :
     for h in histos[0:] : hsum.Add(h)
     return hsum
 
-def binContentsWithUoflow(h) :
-    nBinsX = h.GetNbinsX()+1
-    return [h.GetBinContent(0)] + [h.GetBinContent(i) for i in range(1, nBinsX)] + [h.GetBinContent(nBinsX+1)]
-
 def cloneAndFillHisto(histo, bincontents=[], suffix='', zeroErr=True) :
     h, bc= histo, bincontents
     assert h.GetNbinsX()==len(bc),"%d bincontents for %d bins"%(len(bc), h.GetNbinsX())
@@ -176,3 +172,11 @@ def getBinIndices(h) :
                 for j in range(1, 1+h.GetNbinsY())
                 for k in range(1, 1+h.GetNbinsZ())]
     else : return []
+def getBinContents(h) :
+    bins = getBinIndices(h)
+    return [h.GetBinContent(b) for b in bins]
+def binContentsWithUoflow(h) :
+    nBinsX = h.GetNbinsX()+1
+    return [h.GetBinContent(0)] + [h.GetBinContent(i) for i in range(1, nBinsX)] + [h.GetBinContent(nBinsX+1)]
+def reverseLegendOrder(leg) :
+    "to be implemented"
