@@ -90,11 +90,10 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
       const JetVector clJets(SusySelection::filterClJets(m_signalJets2Lep));
       m_tupleMaker.fill(weight, run, event, *l0, *l1, *m, lowPtLep, clJets);
   } else {
-      for(uint s = 0; s<m_systs.size(); ++s){
-          smm::SYSTEMATIC sys = static_cast<smm::SYSTEMATIC>(m_systs.at(s));
+      for(uint iSys = 0; iSys<m_systs.size(); ++iSys){
           bool is1j(j.size()==1), is2j(j.size()>1);
-
           const sf::Region fakeR = sf::CR_SSInc1j;
+          smm::SYSTEMATIC sys = static_cast<smm::SYSTEMATIC>(m_systs.at(iSys));
           if(ssf.sameSign && ssf.ge1j) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,metRel,sys), PR_CRSsInc1j, sys);
           if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), PR_CR8lpt,    sys);
           if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), PR_CR8ee,     sys);
@@ -126,10 +125,10 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
               if(SusySelection::isEventForHft(v, ssf)) {
                   swh::kin::DilepVars vv(v); // non-const
                   vv.weight = getFakeWeight(l,fakeR, metRel,sys);
-                  fillHft(sys, vv);
+                  fillHft(iSys, vv);
               }
           }
-      } // end for(s)
+      } // end for(iSys)
   }
   return true;
 }
