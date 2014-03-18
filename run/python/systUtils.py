@@ -5,9 +5,12 @@
 
 # todo : replace the various range(...) with rootUtils.getBinIndices()
 
+import math
 import numpy as np
 from rootUtils import importRoot
 r = importRoot()
+
+from rootUtils import integralAndError
 
 def fakeSystVariations() :
     "2x2x2=8 syst variations for the fake estimate, see DiLeptonMatrixMethod::systematic_names"
@@ -49,7 +52,27 @@ def fetchVariationHistos(input_fake_file=None, nominal_histo=None, variations=fa
     nom_hname = nominal_histo.GetName()
     return dict([(v, input_fake_file.Get(nom_hname.replace('_NONE','_'+v))) for v in variations])
 def computeFakeSysErr2(nominal_histo=None, vars_histos={}) :
+    "Compute the bin-by-bin sum2 err including up&down fake systematic variations"
+    def bc(h) : return [h.GetBinContent(b) for b in range(1, 1+h.GetNbinsX())]
+    nom_bcs  = bc(nominal_histo)
+    vars_bcs = dict([(v, bc(h)) for v, h in vars_histos.iteritems()])
+    bins = range(nominal_histo.GetNbinsX())
+    deltas = [[vars_bcs[v][b] - nom_bcs[b] for v in vars_bcs.keys()] for b in bins]
+    def positive(ll) : return [l if not l<0.0 else 0.0 for l in ll ]
+    def negative(ll) : return [l if     l<0.0 else 0.0 for l in ll ]
+    def sumquad(ll) : return sum([l*l for l in ll])
+    up_e2s = np.array([sumquad(positive(deltas[b])) for b in bins])
+    do_e2s = np.array([sumquad(negative(deltas[b])) for b in bins])
+    return {'up' : up_e2s, 'down' : do_e2s}
+def computeStatErr2(nominal_histo=None) :
+    "Compute the bin-by-bin err2 (should include also mc syst, but for now it does not)"
+    bins = range(1, 1+nominal_histo.GetNbinsX())
+    bes = [nominal_histo.GetBinError(b)   for b in bins]
+    be2s = np.array([e*e for e in bes])
+    return {'up' : be2s, 'down' : be2s}
+def computeFakeSysStatErr2(nominal_histo=None, vars_histos={}) :
     "Compute the bin-by-bin sum2 err including up&down fake systematic variations + stat. unc."
+    print "refactor, use computeStatErr2 and computeSysErr2"
     def bc(h) : return [h.GetBinContent(b) for b in range(1, 1+h.GetNbinsX())]
     def be(h) : return [h.GetBinError(b) for b in range(1, 1+h.GetNbinsX())]
     nom_bcs  = bc(nominal_histo)
@@ -63,15 +86,9 @@ def computeFakeSysErr2(nominal_histo=None, vars_histos={}) :
     up_e2s = np.array([sumquad(positive(deltas[b])) for b in bins]) + np.array(nom_be2s)
     do_e2s = np.array([sumquad(negative(deltas[b])) for b in bins]) + np.array(nom_be2s)
     return {'up' : up_e2s, 'down' : do_e2s}
-def computeStatErr2(nominal_histo=None) :
-    "Compute the bin-by-bin err2 (should include also mc syst, but for now it does not)"
-    bins = range(1, 1+nominal_histo.GetNbinsX())
-    bes = [nominal_histo.GetBinError(b)   for b in bins]
-    be2s = np.array([e*e for e in bes])
-    return {'up' : be2s, 'down' : be2s}
 def fetchFakeSysHistosAndComputeSysErr2(input_fake_file=None, nominal_histo=None) :
     vars_histos = fetchVariationHistos(input_fake_file, nominal_histo)
-    return computeFakeSysErr2(nominal_histo, vars_histos)
+    return computeFakeSysStatErr2(nominal_histo, vars_histos)
 def buildErrBandGraph(histo_tot_bkg, err2s) :
     h = histo_tot_bkg
     bins = range(1, 1+h.GetNbinsX())
