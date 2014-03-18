@@ -180,3 +180,7 @@ def binContentsWithUoflow(h) :
     return [h.GetBinContent(0)] + [h.GetBinContent(i) for i in range(1, nBinsX)] + [h.GetBinContent(nBinsX+1)]
 def reverseLegendOrder(leg) :
     "to be implemented"
+def integralAndError(h) :
+    error = r.Double(0.0)
+    integral = h.IntegralAndError(0,-1, error)
+    return integral, float(error)

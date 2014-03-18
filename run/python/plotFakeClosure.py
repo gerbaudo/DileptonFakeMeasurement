@@ -19,6 +19,7 @@ from rootUtils import (referenceLine
                        ,buildRatioHistogram
                        ,buildBotTopPads
                        ,importRoot
+                       ,integralAndError
                        )
 r = importRoot()
 r.gStyle.SetPadTickX(1)
@@ -167,10 +168,6 @@ def addErr2s(current_err2={}, add_err2={}) :
     else :
         return dict([(k, current_err2[k] + add_err2[k]) for k in current_err2.keys()])
 
-def integralAndError(histo) :
-    error = r.Double(0.0)
-    integral = histo.IntegralAndError(0, histo.GetNbinsX(), error)
-    return integral, float(error)
 def drawTop(pad, hists, err_band, label=('','')) :
     pad.Draw()
     pad.cd()
