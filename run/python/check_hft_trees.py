@@ -18,6 +18,7 @@ from rootUtils import (getBinContents
                        ,getMinMax
                        ,topRightLegend
                        ,importRoot
+                       ,integralAndError
                        ,setWhPlotStyle
                        )
 r = importRoot()
@@ -126,6 +127,7 @@ def runPlot(opts) :
     excludedSyst = opts.exclude
     verbose      = opts.verbose
     mkdirIfNeeded(outputDir)
+    buildTotBkg = systUtils.buildTotBackgroundHisto
     buildStat = systUtils.buildStatisticalErrorBand
     buildSyst = systUtils.buildSystematicErrorBand
 
@@ -145,11 +147,13 @@ def runPlot(opts) :
             nominalHistoSign    = signal.getHistogram(variable=var, selection=sel, cacheIt=True)
             nominalHistoFakeBkg = fake.getHistogram(variable=var, selection=sel, cacheIt=True)
             nominalHistosSimBkg = dict([(g.name, g.getHistogram(variable=var, selection=sel, cacheIt=True)) for g in simBkgs])
-            nominalHistosBkg = dict([('fake', nominalHistoFakeBkg)] + [(g, h) for g, h in nominalHistosSimBkg.iteritems()])
-            statErrBand = buildStat(fake=fake, simBkgs=simBkgs, variable=var, selection=sel)
-            systErrBand = buildSyst(fake=fake, simBkgs=simBkgs, variable=var, selection=sel)
+            nominalHistosBkg    = dict([('fake', nominalHistoFakeBkg)] + [(g, h) for g, h in nominalHistosSimBkg.iteritems()])
+            nominalHistoTotBkg  = buildTotBkg(histoFakeBkg=nominalHistoFakeBkg, histosSimBkgs=nominalHistosSimBkg)
+            statErrBand = buildStat(nominalHistoTotBkg)
+            systErrBand = buildSyst(fake=fake, nominalHistosSimBkg=nominalHistosSimBkg, variable=var, selection=sel)
 
-            plotHistos(histoData=nominalHistoData, histoSignal=nominalHistoSign, histosBkg=nominalHistosBkg,
+            plotHistos(histoData=nominalHistoData, histoSignal=None, histoTotBkg=nominalHistoTotBkg,
+                       histosBkg=nominalHistosBkg,
                        statErrBand=statErrBand, systErrBand=systErrBand,
                        canvasName=(sel+'_'+var), outdir=outputDir, verbose=verbose)
 
@@ -182,11 +186,11 @@ def countAndFillHistos(samplesPerGroup={}, syst='', verbose=False, outdir='./') 
     for group, samplesGroup in samplesPerGroup.iteritems() :
         logLine = "---->"
         if verbose : print 1*' ',group
-        hsGroup   = histos  [group]
-        cntsGroup = counters[group]
+        histosGroup = histos  [group]
+        countsGroup = counters[group]
         for sample in samplesGroup :
             if verbose : logLine +=" %s"%sample.name
-            fillAndCount(hsGroup, cntsGroup, sample)
+            fillAndCount(histosGroup, countsGroup, sample)
         if verbose : print logLine
     if verbose : print 'done'
     return counters, histos
@@ -237,7 +241,7 @@ class BaseSampleGroup(object) :
                 or (self.isMc and sys in systUtils.mcWeightVariations())
                 or (self.isMc and sys in systUtils.mcObjectVariations())
                 or (self.isFake and sys in systUtils.fakeSystVariations()))
-    def setSystNominal(self) : self.setSyst()
+    def setSystNominal(self) : return self.setSyst()
     def setSyst(self, sys='NOM') :
         nominal = 'NOM' # do we have differnt names for nom (mc vs fake)?
         self.isObjSys    = sys in systUtils.mcObjectVariations()
@@ -273,7 +277,9 @@ class Sample(BaseSampleGroup) :
         def fakeFilename(sample, dir, sys) : return "%(dir)s/%(sys)s_fake.%(sam)s.PhysCont.root" % {'dir':dir, 'sam':sample, 'sys':sys}
         def mcFilename  (sample, dir, sys) : return "%(dir)s/%(sys)s_%(dsid)s.root" % {'dir':dir, 'sys':sys, 'dsid':sample}
         fnameFunc = dataFilename if self.isData else fakeFilename if self.isFake else mcFilename
-        sys = self.syst if self.isMc and self.isObjSys else 'NOM'
+        sys = (self.syst
+               if (self.isMc and self.isObjSys or self.isFake and self.isFakeSys)
+               else 'NOM')
         return fnameFunc(self.name, self.hftInputDir, sys)
     @property
     def hftTreename(self) :
@@ -365,7 +371,6 @@ def allGroups(noData=False, noSignal=True) :
             + ([] if noData else ['data'])
             + ['fake']
             )
-
 def llPairs() : return ['ee', 'em', 'mm']
 def njetSelections() : return ['1jet', '23jets']
 def signalRegions() :
@@ -435,7 +440,7 @@ def fillAndCount(histos, counters, sample, blind=True) :
                 histos[sel]['mljj'  ].Fill(mljj, weight)
                 histos[sel]['onebin'].Fill(1.0,  weight)
             # checks
-            if (fillHisto
+            if (False and fillHisto
                 and sel in signalRegions()
                 and sample.isFake ) :
                 channel = 'ee' if tree.isEE else 'mm' if tree.isMUMU else 'em'
@@ -531,6 +536,7 @@ def bookHistos(variables, samples, selections) :
         elif v=='dphijj'  : h = r.TH1F(histoName(sam, sel, 'dphijj' ), ';#Delta#phi(j, j) [rad]; entries/bin',  25, 0.0, twopi)
         elif v=='detajj'  : h = r.TH1F(histoName(sam, sel, 'detajj' ), ';#Delta#eta(j, j); entries/bin',        25, 0.0, +3.0 )
         else : print "unknown variable %s"%v
+        h.Sumw2()
         h.SetDirectory(0)
         return h
     return dict([(sam, dict([(sel, dict([(v, histo(v, sam, sel)) for v in variables]))
@@ -552,9 +558,10 @@ def getGroupColor(g) :
     g = hftGroup2stdGroup(g)
     return colors[g]
 
-def plotHistos(histoData=None, histoSignal=None, histosBkg={},
+def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
                statErrBand=None, systErrBand=None, # these are TGraphAsymmErrors
-               canvasName='canvas', outdir='./', verbose=False) :
+               canvasName='canvas', outdir='./', verbose=False,
+               drawStatErr=False, drawSystErr=False) :
     "Note: blinding can be required for only a subrange of the histo, so it is taken care of when filling"
     setWhPlotStyle()
     padMaster = histoData
@@ -582,15 +589,32 @@ def plotHistos(histoData=None, histoSignal=None, histosBkg={},
     for h, g, o in leg._reversedEntries[::-1] : leg.AddEntry(h, g, o) # stack goes b-t, legend goes t-b
 #     stack.Draw()
     stack.Draw('hist same')
+    histoData.SetMarkerStyle(r.kFullCircle)
     histoData.Draw('same')
     if histoSignal : histoSignal.Draw('same')
     #leg.AddEntry(err_band, 'Uncertainty', 'F')
-    if statErrBand : statErrBand.Draw('E2 same')
-    if systErrBand : systErrBand.Draw('E2 same')
-    totErrBand = None # todo: build from statErrBand, systErrBand
-    if totErrBand : totErrBand.Draw('E2 same')
+    if statErrBand and drawStatErr :
+        statErrBand.SetFillStyle(3006)
+        statErrBand.Draw('E2 same')
+        leg.AddEntry(statErrBand, 'stat', 'f')
+    if systErrBand and drawSystErr :
+        systErrBand.SetFillStyle(3007)
+        systErrBand.Draw('E2 same')
+        leg.AddEntry(systErrBand, 'syst', 'f')
+    totErrBand = systUtils.combineStatAndSystErrorBands(statErrBand, systErrBand)
+    if totErrBand :
+        totErrBand.Draw('E2 same')
+        totErrBand.SetFillStyle(3005)
+        leg.AddEntry(totErrBand, 'stat+syst', 'f')
     leg.Draw('same')
+    can.Update()
+    tex = r.TLatex()
+    tex.SetTextSize(0.5 * tex.GetTextSize())
+    tex.SetNDC(True)
+    label = "#splitline{%s}{%s}"%(padMaster.GetName(), "%.3f +/- %.3f (stat)"%(integralAndError(histoTotBkg)))
+    tex.DrawLatex(0.10, 0.95, label)
     can.Update() # force stack to create padMaster
+
 #     hStack = stack.GetHistogram()
 #     padMaster.SetMaximum(1.1*max([h.GetMaximum() for h in [hStack]+histos.values()]))
 #     can.Update()
