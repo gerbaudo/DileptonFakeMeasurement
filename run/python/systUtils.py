@@ -122,20 +122,49 @@ def buildErrBandRatioGraph(errband_graph) :
 
 #___________________________________________________________
 # todo : move Group here (fake and simBkgs are Group objects)
-def buildStatisticalErrorBand(fake=None, simBkgs=[], variable='', selection='') :
-    "Just get the histos and let ROOT add up the stat uncertainties"
-    for g in [fake] + simBkgs :
-        g.setSystNominal()
-    fakeHisto = fake.getHistogram(variable, selection)
-    if not fakeHisto :
-        print "buildStatisticalErrorBand: no fake"
-        return
-    totBkg = fakeHisto.Clone(fakeHisto.GetName().replace('_fake','_totbkg'))
-    for b in simBkgs :
-        h = b.getHistogram(variable, selection)
-        if h : totBkg.Add(h)
-        else : print "buildStatisticalErrorBand: missing %s"%b.name
-    return buildErrBandGraph(totBkg, computeStatErr2(totBkg))
+def buildTotBackgroundHisto(histoFakeBkg=None, histosSimBkgs={}) :
+    hTemplate = histoFakeBkg
+    if not hTemplate :
+        hTemplate = first(histosSimBkgs)
+        print "warning, cannot use fake as template; histo name will be wrong, based on %s"%hTemplate.GetName()
+    totBkg = hTemplate.Clone(hTemplate.GetName().replace('_fake','_totbkg'))
+    totBkg.Reset()
+    totBkg.Sumw2()
+    allBackgrounds = dict((group, histo) for group, histo in [('fake',histoFakeBkg)]+[(g,h) for g,h in histosSimBkgs.iteritems()])
+    for group, histo in allBackgrounds.iteritems() :
+        if histo :
+            totBkg.Add(histo)
+            integral, error = integralAndError(histo)
+            print "adding %.3f +/- %.3f  : %s (%s)" % (integral, error, group, histo.GetName())
+        else : print "buildStatisticalErrorBand: missing %s"%group
+    integral, error = integralAndError(totBkg)
+    print "totBkg %.3f +/- %.3f  : %s" % (integral, error, totBkg.GetName())
+    return totBkg
 #___________________________________________________________
-def buildSystematicErrorBand(fake=None, simBkgs=[], variable='', selection='') :
-    print "to be implemented"
+def buildStatisticalErrorBand(histoTotBkg= None) :
+    return buildErrBandGraph(histoTotBkg, computeStatErr2(histoTotBkg))
+#___________________________________________________________
+def buildSystematicErrorBand(fake=None, nominalHistosSimBkg={}, variable='', selection='') :
+    fake.setSystNominal()
+    nominal_histo = buildTotBackgroundHisto(fake.getHistogram(variable, selection), nominalHistosSimBkg)
+    vars_histos = dict((sys,
+                        buildTotBackgroundHisto(fake.setSyst(sys).getHistogram(variable=variable, selection=selection),
+                                                nominalHistosSimBkg))
+                        for sys in fakeSystVariations())
+    fakeErr2 = computeFakeSysErr2(nominal_histo=nominal_histo, vars_histos=vars_histos)
+    return buildErrBandGraph(nominal_histo, fakeErr2)
+def combineStatAndSystErrorBands(statErrBand, systErrBand) :
+    sqrt = math.sqrt
+    totErrBand = statErrBand.Clone() if statErrBand else systErrBand.Clone() if systErrBand else None
+    if statErrBand and systErrBand :
+        points = range(totErrBand.GetN())
+        eys_stat_lo = np.array([abs(statErrBand.GetErrorYlow (i)) for i in points])
+        eys_stat_hi = np.array([abs(statErrBand.GetErrorYhigh(i)) for i in points])
+        eys_syst_lo = np.array([abs(systErrBand.GetErrorYlow (i)) for i in points])
+        eys_syst_hi = np.array([abs(systErrBand.GetErrorYhigh(i)) for i in points])
+        eys_lo = np.sqrt(eys_stat_lo*eys_stat_lo + eys_syst_lo*eys_syst_lo))
+        eys_hi = np.sqrt(eys_stat_hi*eys_stat_hi + eys_syst_hi*eys_syst_hi))
+        for p, ey_lo, ey_hi in zip(points, eys_lo, eys_hi) :
+            totErrBand.SetPointEYlow (p, ey_lo)
+            totErrBand.SetPointEYhigh(p, ey_hi)
+    return totErrBand
