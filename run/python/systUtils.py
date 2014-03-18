@@ -153,6 +153,7 @@ def buildSystematicErrorBand(fake=None, nominalHistosSimBkg={}, variable='', sel
                         for sys in fakeSystVariations())
     fakeErr2 = computeFakeSysErr2(nominal_histo=nominal_histo, vars_histos=vars_histos)
     return buildErrBandGraph(nominal_histo, fakeErr2)
+#___________________________________________________________
 def combineStatAndSystErrorBands(statErrBand, systErrBand) :
     sqrt = math.sqrt
     totErrBand = statErrBand.Clone() if statErrBand else systErrBand.Clone() if systErrBand else None
@@ -162,9 +163,16 @@ def combineStatAndSystErrorBands(statErrBand, systErrBand) :
         eys_stat_hi = np.array([abs(statErrBand.GetErrorYhigh(i)) for i in points])
         eys_syst_lo = np.array([abs(systErrBand.GetErrorYlow (i)) for i in points])
         eys_syst_hi = np.array([abs(systErrBand.GetErrorYhigh(i)) for i in points])
-        eys_lo = np.sqrt(eys_stat_lo*eys_stat_lo + eys_syst_lo*eys_syst_lo))
-        eys_hi = np.sqrt(eys_stat_hi*eys_stat_hi + eys_syst_hi*eys_syst_hi))
+        eys_lo = np.sqrt(eys_stat_lo*eys_stat_lo + eys_syst_lo*eys_syst_lo)
+        eys_hi = np.sqrt(eys_stat_hi*eys_stat_hi + eys_syst_hi*eys_syst_hi)
         for p, ey_lo, ey_hi in zip(points, eys_lo, eys_hi) :
             totErrBand.SetPointEYlow (p, ey_lo)
             totErrBand.SetPointEYhigh(p, ey_hi)
     return totErrBand
+#___________________________________________________________
+def totalUpDownVariation(errBand) :
+    points = range(errBand.GetN())
+    up   = [abs(errBand.GetErrorYhigh(p)) for p in points]
+    down = [abs(errBand.GetErrorYlow (p)) for p in points]
+    return sum(up), sum(down)
+#___________________________________________________________
