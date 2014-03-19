@@ -23,6 +23,7 @@ from rootUtils import (getBinContents
                        )
 r = importRoot()
 from utils import (first
+                   ,getCommandOutput
                    ,mkdirIfNeeded
                    ,filterWithRegexp
                    ,remove_duplicates
@@ -60,6 +61,7 @@ Example usage ('plot' mode):
 
 def main() :
     parser = optparse.OptionParser(usage=usage)
+    parser.add_option('-b', '--batch',  action='store_true', default=False, help='submit to batch (used in fill mode)')
     parser.add_option('-f', '--input-fake', help='location hft trees for fake')
     parser.add_option('-g', '--input-gen', help='location hft trees for everything else')
     parser.add_option('-i', '--input-dir')
@@ -92,6 +94,7 @@ def main() :
     elif mode=='plot' : runPlot(opts)
 
 def runFill(opts) :
+    batchMode    = opts.batch
     inputFakeDir = opts.input_fake
     inputGenDir  = opts.input_gen
     outputDir    = opts.output_dir
@@ -108,11 +111,37 @@ def runFill(opts) :
     if sysOption=='weight' or anySys : systematics += systUtils.mcWeightVariations()
     if sysOption and sysOption.count(',') : systematics = [s for s in systUtils.getAllVariations() if s in sysOption.split(',')]
     elif sysOption in systUtils.getAllVariations() : systematics = [sysOption]
-    if not anySys and len(systematics)==1 and sysOption!='NOM' : raise ValueError("Invalid syst %s"%str(sysOption))
+    elif not anySys and len(systematics)==1 and sysOption!='NOM' : raise ValueError("Invalid syst %s"%str(sysOption))
     if excludedSyst : systematics = [s for s in systematics if s not in filterWithRegexp(systematics, excludedSyst)]
 
     if verbose : print "about to loop over these systematics:\n %s"%str(systematics)
     for syst in systematics :
+        if batchMode :
+            newOptions  = " --input-gen %s" % opts.input_gen
+            newOptions += " --input-fake %s" % opts.input_fake
+            newOptions += " --output-dir %s" % opts.output_dir
+            newOptions += " --verbose %s" % opts.verbose
+            newOptions += " --syst %s" % syst
+            template = 'batch/templates/check_hft_fill.sh.template'
+            script = "batch/hft_%s.sh"%syst
+            scriptFile = open(script, 'w')
+            scriptFile.write(open(template).read().replace('${opt}', newOptions))
+            scriptFile.close()
+            cmd = "qsub -q atlas"
+            cmd += " -j oe -V " # join stdout/stderr, export env
+            cmd += " -N %(jobname)s "
+            cmd += " -o %(outlog)s "
+            cmd += " %(scripname)s"
+            cmd = cmd % {'jobname' : 'fill_'+syst,
+                         'outlog' : 'log/hft/fill_'+syst+'.log',
+                         'scripname' : script,
+                         'options' : newOptions
+                         }
+            if verbose : print cmd
+            out = getCommandOutput(cmd)
+            if verbose : print out['stdout']
+            if out['stderr'] : print  out['stderr']
+            continue
         if verbose : print '---- filling ',syst
         samplesPerGroup = allSamplesAllGroups()
         [s.setSyst(syst) for g, samples in samplesPerGroup.iteritems() for s in samples]
@@ -175,11 +204,6 @@ def runPlot(opts) :
                        histosBkg=nominalHistosBkg,
                        statErrBand=statErrBand, systErrBand=systErrBand,
                        canvasName=(sel+'_'+var), outdir=outputDir, verbose=verbose)
-
-        # you are here: now build error bands for [selection][group][variable] for s in [systs]
-        # ----> reuse systUtils.computeFakeSysErr2
-
-
 
 def countAndFillHistos(samplesPerGroup={}, syst='', verbose=False, outdir='./') :
 
