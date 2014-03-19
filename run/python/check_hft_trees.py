@@ -650,6 +650,9 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
         sysUp, sysDo = systUtils.totalUpDownVariation(systErrBand)
         label += "#pm #splitline{%.3f}{%.3f} (syst)"%(sysUp, sysDo)
     tex.DrawLatex(0.10, 0.95, label)
+    yMin, yMax = getMinMax([histoData, histoTotBkg, totErrBand])
+    padMaster.SetMinimum(0.0)
+    padMaster.SetMaximum(1.1 * yMax)
     can.RedrawAxis()
     can.Update() # force stack to create padMaster
     for ext in ['png'] : can.SaveAs(outdir+'/'+can.GetName()+'.'+ext)
