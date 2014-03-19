@@ -14,12 +14,14 @@ import math
 import optparse
 import os
 import pprint
-from rootUtils import (getBinContents
+from rootUtils import (drawAtlasLabel
+                       ,getBinContents
                        ,getMinMax
                        ,topRightLegend
                        ,importRoot
                        ,integralAndError
                        ,setWhPlotStyle
+                       ,setAtlasStyle
                        )
 r = importRoot()
 from utils import (first
@@ -185,6 +187,7 @@ def runPlot(opts) :
 
     simBkgs = [g for g in groups if g.isMcBkg]
     data, fake, signal = findByName(groups, 'data'), findByName(groups, 'fake'), findByName(groups, 'signal')
+
     for sel in selections :
         if verbose : print '-- plotting ',sel
         for var in variables :
@@ -200,7 +203,7 @@ def runPlot(opts) :
             systErrBand = buildSyst(fake=fake, simBkgs=simBkgs, variable=var, selection=sel,
                                     fakeVariations=fakeSystematics, mcVariations=mcSystematics, verbose=verbose)
 
-            plotHistos(histoData=nominalHistoData, histoSignal=None, histoTotBkg=nominalHistoTotBkg,
+            plotHistos(histoData=nominalHistoData, histoSignal=nominalHistoSign, histoTotBkg=nominalHistoTotBkg,
                        histosBkg=nominalHistosBkg,
                        statErrBand=statErrBand, systErrBand=systErrBand,
                        canvasName=(sel+'_'+var), outdir=outputDir, verbose=verbose)
@@ -252,16 +255,6 @@ def printCounters(counters):
     print tablePre.csv()
     print 4*'-',' blind regions ',4*'-'
     print tableBld.csv()
-# def plotHistos(histos, plotdir='./') :
-#     blindGroups = [g for g in histos.keys() if g!='data']
-#     countersFromHist = dict((g, dict((s, histos[g][s]['mljj'].Integral()) for s in controlRegions())) for g in blindGroups)
-#     tableHist = CutflowTable(samples=blindGroups, selections=controlRegions(), countsSampleSel=countersFromHist)
-#     tableHist.nDecimal = 6
-#     print 4*'-',' mljj histograms ',4*'-'
-#     print tableHist.csv()
-#     histosPerSel = dict((s, dict((g, histos[g][s]['mljj']) for g in histos.keys())) for s in first(histos).keys())
-#     for s, hs in histosPerSel.iteritems() : plotHistos(s, hs, plotdir)
-
 #___________________________________________________________
 class BaseSampleGroup(object) :
     def __init__(self, name) :
@@ -590,7 +583,8 @@ def countTotalBkg(counters={'sample' : {'sel':0.0}}) :
     counters['totBkg'] = dict((s, sum(counters[b][s] for b in backgrounds)) for s in selections)
 def getGroupColor(g) :
     oldColors = SampleUtils.colors
-    colors = dict((g,c) for g,c in [(k,v) for k,v in oldColors.iteritems()] + [('signal',r.kRed), ('WW',r.kBlue), ('Higgs',r.kYellow)])
+    newColors = [('signal',r.kMagenta), ('WW',r.kAzure-9), ('Higgs',r.kYellow-9)]
+    colors = dict((g,c) for g,c in [(k,v) for k,v in oldColors.iteritems()] + newColors)
     def hftGroup2stdGroup(_) :
         fromTo = {'Zjets':'zjets', 'Top':'ttbar', 'ZV':'diboson',}
         return fromTo[_] if _ in fromTo else _
@@ -602,7 +596,8 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
                canvasName='canvas', outdir='./', verbose=False,
                drawStatErr=False, drawSystErr=False) :
     "Note: blinding can be required for only a subrange of the histo, so it is taken care of when filling"
-    setWhPlotStyle()
+    #setWhPlotStyle()
+    setAtlasStyle()
     padMaster = histoData
     if verbose : print "plotting ",padMaster.GetName()
     can = r.TCanvas(canvasName, padMaster.GetTitle(), 800, 600)
@@ -613,7 +608,7 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
     stack = r.THStack('stack_'+padMaster.GetName(), '')
     r.SetOwnership(stack, False)
     can._hists.append(stack)
-    leg = topRightLegend(can, 0.275, 0.475, shift=-0.025)
+    leg = topRightLegend(can, 0.2, 0.325)
     can._leg = leg
     leg.SetBorderSize(0)
     leg._reversedEntries = []
@@ -627,7 +622,10 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
     stack.Draw('hist same')
     histoData.SetMarkerStyle(r.kFullCircle)
     histoData.Draw('same')
-    if histoSignal : histoSignal.Draw('same')
+    if histoSignal :
+        histoSignal.SetLineColor(getGroupColor('signal'))
+        histoSignal.Draw('same')
+        leg.AddEntry(histoSignal, 'signal', 'l')
     if statErrBand and drawStatErr :
         statErrBand.SetFillStyle(3006)
         statErrBand.Draw('E2 same')
@@ -652,7 +650,8 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
         sysUp, sysDo = systUtils.totalUpDownVariation(systErrBand)
         label += "#pm #splitline{%.3f}{%.3f} (syst)"%(sysUp, sysDo)
     tex.DrawLatex(0.10, 0.95, label)
-    yMin, yMax = getMinMax([histoData, histoTotBkg, totErrBand])
+    drawAtlasLabel(can, xpos=0.125, align=13)
+    yMin, yMax = getMinMax([histoData, histoTotBkg, histoSignal, totErrBand])
     padMaster.SetMinimum(0.0)
     padMaster.SetMaximum(1.1 * yMax)
     can.RedrawAxis()

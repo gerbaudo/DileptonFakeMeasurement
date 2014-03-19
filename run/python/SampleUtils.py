@@ -11,10 +11,10 @@ from rootUtils import importRoot
 r = importRoot()
 
 colors = {
-    'ttbar'       : r.kRed+1,
+    'ttbar'       : r.kSpring+1,
     'zjets'       : r.kOrange-2,
     'wjets'       : r.kBlue-2,
-    'diboson'     : r.kSpring+2,
+    'diboson'     : r.kAzure+4,
     'singletop'   : r.kAzure-4,
     'multijet'    : r.kGray,
     'fake'        : r.kGray, # just another name for the same thing
