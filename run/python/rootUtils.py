@@ -156,6 +156,9 @@ def topRightLabel(pad, label, xpos=None, ypos=None, align=33) :
     tex.DrawLatex((1.0-pad.GetRightMargin()) if not xpos else xpos, (1.0-pad.GetTopMargin()) if not ypos else ypos, label)
     pad._label = tex
     return tex
+def drawAtlasLabel(pad, xpos=None, ypos=None, align=33) :
+    label = "#bf{#it{ATLAS}} Internal, #sqrt{s} = 8 TeV, 20.3 fb^{-1}"
+    return topRightLabel(pad, label, xpos, ypos, align)
 def getBinIndices(h) :
     "Return a list of the internal indices used by TH1/TH2/TH3; see TH1::GetBin for info on internal mapping"
     cname = h.Class().GetName()
@@ -184,3 +187,32 @@ def integralAndError(h) :
     error = r.Double(0.0)
     integral = h.IntegralAndError(0,-1, error)
     return integral, float(error)
+
+def setAtlasStyle() :
+    aStyle = getAtlasStyle()
+    r.gROOT.SetStyle("ATLAS")
+    r.gROOT.ForceStyle()
+def getAtlasStyle() :
+    style = r.TStyle('ATLAS', 'Atlas style')
+    white = 0
+    style.SetFrameBorderMode(white)
+    style.SetFrameFillColor(white)
+    style.SetCanvasBorderMode(white)
+    style.SetCanvasColor(white)
+    style.SetPadBorderMode(white)
+    style.SetPadColor(white)
+    style.SetStatColor(white)
+    #style.SetPaperSize(20,26)
+#     style.SetPadTopMargin(0.05)
+#     style.SetPadRightMargin(0.05)
+#     style.SetPadBottomMargin(0.16)
+#     style.SetPadLeftMargin(0.16)
+    #style.SetTitleXOffset(1.4)
+    #style.SetTitleYOffset(1.4)
+    font, fontSize = 42, 0.04 # helvetica large
+    style.SetTextFont(font)
+#     style.SetTextSize(fontSize)
+    style.SetLabelFont(font,"xyz")
+    style.SetTitleFont(font,"xyz")
+    style.SetOptStat(0)
+    return style
