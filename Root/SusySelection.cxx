@@ -453,21 +453,9 @@ void SusySelection::cacheStaticWeightComponents()
 SusySelection::WeightComponents SusySelection::computeNonStaticWeightComponents(cvl_t& leptons, cvj_t& jets, const susy::wh::Systematic sys)
 {
     WeightComponents wc;
-    if(nt.evt()->isMC) { // some of these calls are expensive; compute only what's needed
-        bool trigSfNeeded(sys==swh::WH_CENTRAL ||
-                          sys==swh::WH_ETRIGREWUP   || sys==swh::WH_MTRIGREWUP ||
-                          sys==swh::WH_ETRIGREWDOWN || sys==swh::WH_MTRIGREWDOWN);
-        bool btagSfNeeded(sys==swh::WH_CENTRAL ||
-                          sys==swh::WH_BJETUP      || sys==swh::WH_BJETDOWN    ||
-                          sys==swh::WH_CJETUP      || sys==swh::WH_CJETDOWN    ||
-                          sys==swh::WH_BMISTAGUP   || sys==swh::WH_BMISTAGDOWN );
-        BTagSys bsys(sys==swh::WH_BJETUP      ? BTag_BJet_UP :
-                     sys==swh::WH_BJETDOWN    ? BTag_BJet_DN :
-                     sys==swh::WH_CJETUP      ? BTag_CJet_UP :
-                     sys==swh::WH_CJETDOWN    ? BTag_CJet_DN :
-                     sys==swh::WH_BMISTAGUP   ? BTag_LJet_UP :
-                     sys==swh::WH_BMISTAGDOWN ? BTag_LJet_DN :
-                     BTag_NOM);
+    if(nt.evt()->isMC) {
+        bool trigSfNeeded(true), btagSfNeeded(true); // todo some of these calls are expensive; compute only what's needed
+        BTagSys bsys = sys2ntbsys(sys);
         wc.lepSf   = susy::getLeptonEff2Lep(leptons, sys);
         wc.trigger = (trigSfNeeded ? getTriggerWeight2Lep(leptons, sys) : 1.0);
         wc.btag    = (btagSfNeeded ? getBTagWeight(jets, nt.evt(), bsys) : 1.0);
