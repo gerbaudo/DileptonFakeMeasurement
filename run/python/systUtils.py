@@ -51,8 +51,15 @@ def getAllVariations() :
 def fetchVariationHistos(input_fake_file=None, nominal_histo=None, variations=fakeSystVariations()) :
     nom_hname = nominal_histo.GetName()
     return dict([(v, input_fake_file.Get(nom_hname.replace('_NONE','_'+v))) for v in variations])
-def computeFakeSysErr2(nominal_histo=None, vars_histos={}) :
-    "Compute the bin-by-bin sum2 err including up&down fake systematic variations"
+def computeSysErr2(nominal_histo=None, vars_histos={}) :
+    """Add in quadrature the the bin-by-bin delta^2 for up&down
+    systematic variations.  We do not know, and we do not care,
+    whether the ones labeled as 'up' give a larger yield and the
+    'down' ones a smaller yield. So we lump all the positive
+    variations together, and do the same for negative ones.
+    This gives the most conservative error estimate.
+    Return the err^2 for up and down.
+    """
     def bc(h) : return [h.GetBinContent(b) for b in range(1, 1+h.GetNbinsX())]
     nom_bcs  = bc(nominal_histo)
     vars_bcs = dict([(v, bc(h)) for v, h in vars_histos.iteritems()])
@@ -65,7 +72,7 @@ def computeFakeSysErr2(nominal_histo=None, vars_histos={}) :
     do_e2s = np.array([sumquad(negative(deltas[b])) for b in bins])
     return {'up' : up_e2s, 'down' : do_e2s}
 def computeStatErr2(nominal_histo=None) :
-    "Compute the bin-by-bin err2 (should include also mc syst, but for now it does not)"
+    "Compute the bin-by-bin stat err2"
     bins = range(1, 1+nominal_histo.GetNbinsX())
     bes = [nominal_histo.GetBinError(b)   for b in bins]
     be2s = np.array([e*e for e in bes])
@@ -144,25 +151,62 @@ def buildTotBackgroundHisto(histoFakeBkg=None, histosSimBkgs={}) :
 def buildStatisticalErrorBand(histoTotBkg= None) :
     return buildErrBandGraph(histoTotBkg, computeStatErr2(histoTotBkg))
 #___________________________________________________________
-def buildSystematicErrorBand(fake=None, nominalHistosSimBkg={}, variable='', selection='') :
-    fake.setSystNominal()
-    nominal_histo = buildTotBackgroundHisto(fake.getHistogram(variable, selection), nominalHistosSimBkg)
-    vars_histos = dict((sys,
-                        buildTotBackgroundHisto(fake.setSyst(sys).getHistogram(variable=variable, selection=selection),
-                                                nominalHistosSimBkg))
-                        for sys in fakeSystVariations())
-    fakeErr2 = computeFakeSysErr2(nominal_histo=nominal_histo, vars_histos=vars_histos)
-    return buildErrBandGraph(nominal_histo, fakeErr2)
+def buildSystematicErrorBand(fake=None, simBkgs=[], variable='', selection='',
+                             fakeVariations = fakeSystVariations(),
+                             mcVariations = mcObjectVariations()+mcWeightVariations(),
+                             verbose=False) :
+    "build the syst error band accounting for fake, mc-object, and mc-weight systematics"
+    if verbose : print "buildSystematicErrorBand(%s, %s)"%(variable, selection)
+    for g in [fake] + simBkgs : g.setSystNominal()
+    nominalFake   = fake.getHistogram(variable, selection)
+    nominalOthers = dict([(g.name, g.getHistogram(variable=variable, selection=selection)) for g in simBkgs])
+
+    fakeSysErrorBand  = buildFakeSystematicErrorBand(fake, nominalOthers, variable, selection, fakeVariations, verbose)
+    mcSysErrorBand    = buildMcSystematicErrorBand  (nominalFake, simBkgs, variable, selection, mcVariations, verbose)
+
+    totErrorBand = None
+    if fakeSysErrorBand and mcSysErrorBand : totErrorBand = addErrorBandsInQuadrature(fakeSysErrorBand, mcSysErrorBand)
+    elif fakeSysErrorBand : totErrorBand = fakeSysErrorBand
+    elif mcSysErrorBand : totErrorBand = mcSysErrorBand
+    return totErrorBand
 #___________________________________________________________
-def combineStatAndSystErrorBands(statErrBand, systErrBand) :
+def buildFakeSystematicErrorBand(fake=None, nominalHistosSimBkg={},
+                                 variable='', selection='', variations=[], verbose=False) :
+    if verbose : print "buildFakeSystematicErrorBand(%s, %s), %s"%(variable, selection, str(variations))
+    fake.setSystNominal()
+    nominalTotBkg = buildTotBackgroundHisto(fake.getHistogram(variable, selection), nominalHistosSimBkg)
+    variedTotBkgs = dict()
+    for sys in variations :
+        if verbose : print "buildFakeSystematicErrorBand(%s)"%sys
+        variedTotBkgs[sys] = buildTotBackgroundHisto(fake.setSyst(sys).getHistogram(variable=variable, selection=selection),
+                                                     nominalHistosSimBkg)
+    err2 = computeSysErr2(nominal_histo=nominalTotBkg, vars_histos=variedTotBkgs)
+    return buildErrBandGraph(nominalTotBkg, err2)
+#___________________________________________________________
+def buildMcSystematicErrorBand(fakeNominalHisto=None, simulatedBackgrounds=[],
+                               variable='', selection='', variations=[], verbose=False) :
+    if verbose : print "buildMcSystematicErrorBand(%s, %s), %s"%(variable, selection, str(variations))
+    for b in simulatedBackgrounds : b.setSystNominal()
+    nominalTotBkg = buildTotBackgroundHisto(fakeNominalHisto, dict((g.name, g.getHistogram(variable, selection))
+                                                                   for g in simulatedBackgrounds))
+    variedTotBkgs = dict()
+    for sys in variations :
+        if verbose : print "buildMcSystematicErrorBand(%s)"%sys
+        variedMcBkgs = dict((g.name, g.setSyst(sys).getHistogram(variable, selection)) for g in simulatedBackgrounds)
+        variedTotBkgs[sys] = buildTotBackgroundHisto(fakeNominalHisto, variedMcBkgs)
+    fakeErr2 = computeSysErr2(nominal_histo=nominalTotBkg, vars_histos=variedTotBkgs)
+    return buildErrBandGraph(nominalTotBkg, fakeErr2)
+#___________________________________________________________
+def addErrorBandsInQuadrature(errBand1, errBand2) :
     sqrt = math.sqrt
-    totErrBand = statErrBand.Clone() if statErrBand else systErrBand.Clone() if systErrBand else None
-    if statErrBand and systErrBand :
+    totErrBand = None
+    if errBand1 and errBand2 :
+        totErrBand = errBand1.Clone()
         points = range(totErrBand.GetN())
-        eys_stat_lo = np.array([abs(statErrBand.GetErrorYlow (i)) for i in points])
-        eys_stat_hi = np.array([abs(statErrBand.GetErrorYhigh(i)) for i in points])
-        eys_syst_lo = np.array([abs(systErrBand.GetErrorYlow (i)) for i in points])
-        eys_syst_hi = np.array([abs(systErrBand.GetErrorYhigh(i)) for i in points])
+        eys_stat_lo = np.array([abs(errBand1.GetErrorYlow (i)) for i in points])
+        eys_stat_hi = np.array([abs(errBand1.GetErrorYhigh(i)) for i in points])
+        eys_syst_lo = np.array([abs(errBand2.GetErrorYlow (i)) for i in points])
+        eys_syst_hi = np.array([abs(errBand2.GetErrorYhigh(i)) for i in points])
         eys_lo = np.sqrt(eys_stat_lo*eys_stat_lo + eys_syst_lo*eys_syst_lo)
         eys_hi = np.sqrt(eys_stat_hi*eys_stat_hi + eys_syst_hi*eys_syst_hi)
         for p, ey_lo, ey_hi in zip(points, eys_lo, eys_hi) :
