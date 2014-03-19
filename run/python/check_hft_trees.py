@@ -476,8 +476,9 @@ def fillAndCount(histos, counters, sample, blind=True) :
         for sel in selections : counters[sel] += (weight if passSels[sel] else 0.0)
         for sel in selections :
             fillHisto = passSels[sel]
-            if blind and sample.isData and (sel not in blindRegions()) :
-                fillHisto = passSels[blindRegionFromAnyRegion(sel)] and not passSels[signalRegionFromAnyRegion(sel)]
+            if blind and sample.isData :
+                if sel in signalRegions() : fillHisto = False
+                else : fillHisto = passSels[blindRegionFromAnyRegion(sel)] and not passSels[signalRegionFromAnyRegion(sel)]
             oneJet = tree.L2nCentralLightJets==1
             mev2gev = 1.0e-3
             mljj = mev2gev*(tree.mlj if oneJet else tree.mljj)
