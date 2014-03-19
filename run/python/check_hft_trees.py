@@ -138,10 +138,28 @@ def runPlot(opts) :
         group.setHistosDir(inputDir)
         group.exploreAvailableSystematics(verbose)
         group.filterAndDropSystematics(sysOption, excludedSyst, verbose)
+
+    mkdirIfNeeded(outputDir)
+    systematics = ['NOM']
+    anySys = sysOption==None
+    if sysOption=='fake'   or anySys : systematics += systUtils.fakeSystVariations()
+    if sysOption=='object' or anySys : systematics += systUtils.mcObjectVariations()
+    if sysOption=='weight' or anySys : systematics += systUtils.mcWeightVariations()
+    if sysOption and sysOption.count(',') : systematics = [s for s in systUtils.getAllVariations() if s in sysOption.split(',')]
+    elif sysOption in systUtils.getAllVariations() : systematics = [sysOption]
+    if not anySys and len(systematics)==1 and sysOption!='NOM' : raise ValueError("Invalid syst %s"%str(sysOption))
+    if excludedSyst : systematics = [s for s in systematics if s not in filterWithRegexp(systematics, excludedSyst)]
+    if verbose : print "using the following systematics : %s"%str(systematics)
+
+    fakeSystematics = [s for s in systematics if s in systUtils.fakeSystVariations()]
+    mcSystematics = [s for s in systematics if s in systUtils.mcObjectVariations() + systUtils.mcWeightVariations()]
+
     simBkgs = [g for g in groups if g.isMcBkg]
     data, fake, signal = findByName(groups, 'data'), findByName(groups, 'fake'), findByName(groups, 'signal')
     for sel in selections :
+        if verbose : print '-- plotting ',sel
         for var in variables :
+            if verbose : print '---- plotting ',var
             for g in groups : g.setSystNominal()
             nominalHistoData    = data.getHistogram(variable=var, selection=sel, cacheIt=True)
             nominalHistoSign    = signal.getHistogram(variable=var, selection=sel, cacheIt=True)
@@ -150,7 +168,8 @@ def runPlot(opts) :
             nominalHistosBkg    = dict([('fake', nominalHistoFakeBkg)] + [(g, h) for g, h in nominalHistosSimBkg.iteritems()])
             nominalHistoTotBkg  = buildTotBkg(histoFakeBkg=nominalHistoFakeBkg, histosSimBkgs=nominalHistosSimBkg)
             statErrBand = buildStat(nominalHistoTotBkg)
-            systErrBand = buildSyst(fake=fake, nominalHistosSimBkg=nominalHistosSimBkg, variable=var, selection=sel)
+            systErrBand = buildSyst(fake=fake, simBkgs=simBkgs, variable=var, selection=sel,
+                                    fakeVariations=fakeSystematics, mcVariations=mcSystematics, verbose=verbose)
 
             plotHistos(histoData=nominalHistoData, histoSignal=None, histoTotBkg=nominalHistoTotBkg,
                        histosBkg=nominalHistosBkg,
@@ -601,7 +620,7 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
         systErrBand.SetFillStyle(3007)
         systErrBand.Draw('E2 same')
         leg.AddEntry(systErrBand, 'syst', 'f')
-    totErrBand = systUtils.combineStatAndSystErrorBands(statErrBand, systErrBand)
+    totErrBand = systUtils.addErrorBandsInQuadrature(statErrBand, systErrBand)
     if totErrBand :
         totErrBand.Draw('E2 same')
         totErrBand.SetFillStyle(3005)
@@ -611,7 +630,11 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
     tex = r.TLatex()
     tex.SetTextSize(0.5 * tex.GetTextSize())
     tex.SetNDC(True)
-    label = "#splitline{%s}{%s}"%(padMaster.GetName(), "%.3f +/- %.3f (stat)"%(integralAndError(histoTotBkg)))
+    label  = "%s : "%(padMaster.GetName())
+    label += "%.3f #pm %.3f (stat)"%(integralAndError(histoTotBkg))
+    if systErrBand :
+        sysUp, sysDo = systUtils.totalUpDownVariation(systErrBand)
+        label += "#pm #splitline{%.3f}{%.3f} (syst)"%(sysUp, sysDo)
     tex.DrawLatex(0.10, 0.95, label)
     can.Update() # force stack to create padMaster
 
