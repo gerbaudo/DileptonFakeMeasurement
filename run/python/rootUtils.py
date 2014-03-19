@@ -77,7 +77,7 @@ def getMinMax(histosOrGraphs=[]) :
         if   cname.startswith('TH1') :               return getMinMaxFromTH1(obj)
         elif cname.startswith('TGraphAsymmErrors') : return getMinMaxFromTGraphAsymmErrors(obj)
         elif cname.startswith('TGraph') :            return getMinMaxFromTGraph(obj)
-    ms, Ms = verticalSlice([mM(o) for o in histosOrGraphs])
+    ms, Ms = verticalSlice([mM(o) for o in histosOrGraphs if o])
     return min(ms), max(Ms)
 def buildRatioHistogram(num, den, name='', divide_opt='B') :
     ratio = num.Clone(name if name else num.GetName()+'_over_'+den.GetName())
