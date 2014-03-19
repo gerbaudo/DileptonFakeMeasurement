@@ -556,6 +556,7 @@ def bookHistos(variables, samples, selections) :
     "book a dict of histograms with keys [sample][selection][var]"
     def histo(variable, sam, sel) :
         twopi = +2.0*math.pi
+        mljjLab = 'm_{lj}' if '1j' in sel else 'm_{ljj}'
         h = None
         if   v=='onebin'  : h = r.TH1F(histoName(sam, sel, 'onebin' ), ';; entries',                             1, 0.5,   1.5)
         elif v=='pt0'     : h = r.TH1F(histoName(sam, sel, 'pt0'    ), ';p_{T,l0} [GeV]; entries/bin',          25, 0.0, 250.0)
@@ -569,7 +570,7 @@ def bookHistos(variables, samples, selections) :
         elif v=='dphill'  : h = r.TH1F(histoName(sam, sel, 'dphill' ), ';#Delta#phi(l, l) [rad]; entries/bin',  25, 0.0, twopi)
         elif v=='detall'  : h = r.TH1F(histoName(sam, sel, 'detall' ), ';#Delta#eta(l, l); entries/bin',        25, 0.0, +3.0 )
         elif v=='mt2j'    : h = r.TH1F(histoName(sam, sel, 'mt2j'   ), ';m^{J}_{T2} [GeV]; entries/bin',        25, 0.0, 500.0)
-        elif v=='mljj'    : h = r.TH1F(histoName(sam, sel, 'mljj'   ), ';m_{ljj} [GeV]; entries/bin',           25, 0.0, 500.0)
+        elif v=='mljj'    : h = r.TH1F(histoName(sam, sel, 'mljj'   ), ';'+mljjLab+' [GeV]; entries/bin',       15, 0.0, 450.0)
         elif v=='dphijj'  : h = r.TH1F(histoName(sam, sel, 'dphijj' ), ';#Delta#phi(j, j) [rad]; entries/bin',  25, 0.0, twopi)
         elif v=='detajj'  : h = r.TH1F(histoName(sam, sel, 'detajj' ), ';#Delta#eta(j, j); entries/bin',        25, 0.0, +3.0 )
         else : print "unknown variable %s"%v
