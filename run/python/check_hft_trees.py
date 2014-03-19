@@ -493,15 +493,6 @@ def fillAndCount(histos, counters, sample, blind=True) :
                 print "ev %d run %d channel %s sel %s weight %f"%(tree.runNumber, tree.eventNumber, channel, sel, weight)
     file.Close()
 
-def mcSystematics() :
-    return ['NOM', 'EER_DN', 'EER_UP', 'EES_LOW_DN', 'EES_LOW_UP',
-            'EES_MAT_DN', 'EES_MAT_UP', 'EES_PS_DN', 'EES_PS_UP',
-            'EES_Z_DN', 'EES_Z_UP', 'ID_DN', 'ID_UP', 'JER', 'JES_DN',
-            'JES_UP', 'MS_DN', 'MS_UP', 'RESOST', 'SCALEST_DN',
-            'SCALEST_UP',]
-def fakeSystematics() :
-    return ['NOM', 'EL_FR_DOWN', 'EL_FR_UP', 'EL_RE_DOWN', 'EL_RE_UP',
-            'MU_FR_DOWN', 'MU_FR_UP', 'MU_RE_DOWN', 'MU_RE_UP',]
 def dataSampleNames() :
     return ["period%(period)s.physics_%(stream)s"%{'period':p, 'stream':s}
             for p in ['A','B','C','D','E','G','H','I','J','L']
@@ -624,8 +615,6 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
     can._leg = leg
     leg.SetBorderSize(0)
     leg._reversedEntries = []
-#     leg.AddEntry(h_data, dataSample(), 'P')
-#     leg.AddEntry(h_bkg, 'sm', 'L')
     for group, histo in sortedAs(histosBkg, stackedGroups()) :
         histo.SetFillColor(getGroupColor(group))
         histo.SetLineColor(histo.GetFillColor())
@@ -633,12 +622,10 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
         can._hists.append(histo)
         leg._reversedEntries.append((histo, group, 'F'))
     for h, g, o in leg._reversedEntries[::-1] : leg.AddEntry(h, g, o) # stack goes b-t, legend goes t-b
-#     stack.Draw()
     stack.Draw('hist same')
     histoData.SetMarkerStyle(r.kFullCircle)
     histoData.Draw('same')
     if histoSignal : histoSignal.Draw('same')
-    #leg.AddEntry(err_band, 'Uncertainty', 'F')
     if statErrBand and drawStatErr :
         statErrBand.SetFillStyle(3006)
         statErrBand.Draw('E2 same')
@@ -657,17 +644,13 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
     tex = r.TLatex()
     tex.SetTextSize(0.5 * tex.GetTextSize())
     tex.SetNDC(True)
-    label  = "%s : "%(padMaster.GetName())
+    label  = "%s tot bkg : "%(can.GetName())
     label += "%.3f #pm %.3f (stat)"%(integralAndError(histoTotBkg))
     if systErrBand :
         sysUp, sysDo = systUtils.totalUpDownVariation(systErrBand)
         label += "#pm #splitline{%.3f}{%.3f} (syst)"%(sysUp, sysDo)
     tex.DrawLatex(0.10, 0.95, label)
     can.Update() # force stack to create padMaster
-
-#     hStack = stack.GetHistogram()
-#     padMaster.SetMaximum(1.1*max([h.GetMaximum() for h in [hStack]+histos.values()]))
-#     can.Update()
     for ext in ['png'] : can.SaveAs(outdir+'/'+can.GetName()+'.'+ext)
 
 def listExistingSyst(dir) :
