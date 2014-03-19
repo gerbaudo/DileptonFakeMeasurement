@@ -159,7 +159,7 @@ inline std::string syst2str(const Systematic &s) { return isValid(s) ? Systemati
 inline std::string syst2str(const SusyNtSys &s)  { return isValid(s) ? SusyNtSystNames[s] : "unknown"; }
 SusyNtSys sys2ntsys(const Systematic &s);
 Systematic ntsys2sys(const SusyNtSys &s);
-
+BTagSys sys2ntbsys(const Systematic &s); //!< convert to SusyDef::BTagSys; return nominal if not a btag-related sys
 } // wh
 } // susy
 #endif

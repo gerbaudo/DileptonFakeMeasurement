@@ -53,6 +53,18 @@ SusyNtSys sys2ntsys(const Systematic &s)
     return static_cast<SusyNtSys>(r);
 }
 //-----------------------------------------
+BTagSys sys2ntbsys(const Systematic &sys)
+{
+    BTagSys bsys(sys==WH_BJETUP      ? BTag_BJet_UP :
+                 sys==WH_BJETDOWN    ? BTag_BJet_DN :
+                 sys==WH_CJETUP      ? BTag_CJet_UP :
+                 sys==WH_CJETDOWN    ? BTag_CJet_DN :
+                 sys==WH_BMISTAGUP   ? BTag_LJet_UP :
+                 sys==WH_BMISTAGDOWN ? BTag_LJet_DN :
+                 BTag_NOM);
+    return bsys;
+}
+//-----------------------------------------
 
 } // wh
 } // susy
