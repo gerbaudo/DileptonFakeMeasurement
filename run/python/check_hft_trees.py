@@ -17,6 +17,8 @@ import pprint
 from rootUtils import (drawAtlasLabel
                        ,getBinContents
                        ,getMinMax
+                       ,graphWithPoissonError
+                       ,increaseAxisFont
                        ,topRightLegend
                        ,importRoot
                        ,integralAndError
@@ -564,7 +566,7 @@ def bookHistos(variables, samples, selections) :
         elif v=='dphill'  : h = r.TH1F(histoName(sam, sel, 'dphill' ), ';#Delta#phi(l, l) [rad]; entries/bin',  25, 0.0, twopi)
         elif v=='detall'  : h = r.TH1F(histoName(sam, sel, 'detall' ), ';#Delta#eta(l, l); entries/bin',        25, 0.0, +3.0 )
         elif v=='mt2j'    : h = r.TH1F(histoName(sam, sel, 'mt2j'   ), ';m^{J}_{T2} [GeV]; entries/bin',        25, 0.0, 500.0)
-        elif v=='mljj'    : h = r.TH1F(histoName(sam, sel, 'mljj'   ), ';'+mljjLab+' [GeV]; entries/bin',       15, 0.0, 450.0)
+        elif v=='mljj'    : h = r.TH1F(histoName(sam, sel, 'mljj'   ), ';'+mljjLab+' [GeV]; entries/30GeV',     15, 0.0, 450.0)
         elif v=='dphijj'  : h = r.TH1F(histoName(sam, sel, 'dphijj' ), ';#Delta#phi(j, j) [rad]; entries/bin',  25, 0.0, twopi)
         elif v=='detajj'  : h = r.TH1F(histoName(sam, sel, 'detajj' ), ';#Delta#eta(j, j); entries/bin',        25, 0.0, +3.0 )
         else : print "unknown variable %s"%v
@@ -608,24 +610,26 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
     stack = r.THStack('stack_'+padMaster.GetName(), '')
     r.SetOwnership(stack, False)
     can._hists.append(stack)
-    leg = topRightLegend(can, 0.2, 0.325)
+    leg = topRightLegend(can, 0.225, 0.325)
     can._leg = leg
     leg.SetBorderSize(0)
     leg._reversedEntries = []
     for group, histo in sortedAs(histosBkg, stackedGroups()) :
         histo.SetFillColor(getGroupColor(group))
-        histo.SetLineColor(histo.GetFillColor())
+        histo.SetLineColor(r.kBlack)
         stack.Add(histo)
         can._hists.append(histo)
         leg._reversedEntries.append((histo, group, 'F'))
     for h, g, o in leg._reversedEntries[::-1] : leg.AddEntry(h, g, o) # stack goes b-t, legend goes t-b
     stack.Draw('hist same')
     histoData.SetMarkerStyle(r.kFullCircle)
-    histoData.Draw('same')
+    histoData.SetLineWidth(2)
+    dataGraph = graphWithPoissonError(histoData)
+    dataGraph.Draw('same p')
     if histoSignal :
         histoSignal.SetLineColor(getGroupColor('signal'))
-        histoSignal.Draw('same')
-        leg.AddEntry(histoSignal, 'signal', 'l')
+        histoSignal.Draw('histo same')
+        leg.AddEntry(histoSignal, '(m_{C1},m_{N1})=(130, 0)GeV', 'l')
     if statErrBand and drawStatErr :
         statErrBand.SetFillStyle(3006)
         statErrBand.Draw('E2 same')
@@ -651,9 +655,11 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
         label += "#pm #splitline{%.3f}{%.3f} (syst)"%(sysUp, sysDo)
     tex.DrawLatex(0.10, 0.95, label)
     drawAtlasLabel(can, xpos=0.125, align=13)
-    yMin, yMax = getMinMax([histoData, histoTotBkg, histoSignal, totErrBand])
+    yMin, yMax = getMinMax([histoData, dataGraph, histoTotBkg, histoSignal, totErrBand])
     padMaster.SetMinimum(0.0)
     padMaster.SetMaximum(1.1 * yMax)
+    increaseAxisFont(padMaster.GetXaxis())
+    increaseAxisFont(padMaster.GetYaxis())
     can.RedrawAxis()
     can.Update() # force stack to create padMaster
     for ext in ['png'] : can.SaveAs(outdir+'/'+can.GetName()+'.'+ext)
