@@ -10,6 +10,7 @@ try:
 except ImportError:
     print "missing numpy: some functions will not be available"
 from utils import verticalSlice
+import math
 
 def importRoot() :
     import ROOT as r
@@ -175,6 +176,9 @@ def getBinIndices(h) :
                 for j in range(1, 1+h.GetNbinsY())
                 for k in range(1, 1+h.GetNbinsZ())]
     else : return []
+def getBinCenters(h) :
+    bins = getBinIndices(h)
+    return [h.GetBinCenter(b) for b in bins]
 def getBinContents(h) :
     bins = getBinIndices(h)
     return [h.GetBinContent(b) for b in bins]
@@ -214,5 +218,43 @@ def getAtlasStyle() :
 #     style.SetTextSize(fontSize)
     style.SetLabelFont(font,"xyz")
     style.SetTitleFont(font,"xyz")
+    style.SetPadTickX(1)
+    style.SetPadTickY(1)
     style.SetOptStat(0)
+    style.SetOptTitle(0)
+    style.SetEndErrorSize(0)
     return style
+def increaseAxisFont(axis, factorLabel=1.25, factorTitle=1.25) :
+    axis.SetLabelSize(factorLabel*axis.GetLabelSize())
+    axis.SetTitleSize(factorTitle*axis.GetTitleSize())
+
+def graphWithPoissonError(histo, fillZero=False) :
+    "From TGuiUtils.cxx; no idea where this implementation is coming from. Ask Anyes et al."
+    gr = r.TGraphAsymmErrors()
+    gr.SetLineWidth(histo.GetLineWidth())
+    gr.SetLineColor(histo.GetLineColor())
+    gr.SetLineStyle(histo.GetLineStyle())
+    gr.SetMarkerSize(histo.GetMarkerSize())
+    gr.SetMarkerColor(histo.GetMarkerColor())
+    gr.SetMarkerStyle(histo.GetMarkerStyle())
+    binCenters  = getBinCenters(histo)
+    binContents = getBinContents(histo)
+    def poissonErr(n) :
+        sqrt = math.sqrt
+        err_up, err_do = 0.0, 0.0
+        if n :
+            y1, y2 = n+1.0, n
+            d1 = 1.0 - 1.0/(9.0*y1) + 1.0/(3.0*sqrt(y1))
+            d2 = 1.0 - 1.0/(9.0*y2) - 1.0/(3.0*sqrt(y2))
+            err_up = y1*d1*d1*d1 - n
+            err_do = n - y2*d2*d2*d2;
+        return err_do, err_up
+    xErr = 0.0
+    yErrors = [poissonErr(v) for v in binContents]
+    for bc, bv, (ed, eu) in zip(binCenters, binContents, yErrors) :
+        if bv or fillZero :
+            point = gr.GetN()
+            gr.SetPoint(point, bc, bv)
+            gr.SetPointError(point, xErr, xErr, ed, eu)
+    histo._poissonErr = gr # attach to histo for persistency
+    return gr
