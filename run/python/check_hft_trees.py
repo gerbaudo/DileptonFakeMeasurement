@@ -596,7 +596,8 @@ def getGroupColor(g) :
 def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
                statErrBand=None, systErrBand=None, # these are TGraphAsymmErrors
                canvasName='canvas', outdir='./', verbose=False,
-               drawStatErr=False, drawSystErr=False) :
+               drawStatErr=False, drawSystErr=False,
+               drawYieldAndError=False) :
     "Note: blinding can be required for only a subrange of the histo, so it is taken care of when filling"
     #setWhPlotStyle()
     setAtlasStyle()
@@ -616,6 +617,7 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
     leg._reversedEntries = []
     for group, histo in sortedAs(histosBkg, stackedGroups()) :
         histo.SetFillColor(getGroupColor(group))
+        histo.SetLineWidth(2)
         histo.SetLineColor(r.kBlack)
         stack.Add(histo)
         can._hists.append(histo)
@@ -628,6 +630,7 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
     dataGraph.Draw('same p')
     if histoSignal :
         histoSignal.SetLineColor(getGroupColor('signal'))
+        histoSignal.SetLineWidth(2)
         histoSignal.Draw('histo same')
         leg.AddEntry(histoSignal, '(m_{C1},m_{N1})=(130, 0)GeV', 'l')
     if statErrBand and drawStatErr :
@@ -653,7 +656,7 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
     if systErrBand :
         sysUp, sysDo = systUtils.totalUpDownVariation(systErrBand)
         label += "#pm #splitline{%.3f}{%.3f} (syst)"%(sysUp, sysDo)
-    tex.DrawLatex(0.10, 0.95, label)
+    if drawYieldAndError : tex.DrawLatex(0.10, 0.95, label)
     drawAtlasLabel(can, xpos=0.125, align=13)
     yMin, yMax = getMinMax([histoData, dataGraph, histoTotBkg, histoSignal, totErrBand])
     padMaster.SetMinimum(0.0)
