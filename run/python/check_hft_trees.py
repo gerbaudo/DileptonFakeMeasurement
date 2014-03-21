@@ -209,6 +209,19 @@ def runPlot(opts) :
                        histosBkg=nominalHistosBkg,
                        statErrBand=statErrBand, systErrBand=systErrBand,
                        canvasName=(sel+'_'+var), outdir=outputDir, verbose=verbose)
+    for group in groups :
+        summary = group.variationsSummary()
+        for selection, summarySel in summary.iteritems() :
+            colW = str(12)
+            header = ' '.join([('%'+colW+'s')%colName for colName in ['variation', 'yield', 'delta[%]']])
+            lineTemplate = '%(sys)'+colW+'s'+'%(counts)'+colW+'s'+'%(delta)'+colW+'s'
+            print "---- summary of variations for %s ----" % group.name
+            print "---             %s                 ---" % selection
+            print header
+            print '\n'.join(lineTemplate%{'sys':s,
+                                          'counts':(("%.3f"%c) if type(c) is float else (str(c)+str(type(c)))),
+                                          'delta' :(("%.3f"%d) if type(d) is float else '--' if d==None else (str(d)+str(type(d)))) }
+                            for s,c,d in summarySel)
 
 def countAndFillHistos(samplesPerGroup={}, syst='', verbose=False, outdir='./') :
 
@@ -261,7 +274,8 @@ def printCounters(counters):
 class BaseSampleGroup(object) :
     def __init__(self, name) :
         self.name = name
-        self.setSyst()
+        self.setSystNominal()
+        self.varCounts = collections.defaultdict(dict)
     @property
     def label(self) : return self.groupname if hasattr(self, 'groupname') else self.name
     @property
@@ -292,6 +306,18 @@ class BaseSampleGroup(object) :
         sysNameFunc = nameObjectSys if self.isObjSys else nameWeightSys if self.isWeightSys else nameFakeSys if self.isFakeSys else identity
         self.syst = sysNameFunc(sys)
         return self
+    def logVariation(self, sys='', selection='', counts=0.0) :
+        "log this systematic variation and internally store it as [selection][sys]"
+        self.varCounts[selection][sys] = counts
+        return self
+    def variationsSummary(self) :
+        summaries = {} # one summary for each selection
+        for selection, sysCounts in self.varCounts.iteritems() :
+            nominalCount = sysCounts['NOM']
+            summaries[selection] = [(sys, sysCount, (100.0*(sysCount-nominalCount)/nominalCount) if nominalCount else None)
+                                    for sys, sysCount in sortedAs(sysCounts, systUtils.getAllVariations())]
+        return summaries
+
 def findByName(bsgs=[], name='') : return [b for b in bsgs if b.name==name][0]
 #___________________________________________________________
 class Sample(BaseSampleGroup) :
@@ -402,6 +428,7 @@ class Group(BaseSampleGroup) :
             else :
                 histo.SetDirectory(0)
                 file.Close()
+        if variable=='onebin' and histo : self.logVariation(self.syst, selection, histo.Integral(0, -1))
         return histo
     def getBinContents(self, variable, selection) :
         return getBinContents(self.getHistogram)
