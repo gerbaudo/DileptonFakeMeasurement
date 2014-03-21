@@ -36,7 +36,7 @@ tar czf ~/tmp/hft_${TAG}.tgz --files-from ${HFT_FILE_LIST}
 
 
 # fill histograms
-# ./python/check_hft_trees.py --verbose --input-gen  out/susyplot/merged/ --input-fake out/fakepred/merged/ --output-dir out/hft_take2/   --batch
+# ./python/check_hft_trees.py --verbose --input-gen  out/susyplot/merged/ --input-fake out/fakepred/merged/ --output-dir out/hft/   --batch
 
 # make plots
-# ./python/check_hft_trees.py -v --input-dir out/hft_take2/ --output-dir out/hft/plots_all_syst  | tee plot_all_syst.log
+# ./python/check_hft_trees.py -v --input-dir out/hft/ --output-dir out/hft/plots_all_syst  | tee plot_all_syst.log
