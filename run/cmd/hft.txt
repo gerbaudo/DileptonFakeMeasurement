@@ -2,7 +2,7 @@
 # ./python/submitJobs.py --susyplot -o  -t ${TAG} -e 'period' --other-opt "--with-hft --with-syst"
 # ./python/submitJobs.py --susyplot -o  -t ${TAG} -s 'period' --other-opt "--with-hft"
 # ./python/submitJobs.py --fakepred -o  -t ${TAG} -s 'period' --other-opt "--with-hft"
-#
+# ./python/email_me_when_youre_done.py --message="hft trees with tag $TAG done"
 
 FAKE_SYSTEMATICS="NOM EL_FR_DOWN EL_FR_UP EL_RE_DOWN EL_RE_UP MU_FR_DOWN MU_FR_UP MU_RE_DOWN MU_RE_UP"
 MC_SYSTEMATICS="NOM EER_DN EER_UP EES_LOW_DN EES_LOW_UP EES_MAT_DN EES_MAT_UP EES_PS_DN EES_PS_UP EES_Z_DN EES_Z_UP ID_DN ID_UP JER JES_DN JES_UP MS_DN MS_UP RESOST SCALEST_DN SCALEST_UP"
@@ -33,3 +33,10 @@ done
 
 echo "creating tar file ~/tmp/hft_${TAG}.tgz"
 tar czf ~/tmp/hft_${TAG}.tgz --files-from ${HFT_FILE_LIST}
+
+
+# fill histograms
+# ./python/check_hft_trees.py --verbose --input-gen  out/susyplot/merged/ --input-fake out/fakepred/merged/ --output-dir out/hft_take2/   --batch
+
+# make plots
+# ./python/check_hft_trees.py -v --input-dir out/hft_take2/ --output-dir out/hft/plots_all_syst  | tee plot_all_syst.log
