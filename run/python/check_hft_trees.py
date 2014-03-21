@@ -533,9 +533,10 @@ def mcDatasetids() :
         'WW' : [177997, 183734, 183736, 183738, 169471, 169472,
                 169473, 169474, 169475, 169476, 169477, 169478,
                 169479, 126988, 126989, 167006],
-        'ZV' : [179974, 179975, 183585, 183587, 183589, 183591,
-                183735, 183737, 183739, 167007, 177999, 183586,
-                183588, 183590, 126894, 179396, 167008],
+        'ZV' : [179974],
+#                 , 179975, 183585, 183587, 183589, 183591,
+#                 183735, 183737, 183739, 167007, 177999, 183586,
+#                 183588, 183590, 126894, 179396, 167008],
         'Zjets' : [178354, 178355, 178356, 178357, 178358, 178359,
                    178360, 178361, 178362, 178363, 178364, 178365,
                    178366, 178367, 178368, 178369, 178370, 178371,
@@ -692,7 +693,7 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
     increaseAxisFont(padMaster.GetYaxis())
     can.RedrawAxis()
     can.Update() # force stack to create padMaster
-    for ext in ['png'] : can.SaveAs(outdir+'/'+can.GetName()+'.'+ext)
+    for ext in ['png','eps'] : can.SaveAs(outdir+'/'+can.GetName()+'.'+ext)
 
 def listExistingSyst(dir) :
     print "listing systematics from ",dir
