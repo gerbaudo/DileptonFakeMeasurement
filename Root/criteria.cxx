@@ -223,34 +223,27 @@ bool passZtautauVeto(const LeptonVector& l, const JetVector& j, const Susy::Met*
   return abs(mZTauTau(*l[0], *l[1], m->lv()) - mZ0) > widthZpeak;
 }
 //-----------------------------------------
+float getLeptonEff(const Susy::Lepton *lep, const susy::wh::Systematic sys)
+{
+    float effFactor = 1.0;
+    if(lep){
+        float sf(lep->effSF), delta(0.0);
+        if     (lep->isEle() && sys==swh::WH_ESFUP   ) delta = (+lep->errEffSF);
+        else if(lep->isEle() && sys==swh::WH_ESFDOWN ) delta = (-lep->errEffSF);
+        else if(lep->isMu()  && sys==swh::WH_MEFFUP  ) delta = (+lep->errEffSF);
+        else if(lep->isMu()  && sys==swh::WH_MEFFDOWN) delta = (-lep->errEffSF);
+        effFactor = (sf + delta);
+    } else {
+        std::cout<<"getLeptonEff: invalid lepton l"<<lep<<"... returning "<<effFactor<<std::endl;
+    }
+    return effFactor;
+}
+//-----------------------------------------
 float getLeptonEff2Lep(const LeptonVector &leptons, const susy::wh::Systematic sys)
 {
   assert(leptons.size()>1);
   const Lepton *l0=leptons[0], *l1=leptons[1];
-  float effFactor = 1.0;
-  if(l0 && l1){
-      struct EffSfFunc {
-          bool pos, neg, elUD, muUD;
-          EffSfFunc(const susy::wh::Systematic sys) {
-              bool muUp(sys==swh::WH_MEFFUP), muDo(sys==swh::WH_MEFFDOWN), elUp(swh::WH_ESFUP), elDo(swh::WH_ESFDOWN);
-              pos  = (muUp || elUp);
-              neg  = (muDo || elDo);
-              elUD = (elUp || elDo);
-              muUD = (muUp || muDo);
-          }
-          float operator()(const Lepton *l) const {
-              float sf(l->effSF), delta(0.0);
-              bool el(elUD && l->isEle()), mu(muUD && l->isMu());
-              if((el && pos) || (mu && pos)) delta = +l->errEffSF;
-              if((el && neg) || (mu && neg)) delta = -l->errEffSF;
-              return sf + delta;
-          }
-      } scaleFactor(sys);
-      effFactor = scaleFactor(l0) * scaleFactor(l1);
-  } else {
-      std::cout<<"getLeptonEff2Lep: invalid lepton l0 "<<l0<<", l1 "<<l1<<"... returning "<<effFactor<<std::endl;
-  }
-  return effFactor;
+  return getLeptonEff(l0, sys) * getLeptonEff(l1, sys);
 }
 //-----------------------------------------
 int pdgIdFromLep(const Lepton *l)

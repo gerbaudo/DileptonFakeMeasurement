@@ -44,6 +44,7 @@ namespace susy
   bool passHtMin(const LeptonVector& l, const JetVector &j, const Susy::Met* met, float minVal);
   bool passNlepMin(const LeptonVector &leptons, size_t minVal);
   bool passZtautauVeto(const LeptonVector& l, const JetVector& j, const Susy::Met* m, float widthZpeak=40.0);
+  float getLeptonEff(const Susy::Lepton *lep, const susy::wh::Systematic sys);
   float getLeptonEff2Lep(const LeptonVector &leptons, const susy::wh::Systematic sys);
   int pdgIdFromLep(const Susy::Lepton *l);
   float transverseMass(const TLorentzVector &lep, const TLorentzVector &met);
