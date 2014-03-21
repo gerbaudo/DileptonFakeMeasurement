@@ -136,7 +136,7 @@ def buildTotBackgroundHisto(histoFakeBkg=None, histosSimBkgs={}) :
         print "warning, cannot use fake as template; histo name will be wrong, based on %s"%hTemplate.GetName()
     totBkg = hTemplate.Clone(hTemplate.GetName().replace('_fake','_totbkg'))
     totBkg.Reset()
-    totBkg.Sumw2()
+    if not totBkg.GetSumw2N() : totBkg.Sumw2()
     allBackgrounds = dict((group, histo) for group, histo in [('fake',histoFakeBkg)]+[(g,h) for g,h in histosSimBkgs.iteritems()])
     for group, histo in allBackgrounds.iteritems() :
         if histo :
