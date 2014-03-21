@@ -91,6 +91,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   clearObjects();
   cacheStaticWeightComponents();
   increment(n_readin, m_weightComponents);
+  unsigned int run(nt.evt()->run), event(nt.evt()->event);
   for(size_t iSys=0; iSys<m_systs.size(); ++iSys) {
       const SusyNtSys sys = static_cast<SusyNtSys>(m_systs[iSys]);
       bool removeLepsFromIso(false);
@@ -134,7 +135,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     iSys);
       if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,iSys);
       if(passEwkSsLea)   fillHistos(ncl, j, m, weight, swh::PR_SsEwkLea,  iSys);
-      if(!ssf.passCommonCriteria()) return kTRUE; // note to self: here the fj and bj veto are implicitly being applied. refactor
+      if(!ssf.passCommonCriteria()) continue; // note to self: here the fj and bj veto are implicitly being applied. refactor
       bool is1j(ssf.eq1j), is2j(ssf.ge2j);
 
       if(ssf.sameSign && ssf.ge1j)                 fillHistos(ncl, j, m, weight, swh::PR_CRSsInc1j,iSys);
