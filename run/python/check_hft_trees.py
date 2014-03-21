@@ -419,6 +419,7 @@ class Group(BaseSampleGroup) :
             histo = self._histoCache[self.syst][hname]
         except KeyError :
             file = r.TFile.Open(self.filenameHisto)
+            if not file : print "missing file %s"%self.filenameHisto
             hname = histoName(sample=self.name, selection=selection, variable=variable)
             histo = file.Get(hname)
             if not histo : print "%s : cannot get histo %s"%(self.name, hname)
