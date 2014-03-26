@@ -70,29 +70,25 @@ function cleantarlist {
 	touch ${HFT_FILE_LIST}
 }
 
-function mergefake {
-    printf "Merge fake"
+function collectfake {
+    printf "Collecting fake"
     local HFT_FILE_LIST=$1
 	for FAKE_SYS in ${FAKE_SYSTEMATICS}
       do
-      rm   out/fakepred/merged/${FAKE_SYS}_${TAG}.root
-      hadd out/fakepred/merged/${FAKE_SYS}_${TAG}.root out/fakepred/${FAKE_SYS}_*.root > /tmp/mergefake_${FAKE_SYS}_${TAG}.log
-      echo "out/fakepred/merged/${FAKE_SYS}_${TAG}.root" >> ${HFT_FILE_LIST}
+      ls out/fakepred/${FAKE_SYS}_*.root >> ${HFT_FILE_LIST}
     done
     printf "...now %d files\n" $(cat ${HFT_FILE_LIST} | wc -l)
 }
 
-function mergedata {
-    printf "Merge data"
+function collectdata {
+    printf "Collecting data"
     local HFT_FILE_LIST=$1
-	rm    out/susyplot/merged/NOM_period_PhysCont_${TAG}.root
-	hadd  out/susyplot/merged/NOM_period_PhysCont_${TAG}.root out/susyplot/NOM_period*.root > /tmp/mergedata_${TAG}.log
-	echo "out/susyplot/merged/NOM_period_PhysCont_${TAG}.root" >> ${HFT_FILE_LIST}
+    ls out/susyplot/NOM_period*.root >> ${HFT_FILE_LIST}
     printf "...now %d files\n" $(cat ${HFT_FILE_LIST} | wc -l)
 }
 
 function collectmc {
-    printf "Collect MC"
+    printf "Collecting MC"
     local HFT_FILE_LIST=$1
     for MC_SYS in ${MC_SYSTEMATICS}
       do
@@ -134,8 +130,8 @@ then
     TAR_FILE="~/tmp/hft_$${TAG}.tgz"
     echo "Files that will go in the tar: ${HFT_FILE_LIST}"
     cleantarlist ${HFT_FILE_LIST}
-    mergefake    ${HFT_FILE_LIST}
-    mergedata    ${HFT_FILE_LIST}
+    collectfake  ${HFT_FILE_LIST}
+    collectdata  ${HFT_FILE_LIST}
     collectmc    ${HFT_FILE_LIST}
     maketar      ${HFT_FILE_LIST} ${TAR_FILE}
 elif [ "$1" == "fillhistos" ]
