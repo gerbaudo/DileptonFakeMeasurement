@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 
-# Steps to produce and verify HFT trees.
+# Commands to produce and verify HFT trees.
 # Run without any argument to get help.
 #
 # davide.gerbaudo@gmail.com
 # 2014-03-21
 
+SCRIPT_NAME=$0
+
 function help {
-	echo "These are the steps to produce the trees for HistFitter"
-	echo "- Setup a tag : 'export TAG=Feb_21'"
-	echo "- Submit the jobs to generate the trees : 'hft.sh submit'"
-	echo "- Create the tar file for HistFitter :    'hft.sh maketar'"
-	echo "- Fill the histograms :                   'hft.sh fillhistos'"
-	echo "- Produce plots and summary tables :      'hft.sh makeplots'"
-    echo "- sanity checks:                          'hft.sh test'"
+	echo -e "These are the steps to produce the trees for HistFitter"
+	echo -e "export TAG=Feb_21 \t # Setup a tag"
+	echo -e "${SCRIPT_NAME} filltrees  \t # Submit the jobs to generate the trees"
+	echo -e "${SCRIPT_NAME} maketar    \t # Create the tar file for HistFitter"
+	echo -e "${SCRIPT_NAME} fillhistos \t # Fill the histograms"
+	echo -e "${SCRIPT_NAME} makeplots  \t # Produce plots and summary tables"
+    echo -e "${SCRIPT_NAME} test       \t # sanity checks"
 }
 
 FAKE_SYSTEMATICS="NOM"
@@ -42,27 +44,26 @@ function testvars {
     echo "MC variations:"
 	for MC_SYS in ${MC_SYSTEMATICS} ; do echo "   ${MC_SYS}" ; done
 }
-#FORREAL=false
-#ifeq (${FORREAL},true)
-#	SUBMIT_OPTION = --submit
-#	SUBMIT_NOTIFY =  ./python/email_me_when_youre_done.py --message "hft trees with tag $TAG done; now you can go to `pwd` and type 'make tar; make histos'" &
-#	SUBMIT_MSG = Jobs submitted, now wait for the email
-#else
-#	SUBMIT_OPTION =
-#	SUBMIT_NOTIFY =
-#	SUBMIT_MSG = "This was a dry run; use 'make submit FORREAL=true' if you actually want to submit the jobs"
-#endif
-#
-#submit:
-#	@echo ${SUBMIT_OPTION}
-#	./python/submitJobs.py --susyplot -o  -t ${TAG} -e 'period' --other-opt "--with-hft --with-syst" $(SUBMIT_OPTION)
-#	./python/submitJobs.py --susyplot -o  -t ${TAG} -s 'period' --other-opt "--with-hft"             $(SUBMIT_OPTION)
-#	./python/submitJobs.py --fakepred -o  -t ${TAG} -s 'period' --other-opt "--with-hft"             $(SUBMIT_OPTION)
-#	${SUBMIT_NOTIFY}
-#	@echo $(SUBMIT_MSG)
-#
-## the list of files that will go in the tar
-#HFT_FILE_LIST="hft_files_${TAG}.txt"
+
+function filltrees {
+    local SUBMIT_OPTION=$1
+    local CONCLUDE_CMD=""
+    local CONCLUDE_MSG=""
+    if [[ "$SUBMIT_OPTION" == "--submit" ]]
+        then
+        CONCLUDE_CMD="./python/email_me_when_youre_done.py"
+        CONCLUDE_CMD+=" --message \"hft trees with tag ${TAG} done; now you can go to `pwd` and type '${SCRIPT_NAME} maketar; ${SCRIPT_NAME} fillhistos'\" &"
+        CONCLUDE_MSG="Jobs submitted, now wait for the email"
+    else
+        CONCLUDE_MSG="This was a dry run; use ${SCRIPT_NAME} filltrees --submit to actually submit the jobs"
+    fi
+	./python/submitJobs.py --susyplot -o  -t ${TAG} -e 'period' --other-opt "--with-hft --with-syst" ${SUBMIT_OPTION}
+	./python/submitJobs.py --susyplot -o  -t ${TAG} -s 'period' --other-opt "--with-hft"             ${SUBMIT_OPTION}
+	./python/submitJobs.py --fakepred -o  -t ${TAG} -s 'period' --other-opt "--with-hft"             ${SUBMIT_OPTION}
+	${CONCLUDE_CMD}
+    echo ${CONCLUDE_MSG}
+    echo ${CONCLUDE_CMD}
+}
 
 function cleantarlist {
     local HFT_FILE_LIST=$1
@@ -104,12 +105,20 @@ function maketar {
 	tar czf ~/tmp/hft_${TAG}.tgz --files-from ${HFT_FILE_LIST}
 }
 
-#fillhistos:
-#	./python/check_hft_trees.py --verbose --input-gen  out/susyplot/merged/ --input-fake out/fakepred/merged/ --output-dir out/hft/   --batch
-#	./python/email_me_when_youre_done.py --message="histograms filled; now you can go to `pwd` and type 'make makeplots'" &
-#
-#makeplots:
-#	./python/check_hft_trees.py -v --input-dir out/hft/ --output-dir out/hft/plots_all_syst  | tee plot_all_syst.log
+function fillhistos {
+	./python/check_hft_trees.py \
+ --verbose \
+ --input-gen  out/susyplot/merged/ \
+ --input-fake out/fakepred/merged/ \
+ --output-dir out/hft/ \
+ --batch
+	./python/email_me_when_youre_done.py \
+ --message="histograms filled (tag ${TAG}); now you can go to `pwd` and type 'hft.sh makeplots'" &
+}
+
+function makeplots {
+	./python/check_hft_trees.py -v --input-dir out/hft/ --output-dir out/hft/plots_all_syst  | tee plot_all_syst_${TAG}.log
+}
 
 #-------------------------
 # main
@@ -121,9 +130,9 @@ then
 elif [ "$1" == "test" ]
 then
         testvars
-elif [ "$1" == "submit" ]
+elif [ "$1" == "filltrees" ]
 then
-    echo
+    filltrees
 elif [ "$1" == "maketar" ]
 then
     HFT_FILE_LIST="hft_files_${TAG}.txt"
@@ -136,10 +145,12 @@ then
     maketar      ${HFT_FILE_LIST} ${TAR_FILE}
 elif [ "$1" == "fillhistos" ]
 then
-    echo
+    echo "Filling histograms"
+    fillhistos
 elif [ "$1" == "makeplots" ]
 then
-    echo
+    echo "Making plots"
+    makeplots
 else
     echo "Unknown option '$*'"
 fi
