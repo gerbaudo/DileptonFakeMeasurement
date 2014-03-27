@@ -683,7 +683,9 @@ def plotHistos(histoData=None, histoSignal=None, histoTotBkg=None, histosBkg={},
     if systErrBand :
         sysUp, sysDo = systUtils.totalUpDownVariation(systErrBand)
         label += "#pm #splitline{%.3f}{%.3f} (syst)"%(sysUp, sysDo)
-    if drawYieldAndError : tex.DrawLatex(0.10, 0.95, label)
+    if drawYieldAndError :
+        tex.DrawLatex(0.10, 0.95, label)
+        can.SetTopMargin(2.0*can.GetTopMargin())
     drawAtlasLabel(can, xpos=0.125, align=13)
     yMin, yMax = getMinMax([histoData, dataGraph, histoTotBkg, histoSignal, totErrBand])
     padMaster.SetMinimum(0.0)
