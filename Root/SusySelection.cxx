@@ -645,6 +645,7 @@ float SusySelection::computeChargeFlipProb(const LeptonVector &leptons, const Me
   m_chargeFlip->setSeed(nt.evt()->event);
   float flipProb(m_chargeFlip->OS2SS(pdg0, &smearedLv0, pdg1, &smearedLv1, sys, isData, chargeFlip::dataonly));
   float overlapFrac(m_chargeFlip->overlapFrac().first);
+  validateQflipProb(flipProb, overlapFrac, l0, l1, nt.evt());
   return flipProb*overlapFrac;
 }
 //-----------------------------------------
@@ -684,7 +685,26 @@ float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
     met.Et = smearedMet.Mod();
     met.phi = smearedMet.Phi();
   }
+  validateQflipProb(flipProb, overlapFrac, l0, l1, nt.evt());
   return flipProb*overlapFrac;
+}
+//-----------------------------------------
+bool SusySelection::validateQflipProb(float &probability, float &overlap, const Lepton *l0, const Lepton *l1, const Event *event)
+{
+    bool isValid=true;
+    if(probability<0.0 || probability>1.0){
+        isValid=false;
+        cout<<"SusySelection::validateQflipProb "
+            <<"error: unphysical probability "<<probability<<" * "<<overlap<<endl;
+            cout<<" setting it to 0.0"<<endl;
+        probability=0.0;
+        if(event && l0 && l1) {
+            event->print();
+            l0->print();
+            l1->print();
+        }
+    }
+    return isValid;
 }
 //-----------------------------------------
 susy::wh::Chan SusySelection::getChan(const LeptonVector& leps)

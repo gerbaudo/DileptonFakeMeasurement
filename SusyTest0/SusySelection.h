@@ -167,13 +167,13 @@ class SusySelection : public SusyNtAna
                                 const susy::wh::Systematic sys,
                                 bool update4mom);
     float computeChargeFlipProb(const LeptonVector &leptons, const Met &met, const susy::wh::Systematic sys);
+    static bool validateQflipProb(float &probability, float &overlap, const Lepton *l0, const Lepton *l1, const Event *event);
     //! any electron or muon, before pt cuts, before overlap removal
     static vl_t getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/);
     static susy::wh::Chan getChan(const LeptonVector& leps); //!< compute lepton channel
     static SsPassFlags assignNjetFlags(const JetVector& jets, SsPassFlags f);
     //! ugly hack function : utils::filter seems not to work properly with SusyNtTools::isCentralLightJet...
     static JetVector filterClJets(const JetVector &jets);
-
  protected:
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
     float computeEventWeightXsFromReader(float lumi);
