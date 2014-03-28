@@ -144,12 +144,12 @@ void MeasureFakeRate2::initHistos(string outName)
         h_l_pt_hflf    [il][icr][ich] = new EffObject(bn+"l_pt_hflf",    nFakePtbins,       FakePtbins);
         h_l_pt_true    [il][icr][ich] = new TH1F     ((bn+"l_pt_true").c_str(), "", nFakePtbins, FakePtbins);
         h_l_pt_fake    [il][icr][ich] = new TH1F     ((bn+"l_pt_fake").c_str(), "", nFakePtbins, FakePtbins);
-        h_l_pt_eta     [il][icr][ich]   = new EffObject2(bn+"l_pt_eta",       nCoarseFakePtbins, coarseFakePtbins, nCoarseEtabins, CoarseEtabins);
+        h_l_pt_eta     [il][icr][ich]   = new EffObject2(bn+"l_pt_eta",       nCoarseFakePtbins, coarseFakePtbins, nEtabins, Etabins);
         h_flavor_pt      [il][icr][ich] = new EffObject2(bn+"flavor_pt",      nFlavBins, flavBins, nCoarseFakePtbins, coarseFakePtbins);
         h_flavor_pt_etaC [il][icr][ich] = new EffObject2(bn+"flavor_pt_etaC", nFlavBins, flavBins, nCoarseFakePtbins, coarseFakePtbins);
         h_flavor_pt_etaF [il][icr][ich] = new EffObject2(bn+"flavor_pt_etaF", nFlavBins, flavBins, nCoarseFakePtbins, coarseFakePtbins);
-        h_flavor_eta     [il][icr][ich] = new EffObject2(bn+"flavor_eta",     nFlavBins, flavBins, nCoarseEtabins,    CoarseEtabins);
-        h_flavor_metrel  [il][icr][ich] = new EffObject2(bn+"flavor_metrel",  nFlavBins, flavBins, nMetbins,          Metbins);
+        h_flavor_eta     [il][icr][ich] = new EffObject2(bn+"flavor_eta",     nFlavBins, flavBins, nEtabins, Etabins);
+        h_flavor_metrel  [il][icr][ich] = new EffObject2(bn+"flavor_metrel",  nFlavBins, flavBins, nMetbins, Metbins);
         for(int lbl=0; lbl<nFlavBins; ++lbl) {
             const std::string &label = LSNames[lbl];
             h_flavor         [il][icr][ich]->SetXLabel(lbl+1, label);
