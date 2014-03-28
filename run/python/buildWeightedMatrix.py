@@ -73,6 +73,7 @@ def main() :
     parser.add_option('-f', '--input_fractions')
     parser.add_option('-o', '--output_file')
     parser.add_option('-p', '--output_plot')
+    parser.add_option('-z', '--zoom-in', help='vertical axis efficiency plots')
     parser.add_option('-v','--verbose', action='store_true', default=False)
     (opts, args) = parser.parse_args()
     requiredOptions = ['tag', 'input_dir', 'output_file', 'output_plot']
@@ -85,6 +86,7 @@ def main() :
     inputFracFname= opts.input_fractions
     outputFname   = opts.output_file
     outputPlotDir = opts.output_plot
+    zoomIn        = opts.zoom_in
     verbose       = opts.verbose
     if verbose : print '\nUsing the following options:\n'+'\n'.join("%s : %s"%(o, str(getattr(opts, o))) for o in allOptions)
 
@@ -96,8 +98,8 @@ def main() :
     inputFiles = dict((k, v) for k, v in allInputFiles.iteritems() if k in fakeProcesses())
     inputFracFile = r.TFile.Open(inputFracFname) if inputFracFname else None
 
-    buildMuonRates    (inputFiles, outputFile, outputPlotDir, inputFracFile=inputFracFile, verbose=verbose)
-    buildElectronRates(inputFiles, outputFile, outputPlotDir, inputFracFile=inputFracFile, verbose=verbose)
+    buildMuonRates    (inputFiles, outputFile, outputPlotDir, inputFracFile=inputFracFile, verbose=verbose, zoomIn=zoomIn)
+    buildElectronRates(inputFiles, outputFile, outputPlotDir, inputFracFile=inputFracFile, verbose=verbose, zoomIn=zoomIn)
     buildSystematics  (allInputFiles['allBkg'], outputFile, verbose)
     outputFile.Close()
     if verbose : print "output saved to \n%s"%'\n'.join([outputFname, outputPlotDir])
@@ -284,7 +286,7 @@ def buildWeightedHistoTwice(histosA={}, fractionsA={}, histosB={}, fractionsB={}
             hout.Add(hA)
             hout.Add(hB)
     return hout
-def buildMuonRates(inputFiles, outputfile, outplotdir, inputFracFile=None, verbose=False) :
+def buildMuonRates(inputFiles, outputfile, outplotdir, inputFracFile=None, verbose=False, zoomIn=False) :
     """
     For each selection region, build the real eff and fake rate
     histo as a weighted sum of the corresponding fractions.
@@ -297,8 +299,8 @@ def buildMuonRates(inputFiles, outputfile, outplotdir, inputFracFile=None, verbo
     eff2d_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_eta',  iF[p], mu_qcdSF, v))  for p in processes)
     eff2d_real = dict((p, brsit('muon_realMC_all_l_pt_eta', iF[p], mu_realSF, v)) for p in processes)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#varepsilon(T|L)'
-    plot1dEfficiencies(eff_qcd,  'eff_mu_qcd',  outplotdir, lT+' qcd fake #mu'+';'+lX+';'+lY)
-    plot1dEfficiencies(eff_real, 'eff_mu_real', outplotdir, lT+' real #mu'    +';'+lX+';'+lY)
+    plot1dEfficiencies(eff_qcd,  'eff_mu_qcd',  outplotdir, lT+' qcd fake #mu'+';'+lX+';'+lY, zoomIn=zoomIn)
+    plot1dEfficiencies(eff_real, 'eff_mu_real', outplotdir, lT+' real #mu'    +';'+lX+';'+lY, zoomIn=zoomIn)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#eta'
     plot2dEfficiencies(eff2d_qcd,  'eff2d_mu_qcd', outplotdir, lT+' qcd fake #mu'+';'+lX+';'+lY)
     plot2dEfficiencies(eff2d_real, 'eff2d_mu_real', outplotdir, lT+' real #mu'   +';'+lX+';'+lY)
@@ -340,7 +342,7 @@ def buildMuonRates(inputFiles, outputfile, outplotdir, inputFracFile=None, verbo
     #json_write(mu_frac, outplotdir+/outFracFilename)
     doPlotFractions = not inputFracFile
     if doPlotFractions : plotFractions(mu_frac, outplotdir, 'frac_mu')
-def buildElectronRates(inputFiles, outputfile, outplotdir, inputFracFile=None, verbose=False) :
+def buildElectronRates(inputFiles, outputfile, outplotdir, inputFracFile=None, verbose=False, zoomIn=False) :
     """
     For each selection region, build the real eff and fake rate
     histo as a weighted sum of the corresponding fractions.
@@ -356,9 +358,9 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, inputFracFile=None, v
     eff2d_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_eta',  iF[p], el_qcdSF, v))  for p in processes)
     eff2d_real = dict((p, brsit('elec_realMC_all_l_pt_eta', iF[p], el_realSF, v)) for p in processes)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#varepsilon(T|L)'
-    plot1dEfficiencies(eff_conv, 'eff_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY)
-    plot1dEfficiencies(eff_qcd,  'eff_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY)
-    plot1dEfficiencies(eff_real, 'eff_el_real', outplotdir, lT+' real el'     +';'+lX+';'+lY)
+    plot1dEfficiencies(eff_conv, 'eff_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY, zoomIn=zoomIn)
+    plot1dEfficiencies(eff_qcd,  'eff_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY, zoomIn=zoomIn)
+    plot1dEfficiencies(eff_real, 'eff_el_real', outplotdir, lT+' real el'     +';'+lX+';'+lY, zoomIn=zoomIn)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#eta'
     plot2dEfficiencies(eff2d_conv, 'eff2d_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY)
     plot2dEfficiencies(eff2d_qcd,  'eff2d_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY)
@@ -489,6 +491,9 @@ def plot1dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='title
         if not padMaster : padMaster = h
     minY, maxY = getMinMax(effs.values()) if zoomIn else (0.0, 1.0)
     padMaster.GetYaxis().SetRangeUser(min([0.0, minY]), 1.1*maxY)
+    padMaster.SetMinimum(0.0)
+    padMaster.SetMaximum(1.1*maxY)
+    padMaster.SetMaximum(0.25)
     padMaster.SetTitle(frameTitle)
     padMaster.SetStats(False)
     drawLegendWithDictKeys(can, effs)
