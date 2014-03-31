@@ -637,13 +637,13 @@ bool MeasureFakeRate2::passHFCR_testSs(const LeptonVector &leptons,
     } // for(iP)
     if(nTags==1 && nProbes==1) {
         //bool passMet(met->Et < 40);
-        bool sameSign(tag->q * probe->q > 0.0);
+//        bool sameSign(tag->q * probe->q > 0.0);
         bool passTrig((probe->isMu()  && passDilepMuMu) || (probe->isEle() && (passDilepMuEm || passDilepEmMu)));
         float mt = Mt(probe,met);
         bool passIterativeSideband = false;
         if(CR == CR_HF)      passIterativeSideband = mt <  40.0;
         if(CR == CR_HF_high) passIterativeSideband = mt < 100.0;
-        if(sameSign && passTrig && passIterativeSideband) {
+        if(passTrig && passIterativeSideband) {
             m_tags.push_back(tag);
             m_probes.push_back(probe);
             LeptonVector temp; temp.push_back(tag); temp.push_back(probe);
