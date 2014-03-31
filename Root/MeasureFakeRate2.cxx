@@ -618,6 +618,7 @@ bool MeasureFakeRate2::passHFCR_testSs(const LeptonVector &leptons,
 // low-met mu(tag)+l(probe)
     Muon* tag=0;
     size_t nTags=0;
+    //bool passSingleMu(false); // DG 2014-03-30: do we need this?
     bool passDilepMuMu(false), passDilepMuEm(false), passDilepEmMu(false);
     for(size_t iTag=0; iTag<m_signalMuons.size(); ++iTag){
         const Muon *m = m_signalMuons[iTag];
