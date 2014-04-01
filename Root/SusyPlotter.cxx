@@ -151,6 +151,22 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   if(is1j && SusySelection::passSrWh1j(v)) fillHistos(ncl, j, m, weight, swh::SrWh1j , sys);
   if(is2j && SusySelection::passSrWh2j(v)) fillHistos(ncl, j, m, weight, swh::SrWh2j , sys);
 
+
+  Lepton *l0 = ncl[0], *l1 = ncl[1];
+  bool isSuspiciousEvent(isOf && SusySelection::passCrWhfake(v) && fabs(l0->Eta())>1.80);
+  if(isSuspiciousEvent) {
+      unsigned int run(nt.evt()->run), event(nt.evt()->event);
+      cout<<"fake suspicious event run "<<run<<" event "<<event
+          <<" "<<(isEe?"ee":isMm?"mm":"em")
+          <<" "<<(is1j?"1j":is2j?"2j":"nj")<<endl;
+      nt.evt()->print();
+      l0->print();
+      l1->print();
+      m->print();
+      for(size_t iJet=0; iJet<j.size(); ++iJet)
+          j[iJet]->print();
+  }
+
   return kTRUE;
 }
 //-----------------------------------------
