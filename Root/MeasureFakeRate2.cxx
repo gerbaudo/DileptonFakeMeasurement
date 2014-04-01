@@ -620,8 +620,9 @@ bool MeasureFakeRate2::passHFCR_testSs(const LeptonVector &leptons,
     size_t nTags=0;
     //bool passSingleMu(false); // DG 2014-03-30: do we need this?
     bool passDilepMuMu(false), passDilepMuEm(false), passDilepEmMu(false);
-    for(size_t iTag=0; iTag<m_signalMuons.size(); ++iTag){
-        const Muon *m = m_signalMuons[iTag];
+//    for(size_t iTag=0; iTag<m_signalMuons.size(); ++iTag){
+    for(size_t iTag=0; iTag<m_baseMuons.size(); ++iTag){
+        const Muon *m = m_baseMuons[iTag];
         uint tf = m->trigFlags;
         passDilepMuMu = (tf & TRIG_mu18_tight_mu8_EFFS);
         passDilepMuEm = (tf & TRIG_mu18_tight_e7_medium1);
@@ -637,13 +638,13 @@ bool MeasureFakeRate2::passHFCR_testSs(const LeptonVector &leptons,
     } // for(iP)
     if(nTags==1 && nProbes==1) {
         //bool passMet(met->Et < 40);
-//        bool sameSign(tag->q * probe->q > 0.0);
+        bool sameSign(tag->q * probe->q > 0.0);
         bool passTrig((probe->isMu()  && passDilepMuMu) || (probe->isEle() && (passDilepMuEm || passDilepEmMu)));
         float mt = Mt(probe,met);
         bool passIterativeSideband = false;
         if(CR == CR_HF)      passIterativeSideband = mt <  40.0;
         if(CR == CR_HF_high) passIterativeSideband = mt < 100.0;
-        if(passTrig && passIterativeSideband) {
+        if(sameSign && passTrig && passIterativeSideband) {
             m_tags.push_back(tag);
             m_probes.push_back(probe);
             LeptonVector temp; temp.push_back(tag); temp.push_back(probe);
