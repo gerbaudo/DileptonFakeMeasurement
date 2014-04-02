@@ -25,6 +25,8 @@ swk::DilepVars swk::compute2lVars(const LeptonVector &leptons, const Susy::Met *
                   (isMu0 && isEl1)  );
         v.isMm = isMu0 && isMu1;
         v.isSs = l0.q * l1.q > 0;
+        v.q0 = l0.q;
+        v.q1 = l1.q;
         v.pt0 = l0.Pt();
         v.pt1 = l1.Pt();
         TLorentzVector ll(l0+l1);
