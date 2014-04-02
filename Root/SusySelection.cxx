@@ -1067,6 +1067,9 @@ bool SusySelection::passSrWh2j(const susy::wh::kin::DilepVars &v)
 //-----------------------------------------
 bool SusySelection::isEventForHft(const susy::wh::kin::DilepVars &vars, const SsPassFlags &flags)
 {
+    // temporary change: save all same-sign events, DG 2014-04-02
+    return vars.isSs;
+/*
     const susy::wh::kin::DilepVars &v = vars;
     SsPassFlags f = flags;
     bool onejet(v.numCentralLightJets==1);
@@ -1084,5 +1087,6 @@ bool SusySelection::isEventForHft(const susy::wh::kin::DilepVars &vars, const Ss
         else       { f.mljj = f.ht = dropThisRequirement; }
     }
     return f.passKinCriteria();
+*/
 }
 //-----------------------------------------
