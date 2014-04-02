@@ -200,8 +200,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     case sf::CR_Real     : passCR = passRealCR  (leptons, jets, m_met, CR); break;
     case sf::CR_SideLow  : passCR = passRealCR  (leptons, jets, m_met, CR); break;
     case sf::CR_SideHigh : passCR = passRealCR  (leptons, jets, m_met, CR); break;
-    case sf::CR_HF       : passCR = passHFCR_testSs(leptons, jets, m_met, CR); break;
-    case sf::CR_HF_high  : passCR = passHFCR_testSs(leptons, jets, m_met, CR); break;
+    case sf::CR_HF       : passCR = passHFCR    (leptons, jets, m_met, CR); break;
+    case sf::CR_HF_high  : passCR = passHFCR    (leptons, jets, m_met, CR); break;
     case sf::CR_Conv     : passCR = passConvCR  (leptons, jets, m_met    ); break;
     case sf::CR_MCConv   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
     case sf::CR_MCQCD    : passCR = passMCReg   (leptons, jets, m_met, CR); break;
