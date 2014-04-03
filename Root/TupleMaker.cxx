@@ -69,7 +69,7 @@ bool TupleMaker::fill(const double weight, const unsigned int run, const unsigne
 {
     l0_.source = l0Source;
     l1_.source = l1Source;
-    return fill(weight, run, event, l0, l0Source, l1, l1Source, met, otherLeptons, jets);
+    return fill(weight, run, event, l0, l1, met, otherLeptons, jets);
 }
 //----------------------------------------------------------
 bool TupleMaker::init(const std::string &outFilename, const std::string &treename)
