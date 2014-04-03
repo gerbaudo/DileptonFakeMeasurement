@@ -61,17 +61,6 @@ bool TupleMaker::fill(const double weight, const unsigned int run, const unsigne
     return someBytesWritten;
 }
 //----------------------------------------------------------
-bool TupleMaker::fill(const double weight, const unsigned int run, const unsigned int event,
-                      const Susy::Lepton &l0, const int l0Source,
-                      const Susy::Lepton &l1, const int l1Source,
-                      const Susy::Met &met,
-                      const LeptonVector &otherLeptons, const JetVector &jets)
-{
-    l0_.source = l0Source;
-    l1_.source = l1Source;
-    return fill(weight, run, event, l0, l1, met, otherLeptons, jets);
-}
-//----------------------------------------------------------
 bool TupleMaker::init(const std::string &outFilename, const std::string &treename)
 {
     if(file_ && file_->IsOpen() && tree_) {
