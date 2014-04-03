@@ -845,12 +845,15 @@ void MeasureFakeRate2::increment(float flag[], bool includeLepSF, bool includeBt
 //----------------------------------------------------------
 sf::LeptonSource MeasureFakeRate2::getLeptonSource(const Lepton* l)
 {
-  uint dsid(nt.evt()->mcChannel);
-  if( isRealLepton(l, dsid) ) return LS_Real;
-  if( susy::isHFLepton(l) )   return LS_HF;
-  if( susy::isLFLepton(l) )   return LS_LF;
-  if( susy::isConvLepton(l) ) return LS_Conv;
-  return LS_Unk;
+    LeptonSource source = LS_Unk;
+    if(nt.evt()->isMC) {
+        uint dsid(nt.evt()->mcChannel);
+        if( isRealLepton(l, dsid) ) source = LS_Real;
+        if( susy::isHFLepton(l) )   source = LS_HF;
+        if( susy::isLFLepton(l) )   source = LS_LF;
+        if( susy::isConvLepton(l) ) source = LS_Conv;
+    }
+    return source;
 }
 //----------------------------------------------------------
 const std::vector<susy::fake::Region> MeasureFakeRate2::allRegions() const
