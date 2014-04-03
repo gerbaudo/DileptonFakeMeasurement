@@ -74,7 +74,9 @@ MeasureFakeRate2::MeasureFakeRate2() :
   m_evtWeight(1.),
   m_metRel(0.),
   m_ch(0),
-  m_ET(ET_Unknown)
+  m_ET(ET_Unknown),
+  m_writeFakeTuple(false),
+  m_tupleMakerHfCr("","")
 {
   resetCounters();
 }
@@ -92,6 +94,15 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
   if(m_dbg) cout << "MeasureFakeRate2::Begin" << endl;
   SusySelection::Begin(0);
   initHistos(m_fileName);
+  if(m_writeFakeTuple) {
+      string filename = tupleFilenameFromHistoFilename(m_fileName);
+      if(m_tupleMakerHfCr.init(filename, "HeavyFlavorControlRegion"))
+          cout<<"initialized ntuple file "<<filename<<endl;
+      else {
+          cout<<"cannot initialize ntuple file '"<<filename<<"'"<<endl;
+          m_writeTuple = false;
+      }
+  }
 }
 /*--------------------------------------------------------------------------------*/
 // Terminate
@@ -99,6 +110,7 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
 void MeasureFakeRate2::Terminate()
 {
   if(m_dbg) cout << "MeasureFakeRate2::Terminate" << endl;
+  if(m_writeFakeTuple) m_tupleMakerHfCr.close();
   cout<<"Writing file "<<m_outFile<<endl;
   m_outFile->Write();
   cout<<"Closing file"<<endl;
@@ -212,6 +224,13 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     if( passCR ){
       for(size_t ip=0; ip<m_probes.size(); ++ip) fillRatesHistos(m_probes.at(ip), jets, m_met, cr);
     } // if(passCR)
+    if(m_writeFakeTuple && passCR && CR==sf::CR_HF_high) {
+        unsigned int run(nt.evt()->run), event(nt.evt()->event);
+        const Lepton *l0 = m_tags[0];
+        const Lepton *l1 = m_probes[0];
+        LeptonVector dummyLepts;
+        m_tupleMakerHfCr.fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
+    }
   } // for(cr)
   return kTRUE;
 }
@@ -935,3 +954,25 @@ void MeasureFakeRate2::resetCounters()
     }
   }// end loop over weight types
 }
+//----------------------------------------------------------
+std::string MeasureFakeRate2::tupleFilenameFromHistoFilename(const std::string &histoFilename) const
+{
+    using std::string;
+    // heuristic: try to find a tag '_Month_day' and prepend 'fake_tuple'; otherwise just append 'fake_tuple'
+    string tupleFname = "fake_tuple.root";
+    if(contains(histoFilename, ".root")) {
+        size_t tagPos = histoFilename.rfind(".root");
+        tupleFname = string(histoFilename).insert(tagPos, "_fake_tuple");
+        string months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+        for(size_t iM=0; iM<12; ++iM) {
+            if(contains(histoFilename, "_"+months[iM])) {
+                tagPos = histoFilename.rfind("_"+ months[iM]);
+                tupleFname = string(histoFilename).insert(tagPos, "_fake_tuple");
+                break;
+            }
+        } // for(iM)
+    }
+    return tupleFname;
+}
+//----------------------------------------------------------
