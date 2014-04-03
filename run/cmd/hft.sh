@@ -46,7 +46,7 @@ function testvars {
 }
 
 function filltrees {
-    local SUBMIT_OPTION=$1
+    local SUBMIT_OPTION="" && [[ $#>0 ]] && SUBMIT_OPTION="${1}"
     local CONCLUDE_CMD=""
     local CONCLUDE_MSG=""
     if [[ "$SUBMIT_OPTION" == "--submit" ]]
@@ -55,7 +55,7 @@ function filltrees {
         CONCLUDE_CMD+=" --message \"hft trees with tag ${TAG} done; now you can go to `pwd` and type '${SCRIPT_NAME} maketar; ${SCRIPT_NAME} fillhistos'\" &"
         CONCLUDE_MSG="Jobs submitted, now wait for the email"
     else
-        CONCLUDE_MSG="This was a dry run; use ${SCRIPT_NAME} filltrees --submit to actually submit the jobs"
+        CONCLUDE_MSG="This was a dry run; use '${SCRIPT_NAME} filltrees --submit' to actually submit the jobs"
     fi
 	./python/submitJobs.py --susyplot -o  -t ${TAG} -e 'period' --other-opt "--with-hft --with-syst" ${SUBMIT_OPTION}
 	./python/submitJobs.py --susyplot -o  -t ${TAG} -s 'period' --other-opt "--with-hft"             ${SUBMIT_OPTION}
@@ -132,7 +132,7 @@ then
         testvars
 elif [ "$1" == "filltrees" ]
 then
-    filltrees
+    filltrees "${2}"
 elif [ "$1" == "maketar" ]
 then
     HFT_FILE_LIST="hft_files_${TAG}.txt"
