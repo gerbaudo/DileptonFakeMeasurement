@@ -51,7 +51,8 @@ struct FourMom {
         if(const Electron *e = dynamic_cast<const Electron*>(&l)) etCone = e->topoEtcone30Corr;
         return set4mom(l);
     }
-    FourMom& setIsTight(bool v) { isTight = true; return *this; }
+    FourMom& setIsTight(bool v) { isTight = v; return *this; }
+    FourMom& setSource(int s) { source = s; return *this; }
     FourMom& setJet(const Jet &j)   { isJet=true; isMu = isEl = false; mv1 = j.mv1; return set4mom(j); }
     FourMom& setMet(const Met &m)   { isJet=isMu=isEl=false; px=m.lv().Px(); py=m.lv().Py(); E=m.lv().E(); return *this; }
 #endif // end ifndef CINT
