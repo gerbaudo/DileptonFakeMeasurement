@@ -34,7 +34,7 @@ TupleMaker::~TupleMaker()
 //----------------------------------------------------------
 // util functions to convert Lepton, Jet -> FourMom
 FourMom lepton2FourMom (const Lepton *l)
-{    
+{
     return (  l && l->isMu()  ? FourMom().setMu(*l)
             : l && l->isEle() ? FourMom().setEl(*l)
             : FourMom());
@@ -59,6 +59,17 @@ bool TupleMaker::fill(const double weight, const unsigned int run, const unsigne
         someBytesWritten = (tree_->Fill()>0);
     }
     return someBytesWritten;
+}
+//----------------------------------------------------------
+bool TupleMaker::fill(const double weight, const unsigned int run, const unsigned int event,
+                      const Susy::Lepton &l0, const int l0Source,
+                      const Susy::Lepton &l1, const int l1Source,
+                      const Susy::Met &met,
+                      const LeptonVector &otherLeptons, const JetVector &jets)
+{
+    l0_.source = l0Source;
+    l1_.source = l1Source;
+    return fill(weight, run, event, l0, l0Source, l1, l1Source, met, otherLeptons, jets);
 }
 //----------------------------------------------------------
 bool TupleMaker::init(const std::string &outFilename, const std::string &treename)

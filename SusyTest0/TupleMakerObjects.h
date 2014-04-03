@@ -21,10 +21,12 @@ struct FourMom {
     double px, py, pz, E;
     bool isMu, isEl, isJet;
     bool isTight;
+    int source; // see FakeLeptonSources
     double charge, d0Signif, z0SinTheta, etCone, ptCone, mv1;;
     FourMom() : px(0), py(0), pz(0), E(0),
                 isMu(false), isEl(false), isJet(false),
                 isTight(false),
+                source(-1),
                 charge(0), d0Signif(0), z0SinTheta(0), etCone(0), ptCone(0), mv1(0) {}
 #ifndef __CINT__
 // cint is not able to parse 'complex' code; see

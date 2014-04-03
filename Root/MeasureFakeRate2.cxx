@@ -228,8 +228,9 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
         unsigned int run(nt.evt()->run), event(nt.evt()->event);
         const Lepton *l0 = m_tags[0];
         const Lepton *l1 = m_probes[0];
+        LeptonSource ls0(getLeptonSource(l0)), ls1(getLeptonSource(l1));
         LeptonVector dummyLepts;
-        m_tupleMakerHfCr.fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
+        m_tupleMakerHfCr.fill(m_evtWeight, run, event, *l0, ls0, *l1, ls1, *m_met, dummyLepts, jets);
     }
   } // for(cr)
   return kTRUE;

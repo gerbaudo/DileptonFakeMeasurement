@@ -49,6 +49,11 @@ public:
     bool fill(const double weight, const unsigned int run, const unsigned int event,
               const Susy::Lepton &l0, const Susy::Lepton &l1, const Susy::Met &met,
               const LeptonVector &otherLeptons, const JetVector &jets);
+    bool fill(const double weight, const unsigned int run, const unsigned int event,
+              const Susy::Lepton &l0, const int l0Source,
+              const Susy::Lepton &l1, const int l1Source,
+              const Susy::Met &met,
+              const LeptonVector &otherLeptons, const JetVector &jets);
     const TFile* file() const { return file_; }
     const TTree* tree() const { return tree_; }
 private: // rule of three 
