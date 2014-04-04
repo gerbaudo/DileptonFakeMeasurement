@@ -5,6 +5,7 @@
 # davide.gerbaudo@gmail.com
 # 2013-08-26
 
+import os
 try:
     import numpy as np
 except ImportError:
@@ -16,6 +17,12 @@ def importRoot() :
     r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
     return r
 r = importRoot()
+
+def importRootCorePackages() :
+    "same functionality as RootCore/scripts/load_packages.C"
+    rcoreDir = os.environ['ROOTCOREDIR']
+    [r.gSystem.Load(l.strip()) for l in open(os.path.join(rcoreDir, 'preload'))]
+    [r.gSystem.Load('lib%s'%l.strip()) for l in open(os.path.join(rcoreDir, 'load'))]
 
 from utils import verticalSlice
 
