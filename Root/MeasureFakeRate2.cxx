@@ -233,8 +233,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
         bool l1IsTight(isSignalLepton(l1, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC));
         LeptonVector dummyLepts;
         m_tupleMakerHfCr
-            .setL0FakeAttributes(l0Source, l0IsTight)
-            .setL1FakeAttributes(l1Source, l1IsTight)
+            .setL0IsTight(l0IsTight).setL0Source(l0Source)
+            .setL1IsTight(l1IsTight).setL1Source(l1Source)
             .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
     }
   } // for(cr)
