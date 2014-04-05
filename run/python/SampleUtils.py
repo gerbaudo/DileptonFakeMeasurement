@@ -9,6 +9,7 @@ import glob, os, re, unittest
 from datasets import datasets, allGroups, allDatasets, activeDatasets
 from rootUtils import importRoot
 r = importRoot()
+import utils
 
 colors = {
     'ttbar'       : r.kRed+1,
@@ -32,6 +33,19 @@ markers = {
     }
 
 allGroups, allDatasets, datasets = allGroups(datasets), allDatasets(datasets), activeDatasets(datasets)
+
+def fastSamplesFromFilenames(filenames=[], verbose=False):
+    """Assume a list of filenames with some common prefix (basepath)
+    and suffix (tag): strip away the prefix&suffix, and return a list
+    of Dataset objects obtained by matching the name to the dataset
+    """
+    prefix = utils.commonPrefix(filenames)
+    suffix = utils.commonSuffix(filenames)
+    if verbose : print "fastSamplesFromFilenames: prefix '%s' suffix '%s'"%(prefix, suffix)
+    if not prefix or not suffix : print "fastSamplesFromFilenames: warning prefix '%s' suffix '%s'"%(prefix, suffix)
+    filenames = [f.replace(prefix, '').replace(suffix, '') for f in filenames]
+    dsets = dict([(d.name, d) for d in datasets])
+    return [dsets[f] for f in filenames]
 
 def guessGroupFromFilename(filename='') :
     "Guess group from filename, either merged or un-merged"
