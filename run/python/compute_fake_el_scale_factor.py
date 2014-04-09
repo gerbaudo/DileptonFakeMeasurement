@@ -30,33 +30,57 @@ from SampleUtils import (colors
                          ,isBkgSample)
 from kin import computeMt
 
+usage="""
+Example usage:
+%prog \\
+ --verbose  \\
+ --mode bbcc \\
+ --tag ${TAG} \\
+ --output-dir ./out/conv_el_scale_factor_same_sign_Mar_07
+ --tag ${TAG} \\
+ --input_dir out/fakerate/merged/data_${TAG}.root \\
+ --output_file out/fakerate/merged/FinalFakeHist_${TAG}.root \\
+ --output_plot out/fakerate/merged/FinalFakeHist_plots_${TAG} \\
+ >& log/fakerate/FinalFakeHist_${TAG}.log
+"""
 def main():
-    parser = optparse.OptionParser()
+    parser = optparse.OptionParser(usage=usage)
     parser.add_option('-i', '--input-dir', default='./out/fakerate')
     parser.add_option('-o', '--output-dir', default='./out/fake_el_scale_factor')
-    parser.add_option('-f', '--fill-histos', action='store_true', default=False)
+    parser.add_option('-m', '--mode', default='bbcc', help='either bbcc or conv')
+    parser.add_option('-t', '--tag', help='tag used to select the input files (e.g. Apr_04)')
+    parser.add_option('-f', '--fill-histos', action='store_true', default=False, help='force fill (default only if needed)')
     parser.add_option('-v', '--verbose', action='store_true', default=False)
     (options, args) = parser.parse_args()
-    inputDir = options.input_dir
+    inputDir  = options.input_dir
     outputDir = options.output_dir
-    tag = 'Apr_02'
-    outputFileName = os.path.join(outputDir, "fake_el_scale_histos_%s.root"%tag)
+    mode      = options.mode
+    tag       = options.tag
+    verbose   = options.verbose
+    if not tag : parser.error('tag is a required option')
+    if mode not in ['bbcc', 'conv'] : parser.error("invalid mode '%s'"%mode)
+    templateInputFilename = "*_%(mode)s_tuple_%(tag)s.root" % {'tag':tag, 'mode':mode}
+    templateOutputFilename =  "%(mode)s_el_scale_histos_%(tag)s.root" % {'tag':tag, 'mode':mode}
+    treeName = 'HeavyFlavorControlRegion' if mode=='bbcc' else 'ConversionControlRegion'
+    outputFileName = os.path.join(outputDir, templateOutputFilename)
     doFillHistograms = options.fill_histos or not os.path.exists(outputFileName)
-    verbose = options.verbose
-    mkdirIfNeeded(outputDir)
-    tupleFilenames = glob.glob(os.path.join(inputDir, '*_fake_tuple_'+tag+'.root'))
+    optionsToPrint = ['inputDir', 'outputDir', 'mode', 'tag', 'doFillHistograms']
+    if verbose : print "options:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
+    # collect inputs
+    tupleFilenames = glob.glob(os.path.join(inputDir, templateInputFilename))
     samples = setSameGroupForAllData(fastSamplesFromFilenames(tupleFilenames, verbose))
     samplesPerGroup = collections.defaultdict(list)
     filenamesPerGroup = collections.defaultdict(list)
+    mkdirIfNeeded(outputDir)
     for s, f in zip(samples, tupleFilenames) :
         samplesPerGroup[s.group].append(s)
         filenamesPerGroup[s.group].append(f)
     vars = ['pt1', 'eta1']
     groups = samplesPerGroup.keys()
+    #fill histos
     if doFillHistograms :
         histosPerGroup = bookHistos(vars, groups)
         for group in groups:
-            treeName = 'HeavyFlavorControlRegion'
             filenames = filenamesPerGroup[group]
             histos = histosPerGroup[group]
             chain = r.TChain(treeName)
@@ -64,6 +88,7 @@ def main():
             print "%s : %d entries"%(group, chain.GetEntries())
             fillHistos(chain, histos, verbose)
         writeHistos(outputFileName, histosPerGroup, verbose)
+    # compute scale factors
     histosPerGroup = fetchHistos(outputFileName, histoNames(vars, groups), verbose)
     plotStackedHistos(histosPerGroup, outputDir, verbose)
     subtractRealAndComputeScaleFactor(histosPerGroup, 'eta1', verbose)
@@ -159,7 +184,7 @@ def fetchHistos(fileName='', histoNames={}, verbose=False):
         isDict = type(dictOrName) is dict
         return dict([(k, fetch(v)) for k,v in dictOrName.iteritems()]) if isDict else inputFile.Get(dictOrName)
     histos = fetch(histoNames)
-    if verbose : print "fetched histos:\n%s"%pprint.pformat(histos)
+    #if verbose : print "fetched histos:\n%s"%pprint.pformat(histos)
     return histos
 def plotStackedHistos(histosPerGroup={}, outputDir='', verbose=False):
     groups = histosPerGroup.keys()
@@ -232,10 +257,11 @@ def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', verbose=Fa
     dataTight.Divide(dataLoose)
     simuTight.Divide(simuLoose)
     print "eff(T|L) vs. ",variable
-    print "efficiency data : ",getBinContents(dataTight)
-    print "efficiency simu : ",getBinContents(simuTight)
+    def formatFloat(floats): return ["%.4f"%f for f in floats]
+    print "efficiency data : ",formatFloat(getBinContents(dataTight))
+    print "efficiency simu : ",formatFloat(getBinContents(simuTight))
     dataTight.Divide(simuTight)
-    print "scale factor data/simu: ",getBinContents(dataTight)
+    print "scale factor data/simu: ",formatFloat(getBinContents(dataTight))
 
 
 

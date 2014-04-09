@@ -96,12 +96,12 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
   SusySelection::Begin(0);
   initHistos(m_fileName);
   if(m_writeFakeTuple) {
-      string filenameHf = tupleFilenameFromHistoFilename(m_fileName, "fake_tuple");
+      string filenameHfLf = tupleFilenameFromHistoFilename(m_fileName, "bbcc_tuple");
       string filenameConv = tupleFilenameFromHistoFilename(m_fileName, "conv_tuple");
-      if(m_tupleMakerHfCr.init(filenameHf, "HeavyFlavorControlRegion"))
-          cout<<"initialized ntuple file "<<filenameHf<<endl;
+      if(m_tupleMakerHfCr.init(filenameHfLf, "HeavyFlavorControlRegion"))
+          cout<<"initialized ntuple file "<<filenameHfLf<<endl;
       else {
-          cout<<"cannot initialize ntuple file '"<<filenameHf<<"'"<<endl;
+          cout<<"cannot initialize ntuple file '"<<filenameHfLf<<"'"<<endl;
           m_writeTuple = false;
       }
       if(m_tupleMakerConv.init(filenameConv, "ConversionControlRegion"))
