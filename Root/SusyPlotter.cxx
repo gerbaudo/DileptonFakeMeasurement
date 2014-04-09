@@ -153,8 +153,12 @@ Bool_t SusyPlotter::Process(Long64_t entry)
 
 
   Lepton *l0 = ncl[0], *l1 = ncl[1];
-  bool isSuspiciousEvent(isOf && SusySelection::passCrWhfake(v) && fabs(l0->Eta())>1.80);
-  if(isSuspiciousEvent) {
+  //bool isSuspiciousEvent(isOf && SusySelection::passCrWhfake(v) && fabs(l0->Eta())>1.80);
+  bool isEventToPrint = (SusySelection::passCrWhZVfake(v) ||
+                         SusySelection::passCrWhfake(v) ||
+                         SusySelection::passCrWhZV(v) ||
+                         SusySelection::passSrWh1j(v) || SusySelection::passSrWh2j(v));
+  if(isEventToPrint) {
       unsigned int run(nt.evt()->run), event(nt.evt()->event);
       cout<<"fake suspicious event run "<<run<<" event "<<event
           <<" "<<(isEe?"ee":isMm?"mm":"em")
