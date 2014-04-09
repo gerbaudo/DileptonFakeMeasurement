@@ -31,7 +31,7 @@ void usage(const char *exeName) {
       <<"\t"<<"-i [--input]       (file, list, or dir)"  <<endl
       <<"\t"<<"-o [--output]      output file"           <<endl
       <<"\t"<<"-s [--sample]      samplename"            <<endl
-      <<"\t"<<"--mcTrig           use MC triggers"       <<endl
+      <<"\t"<<"--write-tuple      write tuple (HF CR)"   <<endl
       <<"\t"<<"-d [--debug]     : debug (>0 print stuff)"<<endl
       <<"\t"<<"-h [--help]      : print help"            <<endl
       <<endl;
@@ -44,6 +44,7 @@ int main(int argc, char** argv)
   int nEvt = -1;
   int nSkip = 0;
   int dbg = 0;
+  bool writeTuple = false;
   string sample;
   string input;
   string output;
@@ -62,6 +63,7 @@ int main(int argc, char** argv)
     else if(sw=="-i"||sw=="--input"      ) { input = argv[++optind]; }
     else if(sw=="-o"||sw=="--output"     ) { output = argv[++optind]; }
     else if(sw=="-s"||sw=="--sample"     ) { sample = argv[++optind]; }
+    else if(sw=="--write-tuple"          ) { writeTuple = true; }
     else if(sw=="-h"||sw=="--help"       ) { usage(argv[0]); return 0; }
     else cout<<"Unknown switch "<<sw<<endl;
     optind++;
@@ -74,6 +76,7 @@ int main(int argc, char** argv)
       <<"  dbg     "<<dbg       <<endl
       <<"  input   "<<input     <<endl
       <<"  output  "<<output    <<endl
+      <<"  tuple   "<<writeTuple<<endl
       <<endl;
 
   TChain* chain = new TChain("susyNt");
@@ -98,6 +101,7 @@ int main(int argc, char** argv)
 
   MeasureFakeRate2 mfr;
   mfr.setDebug(dbg);
+  mfr.setWriteFakeNtuple(writeTuple);
   if(sample.size()) mfr.setSampleName(sample);
   if(output.size()) mfr.setFileName(output);
 

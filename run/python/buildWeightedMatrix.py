@@ -28,7 +28,7 @@ from math import sqrt
 import operator
 import optparse
 import os
-from rootUtils import importRoot, buildRatioHistogram, drawLegendWithDictKeys, getMinMax, getBinContents, getBinIndices
+from rootUtils import importRoot, buildRatioHistogram, drawLegendWithDictKeys, getMinMax, getBinContents, getBinIndices, getBinning
 r = importRoot()
 r.gStyle.SetPadTickX(1)
 r.gStyle.SetPadTickY(1)
@@ -38,6 +38,12 @@ from utils import (enumFromHeader
                    ,json_write
                    ,rmIfExists
                    )
+from fakeUtils import (samples
+                       ,fakeProcesses
+                       ,getInputFiles
+                       ,buildRatio
+                       )
+
 import matplotlib as mpl
 mpl.use('Agg') # render plots without X
 import matplotlib.pyplot as plt
@@ -64,21 +70,23 @@ def main() :
     parser = optparse.OptionParser(usage=usage)
     parser.add_option('-t', '--tag')
     parser.add_option('-i', '--input_dir')
-    parser.add_option('-s', '--input_sf', help='will toggle bin-by-bin scale factors for conv and qcd')
+    parser.add_option('-f', '--input_fractions')
     parser.add_option('-o', '--output_file')
     parser.add_option('-p', '--output_plot')
+    parser.add_option('-z', '--zoom-in', help='vertical axis efficiency plots')
     parser.add_option('-v','--verbose', action='store_true', default=False)
     (opts, args) = parser.parse_args()
     requiredOptions = ['tag', 'input_dir', 'output_file', 'output_plot']
-    otherOptions = ['input_sf', 'verbose']
+    otherOptions = ['verbose']
     allOptions = requiredOptions + otherOptions
     def optIsNotSpecified(o) : return not hasattr(opts, o) or getattr(opts,o) is None
     if any(optIsNotSpecified(o) for o in requiredOptions) : parser.error('Missing required option')
     tag = opts.tag
     inputDirname  = opts.input_dir
-    inputSfFname  = opts.input_sf
+    inputFracFname= opts.input_fractions
     outputFname   = opts.output_file
     outputPlotDir = opts.output_plot
+    zoomIn        = opts.zoom_in
     verbose       = opts.verbose
     if verbose : print '\nUsing the following options:\n'+'\n'.join("%s : %s"%(o, str(getattr(opts, o))) for o in allOptions)
 
@@ -88,70 +96,69 @@ def main() :
     mkdirIfNeeded(outputPlotDir)
     outputFile = r.TFile.Open(outputFname, 'recreate')
     inputFiles = dict((k, v) for k, v in allInputFiles.iteritems() if k in fakeProcesses())
-    inputSfFile = r.TFile.Open(inputSfFname) if inputSfFname else None
+    inputFracFile = r.TFile.Open(inputFracFname) if inputFracFname else None
 
-    buildMuonRates    (inputFiles, outputFile, outputPlotDir, inputSfFile, verbose)
-    buildElectronRates(inputFiles, outputFile, outputPlotDir, inputSfFile, verbose)
+    buildMuonRates    (inputFiles, outputFile, outputPlotDir, inputFracFile=inputFracFile, verbose=verbose, zoomIn=zoomIn)
+    buildElectronRates(inputFiles, outputFile, outputPlotDir, inputFracFile=inputFracFile, verbose=verbose, zoomIn=zoomIn)
     buildSystematics  (allInputFiles['allBkg'], outputFile, verbose)
     outputFile.Close()
     if verbose : print "output saved to \n%s"%'\n'.join([outputFname, outputPlotDir])
 
-def samples() : return ['allBkg', 'ttbar', 'wjets', 'zjets', 'diboson', 'heavyflavor']
-def fakeProcesses() : return ['ttbar', 'wjets', 'zjets', 'diboson', 'heavyflavor']
 def frac2str(frac) :
-    return '\n'.join([''.join("%12s"%s for s in fakeProcesses()),
-                      ''.join("%12s"%("%.3f"%frac[s]) for s in fakeProcesses())])
+    flatFraction = type(first(frac)) is float
+    return ('\n'.join([''.join("%12s"%s for s in fakeProcesses()),
+                       ''.join("%12s"%("%.3f"%frac[s]) for s in fakeProcesses())])
+            if flatFraction
+            else '\n'.join([''.join("%12s"%s for s in fakeProcesses())]
+                           +[''.join("%12s"%("%.3f"%frac[s].GetBinContent(b)) for s in fakeProcesses())
+                             for b in getBinIndices(first(frac))]))
+
 def selectionRegions() :
     print "hardcoded selectionRegions, should match what's in FakeRegions.h; fix DiLeptonMatrixMethod"
-    return ['CR_SSInc',
-            'CR_SSInc1j',
-            'CR_WHSS',
-            'CR_CR8lpt',
-            'CR_CR8ee',
-            'CR_CR8mm',
-            'CR_CR8mmMtww',
-            'CR_CR8mmHt',
-            'CR_CR9lpt',
-            'CR_SsEwk',
-            'CR_SsEwkLoose',
-            'CR_SsEwkLea',
-            'CR_WHZVfake1jee',
-            'CR_WHZVfake2jee',
-            'CR_WHZVfake1jem',
-            'CR_WHZVfake2jem',
-            'CR_WHfake1jem',
-            'CR_WHfake2jem',
-            'CR_WHZV1jmm',
-            'CR_WHZV2jmm',
-            'CR_WHfake1jmm',
-            'CR_WHfake2jmm',
+    return  ['CR_SRWHnoMlj', 'CR_SRWH1j', 'CR_SSInc1j']
+#--tmp--    return ['CR_SSInc',
+#--tmp--            'CR_SSInc1j',
+#--tmp--            'CR_WHSS',
+#--tmp--            'CR_CR8lpt',
+#--tmp--            'CR_CR8ee',
+#--tmp--            'CR_CR8mm',
+#--tmp--            'CR_CR8mmMtww',
+#--tmp--            'CR_CR8mmHt',
+#--tmp--            'CR_CR9lpt',
+#--tmp--            'CR_SsEwk',
+#--tmp--            'CR_SsEwkLoose',
+#--tmp--            'CR_SsEwkLea',
+#--tmp--            'CR_WHZVfake1jee',
+#--tmp--            'CR_WHZVfake2jee',
+#--tmp--            'CR_WHZVfake1jem',
+#--tmp--            'CR_WHZVfake2jem',
+#--tmp--            'CR_WHfake1jem',
+#--tmp--            'CR_WHfake2jem',
+#--tmp--            'CR_WHZV1jmm',
+#--tmp--            'CR_WHZV2jmm',
+#--tmp--            'CR_WHfake1jmm',
+#--tmp--            'CR_WHfake2jmm',
+#--tmp--
+#--tmp--            "CR_WHZVfake1j",
+#--tmp--            "CR_WHZVfake2j",
+#--tmp--            "CR_WHfake1j",
+#--tmp--            "CR_WHfake2j",
+#--tmp--            "CR_WHZV1j",
+#--tmp--            "CR_WHZV2j",
+#--tmp--
+#--tmp--            "CR_SRWH1j",
+#--tmp--            "CR_SRWH2j"
+#--tmp--            ]
 
-            "CR_WHZVfake1j",
-            "CR_WHZVfake2j",
-            "CR_WHfake1j",
-            "CR_WHfake2j",
-            "CR_WHZV1j",
-            "CR_WHZV2j",
-
-            "CR_SRWH1j",
-            "CR_SRWH2j"
-            ]
 def isRegionToBePlotted(sr) :
     "regions for which we plot the weighted matrices"
-    return sr in ['CR_WHZVfake1j', 'CR_WHZVfake2j', 'CR_WHfake1j', 'CR_WHfake2j', 'CR_WHZV1j', 'CR_WHZV2j', 'CR_SRWH1j', 'CR_SRWH2j']
+    srs = ['CR_WHZVfake1j', 'CR_WHZVfake2j', 'CR_WHfake1j', 'CR_WHfake2j', 'CR_WHZV1j', 'CR_WHZV2j', 'CR_SRWH1j', 'CR_SRWH2j']
+    srs = ['CR_SRWHnoMlj', 'CR_SRWH1j', 'CR_SSInc1j']
+    return sr in srs
 
 def extractionRegions() :
     return ['qcdMC', 'convMC', 'realMC']
 
-def getInputFiles(inputDirname, tag, verbose=False) :
-    inDir = inputDirname
-    tag = tag if tag.startswith('_') else '_'+tag
-    files = dict(zip(samples(), [r.TFile.Open(inDir+'/'+s+tag+'.root') for s in samples()]))
-    if verbose : print "getInputFiles('%s'):\n\t%s"%(inputDirname, '\n\t'.join("%s : %s"%(k, f.GetName()) for k, f in files.iteritems()))
-    return files
-def buildRatio(inputFile=None, histoBaseName='') :
-    num, den = inputFile.Get(histoBaseName+'_num'), inputFile.Get(histoBaseName+'_den')
-    return buildRatioHistogram(num, den, histoBaseName +'_rat')
 def getRealEff(lepton='electron|muon', inputFile=None, scaleFactor=1.0) :
     histoName = lepton+'_realMC_all_l_pt_coarse'
     effHisto = buildRatio(inputFile, histoName)
@@ -159,21 +166,9 @@ def getRealEff(lepton='electron|muon', inputFile=None, scaleFactor=1.0) :
     return effHisto
 def buildRatioAndScaleIt(histoPrefix='', inputFile=None, scaleFactor=1.0, verbose=False) :
     ratioHisto = buildRatio(inputFile, histoPrefix)
-
     def lf2s(l) : return ', '.join(["%.3f"%e for e in l])
     if verbose: print ratioHisto.GetName()," before scaling: ",lf2s(getBinContents(ratioHisto))
-    if   type(scaleFactor)==float : ratioHisto.Scale(scaleFactor)
-    elif type(scaleFactor)==r.TH1F :
-        if type(scaleFactor)==r.TH1F and type(ratioHisto)==r.TH2F :
-            tmpH = ratioHisto.Clone(scaleFactor.GetName()+'_vs_eta')
-            ptBins, etaBins = range(1, 1+ratioHisto.GetNbinsX()), range(1, 1+ratioHisto.GetNbinsY()),
-            for p in ptBins :
-                for e in etaBins :
-                    tmpH.SetBinContent(p, e, scaleFactor.GetBinContent(p))
-                    tmpH.SetBinError(p, e, scaleFactor.GetBinError(p))
-            scaleFactor = tmpH
-        ratioHisto.Multiply(scaleFactor)
-    else : raise TypeError("unknown SF type %s"%type(scaleFactor))
+    ratioHisto.Scale(scaleFactor)
     if verbose: print ratioHisto.GetName()," after scaling: ",lf2s(getBinContents(ratioHisto))
     return ratioHisto
 def buildPercentages(inputFiles, histoName, binLabel) :
@@ -210,59 +205,126 @@ def binWeightedSum(histos={}, weights={}, bin=1) :
             for h, w in [(histos[k], weights[k]) for k in histos.keys()]]
     tot  = sum(c*w     for c, e, w in cews)
     err2 = sum(e*e*w*w for c, e, w in cews)
+    print "weighted bin %d (w=%.1f) : %.3f = %s"%(bin, sum(w for c, e, w in cews), tot,
+                                                  '+'.join("%.2f*%.2f"%(w,c) for c, e, w in cews))
     return tot, err2
 def buildWeightedHisto(histos={}, fractions={}, histoName='', histoTitle='') :
     "was getFinalRate"
     hout = first(histos).Clone(histoName if histoName else 'final_rate') # should pick a better default
     hout.SetTitle(histoTitle)
     hout.Reset()
-    for b in getBinIndices(hout) :
-        tot, err2 = binWeightedSum(histos, fractions, b)
-        hout.SetBinContent(b, tot)
-        hout.SetBinError(b, sqrt(err2))
+    flatFraction = type(first(fractions)) is float
+    if flatFraction :
+        print "averaging flat ",histoName
+        print 'keys -> ',histos.keys()
+        for b in getBinIndices(hout) :
+            tot, err2 = binWeightedSum(histos, fractions, b)
+            hout.SetBinContent(b, tot)
+            hout.SetBinError(b, sqrt(err2))
+    else :
+        bH, bF = getBinning(first(histos)), getBinning(first(fractions))
+        assert bH == bF,"different binning %s: %s, %s: %s"%(first(histos).GetName(), bH, first(fractions).GetName(), bF)
+        weightedHistos = dict((p, h.Clone(h.GetName()+'_weighted_for_'+histoName)) for p,h in histos.iteritems()) # preserve originals
+        print "averaging 2d ",histoName
+        for b in getBinIndices(hout):
+            print "bin %d (w=%.1f):  %.3f = %s"%(b,
+                                                 sum(fractions[p].GetBinContent(b) for p in fractions.keys()),
+                                                 sum(fractions[p].GetBinContent(b)*weightedHistos[p].GetBinContent(b) for p in fractions.keys()),
+                                                 '+'.join("%.2f*%.2f"%(fractions[p].GetBinContent(b), weightedHistos[p].GetBinContent(b))
+                                                          for p in fractions.keys()))
+        for p,h in weightedHistos.iteritems() :
+            h.Multiply(fractions[p])
+            hout.Add(h)
     return hout
 def buildWeightedHistoTwice(histosA={}, fractionsA={}, histosB={}, fractionsB={},
                             histoName='', histoTitle='') :
     "was getFinalRate"
     assert not set(histosA)-set(histosB),"different keys A[%s], B[%s]"%(str(histosA.keys()), str(histosB.keys()))
+    assert type(first(fractionsA)) is type(first(fractionsB)),"etherogenous fractions A %s, B %s"%(type(first(fractionsA)), type(first(fractionsB)))
     hout = first(histosA).Clone(histoName if histoName else 'final_rate') # should pick a better default
     hout.SetTitle(histoTitle)
     hout.Reset()
-    for b in getBinIndices(hout) :
-        totA, errA2 = binWeightedSum(histosA, fractionsA, b)
-        totB, errB2 = binWeightedSum(histosB, fractionsB, b)
-        hout.SetBinContent(b, totA + totB)
-        hout.SetBinError(b, sqrt(errA2 + errB2))
+    flatFraction = type(first(fractionsA)) is float
+    if flatFraction :
+        print "averaging flat ",histoName
+        print 'keys -> ',histosA.keys()
+        for b in getBinIndices(hout) :
+            totA, errA2 = binWeightedSum(histosA, fractionsA, b)
+            totB, errB2 = binWeightedSum(histosB, fractionsB, b)
+            hout.SetBinContent(b, totA + totB)
+            hout.SetBinError(b, sqrt(errA2 + errB2))
+    else :
+        bHA, bFA = getBinning(first(histosA)), getBinning(first(fractionsA))
+        bHB, bFB = getBinning(first(histosB)), getBinning(first(fractionsB))
+        assert bHA == bFA,"different binning %s: %s, %s: %s"%(first(histosA).GetName(), bHA, first(fractionsA).GetName(), bFA)
+        assert bHB == bFB,"different binning %s: %s, %s: %s"%(first(histosB).GetName(), bHB, first(fractionsB).GetName(), bFB)
+        assert bHA == bHB,"different binning %s: %s, %s: %s"%(first(histosA).GetName(), bHA, first(histosB).GetName(), bHB)
+        weightedHistosA = dict((p, h.Clone(h.GetName()+'_weighted_for_'+histoName)) for p,h in histosA.iteritems()) # preserve originals
+        weightedHistosB = dict((p, h.Clone(h.GetName()+'_weighted_for_'+histoName)) for p,h in histosB.iteritems())
+
+
+        print "averaging 2d ",histoName
+        for b in getBinIndices(hout):
+            print "bin %d (w=%.1f):  %.3f = %s"%(b,
+                                                 sum(fractionsA[p].GetBinContent(b)+fractionsB[p].GetBinContent(b) for p in fractionsA.keys()),
+                                                 sum(fractionsA[p].GetBinContent(b)*weightedHistosA[p].GetBinContent(b)
+                                                     +fractionsB[p].GetBinContent(b)*weightedHistosB[p].GetBinContent(b)
+                                                     for p in fractionsA.keys()),
+                                                 '+'.join(["%.2f*%.2f"%(fractionsA[p].GetBinContent(b),
+                                                                        weightedHistosA[p].GetBinContent(b))
+                                                           for p in fractionsA.keys()]+
+                                                          ["%.2f*%.2f"%(fractionsB[p].GetBinContent(b),
+                                                                        weightedHistosB[p].GetBinContent(b))
+                                                           for p in fractionsB.keys()]))
+
+
+        for p in weightedHistosA.keys() :
+            hA, fA = weightedHistosA[p], fractionsA[p]
+            hB, fB = weightedHistosB[p], fractionsB[p]
+            hA.Multiply(fA)
+            hB.Multiply(fB)
+            hout.Add(hA)
+            hout.Add(hB)
     return hout
-def buildMuonRates(inputFiles, outputfile, outplotdir, inputSfFile=None, verbose=False) :
+def buildMuonRates(inputFiles, outputfile, outplotdir, inputFracFile=None, verbose=False, zoomIn=False) :
     """
     For each selection region, build the real eff and fake rate
     histo as a weighted sum of the corresponding fractions.
     """
     processes = fakeProcesses()
     brsit, iF, v = buildRatioAndScaleIt, inputFiles, verbose
-    mu_qcdSF_pt = inputSfFile.Get('muon_qcdSF_pt') if inputSfFile else mu_qcdSF
-    print "buildMuonRates: values to be fixed: ",' '.join(["%s: %s"%(v, eval(v)) for v in ['mu_qcdSF', 'mu_realSF']])
-    eff_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_coarse',  iF[p], mu_qcdSF_pt, v))  for p in processes)
+    print "buildMuonRates: values to be fixed: ",' '.join(["%s: %s"%(_, eval(_)) for _ in ['mu_qcdSF', 'mu_realSF']])
+    eff_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_coarse',  iF[p], mu_qcdSF, v))  for p in processes)
     eff_real = dict((p, brsit('muon_realMC_all_l_pt_coarse', iF[p], mu_realSF, v)) for p in processes)
-    eff2d_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_eta',  iF[p], mu_qcdSF_pt, v))  for p in processes)
+    eff2d_qcd  = dict((p, brsit('muon_qcdMC_all_l_pt_eta',  iF[p], mu_qcdSF, v))  for p in processes)
     eff2d_real = dict((p, brsit('muon_realMC_all_l_pt_eta', iF[p], mu_realSF, v)) for p in processes)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#varepsilon(T|L)'
-    plot1dEfficiencies(eff_qcd,  'eff_mu_qcd',  outplotdir, lT+' qcd fake #mu'+';'+lX+';'+lY)
-    plot1dEfficiencies(eff_real, 'eff_mu_real', outplotdir, lT+' real #mu'    +';'+lX+';'+lY)
+    plot1dEfficiencies(eff_qcd,  'eff_mu_qcd',  outplotdir, lT+' qcd fake #mu'+';'+lX+';'+lY, zoomIn=zoomIn)
+    plot1dEfficiencies(eff_real, 'eff_mu_real', outplotdir, lT+' real #mu'    +';'+lX+';'+lY, zoomIn=zoomIn)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#eta'
     plot2dEfficiencies(eff2d_qcd,  'eff2d_mu_qcd', outplotdir, lT+' qcd fake #mu'+';'+lX+';'+lY)
     plot2dEfficiencies(eff2d_real, 'eff2d_mu_real', outplotdir, lT+' real #mu'   +';'+lX+';'+lY)
     mu_frac = dict()
     for sr in selectionRegions() :
-        frac_qcd  = buildPercentages(inputFiles, 'muon_'+sr+'_all_flavor_den', 'qcd')
-        frac_real = buildPercentages(inputFiles, 'muon_'+sr+'_all_flavor_den', 'real')
+        fC, bP = fetchCompositions, buildPercentages
+        isf = inputFracFile
+        hnTemplateQcd = '%(proc)s_muon_'+sr+'_all_flavor_pt_den_qcd'
+        hnTemplateReal = '%(proc)s_muon_'+sr+'_all_flavor_pt_den_real'
+        frac_qcd  = fC(isf, hnTemplateQcd,  processes) if isf else bP(inputFiles, 'muon_'+sr+'_all_flavor_den', 'qcd')
+        frac_real = fC(isf, hnTemplateReal, processes) if isf else bP(inputFiles, 'muon_'+sr+'_all_flavor_den', 'real')
         if verbose : print "mu : sr ",sr,"\n frac_qcd  : ",frac2str(frac_qcd )
         if verbose : print "mu : sr ",sr,"\n frac_real : ",frac2str(frac_real)
         fake1d = buildWeightedHisto(eff_qcd,  frac_qcd, 'mu_fake_rate_'+sr, 'Muon fake rate '+sr)
         real1d = buildWeightedHisto(eff_real, frac_real, 'mu_real_eff_'+sr, 'Muon real eff ' +sr)
-        fake2d = buildWeightedHisto(eff2d_qcd,  frac_qcd, 'mu_fake_rate2d_'+sr, 'Muon fake rate #eta vs. p_{T}'+sr)
-        real2d = buildWeightedHisto(eff2d_real, frac_real, 'mu_real_eff2d_'+sr, 'Muon real eff  #eta vs. p_{T}'+sr)
+
+        c2dC = compose2Dcompositions
+        hnTemplateQcd = '%(proc)s_muon_'+sr+'_all_flavor_pt_%(etabin)s_den_qcd'
+        hnTemplateReal = '%(proc)s_muon_'+sr+'_all_flavor_pt_%(etabin)s_den_real'
+        frac_qcd2d  = c2dC(isf, hnTemplateQcd,  processes) if isf else frac_qcd
+        frac_real2d = c2dC(isf, hnTemplateReal, processes) if isf else frac_real
+        fake2d = buildWeightedHisto(eff2d_qcd,  frac_qcd2d, 'mu_fake_rate2d_'+sr, 'Muon fake rate #eta vs. p_{T}'+sr)
+        real2d = buildWeightedHisto(eff2d_real, frac_real2d, 'mu_real_eff2d_'+sr, 'Muon real eff  #eta vs. p_{T}'+sr)
+
         outputfile.cd()
         fake1d.Write()
         real1d.Write()
@@ -270,12 +332,17 @@ def buildMuonRates(inputFiles, outputfile, outplotdir, inputSfFile=None, verbose
         real2d.Write()
         mu_frac[sr] = {'qcd' : frac_qcd, 'real' : frac_real}
         if isRegionToBePlotted(sr) :
+            print "plotting eff2d_mu_fake:"
+            fake2d.Print('all')
+            print "plotting eff2d_mu_real"
+            real2d.Print('all')
             lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#eta'
             plot2dEfficiencies({sr : fake2d}, 'eff2d_mu_fake', outplotdir, lT+' fake #mu'+';'+lX+';'+lY)
             plot2dEfficiencies({sr : real2d}, 'eff2d_mu_real', outplotdir, lT+' real #mu'+';'+lX+';'+lY)
     #json_write(mu_frac, outplotdir+/outFracFilename)
-    plotFractions(mu_frac, outplotdir, 'frac_mu')
-def buildElectronRates(inputFiles, outputfile, outplotdir, inputSfFile=None, verbose=False) :
+    doPlotFractions = not inputFracFile
+    if doPlotFractions : plotFractions(mu_frac, outplotdir, 'frac_mu')
+def buildElectronRates(inputFiles, outputfile, outplotdir, inputFracFile=None, verbose=False, zoomIn=False) :
     """
     For each selection region, build the real eff and fake rate
     histo as a weighted sum of the corresponding fractions.
@@ -283,35 +350,46 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, inputSfFile=None, ver
     """
     processes = fakeProcesses()
     brsit, iF, v = buildRatioAndScaleIt, inputFiles, verbose
-    el_qcdSF_pt  = inputSfFile.Get('elec_qcdSF_pt') if inputSfFile else el_qcdSF
-    el_convSF_pt = inputSfFile.Get('elec_convSF_pt') if inputSfFile else el_convSF
-    print "buildElectronRates: values to be fixed: ",' '.join(["%s: %s"%(v, eval(v)) for v in ['el_qcdSF', 'el_convSF', 'el_realSF']])
-    eff_conv = dict((p, brsit('elec_convMC_all_l_pt_coarse', iF[p], el_convSF_pt, v)) for p in processes)
-    eff_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_coarse',  iF[p], el_qcdSF_pt, v))  for p in processes)
+    print "buildElectronRates: values to be fixed: ",' '.join(["%s: %s"%(_, eval(_)) for _ in ['el_qcdSF', 'el_convSF', 'el_realSF']])
+    eff_conv = dict((p, brsit('elec_convMC_all_l_pt_coarse', iF[p], el_convSF, v)) for p in processes)
+    eff_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_coarse',  iF[p], el_qcdSF, v))  for p in processes)
     eff_real = dict((p, brsit('elec_realMC_all_l_pt_coarse', iF[p], el_realSF, v)) for p in processes)
-    eff2d_conv = dict((p, brsit('elec_convMC_all_l_pt_eta', iF[p], el_convSF_pt, v)) for p in processes)
-    eff2d_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_eta',  iF[p], el_qcdSF_pt, v))  for p in processes)
+    eff2d_conv = dict((p, brsit('elec_convMC_all_l_pt_eta', iF[p], el_convSF, v)) for p in processes)
+    eff2d_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_eta',  iF[p], el_qcdSF, v))  for p in processes)
     eff2d_real = dict((p, brsit('elec_realMC_all_l_pt_eta', iF[p], el_realSF, v)) for p in processes)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#varepsilon(T|L)'
-    plot1dEfficiencies(eff_conv, 'eff_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY)
-    plot1dEfficiencies(eff_qcd,  'eff_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY)
-    plot1dEfficiencies(eff_real, 'eff_el_real', outplotdir, lT+' real el'     +';'+lX+';'+lY)
+    plot1dEfficiencies(eff_conv, 'eff_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY, zoomIn=zoomIn)
+    plot1dEfficiencies(eff_qcd,  'eff_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY, zoomIn=zoomIn)
+    plot1dEfficiencies(eff_real, 'eff_el_real', outplotdir, lT+' real el'     +';'+lX+';'+lY, zoomIn=zoomIn)
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#eta'
     plot2dEfficiencies(eff2d_conv, 'eff2d_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY)
     plot2dEfficiencies(eff2d_qcd,  'eff2d_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY)
     plot2dEfficiencies(eff2d_real, 'eff2d_el_real', outplotdir, lT+' real el'     +';'+lX+';'+lY)
     el_frac = dict()
     for sr in selectionRegions() :
-        frac_conv, frac_qcd= buildPercentagesTwice(inputFiles, 'elec_'+sr+'_all_flavor_den',
-                                                   'conv', 'qcd')
-        frac_real = buildPercentages(inputFiles, 'elec_'+sr+'_all_flavor_den', 'real')
+        fC, bPt = fetchCompositions, buildPercentagesTwice
+        isf = inputFracFile
+        hnTemplateQcd  = '%(proc)s_elec_'+sr+'_all_flavor_pt_den_qcd'
+        hnTemplateConv = '%(proc)s_elec_'+sr+'_all_flavor_pt_den_conv'
+        hnTemplateReal = '%(proc)s_elec_'+sr+'_all_flavor_pt_den_real'
+        frac_conv, frac_qcd= (fC(isf, hnTemplateConv,  processes), fC(isf, hnTemplateQcd,  processes)) if isf else bPt(inputFiles, 'elec_'+sr+'_all_flavor_den', 'conv', 'qcd')
+        frac_real = fC(isf, hnTemplateReal, processes) if isf else buildPercentages(inputFiles, 'elec_'+sr+'_all_flavor_den', 'real')
         if verbose : print "el : sr ",sr,"\n frac_conv : ",frac2str(frac_conv)
         if verbose : print "el : sr ",sr,"\n frac_qcd  : ",frac2str(frac_qcd )
         if verbose : print "el : sr ",sr,"\n frac_real : ",frac2str(frac_real)
         real1d = buildWeightedHisto     (eff_real, frac_real,                     'el_real_eff_'+sr, 'Electron real eff '+sr)
         fake1d = buildWeightedHistoTwice(eff_conv, frac_conv, eff_qcd,  frac_qcd, 'el_fake_rate_'+sr, 'Electron fake rate '+sr)
-        real2d = buildWeightedHisto     (eff2d_real, frac_real,                     'el_real_eff2d_'+sr, 'Electron real eff  #eta vs. p_{T}'+sr)
-        fake2d = buildWeightedHistoTwice(eff2d_conv, frac_conv, eff2d_qcd,  frac_qcd, 'el_fake_rate2d_'+sr, 'Electron fake rate  #eta vs. p_{T}'+sr)
+
+        c2dC = compose2Dcompositions
+        hnTemplateQcd  = '%(proc)s_elec_'+sr+'_all_flavor_pt_%(etabin)s_den_qcd'
+        hnTemplateConv = '%(proc)s_elec_'+sr+'_all_flavor_pt_%(etabin)s_den_conv'
+        hnTemplateReal = '%(proc)s_elec_'+sr+'_all_flavor_pt_%(etabin)s_den_real'
+        frac_qcd2d  = c2dC(isf, hnTemplateQcd,  processes) if isf else frac_qcd
+        frac_conv2d = c2dC(isf, hnTemplateConv, processes) if isf else frac_conv
+        frac_real2d = c2dC(isf, hnTemplateReal, processes) if isf else frac_real
+        real2d = buildWeightedHisto     (eff2d_real, frac_real2d,                     'el_real_eff2d_'+sr, 'Electron real eff  #eta vs. p_{T}'+sr)
+        fake2d = buildWeightedHistoTwice(eff2d_conv, frac_conv2d, eff2d_qcd,  frac_qcd2d, 'el_fake_rate2d_'+sr, 'Electron fake rate  #eta vs. p_{T}'+sr)
+
         outputfile.cd()
         fake1d.Write()
         real1d.Write()
@@ -323,7 +401,8 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, inputSfFile=None, ver
             plot2dEfficiencies({sr : fake2d}, 'eff2d_el_fake', outplotdir, lT+' fake e'+';'+lX+';'+lY)
             plot2dEfficiencies({sr : real2d}, 'eff2d_el_real', outplotdir, lT+' real e'+';'+lX+';'+lY)
     #json_write(el_frac, outFracFilename)
-    plotFractions(el_frac, outplotdir, 'frac_el')
+    doPlotFractions = not inputFracFile
+    if doPlotFractions : plotFractions(el_frac, outplotdir, 'frac_el')
 def buildEtaSyst(inputFileTotMc, inputHistoBaseName='(elec|muon)_qcdMC_all', outputHistoName='', verbose=False) :
     """
     Take the eta distribution and normalize it to the average fake
@@ -412,6 +491,9 @@ def plot1dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='title
         if not padMaster : padMaster = h
     minY, maxY = getMinMax(effs.values()) if zoomIn else (0.0, 1.0)
     padMaster.GetYaxis().SetRangeUser(min([0.0, minY]), 1.1*maxY)
+    padMaster.SetMinimum(0.0)
+    padMaster.SetMaximum(1.1*maxY)
+    padMaster.SetMaximum(0.25)
     padMaster.SetTitle(frameTitle)
     padMaster.SetStats(False)
     drawLegendWithDictKeys(can, effs)
@@ -442,7 +524,25 @@ def plot2dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='effic
             rmIfExists(outFilename)
             can.SaveAs(outFilename)
     r.gStyle.SetPaintTextFormat(origTextFormat)
-
+def fetchCompositions(inputSfFile=None, templateHistoName="%(proc)s", processes=[]) :
+    histos = dict((p, inputSfFile.Get(templateHistoName%{'proc':p})) for p in processes)
+    assert all(v for v in histos.values()),"missing compositions: (template %s):\n%s"%(templateHistoName, histos)
+    return histos
+def compose2Dcompositions(inputSfFile=None, templateHistoName="%(proc)s_%(etabin)s", processes=[]) :
+    "take two 1D fractions histograms for one eta slice each, and compose them in a 2D fractions histogram"
+    etaBins = ['etaC', 'etaF']
+    histos1d = dict((e, dict((p, inputSfFile.Get(templateHistoName%{'proc':p, 'etabin':e})) for p in processes)) for e in etaBins)
+    assert all(v for ve in histos1d.values() for v in ve.values()),"missing compositions: %s"%histos1d
+    h1dC, h1dF = first(histos1d['etaC']), first(histos1d['etaF'])
+    nX, xMin, xMax = h1dC.GetNbinsX(), h1dC.GetXaxis().GetBinLowEdge(1), h1dC.GetXaxis().GetBinUpEdge(h1dC.GetNbinsX())
+    histos2d = dict((p, r.TH2F(histos1d['etaC'][p].GetName().replace('_etaC_','_vs_eta_'), '', nX, xMin, xMax, 2, 0.0, 2.0)) for p in histos1d['etaC'].keys())
+    for p in processes :
+        for iEta, eta in zip(range(1, 1+len(etaBins)), etaBins) :
+            hEta, hEtaPt = histos1d[eta][p], histos2d[p]
+            for iPt in range(1, 1+nX) :
+                hEtaPt.SetBinContent(iPt, iEta, hEta.GetBinContent(iPt))
+                hEtaPt.SetBinError  (iPt, iEta, hEta.GetBinError  (iPt))
+    return histos2d
 
 
 if __name__=='__main__' :

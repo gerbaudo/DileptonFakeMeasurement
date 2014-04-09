@@ -16,6 +16,7 @@ TAG="Oct_10"
  --input_data out/fakerate/merged/data_${TAG}.root \
  --input_mc   out/fakerate/merged/allBkgButHf_${TAG}.root \
  --output     out/fakerate/merged/iterative_out_${TAG}.root \
+ --plot       out/fakerate/merged/iterative_plots_${TAG} \
  >& log/fakerate/IterFake_${TAG}.log
 
 # Determine the scale factors (p_T dep flat fit).
@@ -26,7 +27,7 @@ TAG="Oct_10"
  --tag ${TAG} \
  --input_dir  out/fakerate/merged/ \
  --input_iter out/fakerate/merged/iterative_out_${TAG}.root \
- --output_dir out/fakerate/merged/plot_${TAG} \
+ --output_dir out/fakerate/merged/scalefactors_plots_${TAG} \
  >& log/fakerate/FakePlot_${TAG}.log
 
 # Produce the weighted matrix with FinalNewFake.
@@ -35,7 +36,7 @@ TAG="Oct_10"
  -t ${TAG} \
  -i out/fakerate/merged/ \
  -o out/fakerate/merged/FinalFakeHist_${TAG}.root \
- -p out/fakerate/merged/FinalFakeHist_plots_${TAG} \
+ -p out/fakerate/merged/weightedMatrix_plots_${TAG} \
  -v \
  >& log/fakerate/FinalFakeHist_${TAG}.log
 

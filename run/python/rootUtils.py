@@ -5,6 +5,7 @@
 # davide.gerbaudo@gmail.com
 # 2013-08-26
 
+import os
 try:
     import numpy as np
 except ImportError:
@@ -16,6 +17,12 @@ def importRoot() :
     r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
     return r
 r = importRoot()
+
+def importRootCorePackages() :
+    "same functionality as RootCore/scripts/load_packages.C"
+    rcoreDir = os.environ['ROOTCOREDIR']
+    [r.gSystem.Load(l.strip()) for l in open(os.path.join(rcoreDir, 'preload'))]
+    [r.gSystem.Load('lib%s'%l.strip()) for l in open(os.path.join(rcoreDir, 'load'))]
 
 from utils import verticalSlice
 
@@ -155,6 +162,12 @@ def topRightLabel(pad, label, xpos=None, ypos=None, align=33) :
     tex.DrawLatex((1.0-pad.GetRightMargin()) if not xpos else xpos, (1.0-pad.GetTopMargin()) if not ypos else ypos, label)
     pad._label = tex
     return tex
+def getBinning(h) :
+    cname = h.Class().GetName()
+    if   cname.startswith('TH1') : return (h.GetNbinsX())
+    elif cname.startswith('TH2') : return (h.GetNbinsX(), h.GetNbinsY())
+    elif cname.startswith('TH3') : return (h.GetNbinsX(), h.GetNbinsY(), h.GetNbinsZ())
+    else : return None
 def getBinIndices(h) :
     "Return a list of the internal indices used by TH1/TH2/TH3; see TH1::GetBin for info on internal mapping"
     cname = h.Class().GetName()

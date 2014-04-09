@@ -215,7 +215,7 @@ template, process = "Sherpa_CT10_%(lv)sgammaPt10", 'Sherpa_Vgamma'
 datasets += [Dataset(sampleType, d, group, template%{'lv':lv}, process)
              for d, lv in [(126739, 'enu'),   (126742, 'munu'), (126856, 'taunu')]]
 template, process = "Sherpa_CT10_%(ll)sgammaPt10", 'Sherpa_Vgamma'
-datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process, placeholder)
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll}, process)
              for d, ll in [(145161, 'ee'),    (145162, 'mumu'), (126854, 'tautau')]]
 template, process = "Sherpa_CT10_%(llss)s", 'Sherpa_llnunu'
 datasets += [Dataset(sampleType, d, group, template%{'llss':llss}, process)

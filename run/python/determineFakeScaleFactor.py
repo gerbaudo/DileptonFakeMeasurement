@@ -93,6 +93,7 @@ def computeAndPlotConvSf(fileData, fileMc, lepton, variable_name, outdir, outfil
     eff_da = buildRate(fileData, lepton+'_fakeConv_'+variable_name)
     eff_mc = buildRate(fileMc,   lepton+'_fakeConv_'+variable_name)
     ratio  = buildRatioHistogram(eff_da, eff_mc)
+    print ratio.GetName(),' : ',["%.3f"%ratio.GetBinContent(b) for b in range(1, 1+ratio.GetNbinsX())]
     fitFunc = fitWithConst(ratio)
     p0, p0Err, chi2, ndf = fitResults(fitFunc)
     p0, p0Err = pdgRound(p0, p0Err)
@@ -156,6 +157,7 @@ def computeAndPlotHfSf(fileIter, fileHf, lepton, variable_name, outdir, outfile=
     eff_da = fileIter.Get(lepton+'_corHFRate')
     eff_mc = buildRate(fileHf, lepton+'_fakeHF_'+variable_name)
     ratio = buildRatioHistogram(eff_da, eff_mc)
+    print ratio.GetName(),' : ',["%.3f"%ratio.GetBinContent(b) for b in range(1, 1+ratio.GetNbinsX())]
     fitFunc = fitWithConst(ratio)
     p0, p0Err, chi2, ndf = fitResults(fitFunc)
     p0, p0Err = pdgRound(p0, p0Err)

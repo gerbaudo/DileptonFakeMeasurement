@@ -55,7 +55,8 @@ const sf::Region signalRegions[] = {
   sf::CR_WHZV2j,
 
   sf::CR_SRWH1j,
-  sf::CR_SRWH2j
+  sf::CR_SRWH2j,
+  sf::CR_SRWHnoMlj
 };
 const size_t nSignalRegions = sizeof(signalRegions)/sizeof(signalRegions[0]);
 const MeasureFakeRate2::LeptonType leptonTypes[] = {MeasureFakeRate2::kElectron, MeasureFakeRate2::kMuon};
@@ -73,7 +74,10 @@ MeasureFakeRate2::MeasureFakeRate2() :
   m_evtWeight(1.),
   m_metRel(0.),
   m_ch(0),
-  m_ET(ET_Unknown)
+  m_ET(ET_Unknown),
+  m_writeFakeTuple(false),
+  m_tupleMakerHfCr("",""),
+  m_tupleMakerConv("","")
 {
   resetCounters();
 }
@@ -91,6 +95,22 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
   if(m_dbg) cout << "MeasureFakeRate2::Begin" << endl;
   SusySelection::Begin(0);
   initHistos(m_fileName);
+  if(m_writeFakeTuple) {
+      string filenameHfLf = tupleFilenameFromHistoFilename(m_fileName, "bbcc_tuple");
+      string filenameConv = tupleFilenameFromHistoFilename(m_fileName, "conv_tuple");
+      if(m_tupleMakerHfCr.init(filenameHfLf, "HeavyFlavorControlRegion"))
+          cout<<"initialized ntuple file "<<filenameHfLf<<endl;
+      else {
+          cout<<"cannot initialize ntuple file '"<<filenameHfLf<<"'"<<endl;
+          m_writeTuple = false;
+      }
+      if(m_tupleMakerConv.init(filenameConv, "ConversionControlRegion"))
+          cout<<"initialized ntuple file "<<filenameConv<<endl;
+      else {
+          cout<<"cannot initialize ntuple file '"<<filenameConv<<"'"<<endl;
+          m_writeTuple = false;
+      }
+  }
 }
 /*--------------------------------------------------------------------------------*/
 // Terminate
@@ -98,6 +118,10 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
 void MeasureFakeRate2::Terminate()
 {
   if(m_dbg) cout << "MeasureFakeRate2::Terminate" << endl;
+  if(m_writeFakeTuple) {
+      m_tupleMakerConv.close();
+      m_tupleMakerHfCr.close();
+  }
   cout<<"Writing file "<<m_outFile<<endl;
   m_outFile->Write();
   cout<<"Closing file"<<endl;
@@ -110,12 +134,11 @@ void MeasureFakeRate2::Terminate()
 void MeasureFakeRate2::initHistos(string outName)
 {
   size_t nRegions(allRegions().size()), nLeptonTypes(m_leptonTypes.size());
-  if(nRegions > kNmaxControlRegions)
-    cout<<" Trying book histos for "<<nRegions<<" regions "<<" >= "<<kNmaxControlRegions<<endl<<" Exiting."<<endl;
-  if(nLeptonTypes > kNmaxLeptonTypes)
-    cout<<" Trying book histos for "<<nLeptonTypes<<" lepton types >= "<<kNmaxLeptonTypes<<endl<<" Exiting."<<endl;
+  if(nRegions > kNmaxControlRegions)  cout<<" Trying book histos for "<<nRegions<<" regions "<<" >= "<<kNmaxControlRegions<<endl<<" Exiting."<<endl;
+  if(nLeptonTypes > kNmaxLeptonTypes) cout<<" Trying book histos for "<<nLeptonTypes<<" lepton types >= "<<kNmaxLeptonTypes<<endl<<" Exiting."<<endl;
   assert(nRegions <= kNmaxControlRegions);
   assert(nLeptonTypes <= kNmaxLeptonTypes);
+  assert(nFlavBins==LS_N);
   cout<<"Creating file: "<<outName<<endl;
   m_outFile = new TFile((outName).c_str(),"recreate");
   m_outFile->cd();
@@ -137,10 +160,28 @@ void MeasureFakeRate2::initHistos(string outName)
         h_njets        [il][icr][ich] = new EffObject(bn+"njets",        nJetbins,          Jetbins);
         h_onebin       [il][icr][ich] = new EffObject(bn+"onebin",       1,    -0.5, 0.5);
         h_flavor       [il][icr][ich] = new EffObject(bn+"flavor",       LS_N, -0.5, LS_N-0.5);
+        h_l_pt_real    [il][icr][ich] = new EffObject(bn+"l_pt_real",    nFakePtbins,       FakePtbins);
+        h_l_pt_conv    [il][icr][ich] = new EffObject(bn+"l_pt_conv",    nFakePtbins,       FakePtbins);
+        h_l_pt_hf      [il][icr][ich] = new EffObject(bn+"l_pt_hf",      nFakePtbins,       FakePtbins);
+        h_l_pt_lf      [il][icr][ich] = new EffObject(bn+"l_pt_lf",      nFakePtbins,       FakePtbins);
+        h_l_pt_hflf    [il][icr][ich] = new EffObject(bn+"l_pt_hflf",    nFakePtbins,       FakePtbins);
         h_l_pt_true    [il][icr][ich] = new TH1F     ((bn+"l_pt_true").c_str(), "", nFakePtbins, FakePtbins);
         h_l_pt_fake    [il][icr][ich] = new TH1F     ((bn+"l_pt_fake").c_str(), "", nFakePtbins, FakePtbins);
-        for(int lbl=0; lbl<LS_N; ++lbl) h_flavor[il][icr][ich]->SetXLabel(lbl+1, LSNames[lbl]);
-        h_l_pt_eta     [il][icr][ich] = new EffObject2(bn+"l_pt_eta",    nCoarseFakePtbins, coarseFakePtbins, nCoarseEtabins, CoarseEtabins);
+        h_l_pt_eta     [il][icr][ich]   = new EffObject2(bn+"l_pt_eta",       nCoarseFakePtbins, coarseFakePtbins, nEtabins, Etabins);
+        h_flavor_pt      [il][icr][ich] = new EffObject2(bn+"flavor_pt",      nFlavBins, flavBins, nCoarseFakePtbins, coarseFakePtbins);
+        h_flavor_pt_etaC [il][icr][ich] = new EffObject2(bn+"flavor_pt_etaC", nFlavBins, flavBins, nCoarseFakePtbins, coarseFakePtbins);
+        h_flavor_pt_etaF [il][icr][ich] = new EffObject2(bn+"flavor_pt_etaF", nFlavBins, flavBins, nCoarseFakePtbins, coarseFakePtbins);
+        h_flavor_eta     [il][icr][ich] = new EffObject2(bn+"flavor_eta",     nFlavBins, flavBins, nEtabins, Etabins);
+        h_flavor_metrel  [il][icr][ich] = new EffObject2(bn+"flavor_metrel",  nFlavBins, flavBins, nMetbins, Metbins);
+        for(int lbl=0; lbl<nFlavBins; ++lbl) {
+            const std::string &label = LSNames[lbl];
+            h_flavor         [il][icr][ich]->SetXLabel(lbl+1, label);
+            h_flavor_pt      [il][icr][ich]->SetXLabel(lbl+1, label);
+            h_flavor_pt_etaC [il][icr][ich]->SetXLabel(lbl+1, label);
+            h_flavor_pt_etaF [il][icr][ich]->SetXLabel(lbl+1, label);
+            h_flavor_eta     [il][icr][ich]->SetXLabel(lbl+1, label);
+            h_flavor_metrel  [il][icr][ich]->SetXLabel(lbl+1, label);
+        }
       } // end for(ich)
     } // end for(icr)
   } // end for(il)
@@ -182,8 +223,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     case sf::CR_Real     : passCR = passRealCR  (leptons, jets, m_met, CR); break;
     case sf::CR_SideLow  : passCR = passRealCR  (leptons, jets, m_met, CR); break;
     case sf::CR_SideHigh : passCR = passRealCR  (leptons, jets, m_met, CR); break;
-    case sf::CR_HF       : passCR = passHFCR    (leptons, jets, m_met, CR); break;
-    case sf::CR_HF_high  : passCR = passHFCR    (leptons, jets, m_met, CR); break;
+    case sf::CR_HF       : passCR = passHFCR_testSs(leptons, jets, m_met, CR); break;
+    case sf::CR_HF_high  : passCR = passHFCR_testSs(leptons, jets, m_met, CR); break;
     case sf::CR_Conv     : passCR = passConvCR  (leptons, jets, m_met    ); break;
     case sf::CR_MCConv   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
     case sf::CR_MCQCD    : passCR = passMCReg   (leptons, jets, m_met, CR); break;
@@ -194,6 +235,20 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     if( passCR ){
       for(size_t ip=0; ip<m_probes.size(); ++ip) fillRatesHistos(m_probes.at(ip), jets, m_met, cr);
     } // if(passCR)
+    if(m_writeFakeTuple && passCR && (CR==sf::CR_HF_high || CR==sf::CR_Conv)) {
+        unsigned int run(nt.evt()->run), event(nt.evt()->event);
+        const Lepton *l0 = m_tags.size()>0 ? m_tags[0] : m_baseLeptons[0]; // hack: no tag for conv region (use baseL as a dummy lep)
+        const Lepton *l1 = m_probes[0];
+        LeptonSource l0Source(getLeptonSource(l0)), l1Source(getLeptonSource(l1));
+        bool l0IsTight(isSignalLepton(l0, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC));
+        bool l1IsTight(isSignalLepton(l1, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC));
+        LeptonVector dummyLepts;
+        susy::wh::TupleMaker &tupleMaker = (CR==sf::CR_HF_high ? m_tupleMakerHfCr : m_tupleMakerConv);
+        tupleMaker
+            .setL0IsTight(l0IsTight).setL0Source(l0Source)
+            .setL1IsTight(l1IsTight).setL1Source(l1Source)
+            .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
+    }
   } // for(cr)
   return kTRUE;
 }
@@ -235,22 +290,40 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
     bool pass(isSignalLepton(lep, m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC));
     FillEffHistos   fill1dEff(pass, m_evtWeight, lt, regionIndex, static_cast<Chan>(m_ch));
     Fill2dEffHistos fill2dEff(pass, m_evtWeight, lt, regionIndex, static_cast<Chan>(m_ch));
-    fill1dEff(h_l_pt        , lep->Pt());
-    fill1dEff(h_l_pt_coarse , lep->Pt());
-    fill1dEff(h_l_eta       , fabs(lep->Eta()));
-    fill1dEff(h_l_eta_coarse, fabs(lep->Eta()));
+    float pt(lep->Pt()), eta(fabs(lep->Eta()));
+    fill1dEff(h_l_pt        , pt);
+    fill1dEff(h_l_pt_coarse , pt);
+    fill1dEff(h_l_eta       , eta);
+    fill1dEff(h_l_eta_coarse, eta);
     fill1dEff(h_metrel      , m_metRel);
     fill1dEff(h_met         , met->Et);
     fill1dEff(h_njets       , jets.size());
     fill1dEff(h_onebin      , 0.0);
-    fill2dEff(h_l_pt_eta    , lep->Pt(), fabs(lep->Eta()));
+    fill2dEff(h_l_pt_eta    , pt, eta);
     if( nt.evt()->isMC ){ // If the event is MC, save the flavor
         LeptonSource ls(getLeptonSource(lep));
-        bool isQcd(ls==LS_HF||ls==LS_LF);
-        fill1dEff(h_flavor, ls);
-        if(isQcd) fill1dEff(h_flavor, LS_QCD);
+        bool isReal(ls==LS_Real), isHf(ls==LS_HF), isLf(ls==LS_LF), isConv(ls==LS_Conv);
+        bool isQcd(isHf||isLf);
+        bool isCentralEta(eta<1.37); // see FakeBinnings.h
+        fill1dEff(h_flavor        , ls);
+        fill2dEff(h_flavor_pt     , ls, pt);
+        fill2dEff(h_flavor_eta    , ls, eta);
+        fill2dEff(h_flavor_metrel , ls, m_metRel);
+        fill2dEff(isCentralEta ? h_flavor_pt_etaC : h_flavor_pt_etaF, ls, pt);
+        if(isReal) fill1dEff(h_l_pt_real, pt);
+        if(isConv) fill1dEff(h_l_pt_conv, pt);
+        if(isHf)   fill1dEff(h_l_pt_hf,   pt);
+        if(isLf)   fill1dEff(h_l_pt_lf,   pt);
+        if(isQcd)  fill1dEff(h_l_pt_hflf, pt);
+        if(isQcd) {
+            fill1dEff(h_flavor        , LS_QCD);
+            fill2dEff(h_flavor_pt     , LS_QCD, pt);
+            fill2dEff(h_flavor_eta    , LS_QCD, eta);
+            fill2dEff(h_flavor_metrel , LS_QCD, m_metRel);
+            fill2dEff(isCentralEta ? h_flavor_pt_etaC : h_flavor_pt_etaF, LS_QCD, pt);
+        }
         TH1F *hlpt = (ls==LS_Real ? h_l_pt_true[lt][regionIndex][m_ch] : h_l_pt_fake[lt][regionIndex][m_ch]);
-        if(hlpt) hlpt->Fill(lep->Pt(), m_evtWeight);
+        if(hlpt) hlpt->Fill(pt, m_evtWeight);
     }
 }
 /*--------------------------------------------------------------------------------*/
@@ -345,6 +418,7 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
 
           case sf::CR_SRWH1j       : passSR = (is1j && passSrWh1j    (v)); break;
           case sf::CR_SRWH2j       : passSR = (is2j && passSrWh2j    (v)); break;
+          case sf::CR_SRWHnoMlj    : passSR =  passSrWhNoMlj         (v);  break;
 
           default: cout<<"invalid ControlRegion "<<CR<<endl;
           } // switch
@@ -562,6 +636,8 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
   if( met->Et > 40 )       return false;
   if( CR == CR_HF )      if( Mt(probe,met) > 40  ) return false;
   if( CR == CR_HF_high ) if( Mt(probe,met) > 100 ) return false;
+  bool sameSign(tag->q * probe->q > 0.0);
+  if(!sameSign) return false;
 
   // We have survived so save objects and return
   LeptonVector temp; temp.push_back(tag); temp.push_back(probe);
@@ -570,6 +646,53 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
   m_probes.push_back( probe );
   m_tags.push_back( tag );
   return true;
+}
+//---------------------------------------------------------
+bool MeasureFakeRate2::passHFCR_testSs(const LeptonVector &leptons,
+                                       const JetVector &jets,
+                                       const Met* met,
+                                       sf::Region CR)
+{
+// trying to get the HF scale factor from a fake enriched region with
+// low-met mu(tag)+l(probe)
+    Muon* tag=0;
+    size_t nTags=0;
+    //bool passSingleMu(false); // DG 2014-03-30: do we need this?
+    bool passDilepMuMu(false), passDilepMuEm(false), passDilepEmMu(false);
+    for(size_t iTag=0; iTag<m_baseMuons.size(); ++iTag){
+        if(const Muon *m = m_baseMuons[iTag]){
+            uint tf = m->trigFlags;
+            passDilepMuMu = (tf & TRIG_mu18_tight_mu8_EFFS);
+            passDilepMuEm = (tf & TRIG_mu18_tight_e7_medium1);
+            passDilepEmMu = (tf & TRIG_e12Tvh_medium1_mu8);
+            bool passDilep(passDilepMuMu || passDilepMuEm || passDilepEmMu);
+            if(m->isMu() && passDilep) { tag = m_baseMuons.at(iTag); nTags++; }
+        }
+    } // for(iTag)
+    Lepton *probe=0;
+    size_t nProbes=0;
+    for(size_t iP=0; iP<leptons.size(); ++iP){
+        if(const Lepton *l = leptons[iP])
+            if(l!=tag) { probe=leptons[iP]; nProbes++; }
+    } // for(iP)
+    if(nTags==1 && nProbes==1) {
+        //bool passMet(met->Et < 40);
+        bool sameSign(tag->q * probe->q > 0.0);
+        bool passTrig((probe->isMu()  && passDilepMuMu) ||
+                      (probe->isEle() && (passDilepMuEm || passDilepEmMu)));
+        float mt = Mt(probe,met);
+        bool passIterativeSideband = false;
+        if(CR == CR_HF)      passIterativeSideband = mt <  40.0;
+        if(CR == CR_HF_high) passIterativeSideband = mt < 100.0;
+        if(sameSign && passTrig && passIterativeSideband) {
+            m_tags.push_back(tag);
+            m_probes.push_back(probe);
+            LeptonVector temp; temp.push_back(tag); temp.push_back(probe);
+            if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(temp, true);
+            return true;
+        }
+    }
+    return false;
 }
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
@@ -742,12 +865,15 @@ void MeasureFakeRate2::increment(float flag[], bool includeLepSF, bool includeBt
 //----------------------------------------------------------
 sf::LeptonSource MeasureFakeRate2::getLeptonSource(const Lepton* l)
 {
-  uint dsid(nt.evt()->mcChannel);
-  if( isRealLepton(l, dsid) ) return LS_Real;
-  if( susy::isHFLepton(l) )   return LS_HF;
-  if( susy::isLFLepton(l) )   return LS_LF;
-  if( susy::isConvLepton(l) ) return LS_Conv;
-  return LS_Unk;
+    LeptonSource source = LS_Unk;
+    if(nt.evt()->isMC) {
+        uint dsid(nt.evt()->mcChannel);
+        if( isRealLepton(l, dsid) ) source = LS_Real;
+        if( susy::isHFLepton(l) )   source = LS_HF;
+        if( susy::isLFLepton(l) )   source = LS_LF;
+        if( susy::isConvLepton(l) ) source = LS_Conv;
+    }
+    return source;
 }
 //----------------------------------------------------------
 const std::vector<susy::fake::Region> MeasureFakeRate2::allRegions() const
@@ -852,3 +978,25 @@ void MeasureFakeRate2::resetCounters()
     }
   }// end loop over weight types
 }
+//----------------------------------------------------------
+std::string MeasureFakeRate2::tupleFilenameFromHistoFilename(const std::string &histoFilename, const std::string &suffix) const
+{
+    using std::string;
+    // heuristic: try to find a tag '_Month_day' and prepend suffix (e.g. 'fake_tuple'); otherwise just append suffix
+    string tupleFname = suffix+".root";
+    if(contains(histoFilename, ".root")) {
+        size_t tagPos = histoFilename.rfind(".root");
+        tupleFname = string(histoFilename).insert(tagPos, "_"+suffix);
+        string months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+        for(size_t iM=0; iM<12; ++iM) {
+            if(contains(histoFilename, "_"+months[iM])) {
+                tagPos = histoFilename.rfind("_"+ months[iM]);
+                tupleFname = string(histoFilename).insert(tagPos, "_"+suffix);
+                break;
+            }
+        } // for(iM)
+    }
+    return tupleFname;
+}
+//----------------------------------------------------------

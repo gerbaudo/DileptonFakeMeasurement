@@ -8,6 +8,9 @@
 // root files that can then be used to calc. weights.   //
 //////////////////////////////////////////////////////////
 
+
+#include "SusyTest0/TupleMaker.h"
+
 // Root Packages
 #include "TTree.h"
 #include "TH1.h"
@@ -54,11 +57,13 @@ class MeasureFakeRate2 : public SusySelection
   virtual Bool_t  Process(Long64_t entry);
   void initHistos(string outName);
   MeasureFakeRate2& setFileName(string f){ m_fileName = f; return *this; }
+  MeasureFakeRate2& setWriteFakeNtuple(bool val) { m_writeFakeTuple = val; return *this; }
   bool selectEvent(bool count=false);
   SsPassFlags passWhSS(const LeptonVector& leptons, const JetVector& jets, const Met* met);
   // Data Control Regions
   bool passRealCR(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR);
   bool passHFCR(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR);
+  bool passHFCR_testSs(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR); //!< test Ss
   bool passConvCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
   bool passSignalRegion(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR);
   // Monte Carlo Regions
@@ -94,10 +99,20 @@ class MeasureFakeRate2 : public SusySelection
   EffObject* h_njets        [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
   EffObject* h_onebin       [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
   EffObject* h_flavor       [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_l_pt_real    [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_l_pt_conv    [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_l_pt_hf      [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_l_pt_lf      [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject* h_l_pt_hflf    [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
   TH1F*      h_l_pt_true    [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
   TH1F*      h_l_pt_fake    [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
   // 2d parametrization
-  EffObject2* h_l_pt_eta    [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject2* h_l_pt_eta       [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject2* h_flavor_pt      [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject2* h_flavor_pt_etaC [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject2* h_flavor_pt_etaF [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject2* h_flavor_eta     [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
+  EffObject2* h_flavor_metrel  [kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N];
  protected:
   std::string  m_fileName;          // Outname file name
   TFile*       m_outFile;           // Output file
@@ -107,6 +122,11 @@ class MeasureFakeRate2 : public SusySelection
   float        m_metRel;            // Met Rel to be plotted
   int          m_ch;                // Set the channel
   DiLepEvtType m_ET;                // Dilepton event type to store cf
+  bool m_writeFakeTuple;            //!< save ntuples containing the info needed to compute fake efficiencies and scale factors
+  susy::wh::TupleMaker m_tupleMakerHfCr; //!< tuple for sf::CR_HF_high
+  susy::wh::TupleMaker m_tupleMakerConv; //!< tuple for sf::CR_Conv
+  //! tuple filename with specific suffix: one suffix (i.e. one output file) for each control region
+  std::string tupleFilenameFromHistoFilename(const std::string &histoFilename, const std::string &suffix) const;
 
   // Event counters
   float                n_readin           [WT_N];
