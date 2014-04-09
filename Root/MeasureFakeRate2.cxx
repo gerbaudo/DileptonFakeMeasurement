@@ -76,7 +76,8 @@ MeasureFakeRate2::MeasureFakeRate2() :
   m_ch(0),
   m_ET(ET_Unknown),
   m_writeFakeTuple(false),
-  m_tupleMakerHfCr("","")
+  m_tupleMakerHfCr("",""),
+  m_tupleMakerConv("","")
 {
   resetCounters();
 }
@@ -95,11 +96,18 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
   SusySelection::Begin(0);
   initHistos(m_fileName);
   if(m_writeFakeTuple) {
-      string filename = tupleFilenameFromHistoFilename(m_fileName);
-      if(m_tupleMakerHfCr.init(filename, "HeavyFlavorControlRegion"))
-          cout<<"initialized ntuple file "<<filename<<endl;
+      string filenameHf = tupleFilenameFromHistoFilename(m_fileName, "fake_tuple");
+      string filenameConv = tupleFilenameFromHistoFilename(m_fileName, "conv_tuple");
+      if(m_tupleMakerHfCr.init(filenameHf, "HeavyFlavorControlRegion"))
+          cout<<"initialized ntuple file "<<filenameHf<<endl;
       else {
-          cout<<"cannot initialize ntuple file '"<<filename<<"'"<<endl;
+          cout<<"cannot initialize ntuple file '"<<filenameHf<<"'"<<endl;
+          m_writeTuple = false;
+      }
+      if(m_tupleMakerConv.init(filenameConv, "ConversionControlRegion"))
+          cout<<"initialized ntuple file "<<filenameConv<<endl;
+      else {
+          cout<<"cannot initialize ntuple file '"<<filenameConv<<"'"<<endl;
           m_writeTuple = false;
       }
   }
@@ -110,7 +118,10 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
 void MeasureFakeRate2::Terminate()
 {
   if(m_dbg) cout << "MeasureFakeRate2::Terminate" << endl;
-  if(m_writeFakeTuple) m_tupleMakerHfCr.close();
+  if(m_writeFakeTuple) {
+      m_tupleMakerConv.close();
+      m_tupleMakerHfCr.close();
+  }
   cout<<"Writing file "<<m_outFile<<endl;
   m_outFile->Write();
   cout<<"Closing file"<<endl;
@@ -212,8 +223,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     case sf::CR_Real     : passCR = passRealCR  (leptons, jets, m_met, CR); break;
     case sf::CR_SideLow  : passCR = passRealCR  (leptons, jets, m_met, CR); break;
     case sf::CR_SideHigh : passCR = passRealCR  (leptons, jets, m_met, CR); break;
-    case sf::CR_HF       : passCR = passHFCR    (leptons, jets, m_met, CR); break;
-    case sf::CR_HF_high  : passCR = passHFCR    (leptons, jets, m_met, CR); break;
+    case sf::CR_HF       : passCR = passHFCR_testSs(leptons, jets, m_met, CR); break;
+    case sf::CR_HF_high  : passCR = passHFCR_testSs(leptons, jets, m_met, CR); break;
     case sf::CR_Conv     : passCR = passConvCR  (leptons, jets, m_met    ); break;
     case sf::CR_MCConv   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
     case sf::CR_MCQCD    : passCR = passMCReg   (leptons, jets, m_met, CR); break;
@@ -224,15 +235,16 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     if( passCR ){
       for(size_t ip=0; ip<m_probes.size(); ++ip) fillRatesHistos(m_probes.at(ip), jets, m_met, cr);
     } // if(passCR)
-    if(m_writeFakeTuple && passCR && CR==sf::CR_HF_high) {
+    if(m_writeFakeTuple && passCR && (CR==sf::CR_HF_high || CR==sf::CR_Conv)) {
         unsigned int run(nt.evt()->run), event(nt.evt()->event);
-        const Lepton *l0 = m_tags[0];
+        const Lepton *l0 = m_tags.size()>0 ? m_tags[0] : m_baseLeptons[0]; // hack: no tag for conv region (use baseL as a dummy lep)
         const Lepton *l1 = m_probes[0];
         LeptonSource l0Source(getLeptonSource(l0)), l1Source(getLeptonSource(l1));
         bool l0IsTight(isSignalLepton(l0, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC));
         bool l1IsTight(isSignalLepton(l1, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC));
         LeptonVector dummyLepts;
-        m_tupleMakerHfCr
+        susy::wh::TupleMaker &tupleMaker = (CR==sf::CR_HF_high ? m_tupleMakerHfCr : m_tupleMakerConv);
+        tupleMaker
             .setL0IsTight(l0IsTight).setL0Source(l0Source)
             .setL1IsTight(l1IsTight).setL1Source(l1Source)
             .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
@@ -645,26 +657,27 @@ bool MeasureFakeRate2::passHFCR_testSs(const LeptonVector &leptons,
     size_t nTags=0;
     //bool passSingleMu(false); // DG 2014-03-30: do we need this?
     bool passDilepMuMu(false), passDilepMuEm(false), passDilepEmMu(false);
-//    for(size_t iTag=0; iTag<m_signalMuons.size(); ++iTag){
     for(size_t iTag=0; iTag<m_baseMuons.size(); ++iTag){
-        const Muon *m = m_baseMuons[iTag];
-        uint tf = m->trigFlags;
-        passDilepMuMu = (tf & TRIG_mu18_tight_mu8_EFFS);
-        passDilepMuEm = (tf & TRIG_mu18_tight_e7_medium1);
-        passDilepEmMu = (tf & TRIG_e12Tvh_medium1_mu8);
-        bool passDilep(passDilepMuMu || passDilepMuEm || passDilepEmMu);
-        if(m->isMu() && passDilep) { tag = m_signalMuons.at(iTag); nTags++; }
+        if(const Muon *m = m_baseMuons[iTag]){
+            uint tf = m->trigFlags;
+            passDilepMuMu = (tf & TRIG_mu18_tight_mu8_EFFS);
+            passDilepMuEm = (tf & TRIG_mu18_tight_e7_medium1);
+            passDilepEmMu = (tf & TRIG_e12Tvh_medium1_mu8);
+            bool passDilep(passDilepMuMu || passDilepMuEm || passDilepEmMu);
+            if(m->isMu() && passDilep) { tag = m_baseMuons.at(iTag); nTags++; }
+        }
     } // for(iTag)
     Lepton *probe=0;
     size_t nProbes=0;
     for(size_t iP=0; iP<leptons.size(); ++iP){
-        const Lepton *l = leptons[iP];
-        if(l!=tag) { probe=leptons.at(iP); nProbes++; }
+        if(const Lepton *l = leptons[iP])
+            if(l!=tag) { probe=leptons[iP]; nProbes++; }
     } // for(iP)
     if(nTags==1 && nProbes==1) {
         //bool passMet(met->Et < 40);
         bool sameSign(tag->q * probe->q > 0.0);
-        bool passTrig((probe->isMu()  && passDilepMuMu) || (probe->isEle() && (passDilepMuEm || passDilepEmMu)));
+        bool passTrig((probe->isMu()  && passDilepMuMu) ||
+                      (probe->isEle() && (passDilepMuEm || passDilepEmMu)));
         float mt = Mt(probe,met);
         bool passIterativeSideband = false;
         if(CR == CR_HF)      passIterativeSideband = mt <  40.0;
@@ -964,20 +977,20 @@ void MeasureFakeRate2::resetCounters()
   }// end loop over weight types
 }
 //----------------------------------------------------------
-std::string MeasureFakeRate2::tupleFilenameFromHistoFilename(const std::string &histoFilename) const
+std::string MeasureFakeRate2::tupleFilenameFromHistoFilename(const std::string &histoFilename, const std::string &suffix) const
 {
     using std::string;
-    // heuristic: try to find a tag '_Month_day' and prepend 'fake_tuple'; otherwise just append 'fake_tuple'
-    string tupleFname = "fake_tuple.root";
+    // heuristic: try to find a tag '_Month_day' and prepend suffix (e.g. 'fake_tuple'); otherwise just append suffix
+    string tupleFname = suffix+".root";
     if(contains(histoFilename, ".root")) {
         size_t tagPos = histoFilename.rfind(".root");
-        tupleFname = string(histoFilename).insert(tagPos, "_fake_tuple");
+        tupleFname = string(histoFilename).insert(tagPos, "_"+suffix);
         string months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
                            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
         for(size_t iM=0; iM<12; ++iM) {
             if(contains(histoFilename, "_"+months[iM])) {
                 tagPos = histoFilename.rfind("_"+ months[iM]);
-                tupleFname = string(histoFilename).insert(tagPos, "_fake_tuple");
+                tupleFname = string(histoFilename).insert(tagPos, "_"+suffix);
                 break;
             }
         } // for(iM)
