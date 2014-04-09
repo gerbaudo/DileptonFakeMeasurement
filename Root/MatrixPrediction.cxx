@@ -77,7 +77,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   SsPassFlags ssf(SusySelection::passSrSs(WH_SRSS1, ncl, t, j, m, allowQflip));
   if(!ssf.passCommonCriteria()) return false;
   if(m_writeTuple && ssf.lepPt) {
-      double weight(getFakeWeight(l, sf::CR_CR8lpt, metRel, smm::SYS_NONE));
+      double weight(getFakeWeight(l, sf::CR_CR8lpt, metRel, smm::SYS_NOM));
       unsigned int run(nt.evt()->run), event(nt.evt()->event);
       LeptonVector anyLep(getAnyElOrMu(nt));
       LeptonVector lowPtLep(subtract_vector(anyLep, m_baseLeptons));
