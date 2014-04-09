@@ -34,7 +34,7 @@ TupleMaker::~TupleMaker()
 //----------------------------------------------------------
 // util functions to convert Lepton, Jet -> FourMom
 FourMom lepton2FourMom (const Lepton *l)
-{    
+{
     return (  l && l->isMu()  ? FourMom().setMu(*l)
             : l && l->isEle() ? FourMom().setEl(*l)
             : FourMom());
