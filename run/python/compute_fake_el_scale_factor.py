@@ -95,6 +95,8 @@ def main():
     subtractRealAndComputeScaleFactor(histosPerGroup, 'pt1', verbose)
 
 
+leptonTypes = ['tight', 'loose', 'real_tight', 'real_loose', 'fake_tight', 'fake_loose']
+
 def fillHistos(chain, histos, verbose=False):
     totNelec, totWeightLoose, totWeightTight = 0, 0.0, 0.0
     nElecTight = 0
@@ -106,6 +108,7 @@ def fillHistos(chain, histos, verbose=False):
         isSameSign = tag.charge*probe.charge > 0.
         isEl, isTight = probe.isEl, probe.isTight
         isReal = probe.source==3 # see FakeLeptonSources.h
+        isFake = not isReal
         probe4m, met4m = r.TLorentzVector(), r.TLorentzVector()
         probe4m.SetPxPyPzE(probe.px, probe.py, probe.pz, probe.E)
         met4m.SetPxPyPzE(met.px, met.py, met.pz, met.E)
@@ -124,20 +127,22 @@ def fillHistos(chain, histos, verbose=False):
         def fill(lepType=''):
             histos['pt1'][lepType].Fill(pt, weight)
             histos['eta1'][lepType].Fill(eta, weight)
-        fill('loose')
         if isTight:
-            fill('tight')
             totWeightTight += weight
             nElecTight += 1
+        fill('loose')
+        if isTight : fill('tight')
         if isReal : fill('real_loose')
-        if isTight and isReal : fill('real_tight')
+        if isFake : fill('fake_loose')
+        if isReal and isTight : fill('real_tight')
+        if isFake and isTight : fill('fake_tight')
 
     if verbose:
         counterNames = ['totNelec', 'nElecTight', 'totWeightLoose', 'totWeightTight', 'nOutRange', 'wOutRange']
         print ', '.join(["%s : %.1f"%(c, eval(c)) for c in counterNames])
 
 def histoName(var, sample, leptonType) : return 'h_'+var+'_'+sample+'_'+leptonType
-def bookHistos(variables, samples) :
+def bookHistos(variables, samples, leptonTypes=leptonTypes) :
     "book a dict of histograms with keys [sample][var][tight, loose, real_tight, real_loose]"
     def histo(variable, hname):
         h = None
@@ -149,11 +154,10 @@ def bookHistos(variables, samples) :
         h.SetDirectory(0)
         h.Sumw2()
         return h
-    lepTypes = ['tight', 'loose', 'real_tight', 'real_loose']
     return dict([(s,
                   dict([(v,
                          dict([(lt, histo(variable=v, hname=histoName(v, s, lt)))
-                               for lt in lepTypes]))
+                               for lt in leptonTypes]))
                         for v in variables]))
                  for s in samples])
 def histoNames(variables, samples) :
@@ -237,7 +241,6 @@ def plotStackedHistos(histosPerGroup={}, outputDir='', verbose=False):
 def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', verbose=False):
     "efficiency scale factor"
     groups = histosPerGroup.keys()
-    leptonTypes = ['tight', 'loose', 'real_tight', 'real_loose']
     histosPerType = dict([(lt,
                            dict([(g,
                                   histosPerGroup[g][variable][lt])
