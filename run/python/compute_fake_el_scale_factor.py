@@ -250,14 +250,17 @@ def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', verbose=Fa
     for lt in leptonTypes :
         histosPerType[lt]['totSimBkg'] = summedHisto([histo for group,histo in histosPerType[lt].iteritems() if isBkgSample(group)])
 
-    dataTight = histosPerType['tight']['data'     ]
-    simuTight = histosPerType['tight']['totSimBkg']
-    dataLoose = histosPerType['loose']['data'     ]
-    simuLoose = histosPerType['loose']['totSimBkg'] # todo: for mc, build fake_tight, fake_loose rather than subtracting (smaller error)
+    simuTight = histosPerType['fake_tight']['totSimBkg']
+    simuLoose = histosPerType['fake_loose']['totSimBkg']
+    dataTight = histosPerType['tight'     ]['data'     ]
+    dataLoose = histosPerType['loose'     ]['data'     ]
+    # subtract real contribution from data
+    # _Note to self_: currently estimating the real contr from MC; in
+    # the past also used iterative corr, which might be more
+    # appropriate in cases like here, where the normalization is
+    # so-so.  Todo: investigate the normalization.
     dataTight.Add(histosPerType['real_tight']['totSimBkg'], -1.0)
-    simuTight.Add(histosPerType['real_tight']['totSimBkg'], -1.0)
     dataLoose.Add(histosPerType['real_loose']['totSimBkg'], -1.0)
-    simuLoose.Add(histosPerType['real_loose']['totSimBkg'], -1.0)
     dataTight.Divide(dataLoose)
     simuTight.Divide(simuLoose)
     print "eff(T|L) vs. ",variable
