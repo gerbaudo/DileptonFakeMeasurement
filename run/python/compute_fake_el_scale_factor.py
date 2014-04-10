@@ -15,6 +15,7 @@ from utils import (first
 import rootUtils
 from rootUtils import (drawLegendWithDictKeys
                        ,getBinContents
+                       ,getBinErrors
                        ,getMinMax
                        ,importRoot
                        ,importRootCorePackages
@@ -264,7 +265,8 @@ def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', verbose=Fa
     print "efficiency data : ",formatFloat(getBinContents(dataTight))
     print "efficiency simu : ",formatFloat(getBinContents(simuTight))
     dataTight.Divide(simuTight)
-    print "scale factor data/simu: ",formatFloat(getBinContents(dataTight))
+    print "sf    data/simu : ",formatFloat(getBinContents(dataTight))
+    print "            +/- : ",formatFloat(getBinErrors(dataTight))
 
 
 
