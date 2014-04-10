@@ -47,7 +47,7 @@ Example usage:
 def main():
     parser = optparse.OptionParser(usage=usage)
     parser.add_option('-i', '--input-dir', default='./out/fakerate')
-    parser.add_option('-o', '--output-dir', default='./out/fake_el_scale_factor')
+    parser.add_option('-o', '--output-dir', default='./out/fake_el_scale_factor', help='dir for plots')
     parser.add_option('-m', '--mode', default='bbcc', help='either bbcc or conv')
     parser.add_option('-t', '--tag', help='tag used to select the input files (e.g. Apr_04)')
     parser.add_option('-f', '--fill-histos', action='store_true', default=False, help='force fill (default only if needed)')
@@ -92,16 +92,22 @@ def main():
     # compute scale factors
     histosPerGroup = fetchHistos(outputFileName, histoNames(vars, groups), verbose)
     plotStackedHistos(histosPerGroup, outputDir, verbose)
-    subtractRealAndComputeScaleFactor(histosPerGroup, 'eta1', verbose)
-    subtractRealAndComputeScaleFactor(histosPerGroup, 'pt1', verbose)
+    sf_el_eta = subtractRealAndComputeScaleFactor(histosPerGroup, 'eta1', 'sf_el_vs_eta', verbose)
+    sf_el_pt  = subtractRealAndComputeScaleFactor(histosPerGroup, 'pt1',  'sf_el_vs_pt',  verbose)
+    outputFile = r.TFile.Open(outputFileName, 'recreate')
+    outputFile.cd()
+    sf_el_eta.Write()
+    sf_el_pt.Write()
+    outputFile.Close()
+    if verbose : print "saved scale factors to %s" % outputFileName
 
+#___________________________________________________
 
 leptonTypes = ['tight', 'loose', 'real_tight', 'real_loose', 'fake_tight', 'fake_loose']
 
 def fillHistos(chain, histos, verbose=False):
-    totNelec, totWeightLoose, totWeightTight = 0, 0.0, 0.0
-    nElecTight = 0
-    nOutRange, wOutRange = 0, 0.0
+    nElecLoose, nElecTight = 0, 0
+    totWeightLoose, totWeightTight = 0.0, 0.0
     for event in chain :
         pars = event.pars
         weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
@@ -116,30 +122,24 @@ def fillHistos(chain, histos, verbose=False):
         pt = probe4m.Pt()
         eta = abs(probe4m.Eta())
         mt = computeMt(probe4m, met4m)
-        if not isSameSign : continue
-        if not isEl : continue
-        if mt > 100.0 : print "mt ",mt
-        if mt > 40.0 : continue
-        if pt<10.0 or pt>100.0 :
-            nOutRange += 1
-            wOutRange += weight
-        totNelec += 1
-        totWeightLoose += weight
-        def fill(lepType=''):
-            histos['pt1'][lepType].Fill(pt, weight)
-            histos['eta1'][lepType].Fill(eta, weight)
-        if isTight:
-            totWeightTight += weight
-            nElecTight += 1
-        fill('loose')
-        if isTight : fill('tight')
-        if isReal : fill('real_loose')
-        if isFake : fill('fake_loose')
-        if isReal and isTight : fill('real_tight')
-        if isFake and isTight : fill('fake_tight')
-
+        isLowMt = mt < 40.0
+        if isSameSign and isEl  and isLowMt :
+            def incrementCounts(counts, weightedCounts) :
+                counts +=1
+                weightedCounts += weight
+            incrementCounts(nElecLoose, totWeightLoose)
+            if isTight: incrementCounts(nElecTight, totWeightTight)
+            def fill(lepType=''):
+                histos['pt1'][lepType].Fill(pt, weight)
+                histos['eta1'][lepType].Fill(eta, weight)
+            fill('loose')
+            if isTight : fill('tight')
+            if isReal : fill('real_loose')
+            if isFake : fill('fake_loose')
+            if isReal and isTight : fill('real_tight')
+            if isFake and isTight : fill('fake_tight')
     if verbose:
-        counterNames = ['totNelec', 'nElecTight', 'totWeightLoose', 'totWeightTight', 'nOutRange', 'wOutRange']
+        counterNames = ['nElecLoose', 'nElecTight', 'totWeightLoose', 'totWeightTight']
         print ', '.join(["%s : %.1f"%(c, eval(c)) for c in counterNames])
 
 def histoName(var, sample, leptonType) : return 'h_'+var+'_'+sample+'_'+leptonType
@@ -239,7 +239,7 @@ def plotStackedHistos(histosPerGroup={}, outputDir='', verbose=False):
         can._histos = [h for h in stack.GetHists()]+[data]
         can.Update()
         can.SaveAs(os.path.join(outputDir, histoname+'.png'))
-def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', verbose=False):
+def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', outhistoname='', verbose=False):
     "efficiency scale factor"
     groups = histosPerGroup.keys()
     histosPerType = dict([(lt,
@@ -267,10 +267,12 @@ def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', verbose=Fa
     def formatFloat(floats): return ["%.4f"%f for f in floats]
     print "efficiency data : ",formatFloat(getBinContents(dataTight))
     print "efficiency simu : ",formatFloat(getBinContents(simuTight))
-    dataTight.Divide(simuTight)
-    print "sf    data/simu : ",formatFloat(getBinContents(dataTight))
-    print "            +/- : ",formatFloat(getBinErrors(dataTight))
-
+    ratio = dataTight.Clone(outhistoname)
+    ratio.SetDirectory(0)
+    ratio.Divide(simuTight)
+    print "sf    data/simu : ",formatFloat(getBinContents(ratio))
+    print "            +/- : ",formatFloat(getBinErrors(ratio))
+    return ratio
 
 
 
