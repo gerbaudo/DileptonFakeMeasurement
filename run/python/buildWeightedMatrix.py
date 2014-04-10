@@ -97,6 +97,7 @@ def main() :
     outputFile = r.TFile.Open(outputFname, 'recreate')
     inputFiles = dict((k, v) for k, v in allInputFiles.iteritems() if k in fakeProcesses())
     inputFracFile = r.TFile.Open(inputFracFname) if inputFracFname else None
+    if inputFracFname and not inputFracFile : parser.error("invalid fraction file %s"%inputFracFname)
 
     buildMuonRates    (inputFiles, outputFile, outputPlotDir, inputFracFile=inputFracFile, verbose=verbose, zoomIn=zoomIn)
     buildElectronRates(inputFiles, outputFile, outputPlotDir, inputFracFile=inputFracFile, verbose=verbose, zoomIn=zoomIn)
