@@ -83,7 +83,7 @@ def independentVariables() :
 
 def regionsToBePlotted() :
     "regions for which we plot the fractions"
-    return  ['CR_SRWHnoMlj', 'CR_SRWH1j']
+    return  ['CR_SRWHnoMlj', 'CR_SRWH1j', 'CR_SSInc1j']
     #return  ['CR_WHZVfake1j', 'CR_WHZVfake2j', 'CR_WHfake1j', 'CR_WHfake2j', 'CR_WHZV1j', 'CR_WHZV2j', 'CR_SRWH1j', 'CR_SRWH2j', 'CR_SRWHnoMlj']
 
 
