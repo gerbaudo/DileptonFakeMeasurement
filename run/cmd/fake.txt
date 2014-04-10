@@ -30,8 +30,19 @@ TAG="Oct_10"
  --output_dir out/fakerate/merged/scalefactors_plots_${TAG} \
  >& log/fakerate/FakePlot_${TAG}.log
 
+# if you want to use the 2d fractions (vs. pt, eta), you need to
+# compute them beforehand (todo: call this within buildWeightedMatrix)
+./python/plotParametrizedFractions.py \
+ -t ${TAG} \
+ -i out/fakerate/merged/ \
+ -o out/fakerate/merged/fraction_${TAG}.root \
+ -p out/fakerate/merged/fraction_plots_${TAG} \
+ >& log/fakerate/fractions.log
+
 # Produce the weighted matrix with FinalNewFake.
 # This is also where the fractions are computed and plotted.
+# If using the 2d fractions, add
+#    '-f out/fakerate/merged/fraction_${TAG}.root'
 ./python/buildWeightedMatrix.py \
  -t ${TAG} \
  -i out/fakerate/merged/ \
