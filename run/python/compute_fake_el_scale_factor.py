@@ -123,7 +123,7 @@ def fillHistos(chain, histos, verbose=False):
         eta = abs(probe4m.Eta())
         mt = computeMt(probe4m, met4m)
         isLowMt = mt < 40.0
-        if isSameSign and isEl  and isLowMt :
+        if (isSameSign or isConversion) and isEl  and isLowMt :
             def incrementCounts(counts, weightedCounts) :
                 counts +=1
                 weightedCounts += weight
