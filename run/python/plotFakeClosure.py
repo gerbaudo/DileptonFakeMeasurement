@@ -151,8 +151,9 @@ def buildHists(inputFiles={}, histo_basename='') :
     h_sm, h_data = None, None
     err2s = {}
     for sample, file in inputFiles.iteritems() :
-        histoname = histo_basename+('_NONE' if isFake(sample) else '_NOM')
+        histoname = histo_basename+('_NOM')
         h = file.Get(histoname)
+        if not h and isFake(sample) : h = histo_basename+'_NONE' # fallback: backward compatibility w/ old name in SusyMatrixMethod
         assert h,"cannot get %s from %s"%(histoname, file.GetName())
         h.SetDirectory(0)
         if not h : print "=> missing %s from %s"%(histoname, file.GetName())
