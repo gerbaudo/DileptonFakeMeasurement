@@ -37,15 +37,15 @@ TAG="Oct_10"
  -i out/fakerate/merged/ \
  -o out/fakerate/merged/fraction_${TAG}.root \
  -p out/fakerate/merged/fraction_plots_${TAG} \
- >& log/fakerate/fractions.log
+ >& log/fakerate/fractions_${TAG}.log
 
 # Produce the weighted matrix with FinalNewFake.
 # This is also where the fractions are computed and plotted.
-# If using the 2d fractions, add
-#    '-f out/fakerate/merged/fraction_${TAG}.root'
+# If not using the 2d fractions, drop the '-f' option.
 ./python/buildWeightedMatrix.py \
  -t ${TAG} \
  -i out/fakerate/merged/ \
+ -f out/fakerate/merged/fraction_${TAG}.root \
  -o out/fakerate/merged/FinalFakeHist_${TAG}.root \
  -p out/fakerate/merged/weightedMatrix_plots_${TAG} \
  -v \
