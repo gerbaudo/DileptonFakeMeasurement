@@ -93,7 +93,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
           /*const*/ swk::DilepVars v(swk::compute2lVars(ncl, m, j));
           v.l3veto = ssf.veto3rdL; // already computed in passSrSs
 
-          const sf::Region fakeR = sf::CR_SRWHnoMlj;
+          const sf::Region fakeR = sf::CR_SSInc1j;
           if(ssf.sameSign && ssf.ge1j) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,metRel,sys), PR_CRSsInc1j, sys);
           if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,    metRel,sys), PR_CR8lpt,    sys);
           if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,     metRel,sys), PR_CR8ee,     sys);
