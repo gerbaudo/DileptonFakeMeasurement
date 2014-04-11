@@ -13,6 +13,7 @@
 import numpy as np
 import optparse
 import os
+import pprint
 from rootUtils import (referenceLine
                        ,topRightLegend
                        ,getMinMax
@@ -174,7 +175,8 @@ def computeFakeSysErr2(input_fake_file=None, nominal_histo=None) :
     variations = ['_EL_RE_UP', '_EL_RE_DOWN', '_MU_RE_UP', '_MU_RE_DOWN', # 2x2x2=8 syst variations for the fake estimate
                   '_EL_FR_UP', '_EL_FR_DOWN', '_MU_FR_UP', '_MU_FR_DOWN']
     nom_hname = nominal_histo.GetName()
-    vars_histos = dict([(v, input_fake_file.Get(nom_hname.replace('_NONE',v))) for v in variations])
+    vars_histos = dict([(v, input_fake_file.Get(nom_hname.replace('_NONE',v).replace('_NOM', v))) for v in variations])
+    assert all(h for k, h in vars_histos.iteritems()),"missing fake sys histos for %s\n%s"%(nom_hname, pprint.pformat(vars_histos))
     def bc(h) : return [h.GetBinContent(b) for b in range(1, 1+h.GetNbinsX())]
     def be(h) : return [h.GetBinError(b) for b in range(1, 1+h.GetNbinsX())]
     nom_bcs  = bc(nominal_histo)
