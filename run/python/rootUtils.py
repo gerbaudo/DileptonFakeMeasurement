@@ -186,3 +186,5 @@ def getBinIndices(h) :
     else : return []
 def getBinContents(h) :
     return [h.GetBinContent(b) for b in getBinIndices(h)]
+def getBinErrors(h) :
+    return [h.GetBinError(b) for b in getBinIndices(h)]

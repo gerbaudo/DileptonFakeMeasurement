@@ -49,12 +49,15 @@ mpl.use('Agg') # render plots without X
 import matplotlib.pyplot as plt
 import numpy as np
 import SampleUtils
+from compute_fake_el_scale_factor import histoname_electron_sf_vs_eta
 
 usage="""
 Example usage:
 %prog \\
  --tag ${TAG} \\
  --input_dir out/fakerate/merged/data_${TAG}.root \\
+ --input-el-sf out/fake_el_scale_factor_${TAG}/hflf_el_scale_histos.root \\
+ --input-el-sf out/fake_el_scale_factor_${TAG}/conv_el_scale_histos.root \\
  --output_file out/fakerate/merged/FinalFakeHist_${TAG}.root \\
  --output_plot out/fakerate/merged/FinalFakeHist_plots_${TAG} \\
  >& log/fakerate/FinalFakeHist_${TAG}.log
@@ -73,6 +76,7 @@ def main() :
     parser.add_option('-f', '--input_fractions')
     parser.add_option('-o', '--output_file')
     parser.add_option('-p', '--output_plot')
+    parser.add_option('-s', '--input-el-sf', default=[], action='append', help='electron bin-by-bin scale factors (from compute_fake_el_scale_factor)')
     parser.add_option('-z', '--zoom-in', help='vertical axis efficiency plots')
     parser.add_option('-v','--verbose', action='store_true', default=False)
     (opts, args) = parser.parse_args()
@@ -84,6 +88,7 @@ def main() :
     tag = opts.tag
     inputDirname  = opts.input_dir
     inputFracFname= opts.input_fractions
+    inputSfFnames = opts.input_el_sf
     outputFname   = opts.output_file
     outputPlotDir = opts.output_plot
     zoomIn        = opts.zoom_in
@@ -92,6 +97,7 @@ def main() :
 
     allInputFiles = getInputFiles(inputDirname, tag, verbose) # includes allBkg, which is used only for sys
     assert all(f for f in allInputFiles.values()), ("missing inputs: \n%s"%'\n'.join(["%s : %s"%kv for kv in allInputFiles.iteritems()]))
+    if inputSfFnames and any([not os.path.exists(f) for f in inputSfFnames]) : parser.error("invalid electron sf file(s) %s"%inputSfFnames)
     outputPlotDir = outputPlotDir+'/' if not outputPlotDir.endswith('/') else ''
     mkdirIfNeeded(outputPlotDir)
     outputFile = r.TFile.Open(outputFname, 'recreate')
@@ -100,7 +106,7 @@ def main() :
     if inputFracFname and not inputFracFile : parser.error("invalid fraction file %s"%inputFracFname)
 
     buildMuonRates    (inputFiles, outputFile, outputPlotDir, inputFracFile=inputFracFile, verbose=verbose, zoomIn=zoomIn)
-    buildElectronRates(inputFiles, outputFile, outputPlotDir, inputFracFile=inputFracFile, verbose=verbose, zoomIn=zoomIn)
+    buildElectronRates(inputFiles, outputFile, outputPlotDir, inputFracFile=inputFracFile, inputElecSfFiles=inputSfFnames, verbose=verbose, zoomIn=zoomIn)
     buildSystematics  (allInputFiles['allBkg'], outputFile, verbose)
     outputFile.Close()
     if verbose : print "output saved to \n%s"%'\n'.join([outputFname, outputPlotDir])
@@ -169,7 +175,10 @@ def buildRatioAndScaleIt(histoPrefix='', inputFile=None, scaleFactor=1.0, verbos
     ratioHisto = buildRatio(inputFile, histoPrefix)
     def lf2s(l) : return ', '.join(["%.3f"%e for e in l])
     if verbose: print ratioHisto.GetName()," before scaling: ",lf2s(getBinContents(ratioHisto))
-    ratioHisto.Scale(scaleFactor)
+    if   type(scaleFactor)==float : ratioHisto.Scale(scaleFactor)
+    elif type(scaleFactor)==r.TH1F : ratioHisto.Multiply(scaleFactor)
+    elif type(scaleFactor)==r.TH2F : ratioHisto.Multiply(scaleFactor)
+    else : raise TypeError("unknown SF type %s, %s"%(type(scaleFactor), str(scaleFactor)))
     if verbose: print ratioHisto.GetName()," after scaling: ",lf2s(getBinContents(ratioHisto))
     return ratioHisto
 def buildPercentages(inputFiles, histoName, binLabel) :
@@ -343,7 +352,22 @@ def buildMuonRates(inputFiles, outputfile, outplotdir, inputFracFile=None, verbo
     #json_write(mu_frac, outplotdir+/outFracFilename)
     doPlotFractions = not inputFracFile
     if doPlotFractions : plotFractions(mu_frac, outplotdir, 'frac_mu')
-def buildElectronRates(inputFiles, outputfile, outplotdir, inputFracFile=None, verbose=False, zoomIn=False) :
+def fetchSfHistos(inputElecSfFiles=[], histoname='', verbose=False):
+    # inputElecSfFile should be two files, one for conv and one for bbcc
+    fileNames = inputElecSfFiles if type(inputElecSfFiles)==list else inputElecSfFiles.split()
+    assert len(fileNames)==2,"fetchSfHistos expects two files (hflf+conv), got %s"%str(inputElecSfFile)
+    if verbose : print "retrieving scale factors from %s"%inputElecSfFiles
+    fname_hflf = first(filter(lambda _ : 'hflf' in _, fileNames))
+    fname_conv = first(filter(lambda _ : 'conv' in _, fileNames))
+    file_hflf = r.TFile.Open(fname_hflf)
+    file_conv = r.TFile.Open(fname_conv)
+    hname = histoname_electron_sf_vs_eta()
+    histos = {'hflf' : composeEtaHistosAs2dPtEta(input1Dhisto=file_hflf.Get(hname), outhistoname=hname+'_hflf'),
+              'conv' : composeEtaHistosAs2dPtEta(input1Dhisto=file_conv.Get(hname), outhistoname=hname+'_conv')
+              }
+    for f in [file_hflf, file_conv] : f.Close()
+    return histos
+def buildElectronRates(inputFiles, outputfile, outplotdir, inputFracFile=None, inputElecSfFiles=[], verbose=False, zoomIn=False) :
     """
     For each selection region, build the real eff and fake rate
     histo as a weighted sum of the corresponding fractions.
@@ -351,13 +375,19 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, inputFracFile=None, v
     """
     processes = fakeProcesses()
     brsit, iF, v = buildRatioAndScaleIt, inputFiles, verbose
-    print "buildElectronRates: values to be fixed: ",' '.join(["%s: %s"%(_, eval(_)) for _ in ['el_qcdSF', 'el_convSF', 'el_realSF']])
+    # if we have the sf vs eta, use it in the 2d parametrization
+    el_convSF_vs_eta = el_convSF if not inputElecSfFiles else fetchSfHistos(inputElecSfFiles, histoname_electron_sf_vs_eta, verbose)['conv']
+    el_qcdSF_vs_eta  = el_qcdSF if not inputElecSfFiles else fetchSfHistos(inputElecSfFiles, histoname_electron_sf_vs_eta, verbose)['hflf']
+    if inputElecSfFiles : el_convSF_vs_eta.Print("all")
+    if inputElecSfFiles : el_qcdSF_vs_eta.Print("all")
+
     eff_conv = dict((p, brsit('elec_convMC_all_l_pt_coarse', iF[p], el_convSF, v)) for p in processes)
     eff_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_coarse',  iF[p], el_qcdSF, v))  for p in processes)
     eff_real = dict((p, brsit('elec_realMC_all_l_pt_coarse', iF[p], el_realSF, v)) for p in processes)
-    eff2d_conv = dict((p, brsit('elec_convMC_all_l_pt_eta', iF[p], el_convSF, v)) for p in processes)
-    eff2d_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_eta',  iF[p], el_qcdSF, v))  for p in processes)
+    eff2d_conv = dict((p, brsit('elec_convMC_all_l_pt_eta', iF[p], el_convSF_vs_eta, v)) for p in processes)
+    eff2d_qcd  = dict((p, brsit('elec_qcdMC_all_l_pt_eta',  iF[p], el_qcdSF_vs_eta, v))  for p in processes)
     eff2d_real = dict((p, brsit('elec_realMC_all_l_pt_eta', iF[p], el_realSF, v)) for p in processes)
+
     lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#varepsilon(T|L)'
     plot1dEfficiencies(eff_conv, 'eff_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY, zoomIn=zoomIn)
     plot1dEfficiencies(eff_qcd,  'eff_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY, zoomIn=zoomIn)
@@ -366,6 +396,7 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, inputFracFile=None, v
     plot2dEfficiencies(eff2d_conv, 'eff2d_el_conv', outplotdir, lT+' conv fake el'+';'+lX+';'+lY)
     plot2dEfficiencies(eff2d_qcd,  'eff2d_el_qcd',  outplotdir, lT+' qcd fake el' +';'+lX+';'+lY)
     plot2dEfficiencies(eff2d_real, 'eff2d_el_real', outplotdir, lT+' real el'     +';'+lX+';'+lY)
+
     el_frac = dict()
     for sr in selectionRegions() :
         fC, bPt = fetchCompositions, buildPercentagesTwice
@@ -546,6 +577,18 @@ def compose2Dcompositions(inputSfFile=None, templateHistoName="%(proc)s_%(etabin
                 hEtaPt.SetBinError  (iPt, iEta, hEta.GetBinError  (iPt))
     return histos2d
 
+def composeEtaHistosAs2dPtEta(input1Dhisto=None, outhistoname='') :
+    "take the 1D scale factor histogram (vs eta), and build a 2D histo that has (pt,eta) on (x,y); see MeasureFakeRate2::initHistos"
+    ptBinEdges = np.array([10.0, 20.0, 35.0, 100.0]) # see FakeBinnings.h -> coarseFakePtbins
+    etaBinEdges = np.array([0.0, 1.37, 2.50])
+    h = r.TH2F(outhistoname, '', len(ptBinEdges)-1, ptBinEdges, len(etaBinEdges)-1, etaBinEdges)
+    h.SetDirectory(0)
+    h.Sumw2()
+    for iX in range(1, 1+len(ptBinEdges)):
+        for iY in range(1, 1+len(etaBinEdges)):
+            h.SetBinContent(iX, iY, input1Dhisto.GetBinContent(iY))
+            h.SetBinError  (iX, iY, input1Dhisto.GetBinError  (iY))
+    return h
 
 if __name__=='__main__' :
     main()
