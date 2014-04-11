@@ -35,20 +35,15 @@ usage="""
 Example usage:
 %prog \\
  --verbose  \\
- --mode bbcc \\
  --tag ${TAG} \\
- --output-dir ./out/conv_el_scale_factor_same_sign_Mar_07
- --tag ${TAG} \\
- --input_dir out/fakerate/merged/data_${TAG}.root \\
- --output_file out/fakerate/merged/FinalFakeHist_${TAG}.root \\
- --output_plot out/fakerate/merged/FinalFakeHist_plots_${TAG} \\
- >& log/fakerate/FinalFakeHist_${TAG}.log
+ --output-dir ./out/fakerate/el_sf_${TAG}
+ >& log/fakerate/el_sf_${TAG}.log
 """
 def main():
     parser = optparse.OptionParser(usage=usage)
     parser.add_option('-i', '--input-dir', default='./out/fakerate')
     parser.add_option('-o', '--output-dir', default='./out/fake_el_scale_factor', help='dir for plots')
-    parser.add_option('-m', '--mode', default='bbcc', help='either bbcc or conv')
+    parser.add_option('-m', '--mode', default='hflf', help='either hflf or conv')
     parser.add_option('-t', '--tag', help='tag used to select the input files (e.g. Apr_04)')
     parser.add_option('-f', '--fill-histos', action='store_true', default=False, help='force fill (default only if needed)')
     parser.add_option('-v', '--verbose', action='store_true', default=False)
@@ -59,53 +54,58 @@ def main():
     tag       = options.tag
     verbose   = options.verbose
     if not tag : parser.error('tag is a required option')
-    if mode not in ['bbcc', 'conv'] : parser.error("invalid mode '%s'"%mode)
-    templateInputFilename = "*_%(mode)s_tuple_%(tag)s.root" % {'tag':tag, 'mode':mode}
-    templateOutputFilename =  "%(mode)s_el_scale_histos_%(tag)s.root" % {'tag':tag, 'mode':mode}
-    treeName = 'HeavyFlavorControlRegion' if mode=='bbcc' else 'ConversionControlRegion'
-    outputFileName = os.path.join(outputDir, templateOutputFilename)
-    doFillHistograms = options.fill_histos or not os.path.exists(outputFileName)
-    optionsToPrint = ['inputDir', 'outputDir', 'mode', 'tag', 'doFillHistograms']
-    if verbose : print "options:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
-    # collect inputs
-    tupleFilenames = glob.glob(os.path.join(inputDir, templateInputFilename))
-    samples = setSameGroupForAllData(fastSamplesFromFilenames(tupleFilenames, verbose))
-    samplesPerGroup = collections.defaultdict(list)
-    filenamesPerGroup = collections.defaultdict(list)
-    mkdirIfNeeded(outputDir)
-    for s, f in zip(samples, tupleFilenames) :
-        samplesPerGroup[s.group].append(s)
-        filenamesPerGroup[s.group].append(f)
-    vars = ['pt1', 'eta1']
-    groups = samplesPerGroup.keys()
-    #fill histos
-    if doFillHistograms :
-        histosPerGroup = bookHistos(vars, groups)
-        for group in groups:
-            filenames = filenamesPerGroup[group]
-            histos = histosPerGroup[group]
-            chain = r.TChain(treeName)
-            [chain.Add(fn) for fn in filenames]
-            print "%s : %d entries"%(group, chain.GetEntries())
-            fillHistos(chain, histos, verbose)
-        writeHistos(outputFileName, histosPerGroup, verbose)
-    # compute scale factors
-    histosPerGroup = fetchHistos(outputFileName, histoNames(vars, groups), verbose)
-    plotStackedHistos(histosPerGroup, outputDir, verbose)
-    sf_el_eta = subtractRealAndComputeScaleFactor(histosPerGroup, 'eta1', 'sf_el_vs_eta', verbose)
-    sf_el_pt  = subtractRealAndComputeScaleFactor(histosPerGroup, 'pt1',  'sf_el_vs_pt',  verbose)
-    outputFile = r.TFile.Open(outputFileName, 'recreate')
-    outputFile.cd()
-    sf_el_eta.Write()
-    sf_el_pt.Write()
-    outputFile.Close()
-    if verbose : print "saved scale factors to %s" % outputFileName
+
+    for mode in ['hflf', 'conv']:
+        isConversion = mode=='conv'
+        templateInputFilename = "*_%(mode)s_tuple_%(tag)s.root" % {'tag':tag, 'mode':mode}
+        templateOutputFilename =  "%(mode)s_el_scale_histos.root" % {'mode':mode}
+        treeName = 'HeavyFlavorControlRegion' if mode=='hflf' else 'ConversionControlRegion'
+        outputFileName = os.path.join(outputDir, templateOutputFilename)
+        doFillHistograms = options.fill_histos or not os.path.exists(outputFileName)
+        optionsToPrint = ['inputDir', 'outputDir', 'mode', 'tag', 'doFillHistograms']
+        if verbose : print "options:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
+        # collect inputs
+        tupleFilenames = glob.glob(os.path.join(inputDir, templateInputFilename))
+        samples = setSameGroupForAllData(fastSamplesFromFilenames(tupleFilenames, verbose))
+        samplesPerGroup = collections.defaultdict(list)
+        filenamesPerGroup = collections.defaultdict(list)
+        mkdirIfNeeded(outputDir)
+        for s, f in zip(samples, tupleFilenames) :
+            samplesPerGroup[s.group].append(s)
+            filenamesPerGroup[s.group].append(f)
+        vars = ['pt1', 'eta1']
+        groups = samplesPerGroup.keys()
+        #fill histos
+        if doFillHistograms :
+            histosPerGroup = bookHistos(vars, groups)
+            for group in groups:
+                filenames = filenamesPerGroup[group]
+                histos = histosPerGroup[group]
+                chain = r.TChain(treeName)
+                [chain.Add(fn) for fn in filenames]
+                print "%s : %d entries"%(group, chain.GetEntries())
+                fillHistos(chain, histos, isConversion, verbose)
+            writeHistos(outputFileName, histosPerGroup, verbose)
+        # compute scale factors
+        histosPerGroup = fetchHistos(outputFileName, histoNames(vars, groups), verbose)
+        plotStackedHistos(histosPerGroup, outputDir, verbose)
+        sf_el_eta = subtractRealAndComputeScaleFactor(histosPerGroup, 'eta1', histoname_electron_sf_vs_eta(), verbose)
+        sf_el_pt  = subtractRealAndComputeScaleFactor(histosPerGroup, 'pt1',  histoname_electron_sf_vs_pt(),  verbose)
+        outputFile = r.TFile.Open(outputFileName, 'recreate')
+        outputFile.cd()
+        sf_el_eta.Write()
+        sf_el_pt.Write()
+        outputFile.Close()
+        if verbose : print "saved scale factors to %s" % outputFileName
 
 #___________________________________________________
 
 leptonTypes = ['tight', 'loose', 'real_tight', 'real_loose', 'fake_tight', 'fake_loose']
 
-def fillHistos(chain, histos, verbose=False):
+def histoname_electron_sf_vs_eta() : return 'sf_el_vs_eta'
+def histoname_electron_sf_vs_pt() : return 'sf_el_vs_pt'
+
+def fillHistos(chain, histos, isConversion, verbose=False):
     nElecLoose, nElecTight = 0, 0
     totWeightLoose, totWeightTight = 0.0, 0.0
     for event in chain :
