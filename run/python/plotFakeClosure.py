@@ -66,8 +66,7 @@ def main() :
     assert all(f for f in inputFiles.values()), ("missing inputs: \n%s"%'\n'.join(["%s : %s"%kv for kv in inputFiles.iteritems()]))
     mkdirIfNeeded(outputDir)
 
-    for region in ['cr8lptee', 'cr8lptmm', 'cr9lpt', 'crSsEwkLoose'
-                   ,"crZVfake1jee"
+    for region in ["crZVfake1jee"
                    ,"crZVfake2jee"
                    ,"crZVfake1jem"
                    ,"crZVfake2jem"
