@@ -62,7 +62,7 @@ def main():
         templateOutputFilename =  "%(mode)s_el_scale_histos.root" % {'mode':mode}
         treeName = 'HeavyFlavorControlRegion' if mode=='hflf' else 'ConversionControlRegion'
         outputFileName = os.path.join(outputDir, templateOutputFilename)
-        cacheFileName = outputFileName.replace('.root', '_cache.root')
+        cacheFileName = outputFileName.replace('.root', '_'+mode+'_cache.root')
         doFillHistograms = options.fill_histos or not os.path.exists(outputFileName)
         optionsToPrint = ['inputDir', 'outputDir', 'mode', 'tag', 'doFillHistograms']
         if verbose : print "options:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
@@ -79,7 +79,7 @@ def main():
         groups = samplesPerGroup.keys()
         #fill histos
         if doFillHistograms :
-            histosPerGroup = bookHistos(vars, groups)
+            histosPerGroup = bookHistos(vars, groups, mode=mode)
             for group in groups:
                 filenames = filenamesPerGroup[group]
                 histos = histosPerGroup[group]
@@ -89,8 +89,8 @@ def main():
                 fillHistos(chain, histos, isConversion, verbose)
             writeHistos(cacheFileName, histosPerGroup, verbose)
         # compute scale factors
-        histosPerGroup = fetchHistos(cacheFileName, histoNames(vars, groups), verbose)
-        plotStackedHistos(histosPerGroup, outputDir, verbose)
+        histosPerGroup = fetchHistos(cacheFileName, histoNames(vars, groups, mode), verbose)
+        plotStackedHistos(histosPerGroup, outputDir, mode, verbose)
         sf_el_eta = subtractRealAndComputeScaleFactor(histosPerGroup, 'eta1', histoname_electron_sf_vs_eta(), verbose)
         sf_el_pt  = subtractRealAndComputeScaleFactor(histosPerGroup, 'pt1',  histoname_electron_sf_vs_pt(),  verbose)
         outputFile = r.TFile.Open(outputFileName, 'recreate')
@@ -144,8 +144,8 @@ def fillHistos(chain, histos, isConversion, verbose=False):
         counterNames = ['nElecLoose', 'nElecTight', 'totWeightLoose', 'totWeightTight']
         print ', '.join(["%s : %.1f"%(c, eval(c)) for c in counterNames])
 
-def histoName(var, sample, leptonType) : return 'h_'+var+'_'+sample+'_'+leptonType
-def bookHistos(variables, samples, leptonTypes=leptonTypes) :
+def histoName(var, sample, leptonType, mode) : return 'h_'+var+'_'+sample+'_'+leptonType+'_'+mode
+def bookHistos(variables, samples, leptonTypes=leptonTypes, mode='') :
     "book a dict of histograms with keys [sample][var][tight, loose, real_tight, real_loose]"
     def histo(variable, hname):
         h = None
@@ -159,16 +159,16 @@ def bookHistos(variables, samples, leptonTypes=leptonTypes) :
         return h
     return dict([(s,
                   dict([(v,
-                         dict([(lt, histo(variable=v, hname=histoName(v, s, lt)))
+                         dict([(lt, histo(variable=v, hname=histoName(v, s, lt, mode)))
                                for lt in leptonTypes]))
                         for v in variables]))
                  for s in samples])
-def histoNames(variables, samples) :
+def histoNames(variables, samples, mode) :
     def extractName(dictOrHist):
         "input must be either a dict or something with 'GetName'"
         isDict = type(dictOrHist) is dict
         return dict([(k, extractName(v)) for k,v in dictOrHist.iteritems()]) if isDict else dictOrHist.GetName()
-    return extractName(bookHistos(variables, samples))
+    return extractName(bookHistos(variables, samples, mode=mode))
 def writeHistos(outputFileName='', histosPerGroup={}, verbose=False):
     outputFile = r.TFile.Open(outputFileName, 'recreate')
     outputFile.cd()
@@ -179,7 +179,6 @@ def writeHistos(outputFileName='', histosPerGroup={}, verbose=False):
             for v in dictOrObj.values():
                 write(v)
         else:
-            if verbose : print dictOrObj.GetName()
             dictOrObj.Write()
     write(histosPerGroup)
     outputFile.Close()
@@ -191,13 +190,12 @@ def fetchHistos(fileName='', histoNames={}, verbose=False):
         isDict = type(dictOrName) is dict
         return dict([(k, fetch(v)) for k,v in dictOrName.iteritems()]) if isDict else inputFile.Get(dictOrName)
     histos = fetch(histoNames)
-    #if verbose : print "fetched histos:\n%s"%pprint.pformat(histos)
     return histos
-def plotStackedHistos(histosPerGroup={}, outputDir='', verbose=False):
+def plotStackedHistos(histosPerGroup={}, outputDir='', mode='', verbose=False):
     groups = histosPerGroup.keys()
     variables = first(histosPerGroup).keys()
     leptonTypes = first(first(histosPerGroup)).keys()
-    histosPerName = dict([(var+'_'+lt, # one canvas for each histo, so key with histoname w/out group
+    histosPerName = dict([(mode+'_'+var+'_'+lt, # one canvas for each histo, so key with histoname w/out group
                            dict([(g, histosPerGroup[g][var][lt]) for g in groups]))
                           for var in variables for lt in leptonTypes])
     for histoname, histosPerGroup in histosPerName.iteritems():
