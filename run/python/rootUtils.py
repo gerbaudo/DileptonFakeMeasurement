@@ -112,7 +112,8 @@ def buildBotTopPads(canvas, splitFraction=0.275, squeezeMargins=True) :
 def summedHisto(histos) :
     "return an histogram that is the sum of the inputs"
     hsum = histos[0].Clone(histos[0].GetName()+'_sum')
-    for h in histos[0:] : hsum.Add(h)
+    hsum.Reset()
+    for h in histos : hsum.Add(h)
     return hsum
 
 def binContentsWithUoflow(h) :
