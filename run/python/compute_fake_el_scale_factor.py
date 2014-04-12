@@ -9,7 +9,8 @@ import numpy as np
 import optparse
 import os
 import pprint
-from utils import (first
+from utils import (dictSum
+                   ,first
                    ,mkdirIfNeeded
                    )
 import rootUtils
@@ -206,6 +207,7 @@ def plotStackedHistos(histosPerGroup={}, outputDir='', verbose=False):
             continue
         bkgHistos = dict([(g, h) for g, h in histosPerGroup.iteritems() if isBkgSample(g)])
         totBkg = summedHisto(bkgHistos.values())
+        err_band = buildErrBandGraph(totBkg, computeStatErr2(totBkg))
         emptyBkg = totBkg.Integral()==0
         if emptyBkg:
             if verbose : print "empty backgrounds, skip %s"%histoname
@@ -225,16 +227,17 @@ def plotStackedHistos(histosPerGroup={}, outputDir='', verbose=False):
             h.SetDirectory(0)
             stack.Add(h)
         stack.Draw('hist same')
+        err_band.Draw('E2 same')
         data = histosPerGroup['data']
         if data and data.GetEntries():
             data.SetMarkerStyle(r.kFullDotLarge)
             data.Draw('p same')
-        yMin, yMax = getMinMax([h for h in [totBkg, data] if h is not None])
+        yMin, yMax = getMinMax([h for h in [totBkg, data, err_band] if h is not None])
         pm.SetMinimum(0.0)
         pm.SetMaximum(1.1*yMax)
         can.Update()
         topRightLabel(can, histoname, xpos=0.125, align=13)
-        drawLegendWithDictKeys(can, bkgHistos, opt='f')
+        drawLegendWithDictKeys(can, dictSum(bkgHistos, {'stat err':err_band}), opt='f')
         can.RedrawAxis()
         can._stack = stack
         can._histos = [h for h in stack.GetHists()]+[data]
@@ -275,6 +278,28 @@ def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', outhistona
     print "            +/- : ",formatFloat(getBinErrors(ratio))
     return ratio
 
+def computeStatErr2(nominal_histo=None) :
+    "Compute the bin-by-bin err2 (should include also mc syst, but for now it does not)"
+    print "computeStatErr2 use the one in rootUtils"
+    bins = range(1, 1+nominal_histo.GetNbinsX())
+    bes = [nominal_histo.GetBinError(b)   for b in bins]
+    be2s = np.array([e*e for e in bes])
+    return {'up' : be2s, 'down' : be2s}
+
+def buildErrBandGraph(histo_tot_bkg, err2s) :
+    print "buildErrBandGraph use the one in rootUtils"
+    h = histo_tot_bkg
+    bins = range(1, 1+h.GetNbinsX())
+    x = np.array([h.GetBinCenter (b) for b in bins])
+    y = np.array([h.GetBinContent(b) for b in bins])
+    ex_lo = ex_hi = np.array([0.5*h.GetBinWidth(b) for b in bins])
+    ey_lo, ey_hi = np.sqrt(err2s['down']), np.sqrt(err2s['up'])
+    gr = r.TGraphAsymmErrors(len(bins), x, y, ex_lo, ex_hi, ey_lo, ey_hi)
+    gr.SetMarkerSize(0)
+    gr.SetFillStyle(3004)
+    gr.SetFillColor(r.kGray+3)
+    gr.SetLineWidth(2)
+    return gr
 
 
 if __name__=='__main__':
