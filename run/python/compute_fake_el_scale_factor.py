@@ -9,7 +9,8 @@ import numpy as np
 import optparse
 import os
 import pprint
-from utils import (first
+from utils import (dictSum
+                   ,first
                    ,mkdirIfNeeded
                    )
 import rootUtils
@@ -61,6 +62,7 @@ def main():
         templateOutputFilename =  "%(mode)s_el_scale_histos.root" % {'mode':mode}
         treeName = 'HeavyFlavorControlRegion' if mode=='hflf' else 'ConversionControlRegion'
         outputFileName = os.path.join(outputDir, templateOutputFilename)
+        cacheFileName = outputFileName.replace('.root', '_'+mode+'_cache.root')
         doFillHistograms = options.fill_histos or not os.path.exists(outputFileName)
         optionsToPrint = ['inputDir', 'outputDir', 'mode', 'tag', 'doFillHistograms']
         if verbose : print "options:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
@@ -77,7 +79,7 @@ def main():
         groups = samplesPerGroup.keys()
         #fill histos
         if doFillHistograms :
-            histosPerGroup = bookHistos(vars, groups)
+            histosPerGroup = bookHistos(vars, groups, mode=mode)
             for group in groups:
                 filenames = filenamesPerGroup[group]
                 histos = histosPerGroup[group]
@@ -85,10 +87,10 @@ def main():
                 [chain.Add(fn) for fn in filenames]
                 print "%s : %d entries"%(group, chain.GetEntries())
                 fillHistos(chain, histos, isConversion, verbose)
-            writeHistos(outputFileName, histosPerGroup, verbose)
+            writeHistos(cacheFileName, histosPerGroup, verbose)
         # compute scale factors
-        histosPerGroup = fetchHistos(outputFileName, histoNames(vars, groups), verbose)
-        plotStackedHistos(histosPerGroup, outputDir, verbose)
+        histosPerGroup = fetchHistos(cacheFileName, histoNames(vars, groups, mode), verbose)
+        plotStackedHistos(histosPerGroup, outputDir, mode, verbose)
         sf_el_eta = subtractRealAndComputeScaleFactor(histosPerGroup, 'eta1', histoname_electron_sf_vs_eta(), verbose)
         sf_el_pt  = subtractRealAndComputeScaleFactor(histosPerGroup, 'pt1',  histoname_electron_sf_vs_pt(),  verbose)
         outputFile = r.TFile.Open(outputFileName, 'recreate')
@@ -116,6 +118,9 @@ def fillHistos(chain, histos, isConversion, verbose=False):
         isEl, isTight = probe.isEl, probe.isTight
         isReal = probe.source==3 # see FakeLeptonSources.h
         isFake = not isReal
+        def isBjet(j, mv1_80=0.3511) : return j.mv1 > mv1_80 # see SusyDefs.h
+        # jets = event.jets # compute only if necessary
+        # hasBjets = any(isBjet(j) for j in jets)
         probe4m, met4m = r.TLorentzVector(), r.TLorentzVector()
         probe4m.SetPxPyPzE(probe.px, probe.py, probe.pz, probe.E)
         met4m.SetPxPyPzE(met.px, met.py, met.pz, met.E)
@@ -123,7 +128,7 @@ def fillHistos(chain, histos, isConversion, verbose=False):
         eta = abs(probe4m.Eta())
         mt = computeMt(probe4m, met4m)
         isLowMt = mt < 40.0
-        if (isSameSign or isConversion) and isEl  and isLowMt :
+        if (isSameSign or isConversion) and isEl  and isLowMt:
             def incrementCounts(counts, weightedCounts) :
                 counts +=1
                 weightedCounts += weight
@@ -142,8 +147,8 @@ def fillHistos(chain, histos, isConversion, verbose=False):
         counterNames = ['nElecLoose', 'nElecTight', 'totWeightLoose', 'totWeightTight']
         print ', '.join(["%s : %.1f"%(c, eval(c)) for c in counterNames])
 
-def histoName(var, sample, leptonType) : return 'h_'+var+'_'+sample+'_'+leptonType
-def bookHistos(variables, samples, leptonTypes=leptonTypes) :
+def histoName(var, sample, leptonType, mode) : return 'h_'+var+'_'+sample+'_'+leptonType+'_'+mode
+def bookHistos(variables, samples, leptonTypes=leptonTypes, mode='') :
     "book a dict of histograms with keys [sample][var][tight, loose, real_tight, real_loose]"
     def histo(variable, hname):
         h = None
@@ -157,16 +162,16 @@ def bookHistos(variables, samples, leptonTypes=leptonTypes) :
         return h
     return dict([(s,
                   dict([(v,
-                         dict([(lt, histo(variable=v, hname=histoName(v, s, lt)))
+                         dict([(lt, histo(variable=v, hname=histoName(v, s, lt, mode)))
                                for lt in leptonTypes]))
                         for v in variables]))
                  for s in samples])
-def histoNames(variables, samples) :
+def histoNames(variables, samples, mode) :
     def extractName(dictOrHist):
         "input must be either a dict or something with 'GetName'"
         isDict = type(dictOrHist) is dict
         return dict([(k, extractName(v)) for k,v in dictOrHist.iteritems()]) if isDict else dictOrHist.GetName()
-    return extractName(bookHistos(variables, samples))
+    return extractName(bookHistos(variables, samples, mode=mode))
 def writeHistos(outputFileName='', histosPerGroup={}, verbose=False):
     outputFile = r.TFile.Open(outputFileName, 'recreate')
     outputFile.cd()
@@ -177,7 +182,6 @@ def writeHistos(outputFileName='', histosPerGroup={}, verbose=False):
             for v in dictOrObj.values():
                 write(v)
         else:
-            if verbose : print dictOrObj.GetName()
             dictOrObj.Write()
     write(histosPerGroup)
     outputFile.Close()
@@ -189,13 +193,12 @@ def fetchHistos(fileName='', histoNames={}, verbose=False):
         isDict = type(dictOrName) is dict
         return dict([(k, fetch(v)) for k,v in dictOrName.iteritems()]) if isDict else inputFile.Get(dictOrName)
     histos = fetch(histoNames)
-    #if verbose : print "fetched histos:\n%s"%pprint.pformat(histos)
     return histos
-def plotStackedHistos(histosPerGroup={}, outputDir='', verbose=False):
+def plotStackedHistos(histosPerGroup={}, outputDir='', mode='', verbose=False):
     groups = histosPerGroup.keys()
     variables = first(histosPerGroup).keys()
     leptonTypes = first(first(histosPerGroup)).keys()
-    histosPerName = dict([(var+'_'+lt, # one canvas for each histo, so key with histoname w/out group
+    histosPerName = dict([(mode+'_'+var+'_'+lt, # one canvas for each histo, so key with histoname w/out group
                            dict([(g, histosPerGroup[g][var][lt]) for g in groups]))
                           for var in variables for lt in leptonTypes])
     for histoname, histosPerGroup in histosPerName.iteritems():
@@ -205,6 +208,7 @@ def plotStackedHistos(histosPerGroup={}, outputDir='', verbose=False):
             continue
         bkgHistos = dict([(g, h) for g, h in histosPerGroup.iteritems() if isBkgSample(g)])
         totBkg = summedHisto(bkgHistos.values())
+        err_band = buildErrBandGraph(totBkg, computeStatErr2(totBkg))
         emptyBkg = totBkg.Integral()==0
         if emptyBkg:
             if verbose : print "empty backgrounds, skip %s"%histoname
@@ -224,16 +228,17 @@ def plotStackedHistos(histosPerGroup={}, outputDir='', verbose=False):
             h.SetDirectory(0)
             stack.Add(h)
         stack.Draw('hist same')
+        err_band.Draw('E2 same')
         data = histosPerGroup['data']
         if data and data.GetEntries():
             data.SetMarkerStyle(r.kFullDotLarge)
             data.Draw('p same')
-        yMin, yMax = getMinMax([h for h in [totBkg, data] if h is not None])
+        yMin, yMax = getMinMax([h for h in [totBkg, data, err_band] if h is not None])
         pm.SetMinimum(0.0)
         pm.SetMaximum(1.1*yMax)
         can.Update()
         topRightLabel(can, histoname, xpos=0.125, align=13)
-        drawLegendWithDictKeys(can, bkgHistos, opt='f')
+        drawLegendWithDictKeys(can, dictSum(bkgHistos, {'stat err':err_band}), opt='f')
         can.RedrawAxis()
         can._stack = stack
         can._histos = [h for h in stack.GetHists()]+[data]
@@ -274,6 +279,28 @@ def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', outhistona
     print "            +/- : ",formatFloat(getBinErrors(ratio))
     return ratio
 
+def computeStatErr2(nominal_histo=None) :
+    "Compute the bin-by-bin err2 (should include also mc syst, but for now it does not)"
+    print "computeStatErr2 use the one in rootUtils"
+    bins = range(1, 1+nominal_histo.GetNbinsX())
+    bes = [nominal_histo.GetBinError(b)   for b in bins]
+    be2s = np.array([e*e for e in bes])
+    return {'up' : be2s, 'down' : be2s}
+
+def buildErrBandGraph(histo_tot_bkg, err2s) :
+    print "buildErrBandGraph use the one in rootUtils"
+    h = histo_tot_bkg
+    bins = range(1, 1+h.GetNbinsX())
+    x = np.array([h.GetBinCenter (b) for b in bins])
+    y = np.array([h.GetBinContent(b) for b in bins])
+    ex_lo = ex_hi = np.array([0.5*h.GetBinWidth(b) for b in bins])
+    ey_lo, ey_hi = np.sqrt(err2s['down']), np.sqrt(err2s['up'])
+    gr = r.TGraphAsymmErrors(len(bins), x, y, ex_lo, ex_hi, ey_lo, ey_hi)
+    gr.SetMarkerSize(0)
+    gr.SetFillStyle(3004)
+    gr.SetFillColor(r.kGray+3)
+    gr.SetLineWidth(2)
+    return gr
 
 
 if __name__=='__main__':
