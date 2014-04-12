@@ -118,6 +118,9 @@ def fillHistos(chain, histos, isConversion, verbose=False):
         isEl, isTight = probe.isEl, probe.isTight
         isReal = probe.source==3 # see FakeLeptonSources.h
         isFake = not isReal
+        def isBjet(j, mv1_80=0.3511) : return j.mv1 > mv1_80 # see SusyDefs.h
+        # jets = event.jets # compute only if necessary
+        # hasBjets = any(isBjet(j) for j in jets)
         probe4m, met4m = r.TLorentzVector(), r.TLorentzVector()
         probe4m.SetPxPyPzE(probe.px, probe.py, probe.pz, probe.E)
         met4m.SetPxPyPzE(met.px, met.py, met.pz, met.E)
@@ -125,7 +128,7 @@ def fillHistos(chain, histos, isConversion, verbose=False):
         eta = abs(probe4m.Eta())
         mt = computeMt(probe4m, met4m)
         isLowMt = mt < 40.0
-        if (isSameSign or isConversion) and isEl  and isLowMt :
+        if (isSameSign or isConversion) and isEl  and isLowMt:
             def incrementCounts(counts, weightedCounts) :
                 counts +=1
                 weightedCounts += weight
