@@ -77,7 +77,10 @@ MeasureFakeRate2::MeasureFakeRate2() :
   m_ET(ET_Unknown),
   m_writeFakeTuple(false),
   m_tupleMakerHfCr("",""),
-  m_tupleMakerConv("","")
+  m_tupleMakerConv("",""),
+  m_tupleMakerMcConv("",""),
+  m_tupleMakerMcQcd("",""),
+  m_tupleMakerMcReal("","")
 {
   resetCounters();
 }
@@ -96,20 +99,24 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
   SusySelection::Begin(0);
   initHistos(m_fileName);
   if(m_writeFakeTuple) {
-      string filenameHfLf = tupleFilenameFromHistoFilename(m_fileName, "hflf_tuple");
-      string filenameConv = tupleFilenameFromHistoFilename(m_fileName, "conv_tuple");
-      if(m_tupleMakerHfCr.init(filenameHfLf, "HeavyFlavorControlRegion"))
-          cout<<"initialized ntuple file "<<filenameHfLf<<endl;
-      else {
-          cout<<"cannot initialize ntuple file '"<<filenameHfLf<<"'"<<endl;
-          m_writeTuple = false;
-      }
-      if(m_tupleMakerConv.init(filenameConv, "ConversionControlRegion"))
-          cout<<"initialized ntuple file "<<filenameConv<<endl;
-      else {
-          cout<<"cannot initialize ntuple file '"<<filenameConv<<"'"<<endl;
-          m_writeTuple = false;
-      }
+      string filenameHfLf   = tupleFilenameFromHistoFilename(m_fileName, "hflf_tuple");
+      string filenameConv   = tupleFilenameFromHistoFilename(m_fileName, "conv_tuple");
+      string filenameMcConv = tupleFilenameFromHistoFilename(m_fileName, "mcconv_tuple");
+      string filenameMcQcd  = tupleFilenameFromHistoFilename(m_fileName, "mcqcd_tuple");
+      string filenameMcReal = tupleFilenameFromHistoFilename(m_fileName, "mcreal_tuple");
+      struct InitTuple{
+          bool &toggle;
+          InitTuple(bool &b) : toggle(b){}
+          void operator() (susy::wh::TupleMaker &tm, string fname, string tname) {
+              if(tm.init(fname, tname)) cout<<"initialized ntuple file "<<fname<<endl;
+              else { cout<<"cannot initialize ntuple file '"<<fname<<"'"<<endl; toggle = false; }
+          }
+      } initTuple(m_writeTuple);
+      initTuple(m_tupleMakerHfCr,   filenameHfLf,   "HeavyFlavorControlRegion");
+      initTuple(m_tupleMakerConv,   filenameConv,   "ConversionControlRegion");
+      initTuple(m_tupleMakerMcConv, filenameMcConv, "ConversionExtractionRegion");
+      initTuple(m_tupleMakerMcQcd,  filenameMcQcd,  "HfLfExtractionRegion");
+      initTuple(m_tupleMakerMcReal, filenameMcReal, "RealExtractionRegion");
   }
 }
 /*--------------------------------------------------------------------------------*/
@@ -119,6 +126,9 @@ void MeasureFakeRate2::Terminate()
 {
   if(m_dbg) cout << "MeasureFakeRate2::Terminate" << endl;
   if(m_writeFakeTuple) {
+      m_tupleMakerMcReal.close();
+      m_tupleMakerMcQcd.close();
+      m_tupleMakerMcConv.close();
       m_tupleMakerConv.close();
       m_tupleMakerHfCr.close();
   }
@@ -235,19 +245,38 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     if( passCR ){
       for(size_t ip=0; ip<m_probes.size(); ++ip) fillRatesHistos(m_probes.at(ip), jets, m_met, cr);
     } // if(passCR)
-    if(m_writeFakeTuple && passCR && (CR==sf::CR_HF_high || CR==sf::CR_Conv)) {
+    if(m_writeFakeTuple && passCR) {
         unsigned int run(nt.evt()->run), event(nt.evt()->event);
-        const Lepton *l0 = m_tags.size()>0 ? m_tags[0] : m_baseLeptons[0]; // hack: no tag for conv region (use baseL as a dummy lep)
-        const Lepton *l1 = m_probes[0];
-        LeptonSource l0Source(getLeptonSource(l0)), l1Source(getLeptonSource(l1));
-        bool l0IsTight(isSignalLepton(l0, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC));
-        bool l1IsTight(isSignalLepton(l1, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC));
-        LeptonVector dummyLepts;
-        susy::wh::TupleMaker &tupleMaker = (CR==sf::CR_HF_high ? m_tupleMakerHfCr : m_tupleMakerConv);
-        tupleMaker
-            .setL0IsTight(l0IsTight).setL0Source(l0Source)
-            .setL1IsTight(l1IsTight).setL1Source(l1Source)
-            .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
+        if(CR==sf::CR_HF_high || CR==sf::CR_Conv) {
+            const Lepton *l0 = m_tags.size()>0 ? m_tags[0] : m_baseLeptons[0]; // hack: no tag for conv region (use baseL as a dummy lep)
+            const Lepton *l1 = m_probes[0];
+            LeptonSource l0Source(getLeptonSource(l0)), l1Source(getLeptonSource(l1));
+            bool l0IsTight(isSignalLepton(l0, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC));
+            bool l1IsTight(isSignalLepton(l1, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC));
+            LeptonVector dummyLepts;
+            susy::wh::TupleMaker &tupleMaker = (CR==sf::CR_HF_high ? m_tupleMakerHfCr : m_tupleMakerConv);
+            tupleMaker
+                .setL0IsTight(l0IsTight).setL0Source(l0Source)
+                .setL1IsTight(l1IsTight).setL1Source(l1Source)
+                .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
+        } else if (CR==sf::CR_MCConv || CR==sf::CR_MCQCD ||  CR==sf::CR_MCReal) {
+            susy::wh::TupleMaker &tupleMaker = (CR==sf::CR_MCConv ? m_tupleMakerMcConv :
+                                                CR==sf::CR_MCQCD  ? m_tupleMakerMcQcd :
+                                                m_tupleMakerMcReal);
+            Lepton dummyL;
+            // either one or two probes, see passMCReg
+            const Lepton *l0 = m_probes.size()>0 ? m_probes[0] : &dummyL;
+            const Lepton *l1 = m_probes.size()>1 ? m_probes[1] : &dummyL;
+            LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk);
+            LeptonSource l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
+            bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC) : false);
+            bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC) : false);
+            LeptonVector dummyLepts;
+            tupleMaker
+                .setL0IsTight(l0IsTight).setL0Source(l0Source)
+                .setL1IsTight(l1IsTight).setL1Source(l1Source)
+                .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
+        }
     }
   } // for(cr)
   return kTRUE;
