@@ -61,6 +61,7 @@ def main():
         templateOutputFilename =  "%(mode)s_el_scale_histos.root" % {'mode':mode}
         treeName = 'HeavyFlavorControlRegion' if mode=='hflf' else 'ConversionControlRegion'
         outputFileName = os.path.join(outputDir, templateOutputFilename)
+        cacheFileName = outputFileName.replace('.root', '_cache.root')
         doFillHistograms = options.fill_histos or not os.path.exists(outputFileName)
         optionsToPrint = ['inputDir', 'outputDir', 'mode', 'tag', 'doFillHistograms']
         if verbose : print "options:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
@@ -85,9 +86,9 @@ def main():
                 [chain.Add(fn) for fn in filenames]
                 print "%s : %d entries"%(group, chain.GetEntries())
                 fillHistos(chain, histos, isConversion, verbose)
-            writeHistos(outputFileName, histosPerGroup, verbose)
+            writeHistos(cacheFileName, histosPerGroup, verbose)
         # compute scale factors
-        histosPerGroup = fetchHistos(outputFileName, histoNames(vars, groups), verbose)
+        histosPerGroup = fetchHistos(cacheFileName, histoNames(vars, groups), verbose)
         plotStackedHistos(histosPerGroup, outputDir, verbose)
         sf_el_eta = subtractRealAndComputeScaleFactor(histosPerGroup, 'eta1', histoname_electron_sf_vs_eta(), verbose)
         sf_el_pt  = subtractRealAndComputeScaleFactor(histosPerGroup, 'pt1',  histoname_electron_sf_vs_pt(),  verbose)
