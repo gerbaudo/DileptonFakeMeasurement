@@ -633,7 +633,7 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
     return false;
 
   // Met and Mt Cut
-  if( met->Et > 40 )       return false;
+  if( met->Et > 60 )       return false;  // DG 2014-04-14 : try the same selection as Matt G. (was 40)
   if( CR == CR_HF )      if( Mt(probe,met) > 40  ) return false;
   if( CR == CR_HF_high ) if( Mt(probe,met) > 100 ) return false;
   bool sameSign(tag->q * probe->q > 0.0);
