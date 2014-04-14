@@ -29,7 +29,8 @@ from datasets import datasets, setSameGroupForAllData
 from SampleUtils import (colors
                          ,fastSamplesFromFilenames
                          ,guessSampleFromFilename
-                         ,isBkgSample)
+                         ,isBkgSample
+                         ,isDataSample)
 from kin import computeMt
 
 usage="""
@@ -44,6 +45,7 @@ def main():
     parser = optparse.OptionParser(usage=usage)
     parser.add_option('-i', '--input-dir', default='./out/fakerate')
     parser.add_option('-o', '--output-dir', default='./out/fake_el_scale_factor', help='dir for plots')
+    parser.add_option('-l', '--lepton', default='el', help='either el or mu')
     parser.add_option('-m', '--mode', default='hflf', help='either hflf or conv')
     parser.add_option('-t', '--tag', help='tag used to select the input files (e.g. Apr_04)')
     parser.add_option('-f', '--fill-histos', action='store_true', default=False, help='force fill (default only if needed)')
@@ -51,15 +53,19 @@ def main():
     (options, args) = parser.parse_args()
     inputDir  = options.input_dir
     outputDir = options.output_dir
+    lepton    = options.lepton
     mode      = options.mode
     tag       = options.tag
     verbose   = options.verbose
     if not tag : parser.error('tag is a required option')
+    if lepton not in ['el', 'mu'] : parser.error("invalid lepton '%s'"%lepton)
+    modes = ['hflf', 'conv'] if lepton=='el' else ['hflf']
 
-    for mode in ['hflf', 'conv']:
+    for mode in modes:
+        print "running mode ",mode
         isConversion = mode=='conv'
         templateInputFilename = "*_%(mode)s_tuple_%(tag)s.root" % {'tag':tag, 'mode':mode}
-        templateOutputFilename =  "%(mode)s_el_scale_histos.root" % {'mode':mode}
+        templateOutputFilename =  "%(mode)s_%(l)s_scale_histos.root" % {'mode':mode, 'l':lepton}
         treeName = 'HeavyFlavorControlRegion' if mode=='hflf' else 'ConversionControlRegion'
         outputFileName = os.path.join(outputDir, templateOutputFilename)
         cacheFileName = outputFileName.replace('.root', '_'+mode+'_cache.root')
@@ -81,12 +87,13 @@ def main():
         if doFillHistograms :
             histosPerGroup = bookHistos(vars, groups, mode=mode)
             for group in groups:
+                isData = isDataSample(group)
                 filenames = filenamesPerGroup[group]
                 histos = histosPerGroup[group]
                 chain = r.TChain(treeName)
                 [chain.Add(fn) for fn in filenames]
                 print "%s : %d entries"%(group, chain.GetEntries())
-                fillHistos(chain, histos, isConversion, verbose)
+                fillHistos(chain, histos, isConversion, isData, lepton, verbose)
             writeHistos(cacheFileName, histosPerGroup, verbose)
         # compute scale factors
         histosPerGroup = fetchHistos(cacheFileName, histoNames(vars, groups, mode), verbose)
@@ -107,17 +114,20 @@ leptonTypes = ['tight', 'loose', 'real_tight', 'real_loose', 'fake_tight', 'fake
 def histoname_electron_sf_vs_eta() : return 'sf_el_vs_eta'
 def histoname_electron_sf_vs_pt() : return 'sf_el_vs_pt'
 
-def fillHistos(chain, histos, isConversion, verbose=False):
-    nElecLoose, nElecTight = 0, 0
+def fillHistos(chain, histos, isConversion, isData, lepton, verbose=False):
+    nLoose, nTight = 0, 0
     totWeightLoose, totWeightTight = 0.0, 0.0
     for event in chain :
         pars = event.pars
         weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
         tag, probe, met = event.l0, event.l1, event.met
         isSameSign = tag.charge*probe.charge > 0.
-        isEl, isTight = probe.isEl, probe.isTight
-        isReal = probe.source==3 # see FakeLeptonSources.h
-        isFake = not isReal
+        isRightLep = probe.isEl if lepton=='el' else probe.isMu
+        isTight = probe.isTight
+        probeSource = probe.source
+        sourceHf, sourceLf, sourceConv, sourceReal, sourceUnknown = 0, 1, 2, 3, 5 # see FakeLeptonSources.h
+        isReal = probeSource==sourceReal and not isData
+        isFake = not isReal and not isData
         def isBjet(j, mv1_80=0.3511) : return j.mv1 > mv1_80 # see SusyDefs.h
         # jets = event.jets # compute only if necessary
         # hasBjets = any(isBjet(j) for j in jets)
@@ -128,12 +138,12 @@ def fillHistos(chain, histos, isConversion, verbose=False):
         eta = abs(probe4m.Eta())
         mt = computeMt(probe4m, met4m)
         isLowMt = mt < 40.0
-        if (isSameSign or isConversion) and isEl  and isLowMt:
-            def incrementCounts(counts, weightedCounts) :
+        if (isSameSign or isConversion) and isRightLep and isLowMt:
+            def incrementCounts(counts, weightedCounts):
                 counts +=1
                 weightedCounts += weight
-            incrementCounts(nElecLoose, totWeightLoose)
-            if isTight: incrementCounts(nElecTight, totWeightTight)
+            incrementCounts(nLoose, totWeightLoose)
+            if isTight: incrementCounts(nTight, totWeightTight)
             def fill(lepType=''):
                 histos['pt1'][lepType].Fill(pt, weight)
                 histos['eta1'][lepType].Fill(eta, weight)
@@ -144,7 +154,7 @@ def fillHistos(chain, histos, isConversion, verbose=False):
             if isReal and isTight : fill('real_tight')
             if isFake and isTight : fill('fake_tight')
     if verbose:
-        counterNames = ['nElecLoose', 'nElecTight', 'totWeightLoose', 'totWeightTight']
+        counterNames = ['nLoose', 'nTight', 'totWeightLoose', 'totWeightTight']
         print ', '.join(["%s : %.1f"%(c, eval(c)) for c in counterNames])
 
 def histoName(var, sample, leptonType, mode) : return 'h_'+var+'_'+sample+'_'+leptonType+'_'+mode
