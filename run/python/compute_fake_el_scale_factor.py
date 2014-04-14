@@ -81,7 +81,7 @@ def main():
         for s, f in zip(samples, tupleFilenames) :
             samplesPerGroup[s.group].append(s)
             filenamesPerGroup[s.group].append(f)
-        vars = ['pt1', 'eta1']
+        vars = ['mt0', 'mt1', 'pt1', 'eta1']
         groups = samplesPerGroup.keys()
         #fill histos
         if doFillHistograms :
@@ -131,19 +131,23 @@ def fillHistos(chain, histos, isConversion, isData, lepton, verbose=False):
         def isBjet(j, mv1_80=0.3511) : return j.mv1 > mv1_80 # see SusyDefs.h
         # jets = event.jets # compute only if necessary
         # hasBjets = any(isBjet(j) for j in jets)
-        probe4m, met4m = r.TLorentzVector(), r.TLorentzVector()
+        tag4m, probe4m, met4m = r.TLorentzVector(), r.TLorentzVector(), r.TLorentzVector()
+        tag4m.SetPxPyPzE(tag.px, tag.py, tag.pz, tag.E)
         probe4m.SetPxPyPzE(probe.px, probe.py, probe.pz, probe.E)
         met4m.SetPxPyPzE(met.px, met.py, met.pz, met.E)
         pt = probe4m.Pt()
         eta = abs(probe4m.Eta())
-        mt = computeMt(probe4m, met4m)
-        isLowMt = mt < 40.0
+        mt0 = computeMt(tag4m, met4m)
+        mt1 = computeMt(probe4m, met4m)
+        isLowMt = mt1 < 40.0
         if (isSameSign or isConversion) and isRightLep and isLowMt:
             def incrementCounts(counts, weightedCounts):
                 counts +=1
                 weightedCounts += weight
             incrementCounts(nLoose, totWeightLoose)
             if isTight: incrementCounts(nTight, totWeightTight)
+            histos['mt0']['loose'].Fill(mt0, weight)
+            histos['mt1']['loose'].Fill(mt1, weight)
             def fill(lepType=''):
                 histos['pt1'][lepType].Fill(pt, weight)
                 histos['eta1'][lepType].Fill(eta, weight)
@@ -162,9 +166,12 @@ def bookHistos(variables, samples, leptonTypes=leptonTypes, mode='') :
     "book a dict of histograms with keys [sample][var][tight, loose, real_tight, real_loose]"
     def histo(variable, hname):
         h = None
+        mtBinEdges = np.array([0.0, 20.0, 40.0, 60.0, 100.0, 200.0])
         ptBinEdges = np.array([10.0, 20.0, 35.0, 100.0])
         etaBinEdges = np.array([0.0, 1.37, 2.50])
-        if   v=='pt1'     : h = r.TH1F(hname, ';p_{T,l1} [GeV]; entries/bin',   len(ptBinEdges)-1,  ptBinEdges)
+        if   v=='mt0'     : h = r.TH1F(hname, ';m_{T}(tag,MET) [GeV]; entries/bin',   len(mtBinEdges)-1,  mtBinEdges)
+        elif v=='mt1'     : h = r.TH1F(hname, ';m_{T}(probe,MET) [GeV]; entries/bin', len(mtBinEdges)-1,  mtBinEdges)
+        elif v=='pt1'     : h = r.TH1F(hname, ';p_{T,l1} [GeV]; entries/bin',   len(ptBinEdges)-1,  ptBinEdges)
         elif v=='eta1'    : h = r.TH1F(hname, ';#eta_{l1}; entries/bin',        len(etaBinEdges)-1, etaBinEdges)
         else : print "unknown variable %s"%v
         h.SetDirectory(0)
