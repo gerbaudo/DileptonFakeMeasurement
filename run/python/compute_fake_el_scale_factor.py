@@ -94,7 +94,7 @@ def main():
                 chain = r.TChain(treeName)
                 [chain.Add(fn) for fn in filenames]
                 print "%s : %d entries"%(group, chain.GetEntries())
-                fillHistos(chain, histosThisGroup, histosPerSource, isConversion, isData, lepton, verbose)
+                fillHistos(chain, histosThisGroup, histosPerSource, isConversion, isData, lepton, group, verbose)
             writeHistos(cacheFileName, histosPerGroup, histosPerSource, verbose)
         # compute scale factors
         histosPerGroup = fetchHistos(cacheFileName, histoNames(vars, groups, mode), verbose)
@@ -121,12 +121,14 @@ def enum2source(l): return allLeptonSources[l.source]
 def histoname_electron_sf_vs_eta() : return 'sf_el_vs_eta'
 def histoname_electron_sf_vs_pt() : return 'sf_el_vs_pt'
 
-def fillHistos(chain, histosThisGroup, histosPerSource, isConversion, isData, lepton, verbose=False):
+def fillHistos(chain, histosThisGroup, histosPerSource, isConversion, isData, lepton, group, verbose=False):
     nLoose, nTight = 0, 0
     totWeightLoose, totWeightTight = 0.0, 0.0
+    normFactor = 5.0 if group=='heavyflavor' else 1.0
     for event in chain :
         pars = event.pars
         weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
+        weight = weight*normFactor
         tag, probe, met = event.l0, event.l1, event.met
         isSameSign = tag.charge*probe.charge > 0.
         isRightLep = probe.isEl if lepton=='el' else probe.isMu
@@ -147,7 +149,8 @@ def fillHistos(chain, histosThisGroup, histosPerSource, isConversion, isData, le
         mt0 = computeMt(tag4m, met4m)
         mt1 = computeMt(probe4m, met4m)
         isLowMt = mt1 < 40.0
-        if (isSameSign or isConversion) and isRightLep and isLowMt:
+#         if (isSameSign or isConversion) and isRightLep and isLowMt:
+        if isRightLep and isLowMt:
             def incrementCounts(counts, weightedCounts):
                 counts +=1
                 weightedCounts += weight
