@@ -92,6 +92,8 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   cacheStaticWeightComponents();
   increment(n_readin, m_weightComponents);
   unsigned int run(nt.evt()->run), event(nt.evt()->event);
+  bool isFirstEvent(m_printer.m_eventCounter==1);
+  if(isFirstEvent && m_fillHft) initHftFiller();
   for(size_t iSys=0; iSys<m_systs.size(); ++iSys) {
       const SusyNtSys sys = static_cast<SusyNtSys>(m_systs[iSys]);
       bool removeLepsFromIso(false);
@@ -149,7 +151,6 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       if(is1j && SusySelection::passSrWh1j(v)) fillHistos(ncl, j, m, weight, swh::SrWh1j , iSys);
       if(is2j && SusySelection::passSrWh2j(v)) fillHistos(ncl, j, m, weight, swh::SrWh2j , iSys);
       if(m_fillHft) {
-          if(!isHftFillerInitialized()) initHftFiller();
           if(SusySelection::isEventForHft(v, ssf)) {
               if(sys==NtSys_NOM) fillHftNominal(v, ncl, j, *m);
               else               fillHft       (iSys, v);
