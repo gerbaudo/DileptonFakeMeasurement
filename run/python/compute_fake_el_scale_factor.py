@@ -1,5 +1,9 @@
 #!/bin/env python
 
+# script to compute the electron (and muon) data/MC scale factor for the fake rate
+
+# davide.gerbaudo@gmail.com
+# April 2014
 
 import array
 import collections
@@ -124,7 +128,7 @@ def histoname_electron_sf_vs_pt() : return 'sf_el_vs_pt'
 def fillHistos(chain, histosThisGroup, histosPerSource, isConversion, isData, lepton, group, verbose=False):
     nLoose, nTight = 0, 0
     totWeightLoose, totWeightTight = 0.0, 0.0
-    normFactor = 5.0 if group=='heavyflavor' else 1.0
+    normFactor = 3.2 if group=='heavyflavor' else 1.0 # bb/cc hand-waving normalization factor, see notes 2014-04-17
     for event in chain :
         pars = event.pars
         weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
