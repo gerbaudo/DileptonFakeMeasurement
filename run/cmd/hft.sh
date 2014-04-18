@@ -52,7 +52,7 @@ function filltrees {
     if [[ "$SUBMIT_OPTION" == "--submit" ]]
         then
         CONCLUDE_CMD="./python/email_me_when_youre_done.py"
-        CONCLUDE_CMD+=" --message \"hft trees with tag ${TAG} done; now you can go to `pwd` and type '${SCRIPT_NAME} maketar; ${SCRIPT_NAME} fillhistos'\" &"
+        CONCLUDE_CMD+=" --message \"hft trees with tag ${TAG} done; now you can go to `pwd` and type '${SCRIPT_NAME} maketar; ${SCRIPT_NAME} fillhistos'\" "
         CONCLUDE_MSG="Jobs submitted, now wait for the email"
     else
         CONCLUDE_MSG="This was a dry run; use '${SCRIPT_NAME} filltrees --submit' to actually submit the jobs"
@@ -60,9 +60,8 @@ function filltrees {
 	./python/submitJobs.py --susyplot -o  -t ${TAG} -e 'period' --other-opt "--with-hft --with-syst" ${SUBMIT_OPTION}
 	./python/submitJobs.py --susyplot -o  -t ${TAG} -s 'period' --other-opt "--with-hft"             ${SUBMIT_OPTION}
 	./python/submitJobs.py --fakepred -o  -t ${TAG} -s 'period' --other-opt "--with-hft"             ${SUBMIT_OPTION}
-	${CONCLUDE_CMD}
+	${CONCLUDE_CMD} &
     echo ${CONCLUDE_MSG}
-    echo ${CONCLUDE_CMD}
 }
 
 function cleantarlist {
