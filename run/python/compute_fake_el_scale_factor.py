@@ -28,13 +28,15 @@ from rootUtils import (drawLegendWithDictKeys
                        ,topRightLabel)
 r = rootUtils.importRoot()
 r.gROOT.SetStyle('Plain')
+r.gStyle.SetPadTickX(1)
+r.gStyle.SetPadTickY(1)
 rootUtils.importRootCorePackages()
 from datasets import datasets, setSameGroupForAllData
-from SampleUtils import (colors
-                         ,fastSamplesFromFilenames
+from SampleUtils import (fastSamplesFromFilenames
                          ,guessSampleFromFilename
                          ,isBkgSample
                          ,isDataSample)
+import SampleUtils
 from kin import computeMt
 
 usage="""
@@ -105,6 +107,7 @@ def main():
         histosPerSource = fetchHistos(cacheFileName, histoNamesPerSource(vars, leptonSources, mode), verbose)
         plotStackedHistos(histosPerGroup, outputDir, mode, verbose)
         plotStackedHistosSources(histosPerSource, outputDir, mode, verbose)
+        plotPerSourceEff(histosPerSource, outputDir, lepton, mode, verbose)
         sf_el_eta = subtractRealAndComputeScaleFactor(histosPerGroup, 'eta1', histoname_electron_sf_vs_eta(), verbose)
         sf_el_pt  = subtractRealAndComputeScaleFactor(histosPerGroup, 'pt1',  histoname_electron_sf_vs_pt(),  verbose)
         outputFile = r.TFile.Open(outputFileName, 'recreate')
@@ -119,7 +122,9 @@ def main():
 leptonTypes = ['tight', 'loose', 'real_tight', 'real_loose', 'fake_tight', 'fake_loose']
 allLeptonSources = ['heavy',   'light', 'conv',  'real',  'qcd', 'unknown'] # see FakeLeptonSources.h
 leptonSources = [s for s in allLeptonSources if s not in ['qcd']] # qcd is just hf+lf
-colorsSources = dict(zip(leptonSources, [r.kBlue-10, r.kMagenta-10, r.kRed-8, r.kGreen-6, r.kCyan-6, r.kGray+1]))
+colorsFillSources = dict(zip(leptonSources, [r.kBlue-10, r.kMagenta-10, r.kRed-8, r.kGreen-6, r.kCyan-6, r.kGray+1]))
+colorsLineSources = dict(zip(leptonSources, [r.kBlue, r.kMagenta, r.kRed, r.kGreen, r.kCyan, r.kGray+1]))
+markersSources = dict(zip(leptonSources, [r.kPlus, r.kCircle, r.kMultiply, r.kOpenSquare, r.kOpenTriangleUp, r.kOpenCross]))
 
 def enum2source(l): return allLeptonSources[l.source]
 def histoname_electron_sf_vs_eta() : return 'sf_el_vs_eta'
@@ -161,10 +166,14 @@ def fillHistos(chain, histosThisGroup, histosPerSource, isConversion, isData, le
             incrementCounts(nLoose, totWeightLoose)
             def fillHistosBySource(histos, probe):
                 leptonSource = enum2source(probe)
-                histos['mt1' ][leptonSource].Fill(mt1, weight)
-                histos['pt1' ][leptonSource].Fill(pt,  weight)
-                histos['eta1'][leptonSource].Fill(eta, weight)
-            if not isData : fillHistosBySource(histosPerSource, probe)
+                def fill(tightOrLoose):
+                    histos['mt1' ][leptonSource][tightOrLoose].Fill(mt1, weight)
+                    histos['pt1' ][leptonSource][tightOrLoose].Fill(pt,  weight)
+                    histos['eta1'][leptonSource][tightOrLoose].Fill(eta, weight)
+                fill('loose')
+                if isTight : fill('tight')
+            sourceIsKnown = not isData
+            if sourceIsKnown : fillHistosBySource(histosPerSource, probe)
 
             if isTight: incrementCounts(nTight, totWeightTight)
             histosThisGroup['mt0']['loose'].Fill(mt0, weight)
@@ -182,8 +191,8 @@ def fillHistos(chain, histosThisGroup, histosPerSource, isConversion, isData, le
         counterNames = ['nLoose', 'nTight', 'totWeightLoose', 'totWeightTight']
         print ', '.join(["%s : %.1f"%(c, eval(c)) for c in counterNames])
 
-def histoNamePerSample(var, sample, leptonType, mode) : return 'h_'+var+'_'+sample+'_'+leptonType+'_'+mode
-def histoNamePerSource(var, leptonSource, mode) : return 'h_'+var+'_'+leptonSource+'_'+mode
+def histoNamePerSample(var, sample, tightOrLoose, mode) : return 'h_'+var+'_'+sample+'_'+tightOrLoose+'_'+mode
+def histoNamePerSource(var, leptonSource, tightOrLoose, mode) : return 'h_'+var+'_'+leptonSource+'_'+tightOrLoose+'_'+mode
 def bookHistos(variables, samples, leptonTypes=leptonTypes, mode='') :
     "book a dict of histograms with keys [sample][var][tight, loose, real_tight, real_loose]"
     def histo(variable, hname):
@@ -205,8 +214,9 @@ def bookHistos(variables, samples, leptonTypes=leptonTypes, mode='') :
                                for lt in leptonTypes]))
                         for v in variables]))
                  for s in samples])
+
 def bookHistosPerSource(variables, sources, mode=''):
-    "book a dict of histograms with keys [var][lepton_source]"
+    "book a dict of histograms with keys [var][lepton_source][tight, loose]"
     def histo(variable, hname):
         h = None
         mtBinEdges = np.array([0.0, 20.0, 40.0, 60.0, 100.0, 200.0])
@@ -221,9 +231,13 @@ def bookHistosPerSource(variables, sources, mode=''):
         h.Sumw2()
         return h
     return dict([(v,
-                  dict([(s, histo(variable=v, hname=histoNamePerSource(v, s, mode)))
+                  dict([(s,
+                         {'loose' : histo(variable=v, hname=histoNamePerSource(v, s, 'loose', mode)),
+                          'tight' : histo(variable=v, hname=histoNamePerSource(v, s, 'tight', mode)),
+                          })
                         for s in leptonSources]))
                  for v in variables])
+
 def extractName(dictOrHist):
     "input must be either a dict or something with 'GetName'"
     isDict = type(dictOrHist) is dict
@@ -261,6 +275,7 @@ def plotStackedHistos(histosPerGroup={}, outputDir='', mode='', verbose=False):
     groups = histosPerGroup.keys()
     variables = first(histosPerGroup).keys()
     leptonTypes = first(first(histosPerGroup)).keys()
+    colors = SampleUtils.colors
     histosPerName = dict([(mode+'_'+var+'_'+lt, # one canvas for each histo, so key with histoname w/out group
                            dict([(g, histosPerGroup[g][var][lt]) for g in groups]))
                           for var in variables for lt in leptonTypes])
@@ -296,7 +311,7 @@ def plotStackedHistos(histosPerGroup={}, outputDir='', mode='', verbose=False):
         if data and data.GetEntries():
             data.SetMarkerStyle(r.kFullDotLarge)
             data.Draw('p same')
-        yMin, yMax = getMinMax([h for h in [totBkg, data, err_band] if h is not None])
+        yMin, yMax = getMinMax([h for h in [totBkg, data, err_band] if h])
         pm.SetMinimum(0.0)
         pm.SetMaximum(1.1*yMax)
         can.Update()
@@ -310,11 +325,13 @@ def plotStackedHistos(histosPerGroup={}, outputDir='', mode='', verbose=False):
 def plotStackedHistosSources(histosPerVar={}, outputDir='', mode='', verbose=False):
     variables = histosPerVar.keys()
     sources = first(histosPerVar).keys()
-    for var, histos in histosPerVar.iteritems():
-        canvasBasename = mode+'_region_'+var
-        missingSources = [s for s, h in histosPerVar.iteritems() if not h]
+    colors = colorsFillSources
+    for var in variables:
+        histos = dict((s, histosPerVar[var][s]['loose']) for s in sources)
+        canvasBasename = mode+'_region_'+var+'_loose'
+        missingSources = [s for s, h in histos.iteritems() if not h]
         if missingSources:
-            if verbose : print "skip %s, missing histos for %s"%(histoname, str(missingSources))
+            if verbose : print "skip %s, missing histos for %s"%(var, str(missingSources))
             continue
         totBkg = summedHisto(histos.values())
         err_band = buildErrBandGraph(totBkg, computeStatErr2(totBkg))
@@ -332,8 +349,7 @@ def plotStackedHistosSources(histosPerVar={}, outputDir='', mode='', verbose=Fal
         can.Update()
         r.SetOwnership(stack, False)
         for s, h in histos.iteritems() :
-            print 'adding ',s
-            h.SetFillColor(colorsSources[s] if s in colorsSources else r.kOrange)
+            h.SetFillColor(colors[s] if s in colors else r.kOrange)
             h.SetDrawOption('bar')
             h.SetDirectory(0)
             stack.Add(h)
@@ -350,6 +366,63 @@ def plotStackedHistosSources(histosPerVar={}, outputDir='', mode='', verbose=Fal
         can._histos = [h for h in stack.GetHists()]
         can.Update()
         can.SaveAs(os.path.join(outputDir, canvasBasename+'.png'))
+
+def plotPerSourceEff(histosPerVar={}, outputDir='', lepton='', mode='', verbose=False, zoomIn=True):
+    "plot efficiency for each source (and 'anysource') as a function of each var; expect histos[var][source][loose,tight]"
+    variables = histosPerVar.keys()
+    sources = [s for s in first(histosPerVar).keys() if s!='real'] # only fake eff really need a scale factor
+    colors = colorsLineSources
+    for var in filter(lambda x : x in ['pt1', 'eta1'], histosPerVar.keys()):
+        histosPerSource = dict((s, histosPerVar[var][s]) for s in sources)
+        canvasBasename = mode+'_efficiency_'+lepton+'_'+var
+        missingSources = [s for s, h in histosPerSource.iteritems() if not h['loose'] or not h['tight']]
+        if missingSources:
+            if verbose : print "skip %s, missing histos for %s"%(var, str(missingSources))
+            continue
+        anySourceLoose = summedHisto([h['loose'] for h in histosPerSource.values()])
+        anySourceTight = summedHisto([h['tight'] for h in histosPerSource.values()])
+        anySourceLoose.SetName(histoNamePerSource(var, 'any', 'loose', mode))
+        anySourceTight.SetName(histoNamePerSource(var, 'any', 'tight', mode))
+        histosPerSource['any'] = { 'loose' : anySourceLoose, 'tight' : anySourceTight }
+        emptyBkg = anySourceLoose.Integral()==0 or anySourceTight.Integral()==0
+        if emptyBkg:
+            if verbose : print "empty backgrounds, skip %s"%canvasBasename
+            continue
+        def computeEfficiencies(histosPerSource={}) :
+            sources = histosPerSource.keys()
+            num = dict((s, histosPerSource[s]['tight']) for s in sources)
+            den = dict((s, histosPerSource[s]['loose']) for s in sources)
+            eff = dict((s, h.Clone(h.GetName().replace('tight', 'tight_over_loose')))
+                       for s, h in num.iteritems())
+            [eff[s].Divide(den[s]) for s in sources]
+            return eff
+
+        effs = computeEfficiencies(histosPerSource)
+        can = r.TCanvas('c_'+canvasBasename, canvasBasename, 800, 600)
+        can.cd()
+        pm = first(effs) # pad master
+        pm.SetStats(False)
+        pm.Draw('axis')
+        can.Update()
+        for s, h in effs.iteritems() :
+            h.SetMarkerColor(colors[s] if s in colors else r.kBlack)
+            h.SetLineColor(h.GetMarkerColor())
+            h.SetLineWidth(2*h.GetLineWidth())
+            h.SetMarkerStyle(markersSources[s] if s in markersSources else r.kDot)
+            h.Draw('ep same')
+            h.SetDirectory(0)
+        pprint.pprint(effs)
+        yMin, yMax = getMinMax(effs.values())
+        pm.SetMinimum(0.0)
+        pm.SetMaximum(0.25 if yMax < 0.5 and zoomIn else 1.1)
+        can.Update()
+        topRightLabel(can, canvasBasename, xpos=0.125, align=13)
+        drawLegendWithDictKeys(can, effs, opt='lp')
+        can.RedrawAxis()
+        can._histos = effs
+        can.Update()
+        can.SaveAs(os.path.join(outputDir, canvasBasename+'.png'))
+
 def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', outhistoname='', verbose=False):
     "efficiency scale factor"
     groups = histosPerGroup.keys()
