@@ -44,6 +44,8 @@ void HftFiller::assignDilepVars(HistFitterTree* const tree, const susy::wh::kin:
         tree->lept2Pt = v.pt1*gev2mev;
         tree->lept1Eta = v.eta0;
         tree->lept2Eta = v.eta1;
+        tree->lept1Phi = v.phi0;
+        tree->lept2Phi = v.phi1;
         tree->L2Mll = v.mll*gev2mev;
         tree->deltaEtaLl = v.detall;
         tree->L2METrel = v.metrel*gev2mev;

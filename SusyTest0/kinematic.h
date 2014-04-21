@@ -26,6 +26,7 @@ namespace kin
     size_t numCentralLightJets;
     float q0, q1;
     float pt0, pt1;
+    float phi0, phi1;
     float eta0, eta1;
     float mll, detall;
     float metrel;
@@ -40,7 +41,7 @@ namespace kin
       weight = qflipWeight = 0.0;
       numCentralLightJets = 0;
       q0 = q1 = 0.0;
-      pt0 = pt1 =  eta0 = eta1 = mll = detall = metrel = mlj = mljj = mt0 = mt1 = mtllmet = 0.0;
+      pt0 = pt1 =  eta0 = eta1 = phi0 = phi1 = mll = detall = metrel = mlj = mljj = mt0 = mt1 = mtllmet = 0.0;
       ht = 0.0;
       l3veto = false;
     }

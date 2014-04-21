@@ -31,6 +31,8 @@ swk::DilepVars swk::compute2lVars(const LeptonVector &leptons, const Susy::Met *
         v.pt1 = l1.Pt();
         v.eta0 = l0.Eta();
         v.eta1 = l1.Eta();
+        v.phi0 = l0.Phi();
+        v.phi1 = l1.Phi();
         TLorentzVector ll(l0+l1);
         v.mll = ll.M();
         v.detall = fabs(l0.Eta() - l1.Eta());
