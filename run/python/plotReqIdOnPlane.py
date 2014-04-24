@@ -38,9 +38,12 @@ histo2l = r.TH2F('mc1mn1_2lep_reqids',
                  50, float(mc1Range['min']), float(mc1Range['max']),
                  50, float(mn1Range['min']), float(mn1Range['max']))
 histo2lnth = r.TH2F('mc1mn1_2lep_notauhad_reqids',
-                    'ReqIds for the WH notauhad 2lep grid ;mc_{1};mn_{1}',
-                    50, float(mc1Range['min']), float(mc1Range['max']),
-                    50, float(mn1Range['min']), float(mn1Range['max']))
+#                     'ReqIds for the WH notauhad 2lep grid ;#tilde{#chi}^{#pm}_{1},#tilde{#chi}^{0}_{2};#tilde{#chi}^{0}_{1}',
+                    ';m (#tilde{#chi}^{#pm}_{1},#tilde{#chi}^{0}_{2}) [GeV]; m (#tilde{#chi}^{0}_{1}) [GeV]',
+                    50, 120, 250, 50, 0, 100
+#                     50, float(mc1Range['min']), float(mc1Range['max']),
+#                     50, float(mn1Range['min']), float(mn1Range['max'])
+                    )
 histo3l = r.TH2F('mc1mn1_3lep_reqids',
                  'ReqIds for the WH 3lep grid ;mc_{1};mn_{1}',
                  50, float(mc1Range['min']), float(mc1Range['max']),
@@ -78,7 +81,7 @@ c = r.TCanvas('c_reqids', 'WH reqids', 800, 600)
 c.cd()
 for h in [histo2l, histo2lnth, histo3l] :
     c.Clear()
-    h.SetTitle(h.GetTitle()+" (%d points)"%h.GetEntries())
+#     h.SetTitle(h.GetTitle()+" (%d points)"%h.GetEntries())
     h.SetStats(0)
     h.SetMarkerSize(1.25*h.GetMarkerSize())
     drawMerged = h==histo2l
