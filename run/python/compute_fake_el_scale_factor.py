@@ -79,6 +79,7 @@ def main():
         optionsToPrint = ['inputDir', 'outputDir', 'mode', 'tag', 'doFillHistograms']
         if verbose : print "options:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
         # collect inputs
+        print '----> input files ',os.path.join(inputDir, templateInputFilename)
         tupleFilenames = glob.glob(os.path.join(inputDir, templateInputFilename))
         samples = setSameGroupForAllData(fastSamplesFromFilenames(tupleFilenames, verbose))
         samplesPerGroup = collections.defaultdict(list)
@@ -87,7 +88,7 @@ def main():
         for s, f in zip(samples, tupleFilenames) :
             samplesPerGroup[s.group].append(s)
             filenamesPerGroup[s.group].append(f)
-        vars = ['mt0', 'mt1', 'pt1', 'eta1']
+        vars = ['mt0', 'mt1', 'pt0', 'pt1', 'eta1']
         groups = samplesPerGroup.keys()
         #fill histos
         if doFillHistograms :
@@ -164,9 +165,12 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
         eta = abs(probe4m.Eta())
         mt0 = computeMt(tag4m, met4m)
         mt1 = computeMt(probe4m, met4m)
+        pt0 = tag4m.Pt()
         isLowMt = mt1 < 40.0
-#         if (isSameSign or isConversion) and isRightLep and isLowMt:
         if isRightLep and isLowMt:
+#         if isRightLep and isLowMt and pt0>20.0: # test trigger effect on tag mu
+#         if (isSameSign or isConversion) and isRightLep and isLowMt: # test sf conversion (not very important for now, 2014-04)
+
             def incrementCounts(counts, weightedCounts):
                 counts +=1
                 weightedCounts += weight
@@ -187,6 +191,7 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
 
             if isTight: incrementCounts(nTight, totWeightTight)
             histosThisGroup['mt0']['loose'].Fill(mt0, weight)
+            histosThisGroup['pt0']['loose'].Fill(pt0, weight)
             histosThisGroup['mt1']['loose'].Fill(mt1, weight)
             def fill(lepType=''):
                 histosThisGroup['pt1' ][lepType].Fill(pt, weight)
@@ -213,6 +218,7 @@ def bookHistos(variables, samples, leptonTypes=leptonTypes, mode='') :
         etaBinEdges = np.array([0.0, 1.37, 2.50])
         if   v=='mt0'     : h = r.TH1F(hname, ';m_{T}(tag,MET) [GeV]; entries/bin',   len(mtBinEdges)-1,  mtBinEdges)
         elif v=='mt1'     : h = r.TH1F(hname, ';m_{T}(probe,MET) [GeV]; entries/bin', len(mtBinEdges)-1,  mtBinEdges)
+        elif v=='pt0'     : h = r.TH1F(hname, ';p_{T,l0} [GeV]; entries/bin',   len(ptBinEdges)-1,  ptBinEdges)
         elif v=='pt1'     : h = r.TH1F(hname, ';p_{T,l1} [GeV]; entries/bin',   len(ptBinEdges)-1,  ptBinEdges)
         elif v=='eta1'    : h = r.TH1F(hname, ';#eta_{l1}; entries/bin',        len(etaBinEdges)-1, etaBinEdges)
         else : print "unknown variable %s"%v
@@ -235,6 +241,7 @@ def bookHistosPerSource(variables, sources, mode=''):
         etaBinEdges = np.array([0.0, 1.37, 2.50])
         if   variable=='mt0'     : h = r.TH1F(hname, ';m_{T}(tag,MET) [GeV]; entries/bin', len(mtBinEdges)-1,  mtBinEdges)
         elif variable=='mt1'     : h = r.TH1F(hname, ';m_{T}(probe,MET) [GeV]; entries/bin', len(mtBinEdges)-1,  mtBinEdges)
+        elif variable=='pt0'     : h = r.TH1F(hname, ';p_{T,l0} [GeV]; entries/bin',   len(ptBinEdges)-1,  ptBinEdges)
         elif variable=='pt1'     : h = r.TH1F(hname, ';p_{T,l1} [GeV]; entries/bin',   len(ptBinEdges)-1,  ptBinEdges)
         elif variable=='eta1'    : h = r.TH1F(hname, ';#eta_{l1}; entries/bin',        len(etaBinEdges)-1, etaBinEdges)
         else : print "unknown variable %s"%v
@@ -258,6 +265,7 @@ def bookHistosPerSamplePerSource(variables, samples, sources, mode=''):
         etaBinEdges = np.array([0.0, 1.37, 2.50])
         if   variable=='mt0'     : h = r.TH1F(hname, ';m_{T}(tag,MET) [GeV]; entries/bin', len(mtBinEdges)-1,  mtBinEdges)
         elif variable=='mt1'     : h = r.TH1F(hname, ';m_{T}(probe,MET) [GeV]; entries/bin', len(mtBinEdges)-1,  mtBinEdges)
+        elif variable=='pt0'     : h = r.TH1F(hname, ';p_{T,l0} [GeV]; entries/bin',   len(ptBinEdges)-1,  ptBinEdges)
         elif variable=='pt1'     : h = r.TH1F(hname, ';p_{T,l1} [GeV]; entries/bin',   len(ptBinEdges)-1,  ptBinEdges)
         elif variable=='eta1'    : h = r.TH1F(hname, ';#eta_{l1}; entries/bin',        len(etaBinEdges)-1, etaBinEdges)
         else : print "unknown variable %s"%v
