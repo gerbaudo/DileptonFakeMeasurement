@@ -78,6 +78,7 @@ MeasureFakeRate2::MeasureFakeRate2() :
   m_writeFakeTuple(false),
   m_tupleMakerHfCr("",""),
   m_tupleMakerConv("",""),
+  m_tupleMakerSsInc1j("",""),
   m_tupleMakerMcConv("",""),
   m_tupleMakerMcQcd("",""),
   m_tupleMakerMcReal("","")
@@ -101,6 +102,7 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
   if(m_writeFakeTuple) {
       string filenameHfLf   = tupleFilenameFromHistoFilename(m_fileName, "hflf_tuple");
       string filenameConv   = tupleFilenameFromHistoFilename(m_fileName, "conv_tuple");
+      string filenameSsInc1j= tupleFilenameFromHistoFilename(m_fileName, "ssinc1j_tuple");
       string filenameMcConv = tupleFilenameFromHistoFilename(m_fileName, "mcconv_tuple");
       string filenameMcQcd  = tupleFilenameFromHistoFilename(m_fileName, "mcqcd_tuple");
       string filenameMcReal = tupleFilenameFromHistoFilename(m_fileName, "mcreal_tuple");
@@ -114,6 +116,7 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
       } initTuple(m_writeTuple);
       initTuple(m_tupleMakerHfCr,   filenameHfLf,   "HeavyFlavorControlRegion");
       initTuple(m_tupleMakerConv,   filenameConv,   "ConversionControlRegion");
+      initTuple(m_tupleMakerSsInc1j,filenameSsInc1j,"SameSign1jetControlRegion");
       initTuple(m_tupleMakerMcConv, filenameMcConv, "ConversionExtractionRegion");
       initTuple(m_tupleMakerMcQcd,  filenameMcQcd,  "HfLfExtractionRegion");
       initTuple(m_tupleMakerMcReal, filenameMcReal, "RealExtractionRegion");
@@ -129,6 +132,7 @@ void MeasureFakeRate2::Terminate()
       m_tupleMakerMcReal.close();
       m_tupleMakerMcQcd.close();
       m_tupleMakerMcConv.close();
+      m_tupleMakerSsInc1j.close();
       m_tupleMakerConv.close();
       m_tupleMakerHfCr.close();
   }
@@ -275,6 +279,18 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC) : false);
             LeptonVector dummyLepts;
             tupleMaker
+                .setL0IsTight(l0IsTight).setL0Source(l0Source)
+                .setL1IsTight(l1IsTight).setL1Source(l1Source)
+                .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
+        } else if(CR==sf::CR_SSInc1j){
+            assert(m_probes.size()>1);
+            if(m_probes.size()>2) cout<<"warning, "<<m_probes.size()<<" probe leptons (expected 2)"<<endl;
+            const Lepton *l0 = m_probes[0], *l1 = m_probes[1];
+            LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
+            bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC) : false);
+            bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC) : false);
+            LeptonVector dummyLepts;
+            m_tupleMakerSsInc1j
                 .setL0IsTight(l0IsTight).setL0Source(l0Source)
                 .setL1IsTight(l1IsTight).setL1Source(l1Source)
                 .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);

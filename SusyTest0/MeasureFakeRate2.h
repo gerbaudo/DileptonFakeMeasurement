@@ -125,6 +125,7 @@ class MeasureFakeRate2 : public SusySelection
   bool m_writeFakeTuple;            //!< save ntuples containing the info needed to compute fake efficiencies and scale factors
   susy::wh::TupleMaker m_tupleMakerHfCr; //!< tuple for sf::CR_HF_high
   susy::wh::TupleMaker m_tupleMakerConv; //!< tuple for sf::CR_Conv
+  susy::wh::TupleMaker m_tupleMakerSsInc1j; //!< tuple for CR_SSInc1j
   susy::wh::TupleMaker m_tupleMakerMcConv; //!< tuple for CR_MCConv
   susy::wh::TupleMaker m_tupleMakerMcQcd;  //!< tuple for CR_MCQCD
   susy::wh::TupleMaker m_tupleMakerMcReal; //!< tuple for CR_MCReal
