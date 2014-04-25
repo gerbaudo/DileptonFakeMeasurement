@@ -103,6 +103,7 @@ def main() :
     outputFile = r.TFile.Open(outputFname, 'recreate')
     inputFiles = dict((k, v) for k, v in allInputFiles.iteritems() if k in fakeProcesses())
     inputFracFile = r.TFile.Open(inputFracFname) if inputFracFname else None
+    if inputFracFname and not inputFracFile : parser.error("invalid fraction file %s"%inputFracFname)
 
     buildMuonRates    (inputFiles, outputFile, outputPlotDir, inputFracFile=inputFracFile, verbose=verbose, zoomIn=zoomIn)
     buildElectronRates(inputFiles, outputFile, outputPlotDir, inputFracFile=inputFracFile, inputElecSfFiles=inputSfFnames, verbose=verbose, zoomIn=zoomIn)
@@ -557,7 +558,8 @@ def plot2dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='effic
     r.gStyle.SetPaintTextFormat(origTextFormat)
 def fetchCompositions(inputSfFile=None, templateHistoName="%(proc)s", processes=[]) :
     histos = dict((p, inputSfFile.Get(templateHistoName%{'proc':p})) for p in processes)
-    assert all(v for v in histos.values()),"missing compositions: (template %s):\n%s"%(templateHistoName, histos)
+    missing = dict([(k, v) for k, v in histos.iteritems() if not v])
+    assert not missing,"missing compositions: (template %s) from %s:\n%s"%(templateHistoName, inputSfFile.GetName(), str(missing))
     return histos
 def compose2Dcompositions(inputSfFile=None, templateHistoName="%(proc)s_%(etabin)s", processes=[]) :
     "take two 1D fractions histograms for one eta slice each, and compose them in a 2D fractions histogram"

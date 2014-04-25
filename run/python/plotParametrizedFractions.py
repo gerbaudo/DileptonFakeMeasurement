@@ -62,7 +62,7 @@ def main() :
 
     allInputFiles = getInputFiles(inputDirname, tag, verbose) # includes allBkg, which is used only for sys
     assert all(f for f in allInputFiles.values()), ("missing inputs: \n%s"%'\n'.join(["%s : %s"%kv for kv in allInputFiles.iteritems()]))
-    outputPlotDir = outputPlotDir+'/' if not outputPlotDir.endswith('/') else ''
+    outputPlotDir = outputPlotDir+('/' if not outputPlotDir.endswith('/') else '')
     mkdirIfNeeded(outputPlotDir)
     inputFiles = dict((k, v) for k, v in allInputFiles.iteritems() if k in fakeProcesses())
     if verbose : print 'Using the following input files:\n'+'\n'.join(["%s : %s"%(p, f.GetName()) for p,f in inputFiles.iteritems()])
@@ -83,7 +83,7 @@ def independentVariables() :
 
 def regionsToBePlotted() :
     "regions for which we plot the fractions"
-    return  ['CR_SRWHnoMlj', 'CR_SRWH1j']
+    return  ['CR_SRWHnoMlj', 'CR_SRWH1j', 'CR_SSInc1j']
     #return  ['CR_WHZVfake1j', 'CR_WHZVfake2j', 'CR_WHfake1j', 'CR_WHfake2j', 'CR_WHZV1j', 'CR_WHZV2j', 'CR_SRWH1j', 'CR_SRWH2j', 'CR_SRWHnoMlj']
 
 
@@ -287,6 +287,8 @@ def plotFractionsStacked(histos={}, canvasName='', outputDir='./', frameTitle='t
     stack = r.THStack('stack_'+canvasName, '')
     leg = topRightLegend(can, 0.275, 0.475, shift=+0.010)
     leg.SetBorderSize(0)
+    leg.SetX1NDC(0.9)
+    leg.SetX2NDC(1.0)
     colors = SampleUtils.colors
     procs = sorted(histos.keys())
     def setHistoAtts(histo, process, colors=colors, fillStyle=None) :
@@ -295,12 +297,21 @@ def plotFractionsStacked(histos={}, canvasName='', outputDir='./', frameTitle='t
         h.SetFillColor(colors[p])
         h.SetLineColor(h.GetFillColor())
         h.SetDrawOption('bar')
-        if fillStyle : h.SetFillStyle(fillStyle)
+        paleColors = {'ttbar':r.kRed-9,
+                      'zjets' : r.kOrange-4,
+                      'wjets' : r.kBlue-8,
+                      'diboson' : r.kSpring+1,
+                      'singletop' : r.kAzure+6,
+                      'multijet' : r.kGray,
+                      'heavyflavor' : r.kViolet-9}
+        if fillStyle :
+            h.SetFillColor(paleColors[p])
+            h.SetLineColor(h.GetFillColor())
     for p in procs:
         h = histos[p]
         setHistoAtts(h, p)
         stack.Add(h)
-    for s in procs[::-1] : leg.AddEntry(histos[s], s, 'F') # stack goes b-t, legend goes t-b
+    for s in procs[::-1] : leg.AddEntry(histos[s], ('bb/cc' if s=='heavyflavor' else s), 'F') # stack goes b-t, legend goes t-b
     for p in filter(lambda p: p in histos2, procs) :
         setHistoAtts(histos2[p], p, fillStyle=3001)
         stack.Add(histos2[p])
