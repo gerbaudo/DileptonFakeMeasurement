@@ -189,3 +189,46 @@ def getBinContents(h) :
     return [h.GetBinContent(b) for b in getBinIndices(h)]
 def getBinErrors(h) :
     return [h.GetBinError(b) for b in getBinIndices(h)]
+
+def writeObjectsToFile(outputFileName='', objects={}, verbose=False):
+    """
+    Objects can either be a list or a dict of TObjects (or a TObject).
+    The list/dict will be recursively navigated down to TObjects.
+    """
+    outputFile = r.TFile.Open(outputFileName, 'recreate')
+    outputFile.cd()
+    if verbose : print "writing to %s"%outputFile.GetName()
+    def write(dictOrObj):
+        isDict = type(dictOrObj) is dict
+        isList = type(dictOrObj) is list
+        if isDict:
+            for v in dictOrObj.values():
+                write(v)
+        elif isList:
+            for v in dictOrObj:
+                write(v)
+        else:
+            dictOrObj.Write()
+    write(objects)
+    outputFile.Close()
+def fetchObjectsFromFile(fileName='', objects={}, verbose=False, closeFileOnExit=False):
+    """
+    Objects is either a name, or a list of names, or a dict of names
+    (or a nested dict,list).  This function will return the same
+    structure (that is list, dict, nested dict...), but with objects
+    instead of names.
+    """
+    inputFile = r.TFile.Open(fileName)
+    if verbose : print "fetching histograms from %s"%inputFile.GetName()
+    def fetch(object):
+        isDict = type(object) is dict
+        isList = type(object) is list
+        if isDict:
+            return dict([(k, fetch(v)) for k,v in object.iteritems()])
+        elif isList:
+            return [fecth(o) for o in object]
+        else:
+            return inputFile.Get(object)
+    fetched_objects = fetch(objects)
+    if closeFileOnExit : inputFile.Close()
+    return fetched_objects

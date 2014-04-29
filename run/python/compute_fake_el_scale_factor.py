@@ -38,6 +38,7 @@ from SampleUtils import (fastSamplesFromFilenames
                          ,isDataSample)
 import SampleUtils
 from kin import computeMt
+import fakeUtils as fakeu
 
 usage="""
 Example usage:
@@ -127,14 +128,14 @@ def main():
 
 #___________________________________________________
 
-leptonTypes = ['tight', 'loose', 'real_tight', 'real_loose', 'fake_tight', 'fake_loose']
-allLeptonSources = ['heavy',   'light', 'conv',  'real',  'qcd', 'unknown'] # see FakeLeptonSources.h
-leptonSources = [s for s in allLeptonSources if s not in ['qcd']] # qcd is just hf+lf
-colorsFillSources = dict(zip(leptonSources, [r.kBlue-10, r.kMagenta-10, r.kRed-8, r.kGreen-6, r.kCyan-6, r.kGray+1]))
-colorsLineSources = dict(zip(leptonSources, [r.kBlue, r.kMagenta, r.kRed, r.kGreen, r.kCyan, r.kGray+1]))
-markersSources = dict(zip(leptonSources, [r.kPlus, r.kCircle, r.kMultiply, r.kOpenSquare, r.kOpenTriangleUp, r.kOpenCross]))
+leptonTypes = fakeu.leptonTypes()
+allLeptonSources = fakeu.allLeptonSources()
+leptonSources = fakeu.leptonSources()
+colorsFillSources = fakeu.colorsFillSources()
+colorsLineSources = fakeu.colorsLineSources()
+markersSources = fakeu.markersSources()
+enum2source = fakeu.enum2source
 
-def enum2source(l): return allLeptonSources[l.source]
 def histoname_electron_sf_vs_eta() : return 'sf_el_vs_eta'
 def histoname_electron_sf_vs_pt() : return 'sf_el_vs_pt'
 
@@ -151,7 +152,7 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
         isRightLep = probe.isEl if lepton=='el' else probe.isMu
         isTight = probe.isTight
         probeSource = probe.source
-        sourceHf, sourceLf, sourceConv, sourceReal, sourceUnknown = 0, 1, 2, 3, 5 # see FakeLeptonSources.h
+        sourceReal = 3 # see FakeLeptonSources.h
         isReal = probeSource==sourceReal and not isData
         isFake = not isReal and not isData
         def isBjet(j, mv1_80=0.3511) : return j.mv1 > mv1_80 # see SusyDefs.h
@@ -213,9 +214,9 @@ def bookHistos(variables, samples, leptonTypes=leptonTypes, mode='') :
     "book a dict of histograms with keys [sample][var][tight, loose, real_tight, real_loose]"
     def histo(variable, hname):
         h = None
-        mtBinEdges = np.array([0.0, 20.0, 40.0, 60.0, 100.0, 200.0])
-        ptBinEdges = np.array([10.0, 20.0, 35.0, 100.0])
-        etaBinEdges = np.array([0.0, 1.37, 2.50])
+        mtBinEdges = fakeu.mtBinEdges()
+        ptBinEdges = fakeu.ptBinEdges()
+        etaBinEdges = fakeu.etaBinEdges()
         if   v=='mt0'     : h = r.TH1F(hname, ';m_{T}(tag,MET) [GeV]; entries/bin',   len(mtBinEdges)-1,  mtBinEdges)
         elif v=='mt1'     : h = r.TH1F(hname, ';m_{T}(probe,MET) [GeV]; entries/bin', len(mtBinEdges)-1,  mtBinEdges)
         elif v=='pt0'     : h = r.TH1F(hname, ';p_{T,l0} [GeV]; entries/bin',   len(ptBinEdges)-1,  ptBinEdges)
@@ -293,31 +294,11 @@ def histoNamesPerSource(variables, samples, mode) :
 def histoNamesPerSamplePerSource(variables, samples, leptonSources, mode) :
     return extractName(bookHistosPerSamplePerSource(variables, samples, leptonSources, mode=mode))
 
-
 def writeHistos(outputFileName='', histosPerGroup={}, histosPerSource={}, histosPerSamplePerGroup={}, verbose=False):
-    outputFile = r.TFile.Open(outputFileName, 'recreate')
-    outputFile.cd()
-    if verbose : print "writing to %s"%outputFile.GetName()
-    def write(dictOrObj):
-        isDict = type(dictOrObj) is dict
-        if isDict:
-            for v in dictOrObj.values():
-                write(v)
-        else:
-            dictOrObj.Write()
-    write(histosPerGroup)
-    write(histosPerSource)
-    write(histosPerSamplePerGroup)
-    outputFile.Close()
+    rootUtils.writeObjectsToFile(outputFileName, [histosPerGroup, histosPerSource, histosPerSamplePerGroup], verbose)
 def fetchHistos(fileName='', histoNames={}, verbose=False):
-    "given a dict of input histonames, return the same dict, but with histo instead of histoname"
-    inputFile = r.TFile.Open(fileName)
-    if verbose : print "fetching histograms from %s"%inputFile.GetName()
-    def fetch(dictOrName):
-        isDict = type(dictOrName) is dict
-        return dict([(k, fetch(v)) for k,v in dictOrName.iteritems()]) if isDict else inputFile.Get(dictOrName)
-    histos = fetch(histoNames)
-    return histos
+    return rootUtils.fetchObjectsFromFile(fileName, histoNames, verbose)
+
 def plotStackedHistos(histosPerGroup={}, outputDir='', mode='', verbose=False):
     groups = histosPerGroup.keys()
     variables = first(histosPerGroup).keys()
