@@ -237,9 +237,9 @@ def bookHistosPerSource(variables, sources, mode=''):
     "book a dict of histograms with keys [var][lepton_source][tight, loose]"
     def histo(variable, hname):
         h = None
-        mtBinEdges = np.array([0.0, 20.0, 40.0, 60.0, 100.0, 200.0])
-        ptBinEdges = np.array([10.0, 20.0, 35.0, 100.0])
-        etaBinEdges = np.array([0.0, 1.37, 2.50])
+        mtBinEdges = fakeu.mtBinEdges()
+        ptBinEdges = fakeu.ptBinEdges()
+        etaBinEdges = fakeu.etaBinEdges()
         if   variable=='mt0'     : h = r.TH1F(hname, ';m_{T}(tag,MET) [GeV]; entries/bin', len(mtBinEdges)-1,  mtBinEdges)
         elif variable=='mt1'     : h = r.TH1F(hname, ';m_{T}(probe,MET) [GeV]; entries/bin', len(mtBinEdges)-1,  mtBinEdges)
         elif variable=='pt0'     : h = r.TH1F(hname, ';p_{T,l0} [GeV]; entries/bin',   len(ptBinEdges)-1,  ptBinEdges)
@@ -261,9 +261,9 @@ def bookHistosPerSamplePerSource(variables, samples, sources, mode=''):
     "book a dict of histograms with keys [var][sample][lepton_source][tight, loose]"
     def histo(variable, hname):
         h = None
-        mtBinEdges = np.array([0.0, 20.0, 40.0, 60.0, 100.0, 200.0])
-        ptBinEdges = np.array([10.0, 20.0, 35.0, 100.0])
-        etaBinEdges = np.array([0.0, 1.37, 2.50])
+        mtBinEdges = fakeu.mtBinEdges()
+        ptBinEdges = fakeu.ptBinEdges()
+        etaBinEdges = fakeu.etaBinEdges()
         if   variable=='mt0'     : h = r.TH1F(hname, ';m_{T}(tag,MET) [GeV]; entries/bin', len(mtBinEdges)-1,  mtBinEdges)
         elif variable=='mt1'     : h = r.TH1F(hname, ';m_{T}(probe,MET) [GeV]; entries/bin', len(mtBinEdges)-1,  mtBinEdges)
         elif variable=='pt0'     : h = r.TH1F(hname, ';p_{T,l0} [GeV]; entries/bin',   len(ptBinEdges)-1,  ptBinEdges)
