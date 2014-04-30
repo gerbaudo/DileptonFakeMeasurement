@@ -33,6 +33,7 @@ public:
             cTagUp_ = cTagDo_ = 1.0;
             lTagUp_ = lTagDo_ = 1.0;
             xsecUp_ = xsecDo_ = 1.0;
+            mcgenUp_ = mcgenDo_ = 1.0;
             return *this;
         }
         float qflipUp_, qflipDo_;
@@ -44,6 +45,7 @@ public:
         float cTagUp_, cTagDo_;
         float lTagUp_, lTagDo_;
         float xsecUp_, xsecDo_;
+        float mcgenUp_, mcgenDo_;
     };
 public:
     HftFiller();
@@ -56,6 +58,8 @@ public:
     HftFiller& setOutputDir(const std::string dir);
     bool determineXsecUncertainty(const int dsid);
     float xsecRelativeUncertainty() const { return xsecRelativeUncertainty_; }
+    bool determineMcGenUncertainty(const int dsid);
+    float mcGenRelativeUncertainty(const int njet) const;
 private:
     void assignDilepVars(HistFitterTree* const tree, const susy::wh::kin::DilepVars &v);
     void assignWeightVars(HistFitterTree* const tree, const susy::wh::HftFiller::WeightVariations &wv);
@@ -66,6 +70,8 @@ private:
     std::vector<HistFitterTree*> m_hftTrees;
     std::string m_outdir;
     float xsecRelativeUncertainty_;
+    float mcGenRelativeUncertainty1j_;
+    float mcGenRelativeUncertainty23j_;
 }; // end HftFiller
 
 } // namespace wh

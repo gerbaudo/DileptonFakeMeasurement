@@ -18,7 +18,7 @@ bool XsecUncertainty::determineGroup(const int dsid)
     case kTtbarW    : unc = 0.07/0.23; break;
     case kTtbarZ    : unc = 0.06/0.21; break;
     case kWw        : unc = 0.05; break;
-    case kWz        : unc = 0.05; break;
+    case kWz        : unc = 0.00; break; // was 0.05, now included in mcGen uncertainty
     case kZz        : unc = 0.07; break;
     case kWwjj      : unc = 0.50; break;
     case kTriboson  : unc = 1.00; break;

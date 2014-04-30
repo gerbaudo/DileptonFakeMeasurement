@@ -15,7 +15,9 @@ using susy::wh::HftFiller;
 
 //----------------------------------------------------------
 HftFiller::HftFiller() :
-    xsecRelativeUncertainty_(1.0)
+    xsecRelativeUncertainty_(1.0),
+    mcGenRelativeUncertainty1j_(0.0),
+    mcGenRelativeUncertainty23j_(0.0)
 {
 }
 //----------------------------------------------------------
@@ -89,6 +91,8 @@ void HftFiller::assignWeightVars(HistFitterTree* const tree, const susy::wh::Hft
         tree->syst_BMISTAGDOWN   = w.lTagDo_;
         tree->syst_XSUP          = w.xsecUp_;
         tree->syst_XSDOWN        = w.xsecDo_;
+        tree->syst_GENUP         = w.mcgenUp_;
+        tree->syst_GENDOWN       = w.mcgenDo_;
     }
 }
 //----------------------------------------------------------
@@ -158,5 +162,35 @@ bool HftFiller::determineXsecUncertainty(const int dsid)
     cout<<"HftFiller::determineXsecUncertainty : using "<<xsecUnc.str()<<" for dsid "<<dsid<<endl;
     xsecRelativeUncertainty_ = xsecUnc.fractionalUncertainty();
     return groupFound;
+}
+//----------------------------------------------------------
+bool HftFiller::determineMcGenUncertainty(const int dsid)
+{
+    XsecUncertainty xsecUnc;
+    bool groupFound = xsecUnc.determineGroup(dsid);
+    if(!groupFound)
+        cout<<"HftFiller::determineMcGenUncertainty : cannot determine group for dsid "<<dsid<<endl
+            <<endl;
+    bool isWz      = xsecUnc.group()==XsecUncertainty::kWz;
+    bool isOtherMc = xsecUnc.group()!=XsecUncertainty::kUnknown;
+    if(isWz){
+        mcGenRelativeUncertainty1j_ = 0.166;
+        mcGenRelativeUncertainty23j_ = 0.368;
+    } else if(isOtherMc){
+        mcGenRelativeUncertainty1j_ = 1.0;
+        mcGenRelativeUncertainty23j_ = 1.0;
+    }
+    cout<<"HftFiller::determineXsecUncertainty : for dsid "<<dsid<<" using "
+        <<" "<<mcGenRelativeUncertainty1j_<<" (1j), "
+        <<" "<<mcGenRelativeUncertainty23j_<<" (23j)"
+        <<endl;
+    return groupFound;
+}
+//----------------------------------------------------------
+float HftFiller::mcGenRelativeUncertainty(const int njet) const
+{
+    return (njet==1 ? // by default pick the more conservative 2,3 value
+            mcGenRelativeUncertainty1j_ :
+            mcGenRelativeUncertainty23j_);
 }
 //----------------------------------------------------------

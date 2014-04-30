@@ -38,6 +38,7 @@ public:
     XsecUncertainty() : m_keepQuiet(false), m_group(kUnknown), m_uncertainty(1.0) {}
     bool determineGroup(const int dsid);
     float fractionalUncertainty() const;
+    McGroup group() const { return m_group; }
     std::string str() const;
     bool m_keepQuiet;
 public:

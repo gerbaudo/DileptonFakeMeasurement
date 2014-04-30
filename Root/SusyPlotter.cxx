@@ -531,6 +531,7 @@ swh::HftFiller::WeightVariations  SusyPlotter::computeWeightVariations(cvl_t& le
     const WeightComponents &w = m_weightComponents;
     swh::HftFiller::WeightVariations wv;
     bool isQflip(w.qflip!=1.0);
+    int njets = numberOfCLJets(jets);
     wv.qflipUp_  = isQflip ? w.relativeQflip(computeChargeFlipProb(l, m, swh::WH_BKGMETHODUP  )) : 1.0;
     wv.qflipDo_  = isQflip ? w.relativeQflip(computeChargeFlipProb(l, m, swh::WH_BKGMETHODDOWN)) : 1.0;
     wv.elTrigUp_ = w.relativeTrig(computeNonStaticWeightComponents(l, j, swh::WH_ETRIGREWUP  ));
@@ -549,6 +550,8 @@ swh::HftFiller::WeightVariations  SusyPlotter::computeWeightVariations(cvl_t& le
     wv.muEffDo_  = w.relativeLepSf(susy::getLeptonEff2Lep(l, swh::WH_MEFFDOWN));
     wv.xsecUp_   = (1.0 + m_hftFiller.xsecRelativeUncertainty());
     wv.xsecDo_   = (1.0 - m_hftFiller.xsecRelativeUncertainty());
+    wv.mcgenUp_  = (1.0 + m_hftFiller.mcGenRelativeUncertainty(njets));
+    wv.mcgenDo_  = (1.0 - m_hftFiller.mcGenRelativeUncertainty(njets));
     return wv;
 }
 //-----------------------------------------
@@ -560,8 +563,11 @@ void SusyPlotter::initHftFiller()
         struct { string operator () (const string &f) { return basedir(f.c_str()); } } guessOutputDir;
         m_hftFiller.setOutputDir(guessOutputDir(m_histFileName));
         m_hftFiller.init(hftTreeName(), m_systNames);
-        if(nt.evt()->isMC)
-            m_hftFiller.determineXsecUncertainty(nt.evt()->mcChannel);
+        if(nt.evt()->isMC){
+            int dsid = nt.evt()->mcChannel;
+            m_hftFiller.determineXsecUncertainty(dsid);
+            m_hftFiller.determineMcGenUncertainty(dsid);
+        }
         if(m_dbg) {
             ostringstream oss;
             oss<<hftTreeName()<<" :\n";
