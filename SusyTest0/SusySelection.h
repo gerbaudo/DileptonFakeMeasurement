@@ -167,7 +167,8 @@ class SusySelection : public SusyNtAna
                                 const susy::wh::Systematic sys,
                                 bool update4mom);
     float computeChargeFlipProb(const LeptonVector &leptons, const Met &met, const susy::wh::Systematic sys);
-    static bool validateQflipProb(float &probability, float &overlap, const Lepton *l0, const Lepton *l1, const Event *event);
+    static bool validateQflipProb(float &probability, float &overlap, const Lepton *l0, const Lepton *l1,
+                                  const Event *event, unsigned int &invalidCounter);
     //! any electron or muon, before pt cuts, before overlap removal
     static vl_t getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/);
     static susy::wh::Chan getChan(const LeptonVector& leps); //!< compute lepton channel
@@ -209,6 +210,7 @@ class SusySelection : public SusyNtAna
     Met                 m_unsmeared_met; //! cached met before charge-flip smearing
     WeightComponents    m_weightComponents;
     susy::ProgressPrinter m_printer;
+    unsigned int        m_nInvalidQflip; //! counter, number of invalid charge flip probabilities
     // Event counters
     float n_readin          [kWeightTypesN]; // [weight type]
     float n_pass_Grl        [kWeightTypesN];

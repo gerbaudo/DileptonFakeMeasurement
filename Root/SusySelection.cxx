@@ -42,7 +42,8 @@ SusySelection::SusySelection() :
   m_w(1.0),
   m_useXsReader(false),
   m_xsFromReader(-1.0),
-  m_qflipProb(0.0)
+  m_qflipProb(0.0),
+  m_nInvalidQflip(0)
 {
   resetAllCounters();
   setAnaType(Ana_2LepWH);
@@ -125,6 +126,8 @@ void SusySelection::Terminate()
   dumpEventCounters();
   if(m_xsReader) delete m_xsReader;
   if(m_chargeFlip) delete m_chargeFlip;
+  if(m_nInvalidQflip)
+      cout<<"Number of invalid charge flip probabilities: "<<m_nInvalidQflip<<" (those were set to 0.0)"<<endl;
 }
 //-----------------------------------------
 void SusySelection::increment(float counters[], const WeightComponents &wc)
@@ -645,7 +648,7 @@ float SusySelection::computeChargeFlipProb(const LeptonVector &leptons, const Me
   m_chargeFlip->setSeed(nt.evt()->event);
   float flipProb(m_chargeFlip->OS2SS(pdg0, &smearedLv0, pdg1, &smearedLv1, sys, isData, chargeFlip::dataonly));
   float overlapFrac(m_chargeFlip->overlapFrac().first);
-  validateQflipProb(flipProb, overlapFrac, l0, l1, nt.evt());
+  validateQflipProb(flipProb, overlapFrac, l0, l1, nt.evt(), m_nInvalidQflip);
   return flipProb*overlapFrac;
 }
 //-----------------------------------------
@@ -685,24 +688,28 @@ float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
     met.Et = smearedMet.Mod();
     met.phi = smearedMet.Phi();
   }
-  validateQflipProb(flipProb, overlapFrac, l0, l1, nt.evt());
+  validateQflipProb(flipProb, overlapFrac, l0, l1, nt.evt(), m_nInvalidQflip);
   return flipProb*overlapFrac;
 }
 //-----------------------------------------
-bool SusySelection::validateQflipProb(float &probability, float &overlap, const Lepton *l0, const Lepton *l1, const Event *event)
+bool SusySelection::validateQflipProb(float &probability, float &overlap, const Lepton *l0, const Lepton *l1,
+                                      const Event *event, unsigned int &invalidCounter)
 {
     bool isValid=true;
     if(probability<0.0 || probability>1.0){
         isValid=false;
-        cout<<"SusySelection::validateQflipProb "
-            <<"error: unphysical probability "<<probability<<" * "<<overlap<<endl;
+        invalidCounter++;
+        if(invalidCounter<100){
+            cout<<"SusySelection::validateQflipProb "
+                <<"error: unphysical probability "<<probability<<" * "<<overlap<<endl;
             cout<<" setting it to 0.0"<<endl;
-        probability=0.0;
-        if(event && l0 && l1) {
-            event->print();
-            l0->print();
-            l1->print();
+            if(event && l0 && l1) {
+                event->print();
+                l0->print();
+                l1->print();
+            }
         }
+        probability=0.0;
     }
     return isValid;
 }
