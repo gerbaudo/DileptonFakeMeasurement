@@ -51,6 +51,14 @@ def topRightLegend(pad,  legWidth, legHeight, shift=0.0) :
     leg.SetFillStyle(0)
     pad._leg = leg
     return leg
+def rightLegend(pad) :
+    bMarg, rMarg, lMarg, tMarg = pad.GetBottomMargin(), pad.GetRightMargin(), pad.GetLeftMargin(), pad.GetTopMargin()
+    leg = r.TLegend(1.0 - rMarg, bMarg, 1.0, 1.0 - tMarg)
+    leg.SetBorderSize(1)
+    leg.SetFillColor(0)
+    leg.SetFillStyle(0)
+    pad._leg = leg
+    return leg
 def drawLegendWithDictKeys(pad, histosDict, legWidth=0.325, legHeight=0.225, opt='p') :
     leg = topRightLegend(pad, legWidth, legHeight)
     for s,h in histosDict.iteritems() :
