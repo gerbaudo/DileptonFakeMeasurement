@@ -34,7 +34,7 @@ from rootUtils import (drawLegendWithDictKeys
                        ,importRootCorePackages
                        ,summedHisto
                        ,topRightLabel
-                       ,topRightLegend)
+                       ,rightLegend)
 r = rootUtils.importRoot()
 r.gROOT.SetStyle('Plain')
 r.gStyle.SetPadTickX(1)
@@ -80,7 +80,7 @@ def main():
     treeName = 'SameSign1jetControlRegion'
     outputFileName = os.path.join(outputDir, templateOutputFilename)
     cacheFileName = outputFileName.replace('.root', '_cache.root')
-    doFillHistograms = options.fill_histos or not os.path.exists(outputFileName)
+    doFillHistograms = options.fill_histos or not os.path.exists(cacheFileName)
     optionsToPrint = ['inputDir', 'outputDir', 'tag', 'doFillHistograms']
     if verbose : print "options:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
     # collect inputs
@@ -146,8 +146,9 @@ def plotFractionsStacked(histos={}, canvasName='', outputDir='./', frameTitle='t
     "plot stack of histos[source][group]"
     can = r.TCanvas(canvasName, '', 800, 600)
     can.cd()
+    can.SetRightMargin(2.0*can.GetRightMargin())
     stack = r.THStack('stack_'+canvasName, '')
-    leg = topRightLegend(can, 0.275, 0.475, shift=+0.050)
+    leg = rightLegend(can)
     leg.SetBorderSize(0)
     colors = SampleUtils.colors
     sources = sorted(histos.keys())
