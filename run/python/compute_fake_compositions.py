@@ -203,29 +203,44 @@ def allSelections() :
 def histoname_electron_sf_vs_eta() : return 'sf_el_vs_eta'
 def histoname_electron_sf_vs_pt() : return 'sf_el_vs_pt'
 
-def getSelection(l0, l1, jets, met):
-    def isBjet(j, mv1_80=0.3511) : return j.mv1 > mv1_80 # see SusyDefs.h
-    def isForwardJet(j) : return j.p4.Pt()>30.0 and abs(j.p4.Eta())<2.4 # should be detEta but not stored
-    fabs = math.fabs
-    clJets = [j for j in jets if not isBjet(j) and not isForwardJet(j) for j in jets]
-    hasFbJets = len(clJets)!=len(jets)
-    nClJets = len(clJets)
+
+def getSelectionChannelOnly(l0, l1, jets, met):
+    nClJets = len(jets) #note to self: these are already central-light jets b/c of passCommonCriteria
     sel = None
-    if nClJets==0:
-        return sel
+    ll = kin.getDilepType(l0, l1)
+    nj = 'eq1j' if nClJets==1 else 'ge2j'
+    mlj  = kin.computeMlj(l0.p4, l1.p4, jets[0].p4)
+    mljj = kin.computeMljj(l0.p4, l1.p4, jets[0].p4, jets[1].p4) if nClJets>1 else None
+    if (ll=='mm' and nj=='eq1j'):
+        sel = 'sr_mm_eq1j' if mlj<90.0 else 'cr_mm_eq1j'
+    elif (ll=='mm' and nj=='ge2j'):
+        sel ='sr_mm_ge2j' if mljj<120.0 else 'cr_mm_ge2j'
+    elif (ll=='em' and nj=='eq1j'):
+        sel = 'sr_ee_eq1j' if mlj<90.0 else 'cr_ee_eq1j'
+    elif (ll=='em' and nj=='ge2j'):
+        sel = 'sr_em_ge2j' if mljj<120.0 else 'cr_em_ge2j'
+    elif (ll=='ee' and nj=='eq1j'):
+        sel = 'sr_ee_eq1j' if mlj<90.0 else 'cr_ee_eq1j'
+    elif (ll=='ee' and nj=='ge2j'):
+        sel = 'sr_ee_ge2j' if mljj<120.0 else 'cr_ee_ge2j'
+    return sel
+
+def getSelection(l0, l1, jets, met):
+    nClJets = len(jets)
+    sel = None
     l0pt    = l0.p4.Pt()
     l1pt    = l1.p4.Pt()
-    j0      = clJets[0]
+    j0      = jets[0]
     mll     = (l0.p4 + l1.p4).M()
-    ht      = kin.computeHt(met.p4, [l0.p4, l1.p4]+[j.p4 for j in clJets])
-    metrel  = kin.computeMetRel(met.p4, [l0.p4, l1.p4]+[j.p4 for j in clJets])
+    ht      = kin.computeHt(met.p4, [l0.p4, l1.p4]+[j.p4 for j in jets])
+    metrel  = kin.computeMetRel(met.p4, [l0.p4, l1.p4]+[j.p4 for j in jets])
     mtl0    = kin.computeMt(l0.p4, met.p4)
     mtl1    = kin.computeMt(l1.p4, met.p4)
     mtmin   = min([mtl0, mtl1])
     mtmax   = max([mtl0, mtl1])
     mlj     = kin.computeMlj(l0.p4, l1.p4, j0.p4)
     detall  = fabs(l0.p4.Eta() - l1.p4.Eta())
-    mljj = kin.computeMljj(l0.p4, l1.p4, clJets[0].p4, clJets[1].p4) if nClJets>1 else None
+    mljj = kin.computeMljj(l0.p4, l1.p4, jets[0].p4, jets[1].p4) if nClJets>1 else None
     ll = kin.getDilepType(l0, l1)
     nj = 'eq1j' if nClJets==1 else 'ge2j'
     if (ll=='mm' and nj=='eq1j'
@@ -289,7 +304,7 @@ def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, verbose=F
         l1IsFake = l0.source!=sourceReal and not isData
         atLeastOneIsFake = l0IsFake or l1IsFake
         if not atLeastOneIsFake : continue
-        selection = getSelection(l0, l1, jets, met)
+        selection = getSelectionChannelOnly(l0, l1, jets, met)
         def fillHistosBySource(lep):
             isTight = lep.isTight
             source = lep.source
