@@ -142,8 +142,7 @@ def histoname_electron_sf_vs_pt() : return 'sf_el_vs_pt'
 def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource, isConversion, isData, lepton, group, verbose=False):
     nLoose, nTight = 0, 0
     totWeightLoose, totWeightTight = 0.0, 0.0
-    #normFactor = 3.2 if group=='heavyflavor' else 1.0 # bb/cc hand-waving normalization factor, see notes 2014-04-17
-    normFactor = -43702.0 if group=='heavyflavor' else 1.0 # bb/cc hand-waving normalization factor, see notes 2014-04-17
+    normFactor = 3.2 if group=='heavyflavor' else 1.0 # bb/cc hand-waving normalization factor, see notes 2014-04-17
     for event in chain :
         pars = event.pars
         weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
@@ -156,9 +155,9 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
         sourceReal = 3 # see FakeLeptonSources.h
         isReal = probeSource==sourceReal and not isData
         isFake = not isReal and not isData
-        def isBjet(j, mv1_80=0.3511) : return j.mv1 > mv1_80 # see SusyDefs.h
-        # jets = event.jets # compute only if necessary
-        # hasBjets = any(isBjet(j) for j in jets)
+        jets = event.jets
+#         def isBjet(j, mv1_80=0.3511) : return j.mv1 > mv1_80 # see SusyDefs.h
+#         hasBjets = any(isBjet(j) for j in jets) # compute only if necessary
         tag4m, probe4m, met4m = r.TLorentzVector(), r.TLorentzVector(), r.TLorentzVector()
         tag4m.SetPxPyPzE(tag.px, tag.py, tag.pz, tag.E)
         probe4m.SetPxPyPzE(probe.px, probe.py, probe.pz, probe.E)
@@ -169,8 +168,7 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
         mt1 = computeMt(probe4m, met4m)
         pt0 = tag4m.Pt()
         isLowMt = mt1 < 40.0
-        if isRightLep and isLowMt:
-#         if isRightLep and isLowMt and pt0>20.0: # test trigger effect on tag mu
+        if isRightLep and isLowMt and pt0>20.0: # test trigger effect on tag mu
 #         if (isSameSign or isConversion) and isRightLep and isLowMt: # test sf conversion (not very important for now, 2014-04)
 
             def incrementCounts(counts, weightedCounts):
