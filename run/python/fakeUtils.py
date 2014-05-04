@@ -1,8 +1,10 @@
 
 import numpy as np
 
-from rootUtils import importRoot, buildRatioHistogram
+from utils import rmIfExists
+from rootUtils import importRoot, buildRatioHistogram, getMinMax, drawLegendWithDictKeys
 r = importRoot()
+import SampleUtils
 
 def samples() : return ['allBkg', 'ttbar', 'wjets', 'zjets', 'diboson', 'heavyflavor']
 def fakeProcesses() : return ['ttbar', 'wjets', 'zjets', 'diboson', 'heavyflavor']
@@ -32,3 +34,52 @@ def colorsLineSources() :
     return dict(zip(leptonSources(), [r.kBlue, r.kMagenta, r.kRed, r.kGreen, r.kCyan, r.kGray+1]))
 def markersSources() :
     return dict(zip(leptonSources(), [r.kPlus, r.kCircle, r.kMultiply, r.kOpenSquare, r.kOpenTriangleUp, r.kOpenCross]))
+
+def plot1dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='title;p_{T} [GeV]; efficiency', zoomIn=False) :
+    can = r.TCanvas(canvasName, '', 800, 600)
+    can.cd()
+    padMaster = None
+    colors, markers = SampleUtils.colors, SampleUtils.markers
+    for s,h in effs.iteritems() :
+        h.SetLineColor(colors[s] if s in colors else r.kBlack)
+        h.SetMarkerColor(h.GetLineColor())
+        h.SetMarkerStyle(markers[s] if s in markers else r.kFullCircle)
+        drawOpt = 'ep same' if padMaster else 'ep'
+        h.Draw(drawOpt)
+        if not padMaster : padMaster = h
+    minY, maxY = getMinMax(effs.values()) if zoomIn else (0.0, 1.0)
+    padMaster.GetYaxis().SetRangeUser(min([0.0, minY]), 1.1*maxY)
+    padMaster.SetMinimum(0.0)
+    padMaster.SetMaximum(1.1*maxY)
+    padMaster.SetMaximum(0.25)
+    padMaster.SetTitle(frameTitle)
+    padMaster.SetStats(False)
+    drawLegendWithDictKeys(can, effs)
+    can.Update()
+    for ext in ['png','eps'] :
+        outFilename = outputDir+'/'+canvasName+'.'+ext
+        rmIfExists(outFilename)
+        can.SaveAs(outFilename)
+
+def plot2dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='efficiency; #eta; p_{T} [GeV]', zoomIn=False) :
+    can = r.TCanvas(canvasName, '', 800, 600)
+    can.cd()
+    origTextFormat = r.gStyle.GetPaintTextFormat()
+    r.gStyle.SetPaintTextFormat('.2f')
+    for s,h in effs.iteritems() :
+        can.Clear()
+        # todo minZ, maxZ = getMinMax(effs.values()) if zoomIn else (0.0, 1.0)
+        minZ, maxZ = (0.0, 1.0)
+        h.SetMarkerSize(1.5*h.GetMarkerSize())
+        h.Draw('colz')
+        h.Draw('text e same')
+        h.GetZaxis().SetRangeUser(min([0.0, minZ]), maxZ)
+        def dropCrPrefix(sr) : return sr.replace('CR_', '')
+        h.SetTitle(dropCrPrefix(s)+' : '+frameTitle)
+        h.SetStats(False)
+        can.Update()
+        for ext in ['png','eps'] :
+            outFilename = outputDir+'/'+canvasName+'_'+s+'.'+ext
+            rmIfExists(outFilename)
+            can.SaveAs(outFilename)
+    r.gStyle.SetPaintTextFormat(origTextFormat)
