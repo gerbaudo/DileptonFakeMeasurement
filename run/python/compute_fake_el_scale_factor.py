@@ -76,7 +76,7 @@ def main():
         treeName = 'HeavyFlavorControlRegion' if mode=='hflf' else 'ConversionControlRegion'
         outputFileName = os.path.join(outputDir, templateOutputFilename)
         cacheFileName = outputFileName.replace('.root', '_'+mode+'_cache.root')
-        doFillHistograms = options.fill_histos or not os.path.exists(outputFileName)
+        doFillHistograms = options.fill_histos or not os.path.exists(cacheFileName)
         optionsToPrint = ['inputDir', 'outputDir', 'mode', 'tag', 'doFillHistograms']
         if verbose : print "options:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
         # collect inputs
