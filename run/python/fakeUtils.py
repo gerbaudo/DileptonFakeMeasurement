@@ -51,7 +51,7 @@ def plot1dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='title
     padMaster.GetYaxis().SetRangeUser(min([0.0, minY]), 1.1*maxY)
     padMaster.SetMinimum(0.0)
     padMaster.SetMaximum(1.1*maxY)
-    padMaster.SetMaximum(0.25)
+    padMaster.SetMaximum(0.25 if (maxY < 0.25 and zoomIn) else 1.1)
     padMaster.SetTitle(frameTitle)
     padMaster.SetStats(False)
     drawLegendWithDictKeys(can, effs)
