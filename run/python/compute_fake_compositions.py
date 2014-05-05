@@ -96,7 +96,7 @@ def main():
     for s, f in zip(samples, tupleFilenames) :
         samplesPerGroup[s.group].append(s)
         filenamesPerGroup[s.group].append(f)
-    vars = ['pt', 'eta']
+    vars = ['pt', 'eta', 'pt_eta']
     groups = samplesPerGroup.keys()
     #fill histos
     if doFillHistograms :
@@ -141,11 +141,13 @@ def main():
                           [(k+'_light',  h) for k,h in histosLight.iteritems()] +
                           [(k+'_conv', h) for k,h in histosConv.iteritems()])
             normalizeHistos(histos)
-            histos = {'heavy':histosHeavy, 'light':histosLight, 'conv':histosConv}
-            frameTitle = 'elec: '+sel+';'+var
-            canvasBaseName = 'elec_fake'+sel+'_'+var+'_frac'
-            plotFractionsStacked(histos, canvasBaseName+'_stack', outputDir, frameTitle)
             histosCompositions[sel][var] = histos
+            is1Dhisto = var!='pt_eta' # can only stack 1D plots
+            if is1Dhisto:
+                histos = {'heavy':histosHeavy, 'light':histosLight, 'conv':histosConv}
+                frameTitle = 'elec: '+sel+';'+var
+                canvasBaseName = 'elec_fake'+sel+'_'+var+'_frac'
+                plotFractionsStacked(histos, canvasBaseName+'_stack', outputDir, frameTitle)
     writeHistos(outputFileName, histosCompositions, verbose)
 
 
@@ -293,8 +295,13 @@ def getSelection(l0, l1, jets, met):
         sel = 'sr_ee_ge2j' if mljj<120.0 else 'cr_ee_ge2j'
     return sel
 
-
-
+def shiftWithinRange(pt, eta, epsilon=1.0e-3):
+    ptBins, etaBins = fakeu.ptBinEdges(), fakeu.etaBinEdges()
+    minPt, maxPt = min(ptBins), max(ptBins)
+    minEta, maxEta = min(etaBins), max(etaBins)
+    pt  = minPt*(1.0+epsilon)  if pt<minPt   else maxPt*(1.0-epsilon)  if pt > maxPt   else pt
+    eta = minEta*(1.0+epsilon) if eta<minEta else maxEta*(1.0-epsilon) if eta > maxEta else eta
+    return pt, eta
 def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, verbose=False):
     "expect histos[group][sel][source][var][loose,tight]"
     normFactor = 3.2 if group=='heavyflavor' else 1.0 # bb/cc hand-waving normalization factor, see notes 2014-04-17
@@ -322,11 +329,14 @@ def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, verbose=F
             isRightLep = lep.isMu and lepton=='mu' or lep.isEl and lepton=='el'
             def fill():
                 pt, eta = lep.p4.Pt(), abs(lep.p4.Eta())
-                histosThisGroupPerSource['ssinc1j'][leptonSource]['pt' ]['loose'].Fill(pt,  weight)
-                histosThisGroupPerSource['ssinc1j'][leptonSource]['eta']['loose'].Fill(eta, weight)
+                pt, eta = shiftWithinRange(pt, eta) # avoid loosing entries due to over/underflow
+                histosThisGroupPerSource['ssinc1j'][leptonSource]['pt'    ]['loose'].Fill(pt,  weight)
+                histosThisGroupPerSource['ssinc1j'][leptonSource]['eta'   ]['loose'].Fill(eta, weight)
+                histosThisGroupPerSource['ssinc1j'][leptonSource]['pt_eta']['loose'].Fill(pt, eta, weight)
                 if selection:
-                    histosThisGroupPerSource[selection][leptonSource]['pt' ]['loose'].Fill(pt,  weight)
-                    histosThisGroupPerSource[selection][leptonSource]['eta']['loose'].Fill(eta, weight)
+                    histosThisGroupPerSource[selection][leptonSource]['pt'    ]['loose'].Fill(pt,  weight)
+                    histosThisGroupPerSource[selection][leptonSource]['eta'   ]['loose'].Fill(eta, weight)
+                    histosThisGroupPerSource[selection][leptonSource]['pt_eta']['loose'].Fill(pt, eta, weight)
             filled = False
             if isRightLep and sourceIsKnown and isFake :
                 fill()
@@ -347,6 +357,7 @@ def bookHistosPerSamplePerSource(variables, samples, sources):
         etaBinEdges = fakeu.etaBinEdges()
         if   variable=='pt'  : h = r.TH1F(hname, ';p_{T,l} [GeV]; entries/bin',   len(ptBinEdges)-1,  ptBinEdges)
         elif variable=='eta' : h = r.TH1F(hname, ';#eta_{l}; entries/bin',        len(etaBinEdges)-1, etaBinEdges)
+        elif variable=='pt_eta' : h = r.TH2F(hname, ';p_{T,l} [GeV]; #eta_{l};',  len(ptBinEdges)-1,  ptBinEdges, len(etaBinEdges)-1, etaBinEdges)
         else : print "unknown variable %s"%v
         h.SetDirectory(0)
         h.Sumw2()
