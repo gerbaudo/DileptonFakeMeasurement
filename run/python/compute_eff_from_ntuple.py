@@ -97,7 +97,7 @@ def main():
         samplesPerGroup[s.group].append(s)
         filenamesPerGroup[s.group].append(f)
     vars = ['pt', 'pt_eta']
-    groups = [g for g in samplesPerGroup.keys() if not isDataSample(g)]
+    groups = [g for g in samplesPerGroup.keys() if not isDataSample(g) and not g=='higgs']
     sourcesThisMode = {'real' : ['real'], # use same convention as in FakeLeptonSources.h
                        'conv' : ['conv'],
                        'hflf' : ['heavy', 'light', 'qcd']
