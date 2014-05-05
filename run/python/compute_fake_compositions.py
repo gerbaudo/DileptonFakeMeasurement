@@ -82,7 +82,10 @@ def main():
     cacheFileName = outputFileName.replace('.root', '_cache.root')
     doFillHistograms = options.fill_histos or not os.path.exists(cacheFileName)
     optionsToPrint = ['inputDir', 'outputDir', 'tag', 'doFillHistograms']
-    if verbose : print "options:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
+    if verbose :
+        print "working from %s"%os.getcwd()
+        print "being called as : %s"%' '.join(os.sys.argv)
+        print "options parsed:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
     # collect inputs
     print '----> input files ',os.path.join(inputDir, templateInputFilename)
     tupleFilenames = glob.glob(os.path.join(inputDir, templateInputFilename))
@@ -109,7 +112,9 @@ def main():
         writeHistos(cacheFileName, histosPerGroupPerSource, verbose)
     # compute and plot fractions
     histosPerGroupPerSource = fetchHistos(cacheFileName, histoNamesPerSamplePerSource(vars, groups, leptonSources))
+    histosCompositions = dict()
     for sel in allSelections():
+        histosCompositions[sel] = dict()
         for var in vars:
             hs, groups = histosPerGroupPerSource, histosPerGroupPerSource.keys()
             groups = [g for g in groups if g!='data' and g!='higgs']
@@ -140,6 +145,8 @@ def main():
             frameTitle = 'elec: '+sel+';'+var
             canvasBaseName = 'elec_fake'+sel+'_'+var+'_frac'
             plotFractionsStacked(histos, canvasBaseName+'_stack', outputDir, frameTitle)
+            histosCompositions[sel][var] = histos
+    writeHistos(outputFileName, histosCompositions, verbose)
 
 
 def plotFractionsStacked(histos={}, canvasName='', outputDir='./', frameTitle='title;p_{T} [GeV]; fraction'):
