@@ -49,6 +49,8 @@ from SampleUtils import (fastSamplesFromFilenames
                          ,isDataSample)
 import SampleUtils
 import fakeUtils as fakeu
+from compute_fake_el_scale_factor import histoname_electron_sf_vs_eta
+from buildWeightedMatrix import fetchSfHistos
 
 usage="""
 Example usage:
@@ -60,11 +62,15 @@ Example usage:
 
  TODO
 """
+
+el_convSF, el_qcdSF = 1.09, 1.0
+
 def main():
     parser = optparse.OptionParser(usage=usage)
     parser.add_option('-i', '--input-dir', default='./out/fakerate')
     parser.add_option('-c', '--comp-histos', help='output from compute_fake_compositions.py')
     parser.add_option('-e', '--eff-histos', default=[], action='append', help='output files from compute_eff_from_ntuple.py')
+    parser.add_option('-s', '--input-el-sf', default=[], action='append', help='electron bin-by-bin scale factors (from compute_fake_el_scale_factor)')
     parser.add_option('-o', '--output-dir', default='./out/fake_weighted_average', help='dir for plots')
     parser.add_option('-l', '--lepton', default='el', help='either el or mu')
     parser.add_option('-t', '--tag', help='tag used to select the input files (e.g. Apr_04)')
@@ -74,6 +80,7 @@ def main():
     inputDir  = options.input_dir
     compFname = options.comp_histos
     effFnames = options.eff_histos
+    sfFnames  = options.input_el_sf
     outputDir = options.output_dir
     lepton    = options.lepton
     tag       = options.tag
@@ -82,6 +89,7 @@ def main():
     if lepton not in ['el', 'mu'] : parser.error("invalid lepton '%s'"%lepton)
     if not compFname or not os.path.exists(compFname) : parser.error("invalid composition file '%s'"%compFname)
     if not effFnames or not all(os.path.exists(f) for f in effFnames) : parser.error("invalid efficiency file '%s'"%str(effFnames))
+    if not sfFnames  or not all(os.path.exists(f) for f in sfFnames) : parser.error("invalid electron sf file(s) %s"%str(sfFnames))
     optionsToPrint = ['inputDir', 'outputDir', 'tag']
     if verbose :
         print "working from %s"%os.getcwd()
@@ -89,10 +97,15 @@ def main():
         print "options parsed:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
     mkdirIfNeeded(outputDir)
     # collect inputs
-    compositions = fetchCompositionHistos(compFname, lepton, verbose) # [var][group][reg][orig]
+    compositions = fetchCompositionHistos(compFname, lepton, verbose) # [var][group][reg][orig], note here orig=[conv,heavy,light]
     # pprint.pprint(compositions)
-    efficiencies = fetchEffienciesHistos(effFnames, lepton, verbose) # [var][group][orig]
+    efficiencies = fetchEffienciesHistos(effFnames, lepton, verbose) # [var][group][orig], note here orig=[conv,heavy,light,qcd]
     # pprint.pprint(efficiencies)
+    el_convSF_vs_eta = fetchSfHistos(sfFnames, histoname_electron_sf_vs_eta, verbose)['conv']
+    el_qcdSF_vs_eta  = fetchSfHistos(sfFnames, histoname_electron_sf_vs_eta, verbose)['hflf']
+    scaleFactors = {'conv' : {'flat' : el_convSF, 'vs_eta' : el_convSF_vs_eta},
+                    'heavy' : {'flat' : el_qcdSF, 'vs_eta' : el_qcdSF_vs_eta} }
+    scaleElectronFakeEfficiencies(efficiencies, scaleFactors)
     # for now compute the weighted avg only for 'ssinc1j'
     avgEfficiencies = dict()
     for reg in first(first(compositions)).keys():
@@ -153,7 +166,7 @@ def fetchCompositionHistos(filename, lepton, verbose):
                             for g in groups))
                       for v in vars)
     return fetchHistos(filename, histonames, verbose)
-def fetchEffienciesHistos(filenames, lepton, verbose):
+def fetchEffienciesHistos(filenames, lepton, verbose=False):
     template = "h_%(var)s_%(group)s_%(origin)s_tight_over_loose_%(region)s"
     regions = ['conv', 'hflf',] # these are the regions for fake el
     assert lepton=='el', "not implemented yet; todo: add regions for fake mu and real el/mu"
@@ -173,13 +186,27 @@ def fetchEffienciesHistos(filenames, lepton, verbose):
     def mergeConvQcd():
         return dict((v, dict((g, dict((o, histosConv[v][g][o] if o in originsConv else histosQcd[v][g][o])
                                       for o in originsQcd+originsConv)) for g in groups)) for v in vars)
-    return mergeConvQcd()
+    histosMerged = mergeConvQcd()
+    return histosMerged
 
 def writeHistos(outputFileName='', histosPerSamplePerSource={}, verbose=False):
     rootUtils.writeObjectsToFile(outputFileName, histosPerSamplePerSource, verbose)
 
 def fetchHistos(fileName='', histoNames={}, verbose=False):
     return rootUtils.fetchObjectsFromFile(fileName, histoNames, verbose)
+
+def scaleElectronFakeEfficiencies(efficiencies={}, scaleFactors={}):
+    for var in efficiencies.keys():
+        for group in first(efficiencies).keys():
+            h = efficiencies[var][group]['conv']
+            if 'TH1' in h.ClassName() :   h.Scale   (scaleFactors['conv']['flat'])
+            elif 'TH2' in h.ClassName() : h.Multiply(scaleFactors['conv']['vs_eta'])
+            h = efficiencies[var][group]['heavy']
+            if 'TH1' in h.ClassName() :   h.Scale   (scaleFactors['heavy']['flat'])
+            elif 'TH2' in h.ClassName() : h.Multiply(scaleFactors['heavy']['vs_eta'])
+            h = efficiencies[var][group]['qcd'] # scale qcd with the 'heavy' sf (but assume that the 'light' one is 1.0, see 3L)
+            if 'TH1' in h.ClassName() :   h.Scale   (scaleFactors['heavy']['flat'])
+            elif 'TH2' in h.ClassName() : h.Multiply(scaleFactors['heavy']['vs_eta'])
 
 def weightedAverage(histosEff={}, histosWeight={}, histoName='', histoTitle='', verbose=False):
     getBinIndices, getBinContents, getBinning = rootUtils.getBinIndices, rootUtils.getBinContents, rootUtils.getBinning
