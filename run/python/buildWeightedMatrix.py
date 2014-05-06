@@ -45,6 +45,7 @@ from fakeUtils import (samples
                        ,plot1dEfficiencies
                        ,plot2dEfficiencies
                        )
+import fakeUtils as fakeu
 
 import matplotlib as mpl
 mpl.use('Agg') # render plots without X
@@ -534,8 +535,8 @@ def compose2Dcompositions(inputSfFile=None, templateHistoName="%(proc)s_%(etabin
 
 def composeEtaHistosAs2dPtEta(input1Dhisto=None, outhistoname='') :
     "take the 1D scale factor histogram (vs eta), and build a 2D histo that has (pt,eta) on (x,y); see MeasureFakeRate2::initHistos"
-    ptBinEdges = np.array([10.0, 20.0, 35.0, 100.0]) # see FakeBinnings.h -> coarseFakePtbins
-    etaBinEdges = np.array([0.0, 1.37, 2.50])
+    ptBinEdges = fakeu.ptBinEdges()
+    etaBinEdges = fakeu.etaBinEdges()
     h = r.TH2F(outhistoname, '', len(ptBinEdges)-1, ptBinEdges, len(etaBinEdges)-1, etaBinEdges)
     h.SetDirectory(0)
     h.Sumw2()
