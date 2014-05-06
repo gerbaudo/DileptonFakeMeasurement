@@ -211,13 +211,14 @@ def guessBaseHistoname(histonames=[]) :
     basename = commonPrefix(histonames) if not len(basename) else basename
     basename = histonames[0] if not len(basename) else basename
     return basename.strip(' _')
-def normalizeHistos(histosFlavorSlice) :
-    basename = guessBaseHistoname([h.GetName() for h in histosFlavorSlice.values()])
-    tot = first(histosFlavorSlice).Clone(basename+'_tot')
+def normalizeHistos(histos) :
+    "Normalize the input histos so that in each bin the sum of the different processes amounts to 1.0"
+    basename = guessBaseHistoname([h.GetName() for h in histos.values()])
+    tot = first(histos).Clone(basename+'_tot')
     tot.Reset()
-    for h in histosFlavorSlice.values() : tot.Add(h)
+    for h in histos.values() : tot.Add(h)
     for b in getBinIndices(tot) : tot.SetBinError(b, 0.0) # norm is a constraint, without error
-    for h in histosFlavorSlice.values() : h.Divide(tot)
+    for h in histos.values() : h.Divide(tot)
 def saveHistos(histos=[], outfile=None) :
     outfile.cd()
     for h in histos : h.Write()
