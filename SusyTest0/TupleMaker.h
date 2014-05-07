@@ -54,6 +54,10 @@ public:
     TupleMaker& setL1IsTight(bool v) { l1_.setIsTight(v); return *this; }
     TupleMaker& setL0Source(int v) { l0_.setSource(v); return *this; }
     TupleMaker& setL1Source(int v) { l1_.setSource(v); return *this; }
+    TupleMaker& setL0EtConeCorr(float v) { l0_.setEtConeCorr(v); return *this; }
+    TupleMaker& setL1EtConeCorr(float v) { l1_.setEtConeCorr(v); return *this; }
+    TupleMaker& setL0PtConeCorr(float v) { l0_.setPtConeCorr(v); return *this; }
+    TupleMaker& setL1PtConeCorr(float v) { l1_.setPtConeCorr(v); return *this; }
     const TFile* file() const { return file_; }
     const TTree* tree() const { return tree_; }
     const FourMom& l0() const { return l0_; }

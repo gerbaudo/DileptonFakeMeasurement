@@ -264,6 +264,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             tupleMaker
                 .setL0IsTight(l0IsTight).setL0Source(l0Source)
                 .setL1IsTight(l1IsTight).setL1Source(l1Source)
+                .setL0EtConeCorr(computeCorrectedEtCone(l0)).setL0PtConeCorr(computeCorrectedPtCone(l0))
+                .setL1EtConeCorr(computeCorrectedEtCone(l1)).setL1PtConeCorr(computeCorrectedPtCone(l1))
                 .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
         } else if (CR==sf::CR_MCConv || CR==sf::CR_MCQCD ||  CR==sf::CR_MCReal) {
             susy::wh::TupleMaker &tupleMaker = (CR==sf::CR_MCConv ? m_tupleMakerMcConv :
@@ -281,6 +283,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             tupleMaker
                 .setL0IsTight(l0IsTight).setL0Source(l0Source)
                 .setL1IsTight(l1IsTight).setL1Source(l1Source)
+                .setL0EtConeCorr(computeCorrectedEtCone(l0)).setL0PtConeCorr(computeCorrectedPtCone(l0))
+                .setL1EtConeCorr(computeCorrectedEtCone(l1)).setL1PtConeCorr(computeCorrectedPtCone(l1))
                 .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
         } else if(CR==sf::CR_SSInc1j){
             assert(m_probes.size()>1);
@@ -293,6 +297,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             m_tupleMakerSsInc1j
                 .setL0IsTight(l0IsTight).setL0Source(l0Source)
                 .setL1IsTight(l1IsTight).setL1Source(l1Source)
+                .setL0EtConeCorr(computeCorrectedEtCone(l0)).setL0PtConeCorr(computeCorrectedPtCone(l0))
+                .setL1EtConeCorr(computeCorrectedEtCone(l1)).setL1PtConeCorr(computeCorrectedPtCone(l1))
                 .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
         }
     }
@@ -921,6 +927,40 @@ sf::LeptonSource MeasureFakeRate2::getLeptonSource(const Lepton* l)
         if( susy::isConvLepton(l) ) source = LS_Conv;
     }
     return source;
+}
+//----------------------------------------------------------
+float MeasureFakeRate2::computeCorrectedEtCone(const Lepton *l)
+{
+    float correctedEtCone = 0.0;
+    if(l){
+        uint nVtx(nt.evt()->nVtx);
+        bool isMC(nt.evt()->isMC);
+        if(l->isEle()) {
+            if(const Electron* e = static_cast<const Electron*>(l))
+                correctedEtCone = SusyNtTools::elEtTopoConeCorr(e, m_baseElectrons, m_baseMuons, nVtx, isMC);
+        } else if(l->isMu()) {
+            if(const Muon* m = static_cast<const Muon*>(l))
+                correctedEtCone = SusyNtTools::muEtConeCorr(m, m_baseElectrons, m_baseMuons, nVtx, isMC);
+        }
+    }
+    return correctedEtCone;
+}
+//----------------------------------------------------------
+float MeasureFakeRate2::computeCorrectedPtCone(const Lepton *l)
+{
+    float correctedPtCone = 0.0;
+    if(l){
+        uint nVtx(nt.evt()->nVtx);
+        bool isMC(nt.evt()->isMC);
+        if(l->isEle()) {
+            if(const Electron* e = static_cast<const Electron*>(l))
+                correctedPtCone = SusyNtTools::elPtConeCorr(e, m_baseElectrons, m_baseMuons, nVtx, isMC);
+        } else if(l->isMu()) {
+            if(const Muon* m = static_cast<const Muon*>(l))
+                correctedPtCone = SusyNtTools::muPtConeCorr(m, m_baseElectrons, m_baseMuons, nVtx, isMC);
+        }
+    }
+    return correctedPtCone;
 }
 //----------------------------------------------------------
 const std::vector<susy::fake::Region> MeasureFakeRate2::allRegions() const

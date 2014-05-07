@@ -22,12 +22,14 @@ struct FourMom {
     bool isMu, isEl, isJet;
     bool isTight;
     int source; // see FakeLeptonSources
-    double charge, d0Signif, z0SinTheta, etCone, ptCone, mv1;;
+    double charge, d0Signif, z0SinTheta, etCone, ptCone, mv1;
+    double etConeCorr, ptConeCorr;
     FourMom() : px(0), py(0), pz(0), E(0),
                 isMu(false), isEl(false), isJet(false),
                 isTight(false),
                 source(-1),
-                charge(0), d0Signif(0), z0SinTheta(0), etCone(0), ptCone(0), mv1(0) {}
+                charge(0), d0Signif(0), z0SinTheta(0), etCone(0), ptCone(0), mv1(0),
+                etConeCorr(0), ptConeCorr(0) {}
 #ifndef __CINT__
 // cint is not able to parse 'complex' code; see
 // http://root.cern.ch/drupal/content/interacting-shared-libraries-rootcint
@@ -53,6 +55,8 @@ struct FourMom {
     }
     FourMom& setIsTight(bool v) { isTight = v; return *this; }
     FourMom& setSource(int s) { source = s; return *this; }
+    FourMom& setEtConeCorr(double v) { etConeCorr = v; return *this; }
+    FourMom& setPtConeCorr(double v) { ptConeCorr = v; return *this; }
     FourMom& setJet(const Jet &j)   { isJet=true; isMu = isEl = false; mv1 = j.mv1; return set4mom(j); }
     FourMom& setMet(const Met &m)   { isJet=isMu=isEl=false; px=m.lv().Px(); py=m.lv().Py(); E=m.lv().E(); return *this; }
 #endif // end ifndef CINT

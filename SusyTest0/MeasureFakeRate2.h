@@ -79,6 +79,10 @@ class MeasureFakeRate2 : public SusySelection
   void resetCounters();
   // Miscellaneous
   susy::fake::LeptonSource getLeptonSource(const Lepton* l);
+  //! used to recompute the corrected iso when storing to ntuple (should refactor upstream SusyNtTools)
+  float computeCorrectedEtCone(const Lepton *l);
+  //! used to recompute the corrected iso when storing to ntuple (should refactor upstream SusyNtTools)
+  float computeCorrectedPtCone(const Lepton *l);
   static const size_t kNmaxControlRegions=64, kNmaxLeptonTypes=2;
   const std::vector<susy::fake::Region> m_controlRegions; //!< where we compute SF and rates (pseudo t&p)
   const std::vector<susy::fake::Region> m_signalRegions;  //!< where we compute fractions to make the weighted avg
