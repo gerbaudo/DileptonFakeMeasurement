@@ -22,12 +22,14 @@ struct FourMom {
     bool isMu, isEl, isJet;
     bool isTight;
     int source; // see FakeLeptonSources
+    unsigned int trigFlags;
     double charge, d0Signif, z0SinTheta, etCone, ptCone, mv1;
     double etConeCorr, ptConeCorr;
     FourMom() : px(0), py(0), pz(0), E(0),
                 isMu(false), isEl(false), isJet(false),
                 isTight(false),
                 source(-1),
+                trigFlags(0),
                 charge(0), d0Signif(0), z0SinTheta(0), etCone(0), ptCone(0), mv1(0),
                 etConeCorr(0), ptConeCorr(0) {}
 #ifndef __CINT__
@@ -46,11 +48,13 @@ struct FourMom {
     FourMom& setMu(const Lepton &l) {
         isMu=true; isEl = isJet = false;
         if(const Muon* m = dynamic_cast<const Muon*>(&l)) etCone = m->etcone30;
+        trigFlags = l.trigFlags;
         return set4mom(l);
     }
     FourMom& setEl(const Lepton &l) {
         isEl=true; isMu = isJet = false;
         if(const Electron *e = dynamic_cast<const Electron*>(&l)) etCone = e->topoEtcone30Corr;
+        trigFlags = l.trigFlags;
         return set4mom(l);
     }
     FourMom& setIsTight(bool v) { isTight = v; return *this; }
