@@ -65,6 +65,7 @@ class MeasureFakeRate2 : public SusySelection
   bool passHFCR(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR);
   bool passHFCR_testSs(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR); //!< test Ss
   bool passConvCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
+  bool passZ3lVetoPlusJetsCR(const LeptonVector &leptons, const JetVector &jets, const Met* met);
   bool passSignalRegion(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR);
   // Monte Carlo Regions
   bool passMCReg(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR);

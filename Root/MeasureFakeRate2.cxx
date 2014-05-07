@@ -788,6 +788,40 @@ bool MeasureFakeRate2::passConvCR(const LeptonVector &leptons,
   return true;
 }
 //----------------------------------------------------------
+bool MeasureFakeRate2::passZ3lVetoPlusJetsCR(const LeptonVector &leptons,
+                                             const JetVector &jets,
+                                             const Met* met)
+{
+    // A control region similar to passConvCR(), but now require M(lll)
+    // outside the Z window, so that we have mumu+e and the e is most
+    // likely a fake from a jet
+    bool pass=false;
+    size_t nSignalMuons   = m_signalMuons.size();
+    size_t nBaseElectrons = m_baseElectrons.size();
+    size_t nBaseLeptons   = m_baseLeptons.size();
+    if(nSignalMuons==2 && nBaseElectrons==1 && nBaseLeptons==3){
+        Muon& mu0    = *m_signalMuons[0];
+        Muon& mu1    = *m_signalMuons[1];
+        Electron& el = *m_baseElectrons[0];
+        float mll((mu0+mu1).M()), mlll((mu0+mu1+el).M());
+        bool outsideZ3l = (mlll<80.0 || mlll>100.0);
+        bool mumuOppSign = (mu0.q*mu1.q < 0.0);
+        bool isMc(nt.evt()->isMC);
+        LeptonVector twoMu; twoMu.push_back(m_signalMuons[0]); twoMu.push_back(m_signalMuons[1]);
+        if(outsideZ3l &&
+           mumuOppSign &&
+           mll > 20.0 &&    // avoid quarkonium resonances
+           met->Et < 50 &&  // avoid W+jets
+           SusySelection::passTrig2LwithMatch(twoMu, m_trigObj, m_met->Et, nt.evt())){
+            m_probes.push_back(static_cast<Lepton*>(&el));
+            float lepEff(isMc ? el.effSF : 1.0);
+            m_evtWeight = lepEff * getEvtWeight(twoMu, true, true);
+            pass=true;
+        }
+    }
+    return pass;
+}
+//----------------------------------------------------------
 float MeasureFakeRate2::getEvtWeight(const LeptonVector& leptons, bool includeBTag, bool includeTrig,
 				  bool doMediumpp)
 {
