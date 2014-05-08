@@ -63,7 +63,7 @@ class MeasureFakeRate2 : public SusySelection
   // Data Control Regions
   bool passRealCR(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR);
   bool passHFCR(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR);
-  bool passHFCR_testSs(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR); //!< test Ss
+  bool passHFCR_Ss(const LeptonVector &leptons, const JetVector& jets, const Met* met);
   bool passConvCR(const LeptonVector &leptons, const JetVector& jets, const Met* met);
   bool passZ3lVetoPlusJetsCR(const LeptonVector &leptons, const JetVector &jets, const Met* met);
   bool passSignalRegion(const LeptonVector &leptons, const JetVector& jets, const Met* met, susy::fake::Region CR);
@@ -129,7 +129,9 @@ class MeasureFakeRate2 : public SusySelection
   DiLepEvtType m_ET;                // Dilepton event type to store cf
   bool m_writeFakeTuple;            //!< save ntuples containing the info needed to compute fake efficiencies and scale factors
   susy::wh::TupleMaker m_tupleMakerHfCr; //!< tuple for sf::CR_HF_high
+  susy::wh::TupleMaker m_tupleMakerHfLfSs; //!< tuple for sf::CR_HF_SS
   susy::wh::TupleMaker m_tupleMakerConv; //!< tuple for sf::CR_Conv
+  susy::wh::TupleMaker m_tupleMakerZmmeJets; //!< tuple for sf::CR_Z3lVetoPlusJets
   susy::wh::TupleMaker m_tupleMakerSsInc1j; //!< tuple for CR_SSInc1j
   susy::wh::TupleMaker m_tupleMakerMcConv; //!< tuple for CR_MCConv
   susy::wh::TupleMaker m_tupleMakerMcQcd;  //!< tuple for CR_MCQCD

@@ -19,6 +19,8 @@ namespace swk = susy::wh::kin;
 const sf::Region controlRegions[] = {
     sf::CR_Real, sf::CR_SideLow, sf::CR_SideHigh, sf::CR_HF, sf::CR_HF_high,
     sf::CR_Conv,
+    sf::CR_HF_SS,
+    sf::CR_HF_mme,
     sf::CR_MCConv, sf::CR_MCQCD,
     sf::CR_MCReal
 };
@@ -77,7 +79,9 @@ MeasureFakeRate2::MeasureFakeRate2() :
   m_ET(ET_Unknown),
   m_writeFakeTuple(false),
   m_tupleMakerHfCr("",""),
+  m_tupleMakerHfLfSs("",""),
   m_tupleMakerConv("",""),
+  m_tupleMakerZmmeJets("",""),
   m_tupleMakerSsInc1j("",""),
   m_tupleMakerMcConv("",""),
   m_tupleMakerMcQcd("",""),
@@ -100,12 +104,14 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
   SusySelection::Begin(0);
   initHistos(m_fileName);
   if(m_writeFakeTuple) {
-      string filenameHfLf   = tupleFilenameFromHistoFilename(m_fileName, "hflf_tuple");
-      string filenameConv   = tupleFilenameFromHistoFilename(m_fileName, "conv_tuple");
-      string filenameSsInc1j= tupleFilenameFromHistoFilename(m_fileName, "ssinc1j_tuple");
-      string filenameMcConv = tupleFilenameFromHistoFilename(m_fileName, "mcconv_tuple");
-      string filenameMcQcd  = tupleFilenameFromHistoFilename(m_fileName, "mcqcd_tuple");
-      string filenameMcReal = tupleFilenameFromHistoFilename(m_fileName, "mcreal_tuple");
+      string filenameHfLf     = tupleFilenameFromHistoFilename(m_fileName, "hflf_tuple");
+      string filenameHfLfSs   = tupleFilenameFromHistoFilename(m_fileName, "hflfss_tuple");
+      string filenameConv     = tupleFilenameFromHistoFilename(m_fileName, "conv_tuple");
+      string filenameZmmeJets = tupleFilenameFromHistoFilename(m_fileName, "zmmejets_tuple");
+      string filenameSsInc1j  = tupleFilenameFromHistoFilename(m_fileName, "ssinc1j_tuple");
+      string filenameMcConv   = tupleFilenameFromHistoFilename(m_fileName, "mcconv_tuple");
+      string filenameMcQcd    = tupleFilenameFromHistoFilename(m_fileName, "mcqcd_tuple");
+      string filenameMcReal   = tupleFilenameFromHistoFilename(m_fileName, "mcreal_tuple");
       struct InitTuple{
           bool &toggle;
           InitTuple(bool &b) : toggle(b){}
@@ -114,12 +120,14 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
               else { cout<<"cannot initialize ntuple file '"<<fname<<"'"<<endl; toggle = false; }
           }
       } initTuple(m_writeTuple);
-      initTuple(m_tupleMakerHfCr,   filenameHfLf,   "HeavyFlavorControlRegion");
-      initTuple(m_tupleMakerConv,   filenameConv,   "ConversionControlRegion");
-      initTuple(m_tupleMakerSsInc1j,filenameSsInc1j,"SameSign1jetControlRegion");
-      initTuple(m_tupleMakerMcConv, filenameMcConv, "ConversionExtractionRegion");
-      initTuple(m_tupleMakerMcQcd,  filenameMcQcd,  "HfLfExtractionRegion");
-      initTuple(m_tupleMakerMcReal, filenameMcReal, "RealExtractionRegion");
+      initTuple(m_tupleMakerHfCr,     filenameHfLf,     "HeavyFlavorControlRegion");
+      initTuple(m_tupleMakerHfLfSs,   filenameHfLfSs,   "HeavyFlavorSsControlRegion");
+      initTuple(m_tupleMakerConv,     filenameConv,     "ConversionControlRegion");
+      initTuple(m_tupleMakerZmmeJets, filenameZmmeJets, "ZmmeVetoPlusJetsRegion");
+      initTuple(m_tupleMakerSsInc1j,  filenameSsInc1j,  "SameSign1jetControlRegion");
+      initTuple(m_tupleMakerMcConv,   filenameMcConv,   "ConversionExtractionRegion");
+      initTuple(m_tupleMakerMcQcd,    filenameMcQcd,    "HfLfExtractionRegion");
+      initTuple(m_tupleMakerMcReal,   filenameMcReal,   "RealExtractionRegion");
   }
 }
 /*--------------------------------------------------------------------------------*/
@@ -129,12 +137,14 @@ void MeasureFakeRate2::Terminate()
 {
   if(m_dbg) cout << "MeasureFakeRate2::Terminate" << endl;
   if(m_writeFakeTuple) {
-      m_tupleMakerMcReal.close();
-      m_tupleMakerMcQcd.close();
-      m_tupleMakerMcConv.close();
-      m_tupleMakerSsInc1j.close();
-      m_tupleMakerConv.close();
-      m_tupleMakerHfCr.close();
+//       m_tupleMakerMcReal.close();
+//       m_tupleMakerMcQcd.close();
+//       m_tupleMakerMcConv.close();
+//       m_tupleMakerSsInc1j.close();
+//       m_tupleMakerZmmeJets.close();
+//       m_tupleMakerConv.close();
+//       m_tupleMakerHfLfSs.close();
+//       m_tupleMakerHfCr.close();
   }
   cout<<"Writing file "<<m_outFile<<endl;
   m_outFile->Write();
@@ -237,11 +247,11 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     case sf::CR_Real     : passCR = passRealCR  (leptons, jets, m_met, CR); break;
     case sf::CR_SideLow  : passCR = passRealCR  (leptons, jets, m_met, CR); break;
     case sf::CR_SideHigh : passCR = passRealCR  (leptons, jets, m_met, CR); break;
-//     case sf::CR_HF       : passCR = passHFCR    (leptons, jets, m_met, CR); break;
-//     case sf::CR_HF_high  : passCR = passHFCR    (leptons, jets, m_met, CR); break;
-    case sf::CR_HF       : passCR = passHFCR_testSs(leptons, jets, m_met, CR); break;
-    case sf::CR_HF_high  : passCR = passHFCR_testSs(leptons, jets, m_met, CR); break;
+    case sf::CR_HF       : passCR = passHFCR    (leptons, jets, m_met, CR); break;
+    case sf::CR_HF_high  : passCR = passHFCR    (leptons, jets, m_met, CR); break;
+    case sf::CR_HF_SS    : passCR = passHFCR_Ss (leptons, jets, m_met    ); break;
     case sf::CR_Conv     : passCR = passConvCR  (leptons, jets, m_met    ); break;
+    case sf::CR_HF_mme   : passCR = passZ3lVetoPlusJetsCR(leptons, jets, m_met); break;
     case sf::CR_MCConv   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
     case sf::CR_MCQCD    : passCR = passMCReg   (leptons, jets, m_met, CR); break;
     case sf::CR_MCReal   : passCR = passMCReg   (leptons, jets, m_met, CR); break;
@@ -253,14 +263,18 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     } // if(passCR)
     if(m_writeFakeTuple && passCR) {
         unsigned int run(nt.evt()->run), event(nt.evt()->event);
-        if(CR==sf::CR_HF_high || CR==sf::CR_Conv) {
+        bool isMc(nt.evt()->isMC);
+        int nVtx(nt.evt()->nVtx);
+        if(CR==sf::CR_HF_high || CR==sf::CR_HF_SS || CR==sf::CR_Conv) {
             const Lepton *l0 = m_tags.size()>0 ? m_tags[0] : m_baseLeptons[0]; // hack: no tag for conv region (use baseL as a dummy lep)
             const Lepton *l1 = m_probes[0];
             LeptonSource l0Source(getLeptonSource(l0)), l1Source(getLeptonSource(l1));
-            bool l0IsTight(isSignalLepton(l0, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC));
-            bool l1IsTight(isSignalLepton(l1, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC));
+            bool l0IsTight(isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc));
+            bool l1IsTight(isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc));
             LeptonVector dummyLepts;
-            susy::wh::TupleMaker &tupleMaker = (CR==sf::CR_HF_high ? m_tupleMakerHfCr : m_tupleMakerConv);
+            susy::wh::TupleMaker &tupleMaker = (CR==sf::CR_HF_high ? m_tupleMakerHfCr :
+                                                CR==sf::CR_HF_SS ? m_tupleMakerHfLfSs :
+                                                m_tupleMakerConv);
             tupleMaker
                 .setL0IsTight(l0IsTight).setL0Source(l0Source)
                 .setL1IsTight(l1IsTight).setL1Source(l1Source)
@@ -277,8 +291,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             const Lepton *l1 = m_probes.size()>1 ? m_probes[1] : &dummyL;
             LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk);
             LeptonSource l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
-            bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC) : false);
-            bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC) : false);
+            bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
             LeptonVector dummyLepts;
             tupleMaker
                 .setL0IsTight(l0IsTight).setL0Source(l0Source)
@@ -286,13 +300,13 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
                 .setL0EtConeCorr(computeCorrectedEtCone(l0)).setL0PtConeCorr(computeCorrectedPtCone(l0))
                 .setL1EtConeCorr(computeCorrectedEtCone(l1)).setL1PtConeCorr(computeCorrectedPtCone(l1))
                 .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
-        } else if(CR==sf::CR_SSInc1j){
+        } else if(CR==sf::CR_SSInc1j) {
             assert(m_probes.size()>1);
             if(m_probes.size()>2) cout<<"warning, "<<m_probes.size()<<" probe leptons (expected 2)"<<endl;
             const Lepton *l0 = m_probes[0], *l1 = m_probes[1];
             LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
-            bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC) : false);
-            bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nt.evt()->nVtx, nt.evt()->isMC) : false);
+            bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
             LeptonVector dummyLepts;
             m_tupleMakerSsInc1j
                 .setL0IsTight(l0IsTight).setL0Source(l0Source)
@@ -300,6 +314,19 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
                 .setL0EtConeCorr(computeCorrectedEtCone(l0)).setL0PtConeCorr(computeCorrectedPtCone(l0))
                 .setL1EtConeCorr(computeCorrectedEtCone(l1)).setL1PtConeCorr(computeCorrectedPtCone(l1))
                 .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
+        } else if(CR==sf::CR_HF_mme){
+            assert(m_probes.size()==1 && m_signalMuons.size()==2); // here we expect 1 probe (el, store as l1) and 2tags (mu+mu, store in lep vec)
+            Lepton *probeEl = m_probes[0];
+            LeptonVector mumu; mumu.push_back(m_signalMuons[0]); mumu.push_back(m_signalMuons[1]);
+            LeptonSource source(probeEl ? getLeptonSource(probeEl) : LS_Unk);
+            bool isTight(probeEl ? isSignalLepton(probeEl, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            Lepton dummyL;
+            m_tupleMakerZmmeJets
+                .setL1Source(source)
+                .setL1IsTight(isTight)
+                .setL1EtConeCorr(computeCorrectedEtCone(probeEl))
+                .setL1PtConeCorr(computeCorrectedPtCone(probeEl))
+                .fill(m_evtWeight, run, event, dummyL, *probeEl, *m_met, mumu, jets);
         }
     }
   } // for(cr)
@@ -701,10 +728,9 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
   return true;
 }
 //---------------------------------------------------------
-bool MeasureFakeRate2::passHFCR_testSs(const LeptonVector &leptons,
-                                       const JetVector &jets,
-                                       const Met* met,
-                                       sf::Region CR)
+bool MeasureFakeRate2::passHFCR_Ss(const LeptonVector &leptons,
+                                   const JetVector &jets,
+                                   const Met* met)
 {
 // trying to get the HF scale factor from a fake enriched region with
 // low-met mu(tag)+l(probe)
@@ -734,9 +760,7 @@ bool MeasureFakeRate2::passHFCR_testSs(const LeptonVector &leptons,
         bool passTrig((probe->isMu()  && passDilepMuMu) ||
                       (probe->isEle() && (passDilepMuEm || passDilepEmMu)));
         float mt = Mt(probe,met);
-        bool passIterativeSideband = false;
-        if(CR == CR_HF)      passIterativeSideband = mt <  40.0;
-        if(CR == CR_HF_high) passIterativeSideband = mt < 100.0;
+        bool passIterativeSideband = mt < 100.0;
         if(sameSign && passTrig && passIterativeSideband) {
             m_tags.push_back(tag);
             m_probes.push_back(probe);
@@ -807,7 +831,8 @@ bool MeasureFakeRate2::passZ3lVetoPlusJetsCR(const LeptonVector &leptons,
         bool outsideZ3l = (mlll<80.0 || mlll>100.0);
         bool mumuOppSign = (mu0.q*mu1.q < 0.0);
         bool isMc(nt.evt()->isMC);
-        LeptonVector twoMu; twoMu.push_back(m_signalMuons[0]); twoMu.push_back(m_signalMuons[1]);
+        LeptonVector twoMu(m_signalMuons.size(), NULL);
+        std::transform(m_signalMuons.begin(), m_signalMuons.end(), twoMu.begin(), muon_ptr2lepton_ptr);
         if(outsideZ3l &&
            mumuOppSign &&
            mll > 20.0 &&    // avoid quarkonium resonances
