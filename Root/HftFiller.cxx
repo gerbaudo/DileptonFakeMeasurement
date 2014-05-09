@@ -39,6 +39,8 @@ void HftFiller::assignDilepVars(HistFitterTree* const tree, const susy::wh::kin:
         tree->isEMU = v.isEm;
         tree->isMUMU = v.isMm;
         tree->isOS = !v.isSs;
+        tree->lept1Flav = (v.isMu0 ? 1 : 0); // 0=el, 1=mu, see HistFitterTree.h
+        tree->lept2Flav = (v.isMu1 ? 1 : 0);
         tree->lept1q = v.q0;
         tree->lept2q = v.q1;
         tree->L2nCentralLightJets = v.numCentralLightJets;

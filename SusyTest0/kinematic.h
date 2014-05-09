@@ -21,7 +21,7 @@ namespace kin
 {
   struct DilepVars { //! container for dilepton variables we want to compute once per event
     DilepVars() { reset(); }
-    bool isEe, isEm, isMm, isSs;
+    bool isEe, isEm, isMm, isSs, isMu0, isMu1;
     float weight, qflipWeight;
     size_t numCentralLightJets;
     float q0, q1;
@@ -38,7 +38,7 @@ namespace kin
     float mtmin() const { return mt0<mt1 ? mt0 : mt1; }
     float mtmax() const { return mt0>mt1 ? mt0 : mt1; }
     void reset() {
-      isEe = isEm = isMm = isSs = false;
+      isEe = isEm = isMm = isSs = isMu0 = isMu1 = false;
       weight = qflipWeight = 0.0;
       numCentralLightJets = 0;
       q0 = q1 = 0.0;
