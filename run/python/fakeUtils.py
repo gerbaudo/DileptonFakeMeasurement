@@ -83,3 +83,75 @@ def plot2dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='effic
             rmIfExists(outFilename)
             can.SaveAs(outFilename)
     r.gStyle.SetPaintTextFormat(origTextFormat)
+
+#___________________________________________________________
+def isTight_std(l): return electronIsTight_std(l) if l.isEl else muonIsTight_std(l) if isMu else False
+def isTight_wh (l): return electronIsTight_wh (l) if l.isEl else muonIsTight_wh (l) if isMu else False
+
+def electronIsTight_std(l): return electronIsFromPv(l) and electronIsIsolated(l, denominator_std(l))
+def electronIsTight_wh (l): return electronIsFromPv(l) and electronIsIsolated(l, denominator_wh (l))
+
+def muonIsTight_std(l): return muonIsFromPv(l) and muonIsIsolated(l, denominator_std(l))
+def muonIsTight_wh (l): return muonIsFromPv(l) and muonIsIsolated(l, denominator_wh (l))
+
+def denominator_wh (l) :
+    pt = l.p4.Pt()
+    return 1.0/min([pt, 60.0]) if pt>0.0 else None
+
+def denominator_std(l) :
+    pt = l.p4.Pt()
+    return 1.0/pt if pt>0.0 else None
+
+def electronIsFromPv(l):
+    maxD0Sig, maxZ0SinTheta = 3.0, 0.4 # see SusyNtTools::isSignalElectron
+    return abs(l.d0Signif) < maxD0Sig and abs(l.z0SinTheta) < maxZ0SinTheta
+
+def muonIsFromPv(l):
+    maxD0Sig, maxZ0SinTheta = 3.0, 1.0 # see SusyNtTools::isSignalMuon
+    return abs(l.d0Sig) < maxD0Sig and abs(l.z0SinTheta) < maxZ0SinTheta
+
+def electronIsIsolated(l, denom):
+    etConeThres, ptConeThres = 0.13, 0.07
+    pt, etCone, ptCone = l.p4.Pt(), l.etConeCorr, l.ptConeCorr
+    return (etCone*denom < etConeThres and ptCone*denom < ptConeThres) if denom else False
+
+def muonIsIsolated(l, denom):
+    etConeThres, ptConeThres = 0.14, 0.06
+    pt, etCone, ptCone = l.p4.Pt(), l.etConeCorr, l.ptConeCorr
+    return (etCone*denom < etConeThres and ptCone*denom < ptConeThres) if denom else False
+#___________________________________________________________
+# see SusyDefs.h:TrigBit
+triggerBitNames = ['e7_medium1', #2012 triggers
+                   'e12Tvh_loose1',
+                   'e12Tvh_medium1',
+                   'e24vh_medium1',
+                   'e24vhi_medium1',
+                   '2e12Tvh_loose1',
+                   'e24vh_medium1_e7_medium1',
+                   'mu8',
+                   'mu13',
+                   'mu18_tight',
+                   'mu24i_tight',
+                   '2mu13',
+                   'mu18_tight_mu8_EFFS',
+                   'e12Tvh_medium1_mu8',
+                   'mu18_tight_e7_medium1',
+                   'g20_loose', # Photon Triggers
+                   'g40_loose',
+                   'g60_loose',
+                   'g80_loose',
+                   'g100_loose',
+                   'g120_loose',
+                   'tau20_medium1', # Tau triggers
+                   'tau20Ti_medium1',
+                   'tau29Ti_medium1',
+                   'tau29Ti_medium1_tau20Ti_medium1',
+                   'tau20Ti_medium1_e18vh_medium1',
+                   'tau20_medium1_mu15',
+                   'e18vh_medium1', # Missing trigger flags for lep-tau matching
+                   'mu15',
+                   '2mu8_EFxe40wMu_tclcw', # MissingEt trigger
+                   ]
+def triggerBit(bitName): return 1<<triggerBitNames.index(bitName)
+def passTrigger(l, trigname): return l.trigFlags & triggerBit(trigname)
+#___________________________________________________________
