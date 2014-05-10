@@ -95,9 +95,11 @@ def main():
         filenamesPerGroup[s.group].append(f)
     vars = ['pt','eta','d0sig','z0SinTheta','etCone','ptCone','etConeCorr','ptConeCorr']
     groups = samplesPerGroup.keys()
+    sources = leptonSources
     #fill histos
     if doFillHistograms :
         histosPerGroup = bookHistosPerGroup(vars, groups)
+        histosPerSource = bookHistosPerSource(vars, sources)
         for group in groups:
             isData = isDataSample(group)
             filenames = filenamesPerGroup[group]
@@ -105,11 +107,13 @@ def main():
             chain = r.TChain(treeName)
             [chain.Add(fn) for fn in filenames]
             print "%s : %d entries"%(group, chain.GetEntries())
-            fillHistos(chain, histosThisGroup, isData, lepton, group, verbose)
-        writeHistos(cacheFileName, histosPerGroup, verbose)
+            fillHistos(chain, histosThisGroup, histosPerSource, isData, lepton, group, verbose)
+        writeHistos(cacheFileName, {'perGroup':histosPerGroup, 'perSource':histosPerSource}, verbose)
     # compute scale factors
     histosPerGroup = fetchHistos(cacheFileName, histoNames(vars, groups), verbose)
-    plotStackedHistos(histosPerGroup, outputDir, mode, verbose)
+    histosPerSource = fetchHistos(cacheFileName, histoNames(vars, sources), verbose)
+    plotStackedHistos(histosPerGroup, outputDir+'/by_group', mode, colors=SampleUtils.colors, verbose=verbose)
+    plotStackedHistos(histosPerSource, outputDir+'/by_source', mode, colors=fakeu.colorsFillSources(), verbose=verbose)
 #___________________________________________________
 
 leptonTypes = fakeu.leptonTypes()
@@ -159,6 +163,11 @@ def bookHistosPerGroup(variables, groups) :
                         for v in variables]))
                  for g in groups])
 
+def bookHistosPerSource(variables, sources) :
+    "book a dict of histograms with keys [source][var][tight,loose]"
+    return bookHistosPerGroup(variables=variables, groups=sources)
+
+
 def extractName(dictOrHist):
     "input must be either a dict or something with 'GetName'"
     isDict = type(dictOrHist) is dict
@@ -167,7 +176,7 @@ def extractName(dictOrHist):
 def histoNames(variables, samples) :
     return extractName(bookHistosPerGroup(variables, samples))
 
-def fillHistos(chain, histosThisGroup, isData, lepton, group, verbose=False):
+def fillHistos(chain, histosThisGroup, histosPerSource, isData, lepton, group, verbose=False):
     nLoose, nTight = 0, 0
     totWeightLoose, totWeightTight = 0.0, 0.0
     for event in chain :
@@ -184,11 +193,12 @@ def fillHistos(chain, histosThisGroup, isData, lepton, group, verbose=False):
         etCone, ptCone = probe.etCone, probe.ptCone
         etConeCorr, ptConeCorr = probe.etConeCorr, probe.ptConeCorr 
         selection = True
+        source = None if isData else enum2source(probe)
         if selection:
             def incrementCounts(counts, weightedCounts):
                 counts +=1
                 weightedCounts += weight
-            def fill(tightOrLoose):
+            def fillPerGroup(tightOrLoose):
                 histosThisGroup['pt'        ][tightOrLoose].Fill(pt, weight)
                 histosThisGroup['eta'       ][tightOrLoose].Fill(eta, weight)
                 histosThisGroup['d0sig'     ][tightOrLoose].Fill(d0Sig, weight)
@@ -197,19 +207,29 @@ def fillHistos(chain, histosThisGroup, isData, lepton, group, verbose=False):
                 histosThisGroup['ptCone'    ][tightOrLoose].Fill(ptCone, weight)
                 histosThisGroup['etConeCorr'][tightOrLoose].Fill(etConeCorr, weight)
                 histosThisGroup['ptConeCorr'][tightOrLoose].Fill(ptConeCorr, weight)
+                if source:
+                    histosThisSource = histosPerSource[source]
+                    histosThisSource['pt'        ][tightOrLoose].Fill(pt, weight)
+                    histosThisSource['eta'       ][tightOrLoose].Fill(eta, weight)
+                    histosThisSource['d0sig'     ][tightOrLoose].Fill(d0Sig, weight)
+                    histosThisSource['z0SinTheta'][tightOrLoose].Fill(z0Sin, weight)
+                    histosThisSource['etCone'    ][tightOrLoose].Fill(etCone, weight)
+                    histosThisSource['ptCone'    ][tightOrLoose].Fill(ptCone, weight)
+                    histosThisSource['etConeCorr'][tightOrLoose].Fill(etConeCorr, weight)
+                    histosThisSource['ptConeCorr'][tightOrLoose].Fill(ptConeCorr, weight)
             incrementCounts(nLoose, totWeightLoose)
-            fill('loose')
+            fillPerGroup('loose')
             if isTight:
                 incrementCounts(nTight, totWeightTight)
-                fill('tight')
+                fillPerGroup('tight')
     if verbose:
         counterNames = ['nLoose', 'nTight', 'totWeightLoose', 'totWeightTight']
         print ', '.join(["%s : %.1f"%(c, eval(c)) for c in counterNames])
 
-def plotStackedHistos(histosPerGroup={}, outputDir='', mode='', verbose=False):
+def plotStackedHistos(histosPerGroup={}, outputDir='', mode='', colors={}, verbose=False):
     groups = histosPerGroup.keys()
     variables = first(histosPerGroup).keys()
-    colors = SampleUtils.colors
+    mkdirIfNeeded(outputDir)
     histosPerName = dict([(var+'_'+tol, # one canvas for each histo, so key with histoname w/out group
                            dict([(g, histosPerGroup[g][var][tol]) for g in groups]))
                           for var in variables for tol in ['tight','loose']])
@@ -241,7 +261,7 @@ def plotStackedHistos(histosPerGroup={}, outputDir='', mode='', verbose=False):
             stack.Add(h)
         stack.Draw('hist same')
         err_band.Draw('E2 same')
-        data = histosPerGroup['data']
+        data = histosPerGroup['data'] if 'data' in histosPerGroup else None
         if data and data.GetEntries():
             data.SetMarkerStyle(r.kFullDotLarge)
             data.Draw('p same')
@@ -249,7 +269,7 @@ def plotStackedHistos(histosPerGroup={}, outputDir='', mode='', verbose=False):
         pm.SetMinimum(0.0)
         pm.SetMaximum(1.1*yMax)
         can.Update()
-        topRightLabel(can, histoname+', '+mode, xpos=0.125, align=13)
+        topRightLabel(can, "#splitline{%s}{%s}"%(histoname, mode), xpos=0.125, align=13)
         drawLegendWithDictKeys(can, dictSum(bkgHistos, {'stat err':err_band}), opt='f')
         can.RedrawAxis()
         can._stack = stack
