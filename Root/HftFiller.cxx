@@ -177,13 +177,13 @@ bool HftFiller::determineMcGenUncertainty(const int dsid)
         cout<<"HftFiller::determineMcGenUncertainty : cannot determine group for dsid "<<dsid<<endl
             <<endl;
     bool isWz      = xsecUnc.group()==XsecUncertainty::kWz;
-    bool isOtherMc = xsecUnc.group()!=XsecUncertainty::kUnknown;
+    //bool isOtherMc = xsecUnc.group()!=XsecUncertainty::kUnknown;
     if(isWz){
         mcGenRelativeUncertainty1j_ = 0.166;
         mcGenRelativeUncertainty23j_ = 0.368;
-    } else if(isOtherMc){
-        mcGenRelativeUncertainty1j_ = 1.0;
-        mcGenRelativeUncertainty23j_ = 1.0;
+    } else { // these are taken care of within Histfitter
+        mcGenRelativeUncertainty1j_ = 0.0;
+        mcGenRelativeUncertainty23j_ = 0.0;
     }
     cout<<"HftFiller::determineXsecUncertainty : for dsid "<<dsid<<" using "
         <<" "<<mcGenRelativeUncertainty1j_<<" (1j), "
