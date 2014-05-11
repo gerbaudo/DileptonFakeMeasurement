@@ -21,6 +21,7 @@ struct FourMom {
     double px, py, pz, E;
     bool isMu, isEl, isJet;
     bool isTight;
+    bool isTightPp; ///< used only for electron to compute tight/loose requirements offline
     int source; // see FakeLeptonSources
     unsigned int trigFlags;
     double charge, d0Signif, z0SinTheta, etCone, ptCone, mv1;
@@ -28,6 +29,7 @@ struct FourMom {
     FourMom() : px(0), py(0), pz(0), E(0),
                 isMu(false), isEl(false), isJet(false),
                 isTight(false),
+                isTightPp(false),
                 source(-1),
                 trigFlags(0),
                 charge(0), d0Signif(0), z0SinTheta(0), etCone(0), ptCone(0), mv1(0),
@@ -53,7 +55,10 @@ struct FourMom {
     }
     FourMom& setEl(const Lepton &l) {
         isEl=true; isMu = isJet = false;
-        if(const Electron *e = dynamic_cast<const Electron*>(&l)) etCone = e->topoEtcone30Corr;
+        if(const Electron *e = dynamic_cast<const Electron*>(&l)){
+            etCone = e->topoEtcone30Corr;
+            isTightPp = e->tightPP;
+        }
         trigFlags = l.trigFlags;
         return set4mom(l);
     }
