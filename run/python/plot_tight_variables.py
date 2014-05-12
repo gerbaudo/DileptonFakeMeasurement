@@ -78,7 +78,6 @@ def main():
     filestems, treenames = utils.verticalSlice(fakeu.tupleStemsAndNames)
     regions = filestems
     assert region in regions,"invalid region '%s', must be one of %s"%(region, str(regions))
-    # you are here : implement different regions
     templateInputFilename = "*_%(region)s_tuple_%(tag)s.root" % {'tag':tag, 'region':region}
     templateOutputFilename =  "%(region)s_%(l)s_tight_plots.root" % {'region':region, 'l':lepton}
     treeName = treenames[regions.index(region)]
@@ -88,7 +87,10 @@ def main():
     cacheFileName = outputFileName.replace('.root', '_'+region+'_cache.root')
     doFillHistograms = options.fill_histos or not os.path.exists(cacheFileName)
     optionsToPrint = ['inputDir', 'outputDir', 'region', 'tag', 'doFillHistograms']
-    if verbose : print "options:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
+    if verbose :
+        print "working from %s"%os.getcwd()
+        print "being called as : %s"%' '.join(os.sys.argv)
+        print "options:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
     # collect inputs
     if verbose : print 'input files ',os.path.join(inputDir, templateInputFilename)
     tupleFilenames = glob.glob(os.path.join(inputDir, templateInputFilename))
