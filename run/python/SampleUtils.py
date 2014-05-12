@@ -45,7 +45,7 @@ def fastSamplesFromFilenames(filenames=[], verbose=False):
     if not prefix or not suffix : print "fastSamplesFromFilenames: warning prefix '%s' suffix '%s'"%(prefix, suffix)
     filenames = [f.replace(prefix, '').replace(suffix, '') for f in filenames]
     dsets = dict([(d.name, d) for d in datasets])
-    return [dsets[f] for f in filenames]
+    return [dsets[f] for f in filenames if f in dsets]
 
 def guessGroupFromFilename(filename='') :
     "Guess group from filename, either merged or un-merged"
