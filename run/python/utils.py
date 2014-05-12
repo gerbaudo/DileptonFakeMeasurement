@@ -120,7 +120,7 @@ def json_read(fname) :
 def rmIfExists(filename) :
     if os.path.exists(filename) : os.remove(filename)
 def mkdirIfNeeded(dirname) :
-    if not os.path.exists(dirname) : os.mkdir(dirname)
+    if not os.path.exists(dirname) : os.makedirs(dirname)
 def verticalSlice(list2d) :
     "http://stackoverflow.com/questions/6253586/python-vertical-array-slicing"
     return zip(*list2d)
