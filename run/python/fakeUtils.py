@@ -160,3 +160,14 @@ triggerBitNames = ['e7_medium1', #2012 triggers
 def triggerBit(bitName): return 1<<triggerBitNames.index(bitName)
 def passTrigger(l, trigname): return l.trigFlags & triggerBit(trigname)
 #___________________________________________________________
+tupleStemsAndNames = [ # stem filename, treename (see MeasureFakeRate2::Begin)
+    ("hflf"     , "HeavyFlavorControlRegion"),
+    ("hflfss"   , "HeavyFlavorSsControlRegion"),
+    ("conv"     , "ConversionControlRegion"),
+    ("zmmejets" , "ZmmeVetoPlusJetsRegion"),
+    ("ssinc1j"  , "SameSign1jetControlRegion"),
+    ("mcconv"   , "ConversionExtractionRegion"),
+    ("mcqcd"    , "HfLfExtractionRegion"),
+    ("mcreal"   , "RealExtractionRegion"),
+    ]
+#___________________________________________________________
