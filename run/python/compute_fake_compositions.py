@@ -74,6 +74,7 @@ def main():
     verbose   = options.verbose
     if not tag : parser.error('tag is a required option')
     if lepton not in ['el', 'mu'] : parser.error("invalid lepton '%s'"%lepton)
+    outputDir = outputDir+'/'+lepton # split the output in subdirectories, so we don't overwrite things
 
     templateInputFilename = "*_ssinc1j_tuple_%(tag)s.root" % {'tag':tag}
     templateOutputFilename =  "%(l)s_composition_histos.root" % {'l':lepton}
@@ -96,7 +97,7 @@ def main():
     for s, f in zip(samples, tupleFilenames) :
         samplesPerGroup[s.group].append(s)
         filenamesPerGroup[s.group].append(f)
-    vars = ['pt', 'eta', 'pt_eta']
+    vars = ['pt', 'eta', 'pt_eta', 'mt']
     groups = samplesPerGroup.keys()
     #fill histos
     if doFillHistograms :
@@ -124,16 +125,16 @@ def main():
             normalizeHistos   = plotParametrizedFractions.normalizeHistos
             plotStackedHistos = plotParametrizedFractions.plotStackedHistos
 
-            frameTitle = 'hf elec: '+sel+' loose;'+var
-            canvasName = 'elec_hf'+sel+'_'+var+'_den'
+            frameTitle = 'hf '+lepton+': '+sel+' loose;'+var
+            canvasName = lepton+'_hf'+sel+'_'+var+'_den'
             plotStackedHistos(histosHeavy, canvasName, outputDir, frameTitle)
 
-            frameTitle = 'lf elec: '+sel+' loose;'+var
-            canvasName = 'elec_lf'+sel+'_'+var+'_den'
+            frameTitle = 'lf '+lepton+': '+sel+' loose;'+var
+            canvasName = lepton+'_lf'+sel+'_'+var+'_den'
             plotStackedHistos(histosHeavy, canvasName, outputDir, frameTitle)
 
-            frameTitle = 'conv elec: '+sel+' loose;'+var
-            canvasName = 'elec_conv'+sel+'_'+var+'_den'
+            frameTitle = 'conv '+lepton+': '+sel+' loose;'+var
+            canvasName = lepton+'_conv'+sel+'_'+var+'_den'
             plotStackedHistos(histosConv, canvasName, outputDir, frameTitle)
 
             # normalize and draw fractions (den only)
@@ -145,8 +146,8 @@ def main():
             is1Dhisto = var!='pt_eta' # can only stack 1D plots
             if is1Dhisto:
                 histos = {'heavy':histosHeavy, 'light':histosLight, 'conv':histosConv}
-                frameTitle = 'elec: '+sel+';'+var
-                canvasBaseName = 'elec_fake'+sel+'_'+var+'_frac'
+                frameTitle = lepton+': '+sel+';'+var
+                canvasBaseName = lepton+'_fake'+sel+'_'+var+'_frac'
                 plotFractionsStacked(histos, canvasBaseName+'_stack', outputDir, frameTitle)
     writeHistos(outputFileName, histosCompositions, verbose)
 
@@ -207,8 +208,8 @@ markersSources = fakeu.markersSources()
 enum2source = fakeu.enum2source
 
 def allSelections() :
-    return ['ssinc1j']+[srcr+'_'+ll+'_'+nj
-                        for srcr in ['sr','cr'] for ll in ['ee','em','mm'] for nj in ['eq1j','ge2j']]
+    return ['ssinc1j']
+# +[srcr+'_'+ll+'_'+nj for srcr in ['sr','cr'] for ll in ['ee','em','mm'] for nj in ['eq1j','ge2j']]
 def histoname_electron_sf_vs_eta() : return 'sf_el_vs_eta'
 def histoname_electron_sf_vs_pt() : return 'sf_el_vs_pt'
 
@@ -295,13 +296,15 @@ def getSelection(l0, l1, jets, met):
         sel = 'sr_ee_ge2j' if mljj<120.0 else 'cr_ee_ge2j'
     return sel
 
-def shiftWithinRange(pt, eta, epsilon=1.0e-3):
-    ptBins, etaBins = fakeu.ptBinEdges(), fakeu.etaBinEdges()
+def shiftWithinRange(pt, eta, mt, epsilon=1.0e-3):
+    ptBins, etaBins, mtBins = fakeu.ptBinEdges(), fakeu.etaBinEdges(), fakeu.mtBinEdges()
     minPt, maxPt = min(ptBins), max(ptBins)
     minEta, maxEta = min(etaBins), max(etaBins)
+    minMt, maxMt = min(mtBins), max(mtBins)
     pt  = minPt*(1.0+epsilon)  if pt<minPt   else maxPt*(1.0-epsilon)  if pt > maxPt   else pt
     eta = minEta*(1.0+epsilon) if eta<minEta else maxEta*(1.0-epsilon) if eta > maxEta else eta
-    return pt, eta
+    mt  = minMt*(1.0+epsilon)  if mt<minMt   else maxMt*(1.0-epsilon)  if mt > maxMt   else mt
+    return pt, eta, mt
 def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, verbose=False):
     "expect histos[group][sel][source][var][loose,tight]"
     normFactor = 3.2 if group=='heavyflavor' else 1.0 # bb/cc hand-waving normalization factor, see notes 2014-04-17
@@ -318,7 +321,7 @@ def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, verbose=F
         l1IsFake = l0.source!=sourceReal and not isData
         atLeastOneIsFake = l0IsFake or l1IsFake
         if not atLeastOneIsFake : continue
-        selection = getSelectionChannelOnly(l0, l1, jets, met)
+        selection = None #getSelectionChannelOnly(l0, l1, jets, met)
         def fillHistosBySource(lep):
             isTight = lep.isTight
             source = lep.source
@@ -328,17 +331,19 @@ def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, verbose=F
             sourceIsKnown = not isData
             isRightLep = lep.isMu and lepton=='mu' or lep.isEl and lepton=='el'
             def fill():
-                pt, eta = lep.p4.Pt(), abs(lep.p4.Eta())
-                pt, eta = shiftWithinRange(pt, eta) # avoid loosing entries due to over/underflow
+                pt, eta, mt = lep.p4.Pt(), abs(lep.p4.Eta()), computeMt(lep.p4, met.p4)
+                pt, eta, mt = shiftWithinRange(pt, eta, mt) # avoid loosing entries due to over/underflow
+                histosThisGroupPerSource['ssinc1j'][leptonSource]['mt'    ]['loose'].Fill(mt,  weight)
                 histosThisGroupPerSource['ssinc1j'][leptonSource]['pt'    ]['loose'].Fill(pt,  weight)
                 histosThisGroupPerSource['ssinc1j'][leptonSource]['eta'   ]['loose'].Fill(eta, weight)
                 histosThisGroupPerSource['ssinc1j'][leptonSource]['pt_eta']['loose'].Fill(pt, eta, weight)
                 if selection:
+                    histosThisGroupPerSource[selection][leptonSource]['mt'    ]['loose'].Fill(mt,  weight)
                     histosThisGroupPerSource[selection][leptonSource]['pt'    ]['loose'].Fill(pt,  weight)
                     histosThisGroupPerSource[selection][leptonSource]['eta'   ]['loose'].Fill(eta, weight)
                     histosThisGroupPerSource[selection][leptonSource]['pt_eta']['loose'].Fill(pt, eta, weight)
             filled = False
-            if isRightLep and sourceIsKnown and isFake :
+            if isRightLep and sourceIsKnown and isFake and lep.p4.Pt()>20.0:
                 fill()
                 filled = True
             return filled
@@ -353,10 +358,12 @@ def bookHistosPerSamplePerSource(variables, samples, sources):
     "book a dict of histograms with keys [group][sel][source][var][tight, loose]"
     def histo(variable, hname):
         h = None
+        mtBinEdges = fakeu.mtBinEdges()
         ptBinEdges = fakeu.ptBinEdges()
         etaBinEdges = fakeu.etaBinEdges()
         if   variable=='pt'  : h = r.TH1F(hname, ';p_{T,l} [GeV]; entries/bin',   len(ptBinEdges)-1,  ptBinEdges)
-        elif variable=='eta' : h = r.TH1F(hname, ';#eta_{l}; entries/bin',        len(etaBinEdges)-1, etaBinEdges)
+        elif variable=='eta' : h = r.TH1F(hname, ';|#eta_{l}|; entries/bin',        len(etaBinEdges)-1, etaBinEdges)
+        elif variable=='mt'  : h = r.TH1F(hname, ';m_{T}(l,MET) [GeV]; entries/bin', len(mtBinEdges)-1, mtBinEdges)
         elif variable=='pt_eta' : h = r.TH2F(hname, ';p_{T,l} [GeV]; #eta_{l};',  len(ptBinEdges)-1,  ptBinEdges, len(etaBinEdges)-1, etaBinEdges)
         else : print "unknown variable %s"%v
         h.SetDirectory(0)
