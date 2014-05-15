@@ -71,7 +71,6 @@ def main():
     regions = filestems
     assert region in regions,"invalid region '%s', must be one of %s"%(region, str(regions))
 
-    isConversion = region=='conv'
     templateInputFilename = "*_%(region)s_tuple_%(tag)s.root" % {'tag':tag, 'region':region}
     templateOutputFilename =  "%(region)s_%(l)s_scale_histos.root" % {'region':region, 'l':lepton}
     treeName = treenames[regions.index(region)]
@@ -111,15 +110,15 @@ def main():
             [chain.Add(fn) for fn in filenames]
             print "%s : %d entries"%(group, chain.GetEntries())
             fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource,
-                       isConversion, isData, lepton, group, verbose)
+                       lepton, group, region, verbose)
         writeHistos(cacheFileName, histosPerGroup, histosPerSource, histosPerGroupPerSource, verbose)
     # compute scale factors
     histosPerGroup = fetchHistos(cacheFileName, histoNames(vars, groups, region), verbose)
     histosPerSource = fetchHistos(cacheFileName, histoNamesPerSource(vars, leptonSources, region), verbose)
     histosPerSamplePerSource = fetchHistos(cacheFileName, histoNamesPerSamplePerSource(vars, groups, leptonSources, region), verbose)
-    plotStackedHistos(histosPerGroup, outputDir, region, verbose)
-    plotStackedHistosSources(histosPerSource, outputDir, region, verbose)
-    plotPerSourceEff(histosPerVar=histosPerSource, outputDir=outputDir, lepton=lepton, region=region, verbose=verbose)
+    plotStackedHistos(histosPerGroup, outputDir+'/by_group', region, verbose)
+    plotStackedHistosSources(histosPerSource, outputDir+'/by_source', region, verbose)
+    plotPerSourceEff(histosPerVar=histosPerSource, outputDir=outputDir+'/by_source', lepton=lepton, region=region, verbose=verbose)
     for g in groups:
         hps = dict((v, histosPerSamplePerSource[v][g])for v in vars)
         plotPerSourceEff(histosPerVar=hps, outputDir=outputDir, lepton=lepton, region=region, sample=g, verbose=verbose)
@@ -146,10 +145,16 @@ def histoname_electron_sf_vs_eta() : return 'sf_el_vs_eta'
 def histoname_electron_sf_vs_pt() : return 'sf_el_vs_pt'
 
 def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource,
-               isConversion, isData, lepton, group, avoidTrigBias=False, verbose=False):
+               lepton, group, region, verbose=False):
     nLoose, nTight = 0, 0
     totWeightLoose, totWeightTight = 0.0, 0.0
-    normFactor = 3.2 if group=='heavyflavor' else 1.0 # bb/cc hand-waving normalization factor, see notes 2014-04-17
+    normFactor = 1.0 if group=='heavyflavor' else 1.0 # bb/cc hand-waving normalization factor, see notes 2014-04-17
+    isData = isDataSample(group)
+    isHflf = region=='hflf'
+    isConversion = region=='conv'
+    if group=='heavyflavor':
+        if lepton=='el' and not isConversion : normFactor = 1.6
+        if lepton=='mu' :                      normFactor = 0.87
     for iEvent, event in enumerate(chain) :
         pars = event.pars
         weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
@@ -174,9 +179,12 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
         mt0 = computeMt(tag4m, met4m)
         mt1 = computeMt(probe4m, met4m)
         pt0 = tag4m.Pt()
-        isLowMt = mt1 < 40.0
-        passTrigBias =  (avoidTrigBias and pt0>20.0) or True
-        if isRightLep and isLowMt:
+        pt1 = probe4m.Pt()
+        isLowMt = mt1 < 40.0 if region=='hflf' else True # used to reduce the contamination from real (mostly W+jets)
+        passTrigBias =  True
+        if isHflf         : passTrigBias = pt0>20.0 and pt1>20.0
+        elif isConversion : passTrigBias = pt1>20.0
+        if isRightLep and isLowMt and passTrigBias:
 #         if (isSameSign or isConversion) and isRightLep and isLowMt: # test sf conversion (not very important for now, 2014-04)
 
             def incrementCounts(counts, weightedCounts):
@@ -311,6 +319,7 @@ def plotStackedHistos(histosPerGroup={}, outputDir='', region='', verbose=False)
     variables = first(histosPerGroup).keys()
     leptonTypes = first(first(histosPerGroup)).keys()
     colors = SampleUtils.colors
+    mkdirIfNeeded(outputDir)
     histosPerName = dict([(region+'_'+var+'_'+lt, # one canvas for each histo, so key with histoname w/out group
                            dict([(g, histosPerGroup[g][var][lt]) for g in groups]))
                           for var in variables for lt in leptonTypes])
@@ -363,6 +372,7 @@ def plotStackedHistosSources(histosPerVar={}, outputDir='', region='', verbose=F
     variables = histosPerVar.keys()
     sources = first(histosPerVar).keys()
     colors = colorsFillSources
+    mkdirIfNeeded(outputDir)
     for var in variables:
         for lOrT in ['loose', 'tight']:
             histos = dict((s, histosPerVar[var][s][lOrT]) for s in sources)
@@ -412,6 +422,7 @@ def plotPerSourceEff(histosPerVar={}, outputDir='', lepton='', region='', sample
     variables = histosPerVar.keys()
     sources = [s for s in first(histosPerVar).keys() if s!='real'] # only fake eff really need a scale factor
     colors = colorsLineSources
+    mkdirIfNeeded(outputDir)
     for var in filter(lambda x : x in ['pt1', 'eta1'], histosPerVar.keys()):
         histosPerSource = dict((s, histosPerVar[var][s]) for s in sources)
         canvasBasename = region+'_efficiency_'+lepton+'_'+var+("_%s"%sample if sample else '')
@@ -468,6 +479,7 @@ def plotPerSourceEff(histosPerVar={}, outputDir='', lepton='', region='', sample
 def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', outhistoname='', outputDir='./', region='', verbose=False):
     "efficiency scale factor"
     groups = histosPerGroup.keys()
+    mkdirIfNeeded(outputDir)
     histosPerType = dict([(lt,
                            dict([(g,
                                   histosPerGroup[g][variable][lt])
