@@ -142,7 +142,7 @@ def main():
                 fakeu.plot1dEfficiencies({reg : avgEff}, 'eff1d_'+lepton+'_fake_'+reg, outputDir, htitle, zoomIn=True)
             else:
                 fakeu.plot2dEfficiencies({reg : avgEff}, 'eff2d_'+lepton+'_fake', outputDir, htitle, zoomIn=True)
-    writeHistos(os.path.join(outputDir,'fake_matrices.root'), avgEfficiencies, verbose)
+    writeHistos(os.path.join(outputDir,'fake_matrices_'+lepton+'.root'), avgEfficiencies, verbose)
 #___________________________________________________
 
 leptonTypes = fakeu.leptonTypes()
