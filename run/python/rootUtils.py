@@ -226,8 +226,8 @@ def fetchObjectsFromFile(fileName='', objects={}, verbose=False, closeFileOnExit
     structure (that is list, dict, nested dict...), but with objects
     instead of names.
     """
+    fetched_objects = type(objects)()
     inputFile = r.TFile.Open(fileName)
-    if verbose : print "fetching histograms from %s"%inputFile.GetName()
     def fetch(object):
         isDict = type(object) is dict
         isList = type(object) is list
@@ -239,6 +239,9 @@ def fetchObjectsFromFile(fileName='', objects={}, verbose=False, closeFileOnExit
             obj = inputFile.Get(object)
             if verbose and not obj.GetName() : print "cannot get '%s' from '%s'"%(str(object), inputFile.GetName())
             return obj
-    fetched_objects = fetch(objects)
-    if closeFileOnExit : inputFile.Close()
+    if not inputFile : print "cannot open %s"%fileName
+    else:
+        if verbose : print "fetching histograms from %s"%inputFile.GetName()
+        fetched_objects = fetch(objects)
+        if closeFileOnExit : inputFile.Close()
     return fetched_objects
