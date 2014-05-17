@@ -99,6 +99,7 @@ def main():
         filenamesPerGroup[s.group].append(f)
     vars = ['pt', 'eta', 'pt_eta', 'mt']
     groups = samplesPerGroup.keys()
+    if lepton=='el' : groups = [g for g in groups if g!='heavyflavor']
     #fill histos
     if doFillHistograms :
         histosPerGroupPerSource = bookHistosPerSamplePerSource(vars, groups, leptonSources)
@@ -210,9 +211,6 @@ enum2source = fakeu.enum2source
 def allSelections() :
     return ['ssinc1j']
 # +[srcr+'_'+ll+'_'+nj for srcr in ['sr','cr'] for ll in ['ee','em','mm'] for nj in ['eq1j','ge2j']]
-def histoname_electron_sf_vs_eta() : return 'sf_el_vs_eta'
-def histoname_electron_sf_vs_pt() : return 'sf_el_vs_pt'
-
 
 def getSelectionChannelOnly(l0, l1, jets, met):
     nClJets = len(jets) #note to self: these are already central-light jets b/c of passCommonCriteria
