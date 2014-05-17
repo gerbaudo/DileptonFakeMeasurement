@@ -61,11 +61,11 @@ def plot1dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='title
         rmIfExists(outFilename)
         can.SaveAs(outFilename)
 
-def plot2dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='efficiency; #eta; p_{T} [GeV]', zoomIn=False) :
+def plot2dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='efficiency; #eta; p_{T} [GeV]', textFormat='.3f', zoomIn=False) :
     can = r.TCanvas(canvasName, '', 800, 600)
     can.cd()
     origTextFormat = r.gStyle.GetPaintTextFormat()
-    r.gStyle.SetPaintTextFormat('.2f')
+    r.gStyle.SetPaintTextFormat(textFormat)
     for s,h in effs.iteritems() :
         can.Clear()
         # todo minZ, maxZ = getMinMax(effs.values()) if zoomIn else (0.0, 1.0)
