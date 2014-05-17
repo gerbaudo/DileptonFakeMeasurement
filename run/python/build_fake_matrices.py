@@ -49,7 +49,7 @@ from SampleUtils import (fastSamplesFromFilenames
                          ,isDataSample)
 import SampleUtils
 import fakeUtils as fakeu
-from compute_fake_el_scale_factor import histoname_electron_sf_vs_eta
+from compute_fake_el_scale_factor import histoname_sf_vs_eta
 from buildWeightedMatrix import fetchSfHistos
 
 usage="""
@@ -62,8 +62,9 @@ Example usage:
 
  TODO
 """
-
+# old flat values (still use them for 1D parametrization?)
 el_convSF, el_qcdSF = 1.09, 1.0
+mu_qcdSF = 0.86
 
 def main():
     parser = optparse.OptionParser(usage=usage)
@@ -97,15 +98,28 @@ def main():
         print "options parsed:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
     mkdirIfNeeded(outputDir)
     # collect inputs
-    compositions = fetchCompositionHistos(compFname, lepton, verbose) # [var][group][reg][orig], note here orig=[conv,heavy,light]
+    groups=['diboson', 'heavyflavor', 'ttbar', 'wjets', 'zjets']
+    if lepton=='el' : groups = filter(lambda _ : _!='heavyflavor', groups) # note this must be in sync with compute_fake_compositions; TODO: implement a way to get the groups from the available histos
+    compositions = fetchCompositionHistos(compFname, lepton, groups, verbose) # [var][group][reg][orig], note here orig=[conv,heavy,light]
     # pprint.pprint(compositions)
-    efficiencies = fetchEffienciesHistos(effFnames, lepton, verbose) # [var][group][orig], note here orig=[conv,heavy,light,qcd]
+    efficiencies = fetchEffienciesHistos(effFnames, lepton, groups, verbose) # [var][group][orig], note here orig=[conv,heavy,light,qcd]
     # pprint.pprint(efficiencies)
-    el_convSF_vs_eta = fetchSfHistos(sfFnames, histoname_electron_sf_vs_eta, verbose)['conv']
-    el_qcdSF_vs_eta  = fetchSfHistos(sfFnames, histoname_electron_sf_vs_eta, verbose)['hflf']
-    scaleFactors = {'conv' : {'flat' : el_convSF, 'vs_eta' : el_convSF_vs_eta},
-                    'heavy' : {'flat' : el_qcdSF, 'vs_eta' : el_qcdSF_vs_eta} }
-    scaleElectronFakeEfficiencies(efficiencies, scaleFactors)
+    if verbose:
+        print 'eff '+lepton+' hf : ',getBinContents(efficiencies['pt_eta']['heavyflavor']['heavy'])
+        print 'eff '+lepton+' lf : ',getBinContents(efficiencies['pt_eta']['heavyflavor']['light'])
+    convSF_vs_eta = fetchSfHistos(sfFnames, lepton, verbose)['conv'] if lepton=='el' else None
+    qcdSF_vs_eta  = fetchSfHistos(sfFnames, lepton, verbose)['hflf']
+    if verbose:
+        print "convSF_vs_eta: ",getBinContents(convSF_vs_eta) if convSF_vs_eta else '--'
+        print "qcdSF_vs_eta: ",getBinContents (qcdSF_vs_eta)
+    if lepton=='el':
+        scaleFactors = {'conv' : {'flat' : el_convSF, 'vs_eta' : convSF_vs_eta},
+                        'heavy' : {'flat' : el_qcdSF, 'vs_eta' : qcdSF_vs_eta} }
+        scaleFakeEfficiencies(efficiencies, scaleFactors)
+    elif lepton=='mu':
+        scaleFactors = {'heavy' : {'flat' : mu_qcdSF, 'vs_eta' : qcdSF_vs_eta} }
+        scaleFakeEfficiencies(efficiencies, scaleFactors)
+
     # for now compute the weighted avg only for 'ssinc1j'
     avgEfficiencies = dict()
     for reg in first(first(compositions)).keys():
@@ -119,6 +133,7 @@ def main():
             htitle = lT+';'+lX+';'+lY
             groups  = first(compositions).keys()
             origins = first(first(first(compositions))).keys()
+            if verbose : print 'origins :',origins,'\n' + 'groups :',groups
             histosEff  = dict((group+'_'+orig, efficiencies[var][group]     [orig]) for group in groups for orig in origins)
             histosComp = dict((group+'_'+orig, compositions[var][group][reg][orig]) for group in groups for orig in origins)
             avgEff =  weightedAverage(histosEff, histosComp, hname, htitle, verbose)
@@ -145,13 +160,12 @@ def histoname_electron_sf_vs_eta() : return 'sf_el_vs_eta'
 def histoname_electron_sf_vs_pt() : return 'sf_el_vs_pt'
 
 
-def fetchCompositionHistos(filename, lepton, verbose):
+def fetchCompositionHistos(filename, lepton, groups=[], verbose=False):
     template = "h_%(var)s_%(group)s_%(region)s_%(origin)s_loose"
     regions = ['ssinc1j'] # inclusive region
     # these are the sr/cr for which we have some electron entries
-#     regions += ['cr_ee_eq1j', 'cr_ee_ge2j', 'cr_em_ge2j',
-#                 'sr_ee_eq1j', 'sr_ee_ge2j', 'sr_em_ge2j', ]
-    groups = ['diboson', 'heavyflavor', 'ttbar', 'wjets', 'zjets',]
+    #     regions += ['cr_ee_eq1j', 'cr_ee_ge2j', 'cr_em_ge2j',
+    #                 'sr_ee_eq1j', 'sr_ee_ge2j', 'sr_em_ge2j', ]
     origins = ['heavy', 'light']
     origins += ['conv'] if lepton=='el' else []
     #origins += ['real'] # real later, for now just worry about the hf/lf splitting
@@ -166,13 +180,14 @@ def fetchCompositionHistos(filename, lepton, verbose):
                             for g in groups))
                       for v in vars)
     return fetchHistos(filename, histonames, verbose)
-def fetchEffienciesHistos(filenames, lepton, verbose=False):
+def fetchEffienciesHistos(filenames, lepton,
+                          groups=['diboson', 'heavyflavor', 'ttbar', 'wjets', 'zjets'],
+                          verbose=False):
     template = "h_%(var)s_%(group)s_%(origin)s_tight_over_loose_%(region)s"
-    regions = ['conv', 'hflf',] # these are the regions for fake el
-    assert lepton=='el', "not implemented yet; todo: add regions for fake mu and real el/mu"
-    fnameQcd  = [f for f in filenames if 'mcqcd' in f][0]
-    fnameConv = [f for f in filenames if 'mcconv' in f][0]
-    assert all(f and os.path.exists(f) for f in [fnameQcd, fnameConv]),"inputs: %s, qcd: %s, conv %s"%(str(filenames), fnameQcd, fnameConv)
+    regions = ['conv', 'hflf',] if lepton=='el' else ['hflf'] # these are the regions where we extract the eff, see MeasureFakeRate2
+    fnameQcd  = first(filter(lambda _ : 'mcqcd' in _, filenames))
+    fnameConv = first(filter(lambda _ : 'mcconv' in _, filenames))
+    assert all(f and os.path.exists(f) for f in [fnameQcd, fnameConv] if f),"inputs: %s, qcd: %s, conv %s"%(str(filenames), fnameQcd, fnameConv)
     groups = ['diboson', 'heavyflavor', 'ttbar', 'wjets', 'zjets',]
     originsConv, originsQcd = ['conv'], ['heavy', 'light', 'qcd']
     vars = ['pt', 'pt_eta']
@@ -186,8 +201,7 @@ def fetchEffienciesHistos(filenames, lepton, verbose=False):
     def mergeConvQcd():
         return dict((v, dict((g, dict((o, histosConv[v][g][o] if o in originsConv else histosQcd[v][g][o])
                                       for o in originsQcd+originsConv)) for g in groups)) for v in vars)
-    histosMerged = mergeConvQcd()
-    return histosMerged
+    return mergeConvQcd() if lepton=='el' else histosQcd
 
 def writeHistos(outputFileName='', histosPerSamplePerSource={}, verbose=False):
     rootUtils.writeObjectsToFile(outputFileName, histosPerSamplePerSource, verbose)
@@ -195,18 +209,20 @@ def writeHistos(outputFileName='', histosPerSamplePerSource={}, verbose=False):
 def fetchHistos(fileName='', histoNames={}, verbose=False):
     return rootUtils.fetchObjectsFromFile(fileName, histoNames, verbose)
 
-def scaleElectronFakeEfficiencies(efficiencies={}, scaleFactors={}):
+def scaleFakeEfficiencies(efficiencies={}, scaleFactors={}):
     for var in efficiencies.keys():
         for group in first(efficiencies).keys():
-            h = efficiencies[var][group]['conv']
-            if 'TH1' in h.ClassName() :   h.Scale   (scaleFactors['conv']['flat'])
-            elif 'TH2' in h.ClassName() : h.Multiply(scaleFactors['conv']['vs_eta'])
             h = efficiencies[var][group]['heavy']
             if 'TH1' in h.ClassName() :   h.Scale   (scaleFactors['heavy']['flat'])
             elif 'TH2' in h.ClassName() : h.Multiply(scaleFactors['heavy']['vs_eta'])
             h = efficiencies[var][group]['qcd'] # scale qcd with the 'heavy' sf (but assume that the 'light' one is 1.0, see 3L)
             if 'TH1' in h.ClassName() :   h.Scale   (scaleFactors['heavy']['flat'])
             elif 'TH2' in h.ClassName() : h.Multiply(scaleFactors['heavy']['vs_eta'])
+            if not 'conv' in efficiencies[var][group] : continue # mu does not have a conv SF, we're done
+            h = efficiencies[var][group]['conv']
+            if 'TH1' in h.ClassName() :   h.Scale   (scaleFactors['conv']['flat'])
+            elif 'TH2' in h.ClassName() : h.Multiply(scaleFactors['conv']['vs_eta'])
+
 
 def weightedAverage(histosEff={}, histosWeight={}, histoName='', histoTitle='', verbose=False):
     getBinIndices, getBinContents, getBinning = rootUtils.getBinIndices, rootUtils.getBinContents, rootUtils.getBinning
@@ -235,14 +251,10 @@ def weightedAverage(histosEff={}, histosWeight={}, histoName='', histoTitle='', 
     print '-- ',histoName,'-- '
     for g in groups:
         bws, bcs = getBinContents(histosWeight[g]), getBinContents(histosEff[g])
-        print "adding %18s : %s"%(g, ' : '.join("%.4f*%.4f"%(bw, bc) for bw, bc in zip(bws, bcs)))                                
-    print histoName,' : ',
-    for g in groups:
-        print ' ',g,
+        print "adding %18s : %s"%(g, ' : '.join("%.4f*%.4f"%(bw, bc) for bw, bc in zip(bws, bcs)))
         histoEff, histoWeight = histosEff[g], histosWeight[g]
         histoEff.Multiply(histoWeight)
         hout.Add(histoEff)
-    print ''
     print "tot weight   : %s"%' '.join(("%.4f"%v for v in (sum(histosWeight[g].GetBinContent(b) for g in groups) for b in bins)))
     print "weighted avg : %s"%' '.join(("%.4f"%v for v in getBinContents(hout)))
     return hout

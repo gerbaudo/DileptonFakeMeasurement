@@ -52,7 +52,7 @@ mpl.use('Agg') # render plots without X
 import matplotlib.pyplot as plt
 import numpy as np
 import SampleUtils
-from compute_fake_el_scale_factor import histoname_electron_sf_vs_eta
+from compute_fake_el_scale_factor import histoname_sf_vs_eta
 
 usage="""
 Example usage:
@@ -355,20 +355,22 @@ def buildMuonRates(inputFiles, outputfile, outplotdir, inputFracFile=None, verbo
     #json_write(mu_frac, outplotdir+/outFracFilename)
     doPlotFractions = not inputFracFile
     if doPlotFractions : plotFractions(mu_frac, outplotdir, 'frac_mu')
-def fetchSfHistos(inputElecSfFiles=[], histoname='', verbose=False):
-    # inputElecSfFile should be two files, one for conv and one for bbcc
-    fileNames = inputElecSfFiles if type(inputElecSfFiles)==list else inputElecSfFiles.split()
-    assert len(fileNames)==2,"fetchSfHistos expects two files (hflf+conv), got %s"%str(inputElecSfFile)
+def fetchSfHistos(inputSfFiles=[], lepton='', verbose=False):
+    fileNames = inputSfFiles
+    assert type(fileNames)==list and len(fileNames) in [1, 2],"fetchSfHistos expects one or two files (hflf+conv), got %s"%str(inputSfFiles)
     if verbose : print "retrieving scale factors from %s"%inputElecSfFiles
     fname_hflf = first(filter(lambda _ : 'hflf' in _, fileNames))
     fname_conv = first(filter(lambda _ : 'conv' in _, fileNames))
     file_hflf = r.TFile.Open(fname_hflf)
-    file_conv = r.TFile.Open(fname_conv)
-    hname = histoname_electron_sf_vs_eta()
-    histos = {'hflf' : composeEtaHistosAs2dPtEta(input1Dhisto=file_hflf.Get(hname), outhistoname=hname+'_hflf'),
-              'conv' : composeEtaHistosAs2dPtEta(input1Dhisto=file_conv.Get(hname), outhistoname=hname+'_conv')
-              }
-    for f in [file_hflf, file_conv] : f.Close()
+    file_conv = r.TFile.Open(fname_conv) if fname_conv else None
+    hname = histoname_sf_vs_eta(lepton)
+    histo_hflf = file_hflf.Get(hname)
+    histo_conv = file_conv.Get(hname) if file_conv else None
+    histos = dict()
+    if histo_hflf : histos['hflf'] = composeEtaHistosAs2dPtEta(input1Dhisto=histo_hflf, outhistoname=hname+'_hflf')
+    if histo_conv : histos['conv'] = composeEtaHistosAs2dPtEta(input1Dhisto=histo_conv, outhistoname=hname+'_conv')
+    for f in [file_hflf, file_conv] :
+        if f : f.Close()
     return histos
 def buildElectronRates(inputFiles, outputfile, outplotdir, inputFracFile=None, inputElecSfFiles=[], verbose=False, zoomIn=False) :
     """
@@ -379,8 +381,9 @@ def buildElectronRates(inputFiles, outputfile, outplotdir, inputFracFile=None, i
     processes = fakeProcesses()
     brsit, iF, v = buildRatioAndScaleIt, inputFiles, verbose
     # if we have the sf vs eta, use it in the 2d parametrization
-    el_convSF_vs_eta = el_convSF if not inputElecSfFiles else fetchSfHistos(inputElecSfFiles, histoname_electron_sf_vs_eta, verbose)['conv']
-    el_qcdSF_vs_eta  = el_qcdSF if not inputElecSfFiles else fetchSfHistos(inputElecSfFiles, histoname_electron_sf_vs_eta, verbose)['hflf']
+    lepton = 'el'
+    el_convSF_vs_eta = el_convSF if not inputElecSfFiles else fetchSfHistos(inputElecSfFiles, lepton, verbose)['conv']
+    el_qcdSF_vs_eta  = el_qcdSF if not inputElecSfFiles else fetchSfHistos(inputElecSfFiles,  lepton, verbose)['hflf']
     if inputElecSfFiles : el_convSF_vs_eta.Print("all")
     if inputElecSfFiles : el_qcdSF_vs_eta.Print("all")
 

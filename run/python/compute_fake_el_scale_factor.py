@@ -122,12 +122,12 @@ def main():
     for g in groups:
         hps = dict((v, histosPerSamplePerSource[v][g])for v in vars)
         plotPerSourceEff(histosPerVar=hps, outputDir=outputDir, lepton=lepton, region=region, sample=g, verbose=verbose)
-    sf_el_eta = subtractRealAndComputeScaleFactor(histosPerGroup, 'eta1', histoname_electron_sf_vs_eta(), outputDir, region, verbose)
-    sf_el_pt  = subtractRealAndComputeScaleFactor(histosPerGroup, 'pt1',  histoname_electron_sf_vs_pt(),  outputDir, region, verbose)
+    sf_eta = subtractRealAndComputeScaleFactor(histosPerGroup, 'eta1', histoname_sf_vs_eta(lepton), outputDir, region, verbose)
+    sf_pt  = subtractRealAndComputeScaleFactor(histosPerGroup, 'pt1',  histoname_sf_vs_pt(lepton),  outputDir, region, verbose)
     outputFile = r.TFile.Open(outputFileName, 'recreate')
     outputFile.cd()
-    sf_el_eta.Write()
-    sf_el_pt.Write()
+    sf_eta.Write()
+    sf_pt.Write()
     outputFile.Close()
     if verbose : print "saved scale factors to %s" % outputFileName
 
@@ -141,8 +141,8 @@ colorsLineSources = fakeu.colorsLineSources()
 markersSources = fakeu.markersSources()
 enum2source = fakeu.enum2source
 
-def histoname_electron_sf_vs_eta() : return 'sf_el_vs_eta'
-def histoname_electron_sf_vs_pt() : return 'sf_el_vs_pt'
+def histoname_sf_vs_eta(l) : return 'sf_'+l+'_vs_eta'
+def histoname_sf_vs_pt (l) : return 'sf_'+l+'_vs_pt'
 
 def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource,
                lepton, group, region, verbose=False):
