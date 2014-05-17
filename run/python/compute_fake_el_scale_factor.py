@@ -554,7 +554,7 @@ def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', outhistona
     refLine.Draw()
     can.Update()
     outFname = os.path.join(outputDir, region+'_'+outhistoname)
-    for ext in ['eps','png']:
+    for ext in ['.eps','.png']:
         utils.rmIfExists(outFname+ext)
         can.SaveAs(outFname+ext)
     return ratio
