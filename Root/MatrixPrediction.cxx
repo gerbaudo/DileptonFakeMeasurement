@@ -80,7 +80,8 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   const SsPassFlags &ssf = varsFlags.second;
   m_weightComponents.fake = getFakeWeight(l,sf::CR_SSInc1j, metRel, smm::SYS_NOM); // just for the counters, use generic CR_SRWHSS
   incrementSsCounters(ssf, m_weightComponents);
-  if(!ssf.passCommonCriteria()) return false;
+  bool passBaseline(ssf.passCommonCriteria()  && l[0]->Pt()>20.0 && l[1]->Pt()>20.0);
+  if(!passBaseline) return false;
   if(m_writeTuple && ssf.lepPt) {
       double weight(getFakeWeight(l, sf::CR_CR8lpt, metRel, smm::SYS_NOM));
       unsigned int run(nt.evt()->run), event(nt.evt()->event);

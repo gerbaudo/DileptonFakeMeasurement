@@ -137,7 +137,8 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     iSys);
       if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,iSys);
       if(passEwkSsLea)   fillHistos(ncl, j, m, weight, swh::PR_SsEwkLea,  iSys);
-      if(!ssf.passCommonCriteria()) continue; // note to self: here the fj and bj veto are implicitly being applied. refactor
+      bool passBaseline(ssf.passCommonCriteria() && ncl[0]->Pt()>20.0 && ncl[1]->Pt()>20.0); // note to self: here the fj and bj veto are implicitly being applied. refactor
+      if(!passBaseline) continue;
       bool is1j(ssf.eq1j), is2j(ssf.ge2j);
 
       if(ssf.sameSign && ssf.ge1j)                 fillHistos(ncl, j, m, weight, swh::PR_CRSsInc1j,iSys);

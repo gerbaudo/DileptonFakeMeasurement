@@ -848,7 +848,9 @@ void SusySelection::initChargeFlipTool()
     return;
   }
   string chargeFlipInput(rcdir);
-  chargeFlipInput += "/../ChargeFlip/data/d0_new2d_chargeflip_map.root";
+  //  chargeFlipInput += "/../ChargeFlip/data/d0_new2d_chargeflip_map.root";
+  //  chargeFlipInput += "/../ChargeFlip/data/d0_new2d_chargeflip_map_scale_last_ptbin.root"; // scaled with wwjj
+  chargeFlipInput += "/../ChargeFlip/data/d0_new2d_chargeflip_map_scale_with_mc_last_ptbin.root"; // scaled with Emma's mc map
   m_chargeFlip = new chargeFlip(chargeFlipInput);
   if(m_dbg) m_chargeFlip->printSettings();
 }
