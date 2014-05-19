@@ -36,6 +36,8 @@ parser.add_option("-s", "--sample-regexp", dest="samples", default='.*',
                   help="create filelists only for matching samples (default '.*')")
 parser.add_option("-e", "--exclude-regexp", dest="exclude", default=None,
                   help="submit jobs excluding matching samples (eg. bkg only: '(period|simplified)')")
+parser.add_option("-q", "--queue", dest="queue", default='atlas',
+                  help="usually either atlas or atlas_slow")
 parser.add_option("-S", "--submit", dest="submit", action='store_true', default=False,
                   help="submit jobs (default dry run)")
 parser.add_option("-t", "--tag", dest="tag", default=defaultBatchTag,
@@ -59,6 +61,7 @@ faketupl     = options.faketupl
 fakeprob     = options.fakeprob
 fakerate     = options.fakerate
 alsoph       = options.alsoplaceholders
+queue        = options.queue
 verbose      = options.verbose
 
 if not [susyplot, susysel, seltuple, fakeprob, fakerate, fakepred, faketupl].count(True)==1 :
@@ -126,12 +129,13 @@ for sample in sampleNames :
         fillInScriptTemplate(sample, input, output, otherOptions, script, template)
     elif fileExists : print "warning, not overwriting existing script '%s'"%script
     cmd = "qsub " \
+          " -q %(queue)s " \
           "-j oe -V " \
           "-N %(jobname)s " \
           "-o %(outlog)s " \
           " %(scripname)s" \
           % \
-          {'jobname':"%s%s"%(sample, batchTag), 'outlog':outlog, 'scripname':script}
+          {'jobname':"%s%s"%(sample, batchTag), 'outlog':outlog, 'scripname':script, 'queue':queue}
     print cmd
     if submit :
         out = getCommandOutput(cmd)
