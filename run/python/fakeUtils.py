@@ -85,17 +85,28 @@ def plot2dEfficiencies(effs={}, canvasName='', outputDir='./', frameTitle='effic
     r.gStyle.SetPaintTextFormat(origTextFormat)
 
 #___________________________________________________________
-def isTight_std(l):   return elecIsTight_std  (l) if l.isEl else muonIsTight_std  (l) if l.isMu else False
-def isTight_tight(l): return elecIsTight_tight(l) if l.isEl else muonIsTight_tight(l) if l.isMu else False
-def isTight_wh (l):   return elecIsTight_wh   (l) if l.isEl else muonIsTight_wh   (l) if l.isMu else False
+def isTight_std(l):
+    "tight with standard isolation"
+    return elecIsTight_std  (l) if l.isEl else muonIsTight_std  (l) if l.isMu else False
+def isTight_tight(l):
+    "tight with standard isolation, but tighter cuts"
+    return elecIsTight_tight(l) if l.isEl else muonIsTight_tight(l) if l.isMu else False
+def isTight_minden(l):
+    "tight with modified isolation: denominator=min(pt,60) rather than pt"
+    return elecIsTight_minden(l) if l.isEl else muonIsTight_minden(l) if l.isMu else False
+def isTight_wh (l):
+    "tight with tighter cuts and modified isolation"
+    return elecIsTight_wh   (l) if l.isEl else muonIsTight_wh   (l) if l.isMu else False
 
-def elecIsTight_std  (l): return l.isTightPp and elecIsFromPv(l) and elecIsIsolated(l, denominator_std(l), etConeThres=0.18, ptConeThres=0.16)
-def elecIsTight_tight(l): return l.isTightPp and elecIsFromPv(l) and elecIsIsolated(l, denominator_std(l), etConeThres=0.13, ptConeThres=0.07)
-def elecIsTight_wh   (l): return l.isTightPp and elecIsFromPv(l) and elecIsIsolated(l, denominator_wh (l), etConeThres=0.13, ptConeThres=0.07)
+def elecIsTight_std   (l): return l.isTightPp and elecIsFromPv(l) and elecIsIsolated(l, denominator_std(l), etConeThres=0.18, ptConeThres=0.16)
+def elecIsTight_tight (l): return l.isTightPp and elecIsFromPv(l) and elecIsIsolated(l, denominator_std(l), etConeThres=0.13, ptConeThres=0.07)
+def elecIsTight_minden(l): return l.isTightPp and elecIsFromPv(l) and elecIsIsolated(l, denominator_wh (l), etConeThres=0.18, ptConeThres=0.16)
+def elecIsTight_wh    (l): return l.isTightPp and elecIsFromPv(l) and elecIsIsolated(l, denominator_wh (l), etConeThres=0.13, ptConeThres=0.07)
 
-def muonIsTight_std  (l): return muonIsFromPv(l) and muonIsIsolated(l, denominator_std(l), etConeThres=None, ptConeThres=0.12)
-def muonIsTight_tight(l): return muonIsFromPv(l) and muonIsIsolated(l, denominator_std(l), etConeThres=0.14, ptConeThres=0.06)
-def muonIsTight_wh   (l): return muonIsFromPv(l) and muonIsIsolated(l, denominator_wh (l), etConeThres=0.14, ptConeThres=0.06)
+def muonIsTight_std   (l): return muonIsFromPv(l) and muonIsIsolated(l, denominator_std(l), etConeThres=None, ptConeThres=0.12)
+def muonIsTight_tight (l): return muonIsFromPv(l) and muonIsIsolated(l, denominator_std(l), etConeThres=0.14, ptConeThres=0.06)
+def muonIsTight_minden(l): return muonIsFromPv(l) and muonIsIsolated(l, denominator_wh(l),  etConeThres=None, ptConeThres=0.12)
+def muonIsTight_wh    (l): return muonIsFromPv(l) and muonIsIsolated(l, denominator_wh (l), etConeThres=0.14, ptConeThres=0.06)
 
 def denominator_wh (l) :
     pt = l.p4.Pt()
