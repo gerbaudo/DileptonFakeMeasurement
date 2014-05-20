@@ -63,6 +63,7 @@ def main():
     parser.add_option('-i', '--input-dir', default='./out/fakerate')
     parser.add_option('-o', '--output-dir', default='./out/fake_el_scale_factor', help='dir for plots')
     parser.add_option('-l', '--lepton', default='el', help='either el or mu')
+    parser.add_option('-s', '--syst-fudge', help='scale down main group (el:wjets, mu:bb/cc) to evaluate fraction syst unc')
     parser.add_option('-t', '--tag', help='tag used to select the input files (e.g. Apr_04)')
     parser.add_option('-f', '--fill-histos', action='store_true', default=False, help='force fill (default only if needed)')
     parser.add_option('-v', '--verbose', action='store_true', default=False)
@@ -70,6 +71,7 @@ def main():
     inputDir  = options.input_dir
     outputDir = options.output_dir
     lepton    = options.lepton
+    systfudge = options.syst_fudge
     tag       = options.tag
     verbose   = options.verbose
     if not tag : parser.error('tag is a required option')
@@ -82,7 +84,7 @@ def main():
     outputFileName = os.path.join(outputDir, templateOutputFilename)
     cacheFileName = outputFileName.replace('.root', '_cache.root')
     doFillHistograms = options.fill_histos or not os.path.exists(cacheFileName)
-    optionsToPrint = ['inputDir', 'outputDir', 'tag', 'doFillHistograms']
+    optionsToPrint = ['inputDir', 'outputDir', 'tag', 'doFillHistograms', 'systfudge']
     if verbose :
         print "working from %s"%os.getcwd()
         print "being called as : %s"%' '.join(os.sys.argv)
@@ -142,6 +144,7 @@ def main():
             histos = dict([(k+'_heavy',  h) for k,h in histosHeavy.iteritems()] +
                           [(k+'_light',  h) for k,h in histosLight.iteritems()] +
                           [(k+'_conv', h) for k,h in histosConv.iteritems()])
+            if systfudge: fudgeCompositions(histosHeavy, histosLight, histosConv if lepton=='el' else None)
             normalizeHistos(histos)
             anygroupCompositions = buildCompositionsAddingGroups({'heavy':histosHeavy, 'light':histosLight, 'conv':histosConv})
             histosCompositions[sel][var] = {'bygroup':histos, 'anygroup': anygroupCompositions}
@@ -411,6 +414,19 @@ def writeHistos(outputFileName='', histosPerSamplePerSource={}, verbose=False):
 def fetchHistos(fileName='', histoNames={}, verbose=False):
     return rootUtils.fetchObjectsFromFile(fileName, histoNames, verbose)
 
-
+def fudgeCompositions(histosHeavy, histosLight, histosConv):
+    "for el, scale down the wjets by 0.5; for mu, scale down bb/cc by 0.5"
+    isEl = histosConv!=None
+    def scaleKeyBy(hDict, key, factor):
+        for k,h in hDict.iteritems():
+            if k==key:
+                h.Scale(factor)
+    if isEl:
+        scaleKeyBy(histosHeavy, 'wjets', 0.5)
+        scaleKeyBy(histosLight, 'wjets', 0.5)
+        scaleKeyBy(histosConv,  'wjets', 0.5)
+    else:
+        scaleKeyBy(histosHeavy, 'heavyflavor', 0.5)
+        scaleKeyBy(histosLight, 'heavyflavor', 0.5)
 if __name__=='__main__':
     main()
