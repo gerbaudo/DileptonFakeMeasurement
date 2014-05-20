@@ -237,7 +237,7 @@ def fetchObjectsFromFile(fileName='', objects={}, verbose=False, closeFileOnExit
             return [fecth(o) for o in object]
         else:
             obj = inputFile.Get(object)
-            if verbose and not obj.GetName() : print "cannot get '%s' from '%s'"%(str(object), inputFile.GetName())
+            if verbose and not obj : print "cannot get '%s' from '%s'"%(str(object), inputFile.GetName())
             return obj
     if not inputFile : print "cannot open %s"%fileName
     else:
