@@ -143,13 +143,14 @@ def main():
                           [(k+'_light',  h) for k,h in histosLight.iteritems()] +
                           [(k+'_conv', h) for k,h in histosConv.iteritems()])
             normalizeHistos(histos)
-            histosCompositions[sel][var] = histos
+            anygroupCompositions = buildCompositionsAddingGroups({'heavy':histosHeavy, 'light':histosLight, 'conv':histosConv})
+            histosCompositions[sel][var] = {'bygroup':histos, 'anygroup': anygroupCompositions}
             is1Dhisto = var!='pt_eta' # can only stack 1D plots
             if is1Dhisto:
-                histos = {'heavy':histosHeavy, 'light':histosLight, 'conv':histosConv}
+                histosBySource = {'heavy':histosHeavy, 'light':histosLight, 'conv':histosConv}
                 frameTitle = lepton+': '+sel+';'+var
                 canvasBaseName = lepton+'_fake'+sel+'_'+var+'_frac'
-                plotFractionsStacked(histos, canvasBaseName+'_stack', outputDir, frameTitle)
+                plotFractionsStacked(histosBySource, canvasBaseName+'_stack', outputDir, frameTitle)
     writeHistos(outputFileName, histosCompositions, verbose)
 
 
@@ -381,6 +382,22 @@ def bookHistosPerSamplePerSource(variables, samples, sources):
                                for s in leptonSources]))
                         for sel in allSelections()]))
                  for g in samples])
+
+def buildCompositionsAddingGroups(histos={}):
+    """
+    Get the histograms split by process and by source, and add them up making just fractions by source.
+    """
+    def buildTotHisto(histosPerGroup={}):
+        firstGroup, firstHisto = [(k,v) for k,v in histosPerGroup.iteritems()][0]
+        hTot = firstHisto.Clone(firstHisto.GetName().replace(firstGroup, 'anygroup'))
+        hTot.Reset()
+        for h in histosPerGroup.values():
+            hTot.Add(h)
+        return hTot
+    totHeavy = buildTotHisto(histos['heavy'])
+    totLight = buildTotHisto(histos['light'])
+    totConv  = buildTotHisto(histos['conv']) if 'conv' in histos else None
+    return dict([('heavy',totHeavy), ('light',totLight)] + [('conv', totConv)] if totConv else [])
 
 def extractName(dictOrHist):
     "input must be either a dict or something with 'GetName'"

@@ -213,7 +213,7 @@ def guessBaseHistoname(histonames=[]) :
     return basename.strip(' _')
 def normalizeHistos(histos) :
     "Normalize the input histos so that in each bin the sum of the different processes amounts to 1.0"
-    basename = guessBaseHistoname([h.GetName() for h in histos.values()])
+    basename = guessBaseHistoname([h.GetName() for h in histos.values() if h])
     tot = first(histos).Clone(basename+'_tot')
     tot.Reset()
     for h in histos.values() : tot.Add(h)
