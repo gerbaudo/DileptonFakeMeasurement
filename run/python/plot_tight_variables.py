@@ -42,7 +42,6 @@ from SampleUtils import (fastSamplesFromFilenames
 import SampleUtils
 import fakeUtils as fakeu
 import utils
-from compute_fake_el_scale_factor import histoname_electron_sf_vs_eta
 from buildWeightedMatrix import fetchSfHistos
 from compute_fake_el_scale_factor import computeStatErr2, buildErrBandGraph
 
@@ -175,6 +174,7 @@ def bookHistosPerGroup(variables, groups, lepLabel='') :
                          {'loose'       : histo(variable=v, hname=histoNamePerSample(g, v, 'loose')),
                           'tight'       : histo(variable=v, hname=histoNamePerSample(g, v, 'tight')),
                           'tight_std'   : histo(variable=v, hname=histoNamePerSample(g, v, 'tight_std')),
+                          'tight_minden': histo(variable=v, hname=histoNamePerSample(g, v, 'tight_minden')),
                           'tight_tight' : histo(variable=v, hname=histoNamePerSample(g, v, 'tight_tight'))
                           })
                         for v in variables]))
@@ -205,9 +205,10 @@ def fillHistos(chain, histosThisGroup, histosPerSource, isData, lepton, group, v
         isRightLep = probe.isEl if lepton=='el' else probe.isMu if lepton=='mu' else False
         if not isRightLep : continue
         # isTight = probe.isTight # this is the same as isTight_wh
-        isTight       = fakeu.isTight_wh   (probe)
-        isTight_std   = fakeu.isTight_std  (probe)
-        isTight_tight = fakeu.isTight_tight(probe)
+        isTight        = fakeu.isTight_wh    (probe)
+        isTight_std    = fakeu.isTight_std   (probe)
+        isTight_minden = fakeu.isTight_minden(probe)
+        isTight_tight  = fakeu.isTight_tight (probe)
         if (isData and isTight != probe.isTight):
             print "isTight_wh %s isTight %s run %d event %d" % (isTight, probe.isTight, evtN, runN)
             print "(RunNumber==%d && EventNumber==%d)"%(runN, evtN)
@@ -271,6 +272,8 @@ def fillHistos(chain, histosThisGroup, histosPerSource, isData, lepton, group, v
                 fillPerGroup('tight')
             if isTight_std:
                 fillPerGroup('tight_std')
+            if isTight_minden:
+                fillPerGroup('tight_minden')
             if isTight_tight:
                 fillPerGroup('tight_tight')
     if verbose:
@@ -342,7 +345,7 @@ def plotIsoComparison(histosPerSource={}, outputDir='', region='', lepton='', ve
         notRealSources = [s for s in sources if s!='real']
         aSource = first(notRealSources)
         totFakeHistos = dict()
-        for lt in ['loose', 'tight', 'tight_std', 'tight_tight']:
+        for lt in ['loose', 'tight', 'tight_std', 'tight_minden', 'tight_tight']:
             template = histosPtPerSource[aSource][lt]
             h = template.Clone(template.GetName().replace(aSource, 'fake'))
             h.Reset()
@@ -350,12 +353,14 @@ def plotIsoComparison(histosPerSource={}, outputDir='', region='', lepton='', ve
             totFakeHistos[lt] = h
         return totFakeHistos
     histosPtPerSource['fake'] = buildTotFakeHistos()
-    effReal_wh    = rootUtils.buildRatioHistogram(histosPtPerSource['real']['tight'      ], histosPtPerSource['real']['loose'])
-    effReal_std   = rootUtils.buildRatioHistogram(histosPtPerSource['real']['tight_std'  ], histosPtPerSource['real']['loose'])
-    effReal_tight = rootUtils.buildRatioHistogram(histosPtPerSource['real']['tight_tight'], histosPtPerSource['real']['loose'])
-    effFake_wh    = rootUtils.buildRatioHistogram(histosPtPerSource['fake']['tight'      ], histosPtPerSource['fake']['loose'])
-    effFake_std   = rootUtils.buildRatioHistogram(histosPtPerSource['fake']['tight_std'  ], histosPtPerSource['fake']['loose'])
-    effFake_tight = rootUtils.buildRatioHistogram(histosPtPerSource['fake']['tight_tight'], histosPtPerSource['fake']['loose'])
+    effReal_wh     = rootUtils.buildRatioHistogram(histosPtPerSource['real']['tight'       ], histosPtPerSource['real']['loose'])
+    effReal_std    = rootUtils.buildRatioHistogram(histosPtPerSource['real']['tight_std'   ], histosPtPerSource['real']['loose'])
+    effReal_minden = rootUtils.buildRatioHistogram(histosPtPerSource['real']['tight_minden'], histosPtPerSource['real']['loose'])
+    effReal_tight  = rootUtils.buildRatioHistogram(histosPtPerSource['real']['tight_tight' ], histosPtPerSource['real']['loose'])
+    effFake_wh     = rootUtils.buildRatioHistogram(histosPtPerSource['fake']['tight'       ], histosPtPerSource['fake']['loose'])
+    effFake_std    = rootUtils.buildRatioHistogram(histosPtPerSource['fake']['tight_std'   ], histosPtPerSource['fake']['loose'])
+    effFake_minden = rootUtils.buildRatioHistogram(histosPtPerSource['fake']['tight_minden'], histosPtPerSource['fake']['loose'])
+    effFake_tight  = rootUtils.buildRatioHistogram(histosPtPerSource['fake']['tight_tight' ], histosPtPerSource['fake']['loose'])
     frameName, frameTitle = region+'_'+lepton, "fake and real efficiencies for %s in %s"%(lepton, region)
     can = r.TCanvas('c_'+frameName, frameTitle, 800, 600)
     can.cd()
@@ -364,30 +369,35 @@ def plotIsoComparison(histosPerSource={}, outputDir='', region='', lepton='', ve
     pm.SetMaximum(1.1)
     pm.GetYaxis().SetTitle("#epsilon(T|L)")
     colorReal, colorFake = r.kBlue, r.kRed
-    markerWh, markerStd, markerTight = r.kMultiply, r.kCircle, r.kOpenSquare
+    markerWh, markerStd, markerMinden, markerTight = r.kMultiply, r.kCircle, r.kOpenTriangleUp, r.kOpenSquare
     def setAttrs(h, mark, col):
         h.SetLineColor(col)
         h.SetMarkerColor(col)
         h.SetMarkerStyle(mark)
-    setAttrs(effReal_wh,    markerWh,    colorReal)
-    setAttrs(effReal_std,   markerStd,   colorReal)
-    setAttrs(effReal_tight, markerTight, colorReal)
-    setAttrs(effFake_wh,    markerWh,    colorFake)
-    setAttrs(effFake_std,   markerStd,   colorFake)
-    setAttrs(effFake_tight, markerTight, colorFake)
+    setAttrs(effReal_wh,     markerWh,     colorReal)
+    setAttrs(effReal_std,    markerStd,    colorReal)
+    setAttrs(effReal_minden, markerMinden, colorReal)
+    setAttrs(effReal_tight,  markerTight,  colorReal)
+    setAttrs(effFake_wh,     markerWh,     colorFake)
+    setAttrs(effFake_std,    markerStd,    colorFake)
+    setAttrs(effFake_minden, markerMinden, colorFake)
+    setAttrs(effFake_tight,  markerTight,  colorFake)
     pm.SetStats(0)
     pm.Draw('axis')
-    for h in [effReal_wh, effReal_std, effReal_tight, effFake_wh, effFake_std, effFake_tight]:
+    #for h in [effReal_wh, effReal_std, effReal_tight, effFake_wh, effFake_std, effFake_tight]:
+    for h in [effReal_wh, effReal_std, effReal_minden, effFake_wh, effFake_std, effFake_minden]:
         h.Draw('same')
     leg = rightLegend(can)
     leg.SetBorderSize(0)
     leg.AddEntry(r.TObject(),   'Real', '')
     leg.AddEntry(effReal_std,   'std iso', 'lp')
-    leg.AddEntry(effReal_tight, 'tight iso', 'lp')
+    #leg.AddEntry(effReal_tight, 'tight iso', 'lp')
+    leg.AddEntry(effReal_minden,'minden iso', 'lp')
     leg.AddEntry(effReal_wh,    'wh iso',  'lp')
     leg.AddEntry(r.TObject(),   'Fake', '')
     leg.AddEntry(effFake_std,   'std iso', 'lp')
-    leg.AddEntry(effFake_tight, 'tight iso', 'lp')
+    #leg.AddEntry(effFake_tight, 'tight iso', 'lp')
+    leg.AddEntry(effFake_minden,'minden iso', 'lp')
     leg.AddEntry(effFake_wh,  '  wh iso',  'lp')
     leg.Draw()
     topRightLabel(can, "#splitline{%s}{%s}"%(lepton, region), xpos=0.125, align=13)
