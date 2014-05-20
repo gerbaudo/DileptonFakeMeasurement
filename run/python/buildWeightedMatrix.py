@@ -358,7 +358,7 @@ def buildMuonRates(inputFiles, outputfile, outplotdir, inputFracFile=None, verbo
 def fetchSfHistos(inputSfFiles=[], lepton='', verbose=False):
     fileNames = inputSfFiles
     assert type(fileNames)==list and len(fileNames) in [1, 2],"fetchSfHistos expects one or two files (hflf+conv), got %s"%str(inputSfFiles)
-    if verbose : print "retrieving scale factors from %s"%inputElecSfFiles
+    if verbose : print "retrieving scale factors from %s"%inputSfFiles
     fname_hflf = first(filter(lambda _ : 'hflf' in _, fileNames))
     fname_conv = first(filter(lambda _ : 'conv' in _, fileNames))
     file_hflf = r.TFile.Open(fname_hflf)
