@@ -109,7 +109,7 @@ def main():
         for group in groups:
             filenames = filenamesPerGroup[group]
             histosThisGroupPerSource = dict((v, histosPerGroupPerSource[v][group]) for v in histosPerGroupPerSource.keys())
-            histosAnyGroupPerSource  = dict((v, histosPerGroupPerSource[v]['anysample']) for v in histosPerGroupPerSource.keys())
+            histosAnyGroupPerSource  = dict((v, histosPerGroupPerSource[v]['anygroup']) for v in histosPerGroupPerSource.keys())
 
             chain = r.TChain(treeName)
             [chain.Add(fn) for fn in filenames]
@@ -124,8 +124,8 @@ def main():
             groups = first(effs).keys()
             varIs1D, varIs2D = v=='pt', v=='pt_eta'
             effsThisSourceThisVar = dict((g, effs[v][g][s]) for g in groups)
-            densThisSourceThisVar = dict((g, histosPerGroupPerSource[v][g][s]['loose']) for g in groups if g!='anysample')
-            numsThisSourceThisVar = dict((g, histosPerGroupPerSource[v][g][s]['tight']) for g in groups if g!='anysample')
+            densThisSourceThisVar = dict((g, histosPerGroupPerSource[v][g][s]['loose']) for g in groups if g!='anygroup')
+            numsThisSourceThisVar = dict((g, histosPerGroupPerSource[v][g][s]['tight']) for g in groups if g!='anygroup')
             if varIs1D:
                 cname = 'eff_'+lepton+'_'+s
                 lT, lX, lY = '#varepsilon(T|L)', 'p_{T} [GeV]', '#varepsilon(T|L)'
@@ -158,7 +158,7 @@ colorsLineSources = fakeu.colorsLineSources()
 markersSources = fakeu.markersSources()
 enum2source = fakeu.enum2source
 
-def fillHistos(chain, histosPerSource, histosPerSourceAnySample, lepton, mode, verbose=False):
+def fillHistos(chain, histosPerSource, histosPerSourceAnygroup, lepton, mode, verbose=False):
     class Counters: # scope trick (otherwise unavailable within nested func
         nLoose, nTight = 0, 0
         totWeightLoose, totWeightTight = 0.0, 0.0
@@ -167,7 +167,7 @@ def fillHistos(chain, histosPerSource, histosPerSourceAnySample, lepton, mode, v
             return ', '.join(["%s : %.1f"%(c, getattr(self, c)) for c in counterNames])
     counters = Counters()
     addTlv = kin.addTlv
-    hspsAnySample = histosPerSourceAnySample
+    hspsAnygroup = histosPerSourceAnygroup
     for iEvent, event in enumerate(chain) :
         pars = event.pars
         weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
@@ -188,13 +188,13 @@ def fillHistos(chain, histosPerSource, histosPerSourceAnySample, lepton, mode, v
                     counters.totWeightTight += weight
                 histosPerSource['pt'    ][source][tightOrLoose].Fill(pt,      weight)
                 histosPerSource['pt_eta'][source][tightOrLoose].Fill(pt, eta, weight)
-                hspsAnySample  ['pt'    ][source][tightOrLoose].Fill(pt,      weight)
-                hspsAnySample  ['pt_eta'][source][tightOrLoose].Fill(pt, eta, weight)
+                hspsAnygroup   ['pt'    ][source][tightOrLoose].Fill(pt,      weight)
+                hspsAnygroup   ['pt_eta'][source][tightOrLoose].Fill(pt, eta, weight)
                 if mode=='hflf': # qcd is heavy+light
                     histosPerSource['pt'    ]['qcd'][tightOrLoose].Fill(pt,      weight)
                     histosPerSource['pt_eta']['qcd'][tightOrLoose].Fill(pt, eta, weight)
-                    hspsAnySample  ['pt'    ]['qcd'][tightOrLoose].Fill(pt,      weight)
-                    hspsAnySample  ['pt_eta']['qcd'][tightOrLoose].Fill(pt, eta, weight)
+                    hspsAnygroup   ['pt'    ]['qcd'][tightOrLoose].Fill(pt,      weight)
+                    hspsAnygroup   ['pt_eta']['qcd'][tightOrLoose].Fill(pt, eta, weight)
             if isRightLep and isRightSource :
                 lep = addTlv(lep)
                 pt, eta = lep.p4.Pt(), abs(lep.p4.Eta())
@@ -226,7 +226,7 @@ def bookHistosPerSamplePerSource(variables, samples, sources, mode=''):
                                  'tight' : histo(var=v, hname=histoNamePerSamplePerSource(v, g, s, 'tight', mode)),
                                  })
                                for s in sources]))
-                        for g in samples+['anysample']]))
+                        for g in samples+['anygroup']]))
                  for v in variables])
 
 def extractName(dictOrHist):
