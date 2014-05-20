@@ -379,6 +379,10 @@ void SusyPlotter::toggleFakeSystematics()
     m_systs.push_back(smm::SYS_EL_FR_DOWN);  m_systNames.push_back(sns[smm::SYS_EL_FR_DOWN]);
     m_systs.push_back(smm::SYS_MU_FR_UP  );  m_systNames.push_back(sns[smm::SYS_MU_FR_UP  ]);
     m_systs.push_back(smm::SYS_MU_FR_DOWN);  m_systNames.push_back(sns[smm::SYS_MU_FR_DOWN]);
+    m_systs.push_back(smm::SYS_EL_FRAC_UP);  m_systNames.push_back(sns[smm::SYS_EL_FRAC_UP]);
+    m_systs.push_back(smm::SYS_EL_FRAC_DO);  m_systNames.push_back(sns[smm::SYS_EL_FRAC_DO]);
+    m_systs.push_back(smm::SYS_MU_FRAC_UP);  m_systNames.push_back(sns[smm::SYS_MU_FRAC_UP]);
+    m_systs.push_back(smm::SYS_MU_FRAC_DO);  m_systNames.push_back(sns[smm::SYS_MU_FRAC_DO]);
 }
 //-----------------------------------------
 void SusyPlotter::initHistos()
