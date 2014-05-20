@@ -104,9 +104,6 @@ def main():
     # pprint.pprint(compositions)
     efficiencies = fetchEffienciesHistos(effFnames, lepton, groups, verbose) # [var][group][orig], note here orig=[conv,heavy,light,qcd]
     # pprint.pprint(efficiencies)
-    if verbose:
-        print 'eff '+lepton+' hf : ',getBinContents(efficiencies['pt_eta']['heavyflavor']['heavy'])
-        print 'eff '+lepton+' lf : ',getBinContents(efficiencies['pt_eta']['heavyflavor']['light'])
     convSF_vs_eta = fetchSfHistos(sfFnames, lepton, verbose)['conv'] if lepton=='el' else None
     qcdSF_vs_eta  = fetchSfHistos(sfFnames, lepton, verbose)['hflf']
     if verbose:
@@ -141,8 +138,40 @@ def main():
             if is1D:
                 fakeu.plot1dEfficiencies({reg : avgEff}, 'eff1d_'+lepton+'_fake_'+reg, outputDir, htitle, zoomIn=True)
             else:
-                fakeu.plot2dEfficiencies({reg : avgEff}, 'eff2d_'+lepton+'_fake', outputDir, htitle, zoomIn=True)
+                fakeu.plot2dEfficiencies({reg : avgEff}, 'eff2d_'+lepton+'_fake_'+reg, outputDir, htitle, zoomIn=True)
     writeHistos(os.path.join(outputDir,'fake_matrices_'+lepton+'.root'), avgEfficiencies, verbose)
+
+    # test with the group-independent efficiencies
+    print 'fetchCompositionHistos ',compFname
+    compositions = fetchCompositionHistos(compFname, lepton, ['anygroup'], verbose)
+    pprint.pprint(compositions)
+    print 'fetchEffienciesHistos ',effFnames
+    efficiencies = fetchEffienciesHistos(effFnames, lepton, ['anygroup'], verbose)
+    pprint.pprint(efficiencies)
+
+    avgEfficiencies = dict()
+    for reg in first(first(compositions)).keys():
+        avgEfficiencies[reg] = dict()
+        for var in ['pt', 'pt_eta']:
+            is1D = var=='pt'
+            lT = "%s #varepsilon(T|L) fake %s"%(reg, lepton)
+            lX = 'p_{T} [GeV]'
+            lY = '#varepsilon(T|L)' if is1D else '#eta'
+            hname = "%(lep)s_fake_%(var)s_%(reg)s"%{'lep':lepton, 'var':var, 'reg':reg}
+            htitle = lT+';'+lX+';'+lY
+            groups  = first(compositions).keys()
+            origins = first(first(first(compositions))).keys()
+            if verbose : print 'origins :',origins,'\n' + 'groups :',groups
+            histosEff  = dict((group+'_'+orig, efficiencies[var][group]     [orig]) for group in groups for orig in origins)
+            histosComp = dict((group+'_'+orig, compositions[var][group][reg][orig]) for group in groups for orig in origins)
+            avgEff =  weightedAverage(histosEff, histosComp, hname, htitle, verbose)
+            avgEfficiencies[reg][var] = avgEff
+            if is1D:
+                fakeu.plot1dEfficiencies({reg : avgEff}, 'eff1d_'+lepton+'_fake_'+reg+'_anygroup', outputDir, htitle, zoomIn=True)
+            else:
+                fakeu.plot2dEfficiencies({reg : avgEff}, 'eff2d_'+lepton+'_fake_'+reg+'_anygroup', outputDir, htitle, zoomIn=True)
+    writeHistos(os.path.join(outputDir,'fake_matrices_'+lepton+'_anygroup.root'), avgEfficiencies, verbose)
+
 #___________________________________________________
 
 leptonTypes = fakeu.leptonTypes()
@@ -181,14 +210,13 @@ def fetchCompositionHistos(filename, lepton, groups=[], verbose=False):
                       for v in vars)
     return fetchHistos(filename, histonames, verbose)
 def fetchEffienciesHistos(filenames, lepton,
-                          groups=['diboson', 'heavyflavor', 'ttbar', 'wjets', 'zjets'],
+                          groups=[],
                           verbose=False):
     template = "h_%(var)s_%(group)s_%(origin)s_tight_over_loose_%(region)s"
     regions = ['conv', 'hflf',] if lepton=='el' else ['hflf'] # these are the regions where we extract the eff, see MeasureFakeRate2
     fnameQcd  = first(filter(lambda _ : 'mcqcd' in _, filenames))
     fnameConv = first(filter(lambda _ : 'mcconv' in _, filenames))
     assert all(f and os.path.exists(f) for f in [fnameQcd, fnameConv] if f),"inputs: %s, qcd: %s, conv %s"%(str(filenames), fnameQcd, fnameConv)
-    groups = ['diboson', 'heavyflavor', 'ttbar', 'wjets', 'zjets',]
     originsConv, originsQcd = ['conv'], ['heavy', 'light', 'qcd']
     vars = ['pt', 'pt_eta']
     def histonamesDict(origins=[], region=''):
