@@ -648,6 +648,9 @@ float SusySelection::computeChargeFlipProb(const LeptonVector &leptons, const Me
   m_chargeFlip->setSeed(nt.evt()->event);
   float flipProb(m_chargeFlip->OS2SS(pdg0, &smearedLv0, pdg1, &smearedLv1, sys, isData, chargeFlip::dataonly));
   float overlapFrac(m_chargeFlip->overlapFrac().first);
+  // DG 2014 this is our own (WH) syst unc (~50%); qflip lhood stat unc is negligible so just multiply it
+  if(systematic==swh::WH_BKGMETHODUP)   overlapFrac *= 1.5;
+  if(systematic==swh::WH_BKGMETHODDOWN) overlapFrac *= 0.5;
   validateQflipProb(flipProb, overlapFrac, l0, l1, nt.evt(), m_nInvalidQflip);
   return flipProb*overlapFrac;
 }
@@ -679,6 +682,9 @@ float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
   m_chargeFlip->setSeed(nt.evt()->event);
   float flipProb(m_chargeFlip->OS2SS(pdg0, &smearedLv0, pdg1, &smearedLv1, sys, isData, chargeFlip::dataonly));
   float overlapFrac(m_chargeFlip->overlapFrac().first);
+  // DG 2014 this is our own (WH) syst unc (~50%); qflip lhood stat unc is negligible so just multiply it
+  if(systematic==swh::WH_BKGMETHODUP)   overlapFrac *= 1.5;
+  if(systematic==swh::WH_BKGMETHODDOWN) overlapFrac *= 0.5;
   if(update4mom) {
     m_unsmeared_lv0 = (*l0);
     m_unsmeared_lv1 = (*l1);
