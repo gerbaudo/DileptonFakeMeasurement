@@ -13,9 +13,10 @@ r = importRoot()
 from rootUtils import integralAndError
 
 def fakeSystVariations() :
-    "2x2x2=8 syst variations for the fake estimate, see DiLeptonMatrixMethod::systematic_names"
+    "syst variations for the fake estimate, see DiLeptonMatrixMethod::systematic_names"
     return ['EL_RE_UP', 'EL_RE_DOWN', 'MU_RE_UP', 'MU_RE_DOWN',
-            'EL_FR_UP', 'EL_FR_DOWN', 'MU_FR_UP', 'MU_FR_DOWN']
+            'EL_FR_UP', 'EL_FR_DOWN', 'MU_FR_UP', 'MU_FR_DOWN',
+            'EL_FRAC_DO', 'EL_FRAC_UP', 'MU_FRAC_DO', 'MU_FRAC_UP']
 def mcObjectVariations() :
     "See definitions in SusyDefs.h:SusyNtSystNames, and active list in SusyPlotter::toggleStdSystematics()"
     return ['EES_Z_UP', 'EES_Z_DN',
