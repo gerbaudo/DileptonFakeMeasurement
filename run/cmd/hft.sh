@@ -23,6 +23,8 @@ FAKE_SYSTEMATICS+=" EL_FR_DOWN EL_FR_UP"
 FAKE_SYSTEMATICS+=" EL_RE_DOWN EL_RE_UP"
 FAKE_SYSTEMATICS+=" MU_FR_DOWN MU_FR_UP"
 FAKE_SYSTEMATICS+=" MU_RE_DOWN MU_RE_UP"
+FAKE_SYSTEMATICS+=" EL_FRAC_DO EL_FRAC_UP"
+FAKE_SYSTEMATICS+=" MU_FRAC_DO MU_FRAC_UP"
 
 MC_SYSTEMATICS="NOM"
 MC_SYSTEMATICS+=" EER_DN EER_UP"
@@ -47,21 +49,17 @@ function testvars {
 
 function filltrees {
     local SUBMIT_OPTION="" && [[ $#>0 ]] && SUBMIT_OPTION="${1}"
-    local CONCLUDE_CMD=""
-    local CONCLUDE_MSG=""
-    if [[ "$SUBMIT_OPTION" == "--submit" ]]
-        then
-        CONCLUDE_CMD="./python/email_me_when_youre_done.py"
-        CONCLUDE_CMD+=" --message \"hft trees with tag ${TAG} done; now you can go to `pwd` and type '${SCRIPT_NAME} maketar; ${SCRIPT_NAME} fillhistos'\" "
-        CONCLUDE_MSG="Jobs submitted, now wait for the email"
-    else
-        CONCLUDE_MSG="This was a dry run; use '${SCRIPT_NAME} filltrees --submit' to actually submit the jobs"
-    fi
 	./python/submitJobs.py --susyplot -o  -t ${TAG} -e 'period' --other-opt "--with-hft --with-syst" ${SUBMIT_OPTION}
 	./python/submitJobs.py --susyplot -o  -t ${TAG} -s 'period' --other-opt "--with-hft"             ${SUBMIT_OPTION}
 	./python/submitJobs.py --fakepred -o  -t ${TAG} -s 'period' --other-opt "--with-hft"             ${SUBMIT_OPTION}
-	${CONCLUDE_CMD} &
-    echo ${CONCLUDE_MSG}
+    if [[ "$SUBMIT_OPTION" == "--submit" ]]
+        then
+        ./python/email_me_when_youre_done.py \
+        --message="hft trees with tag ${TAG} done; now you can go to `pwd` and type '${SCRIPT_NAME} maketar; ${SCRIPT_NAME} fillhistos'" &
+        echo "Jobs submitted, now wait for the email"
+    else
+        echo "This was a dry run; use '${SCRIPT_NAME} filltrees --submit' to actually submit the jobs"
+    fi
 }
 
 function cleantarlist {
