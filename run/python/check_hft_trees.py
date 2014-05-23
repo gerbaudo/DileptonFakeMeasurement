@@ -493,7 +493,9 @@ def fillAndCount(histos, counters, sample, blind=True) :
     selections = allRegions()
     selWeights = dict((s, r.TTreeFormula(s, selectionFormulas(s), tree)) for s in selections)
     weightFormula = r.TTreeFormula('weightFormula', sample.weightLeafname, tree)
-    for ev in tree :
+    l1 = r.TLorentzVector()
+    l2 = r.TLorentzVector()
+    for iEvent, event in enumerate(tree) :
         weight = weightFormula.EvalInstance()
         passSels = dict((s, selWeights[s].EvalInstance()) for s in selections)
         for sel in selections : counters[sel] += (weight if passSels[sel] else 0.0)
@@ -502,18 +504,23 @@ def fillAndCount(histos, counters, sample, blind=True) :
             if blind and sample.isData :
                 if sel in signalRegions() : fillHisto = False
                 else : fillHisto = passSels[blindRegionFromAnyRegion(sel)] and not passSels[signalRegionFromAnyRegion(sel)]
-            oneJet = tree.L2nCentralLightJets==1
+            oneJet = event.L2nCentralLightJets==1
             mev2gev = 1.0e-3
-            mljj = mev2gev*(tree.mlj if oneJet else tree.mljj)
+            mljj = mev2gev*(event.mlj if oneJet else event.mljj)
+            l1.SetPtEtaPhiM(event.lept1Pt*mev2gev, event.lept1Eta, event.lept1Phi, 0.0) # massless here is good enough
+            l2.SetPtEtaPhiM(event.lept2Pt*mev2gev, event.lept2Eta, event.lept2Phi, 0.0)
+            ll = l1+l2
+            ptll = ll.Pt()
             if fillHisto :
                 histos[sel]['mljj'  ].Fill(mljj, weight)
+                histos[sel]['ptll'  ].Fill(ptll, weight)
                 histos[sel]['onebin'].Fill(1.0,  weight)
             # checks
             if (False and fillHisto
                 and sel in signalRegions()
                 and sample.isFake ) :
-                channel = 'ee' if tree.isEE else 'mm' if tree.isMUMU else 'em'
-                print "ev %d run %d channel %s sel %s weight %f"%(tree.runNumber, tree.eventNumber, channel, sel, weight)
+                channel = 'ee' if event.isEE else 'mm' if event.isMUMU else 'em'
+                print "ev %d run %d channel %s sel %s weight %f"%(event.runNumber, event.eventNumber, channel, sel, weight)
     file.Close()
 
 def dataSampleNames() :
@@ -571,7 +578,7 @@ def stackedGroups() :
     return [g for g in allSamplesAllGroups().keys() if g not in ['data', 'signal']]
 
 def variablesToPlot() :
-    return ['onebin','mljj']
+    return ['onebin','mljj', 'ptll']
     return ['pt0','pt1','mll','mtmin','mtmax','mtllmet','ht','metrel','dphill','detall',
             'mt2j','mljj','dphijj','detajj']
 def histoName(sample, selection, variable) : return "h_%s_%s_%s"%(variable, sample, selection)
@@ -585,6 +592,7 @@ def bookHistos(variables, samples, selections) :
         elif v=='pt0'     : h = r.TH1F(histoName(sam, sel, 'pt0'    ), ';p_{T,l0} [GeV]; entries/bin',          25, 0.0, 250.0)
         elif v=='pt1'     : h = r.TH1F(histoName(sam, sel, 'pt1'    ), ';p_{T,l1} [GeV]; entries/bin',          25, 0.0, 250.0)
         elif v=='mll'     : h = r.TH1F(histoName(sam, sel, 'mll'    ), ';m_{l0,l1} [GeV]; entries/bin',         25, 0.0, 250.0)
+        elif v=='ptll'    : h = r.TH1F(histoName(sam, sel, 'ptll'   ), ';p_{T,l0+l1} [GeV]; entries/bin',       25, 0.0, 250.0)
         elif v=='mtmin'   : h = r.TH1F(histoName(sam, sel, 'mtmin'  ), ';m_{T,min}(l, MET) [GeV]; entries/bin', 25, 0.0, 400.0)
         elif v=='mtmax'   : h = r.TH1F(histoName(sam, sel, 'mtmax'  ), ';m_{T,max}(l, MET) [GeV]; entries/bin', 25, 0.0, 400.0)
         elif v=='mtllmet' : h = r.TH1F(histoName(sam, sel, 'mtllmet'), ';m_{T}(l+l, MET) [GeV]; entries/bin',   25, 0.0, 600.0)
