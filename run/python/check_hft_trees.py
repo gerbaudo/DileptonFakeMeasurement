@@ -592,7 +592,7 @@ def bookHistos(variables, samples, selections) :
         elif v=='pt0'     : h = r.TH1F(histoName(sam, sel, 'pt0'    ), ';p_{T,l0} [GeV]; entries/bin',          25, 0.0, 250.0)
         elif v=='pt1'     : h = r.TH1F(histoName(sam, sel, 'pt1'    ), ';p_{T,l1} [GeV]; entries/bin',          25, 0.0, 250.0)
         elif v=='mll'     : h = r.TH1F(histoName(sam, sel, 'mll'    ), ';m_{l0,l1} [GeV]; entries/bin',         25, 0.0, 250.0)
-        elif v=='ptll'    : h = r.TH1F(histoName(sam, sel, 'ptll'   ), ';p_{T,l0+l1} [GeV]; entries/bin',       25, 0.0, 250.0)
+        elif v=='ptll'    : h = r.TH1F(histoName(sam, sel, 'ptll'   ), ';p_{T,l0+l1} [GeV]; entries/bin',       12, 0.0, 240.0)
         elif v=='mtmin'   : h = r.TH1F(histoName(sam, sel, 'mtmin'  ), ';m_{T,min}(l, MET) [GeV]; entries/bin', 25, 0.0, 400.0)
         elif v=='mtmax'   : h = r.TH1F(histoName(sam, sel, 'mtmax'  ), ';m_{T,max}(l, MET) [GeV]; entries/bin', 25, 0.0, 400.0)
         elif v=='mtllmet' : h = r.TH1F(histoName(sam, sel, 'mtllmet'), ';m_{T}(l+l, MET) [GeV]; entries/bin',   25, 0.0, 600.0)
