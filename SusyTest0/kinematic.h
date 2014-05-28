@@ -31,8 +31,11 @@ namespace kin
     float mll, detall;
     float metrel;
     float j0pt, j1pt, j2pt;
+    float j0eta, j1eta, j2eta;
+    float j0phi, j1phi, j2phi;
     float mlj, mljj;
     float mt0, mt1, mtllmet;
+    float met, metPhi;
     float ht;
     bool l3veto;
     float mtmin() const { return mt0<mt1 ? mt0 : mt1; }
@@ -43,7 +46,10 @@ namespace kin
       numCentralLightJets = 0;
       q0 = q1 = 0.0;
       pt0 = pt1 =  eta0 = eta1 = phi0 = phi1 = mll = detall = metrel = mlj = mljj = mt0 = mt1 = mtllmet = 0.0;
-      j0pt = j1pt = j2pt = 0.0;
+      met = metPhi = 0.0;
+      j0pt  = j1pt  = j2pt  = 0.0;
+      j0eta = j1eta = j2eta = 0.0;
+      j0phi = j1phi = j2phi = 0.0;
       ht = 0.0;
       l3veto = false;
     }

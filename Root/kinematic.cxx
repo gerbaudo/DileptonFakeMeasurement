@@ -48,9 +48,11 @@ swk::DilepVars swk::compute2lVars(const LeptonVector &leptons, const Susy::Met *
         v.mt1 = swk::transverseMass(l1, met->lv());
         v.ht = swk::meff(l0, l1, met, jets);
         v.mtllmet = transverseMass(ll, met->lv());
-        if(jets.size()>0) v.j0pt = (*jets[0]).Pt();
-        if(jets.size()>1) v.j1pt = (*jets[1]).Pt();
-        if(jets.size()>2) v.j2pt = (*jets[2]).Pt();
+        v.met = met->Et;
+        v.metPhi = met->phi;
+        if(jets.size()>0) { const Susy::Jet& j = (*jets[0]); v.j0pt = j.Pt(); v.j0eta = j.Eta(); v.j0phi = j.Phi(); }
+        if(jets.size()>1) { const Susy::Jet& j = (*jets[1]); v.j1pt = j.Pt(); v.j1eta = j.Eta(); v.j1phi = j.Phi(); }
+        if(jets.size()>2) { const Susy::Jet& j = (*jets[2]); v.j2pt = j.Pt(); v.j2eta = j.Eta(); v.j2phi = j.Phi(); }
         v.l3veto = swk::passThirdLeptonVeto(&l0, &l1, otherLeptons);
     }
     return v;
