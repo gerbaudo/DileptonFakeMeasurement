@@ -83,6 +83,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   bool passBaseline(ssf.passCommonCriteria()  && l[0]->Pt()>20.0 && l[1]->Pt()>20.0);
   if(!passBaseline) return false;
   unsigned int run(nt.evt()->run), event(nt.evt()->event);
+  bool fillOldHistograms = false; // avoid filling old histos with all SRs when doing HFT (run out of memory)
   if(m_writeTuple && ssf.lepPt) {
       double weight(getFakeWeight(l, sf::CR_SSInc1j, metRel, smm::SYS_NOM));
       LeptonVector anyLep(getAnyElOrMu(nt));
@@ -90,7 +91,19 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
       const Lepton *l0(l[0]), *l1(l[1]);
       const JetVector clJets(SusySelection::filterClJets(m_signalJets2Lep));
       m_tupleMaker.fill(weight, run, event, *l0, *l1, *m, lowPtLep, clJets);
-  } else {
+  } else if(m_fillHft) {
+      for(uint iSys = 0; iSys<m_systs.size(); ++iSys){
+          const sf::Region fakeR = sf::CR_SSInc1j;
+          smm::SYSTEMATIC sys = static_cast<smm::SYSTEMATIC>(m_systs.at(iSys));
+          float fakeWeight = getFakeWeight(l, fakeR, metRel, sys);
+             if(!isHftFillerInitialized()) initHftFiller();
+              if(SusySelection::isEventForHft(v, ssf)) {
+                  swh::kin::DilepVars vv(v); // non-const
+                  vv.weight = fakeWeight;
+                  fillHft(iSys, vv);
+              }
+      } // end for(iSys)
+  } else if(fillOldHistograms) {
       for(uint iSys = 0; iSys<m_systs.size(); ++iSys){
           bool is1j(j.size()==1), is2j(j.size()>1);
           const sf::Region fakeR = sf::CR_SSInc1j;
@@ -122,14 +135,6 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
           if(passEwkSs)      fillHistos(ncl, j, m, fakeWeight, PR_SsEwk,     iSys);
           if(passEwkSsLoose) fillHistos(ncl, j, m, fakeWeight, PR_SsEwkLoose,iSys);
           if(passEwkSsLea)   fillHistos(ncl, j, m, fakeWeight, PR_SsEwkLea,  iSys);
-          if(m_fillHft) {
-              if(!isHftFillerInitialized()) initHftFiller();
-              if(SusySelection::isEventForHft(v, ssf)) {
-                  swh::kin::DilepVars vv(v); // non-const
-                  vv.weight = fakeWeight;
-                  fillHft(iSys, vv);
-              }
-          }
       } // end for(iSys)
   }
   return true;

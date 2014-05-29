@@ -94,6 +94,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   //unsigned int run(nt.evt()->run), event(nt.evt()->event);
   bool isFirstEvent(m_printer.m_eventCounter==1);
   if(isFirstEvent && m_fillHft) initHftFiller();
+
   for(size_t iSys=0; iSys<m_systs.size(); ++iSys) {
       const SusyNtSys sys = static_cast<SusyNtSys>(m_systs[iSys]);
       bool removeLepsFromIso(false);
@@ -120,42 +121,44 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       float weight(m_weightComponents.product());
       const DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
       bool sameFlav(ll==ee||ll==mm);
-      if(ssf.passLpt()) {
-          swh::Region pr = (sameFlav ? swh::PR_CR8lpt : swh::PR_CR9lpt);
-          fillHistos(ncl, j, m, weight, pr, iSys);
-          if     (ll==ee && ssf.zllVeto) fillHistos(ncl, j, m, weight, PR_CR8ee, iSys);
-          else if(ll==mm) {
-              bool passMinMet(m->Et > 40.0);
-              if(passMinMet ) fillHistos(ncl, j, m, weight, swh::PR_CR8mm,     iSys);
-              if(ssf.mtllmet) fillHistos(ncl, j, m, weight, swh::PR_CR8mmMtww, iSys);
-              if(ssf.ht     ) fillHistos(ncl, j, m, weight, swh::PR_CR8mmHt,   iSys);
-          } // end if(mm)
-      } // end passLpt
-      bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
-      bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
-      bool passEwkSsLea  (SusySelection::passEwkSsLea  (ncl,j,m));
-      if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     iSys);
-      if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,iSys);
-      if(passEwkSsLea)   fillHistos(ncl, j, m, weight, swh::PR_SsEwkLea,  iSys);
       bool passBaseline(ssf.passCommonCriteria() && ncl[0]->Pt()>20.0 && ncl[1]->Pt()>20.0); // note to self: here the fj and bj veto are implicitly being applied. refactor
       if(!passBaseline) continue;
       bool is1j(ssf.eq1j), is2j(ssf.ge2j);
-
-      if(ssf.sameSign && ssf.ge1j)                 fillHistos(ncl, j, m, weight, swh::PR_CRSsInc1j,iSys);
-      if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1j , iSys);
-      if(is2j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2j , iSys);
-      if(is1j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1j   , iSys);
-      if(is2j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2j   , iSys);
-      if(is1j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV1j     , iSys);
-      if(is2j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV2j     , iSys);
-
-      if(is1j && SusySelection::passSrWh1j(v)) fillHistos(ncl, j, m, weight, swh::SrWh1j , iSys);
-      if(is2j && SusySelection::passSrWh2j(v)) fillHistos(ncl, j, m, weight, swh::SrWh2j , iSys);
+      bool fillOldHistograms = false; // avoid filling old histos with all SRs when doing HFT (run out of memory)
       if(m_fillHft) {
           if(SusySelection::isEventForHft(v, ssf)) {
               if(sys==NtSys_NOM) fillHftNominal(v, ncl, j, *m);
               else               fillHft       (iSys, v);
           }
+      } else if(fillOldHistograms){
+          if(ssf.passLpt()) {
+              swh::Region pr = (sameFlav ? swh::PR_CR8lpt : swh::PR_CR9lpt);
+              fillHistos(ncl, j, m, weight, pr, iSys);
+              if     (ll==ee && ssf.zllVeto) fillHistos(ncl, j, m, weight, PR_CR8ee, iSys);
+              else if(ll==mm) {
+                  bool passMinMet(m->Et > 40.0);
+                  if(passMinMet ) fillHistos(ncl, j, m, weight, swh::PR_CR8mm,     iSys);
+                  if(ssf.mtllmet) fillHistos(ncl, j, m, weight, swh::PR_CR8mmMtww, iSys);
+                  if(ssf.ht     ) fillHistos(ncl, j, m, weight, swh::PR_CR8mmHt,   iSys);
+              } // end if(mm)
+          } // end passLpt
+          bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
+          bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
+          bool passEwkSsLea  (SusySelection::passEwkSsLea  (ncl,j,m));
+          if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     iSys);
+          if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,iSys);
+          if(passEwkSsLea)   fillHistos(ncl, j, m, weight, swh::PR_SsEwkLea,  iSys);
+
+          if(ssf.sameSign && ssf.ge1j)                 fillHistos(ncl, j, m, weight, swh::PR_CRSsInc1j,iSys);
+          if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1j , iSys);
+          if(is2j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2j , iSys);
+          if(is1j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1j   , iSys);
+          if(is2j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2j   , iSys);
+          if(is1j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV1j     , iSys);
+          if(is2j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV2j     , iSys);
+
+          if(is1j && SusySelection::passSrWh1j(v)) fillHistos(ncl, j, m, weight, swh::SrWh1j , iSys);
+          if(is2j && SusySelection::passSrWh2j(v)) fillHistos(ncl, j, m, weight, swh::SrWh2j , iSys);
       }
   } // for(iSys)
   return kTRUE;
@@ -209,6 +212,7 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
   const size_t &ri = regionIndex;
   assert(l0);
   assert(l1);
+
   #define FILL(h, var)					\
     do{								\
       float max   = h[ch][ri][sys]->GetXaxis()->GetXmax();	\
@@ -268,7 +272,6 @@ void SusyPlotter::fillHistos(const LeptonVector& leps, const JetVector &jets,
   FILL(h_l_origin, l0->mcOrigin);
   FILL(h_l_type, l1->mcType);
   FILL(h_l_origin, l1->mcOrigin);
-
   FILL(h_sumQ, l0->q + l1->q);
   float mt_met_ll = susy::transverseMass(ll, mlv);
   float mt2 = susy::computeMt2(*l0, *l1, mlv);
