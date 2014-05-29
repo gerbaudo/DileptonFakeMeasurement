@@ -91,7 +91,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
   clearObjects();
   cacheStaticWeightComponents();
   increment(n_readin, m_weightComponents);
-  unsigned int run(nt.evt()->run), event(nt.evt()->event);
+  //unsigned int run(nt.evt()->run), event(nt.evt()->event);
   bool isFirstEvent(m_printer.m_eventCounter==1);
   if(isFirstEvent && m_fillHft) initHftFiller();
   for(size_t iSys=0; iSys<m_systs.size(); ++iSys) {
@@ -584,9 +584,10 @@ void SusyPlotter::initHftFiller()
 //-----------------------------------------
 void SusyPlotter::fillHftNominal(const susy::wh::kin::DilepVars &v, cvl_t& leptons, cvj_t& jets, const Met &met)
 {
-    unsigned int run(nt.evt()->run), event(nt.evt()->event);
+    bool isMc(nt.evt()->isMC);
+    unsigned int run(isMc ? nt.evt()->mcChannel : nt.evt()->run), event(nt.evt()->event);
     const size_t systIndex=0;
-    if(nt.evt()->isMC) {
+    if(isMc) {
         const swh::HftFiller::WeightVariations wv = computeWeightVariations(leptons, jets, met);
         m_hftFiller.fill(systIndex, v, run, event, wv);
     } else {
@@ -596,7 +597,8 @@ void SusyPlotter::fillHftNominal(const susy::wh::kin::DilepVars &v, cvl_t& lepto
 //-----------------------------------------
 void SusyPlotter::fillHft(const size_t sys, const susy::wh::kin::DilepVars &v)
 {
-    unsigned int run(nt.evt()->run), event(nt.evt()->event);
+    bool isMc(nt.evt()->isMC);
+    unsigned int run(isMc ? nt.evt()->mcChannel : nt.evt()->run), event(nt.evt()->event);
     m_hftFiller.fill(sys, v, run, event);
 }
 //-----------------------------------------
