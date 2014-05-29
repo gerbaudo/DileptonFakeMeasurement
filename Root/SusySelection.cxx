@@ -4,6 +4,8 @@
 #include <iomanip> // setw, setprecision
 #include <sstream>      // std::ostringstream
 #include "TCanvas.h"
+#include "TVector2.h"
+
 #include "SusyTest0/SusySelection.h"
 #include "SusyTest0/SusyPlotter.h"
 
@@ -692,7 +694,7 @@ float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
     l0->SetPtEtaPhiM(smearedLv0.Pt(), smearedLv0.Eta(), smearedLv0.Phi(), smearedLv0.M());
     l1->SetPtEtaPhiM(smearedLv1.Pt(), smearedLv1.Eta(), smearedLv1.Phi(), smearedLv1.M());
     met.Et = smearedMet.Mod();
-    met.phi = smearedMet.Phi();
+    met.phi = TVector2::Phi_mpi_pi(smearedMet.Phi());
   }
   validateQflipProb(flipProb, overlapFrac, l0, l1, nt.evt(), m_nInvalidQflip);
   return flipProb*overlapFrac;
