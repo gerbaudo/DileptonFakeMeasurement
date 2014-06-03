@@ -251,7 +251,7 @@ def countAndFillHistos(samplesPerGroup={}, syst='', verbose=False, outdir='./') 
         countsGroup = counters[group]
         for sample in samplesGroup :
             if verbose : logLine +=" %s"%sample.name
-            fillAndCount(histosGroup, countsGroup, sample)
+            fillAndCount(histosGroup, countsGroup, sample, blind=False)
         if verbose : print logLine
     if verbose : print 'done'
     return counters, histos
@@ -516,11 +516,12 @@ def fillAndCount(histos, counters, sample, blind=True) :
                 histos[sel]['ptll'  ].Fill(ptll, weight)
                 histos[sel]['onebin'].Fill(1.0,  weight)
             # checks
-            if (False and fillHisto
+            if (True and fillHisto
                 and sel in signalRegions()
-                and sample.isFake ) :
+                and (sample.isData or sample.isFake)) :
                 channel = 'ee' if event.isEE else 'mm' if event.isMUMU else 'em'
-                print "ev %d run %d channel %s sel %s weight %f"%(event.runNumber, event.eventNumber, channel, sel, weight)
+                dataOrFake = 'data' if sample.isData else 'fake' if sample.isFake else 'other'
+                print "ev %d run %d channel %s sel %s sample %s weight %f"%(event.runNumber, event.eventNumber, channel, sel, dataOrFake, weight)
     file.Close()
 
 def dataSampleNames() :
