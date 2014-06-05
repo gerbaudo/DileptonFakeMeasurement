@@ -495,6 +495,7 @@ def fillAndCount(histos, counters, sample, blind=True) :
     weightFormula = r.TTreeFormula('weightFormula', sample.weightLeafname, tree)
     l1 = r.TLorentzVector()
     l2 = r.TLorentzVector()
+    met = r.TLorentzVector()
     for iEvent, event in enumerate(tree) :
         weight = weightFormula.EvalInstance()
         passSels = dict((s, selWeights[s].EvalInstance()) for s in selections)
@@ -509,12 +510,22 @@ def fillAndCount(histos, counters, sample, blind=True) :
             mljj = mev2gev*(event.mlj if oneJet else event.mljj)
             l1.SetPtEtaPhiM(event.lept1Pt*mev2gev, event.lept1Eta, event.lept1Phi, 0.0) # massless here is good enough
             l2.SetPtEtaPhiM(event.lept2Pt*mev2gev, event.lept2Eta, event.lept2Phi, 0.0)
+            met.SetPtEtaPhiM(event.met*mev2gev,               0.0, event.metPhi,   0.0)
             ll = l1+l2
             ptll = ll.Pt()
+            mll = ll.M()
+            l1IsMu = event.lept1Flav==1
+            l2IsMu = event.lept2Flav==1
+            dphil0met = abs(l1.DeltaPhi(met)) if l1.Pt()>l2.Pt() else abs(l2.DeltaPhi(met))
             if fillHisto :
+                histos[sel]['mll'   ].Fill(mll, weight)
                 histos[sel]['mljj'  ].Fill(mljj, weight)
                 histos[sel]['ptll'  ].Fill(ptll, weight)
                 histos[sel]['onebin'].Fill(1.0,  weight)
+                histos[sel]['dphil0met'].Fill(dphil0met, weight)
+                if l1IsMu or l2IsMu:
+                    dphimumet = abs(l1.DeltaPhi(met)) if l1IsMu else abs(l2.DeltaPhi(met))
+                    histos[sel]['dphimumet'].Fill(dphimumet, weight)
             # checks
             if (True and fillHisto
                 and sel in signalRegions()
@@ -579,7 +590,7 @@ def stackedGroups() :
     return [g for g in allSamplesAllGroups().keys() if g not in ['data', 'signal']]
 
 def variablesToPlot() :
-    return ['onebin','mljj', 'ptll']
+    return ['onebin','mljj', 'ptll', 'mll', 'dphil0met', 'dphimumet']
     return ['pt0','pt1','mll','mtmin','mtmax','mtllmet','ht','metrel','dphill','detall',
             'mt2j','mljj','dphijj','detajj']
 def histoName(sample, selection, variable) : return "h_%s_%s_%s"%(variable, sample, selection)
@@ -590,21 +601,23 @@ def bookHistos(variables, samples, selections) :
         mljjLab = 'm_{lj}' if '1j' in sel else 'm_{ljj}'
         h = None
         if   v=='onebin'  : h = r.TH1F(histoName(sam, sel, 'onebin' ), ';; entries',                             1, 0.5,   1.5)
-        elif v=='pt0'     : h = r.TH1F(histoName(sam, sel, 'pt0'    ), ';p_{T,l0} [GeV]; entries/bin',          25, 0.0, 250.0)
-        elif v=='pt1'     : h = r.TH1F(histoName(sam, sel, 'pt1'    ), ';p_{T,l1} [GeV]; entries/bin',          25, 0.0, 250.0)
-        elif v=='mll'     : h = r.TH1F(histoName(sam, sel, 'mll'    ), ';m_{l0,l1} [GeV]; entries/bin',         25, 0.0, 250.0)
+        elif v=='pt0'     : h = r.TH1F(histoName(sam, sel, 'pt0'    ), ';p_{T,l0} [GeV]; entries/bin',          12, 0.0, 240.0)
+        elif v=='pt1'     : h = r.TH1F(histoName(sam, sel, 'pt1'    ), ';p_{T,l1} [GeV]; entries/bin',          12, 0.0, 240.0)
+        elif v=='mll'     : h = r.TH1F(histoName(sam, sel, 'mll'    ), ';m_{l0,l1} [GeV]; entries/bin',         12, 0.0, 240.0)
         elif v=='ptll'    : h = r.TH1F(histoName(sam, sel, 'ptll'   ), ';p_{T,l0+l1} [GeV]; entries/bin',       12, 0.0, 240.0)
-        elif v=='mtmin'   : h = r.TH1F(histoName(sam, sel, 'mtmin'  ), ';m_{T,min}(l, MET) [GeV]; entries/bin', 25, 0.0, 400.0)
-        elif v=='mtmax'   : h = r.TH1F(histoName(sam, sel, 'mtmax'  ), ';m_{T,max}(l, MET) [GeV]; entries/bin', 25, 0.0, 400.0)
-        elif v=='mtllmet' : h = r.TH1F(histoName(sam, sel, 'mtllmet'), ';m_{T}(l+l, MET) [GeV]; entries/bin',   25, 0.0, 600.0)
-        elif v=='ht'      : h = r.TH1F(histoName(sam, sel, 'ht'     ), ';H_{T} [GeV]; entries/bin',             25, 0.0, 800.0)
-        elif v=='metrel'  : h = r.TH1F(histoName(sam, sel, 'metrel' ), ';MET_{rel} [GeV]; entries/bin',         25, 0.0, 300.0)
-        elif v=='dphill'  : h = r.TH1F(histoName(sam, sel, 'dphill' ), ';#Delta#phi(l, l) [rad]; entries/bin',  25, 0.0, twopi)
-        elif v=='detall'  : h = r.TH1F(histoName(sam, sel, 'detall' ), ';#Delta#eta(l, l); entries/bin',        25, 0.0, +3.0 )
-        elif v=='mt2j'    : h = r.TH1F(histoName(sam, sel, 'mt2j'   ), ';m^{J}_{T2} [GeV]; entries/bin',        25, 0.0, 500.0)
-        elif v=='mljj'    : h = r.TH1F(histoName(sam, sel, 'mljj'   ), ';'+mljjLab+' [GeV]; entries/30GeV',     15, 0.0, 450.0)
-        elif v=='dphijj'  : h = r.TH1F(histoName(sam, sel, 'dphijj' ), ';#Delta#phi(j, j) [rad]; entries/bin',  25, 0.0, twopi)
-        elif v=='detajj'  : h = r.TH1F(histoName(sam, sel, 'detajj' ), ';#Delta#eta(j, j); entries/bin',        25, 0.0, +3.0 )
+        elif v=='mtmin'   : h = r.TH1F(histoName(sam, sel, 'mtmin'  ), ';m_{T,min}(l, MET) [GeV]; entries/bin', 12, 0.0, 360.0)
+        elif v=='mtmax'   : h = r.TH1F(histoName(sam, sel, 'mtmax'  ), ';m_{T,max}(l, MET) [GeV]; entries/bin', 12, 0.0, 360.0)
+        elif v=='mtllmet' : h = r.TH1F(histoName(sam, sel, 'mtllmet'), ';m_{T}(l+l, MET) [GeV]; entries/bin',   12, 0.0, 600.0)
+        elif v=='ht'      : h = r.TH1F(histoName(sam, sel, 'ht'     ), ';H_{T} [GeV]; entries/bin',             12, 0.0, 600.0)
+        elif v=='metrel'  : h = r.TH1F(histoName(sam, sel, 'metrel' ), ';MET_{rel} [GeV]; entries/bin',         12, 0.0, 360.0)
+        elif v=='dphill'  : h = r.TH1F(histoName(sam, sel, 'dphill' ), ';#Delta#phi(l, l) [rad]; entries/bin',  10, 0.0, twopi)
+        elif v=='detall'  : h = r.TH1F(histoName(sam, sel, 'detall' ), ';#Delta#eta(l, l); entries/bin',        10, 0.0, +3.0 )
+        elif v=='dphil0met': h= r.TH1F(histoName(sam, sel, 'dphil0met'),';#Delta#phi(l0, met) [rad]; entries/bin',  10, 0.0, twopi)
+        elif v=='dphimumet': h= r.TH1F(histoName(sam, sel, 'dphimumet'),';#Delta#phi(#mu, met) [rad]; entries/bin', 10, 0.0, twopi)
+        elif v=='mt2j'    : h = r.TH1F(histoName(sam, sel, 'mt2j'   ), ';m^{J}_{T2} [GeV]; entries/bin',        12, 0.0, 480.0)
+        elif v=='mljj'    : h = r.TH1F(histoName(sam, sel, 'mljj'   ), ';'+mljjLab+' [GeV]; entries/30GeV',     12, 0.0, 480.0)
+        elif v=='dphijj'  : h = r.TH1F(histoName(sam, sel, 'dphijj' ), ';#Delta#phi(j, j) [rad]; entries/bin',  10, 0.0, twopi)
+        elif v=='detajj'  : h = r.TH1F(histoName(sam, sel, 'detajj' ), ';#Delta#eta(j, j); entries/bin',        10, 0.0, +3.0 )
         else : print "unknown variable %s"%v
         h.Sumw2()
         h.SetDirectory(0)
