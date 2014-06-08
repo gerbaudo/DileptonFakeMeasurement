@@ -321,9 +321,6 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
           case sf::CR_CR8mmMtww    : passSR = (whssFlags.mtllmet && isMm);        break;
           case sf::CR_CR8mmHt      : passSR = (whssFlags.ht      && isMm);        break;
           case sf::CR_CR9lpt       : passSR = (isOf && whssFlags.lepPt);          break;
-          case sf::CR_SsEwk        : passSR = SusySelection::passEwkSs     (leptons, jets, met); break;
-          case sf::CR_SsEwkLoose   : passSR = SusySelection::passEwkSsLoose(leptons, jets, met); break;
-          case sf::CR_SsEwkLea     : passSR = SusySelection::passEwkSsLea  (leptons, jets, met); break;
           case sf::CR_WHZVfake1jee : passSR = (isEe && is1j && SusySelection::passCrWhZVfakeEe(v)); break;
           case sf::CR_WHZVfake2jee : passSR = (isEe && is2j && SusySelection::passCrWhZVfakeEe(v)); break;
           case sf::CR_WHZVfake1jem : passSR = (isOf && is1j && SusySelection::passCrWhZVfakeEm(v)); break;
@@ -444,7 +441,7 @@ SsPassFlags MeasureFakeRate2::passWhSS(const LeptonVector& leptons, const JetVec
   if(m_signalTaus.size()==0)                          { increment(n_pass_CRWHSStauv  [m_ET], lsf, bsf); f.tauVeto=true;} else  return f;
   if(numberOfFJets(jets)==0)                          { increment(n_pass_CRWHSSnfj   [m_ET], lsf, bsf); f.fjveto =true;} else  return f;
   if(numberOfCBJets(jets)==0)                         { increment(n_pass_CRWHSSnbj   [m_ET], lsf, bsf); f.bjveto =true;} else  return f;
-  if(numberOfCLJets(jets)>0)                          { increment(n_pass_CRWHSSnj    [m_ET], lsf, bsf); f.ge1j   =true;} else  return f;
+  if(numberOfCLJets(jets, m_jvfTool, NtSys_NOM, m_anaType)>0) { increment(n_pass_CRWHSSnj    [m_ET], lsf, bsf); f.ge1j   =true;} else  return f;
   if(susy::pass2LepPt    (leptons, ptL0Min, ptL1Min)) { increment(n_pass_CRWHSS2lpt  [m_ET], lsf, bsf); f.lepPt  =true;} else  return f;
   if(susy::passZllVeto   (leptons, loMllZ, hiMllZ))   { increment(n_pass_CRWHSSzveto [m_ET], lsf, bsf); f.zllVeto=true;} else  return f;
   if(susy::passMtLlMetMin(leptons, met, mtwwMin))     { increment(n_pass_CRWHSSmwwt  [m_ET], lsf, bsf); f.mtllmet=true;} else  return f;

@@ -4,12 +4,14 @@
 #include <iomanip> // setw, setprecision
 #include <sstream>      // std::ostringstream
 #include "TCanvas.h"
+#include "TSystem.h"
 #include "TVector2.h"
 
 #include "SusyTest0/SusySelection.h"
 #include "SusyTest0/SusyPlotter.h"
 
 #include "ChargeFlip/chargeFlip.h"
+#include "SusyNtuple/MCWeighter.h"
 #include "SusyTest0/EventFlags.h"
 #include "SusyTest0/criteria.h"
 #include "SusyTest0/kinematic.h"
@@ -41,6 +43,8 @@ SusySelection::SusySelection() :
   m_outTupleFile(""),
   m_trigObj(NULL),
   m_useMCTrig(false),
+  m_chargeFlip(NULL),
+  m_mcWeighter(NULL),
   m_w(1.0),
   m_useXsReader(false),
   m_xsFromReader(-1.0),
@@ -75,11 +79,17 @@ void SusySelection::Begin(TTree* /*tree*/)
   }
 }
 //-----------------------------------------
-JetVector SusySelection::filterClJets(const JetVector &jets)
+void SusySelection::Init(TTree* tree)
+{
+    SusyNtAna::Init(tree);
+    initMcWeighter(tree);
+}
+//-----------------------------------------
+JetVector SusySelection::filterClJets(const JetVector &jets, JVFUncertaintyTool* jvfTool, SusyNtSys sys, AnalysisType anaType)
 {
     JetVector oj;
     for(size_t i=0; i<jets.size(); ++i)
-        if(SusyNtTools::isCentralLightJet(jets[i])) oj.push_back(jets[i]);
+      if(SusyNtTools::isCentralLightJet(jets[i], jvfTool, sys, anaType)) oj.push_back(jets[i]);
     return oj;
 }
 //-----------------------------------------
@@ -101,7 +111,7 @@ Bool_t SusySelection::Process(Long64_t entry)
   const LeptonVector& l = m_signalLeptons;
   if(l.size()>1) assignNonStaticWeightComponents(computeNonStaticWeightComponents(l, bj, susy::wh::WH_CENTRAL));
   else return false;
-  VarFlag_t varsFlags = computeSsFlags(m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, allowQflip);
+  VarFlag_t varsFlags = computeSsFlags(m_signalLeptons, m_signalTaus, m_signalJets2Lep, m_met, susy::wh::WH_CENTRAL, allowQflip);
   const SsPassFlags &ssf = varsFlags.second;
   incrementSsCounters(ssf, m_weightComponents);
   if(ssf.lepPt) {
@@ -112,11 +122,10 @@ Bool_t SusySelection::Process(Long64_t entry)
           LeptonVector lowPtLep(subtract_vector(anyLep, m_baseLeptons));
           const Lepton *l0 = m_signalLeptons[0];
           const Lepton *l1 = m_signalLeptons[1];
-          const JetVector clJets(filterClJets(m_signalJets2Lep));
+          const JetVector clJets(SusySelection::filterClJets(m_signalJets2Lep, m_jvfTool, NtSys_NOM, m_anaType));
           m_tupleMaker.fill(weight, run, event, *l0, *l1, *m_met, lowPtLep, clJets);
       }
   }
-  checkAndIncrementEwk(m_signalLeptons, m_signalJets2Lep, m_met);
   return kTRUE;
 }
 //-----------------------------------------
@@ -128,6 +137,7 @@ void SusySelection::Terminate()
   dumpEventCounters();
   if(m_xsReader) delete m_xsReader;
   if(m_chargeFlip) delete m_chargeFlip;
+  if(m_mcWeighter) delete m_mcWeighter;
   if(m_nInvalidQflip)
       cout<<"Number of invalid charge flip probabilities: "<<m_nInvalidQflip<<" (those were set to 0.0)"<<endl;
 }
@@ -193,10 +203,11 @@ void SusySelection::incrementCounters(const susy::wh::EventFlags &f, const Weigh
 }
 //-----------------------------------------
 SusySelection::VarFlag_t SusySelection::computeSsFlags(LeptonVector& leptons,
-                                        const TauVector& taus,
-                                        const JetVector& jets,
-                                        const Met *met,
-                                        bool allowQflip)
+                                                       const TauVector& taus,
+                                                       const JetVector& jets,
+                                                       const Met *met,
+                                                       const susy::wh::Systematic sys,
+                                                       bool allowQflip)
 {
   SsPassFlags f;
   swk::DilepVars v;
@@ -206,7 +217,7 @@ SusySelection::VarFlag_t SusySelection::computeSsFlags(LeptonVector& leptons,
   Met ncmet(*m_met); // non-const met \todo: should modify a non-const input
   if(leptons.size()>1) {
       f.updateLlFlags(*leptons[0], *leptons[1]);
-      f = assignNjetFlags(js, f);
+      f = assignNjetFlags(js, m_jvfTool, sys2ntsys(sys), m_anaType, f);
       DiLepEvtType ll(getDiLepEvtType(leptons));
       if(ll==ET_me) ll = ET_em;
       bool update4mom(true); // charge flip
@@ -301,10 +312,10 @@ bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
     return false;
 }
 //-----------------------------------------
-bool SusySelection::passJetVeto(const JetVector& jets)
+bool SusySelection::passJetVeto(const JetVector& jets, const susy::wh::Systematic sys)
 {
   // Require no light, b, or forward jets
-  int N_L20 = numberOfCLJets(jets);
+  int N_L20 = numberOfCLJets(jets, m_jvfTool, sys2ntsys(sys), m_anaType);
   int N_B20 = numberOfCBJets(jets);
   int N_F30 = numberOfFJets(jets);
   return (N_L20 + N_B20 + N_F30 == 0);
@@ -322,57 +333,10 @@ bool SusySelection::passfJetVeto(const JetVector& jets)
   return (0 == numberOfFJets(jets));
 }
 //-----------------------------------------
-bool SusySelection::passge1Jet(const JetVector& jets)
-{
-  int N_L20 = numberOfCLJets(jets);
-  int N_B20 = numberOfCBJets(jets);
-  int N_F30 = numberOfFJets(jets);
-  return (N_L20 >=1 && N_B20 + N_F30 == 0);
-}
-bool SusySelection::passge2Jet(const JetVector& jets)
-{
-  int N_L20 = numberOfCLJets(jets);
-  int N_B20 = numberOfCBJets(jets);
-  int N_F30 = numberOfFJets(jets);
-  return (N_L20 >=2 && N_B20 + N_F30 == 0);
-}
-bool SusySelection::passge3Jet(const JetVector& jets)
-{
-  int N_L20 = numberOfCLJets(jets);
-  int N_B20 = numberOfCBJets(jets);
-  int N_F30 = numberOfFJets(jets);
-  return (N_L20 >=3 && N_B20 + N_F30 == 0);
-}
-//-----------------------------------------
-bool SusySelection::passeq2Jet(const JetVector& jets)
-{
-  int N_L20 = numberOfCLJets(jets);
-  int N_B20 = numberOfCBJets(jets);
-  int N_F30 = numberOfFJets(jets);
-  return (N_L20 == 2 && N_B20 + N_F30 == 0);
-}
-//-----------------------------------------
-bool SusySelection::passge2JetWoutFwVeto(const JetVector& jets)
-{
-  return (numberOfCLJets(jets) >= 2 && numberOfCBJets(jets) < 1);
-}
-//-----------------------------------------
-bool SusySelection::passeq2JetWoutFwVeto(const JetVector& jets)
-{
-  return (numberOfCLJets(jets) == 2 && numberOfCBJets(jets) < 1);
-}
-//-----------------------------------------
 bool SusySelection::passMetRelMin(const Met *met, const LeptonVector& leptons,
                                   const JetVector& jets, float minVal){
   float metrel = getMetRel(met,leptons,jets);
   return (minVal < metrel);
-}
-//----------------------------------------------------------
-bool SusySelection::passNj(const JetVector& jets, int minNj, int maxNj)
-{
-  int nj(numberOfCLJets(jets));
-  return (minNj < nj && nj <= maxNj
-	  && numberOfCBJets(jets) < 1);
 }
 //-----------------------------------------
 bool SusySelection::passMuonRelIso(const LeptonVector &leptons, float maxVal)
@@ -390,67 +354,25 @@ bool SusySelection::passMuonRelIso(const LeptonVector &leptons, float maxVal)
   return true;
 }
 //-----------------------------------------
-bool SusySelection::passEwkSs(const LeptonVector& leptons, const JetVector& jets, const Met* met)
-{
-    if(leptons.size()<2) return false;
-    bool noBjets(numberOfCBJets(jets)==0), noFwJets(numberOfFJets(jets)==0);
-    bool someCentralJets(numberOfCLJets(jets)>0);
-    const Lepton &l0 = *leptons[0], &l1 = *leptons[1];
-    TLorentzVector ll(l0+l1);
-    return (noBjets && noFwJets && someCentralJets
-            && (getMetRel(met, leptons, jets)>50.0)
-            && susy::sameSign(leptons)
-            && (ll.M()<60.0) && (ll.Pt()<20.) && (fabs(l0.DeltaPhi(l1)) >= 1.3));
-}
-//-----------------------------------------
-bool SusySelection::passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met)
-{
-    if(leptons.size()<2) return false;
-    bool noBjets(numberOfCBJets(jets)==0), noFwJets(numberOfFJets(jets)==0);
-    bool someCentralJets(numberOfCLJets(jets)>0);
-    bool isEe(leptons[0]->isEle() && leptons[1]->isEle());
-    bool passZeeVeto(isEe ? susy::passZllVeto(leptons, 91.2-10.0, 91.2+10.0) : true);
-    return (noBjets && noFwJets && someCentralJets && passZeeVeto
-            && susy::sameSign(leptons)
-            && (getMetRel(met, leptons, jets)>40.0));
-}
-//-----------------------------------------
-bool SusySelection::passEwkSsLea(const LeptonVector& leptons, const JetVector& jets, const Met* met)
-{
-    bool pass=false;
-    if(leptons.size()>=2) {
-        bool noBjets(numberOfCBJets(jets)==0), noFwJets(numberOfFJets(jets)==0);
-        bool someCentralJets(numberOfCLJets(jets)>0);
-        const Susy::Lepton &l0 = *leptons[0], &l1 = *leptons[1];
-        float mll = (l0+l1).M();
-        bool isEe(l0.isEle() && l1.isEle());
-        bool passZeeVeto(isEe ? fabs(mll- 91.2)>10.0 : true);
-        pass= (noBjets && noFwJets && someCentralJets && passZeeVeto
-               && susy::sameSign(leptons)
-               && (met->Et<40.0));
-    }
-    return pass;
-}
-//-----------------------------------------
-void SusySelection::checkAndIncrementEwk(const LeptonVector& leptons, const JetVector& jets, const Met* met)
-{
-  DiLepEvtType ll(getDiLepEvtType(leptons));
-  if(ll==ET_me) ll = ET_em;
-  if(SusySelection::passEwkSs     (leptons, jets, met)) increment(n_pass_ewkSs      [ll], m_weightComponents);
-  if(SusySelection::passEwkSsLoose(leptons, jets, met)) increment(n_pass_ewkSsLoose [ll], m_weightComponents);
-  if(SusySelection::passEwkSsLea  (leptons, jets, met)) increment(n_pass_ewkSsLea   [ll], m_weightComponents);
-}
-//-----------------------------------------
 void SusySelection::cacheStaticWeightComponents()
 {
   m_weightComponents.reset();
   if(!nt.evt()->isMC) {m_weightComponents.reset(); return;}
   m_weightComponents.gen = nt.evt()->w;
   m_weightComponents.pileup = nt.evt()->wPileup;
-  bool useSumwMap(true);
-  m_weightComponents.susynt = (m_useXsReader ?
-                               computeEventWeightXsFromReader(LUMI_A_L) :
-                               SusyNtAna::getEventWeight(LUMI_A_L, useSumwMap));
+//   bool useSumwMap(true);
+//   m_weightComponents.susynt = (m_useXsReader ?
+//                                computeEventWeightXsFromReader(LUMI_A_L) :
+//                                SusyNtAna::getEventWeight(LUMI_A_L, useSumwMap));
+  //   const bool useSumwMap(true);
+  //   const bool useProcSumw(true);
+  //   const bool useSusyXsec(true);
+  //m_weightComponents.susynt = getEventWeight(LUMI_A_L, useSumwMap, useProcSumw, useSusyXsec);
+  const MCWeighter::WeightSys wSys = MCWeighter::Sys_NOM;
+  m_weightComponents.susynt = m_mcWeighter->getMCWeight(nt.evt(), LUMI_A_L, wSys);
+  cout<<"calling mcweighter->getMCWeight(event="<<nt.evt()<<", lumi="<<LUMI_A_L<<", sys="<<wSys<<")"
+      <<" = "<<m_weightComponents.susynt<<endl;
+
   float genpu(m_weightComponents.gen*m_weightComponents.pileup);
   m_weightComponents.norm = (genpu != 0.0 ? m_weightComponents.susynt/genpu : 1.0);
 }
@@ -737,9 +659,9 @@ susy::wh::Chan SusySelection::getChan(const LeptonVector& leps)
   return susy::wh::Ch_N; // not in range
 }
 //-----------------------------------------
-SsPassFlags SusySelection::assignNjetFlags(const JetVector& jets, SsPassFlags f)
+SsPassFlags SusySelection::assignNjetFlags(const JetVector& jets, JVFUncertaintyTool* jvfTool, SusyNtSys sys, AnalysisType anaType, SsPassFlags f)
 {
-  int njCl = numberOfCLJets(jets);
+  int njCl = numberOfCLJets(jets, jvfTool, sys, anaType);
   int njB  = numberOfCBJets(jets);
   int njF  = numberOfFJets (jets);
   f.bjveto = njB  == 0;
@@ -861,6 +783,19 @@ void SusySelection::initChargeFlipTool()
   chargeFlipInput += "/../ChargeFlip/data/d0_new2d_chargeflip_map_scale_with_mc_last_ptbin.root"; // scaled with Emma's mc map
   m_chargeFlip = new chargeFlip(chargeFlipInput);
   if(m_dbg) m_chargeFlip->printSettings();
+}
+//-----------------------------------------
+bool SusySelection::initMcWeighter(TTree *tree)
+{
+    bool success=false;
+    if(tree){
+        string xsecDir = gSystem->ExpandPathName("$ROOTCOREBIN/data/SUSYTools/mc12_8TeV/");
+        m_mcWeighter = new MCWeighter(tree, xsecDir);
+        if(m_dbg) cout<<"SusySelection: MCWeighter has been initialized"<<endl;
+    } else {
+        cout<<"SusySelection::initMcWeighter: error, invalid input tree, cannot initialize Mcweighter"<<endl;
+    }
+    return success;
 }
 //-----------------------------------------
 LeptonVector SusySelection::getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/)
