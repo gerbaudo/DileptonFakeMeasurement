@@ -370,9 +370,6 @@ void SusySelection::cacheStaticWeightComponents()
   //m_weightComponents.susynt = getEventWeight(LUMI_A_L, useSumwMap, useProcSumw, useSusyXsec);
   const MCWeighter::WeightSys wSys = MCWeighter::Sys_NOM;
   m_weightComponents.susynt = m_mcWeighter->getMCWeight(nt.evt(), LUMI_A_L, wSys);
-  cout<<"calling mcweighter->getMCWeight(event="<<nt.evt()<<", lumi="<<LUMI_A_L<<", sys="<<wSys<<")"
-      <<" = "<<m_weightComponents.susynt<<endl;
-
   float genpu(m_weightComponents.gen*m_weightComponents.pileup);
   m_weightComponents.norm = (genpu != 0.0 ? m_weightComponents.susynt/genpu : 1.0);
 }
@@ -791,6 +788,8 @@ bool SusySelection::initMcWeighter(TTree *tree)
     if(tree){
         string xsecDir = gSystem->ExpandPathName("$ROOTCOREBIN/data/SUSYTools/mc12_8TeV/");
         m_mcWeighter = new MCWeighter(tree, xsecDir);
+        bool isPmssmSample(contains(sampleName(), "Herwigpp_UEEE3_CTEQ6L1_DGnoSL_TB10"));
+        if(isPmssmSample) m_mcWeighter->setLabelBinCounter("Initial").clearAndRebuildSumwMap(m_tree);
         if(m_dbg) cout<<"SusySelection: MCWeighter has been initialized"<<endl;
     } else {
         cout<<"SusySelection::initMcWeighter: error, invalid input tree, cannot initialize Mcweighter"<<endl;
