@@ -129,18 +129,12 @@ def runFill(opts) :
             template = 'batch/templates/check_hft_fill.sh.template'
             script = "batch/hft_%s.sh"%syst
             scriptFile = open(script, 'w')
-            scriptFile.write(open(template).read().replace('${opt}', newOptions))
+            scriptFile.write(open(template).read()
+                             .replace('%(opt)s', newOptions)
+                             .replace('%(logfile)s', 'log/hft/fill_'+syst+'.log')
+                             .replace('%(jobname)s', 'fill_'+syst))
             scriptFile.close()
-            cmd = "qsub -q atlas"
-            cmd += " -j oe -V " # join stdout/stderr, export env
-            cmd += " -N %(jobname)s "
-            cmd += " -o %(outlog)s "
-            cmd += " %(scripname)s"
-            cmd = cmd % {'jobname' : 'fill_'+syst,
-                         'outlog' : 'log/hft/fill_'+syst+'.log',
-                         'scripname' : script,
-                         'options' : newOptions
-                         }
+            cmd = "sbatch %s"%script
             if verbose : print cmd
             out = getCommandOutput(cmd)
             if verbose : print out['stdout']

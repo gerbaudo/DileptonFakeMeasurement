@@ -49,6 +49,7 @@ function testvars {
 
 function filltrees {
     local SUBMIT_OPTION="" && [[ $#>0 ]] && SUBMIT_OPTION="${1}"
+# 	./python/submitJobs.py --susyplot -o  -t ${TAG} -s 'Herwigpp_UEEE3_CTEQ6L1_DGnoSL_TB10_05' --other-opt "--with-hft --with-syst" ${SUBMIT_OPTION}
 	./python/submitJobs.py --susyplot -o  -t ${TAG} -e 'period' --other-opt "--with-hft --with-syst" ${SUBMIT_OPTION}
 	./python/submitJobs.py --susyplot -o  -t ${TAG} -s 'period' --other-opt "--with-hft"             ${SUBMIT_OPTION}
 	./python/submitJobs.py --fakepred -o  -t ${TAG} -s 'period' --other-opt "--with-hft"             ${SUBMIT_OPTION}

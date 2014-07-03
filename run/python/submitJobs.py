@@ -100,15 +100,19 @@ sampleNames   = filterWithRegexp(sampleNames, regexp)
 excludedNames = [] if exclude is None else filterWithRegexp(sampleNames, exclude)
 sampleNames   = [s for s in sampleNames if s not in excludedNames]
 def listExists(dset='', flistDir='./filelist') : return os.path.exists(flistDir+'/'+dset+'.txt')
-def fillInScriptTemplate(sample, input, output, otherOptions, outScript, scriptTemplate) :
+def fillInScriptTemplate(sample, input, output, outlog, otherOptions, outScript, scriptTemplate, tag) :
     options  = otherOptions
     options += ' --WH-sample' if isSigSample(sample) else ''
+    jobname = sample
+    out_logfile  = logdir+'/'+sample+'_'+tag+'.log'
     outFile = open(outScript, 'w')
     for line in open(scriptTemplate).readlines() :
-        line = line.replace('${inp}', input)
-        line = line.replace('${out}', output)
-        line = line.replace('${opt}', options)
-        line = line.replace('${sample}', sample)
+        line = line.replace('%(inp)s', input)
+        line = line.replace('%(jobname)s', jobname)
+        line = line.replace('%(logfile)s', out_logfile)
+        line = line.replace('%(out)s', output)
+        line = line.replace('%(opt)s', options)
+        line = line.replace('%(sample)s', sample)
         outFile.write(line)
     outFile.close()
 
@@ -124,15 +128,9 @@ for sample in sampleNames :
     script = outScriptTemplate%{'batdir':batdir, 'sample':sample}
     fileExists = os.path.exists(script)
     if overwrite or not fileExists :
-        fillInScriptTemplate(sample, input, output, otherOptions, script, template)
+        fillInScriptTemplate(sample, input, output, outlog, otherOptions, script, template, batchTag)
     elif fileExists : print "warning, not overwriting existing script '%s'"%script
-    cmd = "qsub " \
-          "-j oe -V " \
-          "-N %(jobname)s " \
-          "-o %(outlog)s " \
-          " %(scripname)s" \
-          % \
-          {'jobname':"%s%s"%(sample, batchTag), 'outlog':outlog, 'scripname':script}
+    cmd = "sbatch %s"%script
     print cmd
     if submit :
         out = getCommandOutput(cmd)
