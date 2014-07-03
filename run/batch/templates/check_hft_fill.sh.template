@@ -8,5 +8,5 @@
 
 echo "Starting on `hostname`, `date`"
 cd ${SLURM_SUBMIT_DIR}
-FakePred --etapt -i %(inp)s -o %(out)s -s %(sample)s --matrix-file ${ROOTCOREDIR}/../SusyMatrixMethod/data/FinalFakeHist_May_20.root %(opt)s
+./python/check_hft_trees.py %(opt)s
 echo "Done, `date`"
