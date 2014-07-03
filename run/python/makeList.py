@@ -9,6 +9,7 @@ import glob
 import optparse
 import re
 import subprocess
+import utils
 from datasets import datasets
 
 validModes = ['mc12', 'susy', 'data',]
@@ -48,6 +49,7 @@ if verbose :
     print '\n'.join(["%s : %s" % (o, eval(o))
                      for o in ['mode','outdir','regexp', 'tag',]])
 
+utils.mkdirIfNeeded(outdir)
 datasets = [d for d in datasets if re.search(regexp, d.name)]
 datasets = [d for d in datasets if not d.placeholder or alsoPh]
 
