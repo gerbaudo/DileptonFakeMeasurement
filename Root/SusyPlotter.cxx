@@ -114,7 +114,7 @@ Bool_t SusyPlotter::Process(Long64_t entry)
       if(l.size()>1) assignNonStaticWeightComponents(computeNonStaticWeightComponents(l, bj, swh::ntsys2sys(sys)));
       else continue;
       bool allowQflip(true);
-      VarFlag_t varsFlags(SusySelection::computeSsFlags(ncl, t, j, m, allowQflip));
+      VarFlag_t varsFlags(SusySelection::computeSsFlags(ncl, t, j, m, ntsys2sys(sys), allowQflip));
       const swk::DilepVars &v = varsFlags.first;
       const SsPassFlags &ssf = varsFlags.second;
       if(sys==NtSys_NOM) incrementSsCounters(ssf, m_weightComponents);
@@ -142,12 +142,6 @@ Bool_t SusyPlotter::Process(Long64_t entry)
                   if(ssf.ht     ) fillHistos(ncl, j, m, weight, swh::PR_CR8mmHt,   iSys);
               } // end if(mm)
           } // end passLpt
-          bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
-          bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
-          bool passEwkSsLea  (SusySelection::passEwkSsLea  (ncl,j,m));
-          if(passEwkSs)      fillHistos(ncl, j, m, weight, swh::PR_SsEwk,     iSys);
-          if(passEwkSsLoose) fillHistos(ncl, j, m, weight, swh::PR_SsEwkLoose,iSys);
-          if(passEwkSsLea)   fillHistos(ncl, j, m, weight, swh::PR_SsEwkLea,  iSys);
 
           if(ssf.sameSign && ssf.ge1j)                 fillHistos(ncl, j, m, weight, swh::PR_CRSsInc1j,iSys);
           if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1j , iSys);
@@ -539,7 +533,7 @@ swh::HftFiller::WeightVariations  SusyPlotter::computeWeightVariations(cvl_t& le
     const WeightComponents &w = m_weightComponents;
     swh::HftFiller::WeightVariations wv;
     bool isQflip(w.qflip!=1.0);
-    int njets = numberOfCLJets(jets);
+    int njets = numberOfCLJets(jets, m_jvfTool, NtSys_NOM, m_anaType);
     wv.qflipUp_  = isQflip ? w.relativeQflip(computeChargeFlipProb(l, m, swh::WH_BKGMETHODUP  )) : 1.0;
     wv.qflipDo_  = isQflip ? w.relativeQflip(computeChargeFlipProb(l, m, swh::WH_BKGMETHODDOWN)) : 1.0;
     wv.elTrigUp_ = w.relativeTrig(computeNonStaticWeightComponents(l, j, swh::WH_ETRIGREWUP  ));

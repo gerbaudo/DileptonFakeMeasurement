@@ -7,7 +7,7 @@
 
 #include "Mt2/mt2_bisect.h"
 #include "SusyNtuple/SusyNtTools.h"
-#include "SusyNtuple/WhTruthExtractor.h"
+#include "SusyNtuple/mc_truth_utils.h"
 #include "LeptonTruthTools/RecoTruthMatch.h"
 #include "SusyTest0/DileptonAnalyticalSolver.h"
 #include "SusyTest0/kinematic.h"
@@ -93,7 +93,7 @@ bool oppositeSign(const LeptonVector& leptons)
 //-----------------------------------------
 bool passHtautauVeto(int hdecay)
 {
-  return (hdecay!=WhTruthExtractor::kPtauAtau);
+  return (hdecay!=susy::mc::kPtauAtau);
 }
 //----------------------------------------------------------
 bool passZllVeto(const LeptonVector& l, float mllLo, float mllHi)

@@ -42,6 +42,7 @@ enum WeightTypes {
 
 // fw decl
 class chargeFlip;
+class MCWeighter;
 
 namespace susy {
 namespace wh {
@@ -93,13 +94,14 @@ class SusySelection : public SusyNtAna
     ofstream out;
 
     virtual void    Begin(TTree *tree); //!< called before looping on entries
+    virtual void    Init(TTree *tree); ///< called when the TChain is attached
     virtual void    Terminate(); //!< called after looping is finished
     virtual Bool_t  Process(Long64_t entry); //!< called at each event
     virtual void dumpEventCounters();
     susy::wh::EventFlags computeEventFlags();
     void incrementCounters(const susy::wh::EventFlags &f, const WeightComponents &w);
     // compute the selection flags for the same-sign signal region; note that the charge flip can modify leptons and met
-    VarFlag_t computeSsFlags(vl_t &l, cvt_t &t, cvj_t &j, const Met* m, bool allowQflip);
+    VarFlag_t computeSsFlags(vl_t &l, cvt_t &t, cvj_t &j, const Met* m, const susy::wh::Systematic sys, bool allowQflip);
     //! increment counters that are specific to the same-sign selection
     void incrementSsCounters(const SsPassFlags &f, const WeightComponents &w);
     // Cut methods
@@ -120,22 +122,11 @@ class SusySelection : public SusyNtAna
                          const susy::wh::Systematic sys,
                          bool update4mom, bool isMC);
     // Signal Region Cuts
-    bool passJetVeto(const JetVector& jets);
+    bool passJetVeto(const JetVector& jets, const susy::wh::Systematic sys);
     bool passMetRelMin(const Met *met, cvl_t &leptons, cvj_t &jets, float minVal);
     bool passbJetVeto(const JetVector& jets);
     bool passfJetVeto(const JetVector& jets);
-    bool passge1Jet(const JetVector& jets);
-    bool passge2Jet(const JetVector& jets);
-    bool passge3Jet(const JetVector& jets);
-    bool passeq2Jet(const JetVector& jets);
-    bool passge2JetWoutFwVeto(const JetVector& jets);
-    bool passeq2JetWoutFwVeto(const JetVector& jets);
-    bool passNj(const JetVector& jets, int minNj=2, int maxNj=3);
     bool passMuonRelIso(const LeptonVector &leptons, float maxVal);
-    static bool passEwkSs     (const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    static bool passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    static bool passEwkSsLea  (const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    void checkAndIncrementEwk(const LeptonVector& leptons, const JetVector& jets, const Met* met);
     static bool passCrWhZVfakeEe(const susy::wh::kin::DilepVars &v);
     static bool passCrWhZVfakeEm(const susy::wh::kin::DilepVars &v);
     static bool passCrWhfakeEm  (const susy::wh::kin::DilepVars &v);
@@ -172,9 +163,9 @@ class SusySelection : public SusyNtAna
     //! any electron or muon, before pt cuts, before overlap removal
     static vl_t getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/);
     static susy::wh::Chan getChan(const LeptonVector& leps); //!< compute lepton channel
-    static SsPassFlags assignNjetFlags(const JetVector& jets, SsPassFlags f);
+    static SsPassFlags assignNjetFlags(const JetVector& jets, JVFUncertaintyTool* jvfTool, SusyNtSys sys, AnalysisType anaType, SsPassFlags f);
     //! ugly hack function : utils::filter seems not to work properly with SusyNtTools::isCentralLightJet...
-    static JetVector filterClJets(const JetVector &jets);
+    static JetVector filterClJets(const JetVector &jets, JVFUncertaintyTool* jvfTool, SusyNtSys sys, AnalysisType anaType);
  protected:
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
     float computeEventWeightXsFromReader(float lumi);
@@ -183,6 +174,7 @@ class SusySelection : public SusyNtAna
     float getTriggerWeight2Lep(const LeptonVector &leptons, const susy::wh::Systematic sys);
     void resetAllCounters();
     void initChargeFlipTool();
+    bool initMcWeighter(TTree *tree);
     void cacheStaticWeightComponents(); //! cache those weight components that do not depend on sel
     //! compute lepton, trigger, and btag scale factors
     WeightComponents computeNonStaticWeightComponents(cvl_t& leptons, cvj_t& jets, const susy::wh::Systematic sys);
@@ -201,6 +193,7 @@ class SusySelection : public SusyNtAna
     DilTrigLogic*       m_trigObj;      // My trigger logic class
     bool                m_useMCTrig;    // Use MC Trigger, i.e. toggle the matching in DilTrigLogic::passDil*()
     chargeFlip*         m_chargeFlip;   //!< tool providing the electron charge flip probability
+    MCWeighter*         m_mcWeighter;   /// tool to determine the normalization
     float               m_w;            // mc weight
     bool                m_useXsReader;  // use SusyXSReader to get the xsec for normalization
     float               m_xsFromReader; // cached xsec from reader

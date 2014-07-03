@@ -75,7 +75,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
   DiLepEvtType ll(getDiLepEvtType(l)), ee(ET_ee), mm(ET_mm);
   bool allowQflip(false), passMinMet(m->Et > 40.0);
   bool isEe(ll==ee), isMm(ll==mm), isSf(isEe||isMm), isOf(!isEe && !isMm);
-  const VarFlag_t varsFlags(SusySelection::computeSsFlags(ncl, t, j, m, allowQflip));
+  const VarFlag_t varsFlags(SusySelection::computeSsFlags(ncl, t, j, m, susy::wh::WH_CENTRAL, allowQflip));
   const swk::DilepVars &v = varsFlags.first;
   const SsPassFlags &ssf = varsFlags.second;
   m_weightComponents.fake = getFakeWeight(l,sf::CR_SSInc1j, metRel, smm::SYS_NOM); // just for the counters, use generic CR_SRWHSS
@@ -89,7 +89,7 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
       LeptonVector anyLep(getAnyElOrMu(nt));
       LeptonVector lowPtLep(subtract_vector(anyLep, m_baseLeptons));
       const Lepton *l0(l[0]), *l1(l[1]);
-      const JetVector clJets(SusySelection::filterClJets(m_signalJets2Lep));
+      const JetVector clJets(SusySelection::filterClJets(m_signalJets2Lep, m_jvfTool, NtSys_NOM, m_anaType));
       m_tupleMaker.fill(weight, run, event, *l0, *l1, *m, lowPtLep, clJets);
   } else if(m_fillHft) {
       for(uint iSys = 0; iSys<m_systs.size(); ++iSys){
@@ -128,13 +128,6 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
 
           if(is1j && SusySelection::passSrWh1j    (v)) fillHistos(ncl, j, m, fakeWeight, swh::SrWh1j     , iSys);
           if(is2j && SusySelection::passSrWh2j    (v)) fillHistos(ncl, j, m, fakeWeight, swh::SrWh2j     , iSys);
-
-          bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
-          bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
-          bool passEwkSsLea  (SusySelection::passEwkSsLea  (ncl,j,m));
-          if(passEwkSs)      fillHistos(ncl, j, m, fakeWeight, PR_SsEwk,     iSys);
-          if(passEwkSsLoose) fillHistos(ncl, j, m, fakeWeight, PR_SsEwkLoose,iSys);
-          if(passEwkSsLea)   fillHistos(ncl, j, m, fakeWeight, PR_SsEwkLea,  iSys);
       } // end for(iSys)
   }
   return true;
@@ -230,8 +223,9 @@ do{                                                                   \
   FILL( hf_njets, jets.size() );
   for(uint ij=0; ij<jets.size(); ++ij){
     Jet* jet = jets.at(ij);
+
     if( isCentralBJet(jet) ) FILL(hf_bjet_pt, jet->Pt());
-    if( isCentralLightJet(jet) ) FILL(hf_ljet_pt, jet->Pt());
+    if( isCentralLightJet(jet, m_jvfTool, NtSys_NOM, m_anaType) ) FILL(hf_ljet_pt, jet->Pt());
   }
   #undef FILL
 }

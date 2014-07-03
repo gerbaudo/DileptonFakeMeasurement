@@ -361,6 +361,13 @@ template, process = "Herwigpp_sM_wA_noslep_notauhad_WH_2Lep_%d", "wA_noslep_nota
 datasets += [Dataset(sampleType, d, groupTemplate%nth, template%nth, process%nth)
              for d, nth in rzip(range(177501, 177528+1), range(1, 28+1))]
 
+groupTemplate = 'pmssm_050_%s_%s_2L'
+template, process = "Herwigpp_UEEE3_CTEQ6L1_DGnoSL_TB10_050_%s_%s_2L", "pmssm_050_%s_%s_2L"
+datasets += [Dataset(sampleType, dsid, groupTemplate%(p1, p2), template%(p1, p2), process%(p1, p2))
+             for dsid, (p1, p2) in rzip(range(186000, 186099+1),
+                                            [(p1, p2)
+                                             for p1 in ['100', '150', '200', '250', '300', '350', '3E3', '400', '450', '500']
+                                             for p2 in ['100', '150', '200', '250', '300', '350', '3E3', '400', '450', '500']])]
 
 #
 # testing
