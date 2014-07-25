@@ -197,7 +197,7 @@ def plotFractionsStacked(histos={}, canvasName='', outputDir='./', frameTitle='t
     canMaster.Draw('axis same')
     can._graphical_objects = [stack, canMaster, leg, tex] + [h for h in stack.GetStack()]
     can.Update()
-    for ext in ['png'] :
+    for ext in ['png','eps'] :
         outFilename = outputDir+'/'+canvasName+'.'+ext
         rmIfExists(outFilename)
         can.SaveAs(outFilename)
