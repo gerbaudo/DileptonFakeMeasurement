@@ -43,7 +43,8 @@ SusySelection::SusySelection() :
   m_qflipProb(0.0)
 {
   resetAllCounters();
-  setAnaType(Ana_2LepWH);
+//  setAnaType(Ana_2LepWH); // tmp test for HLFV
+  setAnaType(Ana_2Lep);
   setSelectTaus(true);
   initChargeFlipTool();
 }

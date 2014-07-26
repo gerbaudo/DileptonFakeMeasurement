@@ -26,6 +26,7 @@ const sf::Region controlRegions[] = {
 };
 const size_t nControlRegions = sizeof(controlRegions)/sizeof(controlRegions[0]);
 const sf::Region signalRegions[] = {
+/*
   sf::CR_SSInc,
   sf::CR_SSInc1j,
   sf::CR_SRWHSS,
@@ -59,6 +60,8 @@ const sf::Region signalRegions[] = {
   sf::CR_SRWH1j,
   sf::CR_SRWH2j,
   sf::CR_SRWHnoMlj
+*/
+    sf::CR_emu
 };
 const size_t nSignalRegions = sizeof(signalRegions)/sizeof(signalRegions[0]);
 const MeasureFakeRate2::LeptonType leptonTypes[] = {MeasureFakeRate2::kElectron, MeasureFakeRate2::kMuon};
@@ -85,7 +88,8 @@ MeasureFakeRate2::MeasureFakeRate2() :
   m_tupleMakerSsInc1j("",""),
   m_tupleMakerMcConv("",""),
   m_tupleMakerMcQcd("",""),
-  m_tupleMakerMcReal("","")
+  m_tupleMakerMcReal("",""),
+  m_tupleMakerEmu("","")
 {
   resetCounters();
 }
@@ -112,6 +116,7 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
       string filenameMcConv   = tupleFilenameFromHistoFilename(m_fileName, "mcconv_tuple");
       string filenameMcQcd    = tupleFilenameFromHistoFilename(m_fileName, "mcqcd_tuple");
       string filenameMcReal   = tupleFilenameFromHistoFilename(m_fileName, "mcreal_tuple");
+      string filenameEmu      = tupleFilenameFromHistoFilename(m_fileName, "emu_tuple");
       struct InitTuple{
           bool &toggle;
           InitTuple(bool &b) : toggle(b){}
@@ -128,6 +133,7 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
       initTuple(m_tupleMakerMcConv,   filenameMcConv,   "ConversionExtractionRegion");
       initTuple(m_tupleMakerMcQcd,    filenameMcQcd,    "HfLfExtractionRegion");
       initTuple(m_tupleMakerMcReal,   filenameMcReal,   "RealExtractionRegion");
+      initTuple(m_tupleMakerEmu,      filenameEmu,      "EmuRegion");
   }
 }
 /*--------------------------------------------------------------------------------*/
@@ -327,6 +333,20 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
                 .setL1EtConeCorr(computeCorrectedEtCone(probeEl))
                 .setL1PtConeCorr(computeCorrectedPtCone(probeEl))
                 .fill(m_evtWeight, run, event, dummyL, *probeEl, *m_met, mumu, jets);
+        } else if(CR==sf::CR_emu) {
+            assert(m_probes.size()>1);
+            if(m_probes.size()>2) cout<<"warning, "<<m_probes.size()<<" probe leptons (expected 2)"<<endl;
+            const Lepton *l0 = m_probes[0], *l1 = m_probes[1];
+            LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
+            bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            LeptonVector dummyLepts;
+            m_tupleMakerEmu
+                .setL0IsTight(l0IsTight).setL0Source(l0Source)
+                .setL1IsTight(l1IsTight).setL1Source(l1Source)
+                .setL0EtConeCorr(computeCorrectedEtCone(l0)).setL0PtConeCorr(computeCorrectedPtCone(l0))
+                .setL1EtConeCorr(computeCorrectedEtCone(l1)).setL1PtConeCorr(computeCorrectedPtCone(l1))
+                .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
         }
     }
   } // for(cr)
@@ -452,7 +472,8 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   bool passSR = false;
   // all the signal regions below require 2L SS
   if( leptons.size() != 2 ) return passSR;
-  if(!susy::sameSign(leptons)) return passSR;
+  bool isEmu = susy::oppositeFlavor(leptons); // hlvf emu special case (accept OS as well)
+  if(!susy::sameSign(leptons) && !isEmu) return passSR;
   SsPassFlags whssFlags = MeasureFakeRate2::passWhSS(leptons,jets,met); // NB this is not the method from SusySelection. Refactor
   susy::wh::Chan ch(SusySelection::getChan(leptons));
   m_ch = SusySelection::getChan(leptons);
@@ -463,6 +484,7 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   /*const*/ swk::DilepVars v(swk::compute2lVars(leptons, met, jets));
   v.l3veto = whssFlags.veto3rdL = SusySelection::passThirdLeptonVeto(leptons[0], leptons[1], lowPtLep, m_debugThisEvent);
   if(CR==sf::CR_SSInc) passSR = susy::sameSign(leptons);
+  else if(CR==sf::CR_emu) passSR = isEmu;
   else {
       bool passCommonCriteria (whssFlags.sameSign && whssFlags.tauVeto && whssFlags.fjveto && whssFlags.bjveto && whssFlags.ge1j);
       if(passCommonCriteria) {
