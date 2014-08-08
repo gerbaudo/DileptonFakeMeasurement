@@ -118,13 +118,13 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
       string filenameMcReal   = tupleFilenameFromHistoFilename(m_fileName, "mcreal_tuple");
       string filenameEmu      = tupleFilenameFromHistoFilename(m_fileName, "emu_tuple");
       struct InitTuple{
-          bool &toggle;
-          InitTuple(bool &b) : toggle(b){}
+          bool all_done;
+          InitTuple() : all_done(true){}
           void operator() (susy::wh::TupleMaker &tm, string fname, string tname) {
               if(tm.init(fname, tname)) cout<<"initialized ntuple file "<<fname<<endl;
-              else { cout<<"cannot initialize ntuple file '"<<fname<<"'"<<endl; toggle = false; }
+              else { cout<<"cannot initialize ntuple file '"<<fname<<"'"<<endl; all_done = false; }
           }
-      } initTuple(m_writeTuple);
+      } initTuple;
       initTuple(m_tupleMakerHfCr,     filenameHfLf,     "HeavyFlavorControlRegion");
       initTuple(m_tupleMakerHfLfSs,   filenameHfLfSs,   "HeavyFlavorSsControlRegion");
       initTuple(m_tupleMakerConv,     filenameConv,     "ConversionControlRegion");
@@ -134,6 +134,7 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
       initTuple(m_tupleMakerMcQcd,    filenameMcQcd,    "HfLfExtractionRegion");
       initTuple(m_tupleMakerMcReal,   filenameMcReal,   "RealExtractionRegion");
       initTuple(m_tupleMakerEmu,      filenameEmu,      "EmuRegion");
+      m_writeTuple = initTuple.all_done;
   }
 }
 /*--------------------------------------------------------------------------------*/
