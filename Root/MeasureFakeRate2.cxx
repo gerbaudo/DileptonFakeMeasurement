@@ -108,15 +108,7 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
   SusySelection::Begin(0);
   initHistos(m_fileName);
   if(m_writeFakeTuple) {
-      string filenameHfLf     = tupleFilenameFromHistoFilename(m_fileName, "hflf_tuple");
-      string filenameHfLfSs   = tupleFilenameFromHistoFilename(m_fileName, "hflfss_tuple");
-      string filenameConv     = tupleFilenameFromHistoFilename(m_fileName, "conv_tuple");
-      string filenameZmmeJets = tupleFilenameFromHistoFilename(m_fileName, "zmmejets_tuple");
-      string filenameSsInc1j  = tupleFilenameFromHistoFilename(m_fileName, "ssinc1j_tuple");
-      string filenameMcConv   = tupleFilenameFromHistoFilename(m_fileName, "mcconv_tuple");
-      string filenameMcQcd    = tupleFilenameFromHistoFilename(m_fileName, "mcqcd_tuple");
-      string filenameMcReal   = tupleFilenameFromHistoFilename(m_fileName, "mcreal_tuple");
-      string filenameEmu      = tupleFilenameFromHistoFilename(m_fileName, "emu_tuple");
+      string (&tffhf)(const std::string&, const std::string&) = MeasureFakeRate2::tupleFilenameFromHistoFilename;
       struct InitTuple{
           bool all_done;
           InitTuple() : all_done(true){}
@@ -125,15 +117,15 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
               else { cout<<"cannot initialize ntuple file '"<<fname<<"'"<<endl; all_done = false; }
           }
       } initTuple;
-      initTuple(m_tupleMakerHfCr,     filenameHfLf,     "HeavyFlavorControlRegion");
-      initTuple(m_tupleMakerHfLfSs,   filenameHfLfSs,   "HeavyFlavorSsControlRegion");
-      initTuple(m_tupleMakerConv,     filenameConv,     "ConversionControlRegion");
-      initTuple(m_tupleMakerZmmeJets, filenameZmmeJets, "ZmmeVetoPlusJetsRegion");
-      initTuple(m_tupleMakerSsInc1j,  filenameSsInc1j,  "SameSign1jetControlRegion");
-      initTuple(m_tupleMakerMcConv,   filenameMcConv,   "ConversionExtractionRegion");
-      initTuple(m_tupleMakerMcQcd,    filenameMcQcd,    "HfLfExtractionRegion");
-      initTuple(m_tupleMakerMcReal,   filenameMcReal,   "RealExtractionRegion");
-      initTuple(m_tupleMakerEmu,      filenameEmu,      "EmuRegion");
+      initTuple(m_tupleMakerHfCr     ,tffhf(m_fileName, "hflf_tuple")     ,"HeavyFlavorControlRegion");
+      initTuple(m_tupleMakerHfLfSs   ,tffhf(m_fileName, "hflfss_tuple")   ,"HeavyFlavorSsControlRegion");
+      initTuple(m_tupleMakerConv     ,tffhf(m_fileName, "conv_tuple")     ,"ConversionControlRegion");
+      initTuple(m_tupleMakerZmmeJets ,tffhf(m_fileName, "zmmejets_tuple") ,"ZmmeVetoPlusJetsRegion");
+      initTuple(m_tupleMakerSsInc1j  ,tffhf(m_fileName, "ssinc1j_tuple")  ,"SameSign1jetControlRegion");
+      initTuple(m_tupleMakerMcConv   ,tffhf(m_fileName, "mcconv_tuple")   ,"ConversionExtractionRegion");
+      initTuple(m_tupleMakerMcQcd    ,tffhf(m_fileName, "mcqcd_tuple")    ,"HfLfExtractionRegion");
+      initTuple(m_tupleMakerMcReal   ,tffhf(m_fileName, "mcreal_tuple")   ,"RealExtractionRegion");
+      initTuple(m_tupleMakerEmu      ,tffhf(m_fileName, "emu_tuple")      ,"EmuRegion");
       m_writeTuple = initTuple.all_done;
   }
 }
@@ -1146,7 +1138,7 @@ void MeasureFakeRate2::resetCounters()
   }// end loop over weight types
 }
 //----------------------------------------------------------
-std::string MeasureFakeRate2::tupleFilenameFromHistoFilename(const std::string &histoFilename, const std::string &suffix) const
+std::string MeasureFakeRate2::tupleFilenameFromHistoFilename(const std::string &histoFilename, const std::string &suffix)// const
 {
     using std::string;
     // heuristic: try to find a tag '_Month_day' and prepend suffix (e.g. 'fake_tuple'); otherwise just append suffix
