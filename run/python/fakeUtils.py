@@ -180,5 +180,6 @@ tupleStemsAndNames = [ # stem filename, treename (see MeasureFakeRate2::Begin)
     ("mcconv"   , "ConversionExtractionRegion"),
     ("mcqcd"    , "HfLfExtractionRegion"),
     ("mcreal"   , "RealExtractionRegion"),
+    ("emu"      , "EmuRegion"),
     ]
 #___________________________________________________________

@@ -55,7 +55,8 @@ Example usage:
 %prog \\
  --verbose  \\
  --tag ${TAG} \\
- --output-dir ./out/fakerate/el_sf_${TAG}
+ --signal-region ssinc1j \\
+ --output-dir ./out/fakerate/el_sf_${TAG} \\
  >& log/fakerate/el_sf_${TAG}.log
 """
 def main():
@@ -63,6 +64,9 @@ def main():
     parser.add_option('-i', '--input-dir', default='./out/fakerate')
     parser.add_option('-o', '--output-dir', default='./out/fake_el_scale_factor', help='dir for plots')
     parser.add_option('-l', '--lepton', default='el', help='either el or mu')
+    parser.add_option('-r', '--region', help='where we want the compositions,'
+                      ' i.e. one of the regions for which we saved the fake nutples'
+                      ' (eg. ssinc1j_tuple*, emu_tuple*')
     parser.add_option('-s', '--syst-fudge', help='scale down main group (el:wjets, mu:bb/cc) to evaluate fraction syst unc')
     parser.add_option('-t', '--tag', help='tag used to select the input files (e.g. Apr_04)')
     parser.add_option('-f', '--fill-histos', action='store_true', default=False, help='force fill (default only if needed)')
@@ -72,15 +76,17 @@ def main():
     outputDir = options.output_dir
     lepton    = options.lepton
     systfudge = options.syst_fudge
+    region    = options.region
     tag       = options.tag
     verbose   = options.verbose
     if not tag : parser.error('tag is a required option')
+    if not region : parser.error('region is a required option')
     if lepton not in ['el', 'mu'] : parser.error("invalid lepton '%s'"%lepton)
     outputDir = outputDir+'/'+lepton # split the output in subdirectories, so we don't overwrite things
 
-    templateInputFilename = "*_ssinc1j_tuple_%(tag)s.root" % {'tag':tag}
+    templateInputFilename = "*_%(region)s_tuple_%(tag)s.root" % {'tag':tag, 'region':region}
     templateOutputFilename =  "%(l)s_composition_histos.root" % {'l':lepton}
-    treeName = 'SameSign1jetControlRegion'
+    treeName = dict(fakeu.tupleStemsAndNames)[region]
     outputFileName = os.path.join(outputDir, templateOutputFilename)
     cacheFileName = outputFileName.replace('.root', '_cache.root')
     doFillHistograms = options.fill_histos or not os.path.exists(cacheFileName)
@@ -102,22 +108,23 @@ def main():
     vars = ['pt', 'eta', 'pt_eta', 'mt']
     groups = samplesPerGroup.keys()
     if lepton=='el' : groups = [g for g in groups if g!='heavyflavor']
+    selections = [region]
     #fill histos
     if doFillHistograms :
-        histosPerGroupPerSource = bookHistosPerSamplePerSource(vars, groups, leptonSources)
+        histosPerGroupPerSource = bookHistosPerSamplePerSource(vars, groups, leptonSources, selections)
         for group in groups:
             isData = isDataSample(group)
             filenames = filenamesPerGroup[group]
             histosThisGroupPerSource = histosPerGroupPerSource[group]
             chain = r.TChain(treeName)
             [chain.Add(fn) for fn in filenames]
-            print "%s : %d entries"%(group, chain.GetEntries())
-            fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, verbose)
+            print "%s : %d entries (%d files)"%(group, chain.GetEntries(), chain.GetListOfFiles().GetEntries())
+            fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, region, verbose)
         writeHistos(cacheFileName, histosPerGroupPerSource, verbose)
     # compute and plot fractions
-    histosPerGroupPerSource = fetchHistos(cacheFileName, histoNamesPerSamplePerSource(vars, groups, leptonSources))
+    histosPerGroupPerSource = fetchHistos(cacheFileName, histoNamesPerSamplePerSource(vars, groups, leptonSources, selections))
     histosCompositions = dict()
-    for sel in allSelections():
+    for sel in selections:
         histosCompositions[sel] = dict()
         for var in vars:
             hs, groups = histosPerGroupPerSource, histosPerGroupPerSource.keys()
@@ -212,10 +219,6 @@ colorsLineSources = fakeu.colorsLineSources()
 markersSources = fakeu.markersSources()
 enum2source = fakeu.enum2source
 
-def allSelections() :
-    return ['ssinc1j']
-# +[srcr+'_'+ll+'_'+nj for srcr in ['sr','cr'] for ll in ['ee','em','mm'] for nj in ['eq1j','ge2j']]
-
 def getSelectionChannelOnly(l0, l1, jets, met):
     nClJets = len(jets) #note to self: these are already central-light jets b/c of passCommonCriteria
     sel = None
@@ -307,8 +310,8 @@ def shiftWithinRange(pt, eta, mt, epsilon=1.0e-3):
     eta = minEta*(1.0+epsilon) if eta<minEta else maxEta*(1.0-epsilon) if eta > maxEta else eta
     mt  = minMt*(1.0+epsilon)  if mt<minMt   else maxMt*(1.0-epsilon)  if mt > maxMt   else mt
     return pt, eta, mt
-def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, verbose=False):
-    "expect histos[group][sel][source][var][loose,tight]"
+def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, selection, verbose=False):
+    "expect histos[sel][source][var][loose,tight]"
     normFactor = 3.2 if group=='heavyflavor' else 1.0 # bb/cc hand-waving normalization factor, see notes 2014-04-17
     nLepFilled = 0
     for event in chain :
@@ -323,7 +326,6 @@ def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, verbose=F
         l1IsFake = l0.source!=sourceReal and not isData
         atLeastOneIsFake = l0IsFake or l1IsFake
         if not atLeastOneIsFake : continue
-        selection = None #getSelectionChannelOnly(l0, l1, jets, met)
         def fillHistosBySource(lep):
             isTight = lep.isTight
             source = lep.source
@@ -335,17 +337,12 @@ def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, verbose=F
             def fill():
                 pt, eta, mt = lep.p4.Pt(), abs(lep.p4.Eta()), computeMt(lep.p4, met.p4)
                 pt, eta, mt = shiftWithinRange(pt, eta, mt) # avoid loosing entries due to over/underflow
-                histosThisGroupPerSource['ssinc1j'][leptonSource]['mt'    ]['loose'].Fill(mt,  weight)
-                histosThisGroupPerSource['ssinc1j'][leptonSource]['pt'    ]['loose'].Fill(pt,  weight)
-                histosThisGroupPerSource['ssinc1j'][leptonSource]['eta'   ]['loose'].Fill(eta, weight)
-                histosThisGroupPerSource['ssinc1j'][leptonSource]['pt_eta']['loose'].Fill(pt, eta, weight)
-                if selection:
-                    histosThisGroupPerSource[selection][leptonSource]['mt'    ]['loose'].Fill(mt,  weight)
-                    histosThisGroupPerSource[selection][leptonSource]['pt'    ]['loose'].Fill(pt,  weight)
-                    histosThisGroupPerSource[selection][leptonSource]['eta'   ]['loose'].Fill(eta, weight)
-                    histosThisGroupPerSource[selection][leptonSource]['pt_eta']['loose'].Fill(pt, eta, weight)
+                histosThisGroupPerSource[selection][leptonSource]['mt'    ]['loose'].Fill(mt,  weight)
+                histosThisGroupPerSource[selection][leptonSource]['pt'    ]['loose'].Fill(pt,  weight)
+                histosThisGroupPerSource[selection][leptonSource]['eta'   ]['loose'].Fill(eta, weight)
+                histosThisGroupPerSource[selection][leptonSource]['pt_eta']['loose'].Fill(pt, eta, weight)
             filled = False
-            if isRightLep and sourceIsKnown and isFake and lep.p4.Pt()>20.0:
+            if isRightLep and sourceIsKnown and isFake: # DG-2014-08-08: pt cut still needed? and lep.p4.Pt()>20.0:
                 fill()
                 filled = True
             return filled
@@ -356,7 +353,7 @@ def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, verbose=F
 
 def histoNamePerSamplePerSource(var, group, sel, source, tightOrLoose):
     return 'h_'+var+'_'+group+'_'+sel+'_'+source+'_'+tightOrLoose
-def bookHistosPerSamplePerSource(variables, samples, sources):
+def bookHistosPerSamplePerSource(variables, samples, sources, selections):
     "book a dict of histograms with keys [group][sel][source][var][tight, loose]"
     def histo(variable, hname):
         h = None
@@ -383,7 +380,7 @@ def bookHistosPerSamplePerSource(variables, samples, sources):
                                         })
                                       for v in variables]))
                                for s in leptonSources]))
-                        for sel in allSelections()]))
+                        for sel in selections]))
                  for g in samples])
 
 def buildCompositionsAddingGroups(histos={}):
@@ -406,8 +403,8 @@ def extractName(dictOrHist):
     "input must be either a dict or something with 'GetName'"
     isDict = type(dictOrHist) is dict
     return dict([(k, extractName(v)) for k,v in dictOrHist.iteritems()]) if isDict else dictOrHist.GetName()
-def histoNamesPerSamplePerSource(variables, samples, leptonSources) :
-    return extractName(bookHistosPerSamplePerSource(variables, samples, leptonSources))
+def histoNamesPerSamplePerSource(variables, samples, leptonSources, selections) :
+    return extractName(bookHistosPerSamplePerSource(variables, samples, leptonSources, selections))
 
 def writeHistos(outputFileName='', histosPerSamplePerSource={}, verbose=False):
     rootUtils.writeObjectsToFile(outputFileName, histosPerSamplePerSource, verbose)
