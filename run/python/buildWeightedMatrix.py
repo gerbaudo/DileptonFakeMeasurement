@@ -49,7 +49,7 @@ import fakeUtils as fakeu
 
 import matplotlib as mpl
 mpl.use('Agg') # render plots without X
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import SampleUtils
 from compute_fake_el_scale_factor import histoname_sf_vs_eta
@@ -481,39 +481,6 @@ def buildSystematics(inputFileTotMc, outputfile, verbose=False) :
               el_region, mu_region, el_eta, mu_eta ]
     outputfile.cd()
     for o in  allSys : o.Write()
-def plotFractions(fractDict={}, outplotdir='./', prefix='') :
-    """
-    input : fractDict[sr][lep_type][sample] = float
-    """
-    outplotdir = outplotdir if outplotdir.endswith('/') else outplotdir+'/'
-    #def isRegionToBePlotted(r) : return r in selectionRegions()+extractionRegions()
-    regions  = sorted(filter(isRegionToBePlotted, fractDict.keys()))
-    leptypes = sorted(first(fractDict).keys())
-    samples  = sorted(first(first(fractDict)).keys())
-    ind = np.arange(len(regions))
-    width = 0.5
-    colors = dict(zip(samples, ['b','g','r','c','m','y']))
-    for lt in leptypes :
-        fracPerSample = dict((s, np.array([fractDict[r][lt][s] for r in regions])) for s in samples)
-        below = np.zeros(len(regions))
-        plots = []
-        fig, ax = plt.subplots()
-        for s, frac in fracPerSample.iteritems() :
-            plots.append(plt.bar(ind, frac, width, color=colors[s], bottom=below))
-            below = below + frac
-        plt.ylabel('fractions')
-        plt.title(prefix+' '+lt+' compositions')
-        plt.xticks(ind+width/2., regions)
-        plt.ylim((0.0, 1.0))
-        plt.grid(True)
-        plt.yticks(np.arange(0.0, 1.0, 0.2))
-        labels = {'heavyflavor' : 'bb/cc', 'diboson' : 'VV', 'ttbar':'tt'}
-        labels = [labels[s] if s in labels else s for s in samples]
-        leg = plt.legend([p[0] for p in plots], labels, bbox_to_anchor=(1.135, 1.05))
-        leg.get_frame().set_alpha(0.5)
-        fig.autofmt_xdate(bottom=0.25, rotation=90, ha='center')
-        fig.savefig(outplotdir+prefix+'_'+lt+'.png')
-        fig.savefig(outplotdir+prefix+'_'+lt+'.eps')
 
 def fetchCompositions(inputSfFile=None, templateHistoName="%(proc)s", processes=[]) :
     histos = dict((p, inputSfFile.Get(templateHistoName%{'proc':p})) for p in processes)
