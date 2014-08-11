@@ -71,6 +71,7 @@ def main():
     parser.add_option('-i', '--input-dir', default='./out/fakerate')
     parser.add_option('-c', '--comp-histos', help='output from compute_fake_compositions.py')
     parser.add_option('-e', '--eff-histos', default=[], action='append', help='output files from compute_eff_from_ntuple.py')
+    parser.add_option('-r', '--region', help='where we have the compositions, and want the fake matrix, e.g. ssinc1j, emu')
     parser.add_option('-s', '--input-el-sf', default=[], action='append', help='electron bin-by-bin scale factors (from compute_fake_el_scale_factor)')
     parser.add_option('-o', '--output-dir', default='./out/fake_weighted_average', help='dir for plots')
     parser.add_option('-l', '--lepton', default='el', help='either el or mu')
@@ -81,6 +82,7 @@ def main():
     inputDir  = options.input_dir
     compFname = options.comp_histos
     effFnames = options.eff_histos
+    region    = options.region
     sfFnames  = options.input_el_sf
     outputDir = options.output_dir
     lepton    = options.lepton
@@ -88,6 +90,7 @@ def main():
     verbose   = options.verbose
 #     if not tag : parser.error('tag is a required option')
     if lepton not in ['el', 'mu'] : parser.error("invalid lepton '%s'"%lepton)
+    if region not in ['emu', 'ssinc1j'] : parser.error("invalid region '%s'"%region)
     if not compFname or not os.path.exists(compFname) : parser.error("invalid composition file '%s'"%compFname)
     if not effFnames or not all(os.path.exists(f) for f in effFnames) : parser.error("invalid efficiency file '%s'"%str(effFnames))
     if not sfFnames  or not all(os.path.exists(f) for f in sfFnames) : parser.error("invalid electron sf file(s) %s"%str(sfFnames))
@@ -98,9 +101,10 @@ def main():
         print "options parsed:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
     mkdirIfNeeded(outputDir)
     # collect inputs
+    regions = [region, ]
     groups=['diboson', 'heavyflavor', 'ttbar', 'wjets', 'zjets']
     if lepton=='el' : groups = filter(lambda _ : _!='heavyflavor', groups) # note this must be in sync with compute_fake_compositions; TODO: implement a way to get the groups from the available histos
-    compositions = fetchCompositionHistos(compFname, lepton, groups, verbose) # [var][group][reg][orig], note here orig=[conv,heavy,light]
+    compositions = fetchCompositionHistos(compFname, lepton, groups, regions, verbose) # [var][group][reg][orig], note here orig=[conv,heavy,light]
     # pprint.pprint(compositions)
     efficiencies = fetchEffienciesHistos(effFnames, lepton, groups, verbose) # [var][group][orig], note here orig=[conv,heavy,light,qcd]
     # pprint.pprint(efficiencies)
@@ -182,19 +186,12 @@ colorsLineSources = fakeu.colorsLineSources()
 markersSources = fakeu.markersSources()
 enum2source = fakeu.enum2source
 
-def allSelections() :
-    return ['ssinc1j']+[srcr+'_'+ll+'_'+nj
-                        for srcr in ['sr','cr'] for ll in ['ee','em','mm'] for nj in ['eq1j','ge2j']]
 def histoname_electron_sf_vs_eta() : return 'sf_el_vs_eta'
 def histoname_electron_sf_vs_pt() : return 'sf_el_vs_pt'
 
 
-def fetchCompositionHistos(filename, lepton, groups=[], verbose=False):
+def fetchCompositionHistos(filename, lepton, groups=[], regions=[], verbose=False):
     template = "h_%(var)s_%(group)s_%(region)s_%(origin)s_loose"
-    regions = ['ssinc1j'] # inclusive region
-    # these are the sr/cr for which we have some electron entries
-    #     regions += ['cr_ee_eq1j', 'cr_ee_ge2j', 'cr_em_ge2j',
-    #                 'sr_ee_eq1j', 'sr_ee_ge2j', 'sr_em_ge2j', ]
     origins = ['heavy', 'light']
     origins += ['conv'] if lepton=='el' else []
     #origins += ['real'] # real later, for now just worry about the hf/lf splitting
