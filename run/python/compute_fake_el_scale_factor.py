@@ -56,6 +56,7 @@ def main():
     parser.add_option('-l', '--lepton', default='el', help='either el or mu')
     parser.add_option('-r', '--region', help='one of the regions for which we saved the fake ntuples')
     parser.add_option('-t', '--tag', help='tag used to select the input files (e.g. Apr_04)')
+    parser.add_option('-T', '--tight-def', help='on-the-fly tight def, one of defs in fakeUtils.py: fakeu.lepIsTight_std, etc.')
     parser.add_option('-f', '--fill-histos', action='store_true', default=False, help='force fill (default only if needed)')
     parser.add_option('-v', '--verbose', action='store_true', default=False)
     (options, args) = parser.parse_args()
@@ -79,7 +80,8 @@ def main():
     outputFileName = os.path.join(outputDir, templateOutputFilename)
     cacheFileName = outputFileName.replace('.root', '_'+region+'_cache.root')
     doFillHistograms = options.fill_histos or not os.path.exists(cacheFileName)
-    optionsToPrint = ['inputDir', 'outputDir', 'region', 'tag', 'doFillHistograms']
+    onthefly_tight_def = eval(options.tight_def) if options.tight_def else None # eval will take care of aborting on typos
+    optionsToPrint = ['inputDir', 'outputDir', 'region', 'tag', 'doFillHistograms', 'onthefly_tight_def']
     if verbose :
         print "working from %s"%os.getcwd()
         print "being called as : %s"%' '.join(os.sys.argv)
@@ -162,7 +164,7 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
         tag, probe, met = event.l0, event.l1, event.met
         isSameSign = tag.charge*probe.charge > 0.
         isRightLep = probe.isEl if lepton=='el' else probe.isMu if lepton=='mu' else False
-        isTight = probe.isTight
+        isTight = onthefly_tight_def(probe) if onthefly_tight_def else probe.isTight
         probeSource = probe.source
         sourceReal = 3 # see FakeLeptonSources.h
         isReal = probeSource==sourceReal and not isData
