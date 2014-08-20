@@ -60,6 +60,7 @@ def main():
     parser.add_option('-m', '--mode', help='real, conv, hflf')
     parser.add_option('-t', '--tag', help='tag used to select the input files (e.g. Apr_04)')
     parser.add_option('-f', '--fill-histos', action='store_true', default=False, help='force fill (default only if needed)')
+    parser.add_option('-T', '--tight-def', help='on-the-fly tight def, one of defs in fakeUtils.py: fakeu.lepIsTight_std, etc.')
     parser.add_option('-v', '--verbose', action='store_true', default=False)
     (options, args) = parser.parse_args()
     inputDir  = options.input_dir
@@ -82,13 +83,15 @@ def main():
     outputFileName = os.path.join(outputDir, templateOutputFilename)
     cacheFileName = outputFileName.replace('.root', '_'+mode+'_cache.root')
     doFillHistograms = options.fill_histos or not os.path.exists(cacheFileName)
-    optionsToPrint = ['inputDir', 'outputDir', 'mode', 'tag', 'doFillHistograms', 'cacheFileName']
+    onthefly_tight_def = eval(options.tight_def) if options.tight_def else None # eval will take care of aborting on typos
+    optionsToPrint = ['inputDir', 'outputDir', 'mode', 'tag', 'doFillHistograms', 'cacheFileName', 'onthefly_tight_def']
     if verbose :
         print "working from %s"%os.getcwd()
         print "being called as : %s"%' '.join(os.sys.argv)
         print "options parsed:\n"+'\n'.join(["%s : %s"%(o, eval(o)) for o in optionsToPrint])
     # collect inputs
     print 'input filenames: ',os.path.join(inputDir, templateInputFilename)
+
     tupleFilenames = glob.glob(os.path.join(inputDir, templateInputFilename))
     samples = setSameGroupForAllData(fastSamplesFromFilenames(tupleFilenames, verbose))
     samplesPerGroup = collections.defaultdict(list)
@@ -175,7 +178,7 @@ def fillHistos(chain, histosPerSource, histosPerSourceAnygroup, lepton, mode, ve
         weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
         l0, l1 = event.l0, event.l1
         def fillHistosBySource(lep):
-            isTight = lep.isTight
+            isTight = onthefly_tight_def(lep) if onthefly_tight_def else lep.isTight
             source = enum2source(lep)
             isRightLep = lep.isEl if lepton=='el' else lep.isMu
             isRightSource = (mode=='real' and source=='real' or
