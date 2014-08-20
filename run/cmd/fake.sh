@@ -7,7 +7,10 @@
 # davide.gerbaudo@gmail.com
 # 2014-08-08
 
-SCRIPT_NAME=$0
+readonly SCRIPT_NAME=$(basename $0)
+# see http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+readonly PROGDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly SIGNAL_REGION="emu" # depends on what you are working; probably 'emu', 'ssinc1j', ...
 
 function help {
 	echo -e "These are the steps to produce the fake matrix file"
@@ -44,7 +47,7 @@ function compute_compositions {
     local FILL="" # "-f" # force fill
     local IN_DIR="out/fakerate/"
     local OUT_DIR="out/fake/compositions_${TAG}"
-    local REGION="emu" # depends on what you are working; probably 'emu', 'ssinc1j', ...
+    local REGION="${SIGNAL_REGION}"
     local OPT="" # "--syst-fudge" # this and the one below if you are doing fake composition variation
     #local OUT_DIR=${OUT_DIR}_syst_shift
     mkdir -p ${OUT_DIR}
@@ -59,7 +62,7 @@ function compute_compositions {
 function compute_scalefactors {
     local IN_DIR="out/fakerate/"
     local OUT_DIR="out/fake/scalefactors_${TAG}"
-    local REGION="emu" # depends on what you are working; probably 'emu', 'ssinc1j', ...
+    local REGION="${SIGNAL_REGION}"
     local COMMON_OPT="${OPT} -v --tag ${TAG} --input-dir ${IN_DIR} --output-dir ${OUT_DIR} --region ${REGION}"
     mkdir -p ${OUT_DIR}
     # todo: implement real lepton case
@@ -78,7 +81,7 @@ function build_matrix {
     local IN_EFFICICENCY_DIR="out/fake/efficiencies_${TAG}"
     local IN_SCALEFACTOR_DIR="out/fake/scalefactors_${TAG}"
     local OUT_DIR="out/fake/weigtedmatrix_${TAG}"
-    local REGION="emu" # depends on what you are working; probably 'emu', 'ssinc1j', ...
+    local REGION="${SIGNAL_REGION}"
     local COMMON_OPT="${OPT} -v --tag ${TAG} --output-dir ${OUT_DIR} --region ${REGION}"
 
     mkdir -p ${OUT_DIR}
