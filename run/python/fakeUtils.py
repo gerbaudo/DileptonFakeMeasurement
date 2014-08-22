@@ -113,6 +113,32 @@ def lepIsTight_tight (l): return muonIsTight_tight (l) if l.isMu else elecIsTigh
 def lepIsTight_minden(l): return muonIsTight_minden(l) if l.isMu else elecIsTight_minden(l)
 def lepIsTight_wh    (l): return muonIsTight_wh    (l) if l.isMu else elecIsTight_wh    (l)
 
+
+# isolation from Liz (see email 2014-06-23, subj 'Fake rate for SS EWK')
+def lepIsTight_05(l):
+    return (muonIsFromPv(l) and
+            muonIsIsolated(l, denominator_wh(l), etConeThres=0.14, ptConeThres=0.06)
+            if l.isMu else
+            l.isTightPp and
+            elecIsFromPv(l) and
+            elecIsIsolated(l, denominator_wh(l), etConeThres=0.13, ptConeThres=0.07))
+def lepIsTight_06(l):
+    return (muonIsFromPv(l) and
+            muonIsIsolated(l, denominator_wh(l), etConeThres=0.12, ptConeThres=0.06)
+            if l.isMu else
+            l.isTightPp and
+            elecIsFromPv(l) and
+            elecIsIsolated(l, denominator_wh(l), etConeThres=0.12, ptConeThres=0.06))
+def lepIsTight_07(l):
+    return (muonIsFromPv(l) and
+            muonIsIsolated(l, denominator_wh(l), etConeThres=0.11, ptConeThres=0.05)
+            if l.isMu else
+            l.isTightPp and
+            elecIsFromPv(l) and
+            elecIsIsolated(l, denominator_wh(l), etConeThres=0.11, ptConeThres=0.05))
+
+
+
 def denominator_wh (l) :
     pt = l.p4.Pt()
     return 1.0/min([pt, 60.0]) if pt>0.0 else None

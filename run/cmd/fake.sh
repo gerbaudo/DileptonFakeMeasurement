@@ -32,6 +32,7 @@ function compute_efficiencies {
     local IN_DIR="out/fakerate/"
     local OUT_DIR="out/fake/efficiencies_${TAG}"
     local COMMON_OPT="--verbose --tag ${TAG} --input-dir ${IN_DIR} --output-dir ${OUT_DIR}"
+    COMMON_OPT+="${COMMON_OPT} --tight-def fakeu.lepIsTight_05"
     mkdir -p ${OUT_DIR}
     echo -e "\n--- electron --- `date +%F-%T`\n"
     time python/compute_eff_from_ntuple.py ${COMMON_OPT} --lepton el --mode real  2>&1  | tee ${OUT_DIR}/el_real_${TAG}.txt
