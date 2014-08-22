@@ -13,6 +13,7 @@ import numpy as np
 import optparse
 import os
 import pprint
+import time
 from utils import (dictSum
                    ,first
                    ,mkdirIfNeeded
@@ -110,6 +111,8 @@ def main():
                        }[mode]
     #fill histos
     if doFillHistograms :
+        start_time = time.clock()
+        num_processed_entries = 0
         histosPerGroupPerSource = bookHistosPerSamplePerSource(vars, groups, sourcesThisMode, mode=mode)
         for group in groups:
             filenames = filenamesPerGroup[group]
@@ -119,8 +122,16 @@ def main():
             chain = r.TChain(treeName)
             [chain.Add(fn) for fn in filenames]
             if verbose: print "%s : %d entries"%(group, chain.GetEntries())
-            fillHistos(chain, histosThisGroupPerSource, histosAnyGroupPerSource, lepton, mode, verbose)
+            num_processed_entries += fillHistos(chain, histosThisGroupPerSource, histosAnyGroupPerSource,
+                                                lepton, mode,
+                                                onthefly_tight_def=onthefly_tight_def, verbose=verbose)
         writeHistos(cacheFileName, histosPerGroupPerSource, verbose)
+        end_time = time.clock()
+        delta_time = end_time - start_time
+        if verbose:
+            print ("processed {0:d} entries ".format(num_processed_entries)
+                   +"in "+("{0:d}min ".format(int(delta_time/60)) if delta_time>60 else "{0:.1f}s ".format(delta_time))
+                   +"({0:.1f}kHz)".format(num_processed_entries/delta_time))
     # compute efficiencies
     histosPerGroupPerSource = fetchHistos(cacheFileName, histoNamesPerSamplePerSource(vars, groups, sourcesThisMode, mode), verbose)
     effs = computeEfficiencies(histosPerGroupPerSource) # still [var][gr][source][l/t]
@@ -163,7 +174,8 @@ colorsLineSources = fakeu.colorsLineSources()
 markersSources = fakeu.markersSources()
 enum2source = fakeu.enum2source
 
-def fillHistos(chain, histosPerSource, histosPerSourceAnygroup, lepton, mode, verbose=False):
+def fillHistos(chain, histosPerSource, histosPerSourceAnygroup, lepton, mode, onthefly_tight_def=None, verbose=False):
+    "fill the histograms, returns the number of events processed"
     class Counters: # scope trick (otherwise unavailable within nested func
         nLoose, nTight = 0, 0
         totWeightLoose, totWeightTight = 0.0, 0.0
@@ -173,11 +185,15 @@ def fillHistos(chain, histosPerSource, histosPerSourceAnygroup, lepton, mode, ve
     counters = Counters()
     addTlv = kin.addTlv
     hspsAnygroup = histosPerSourceAnygroup
+    if verbose : print "about to loop on {0} entries".format(chain.GetEntries())
+    num_processed_entries = 0
     for iEvent, event in enumerate(chain) :
+        num_processed_entries += 1
         pars = event.pars
         weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
         l0, l1 = event.l0, event.l1
         def fillHistosBySource(lep):
+            kin.addTlv(lep)
             isTight = onthefly_tight_def(lep) if onthefly_tight_def else lep.isTight
             source = enum2source(lep)
             isRightLep = lep.isEl if lepton=='el' else lep.isMu
@@ -208,6 +224,7 @@ def fillHistos(chain, histosPerSource, histosPerSourceAnygroup, lepton, mode, ve
         fillHistosBySource(l0)
         fillHistosBySource(l1)
     if verbose : print counters.str()
+    return num_processed_entries
 
 def histoNamePerSamplePerSource(var, sample, leptonSource, tightOrLoose, mode):
     return 'h_'+var+'_'+sample+'_'+leptonSource+'_'+tightOrLoose+'_'+mode
