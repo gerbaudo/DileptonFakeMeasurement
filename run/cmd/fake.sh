@@ -10,7 +10,7 @@
 readonly SCRIPT_NAME=$(basename $0)
 # see http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 readonly PROGDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-readonly SIGNAL_REGION="emu" # depends on what you are working; probably 'emu', 'ssinc1j', ...
+readonly SIGNAL_REGION="ssinc1j" # depends on what you are working; probably 'emu', 'ssinc1j', ...
 
 function help {
 	echo -e "These are the steps to produce the fake matrix file"
@@ -52,7 +52,7 @@ function compute_compositions {
     local OPT="" # "--syst-fudge" # this and the one below if you are doing fake composition variation
     #local OUT_DIR=${OUT_DIR}_syst_shift
     mkdir -p ${OUT_DIR}
-    local COMMON_OPT="${F} ${OPT} -v --tag ${TAG} --region ${REGION} --input-dir ${IN_DIR} --output-dir ${OUT_DIR}"
+    local COMMON_OPT="${FILL} ${OPT} -v --tag ${TAG} --region ${REGION} --input-dir ${IN_DIR} --output-dir ${OUT_DIR}"
     echo -e "\n--- electron --- `date +%F-%T`\n"
     time python/compute_fake_compositions.py ${COMMON_OPT} --lepton el 2>&1 | tee ${OUT_DIR}/el_${TAG}.txt
     echo -e "\n--- muon --- `date +%F-%T`\n"
@@ -65,6 +65,7 @@ function compute_scalefactors {
     local OUT_DIR="out/fake/scalefactors_${TAG}"
     local REGION="${SIGNAL_REGION}"
     local COMMON_OPT="${OPT} -v --tag ${TAG} --input-dir ${IN_DIR} --output-dir ${OUT_DIR} --region ${REGION}"
+    COMMON_OPT+="${COMMON_OPT} --tight-def fakeu.lepIsTight_05"
     mkdir -p ${OUT_DIR}
     # todo: implement real lepton case
     echo -e "\n--- electron --- `date +%F-%T`\n"
