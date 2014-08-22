@@ -20,6 +20,7 @@ import numpy as np
 import optparse
 import os
 import pprint
+import time
 from utils import (dictSum
                    ,first
                    ,mkdirIfNeeded
@@ -111,6 +112,8 @@ def main():
     selections = [region]
     #fill histos
     if doFillHistograms :
+        start_time = time.clock()
+        num_processed_entries = 0
         histosPerGroupPerSource = bookHistosPerSamplePerSource(vars, groups, leptonSources, selections)
         for group in groups:
             isData = isDataSample(group)
@@ -119,8 +122,16 @@ def main():
             chain = r.TChain(treeName)
             [chain.Add(fn) for fn in filenames]
             print "%s : %d entries (%d files)"%(group, chain.GetEntries(), chain.GetListOfFiles().GetEntries())
-            fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, region, verbose)
+            num_processed_entries += fillHistos(chain, histosThisGroupPerSource,
+                                                isData, lepton, group, region, verbose)
         writeHistos(cacheFileName, histosPerGroupPerSource, verbose)
+        end_time = time.clock()
+        delta_time = end_time - start_time
+        if verbose:
+            print ("processed {0:d} entries ".format(num_processed_entries)
+                   +"in "+("{0:d} min ".format(int(delta_time/60)) if delta_time>60 else
+                           "{0:.1f} s ".format(delta_time))
+                   +"({0:.1f} kHz)".format(num_processed_entries/delta_time))
     # compute and plot fractions
     histosPerGroupPerSource = fetchHistos(cacheFileName, histoNamesPerSamplePerSource(vars, groups, leptonSources, selections))
     histosCompositions = dict()
@@ -314,7 +325,9 @@ def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, selection
     "expect histos[sel][source][var][loose,tight]"
     normFactor = 3.2 if group=='heavyflavor' else 1.0 # bb/cc hand-waving normalization factor, see notes 2014-04-17
     nLepFilled = 0
+    num_processed_entries = 0
     for event in chain :
+        num_processed_entries += 1
         pars = event.pars
         weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
         weight = weight*normFactor
@@ -348,8 +361,8 @@ def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, selection
             return filled
         if fillHistosBySource(l0) : nLepFilled += 1
         if fillHistosBySource(l1) : nLepFilled += 1
-    if verbose:
-        print "filled histos for %d leptons"%nLepFilled
+    if verbose : print "filled histos for %d leptons"%nLepFilled
+    return num_processed_entries
 
 def histoNamePerSamplePerSource(var, group, sel, source, tightOrLoose):
     return 'h_'+var+'_'+group+'_'+sel+'_'+source+'_'+tightOrLoose

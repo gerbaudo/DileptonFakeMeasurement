@@ -13,6 +13,7 @@ import numpy as np
 import optparse
 import os
 import pprint
+import time
 from utils import (dictSum
                    ,first
                    ,mkdirIfNeeded
@@ -37,7 +38,7 @@ from SampleUtils import (fastSamplesFromFilenames
                          ,isBkgSample
                          ,isDataSample)
 import SampleUtils
-from kin import computeMt
+import kin
 import fakeUtils as fakeu
 import utils
 
@@ -100,6 +101,8 @@ def main():
     groups = samplesPerGroup.keys()
     #fill histos
     if doFillHistograms :
+        start_time = time.clock()
+        num_processed_entries = 0
         histosPerGroup = bookHistos(vars, groups, region=region)
         histosPerSource = bookHistosPerSource(vars, leptonSources, region=region)
         histosPerGroupPerSource = bookHistosPerSamplePerSource(vars, groups, leptonSources, region=region)
@@ -110,10 +113,19 @@ def main():
             histosThisGroupPerSource = dict((v, histosPerGroupPerSource[v][group]) for v in histosPerGroupPerSource.keys())
             chain = r.TChain(treeName)
             [chain.Add(fn) for fn in filenames]
-            print "%s : %d entries"%(group, chain.GetEntries())
-            fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource,
-                       lepton, group, region, verbose)
+            if verbose: print "%s : %d entries"%(group, chain.GetEntries())
+            num_processed_entries += fillHistos(chain, histosThisGroup, histosPerSource,
+                                                histosThisGroupPerSource,
+                                                lepton, group, region,
+                                                onthefly_tight_def=onthefly_tight_def, verbose=verbose)
         writeHistos(cacheFileName, histosPerGroup, histosPerSource, histosPerGroupPerSource, verbose)
+        end_time = time.clock()
+        delta_time = end_time - start_time
+        if verbose:
+            print ("processed {0:d} entries ".format(num_processed_entries)
+                   +"in "+("{0:d} min ".format(int(delta_time/60)) if delta_time>60 else
+                           "{0:.1f} s ".format(delta_time))
+                   +"({0:.1f} kHz)".format(num_processed_entries/delta_time))
     # compute scale factors
     histosPerGroup = fetchHistos(cacheFileName, histoNames(vars, groups, region), verbose)
     histosPerSource = fetchHistos(cacheFileName, histoNamesPerSource(vars, leptonSources, region), verbose)
@@ -147,21 +159,24 @@ def histoname_sf_vs_eta(l) : return 'sf_'+l+'_vs_eta'
 def histoname_sf_vs_pt (l) : return 'sf_'+l+'_vs_pt'
 
 def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource,
-               lepton, group, region, verbose=False):
+               lepton, group, region, onthefly_tight_def=None, verbose=False):
     nLoose, nTight = 0, 0
     totWeightLoose, totWeightTight = 0.0, 0.0
     normFactor = 1.0 if group=='heavyflavor' else 1.0 # bb/cc hand-waving normalization factor, see notes 2014-04-17
+    addTlv, computeMt = kin.addTlv, kin.computeMt
     isData = isDataSample(group)
     isHflf = region=='hflf'
     isConversion = region=='conv'
     if group=='heavyflavor':
         if lepton=='el' and not isConversion : normFactor = 1.6
         if lepton=='mu' :                      normFactor = 0.87
+    num_processed_entries = 0
     for iEvent, event in enumerate(chain) :
+        num_processed_entries += 1
         pars = event.pars
         weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
         weight = weight*normFactor
-        tag, probe, met = event.l0, event.l1, event.met
+        tag, probe, met = addTlv(event.l0), addTlv(event.l1), addTlv(event.met)
         isSameSign = tag.charge*probe.charge > 0.
         isRightLep = probe.isEl if lepton=='el' else probe.isMu if lepton=='mu' else False
         isTight = onthefly_tight_def(probe) if onthefly_tight_def else probe.isTight
@@ -223,6 +238,7 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
     if verbose:
         counterNames = ['nLoose', 'nTight', 'totWeightLoose', 'totWeightTight']
         print ', '.join(["%s : %.1f"%(c, eval(c)) for c in counterNames])
+    return num_processed_entries
 
 def histoNamePerSample(var, sample, tightOrLoose, region) : return 'h_'+var+'_'+sample+'_'+tightOrLoose+'_'+region
 def histoNamePerSource(var, leptonSource, tightOrLoose, region) : return 'h_'+var+'_'+leptonSource+'_'+tightOrLoose+'_'+region

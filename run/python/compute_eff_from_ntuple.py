@@ -130,8 +130,9 @@ def main():
         delta_time = end_time - start_time
         if verbose:
             print ("processed {0:d} entries ".format(num_processed_entries)
-                   +"in "+("{0:d}min ".format(int(delta_time/60)) if delta_time>60 else "{0:.1f}s ".format(delta_time))
-                   +"({0:.1f}kHz)".format(num_processed_entries/delta_time))
+                   +"in "+("{0:d} min ".format(int(delta_time/60)) if delta_time>60 else
+                           "{0:.1f} s ".format(delta_time))
+                   +"({0:.1f} kHz)".format(num_processed_entries/delta_time))
     # compute efficiencies
     histosPerGroupPerSource = fetchHistos(cacheFileName, histoNamesPerSamplePerSource(vars, groups, sourcesThisMode, mode), verbose)
     effs = computeEfficiencies(histosPerGroupPerSource) # still [var][gr][source][l/t]
@@ -193,7 +194,7 @@ def fillHistos(chain, histosPerSource, histosPerSourceAnygroup, lepton, mode, on
         weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
         l0, l1 = event.l0, event.l1
         def fillHistosBySource(lep):
-            kin.addTlv(lep)
+            lep = addTlv(lep)
             isTight = onthefly_tight_def(lep) if onthefly_tight_def else lep.isTight
             source = enum2source(lep)
             isRightLep = lep.isEl if lepton=='el' else lep.isMu
