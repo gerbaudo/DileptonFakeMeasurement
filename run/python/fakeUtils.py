@@ -108,10 +108,10 @@ def muonIsTight_tight (l): return muonIsFromPv(l) and muonIsIsolated(l, denomina
 def muonIsTight_minden(l): return muonIsFromPv(l) and muonIsIsolated(l, denominator_wh(l),  etConeThres=None, ptConeThres=0.12)
 def muonIsTight_wh    (l): return muonIsFromPv(l) and muonIsIsolated(l, denominator_wh (l), etConeThres=0.14, ptConeThres=0.06)
 
-def lepIsTight_std   (l): return elecIsTight_std   (l) if l.isEle else muonIsTight_std   (l)
-def lepIsTight_tight (l): return elecIsTight_tight (l) if l.isEle else muonIsTight_tight (l)
-def lepIsTight_minden(l): return elecIsTight_minden(l) if l.isEle else muonIsTight_minden(l)
-def lepIsTight_wh    (l): return elecIsTight_wh    (l) if l.isEle else muonIsTight_wh    (l)
+def lepIsTight_std   (l): return muonIsTight_std   (l) if l.isMu else elecIsTight_std   (l)
+def lepIsTight_tight (l): return muonIsTight_tight (l) if l.isMu else elecIsTight_tight (l)
+def lepIsTight_minden(l): return muonIsTight_minden(l) if l.isMu else elecIsTight_minden(l)
+def lepIsTight_wh    (l): return muonIsTight_wh    (l) if l.isMu else elecIsTight_wh    (l)
 
 def denominator_wh (l) :
     pt = l.p4.Pt()
