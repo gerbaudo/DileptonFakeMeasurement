@@ -71,7 +71,7 @@ def main():
     parser.add_option('-c', '--comp-histos', help='output from compute_fake_compositions.py')
     parser.add_option('-e', '--eff-histos', default=[], action='append', help='output files from compute_eff_from_ntuple.py')
     parser.add_option('-r', '--region', help='where we have the compositions, and want the fake matrix, e.g. ssinc1j, emu')
-    parser.add_option('-s', '--input-el-sf', default=[], action='append', help='electron bin-by-bin scale factors (from compute_fake_el_scale_factor)')
+    parser.add_option('-s', '--scale-factors', default=[], action='append', help='bin-by-bin data/mc from compute_fake_scale_factor')
     parser.add_option('-o', '--output-dir', default='./out/fake_weighted_average', help='dir for plots')
     parser.add_option('-l', '--lepton', default='el', help='either el or mu')
     parser.add_option('-f', '--fill-histos', action='store_true', default=False, help='force fill (default only if needed)')
@@ -81,7 +81,7 @@ def main():
     compFname = options.comp_histos
     effFnames = options.eff_histos
     region    = options.region
-    sfFnames  = options.input_el_sf
+    sfFnames  = options.scale_factors
     outputDir = options.output_dir
     lepton    = options.lepton
     verbose   = options.verbose

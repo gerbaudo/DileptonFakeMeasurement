@@ -82,6 +82,7 @@ function build_matrix {
     local IN_COMPOSITION_DIR="out/fake/compositions_${TAG}"
     local IN_EFFICICENCY_DIR="out/fake/efficiencies_${TAG}"
     local IN_SCALEFACTOR_DIR="out/fake/scalefactors_${TAG}"
+out/fake/scalefactors_Jul_25_tight_06/hflf/mu/
     local OUT_DIR="out/fake/weigtedmatrix_${TAG}"
     local REGION="${SIGNAL_REGION}"
     local COMMON_OPT="${OPT} -v --tag ${TAG} --output-dir ${OUT_DIR} --region ${REGION}"
@@ -90,20 +91,20 @@ function build_matrix {
     python/build_fake_matrices.py \
         ${COMMON_OPT} \
         --lepton el \
-        --comp-histos ${IN_COMPOSITION_DIR}/el/el_composition_histos.root \
-        --eff-histos  ${IN_EFFICICENCY_DIR}/mcconv_histos_el_eff.root \
-        --eff-histos  ${IN_EFFICICENCY_DIR}/mcqcd_histos_el_eff.root \
-        --input-el-sf ${IN_SCALEFACTOR_DIR}/hflf/el/hflf_el_scale_histos.root \
-        --input-el-sf ${IN_SCALEFACTOR_DIR}/conv/el/conv_el_scale_histos.root \
+        --comp-histos   ${IN_COMPOSITION_DIR}/el/el_composition_histos.root \
+        --eff-histos    ${IN_EFFICICENCY_DIR}/mcconv_histos_el_eff.root \
+        --eff-histos    ${IN_EFFICICENCY_DIR}/mcqcd_histos_el_eff.root \
+        --scale-factors ${IN_SCALEFACTOR_DIR}/hflf/el/hflf_el_scale_histos.root \
+        --scale-factors ${IN_SCALEFACTOR_DIR}/conv/el/conv_el_scale_histos.root \
         2>&1 | tee ${OUT_DIR}/build_fake_matrices_el.txt
 
 
     python/build_fake_matrices.py \
         ${COMMON_OPT} \
         --lepton mu \
-        --comp-histos ${IN_COMPOSITION_DIR}/mu/mu_composition_histos.root \
-        --eff-histos ${IN_EFFICICENCY_DIR}/mcqcd_histos_mu_eff.root \
-        --input-el-sf out/fake_sf_May_10/hflf/mu/hflf_mu_scale_histos.root \
+        --comp-histos   ${IN_COMPOSITION_DIR}/mu/mu_composition_histos.root \
+        --eff-histos    ${IN_EFFICICENCY_DIR}/mcqcd_histos_mu_eff.root \
+        --scale-factors ${IN_SCALEFACTOR_DIR}/hflf/mu/hflf_mu_scale_histos.root \
         2>&1 | tee ${OUT_DIR}/build_fake_matrices_mu.txt
 
     echo -e "Putting all the histograms in the same output file"

@@ -47,13 +47,14 @@ Example usage:
 %prog \\
  --verbose  \\
  --tag ${TAG} \\
+ --lepton el \\
  --output-dir ./out/fakerate/el_sf_${TAG}
  >& log/fakerate/el_sf_${TAG}.log
 """
 def main():
     parser = optparse.OptionParser(usage=usage)
     parser.add_option('-i', '--input-dir', default='./out/fakerate')
-    parser.add_option('-o', '--output-dir', default='./out/fake_el_scale_factor', help='dir for plots')
+    parser.add_option('-o', '--output-dir', default='./out/fake_scale_factor', help='dir for plots')
     parser.add_option('-l', '--lepton', default='el', help='either el or mu')
     parser.add_option('-r', '--region', help='one of the regions for which we saved the fake ntuples')
     parser.add_option('-t', '--tag', help='tag used to select the input files (e.g. Apr_04)')
