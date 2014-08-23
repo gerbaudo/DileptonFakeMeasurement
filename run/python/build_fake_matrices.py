@@ -56,7 +56,6 @@ usage="""
 Example usage:
 %prog \\
  --verbose  \\
- --tag ${TAG} \\
  --output-dir ./out/fakerate/el_sf_${TAG}
  >& log/fakerate/el_sf_${TAG}.log
 
@@ -75,7 +74,6 @@ def main():
     parser.add_option('-s', '--input-el-sf', default=[], action='append', help='electron bin-by-bin scale factors (from compute_fake_el_scale_factor)')
     parser.add_option('-o', '--output-dir', default='./out/fake_weighted_average', help='dir for plots')
     parser.add_option('-l', '--lepton', default='el', help='either el or mu')
-    parser.add_option('-t', '--tag', help='tag used to select the input files (e.g. Apr_04)')
     parser.add_option('-f', '--fill-histos', action='store_true', default=False, help='force fill (default only if needed)')
     parser.add_option('-v', '--verbose', action='store_true', default=False)
     (options, args) = parser.parse_args()
@@ -86,15 +84,13 @@ def main():
     sfFnames  = options.input_el_sf
     outputDir = options.output_dir
     lepton    = options.lepton
-    tag       = options.tag
     verbose   = options.verbose
-#     if not tag : parser.error('tag is a required option')
     if lepton not in ['el', 'mu'] : parser.error("invalid lepton '%s'"%lepton)
     if region not in ['emu', 'ssinc1j'] : parser.error("invalid region '%s'"%region)
     if not compFname or not os.path.exists(compFname) : parser.error("invalid composition file '%s'"%compFname)
     if not effFnames or not all(os.path.exists(f) for f in effFnames) : parser.error("invalid efficiency file '%s'"%str(effFnames))
     if not sfFnames  or not all(os.path.exists(f) for f in sfFnames) : parser.error("invalid electron sf file(s) %s"%str(sfFnames))
-    optionsToPrint = ['inputDir', 'outputDir', 'tag']
+    optionsToPrint = ['inputDir', 'outputDir']
     if verbose :
         print "working from %s"%os.getcwd()
         print "being called as : %s"%' '.join(os.sys.argv)
