@@ -75,6 +75,7 @@ def main():
     parser.add_option('-o', '--output-dir', default='./out/fake_weighted_average', help='dir for plots')
     parser.add_option('-l', '--lepton', default='el', help='either el or mu')
     parser.add_option('-f', '--fill-histos', action='store_true', default=False, help='force fill (default only if needed)')
+    parser.add_option('--also-anygroup', action='store_true', help='also build matrix without compositions,'                      ' to evaluate the systematic uncertainty on the composition')
     parser.add_option('-v', '--verbose', action='store_true', default=False)
     (options, args) = parser.parse_args()
     inputDir  = options.input_dir
@@ -140,37 +141,40 @@ def main():
             else:
                 fakeu.plot2dEfficiencies({reg : avgEff}, 'eff2d_'+lepton+'_fake_'+reg, outputDir, htitle, zoomIn=True)
     writeHistos(os.path.join(outputDir,'fake_matrices_'+lepton+'.root'), avgEfficiencies, verbose)
-
-    # test with the group-independent efficiencies
-    print 'fetchCompositionHistos ',compFname
-    compositions = fetchCompositionHistos(compFname, lepton, ['anygroup'], verbose)
-    pprint.pprint(compositions)
-    print 'fetchEffienciesHistos ',effFnames
-    efficiencies = fetchEffienciesHistos(effFnames, lepton, ['anygroup'], verbose)
-    pprint.pprint(efficiencies)
-
-    avgEfficiencies = dict()
-    for reg in first(first(compositions)).keys():
-        avgEfficiencies[reg] = dict()
-        for var in ['pt', 'pt_eta']:
-            is1D = var=='pt'
-            lT = "%s #varepsilon(T|L) fake %s"%(reg, lepton)
-            lX = 'p_{T} [GeV]'
-            lY = '#varepsilon(T|L)' if is1D else '#eta'
-            hname = "%(lep)s_fake_%(var)s_%(reg)s"%{'lep':lepton, 'var':var, 'reg':reg}
-            htitle = lT+';'+lX+';'+lY
-            groups  = first(compositions).keys()
-            origins = first(first(first(compositions))).keys()
-            if verbose : print 'origins :',origins,'\n' + 'groups :',groups
-            histosEff  = dict((group+'_'+orig, efficiencies[var][group]     [orig]) for group in groups for orig in origins)
-            histosComp = dict((group+'_'+orig, compositions[var][group][reg][orig]) for group in groups for orig in origins)
-            avgEff =  weightedAverage(histosEff, histosComp, hname, htitle, verbose)
-            avgEfficiencies[reg][var] = avgEff
-            if is1D:
-                fakeu.plot1dEfficiencies({reg : avgEff}, 'eff1d_'+lepton+'_fake_'+reg+'_anygroup', outputDir, htitle, zoomIn=True)
-            else:
-                fakeu.plot2dEfficiencies({reg : avgEff}, 'eff2d_'+lepton+'_fake_'+reg+'_anygroup', outputDir, htitle, zoomIn=True)
-    writeHistos(os.path.join(outputDir,'fake_matrices_'+lepton+'_anygroup.root'), avgEfficiencies, verbose)
+    if options.also_anygroup:# test with the group-independent efficiencies
+	print 'fetchCompositionHistos ',compFname
+	compositions = fetchCompositionHistos(compFname, lepton, ['anygroup'], verbose)
+	pprint.pprint(compositions)
+	print 'fetchEffienciesHistos ',effFnames
+	efficiencies = fetchEffienciesHistos(effFnames, lepton, ['anygroup'], verbose)
+	pprint.pprint(efficiencies)
+	avgEfficiencies = dict()
+	for reg in first(first(compositions)).keys():
+	    avgEfficiencies[reg] = dict()
+	    for var in ['pt', 'pt_eta']:
+	        is1D = var=='pt'
+	        lT = "%s #varepsilon(T|L) fake %s"%(reg, lepton)
+	        lX = 'p_{T} [GeV]'
+	        lY = '#varepsilon(T|L)' if is1D else '#eta'
+	        hname = "%(lep)s_fake_%(var)s_%(reg)s"%{'lep':lepton, 'var':var, 'reg':reg}
+	        htitle = lT+';'+lX+';'+lY
+	        groups  = first(compositions).keys()
+	        origins = first(first(first(compositions))).keys()
+	        if verbose : print 'origins :',origins,'\n' + 'groups :',groups
+	        histosEff  = dict((group+'_'+orig, efficiencies[var][group]     [orig])
+                                  for group in groups for orig in origins)
+	        histosComp = dict((group+'_'+orig, compositions[var][group][reg][orig])
+                                  for group in groups for orig in origins)
+	        avgEff =  weightedAverage(histosEff, histosComp, hname, htitle, verbose)
+	        avgEfficiencies[reg][var] = avgEff
+	        if is1D:
+	            fakeu.plot1dEfficiencies({reg : avgEff}, 'eff1d_'+lepton+'_fake_'+reg+'_anygroup',
+                                             outputDir, htitle, zoomIn=True)
+	        else:
+	            fakeu.plot2dEfficiencies({reg : avgEff}, 'eff2d_'+lepton+'_fake_'+reg+'_anygroup',
+                                             outputDir, htitle, zoomIn=True)
+	writeHistos(os.path.join(outputDir,'fake_matrices_'+lepton+'_anygroup.root'),
+                    avgEfficiencies, verbose)
 
 #___________________________________________________
 
@@ -191,7 +195,7 @@ def fetchCompositionHistos(filename, lepton, groups=[], regions=[], verbose=Fals
     origins = ['heavy', 'light']
     origins += ['conv'] if lepton=='el' else []
     #origins += ['real'] # real later, for now just worry about the hf/lf splitting
-    vars = ['pt', 'pt_eta']
+    variables = ['pt', 'pt_eta']
     histonames = dict((v,
                        dict((g,
                              dict((reg,
@@ -200,7 +204,7 @@ def fetchCompositionHistos(filename, lepton, groups=[], regions=[], verbose=Fals
                                         for o in origins))
                                   for reg in regions))
                             for g in groups))
-                      for v in vars)
+                      for v in variables)
     return fetchHistos(filename, histonames, verbose)
 def fetchEffienciesHistos(filenames, lepton,
                           groups=[],
