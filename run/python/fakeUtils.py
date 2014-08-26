@@ -115,7 +115,7 @@ def lepIsTight_wh    (l): return muonIsTight_wh    (l) if l.isMu else elecIsTigh
 
 
 # isolation from Liz (see email 2014-06-23, subj 'Fake rate for SS EWK')
-def lepIsTight_05(l):
+def lepIsTight_07(l):
     return (muonIsFromPv(l) and
             muonIsIsolated(l, denominator_wh(l), etConeThres=0.14, ptConeThres=0.06)
             if l.isMu else
@@ -129,7 +129,7 @@ def lepIsTight_06(l):
             l.isTightPp and
             elecIsFromPv(l) and
             elecIsIsolated(l, denominator_wh(l), etConeThres=0.12, ptConeThres=0.06))
-def lepIsTight_07(l):
+def lepIsTight_05(l):
     return (muonIsFromPv(l) and
             muonIsIsolated(l, denominator_wh(l), etConeThres=0.11, ptConeThres=0.05)
             if l.isMu else
