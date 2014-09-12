@@ -118,7 +118,11 @@ def json_read(fname) :
     with open(fname) as inp :
         return json.load(inp)
 def rmIfExists(filename) :
-    if os.path.exists(filename) : os.remove(filename)
+    "remove a file or a list of files"
+    if type(filename) is list:
+        [rmIfExists(f) for f in filename]
+    elif os.path.exists(filename):
+        os.remove(filename)
 def mkdirIfNeeded(dirname) :
     if not os.path.exists(dirname) : os.makedirs(dirname)
 def verticalSlice(list2d) :
