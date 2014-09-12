@@ -222,7 +222,7 @@ def normalizeHistos(histos) :
 def saveHistos(histos=[], outfile=None) :
     outfile.cd()
     for h in histos : h.Write()
-def plotStackedHistos(histosFlavorSlice={}, canvasName='', outputDir='./', frameTitle='stack') :
+def plotStackedHistos(histosFlavorSlice={}, canvasName='', outputDir='./', frameTitle='stack', colors={}) :
     "Plot the input histos used to compute the fractions"
     histos = histosFlavorSlice
     can = r.TCanvas(canvasName, '', 800, 600)
@@ -230,7 +230,7 @@ def plotStackedHistos(histosFlavorSlice={}, canvasName='', outputDir='./', frame
     stack = r.THStack('stack_'+canvasName, '')
     leg = topRightLegend(can, 0.275, 0.475, shift=-0.025)
     leg.SetBorderSize(0)
-    colors = SampleUtils.colors
+    colors = SampleUtils.colors if not colors else colors
     procs = sorted(histos.keys())
     for p in procs:
         h = histos[p]
