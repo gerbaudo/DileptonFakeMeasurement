@@ -225,7 +225,7 @@ def saveHistos(histos=[], outfile=None) :
 def plotStackedHistos(histosFlavorSlice={}, canvasName='', outputDir='./', frameTitle='stack', colors={}) :
     "Plot the input histos used to compute the fractions"
     histos = histosFlavorSlice
-    can = r.TCanvas(canvasName, '', 800, 600)
+    can = r.TCanvas(canvasName, canvasName, 800, 600)
     can.cd()
     stack = r.THStack('stack_'+canvasName, '')
     leg = topRightLegend(can, 0.275, 0.475, shift=-0.025)
@@ -257,7 +257,7 @@ def plotStackedHistos(histosFlavorSlice={}, canvasName='', outputDir='./', frame
         rmIfExists(outFilename)
         can.SaveAs(outFilename)
 
-def plotFractionsHistos(histos={}, canvasName='', outputDir='./', frameTitle='title;p_{T} [GeV]; efficiency', zoomIn=False) :
+def plotFractionsHistos(histos={}, canvasName='', canvasTitle='', outputDir='./', frameTitle='title;p_{T} [GeV]; efficiency', zoomIn=False) :
     can = r.TCanvas(canvasName, '', 800, 600)
     can.cd()
     padMaster = None
@@ -280,7 +280,7 @@ def plotFractionsHistos(histos={}, canvasName='', outputDir='./', frameTitle='ti
         rmIfExists(outFilename)
         can.SaveAs(outFilename)
 
-def plotFractionsStacked(histos={}, canvasName='', outputDir='./', frameTitle='title;p_{T} [GeV]; efficiency',
+def plotFractionsStacked(histos={}, canvasName='', canvasTitle='', outputDir='./', frameTitle='title;p_{T} [GeV]; efficiency',
                          histos2={}, h1Label='', h2Label='') :
     "plot stack of histos; optional histos2 are also stacked with the same colors, but with different fill style"
     can = r.TCanvas(canvasName, '', 800, 600)
