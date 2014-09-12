@@ -15,6 +15,7 @@ def importRoot() :
     import ROOT as r
     r.gROOT.SetBatch(True)                     # no windows popping up
     r.PyConfig.IgnoreCommandLineOptions = True # don't let root steal our cmd-line options
+    r.gErrorIgnoreLevel = r.kWarning           # avoid annoying 'Info in <TCanvas::Print>'
     return r
 r = importRoot()
 
@@ -245,3 +246,9 @@ def fetchObjectsFromFile(fileName='', objects={}, verbose=False, closeFileOnExit
         fetched_objects = fetch(objects)
         if closeFileOnExit : inputFile.Close()
     return fetched_objects
+def printHistoIntegrals(histos={}, keyColWidth=20, nameColWidth=40, integralColWidth=20, integralPrecision=1):
+    "given a dict of histos, print a table with their integrals"
+    templateLine = '{0:<'+str(keyColWidth)+'} {1:<'+str(nameColWidth)+'} : {2:>'+str(integralColWidth)+'.'+str(integralPrecision)+'f}'
+    print ('integrals :\n'
+           +'\n'.join([templateLine.format(k, h.GetName(), h.Integral())
+                       for k, h in histos.iteritems()]))
