@@ -7,6 +7,7 @@
 #include "SusyMatrixMethod/MatrixLepton.h"
 #include "SusyMatrixMethod/DiLeptonMatrixMethod.h"
 
+#include "DileptonMatrixMethod/DileptonMatrixMethod.h"
 
 /*
 
@@ -64,7 +65,7 @@ class MatrixPrediction : public SusyPlotter
                         const Met* met,float weight, size_t regionIndex, uint sys);
     // Get the fake event weight given a signal region
     float getFakeWeight(const LeptonVector &baseLeps, susy::fake::Region region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NOM);
-    float getRFWeight(const LeptonVector &baseLeps, susy::fake::Region region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NOM);
+    //    float getRFWeight(const LeptonVector &baseLeps, susy::fake::Region region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NOM);
     MatrixPair getMatrixPair(const LeptonVector &baseLeps); //!< Get the Matrix Pair type
     MatrixPrediction& setMatrixFilename(const std::string filename); // to be called before Begin
     MatrixPrediction& use2dParametrization() { m_use2dparametrization = true; return *this; }
@@ -72,11 +73,12 @@ class MatrixPrediction : public SusyPlotter
                                     const LeptonVector &ls);
     std::string eventDetails(bool passSrSs, const Susy::Event &event, const DiLepEvtType &ll,
                              const LeptonVector &ls);
-    ClassDef(MatrixPrediction, 2);
+    ClassDef(MatrixPrediction, 3);
 
   protected:
     std::vector<uint> m_matrixSys;      // systematics to process
-    SusyMatrixMethod::DiLeptonMatrixMethod* m_matrix;
+    //    SusyMatrixMethod::DiLeptonMatrixMethod* m_matrix;
+    susy::fake::DileptonMatrixMethod* m_matrix;
     std::string m_matrixFilename;
     bool m_use2dparametrization;
     bool m_allconfigured;

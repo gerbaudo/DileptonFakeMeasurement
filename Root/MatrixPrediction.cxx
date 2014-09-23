@@ -5,6 +5,8 @@
 #include "SusyTest0/criteria.h"
 #include "SusyTest0/kinematic.h"
 
+#include "DileptonMatrixMethod/Systematic.h"
+
 #include <iomanip>
 #include <sstream>      // std::ostringstream
 
@@ -12,6 +14,7 @@ using namespace std;
 using namespace Susy;
 using namespace susy::wh; // cleanup
 namespace swh = susy::wh;
+namespace sf = susy::fake;
 
 const float ptmin    = 0;
 const float ptmax    = 250;
@@ -235,27 +238,36 @@ do{                                                                   \
 float MatrixPrediction::getFakeWeight(const LeptonVector &baseLeps,
                                       susy::fake::Region region,
                                       float metRel,
-                                      SusyMatrixMethod::SYSTEMATIC sys)
+                                      SusyMatrixMethod::SYSTEMATIC /*sys*/)
 {
   if(baseLeps.size() != 2) return 0.0;
   uint nVtx = nt.evt()->nVtx;
   bool isMC = nt.evt()->isMC;
-  float gev2mev(1000.);
+  float gev2mev(1000.), gev(1.0);
   //m_matrix->setDileptonType(baseLeps[0]->isEle(), baseLeps[1]->isEle());
   const Susy::Lepton *l0=baseLeps[0], *l1=baseLeps[1];
   bool l0IsSig(SusyNtTools::isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMC));
   bool l1IsSig(SusyNtTools::isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMC));
-  return m_matrix->getTotalFake(l0IsSig, l0->isEle(), l0->Pt()*gev2mev, l0->Eta(),
-                                l1IsSig, l1->isEle(), l1->Pt()*gev2mev, l1->Eta(),
-                                region, metRel*gev2mev, sys);
+
+  string regionName="emuInc";
+  sf::Systematic::Value sys = sf::Systematic::SYS_NOM;
+  size_t iRegion = m_matrix->getIndexRegion(regionName);
+  sf::Lepton fl0(l0IsSig, l0->isEle(), l0->Pt()*gev, l0->Eta());
+  sf::Lepton fl1(l1IsSig, l1->isEle(), l1->Pt()*gev, l1->Eta());
+  double weight = m_matrix->getTotalFake(fl0, fl1, iRegion, metRel*gev, sys);
+  return weight;
+
+  // return m_matrix->getTotalFake(l0IsSig, l0->isEle(), l0->Pt()*gev2mev, l0->Eta(),
+  //                               l1IsSig, l1->isEle(), l1->Pt()*gev2mev, l1->Eta(),
+  //                               region, metRel*gev2mev, sys);
 }
 //----------------------------------------------------------
+/*
 float MatrixPrediction::getRFWeight(const LeptonVector &baseLeps,
                                     susy::fake::Region region,
                                     float metRel,
                                     SusyMatrixMethod::SYSTEMATIC sys)
 {
-
   if(baseLeps.size() != 2) return 0.0;
   uint nVtx = nt.evt()->nVtx;
   bool isMC = nt.evt()->isMC;
@@ -270,7 +282,9 @@ float MatrixPrediction::getRFWeight(const LeptonVector &baseLeps,
 			  region,
 			  metRel * 1000.,
 			  sys);
+
 }
+*/
 //----------------------------------------------------------
 MatrixPair MatrixPrediction::getMatrixPair(const LeptonVector &baseLeps)
 {
@@ -298,9 +312,17 @@ MatrixPrediction& MatrixPrediction::setMatrixFilename(const std::string filename
 bool MatrixPrediction::initMatrixTool()
 {
   // Load the matrix method package
-  m_matrix = new SusyMatrixMethod::DiLeptonMatrixMethod();
-  SusyMatrixMethod::RATE_PARAM pm = (m_use2dparametrization ? SusyMatrixMethod::PT_ETA : SusyMatrixMethod::PT);
-  return m_matrix->configure(m_matrixFilename, pm, pm, pm, pm);
+  // m_matrix = new SusyMatrixMethod::DiLeptonMatrixMethod();
+  // SusyMatrixMethod::RATE_PARAM pm = (m_use2dparametrization ? SusyMatrixMethod::PT_ETA : SusyMatrixMethod::PT);
+  // return m_matrix->configure(m_matrixFilename, pm, pm, pm, pm);
+
+  m_matrix = new sf::DileptonMatrixMethod();
+  sf::Parametrization::Value p = (m_use2dparametrization ? sf::Parametrization::PT_ETA : sf::Parametrization::PT);
+  std::vector<std::string> regions;
+  regions.push_back("emuInc");
+  // regions.push_back("CR_SSInc1j");
+  return m_matrix->configure(m_matrixFilename, regions, p, p, p, p);
+
 }
 //----------------------------------------------------------
 std::string MatrixPrediction::dilepDetails(const Susy::Event &event,
