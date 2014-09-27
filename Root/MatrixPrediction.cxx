@@ -262,30 +262,6 @@ float MatrixPrediction::getFakeWeight(const LeptonVector &baseLeps,
   //                               region, metRel*gev2mev, sys);
 }
 //----------------------------------------------------------
-/*
-float MatrixPrediction::getRFWeight(const LeptonVector &baseLeps,
-                                    susy::fake::Region region,
-                                    float metRel,
-                                    SusyMatrixMethod::SYSTEMATIC sys)
-{
-  if(baseLeps.size() != 2) return 0.0;
-  uint nVtx = nt.evt()->nVtx;
-  bool isMC = nt.evt()->isMC;
-  return m_matrix->getRF( isSignalLepton(baseLeps[0],m_baseElectrons, m_baseMuons,nVtx,isMC),
-			  baseLeps[0]->isEle(),
-			  baseLeps[0]->Pt() * 1000.,
-			  baseLeps[0]->Eta(),
-			  isSignalLepton(baseLeps[1],m_baseElectrons, m_baseMuons,nVtx,isMC),
-			  baseLeps[1]->isEle(),
-			  baseLeps[1]->Pt() * 1000.,
-			  baseLeps[1]->Eta(),
-			  region,
-			  metRel * 1000.,
-			  sys);
-
-}
-*/
-//----------------------------------------------------------
 MatrixPair MatrixPrediction::getMatrixPair(const LeptonVector &baseLeps)
 {
   if(baseLeps.size() < 2) return MP_N;

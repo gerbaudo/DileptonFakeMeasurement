@@ -65,7 +65,6 @@ class MatrixPrediction : public SusyPlotter
                         const Met* met,float weight, size_t regionIndex, uint sys);
     // Get the fake event weight given a signal region
     float getFakeWeight(const LeptonVector &baseLeps, susy::fake::Region region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NOM);
-    //    float getRFWeight(const LeptonVector &baseLeps, susy::fake::Region region, float metRel, SusyMatrixMethod::SYSTEMATIC sys = SusyMatrixMethod::SYS_NOM);
     MatrixPair getMatrixPair(const LeptonVector &baseLeps); //!< Get the Matrix Pair type
     MatrixPrediction& setMatrixFilename(const std::string filename); // to be called before Begin
     MatrixPrediction& use2dParametrization() { m_use2dparametrization = true; return *this; }
