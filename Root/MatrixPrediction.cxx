@@ -97,43 +97,41 @@ Bool_t MatrixPrediction::Process(Long64_t entry)
           v.l3veto = ssf.veto3rdL; // already computed in passSrSs
 
           const sf::Region fakeR = sf::CR_SSInc1j;
-          if(ssf.sameSign && ssf.ge1j) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,metRel,sys), PR_CRSsInc1j, sys);
-          if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,    metRel,sys), PR_CR8lpt,    sys);
-          if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,     metRel,sys), PR_CR8ee,     sys);
+          double weight = getFakeWeight(l,fakeR,metRel,sys);
+          if(ssf.sameSign && ssf.ge1j) fillHistos(ncl, j, m, weight, PR_CRSsInc1j, sys);
+          if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, weight, PR_CR8lpt,    sys);
+          if(isEe && ssf.zllVeto  ) fillHistos(ncl, j, m, weight, PR_CR8ee,     sys);
           if(isMm && ssf.lepPt
-             && passMinMet   ) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,     metRel,sys), PR_CR8mm,     sys);
-          if(isMm && ssf.mtllmet  ) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), PR_CR8mmMtww, sys);
-          if(isMm && ssf.ht       ) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,   metRel,sys), PR_CR8mmHt,   sys);
-          if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,    metRel,sys), PR_CR8lpt,    sys);
-          if(isOf && ssf.lepPt    ) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,    metRel,sys), PR_CR9lpt,    sys);
+             && passMinMet   ) fillHistos(ncl, j, m, weight, PR_CR8mm,     sys);
+          if(isMm && ssf.mtllmet  ) fillHistos(ncl, j, m, weight, PR_CR8mmMtww, sys);
+          if(isMm && ssf.ht       ) fillHistos(ncl, j, m, weight, PR_CR8mmHt,   sys);
+          if(isSf && ssf.lepPt    ) fillHistos(ncl, j, m, weight, PR_CR8lpt,    sys);
+          if(isOf && ssf.lepPt    ) fillHistos(ncl, j, m, weight, PR_CR9lpt,    sys);
 
-          if(isEe && is1j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), sw::CrZVfake1jee, sys);
-          if(isEe && is2j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), sw::CrZVfake2jee, sys);
-          if(isOf && is1j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), sw::CrZVfake1jem, sys);
-          if(isOf && is2j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), sw::CrZVfake2jem, sys);
-          if(isOf && is1j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), sw::Crfake1jem  , sys);
-          if(isOf && is2j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), sw::Crfake2jem  , sys);
-          if(isMm && is1j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), sw::CrZV1jmm    , sys);
-          if(isMm && is2j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), sw::CrZV2jmm    , sys);
-          if(isMm && is1j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), sw::Crfake1jmm  , sys);
-          if(isMm && is2j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), sw::Crfake2jmm  , sys);
+          if(isEe && is1j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, sw::CrZVfake1jee, sys);
+          if(isEe && is2j && SusySelection::passCrWhZVfakeEe(v)) fillHistos(ncl, j, m, weight, sw::CrZVfake2jee, sys);
+          if(isOf && is1j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, weight, sw::CrZVfake1jem, sys);
+          if(isOf && is2j && SusySelection::passCrWhZVfakeEm(v)) fillHistos(ncl, j, m, weight, sw::CrZVfake2jem, sys);
+          if(isOf && is1j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, weight, sw::Crfake1jem  , sys);
+          if(isOf && is2j && SusySelection::passCrWhfakeEm  (v)) fillHistos(ncl, j, m, weight, sw::Crfake2jem  , sys);
+          if(isMm && is1j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, weight, sw::CrZV1jmm    , sys);
+          if(isMm && is2j && SusySelection::passCrWhZVMm    (v)) fillHistos(ncl, j, m, weight, sw::CrZV2jmm    , sys);
+          if(isMm && is1j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, weight, sw::Crfake1jmm  , sys);
+          if(isMm && is2j && SusySelection::passCrWhfakeMm  (v)) fillHistos(ncl, j, m, weight, sw::Crfake2jmm  , sys);
 
-          if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), swh::CrZVfake1j , sys);
-          if(is2j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR, metRel,sys), swh::CrZVfake2j , sys);
-          if(is1j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,   metRel,sys), swh::Crfake1j   , sys);
-          if(is2j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,   metRel,sys), swh::Crfake2j   , sys);
-          if(is1j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,     metRel,sys), swh::CrZV1j     , sys);
-          if(is2j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,     metRel,sys), swh::CrZV2j     , sys);
+          if(is1j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake1j , sys);
+          if(is2j && SusySelection::passCrWhZVfake(v)) fillHistos(ncl, j, m, weight, swh::CrZVfake2j , sys);
+          if(is1j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake1j   , sys);
+          if(is2j && SusySelection::passCrWhfake  (v)) fillHistos(ncl, j, m, weight, swh::Crfake2j   , sys);
+          if(is1j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV1j     , sys);
+          if(is2j && SusySelection::passCrWhZV    (v)) fillHistos(ncl, j, m, weight, swh::CrZV2j     , sys);
 
-          if(is1j && SusySelection::passSrWh1j    (v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,     metRel,sys), swh::SrWh1j     , sys);
-          if(is2j && SusySelection::passSrWh2j    (v)) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,     metRel,sys), swh::SrWh2j     , sys);
+          if(is1j && SusySelection::passSrWh1j    (v)) fillHistos(ncl, j, m, weight, swh::SrWh1j     , sys);
+          if(is2j && SusySelection::passSrWh2j    (v)) fillHistos(ncl, j, m, weight, swh::SrWh2j     , sys);
 
-          bool passEwkSs     (SusySelection::passEwkSs     (ncl,j,m));
-          bool passEwkSsLoose(SusySelection::passEwkSsLoose(ncl,j,m));
-          bool passEwkSsLea  (SusySelection::passEwkSsLea  (ncl,j,m));
-          if(passEwkSs)      fillHistos(ncl, j, m, getFakeWeight(l,fakeR,     metRel,sys), PR_SsEwk,     sys);
-          if(passEwkSsLoose) fillHistos(ncl, j, m, getFakeWeight(l,fakeR,metRel,sys), PR_SsEwkLoose,sys);
-          if(passEwkSsLea)   fillHistos(ncl, j, m, getFakeWeight(l,fakeR,  metRel,sys), PR_SsEwkLea,  sys);
+          if(SusySelection::passEwkSs     (ncl,j,m)) fillHistos(ncl, j, m, weight, PR_SsEwk,     sys);
+          if(SusySelection::passEwkSsLoose(ncl,j,m)) fillHistos(ncl, j, m, weight, PR_SsEwkLoose,sys);
+          if(SusySelection::passEwkSsLea  (ncl,j,m)) fillHistos(ncl, j, m, weight, PR_SsEwkLea,  sys);
       } // end for(s)
   }
   return true;
@@ -244,7 +242,6 @@ float MatrixPrediction::getFakeWeight(const LeptonVector &baseLeps,
   uint nVtx = nt.evt()->nVtx;
   bool isMC = nt.evt()->isMC;
   float gev2mev(1000.), gev(1.0);
-  //m_matrix->setDileptonType(baseLeps[0]->isEle(), baseLeps[1]->isEle());
   const Susy::Lepton *l0=baseLeps[0], *l1=baseLeps[1];
   bool l0IsSig(SusyNtTools::isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMC));
   bool l1IsSig(SusyNtTools::isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMC));
@@ -256,10 +253,6 @@ float MatrixPrediction::getFakeWeight(const LeptonVector &baseLeps,
   sf::Lepton fl1(l1IsSig, l1->isEle(), l1->Pt()*gev, l1->Eta());
   double weight = m_matrix->getTotalFake(fl0, fl1, iRegion, metRel*gev, sys);
   return weight;
-
-  // return m_matrix->getTotalFake(l0IsSig, l0->isEle(), l0->Pt()*gev2mev, l0->Eta(),
-  //                               l1IsSig, l1->isEle(), l1->Pt()*gev2mev, l1->Eta(),
-  //                               region, metRel*gev2mev, sys);
 }
 //----------------------------------------------------------
 MatrixPair MatrixPrediction::getMatrixPair(const LeptonVector &baseLeps)
@@ -287,11 +280,6 @@ MatrixPrediction& MatrixPrediction::setMatrixFilename(const std::string filename
 //----------------------------------------------------------
 bool MatrixPrediction::initMatrixTool()
 {
-  // Load the matrix method package
-  // m_matrix = new SusyMatrixMethod::DiLeptonMatrixMethod();
-  // SusyMatrixMethod::RATE_PARAM pm = (m_use2dparametrization ? SusyMatrixMethod::PT_ETA : SusyMatrixMethod::PT);
-  // return m_matrix->configure(m_matrixFilename, pm, pm, pm, pm);
-
   m_matrix = new sf::DileptonMatrixMethod();
   sf::Parametrization::Value p = (m_use2dparametrization ? sf::Parametrization::PT_ETA : sf::Parametrization::PT);
   std::vector<std::string> regions;
