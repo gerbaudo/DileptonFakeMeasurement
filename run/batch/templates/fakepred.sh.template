@@ -8,5 +8,6 @@
 
 echo "Starting on `hostname`, `date`"
 cd ${SLURM_SUBMIT_DIR}
-FakePred --etapt -i %(inp)s -o %(out)s -s %(sample)s --matrix-file ${ROOTCOREDIR}/../SusyMatrixMethod/data/FinalFakeHist_May_20.root %(opt)s
+# FakePred --etapt -i %(inp)s -o %(out)s -s %(sample)s --matrix-file ${ROOTCOREDIR}/../SusyMatrixMethod/data/FinalFakeHist_May_20.root %(opt)s
+FakePred --etapt -i %(inp)s -o %(out)s -s %(sample)s --matrix-file ${ROOTCOREDIR}/data/DileptonMatrixMethod/FakeMatrix_Jul_26.root %(opt)s
 echo "Done, `date`"
