@@ -248,6 +248,7 @@ float MatrixPrediction::getFakeWeight(const LeptonVector &baseLeps,
 
   string regionName="emuInc";
   sf::Systematic::Value sys = sf::Systematic::SYS_NOM;
+  // note to self: the sys is broken, fix it when dropping SusyMatrixMethod. [DG 2014-09-26] 
   size_t iRegion = m_matrix->getIndexRegion(regionName);
   sf::Lepton fl0(l0IsSig, l0->isEle(), l0->Pt()*gev, l0->Eta());
   sf::Lepton fl1(l1IsSig, l1->isEle(), l1->Pt()*gev, l1->Eta());
