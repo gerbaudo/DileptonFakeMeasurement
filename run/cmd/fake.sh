@@ -10,7 +10,10 @@
 readonly SCRIPT_NAME=$(basename $0)
 # see http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 readonly PROGDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-readonly SIGNAL_REGION="ssinc1j" # depends on what you are working; probably 'emu', 'ssinc1j', ...
+readonly SIGNAL_REGION="emu" #ssinc1j" # depends on what you are working; probably 'emu', 'ssinc1j', ...
+# the two options below are needed only when scanning the tight defs for Liz
+readonly TIGHTDEF_OPT="" #"--tight-def fakeu.lepIsTight_07"
+readonly TIGHTDEF_SUFFIX="" # "_tight_07"
 
 function help {
 	echo -e "These are the steps to produce the fake matrix file"
@@ -28,11 +31,11 @@ function check_env {
 
 function compute_efficiencies {
     echo -e "computing efficiencies...this might take some time if we need to fill the histograms"
-    # todo: do we want to allow for '--fill' to be passed in?
+    local FILL="--fill-histos" # force fill
     local IN_DIR="out/fakerate/"
     local OUT_DIR="out/fake/efficiencies_${TAG}"
     local COMMON_OPT="--verbose --tag ${TAG} --input-dir ${IN_DIR} --output-dir ${OUT_DIR}"
-    COMMON_OPT+="${COMMON_OPT} --tight-def fakeu.lepIsTight_05"
+    COMMON_OPT="${COMMON_OPT} ${FILL} ${TIGHTDEF_OPT}"
     mkdir -p ${OUT_DIR}
     echo -e "\n--- electron --- `date +%F-%T`\n"
     time python/compute_eff_from_ntuple.py ${COMMON_OPT} --lepton el --mode real  2>&1  | tee ${OUT_DIR}/el_real_${TAG}.txt
@@ -45,7 +48,7 @@ function compute_efficiencies {
 }
 
 function compute_compositions {
-    local FILL="" # "-f" # force fill
+    local FILL="--fill-histos" # force fill
     local IN_DIR="out/fakerate/"
     local OUT_DIR="out/fake/compositions_${TAG}"
     local REGION="${SIGNAL_REGION}"
@@ -61,31 +64,32 @@ function compute_compositions {
 }
 
 function compute_scalefactors {
+    local FILL="--fill-histos" # force fill
     local IN_DIR="out/fakerate/"
     local OUT_DIR="out/fake/scalefactors_${TAG}"
     local REGION="${SIGNAL_REGION}"
-    local COMMON_OPT="${OPT} -v --tag ${TAG} --input-dir ${IN_DIR} --output-dir ${OUT_DIR} --region ${REGION}"
-    COMMON_OPT+="${COMMON_OPT} --tight-def fakeu.lepIsTight_05"
+    local COMMON_OPT="${FILL} ${OPT} -v --tag ${TAG} --input-dir ${IN_DIR} --output-dir ${OUT_DIR} --region ${REGION}"
+    COMMON_OPT="${COMMON_OPT} ${TIGHTDEF_OPT}"
     mkdir -p ${OUT_DIR}
     # todo: implement real lepton case
     echo -e "\n--- electron --- `date +%F-%T`\n"
-    time python/compute_fake_el_scale_factor.py ${COMMON_OPT} --lepton el --region hflf 2>&1 | tee ${OUT_DIR}/el_hflf_${TAG}.txt
-    time python/compute_fake_el_scale_factor.py ${COMMON_OPT} --lepton el --region conv 2>&1 | tee ${OUT_DIR}/el_conv_${TAG}.txt
-    #time python/compute_fake_el_scale_factor.py ${COMMON_OPT} --lepton el --region real 2>&1 | tee ${OUT_DIR}/el_real_${TAG}.txt
+    time python/compute_fake_scale_factor.py ${COMMON_OPT} --lepton el --region hflf 2>&1 | tee ${OUT_DIR}/el_hflf_${TAG}.txt
+    time python/compute_fake_scale_factor.py ${COMMON_OPT} --lepton el --region conv 2>&1 | tee ${OUT_DIR}/el_conv_${TAG}.txt
+    #time python/compute_fake_scale_factor.py ${COMMON_OPT} --lepton el --region real 2>&1 | tee ${OUT_DIR}/el_real_${TAG}.txt
     echo -e "\n--- muon --- `date +%F-%T`\n"
-    time python/compute_fake_el_scale_factor.py ${COMMON_OPT} --lepton mu --region hflf 2>&1 | tee ${OUT_DIR}/mu_hflf_${TAG}.txt
-    #time python/compute_fake_el_scale_factor.py ${COMMON_OPT} --lepton mu --region real 2>&1 | tee ${OUT_DIR}/mu_real_${TAG}.txt
+    time python/compute_fake_scale_factor.py ${COMMON_OPT} --lepton mu --region hflf 2>&1 | tee ${OUT_DIR}/mu_hflf_${TAG}.txt
+    #time python/compute_fake_scale_factor.py ${COMMON_OPT} --lepton mu --region real 2>&1 | tee ${OUT_DIR}/mu_real_${TAG}.txt
 }
 
 function build_matrix {
     local SYS="" #"_syst_shift" # uncomment this to pick up the shifted compositions
-    local IN_COMPOSITION_DIR="out/fake/compositions_${TAG}"
-    local IN_EFFICICENCY_DIR="out/fake/efficiencies_${TAG}"
-    local IN_SCALEFACTOR_DIR="out/fake/scalefactors_${TAG}"
-out/fake/scalefactors_Jul_25_tight_06/hflf/mu/
-    local OUT_DIR="out/fake/weigtedmatrix_${TAG}"
+    local TAGT="${TAG}${TIGHTDEF_SUFFIX}"
+    local IN_COMPOSITION_DIR="out/fake/compositions_${TAGT}"
+    local IN_EFFICICENCY_DIR="out/fake/efficiencies_${TAGT}"
+    local IN_SCALEFACTOR_DIR="out/fake/scalefactors_${TAGT}"
+    local OUT_DIR="out/fake/weigtedmatrix_${TAGT}"
     local REGION="${SIGNAL_REGION}"
-    local COMMON_OPT="${OPT} -v --tag ${TAG} --output-dir ${OUT_DIR} --region ${REGION}"
+    local COMMON_OPT="${OPT} -v --output-dir ${OUT_DIR} --region ${REGION}"
 
     mkdir -p ${OUT_DIR}
     python/build_fake_matrices.py \
