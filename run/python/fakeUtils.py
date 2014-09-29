@@ -212,5 +212,7 @@ tupleStemsAndNames = [ # stem filename, treename (see MeasureFakeRate2::Begin)
     ("mcqcd"    , "HfLfExtractionRegion"),
     ("mcreal"   , "RealExtractionRegion"),
     ("emu"      , "EmuRegion"),
+    ("razor0j"  , "Razor0jRegion"),
+    ("razor1j"  , "Razor1jRegion"),
     ]
 #___________________________________________________________
