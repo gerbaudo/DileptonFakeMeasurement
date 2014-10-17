@@ -17,12 +17,14 @@ namespace swk = susy::wh::kin;
 
 
 const sf::Region controlRegions[] = {
+/* --tmp--2014-09-27 disable all other regions
     sf::CR_Real, sf::CR_SideLow, sf::CR_SideHigh, sf::CR_HF, sf::CR_HF_high,
     sf::CR_Conv,
     sf::CR_HF_SS,
     sf::CR_HF_mme,
     sf::CR_MCConv, sf::CR_MCQCD,
     sf::CR_MCReal
+*/
 };
 const size_t nControlRegions = sizeof(controlRegions)/sizeof(controlRegions[0]);
 const sf::Region signalRegions[] = {
@@ -61,7 +63,9 @@ const sf::Region signalRegions[] = {
   sf::CR_SRWH2j,
   sf::CR_SRWHnoMlj
 */
-    sf::CR_emu
+    sf::CR_emu,
+    sf::CR_razor0j,
+    sf::CR_razor1j
 };
 const size_t nSignalRegions = sizeof(signalRegions)/sizeof(signalRegions[0]);
 const MeasureFakeRate2::LeptonType leptonTypes[] = {MeasureFakeRate2::kElectron, MeasureFakeRate2::kMuon};
@@ -89,7 +93,9 @@ MeasureFakeRate2::MeasureFakeRate2() :
   m_tupleMakerMcConv("",""),
   m_tupleMakerMcQcd("",""),
   m_tupleMakerMcReal("",""),
-  m_tupleMakerEmu("","")
+  m_tupleMakerEmu("",""),
+  m_tupleMakerRazor0j("",""),
+  m_tupleMakerRazor1j("","")
 {
   resetCounters();
 }
@@ -117,6 +123,7 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
               else { cout<<"cannot initialize ntuple file '"<<fname<<"'"<<endl; all_done = false; }
           }
       } initTuple;
+/* --tmp--2014-09-27 disable all other ntuples
       initTuple(m_tupleMakerHfCr     ,tffhf(m_fileName, "hflf_tuple")     ,"HeavyFlavorControlRegion");
       initTuple(m_tupleMakerHfLfSs   ,tffhf(m_fileName, "hflfss_tuple")   ,"HeavyFlavorSsControlRegion");
       initTuple(m_tupleMakerConv     ,tffhf(m_fileName, "conv_tuple")     ,"ConversionControlRegion");
@@ -125,7 +132,10 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
       initTuple(m_tupleMakerMcConv   ,tffhf(m_fileName, "mcconv_tuple")   ,"ConversionExtractionRegion");
       initTuple(m_tupleMakerMcQcd    ,tffhf(m_fileName, "mcqcd_tuple")    ,"HfLfExtractionRegion");
       initTuple(m_tupleMakerMcReal   ,tffhf(m_fileName, "mcreal_tuple")   ,"RealExtractionRegion");
+*/
       initTuple(m_tupleMakerEmu      ,tffhf(m_fileName, "emu_tuple")      ,"EmuRegion");
+      initTuple(m_tupleMakerRazor0j  ,tffhf(m_fileName, "razor0j_tuple")  ,"Razor0jRegion");
+      initTuple(m_tupleMakerRazor1j  ,tffhf(m_fileName, "razor1j_tuple")  ,"Razor1jRegion");
       m_writeTuple = initTuple.all_done;
   }
 }
@@ -340,6 +350,20 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
                 .setL0EtConeCorr(computeCorrectedEtCone(l0)).setL0PtConeCorr(computeCorrectedPtCone(l0))
                 .setL1EtConeCorr(computeCorrectedEtCone(l1)).setL1PtConeCorr(computeCorrectedPtCone(l1))
                 .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
+        } else if(CR==sf::CR_razor0j || CR==sf::CR_razor1j) {
+            assert(m_probes.size()>1);
+            const Lepton *l0 = m_probes[0], *l1 = m_probes[1];
+            LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
+            bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            LeptonVector dummyLepts;
+            susy::wh::TupleMaker& tm = CR==sf::CR_razor0j ? m_tupleMakerRazor0j : m_tupleMakerRazor1j;
+            tm
+                .setL0IsTight(l0IsTight).setL0Source(l0Source)
+                .setL1IsTight(l1IsTight).setL1Source(l1Source)
+                .setL0EtConeCorr(computeCorrectedEtCone(l0)).setL0PtConeCorr(computeCorrectedPtCone(l0))
+                .setL1EtConeCorr(computeCorrectedEtCone(l1)).setL1PtConeCorr(computeCorrectedPtCone(l1))
+                .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
         }
     }
   } // for(cr)
@@ -478,6 +502,8 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
   v.l3veto = whssFlags.veto3rdL = SusySelection::passThirdLeptonVeto(leptons[0], leptons[1], lowPtLep, m_debugThisEvent);
   if(CR==sf::CR_SSInc) passSR = susy::sameSign(leptons);
   else if(CR==sf::CR_emu) passSR = isEmu;
+  else if(CR==sf::CR_razor0j) passSR = SusySelection::passSrRazor0jet(leptons, jets, *met);
+  else if(CR==sf::CR_razor1j) passSR = SusySelection::passSrRazor1jet(leptons, jets, *met);
   else {
       bool passCommonCriteria (whssFlags.sameSign && whssFlags.tauVeto && whssFlags.fjveto && whssFlags.bjveto && whssFlags.ge1j);
       if(passCommonCriteria) {
