@@ -23,6 +23,9 @@ function help {
     echo -e "${SCRIPT_NAME} scalefactors \t # Compute data/mc scale factors (not implemented yet...)"
     echo -e "${SCRIPT_NAME} build        \t # Build weighted matrix"
     echo -e "Note: current tag is ${TAG}"
+    echo -e "All these scripts need the input ntuples, which can be generated with"
+    echo -e "submitJobs.py --fakerate -o --tag=${TAG} -e '(Sherpa_CT10_lllnu_WZ|noslep.*_WH)' --other-opt=\" --write-tuple \" --submit"
+    echo -e "submitJobs.py --fakerate -o --tag=${TAG} -s 'PowhegPythia8_AU2CT10_WZ_W' --alsoplaceholders --other-opt=\" --write-tuple \" --submit"
 }
 
 function check_env {
