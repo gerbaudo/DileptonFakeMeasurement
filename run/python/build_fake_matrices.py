@@ -87,7 +87,7 @@ def main():
     lepton    = options.lepton
     verbose   = options.verbose
     if lepton not in ['el', 'mu'] : parser.error("invalid lepton '%s'"%lepton)
-    if region not in ['emu', 'ssinc1j'] : parser.error("invalid region '%s'"%region)
+    if region not in ['emu', 'ssinc1j','razor0j'] : parser.error("invalid region '%s'"%region)
     if not compFname or not os.path.exists(compFname) : parser.error("invalid composition file '%s'"%compFname)
     if not effFnames or not all(os.path.exists(f) for f in effFnames) : parser.error("invalid efficiency file '%s'"%str(effFnames))
     if not sfFnames  or not all(os.path.exists(f) for f in sfFnames) : parser.error("invalid electron sf file(s) %s"%str(sfFnames))
