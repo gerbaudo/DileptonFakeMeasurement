@@ -1107,8 +1107,8 @@ bool SusySelection::passSrRazor0jet(const LeptonVector &leptons, const JetVector
                num_forward_jets==0 &&
                num_central_light_jets==0 &&
                l0.Pt() > 35.0 &&
-               l1.Pt() > 20.0
-               // &&
+               l1.Pt() > 20.0 &&
+               mDeltaR > 20.0
                // mDeltaR>150.0
             );
     } else if(mumu) {
@@ -1117,8 +1117,8 @@ bool SusySelection::passSrRazor0jet(const LeptonVector &leptons, const JetVector
                num_forward_jets==0 &&
                num_central_light_jets==0 &&
                l0.Pt() > 35.0 &&
-               l1.Pt() > 20.0
-               // &&
+               l1.Pt() > 20.0 &&
+               mDeltaR > 20.0
                // mDeltaR > 150.0
             );
     } else if(emu) {
@@ -1126,8 +1126,8 @@ bool SusySelection::passSrRazor0jet(const LeptonVector &leptons, const JetVector
                num_forward_jets==0 &&
                num_central_light_jets==0 &&
                l0.Pt() > 35.0 &&
-               l1.Pt() > 20.0
-               // &&
+               l1.Pt() > 20.0 &&
+               mDeltaR > 20.0
                // mDeltaR > 150.0
             );
     }
