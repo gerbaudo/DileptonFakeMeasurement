@@ -67,8 +67,7 @@ function compute_scalefactors {
     local FILL="--fill-histos" # force fill
     local IN_DIR="out/fakerate/"
     local OUT_DIR="out/fake/scalefactors_${TAG}"
-    local REGION="${SIGNAL_REGION}"
-    local COMMON_OPT="${FILL} ${OPT} -v --tag ${TAG} --input-dir ${IN_DIR} --output-dir ${OUT_DIR} --region ${REGION}"
+    local COMMON_OPT="${FILL} ${OPT} -v --tag ${TAG} --input-dir ${IN_DIR} --output-dir ${OUT_DIR}"
     COMMON_OPT="${COMMON_OPT} ${TIGHTDEF_OPT}"
     mkdir -p ${OUT_DIR}
     # todo: implement real lepton case
