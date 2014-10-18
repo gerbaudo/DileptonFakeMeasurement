@@ -64,8 +64,7 @@ const sf::Region signalRegions[] = {
   sf::CR_SRWHnoMlj
 */
     sf::CR_emu,
-    sf::CR_razor0j,
-    sf::CR_razor1j
+    sf::CR_razor0j
 };
 const size_t nSignalRegions = sizeof(signalRegions)/sizeof(signalRegions[0]);
 const MeasureFakeRate2::LeptonType leptonTypes[] = {MeasureFakeRate2::kElectron, MeasureFakeRate2::kMuon};
@@ -135,7 +134,6 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
 */
       initTuple(m_tupleMakerEmu      ,tffhf(m_fileName, "emu_tuple")      ,"EmuRegion");
       initTuple(m_tupleMakerRazor0j  ,tffhf(m_fileName, "razor0j_tuple")  ,"Razor0jRegion");
-      initTuple(m_tupleMakerRazor1j  ,tffhf(m_fileName, "razor1j_tuple")  ,"Razor1jRegion");
       m_writeTuple = initTuple.all_done;
   }
 }
@@ -350,14 +348,14 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
                 .setL0EtConeCorr(computeCorrectedEtCone(l0)).setL0PtConeCorr(computeCorrectedPtCone(l0))
                 .setL1EtConeCorr(computeCorrectedEtCone(l1)).setL1PtConeCorr(computeCorrectedPtCone(l1))
                 .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
-        } else if(CR==sf::CR_razor0j || CR==sf::CR_razor1j) {
+        } else if(CR==sf::CR_razor0j) {
             assert(m_probes.size()>1);
             const Lepton *l0 = m_probes[0], *l1 = m_probes[1];
             LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
             bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
             bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
             LeptonVector dummyLepts;
-            susy::wh::TupleMaker& tm = CR==sf::CR_razor0j ? m_tupleMakerRazor0j : m_tupleMakerRazor1j;
+            susy::wh::TupleMaker& tm = m_tupleMakerRazor0j;
             tm
                 .setL0IsTight(l0IsTight).setL0Source(l0Source)
                 .setL1IsTight(l1IsTight).setL1Source(l1Source)
