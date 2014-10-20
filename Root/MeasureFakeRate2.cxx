@@ -28,8 +28,8 @@ const sf::Region controlRegions[] = {
 };
 const size_t nControlRegions = sizeof(controlRegions)/sizeof(controlRegions[0]);
 const sf::Region signalRegions[] = {
-/*
   sf::CR_SSInc,
+/*
   sf::CR_SSInc1j,
   sf::CR_SRWHSS,
   sf::CR_CR8lpt,
@@ -88,6 +88,7 @@ MeasureFakeRate2::MeasureFakeRate2() :
   m_tupleMakerHfLfSs("",""),
   m_tupleMakerConv("",""),
   m_tupleMakerZmmeJets("",""),
+  m_tupleMakerSsInc("",""),
   m_tupleMakerSsInc1j("",""),
   m_tupleMakerMcConv("",""),
   m_tupleMakerMcQcd("",""),
@@ -132,6 +133,7 @@ void MeasureFakeRate2::Begin(TTree* /*tree*/)
       initTuple(m_tupleMakerMcQcd    ,tffhf(m_fileName, "mcqcd_tuple")    ,"HfLfExtractionRegion");
       initTuple(m_tupleMakerMcReal   ,tffhf(m_fileName, "mcreal_tuple")   ,"RealExtractionRegion");
 */
+      initTuple(m_tupleMakerSsInc    ,tffhf(m_fileName, "ssinc_tuple")    ,"SameSignRegion");
       initTuple(m_tupleMakerEmu      ,tffhf(m_fileName, "emu_tuple")      ,"EmuRegion");
       initTuple(m_tupleMakerRazor0j  ,tffhf(m_fileName, "razor0j_tuple")  ,"Razor0jRegion");
       m_writeTuple = initTuple.all_done;
@@ -152,6 +154,9 @@ void MeasureFakeRate2::Terminate()
 //       m_tupleMakerConv.close();
 //       m_tupleMakerHfLfSs.close();
 //       m_tupleMakerHfCr.close();
+      cout<<"m_tupleMakerSsInc:   "<<m_tupleMakerSsInc.tree()->GetEntries()<<" entries "<<endl;
+      cout<<"m_tupleMakerEmu:     "<<m_tupleMakerEmu.tree()->GetEntries()<<" entries "<<endl;
+      cout<<"m_tupleMakerRazor0j: "<<m_tupleMakerRazor0j.tree()->GetEntries()<<" entries "<<endl;
   }
   cout<<"Writing file "<<m_outFile<<endl;
   m_outFile->Write();
@@ -357,6 +362,20 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             LeptonVector dummyLepts;
             susy::wh::TupleMaker& tm = m_tupleMakerRazor0j;
             tm
+                .setL0IsTight(l0IsTight).setL0Source(l0Source)
+                .setL1IsTight(l1IsTight).setL1Source(l1Source)
+                .setL0EtConeCorr(computeCorrectedEtCone(l0)).setL0PtConeCorr(computeCorrectedPtCone(l0))
+                .setL1EtConeCorr(computeCorrectedEtCone(l1)).setL1PtConeCorr(computeCorrectedPtCone(l1))
+                .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
+        } else if(CR==sf::CR_SSInc) {
+            assert(m_probes.size()>1);
+            if(m_probes.size()>2) cout<<"warning, "<<m_probes.size()<<" probe leptons (expected 2)"<<endl;
+            const Lepton *l0 = m_probes[0], *l1 = m_probes[1];
+            LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
+            bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            LeptonVector dummyLepts;
+            m_tupleMakerSsInc
                 .setL0IsTight(l0IsTight).setL0Source(l0Source)
                 .setL1IsTight(l1IsTight).setL1Source(l1Source)
                 .setL0EtConeCorr(computeCorrectedEtCone(l0)).setL0PtConeCorr(computeCorrectedPtCone(l0))
