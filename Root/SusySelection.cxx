@@ -1103,29 +1103,29 @@ bool SusySelection::passSrRazor0jet(const LeptonVector &leptons, const JetVector
 
     if(ee){
         pass =(abs(mll-91.2) > 10.0 &&
-               num_central_cb_jets==0 &&
-               num_forward_jets==0 &&
+               // num_forward_jets==0 &&
+               // num_central_cb_jets==0 &&
                // num_central_light_jets==0 &&
-               l0.Pt() > 35.0 &&
+               l0.Pt() > 20.0 &&
                l1.Pt() > 20.0 //&&
                // mDeltaR > 20.0
                // mDeltaR>150.0
             );
     } else if(mumu) {
         pass =(abs(mll-91.2) > 10.0 &&
-               num_central_cb_jets==0 &&
-               num_forward_jets==0 &&
+               // num_forward_jets==0 &&
+               // num_central_cb_jets==0 &&
                // num_central_light_jets==0 &&
-               l0.Pt() > 35.0 &&
+               l0.Pt() > 20.0 &&
                l1.Pt() > 20.0 //&&
                // mDeltaR > 20.0
                // mDeltaR > 150.0
             );
     } else if(emu) {
-        pass =(num_central_cb_jets==0 &&
-               num_forward_jets==0 &&
+        pass =(// num_forward_jets==0 &&
+               // num_central_cb_jets==0 &&
                // num_central_light_jets==0 &&
-               l0.Pt() > 35.0 &&
+               l0.Pt() > 20.0 &&
                l1.Pt() > 20.0 //&&
                // mDeltaR > 20.0
                // mDeltaR > 150.0
