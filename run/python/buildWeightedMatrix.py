@@ -361,10 +361,10 @@ def fetchSfHistos(inputSfFiles=[], lepton='', verbose=False):
     if verbose : print "retrieving scale factors from %s"%inputSfFiles
     fname_hflf = first(filter(lambda _ : 'hflf' in _, fileNames))
     fname_conv = first(filter(lambda _ : 'conv' in _, fileNames))
-    file_hflf = r.TFile.Open(fname_hflf)
+    file_hflf = r.TFile.Open(fname_hflf) if fname_hflf else None
     file_conv = r.TFile.Open(fname_conv) if fname_conv else None
     hname = histoname_sf_vs_eta(lepton)
-    histo_hflf = file_hflf.Get(hname)
+    histo_hflf = file_hflf.Get(hname) if file_hflf else None
     histo_conv = file_conv.Get(hname) if file_conv else None
     histos = dict()
     if histo_hflf : histos['hflf'] = composeEtaHistosAs2dPtEta(input1Dhisto=histo_hflf, outhistoname=hname+'_hflf')
