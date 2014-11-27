@@ -21,6 +21,7 @@ def buildRatio(inputFile=None, histoBaseName='') :
 def mtBinEdges() : return np.array([0.0, 20.0, 40.0, 60.0, 100.0, 200.0])
 def ptBinEdges() : return np.array([10.0, 20.0, 35.0, 100.0])
 def etaBinEdges() : return np.array([0.0, 1.37, 2.50])
+def mdeltarBinEdges() : return np.array([0.0, 20.0, 40.0, 60.0, 100.0, 200.0])
 
 def leptonTypes() : return ['tight', 'loose', 'real_tight', 'real_loose', 'fake_tight', 'fake_loose']
 def allLeptonSources() : return ['heavy',   'light', 'conv',  'real',  'qcd', 'unknown'] # see FakeLeptonSources.h
@@ -207,6 +208,7 @@ tupleStemsAndNames = [ # stem filename, treename (see MeasureFakeRate2::Begin)
     ("hflfss"   , "HeavyFlavorSsControlRegion"),
     ("conv"     , "ConversionControlRegion"),
     ("zmmejets" , "ZmmeVetoPlusJetsRegion"),
+    ("ssinc"    , "SameSignRegion"),
     ("ssinc1j"  , "SameSign1jetControlRegion"),
     ("mcconv"   , "ConversionExtractionRegion"),
     ("mcqcd"    , "HfLfExtractionRegion"),
