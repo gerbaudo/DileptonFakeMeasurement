@@ -9,6 +9,20 @@ import os
 try:
     import numpy as np
 except ImportError:
+    class HackyNumpy(object):
+        "a hack replacement for np; it is only expected to work for basic array operations"
+        def __init__(self):
+            pass
+        def array(self, an_array):
+            length = an_array.GetNoElements() if hasattr(an_array, 'GetNoElements') else len(an_array)
+            vv = r.TVectorD(length)
+            for i in range(length) : vv[i] = an_array[i]
+            return vv
+        def sqrt(self, an_array):
+            return self.array(an_array).Sqrt()
+        def square(self, an_array):
+            return self.array(an_array).Sqr()
+    np = HackyNumpy()
     print "missing numpy: some functions will not be available"
 
 def importRoot() :
@@ -198,6 +212,10 @@ def getBinContents(h) :
     return [h.GetBinContent(b) for b in getBinIndices(h)]
 def getBinErrors(h) :
     return [h.GetBinError(b) for b in getBinIndices(h)]
+def getBinEdges(h) :
+    bins = getBinIndices(h)
+    ax = h.GetXaxis()
+    return [ax.GetBinLowEdge(b) for b in bins]+[ax.GetBinUpEdge(bins[-1])]
 
 def writeObjectsToFile(outputFileName='', objects={}, verbose=False):
     """
