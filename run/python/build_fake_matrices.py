@@ -50,7 +50,6 @@ from SampleUtils import (fastSamplesFromFilenames
 import SampleUtils
 import fakeUtils as fakeu
 from compute_fake_el_scale_factor import histoname_sf_vs_eta
-from buildWeightedMatrix import fetchSfHistos
 
 usage="""
 Example usage:
@@ -62,8 +61,8 @@ Example usage:
  TODO
 """
 # old flat values (still use them for 1D parametrization?)
-el_convSF, el_qcdSF = 1.09, 1.0
-mu_qcdSF = 0.86
+el_convSF, el_qcdSF = 1.09, 1.3
+mu_qcdSF = 1.3
 
 def main():
     parser = optparse.OptionParser(usage=usage)
@@ -87,10 +86,12 @@ def main():
     lepton    = options.lepton
     verbose   = options.verbose
     if lepton not in ['el', 'mu'] : parser.error("invalid lepton '%s'"%lepton)
-    if region not in ['emu', 'ssinc1j','razor0j'] : parser.error("invalid region '%s'"%region)
+    if region not in ['emu', 'ssinc', 'ssinc1j','razor0j'] : parser.error("invalid region '%s'"%region)
     if not compFname or not os.path.exists(compFname) : parser.error("invalid composition file '%s'"%compFname)
     if not effFnames or not all(os.path.exists(f) for f in effFnames) : parser.error("invalid efficiency file '%s'"%str(effFnames))
-    if not sfFnames  or not all(os.path.exists(f) for f in sfFnames) : parser.error("invalid electron sf file(s) %s"%str(sfFnames))
+    if not sfFnames  or not all(os.path.exists(f) for f in sfFnames) :
+        # parser.error("invalid electron sf file(s) %s"%str(sfFnames))
+        print "missing sf files, using flat scale factors"# do not crash, fall back on flat scale factors
     optionsToPrint = ['inputDir', 'outputDir']
     if verbose :
         print "working from %s"%os.getcwd()
@@ -105,17 +106,23 @@ def main():
     # pprint.pprint(compositions)
     efficiencies = fetchEffienciesHistos(effFnames, lepton, groups, verbose) # [var][group][orig], note here orig=[conv,heavy,light,qcd]
     # pprint.pprint(efficiencies)
-    convSF_vs_eta = fetchSfHistos(sfFnames, lepton, verbose)['conv'] if lepton=='el' else None
-    qcdSF_vs_eta  = fetchSfHistos(sfFnames, lepton, verbose)['hflf']
-    if verbose:
-        print "convSF_vs_eta: ",getBinContents(convSF_vs_eta) if convSF_vs_eta else '--'
-        print "qcdSF_vs_eta: ",getBinContents (qcdSF_vs_eta)
+    scale_factor_histos = fetchSfHistos(sfFnames, lepton, verbose)
+    convSF_vs_eta = scale_factor_histos['conv'] if lepton=='el' else None
+    qcdSF_vs_eta  = scale_factor_histos['hflf'] if 'hflf' in scale_factor_histos else None
+    # if verbose:
+    #     print "convSF: "+("vs. eta {0}".format(getBinContents(convSF_vs_eta)) if convSF_vs_eta else el_convSF)
+    #     print "qcdSF: "+("vs. eta {0}".format(getBinContents(qcdSF_vs_eta)) if qcdSF_vs_eta else el_qcdSF)
+    def scale_factor_to_str(sf):
+        if 'vs_eta' in sf: return '['+', '.join("%.3f" % _ for _ in sf['vs_eta'])+']'
+        else : return "%.3f" % sf['flat']
     if lepton=='el':
         scaleFactors = {'conv' : {'flat' : el_convSF, 'vs_eta' : convSF_vs_eta},
                         'heavy' : {'flat' : el_qcdSF, 'vs_eta' : qcdSF_vs_eta} }
+        if verbose : print_scale_factor_dict(scaleFactors)
         scaleFakeEfficiencies(efficiencies, scaleFactors)
     elif lepton=='mu':
         scaleFactors = {'heavy' : {'flat' : mu_qcdSF, 'vs_eta' : qcdSF_vs_eta} }
+        if verbose : print_scale_factor_dict(scaleFactors)
         scaleFakeEfficiencies(efficiencies, scaleFactors)
 
     # for now compute the weighted avg only for 'ssinc1j'
@@ -147,7 +154,6 @@ def main():
 	pprint.pprint(compositions)
 	print 'fetchEffienciesHistos ',effFnames
 	efficiencies = fetchEffienciesHistos(effFnames, lepton, ['anygroup'], verbose)
-	pprint.pprint(efficiencies)
 	avgEfficiencies = dict()
 	for reg in first(first(compositions)).keys():
 	    avgEfficiencies[reg] = dict()
@@ -185,6 +191,7 @@ colorsFillSources = fakeu.colorsFillSources()
 colorsLineSources = fakeu.colorsLineSources()
 markersSources = fakeu.markersSources()
 enum2source = fakeu.enum2source
+fetchSfHistos = fakeu.fetchSfHistos
 
 def histoname_electron_sf_vs_eta() : return 'sf_el_vs_eta'
 def histoname_electron_sf_vs_pt() : return 'sf_el_vs_pt'
@@ -237,6 +244,17 @@ def fetchHistos(fileName='', histoNames={}, verbose=False):
 def scaleFakeEfficiencies(efficiencies={}, scaleFactors={}):
     for var in efficiencies.keys():
         for group in first(efficiencies).keys():
+            def is1d(h): return 'TH1' in h.ClassName()
+            def is2d(h): return 'TH2' in h.ClassName()
+            def scaleHisto(h, sf):
+                if is1d(h) or not 'vs_eta' in sf or not sf['vs_eta'] :   h.Scale(sf['flat'])
+                elif is2d(h) : h.Multiply(sf['vs_eta'])
+            scaleHisto(efficiencies[var][group]['heavy'], scaleFactors['heavy'])
+            scaleHisto(efficiencies[var][group]['qcd'], scaleFactors['heavy'])
+            if 'conv' not in efficiencies[var][group] : continue # mu does not have a conv SF, we're done
+            scaleHisto(efficiencies[var][group]['conv'], scaleFactors['conv'])
+            #
+            continue
             h = efficiencies[var][group]['heavy']
             if 'TH1' in h.ClassName() :   h.Scale   (scaleFactors['heavy']['flat'])
             elif 'TH2' in h.ClassName() : h.Multiply(scaleFactors['heavy']['vs_eta'])
@@ -283,6 +301,14 @@ def weightedAverage(histosEff={}, histosWeight={}, histoName='', histoTitle='', 
     print "tot weight   : %s"%' '.join(("%.4f"%v for v in (sum(histosWeight[g].GetBinContent(b) for g in groups) for b in bins)))
     print "weighted avg : %s"%' '.join(("%.4f"%v for v in getBinContents(hout)))
     return hout
+
+def print_scale_factor_dict(sf_dict):
+    "dict is something like {conv,heavy : {flat,vs_eta : values}}"
+    print "scale factors:"
+    for k,v in sf_dict.iteritems():
+        values = getBinContents(v['vs_eta']) if 'vs_eta' in v and v['vs_eta'] else [v['flat'],]
+        formatted_values = ', '.join("%.3f"%_ for _ in values)
+        print "%s : %s"%(k, formatted_values)
 
 if __name__=='__main__':
     main()

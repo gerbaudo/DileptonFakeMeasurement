@@ -40,6 +40,7 @@ from utils import (enumFromHeader
                    )
 from fakeUtils import (samples
                        ,fakeProcesses
+                       ,fetchSfHistos
                        ,getInputFiles
                        ,buildRatio
                        ,plot1dEfficiencies
@@ -52,7 +53,6 @@ mpl.use('Agg') # render plots without X
 #import matplotlib.pyplot as plt
 import numpy as np
 import SampleUtils
-from compute_fake_el_scale_factor import histoname_sf_vs_eta
 
 usage="""
 Example usage:
@@ -355,23 +355,6 @@ def buildMuonRates(inputFiles, outputfile, outplotdir, inputFracFile=None, verbo
     #json_write(mu_frac, outplotdir+/outFracFilename)
     doPlotFractions = not inputFracFile
     if doPlotFractions : plotFractions(mu_frac, outplotdir, 'frac_mu')
-def fetchSfHistos(inputSfFiles=[], lepton='', verbose=False):
-    fileNames = inputSfFiles
-    assert type(fileNames)==list and len(fileNames) in [1, 2],"fetchSfHistos expects one or two files (hflf+conv), got %s"%str(inputSfFiles)
-    if verbose : print "retrieving scale factors from %s"%inputSfFiles
-    fname_hflf = first(filter(lambda _ : 'hflf' in _, fileNames))
-    fname_conv = first(filter(lambda _ : 'conv' in _, fileNames))
-    file_hflf = r.TFile.Open(fname_hflf) if fname_hflf else None
-    file_conv = r.TFile.Open(fname_conv) if fname_conv else None
-    hname = histoname_sf_vs_eta(lepton)
-    histo_hflf = file_hflf.Get(hname) if file_hflf else None
-    histo_conv = file_conv.Get(hname) if file_conv else None
-    histos = dict()
-    if histo_hflf : histos['hflf'] = composeEtaHistosAs2dPtEta(input1Dhisto=histo_hflf, outhistoname=hname+'_hflf')
-    if histo_conv : histos['conv'] = composeEtaHistosAs2dPtEta(input1Dhisto=histo_conv, outhistoname=hname+'_conv')
-    for f in [file_hflf, file_conv] :
-        if f : f.Close()
-    return histos
 def buildElectronRates(inputFiles, outputfile, outplotdir, inputFracFile=None, inputElecSfFiles=[], verbose=False, zoomIn=False) :
     """
     For each selection region, build the real eff and fake rate
@@ -502,19 +485,6 @@ def compose2Dcompositions(inputSfFile=None, templateHistoName="%(proc)s_%(etabin
                 hEtaPt.SetBinContent(iPt, iEta, hEta.GetBinContent(iPt))
                 hEtaPt.SetBinError  (iPt, iEta, hEta.GetBinError  (iPt))
     return histos2d
-
-def composeEtaHistosAs2dPtEta(input1Dhisto=None, outhistoname='') :
-    "take the 1D scale factor histogram (vs eta), and build a 2D histo that has (pt,eta) on (x,y); see MeasureFakeRate2::initHistos"
-    ptBinEdges = fakeu.ptBinEdges()
-    etaBinEdges = fakeu.etaBinEdges()
-    h = r.TH2F(outhistoname, '', len(ptBinEdges)-1, ptBinEdges, len(etaBinEdges)-1, etaBinEdges)
-    h.SetDirectory(0)
-    h.Sumw2()
-    for iX in range(1, 1+len(ptBinEdges)):
-        for iY in range(1, 1+len(etaBinEdges)):
-            h.SetBinContent(iX, iY, input1Dhisto.GetBinContent(iY))
-            h.SetBinError  (iX, iY, input1Dhisto.GetBinError  (iY))
-    return h
 
 if __name__=='__main__' :
     main()
