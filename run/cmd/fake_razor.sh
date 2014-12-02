@@ -15,11 +15,11 @@ readonly SIGNAL_REGION="razor0j" #"emu" #ssinc1j" # depends on what you are work
 readonly TIGHTDEF_OPT="" #"--tight-def fakeu.lepIsTight_07"
 readonly TIGHTDEF_SUFFIX="" # "_tight_07"
 
-readonly TAG_NTUPLE="Oct_20"
-readonly TAG_COMPOSITIONS="razor_mdr00_Oct_20"
-readonly TAG_EFFICIENCIES="Jul_26"
-readonly TAG_SCALE_FACTORS="Jul_26" # still used for el conv, others are flat for these tests
-readonly TAG_WEIGHTED_AVG="razor_mdr00_Nov_26"
+readonly TAG_NTUPLE="Nov_27"
+readonly TAG_COMPOSITIONS="razor_mdr00_Nov_27"
+readonly TAG_EFFICIENCIES="Nov_27"
+readonly TAG_SCALE_FACTORS="Nov_27" # still used for el conv, others are flat for these tests
+readonly TAG_WEIGHTED_AVG="razor_mdr00_Nov_27"
 
 function help {
 	echo -e "These are the steps to produce the fake matrix file"
