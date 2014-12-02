@@ -255,12 +255,13 @@ def fillHistos(chain, histosPerSource, histosPerSourceAnygroup={}, lepton='', on
                 pt, eta = lep.p4.Pt(), abs(lep.p4.Eta())
                 fill('loose')
                 if isTight : fill('tight')
-        isEmu = (l0.isEl and l1.isEl) or (l0.isMu and l1.isEl)
-        isTightLoose = is_tight(l0) != is_tight(l1)
-        isTightTight = is_tight(l0) and is_tight(l1)
-        if isEmu and isTightTight:
-            fillHistosBySource(l0)
-            fillHistosBySource(l1)
+        isEmu = (l0.isEl and l1.isMu) or (l0.isMu and l1.isEl)
+        l0, l1 = addTlv(l0), addTlv(l1)
+        l0, l1 = (l0, l1) if l0.p4.Pt()>l1.p4.Pt() else (l1, l0) # pt sort
+        # todo: add trigger requirement on l0
+        isTightLoose = is_tight(l0) and not is_tight(l1)
+        isTightTight = (is_tight(l0) and is_tight(l1))
+        if isEmu and (isTightTight or isTightLoose) : fillHistosBySource(l1)
     if verbose : print counters.str()
     return num_processed_entries
 

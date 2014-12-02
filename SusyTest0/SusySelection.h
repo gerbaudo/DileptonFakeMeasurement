@@ -169,7 +169,13 @@ class SusySelection : public SusyNtAna
     static bool passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lepton* l1, const LeptonVector& otherLeptons, bool verbose=false);
     //! ugly hack function : utils::filter seems not to work properly with SusyNtTools::isCentralLightJet...
     static JetVector filterClJets(const JetVector &jets);
+    //! 0-jet signal region for Danny's study
+    bool passSrRazor0jet(const LeptonVector &leptons, const JetVector& jets, const Met &met);
+    //! 1-jet signal region for Danny's study
+    bool passSrRazor1jet(const LeptonVector &leptons, const JetVector& jets, const Met &met);
 
+    void computeRazor(const LeptonVector &leptons, const JetVector& jets, const Met &met,
+                      double &dphi_ll_vBetaT, double &mDeltaR);
  protected:
     //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
     float computeEventWeightXsFromReader(float lumi);

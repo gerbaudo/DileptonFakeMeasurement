@@ -4,4 +4,5 @@
 #PBS -l nodes=1:ppn=1
 
 cd $PBS_O_WORKDIR
-FakePred -i ${inp} --tuple-out ${out} -s ${sample} --matrix-file ${ROOTCOREDIR}/../SusyMatrixMethod/data/FinalFakeHist_Nov_10.root ${opt}
+# FakePred -i ${inp} --tuple-out ${out} -s ${sample} --matrix-file ${ROOTCOREDIR}/../SusyMatrixMethod/data/FinalFakeHist_Nov_10.root ${opt}
+FakePred -i ${inp} --tuple-out ${out} -s ${sample} --matrix-file ${ROOTCOREDIR}/data/DileptonMatrixMethod/FakeMatrix_Jul_26.root ${opt}

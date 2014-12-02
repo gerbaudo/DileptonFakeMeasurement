@@ -1,7 +1,7 @@
 
 import numpy as np
 
-from utils import rmIfExists
+from utils import first, rmIfExists
 from rootUtils import importRoot, buildRatioHistogram, getMinMax, drawLegendWithDictKeys
 r = importRoot()
 import SampleUtils
@@ -21,6 +21,7 @@ def buildRatio(inputFile=None, histoBaseName='') :
 def mtBinEdges() : return np.array([0.0, 20.0, 40.0, 60.0, 100.0, 200.0])
 def ptBinEdges() : return np.array([10.0, 20.0, 35.0, 100.0])
 def etaBinEdges() : return np.array([0.0, 1.37, 2.50])
+def mdeltarBinEdges() : return np.array([0.0, 20.0, 40.0, 60.0, 100.0, 200.0])
 
 def leptonTypes() : return ['tight', 'loose', 'real_tight', 'real_loose', 'fake_tight', 'fake_loose']
 def allLeptonSources() : return ['heavy',   'light', 'conv',  'real',  'qcd', 'unknown'] # see FakeLeptonSources.h
@@ -166,6 +167,48 @@ def muonIsIsolated(l, denom, etConeThres, ptConeThres):
     return ((etCone*denom < etConeThres if etConeThres else True) and
             (ptCone*denom < ptConeThres if ptConeThres else True)
             if denom else False)
+
+def fetchSfHistos(inputSfFiles=[], lepton='', verbose=False):
+    from compute_fake_el_scale_factor import histoname_sf_vs_eta
+    fileNames = inputSfFiles
+    histos = dict()
+    print "fetchSfHistos: fileNames ",fileNames
+    if not (type(fileNames)==list and
+            len(fileNames) in [1, 2]):
+        print "fetchSfHistos expects one or two files (hflf+conv), got %s"%str(inputSfFiles)
+        print "returning ",histos
+        return histos
+    if verbose : print "retrieving scale factors from %s"%inputSfFiles
+    fname_hflf = first(filter(lambda _ : 'hflf' in _, fileNames))
+    fname_conv = first(filter(lambda _ : 'conv' in _, fileNames))
+    file_hflf = r.TFile.Open(fname_hflf) if fname_hflf else None
+    file_conv = r.TFile.Open(fname_conv) if fname_conv else None
+    hname = histoname_sf_vs_eta(lepton)
+    histo_hflf = file_hflf.Get(hname) if file_hflf else None
+    histo_conv = file_conv.Get(hname) if file_conv else None
+    if histo_hflf : histos['hflf'] = composeEtaHistosAs2dPtEta(input1Dhisto=histo_hflf,
+                                                               outhistoname=hname+'_hflf')
+    if histo_conv : histos['conv'] = composeEtaHistosAs2dPtEta(input1Dhisto=histo_conv,
+                                                               outhistoname=hname+'_conv')
+    for f in [file_hflf, file_conv] :
+        if f : f.Close()
+    return histos
+
+def composeEtaHistosAs2dPtEta(input1Dhisto=None, outhistoname='') :
+    """take the 1D scale factor histogram (vs eta), and build a 2D
+    histo that has (pt,eta) on (x,y); see
+    MeasureFakeRate2::initHistos"""
+    ptBins = ptBinEdges()
+    etaBins = etaBinEdges()
+    h = r.TH2F(outhistoname, '', len(ptBins)-1, ptBins, len(etaBins)-1, etaBins)
+    h.SetDirectory(0)
+    h.Sumw2()
+    for iX in range(1, 1+len(ptBins)):
+        for iY in range(1, 1+len(etaBins)):
+            h.SetBinContent(iX, iY, input1Dhisto.GetBinContent(iY))
+            h.SetBinError  (iX, iY, input1Dhisto.GetBinError  (iY))
+    return h
+
 #___________________________________________________________
 # see SusyDefs.h:TrigBit
 triggerBitNames = ['e7_medium1', #2012 triggers
@@ -207,10 +250,13 @@ tupleStemsAndNames = [ # stem filename, treename (see MeasureFakeRate2::Begin)
     ("hflfss"   , "HeavyFlavorSsControlRegion"),
     ("conv"     , "ConversionControlRegion"),
     ("zmmejets" , "ZmmeVetoPlusJetsRegion"),
+    ("ssinc"    , "SameSignRegion"),
     ("ssinc1j"  , "SameSign1jetControlRegion"),
     ("mcconv"   , "ConversionExtractionRegion"),
     ("mcqcd"    , "HfLfExtractionRegion"),
     ("mcreal"   , "RealExtractionRegion"),
     ("emu"      , "EmuRegion"),
+    ("razor0j"  , "Razor0jRegion"),
+    ("razor1j"  , "Razor1jRegion"),
     ]
 #___________________________________________________________

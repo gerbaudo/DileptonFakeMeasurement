@@ -132,11 +132,14 @@ class MeasureFakeRate2 : public SusySelection
   susy::wh::TupleMaker m_tupleMakerHfLfSs; //!< tuple for sf::CR_HF_SS
   susy::wh::TupleMaker m_tupleMakerConv; //!< tuple for sf::CR_Conv
   susy::wh::TupleMaker m_tupleMakerZmmeJets; //!< tuple for sf::CR_Z3lVetoPlusJets
+  susy::wh::TupleMaker m_tupleMakerSsInc; //!< tuple for CR_SSInc
   susy::wh::TupleMaker m_tupleMakerSsInc1j; //!< tuple for CR_SSInc1j
   susy::wh::TupleMaker m_tupleMakerMcConv; //!< tuple for CR_MCConv
   susy::wh::TupleMaker m_tupleMakerMcQcd;  //!< tuple for CR_MCQCD
   susy::wh::TupleMaker m_tupleMakerMcReal; //!< tuple for CR_MCReal
   susy::wh::TupleMaker m_tupleMakerEmu; ///< tuple for emu
+  susy::wh::TupleMaker m_tupleMakerRazor0j;
+  susy::wh::TupleMaker m_tupleMakerRazor1j;
   //! tuple filename with specific suffix: one suffix (i.e. one output file) for each control region
   static std::string tupleFilenameFromHistoFilename(const std::string &histoFilename, const std::string &suffix);
 

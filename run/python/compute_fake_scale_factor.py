@@ -199,11 +199,13 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
         pt0 = tag4m.Pt()
         pt1 = probe4m.Pt()
         isLowMt = mt1 < 40.0 if region=='hflf' else True # used to reduce the contamination from real (mostly W+jets)
+        isMuMu = tag.isMu and probe.isMu
         passTrigBias =  True
-        if isHflf         : passTrigBias = pt0>20.0 and pt1>20.0
+        if   isHflf       : passTrigBias = pt0>20.0 and pt1>20.0
         elif isConversion : passTrigBias = pt1>20.0
-        if isRightLep and isLowMt and passTrigBias:
-#         if (isSameSign or isConversion) and isRightLep and isLowMt: # test sf conversion (not very important for now, 2014-04)
+        if tag.isMu and (isSameSign or isConversion) and isRightLep and isLowMt and passTrigBias:
+        # if isMuMu and isRightLep and isLowMt and passTrigBias: # test emu mumu
+        # if (isSameSign or isConversion) and isRightLep and isLowMt: # test sf conversion (not very important for now, 2014-04)
 
             def incrementCounts(counts, weightedCounts):
                 counts +=1

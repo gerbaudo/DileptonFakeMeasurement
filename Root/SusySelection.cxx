@@ -1085,3 +1085,113 @@ bool SusySelection::passSrWhNoMlj(const susy::wh::kin::DilepVars &v)
     return (pass1j || pass2j);
 }
 //-----------------------------------------
+bool SusySelection::passSrRazor0jet(const LeptonVector &leptons, const JetVector& jets, const Met &met)
+{
+    bool pass=false;
+    if(leptons.size()<2) return pass;
+    size_t num_central_light_jets = numberOfCLJets(jets);
+    size_t num_central_cb_jets = numberOfCBJets(jets);
+    size_t num_forward_jets = numberOfFJets(jets);
+    Susy::Lepton &l0 = *leptons[0];
+    Susy::Lepton &l1 = *leptons[1];
+    bool ee(l0.isEle() && l1.isEle());
+    bool mumu(l0.isMu() && l1.isMu());
+    bool emu((l0.isEle() && l1.isMu()) || (l0.isMu() && l1.isEle()));
+    double mll((l0+l1).M());
+    double dphi_ll_vBetaT(0.0), mDeltaR(0.0);
+    SusySelection::computeRazor(leptons, jets, met, dphi_ll_vBetaT, mDeltaR);
+
+    if(ee){
+        pass =(abs(mll-91.2) > 10.0 &&
+               // num_forward_jets==0 &&
+               // num_central_cb_jets==0 &&
+               // num_central_light_jets==0 &&
+               l0.Pt() > 20.0 &&
+               l1.Pt() > 20.0 //&&
+               // mDeltaR > 20.0
+               // mDeltaR>150.0
+            );
+    } else if(mumu) {
+        pass =(abs(mll-91.2) > 10.0 &&
+               // num_forward_jets==0 &&
+               // num_central_cb_jets==0 &&
+               // num_central_light_jets==0 &&
+               l0.Pt() > 20.0 &&
+               l1.Pt() > 20.0 //&&
+               // mDeltaR > 20.0
+               // mDeltaR > 150.0
+            );
+    } else if(emu) {
+        pass =(// num_forward_jets==0 &&
+               // num_central_cb_jets==0 &&
+               // num_central_light_jets==0 &&
+               l0.Pt() > 20.0 &&
+               l1.Pt() > 20.0 //&&
+               // mDeltaR > 20.0
+               // mDeltaR > 150.0
+            );
+    }
+//    cout<<"SusySelection::passSrRazor0jet "<<(ee ? "ee" : mumu ? "mumu" : "emu")<<" "<<pass<<endl;
+    return pass;
+}
+//-----------------------------------------
+bool SusySelection::passSrRazor1jet(const LeptonVector &leptons, const JetVector& jets, const Met &met)
+{
+    bool pass=false;
+    if(leptons.size()<2) return pass;
+    size_t num_central_light_jets = numberOfCLJets(jets);
+    size_t num_central_cb_jets = numberOfCBJets(jets);
+    size_t num_forward_jets = numberOfFJets(jets);
+    Susy::Lepton &l0 = *leptons[0];
+    Susy::Lepton &l1 = *leptons[1];
+    bool ee(l0.isEle() && l1.isEle());
+    bool mumu(l0.isMu() && l1.isMu());
+    bool emu((l0.isEle() && l1.isMu()) || (l0.isMu() && l1.isEle()));
+    double mll((l0+l1).M());
+    double dphi_ll_vBetaT(0.0), mDeltaR(0.0);
+    SusySelection::computeRazor(leptons, jets, met, dphi_ll_vBetaT, mDeltaR);
+    double r2 = (met.Et / (met.Et + l0.Pt() + l1.Pt()));
+    TLorentzVector j0 = m_signalJets2Lep.size()>0 ? *m_signalJets2Lep[0] : TLorentzVector();
+    if(ee){
+        pass = (num_central_light_jets==1 &&
+                num_central_cb_jets==0 &&
+                num_forward_jets==0 &&
+                abs(mll-91.2) > 10.0 &&
+                mDeltaR > 90.0 &&
+                j0.Pt() > 80.0 &&
+                dphi_ll_vBetaT > 2.0 &&
+                r2 > 0.5);
+    } else if(mumu) {
+        pass = (num_central_light_jets==1 &&
+                num_central_cb_jets==0 &&
+                num_forward_jets==0 &&
+                abs(mll-91.2) > 10.0 &&
+                mDeltaR > 90.0 &&
+                j0.Pt() > 80.0 &&
+                dphi_ll_vBetaT > 2.0 &&
+                r2 > 0.5);
+    } else if(emu) {
+        pass = (num_central_light_jets==1 &&
+                num_central_cb_jets==0 &&
+                num_forward_jets==0 &&
+                mDeltaR > 90.0 &&
+                j0.Pt() > 80.0 &&
+                dphi_ll_vBetaT > 2.5 &&
+                r2 > 0.7);
+    }
+//    cout<<"SusySelection::passSrRazor0jet "<<(ee ? "ee" : mumu ? "mumu" : "emu")<<" "<<pass<<endl;
+    return pass;
+}
+//-----------------------------------------
+
+void SusySelection::computeRazor(const LeptonVector &leptons, const JetVector& jets, const Met &met,
+                                 double &dphi_ll_vBetaT, double &mDeltaR)
+{
+    TVector3 vBETA_z, pT_CM, vBETA_T_CMtoR, vBETA_R;
+    double SHATR, dphi_LL_vBETA_T, dphi_L1_L2, gamma_R, dphi_vBETA_R_vBETA_T, MDELTAR, costhetaRp1;
+    SusyNtTools::superRazor(leptons, &met,
+                            vBETA_z,  pT_CM, vBETA_T_CMtoR,  vBETA_R,
+                            SHATR, dphi_LL_vBETA_T, dphi_L1_L2, gamma_R, dphi_vBETA_R_vBETA_T, MDELTAR, costhetaRp1);
+    dphi_ll_vBetaT = dphi_LL_vBETA_T;
+    mDeltaR = MDELTAR;
+}

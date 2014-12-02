@@ -106,7 +106,7 @@ def main():
     for s, f in zip(samples, tupleFilenames) :
         samplesPerGroup[s.group].append(s)
         filenamesPerGroup[s.group].append(f)
-    vars = ['pt', 'eta', 'pt_eta', 'mt']
+    vars = ['pt', 'eta', 'pt_eta', 'mt', 'mdeltar']
     groups = samplesPerGroup.keys()
     if lepton=='el' : groups = [g for g in groups if g!='heavyflavor']
     selections = [region]
@@ -334,6 +334,7 @@ def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, selection
         l0, l1 = kin.addTlv(event.l0), kin.addTlv(event.l1)
         met = kin.addTlv(event.met)
         jets = [kin.addTlv(j) for j in event.jets]
+        dphi_ll_vBetaT, mdeltar = kin.computeRazor(l0.p4, l1.p4, met.p4)
         sourceReal = 3 # see FakeLeptonSources.h
         l0IsFake = l0.source!=sourceReal and not isData
         l1IsFake = l0.source!=sourceReal and not isData
@@ -350,12 +351,14 @@ def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, selection
             def fill():
                 pt, eta, mt = lep.p4.Pt(), abs(lep.p4.Eta()), computeMt(lep.p4, met.p4)
                 pt, eta, mt = shiftWithinRange(pt, eta, mt) # avoid loosing entries due to over/underflow
-                histosThisGroupPerSource[selection][leptonSource]['mt'    ]['loose'].Fill(mt,  weight)
-                histosThisGroupPerSource[selection][leptonSource]['pt'    ]['loose'].Fill(pt,  weight)
-                histosThisGroupPerSource[selection][leptonSource]['eta'   ]['loose'].Fill(eta, weight)
-                histosThisGroupPerSource[selection][leptonSource]['pt_eta']['loose'].Fill(pt, eta, weight)
+                histosThisGroupPerSource[selection][leptonSource]['mt'     ]['loose'].Fill(mt,      weight)
+                histosThisGroupPerSource[selection][leptonSource]['pt'     ]['loose'].Fill(pt,      weight)
+                histosThisGroupPerSource[selection][leptonSource]['eta'    ]['loose'].Fill(eta,     weight)
+                histosThisGroupPerSource[selection][leptonSource]['mdeltar']['loose'].Fill(mdeltar, weight)
+                histosThisGroupPerSource[selection][leptonSource]['pt_eta' ]['loose'].Fill(pt, eta, weight)
             filled = False
-            if isRightLep and sourceIsKnown and isFake: # DG-2014-08-08: pt cut still needed? and lep.p4.Pt()>20.0:
+            # if isRightLep and sourceIsKnown and isFake: # DG-2014-08-08: pt cut still needed? and lep.p4.Pt()>20.0:
+            if isRightLep and sourceIsKnown and isFake: # and mdeltar>20.0: # DG-2014-10-17: try razor mod sel
                 fill()
                 filled = True
             return filled
@@ -373,9 +376,11 @@ def bookHistosPerSamplePerSource(variables, samples, sources, selections):
         mtBinEdges = fakeu.mtBinEdges()
         ptBinEdges = fakeu.ptBinEdges()
         etaBinEdges = fakeu.etaBinEdges()
+        mdrBinEdges = fakeu.mdeltarBinEdges()
         if   variable=='pt'  : h = r.TH1F(hname, ';p_{T,l} [GeV]; entries/bin',   len(ptBinEdges)-1,  ptBinEdges)
         elif variable=='eta' : h = r.TH1F(hname, ';|#eta_{l}|; entries/bin',        len(etaBinEdges)-1, etaBinEdges)
         elif variable=='mt'  : h = r.TH1F(hname, ';m_{T}(l,MET) [GeV]; entries/bin', len(mtBinEdges)-1, mtBinEdges)
+        elif variable=='mdeltar': h = r.TH1F(hname, ';m_{T}(l,MET) [GeV]; entries/bin', len(mdrBinEdges)-1, mdrBinEdges)
         elif variable=='pt_eta' : h = r.TH2F(hname, ';p_{T,l} [GeV]; #eta_{l};',  len(ptBinEdges)-1,  ptBinEdges, len(etaBinEdges)-1, etaBinEdges)
         else : print "unknown variable %s"%v
         h.SetDirectory(0)

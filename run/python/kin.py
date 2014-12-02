@@ -89,3 +89,42 @@ def computeMljj(l0, l1, j0, j1) :
 def computeMlj(l0, l1, j) :
     dr0, dr1 = j.DeltaR(l0), j.DeltaR(l1)
     return (j+l0).M() if dr0<dr1 else (j+l1).M()
+
+def computeRazor(l0, l1, met):
+    """
+    razor variables from hep-ph/1310.4827.
+    Inputs are TLorentzVector objects
+    """
+    metlv = met
+    l0    = l0
+    l1    = l1
+    # lab frame
+    vBETA_z = (l0+l1).Vect()*r.Double(1./(l0.E()+l1.E()))
+    vBETA_z.SetX(0.0)
+    vBETA_z.SetY(0.0)
+    l0.Boost(-vBETA_z)
+    l1.Boost(-vBETA_z)
+    pT_CM = (l0+l1).Vect() + metlv.Vect()
+    pT_CM.SetZ(0.0)
+    ll = l0+l1
+    SHATR = sqrt( 2.*(ll.E()*ll.E() - ll.Vect().Dot(pT_CM)
+                      + ll.E()*sqrt( ll.E()*ll.E() + pT_CM.Mag2() - 2.*ll.Vect().Dot(pT_CM) )))
+    vBETA_T_CMtoR = pT_CM * r.Double(1./sqrt(pT_CM.Mag2() + SHATR*SHATR))
+    l0.Boost(-vBETA_T_CMtoR)
+    l1.Boost(-vBETA_T_CMtoR)
+    ll.Boost(-vBETA_T_CMtoR)
+    # R-frame
+    dphi_LL_vBETA_T = fabs((ll.Vect()).DeltaPhi(vBETA_T_CMtoR))
+    dphi_L1_L2 = fabs(l0.Vect().DeltaPhi(l1.Vect()))
+    vBETA_R = (l0.Vect() - l1.Vect())*r.Double(1./(l0.E()+l1.E()))
+    try:
+        gamma_R = 1./sqrt(1.-vBETA_R.Mag2())
+    except ValueError:
+        print 1.-vBETA_R.Mag2()
+    dphi_vBETA_R_vBETA_T = fabs(vBETA_R.DeltaPhi(vBETA_T_CMtoR))
+    l0.Boost(-vBETA_R)
+    l1.Boost(vBETA_R)
+    # R+1 frame
+    MDELTAR = 2.*l0.E()
+    costhetaRp1 = l0.Vect().Dot(vBETA_R)/(l0.Vect().Mag()*vBETA_R.Mag())
+    return dphi_LL_vBETA_T, MDELTAR
