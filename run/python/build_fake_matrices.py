@@ -253,19 +253,6 @@ def scaleFakeEfficiencies(efficiencies={}, scaleFactors={}):
             scaleHisto(efficiencies[var][group]['qcd'], scaleFactors['heavy'])
             if 'conv' not in efficiencies[var][group] : continue # mu does not have a conv SF, we're done
             scaleHisto(efficiencies[var][group]['conv'], scaleFactors['conv'])
-            #
-            continue
-            h = efficiencies[var][group]['heavy']
-            if 'TH1' in h.ClassName() :   h.Scale   (scaleFactors['heavy']['flat'])
-            elif 'TH2' in h.ClassName() : h.Multiply(scaleFactors['heavy']['vs_eta'])
-            h = efficiencies[var][group]['qcd'] # scale qcd with the 'heavy' sf (but assume that the 'light' one is 1.0, see 3L)
-            if 'TH1' in h.ClassName() :   h.Scale   (scaleFactors['heavy']['flat'])
-            elif 'TH2' in h.ClassName() : h.Multiply(scaleFactors['heavy']['vs_eta'])
-            if not 'conv' in efficiencies[var][group] : continue # mu does not have a conv SF, we're done
-            h = efficiencies[var][group]['conv']
-            if 'TH1' in h.ClassName() :   h.Scale   (scaleFactors['conv']['flat'])
-            elif 'TH2' in h.ClassName() : h.Multiply(scaleFactors['conv']['vs_eta'])
-
 
 def weightedAverage(histosEff={}, histosWeight={}, histoName='', histoTitle='', verbose=False):
     getBinIndices, getBinContents, getBinning = rootUtils.getBinIndices, rootUtils.getBinContents, rootUtils.getBinning
