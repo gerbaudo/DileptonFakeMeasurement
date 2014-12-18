@@ -166,6 +166,30 @@ datasets += [Dataset(sampleType, d, group, template%{'qq':qq, 'np':np}, process,
                                      npsBase[:-1]+['3', '4incl'])]
              for d, np in rzip(dsids, nps)]
 
+
+nps = ['0', '1', '2', '3', '4', '5incl']
+template, process = "AlpgenPythia_Auto_P2011C_Z%(ll)sNp%(np)s", 'Zlljets'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process, placeholder)
+             for ll, dsids in [('ee',     range(147105, 147110+1)),
+                               ('mumu',   range(147113, 147118+1)),
+                               ('tautau', range(147121, 147126+1))]
+             for d, np in rzip(dsids, nps)]
+
+nps = ['0', '1', '2', '3incl']
+template, process = "AlpgenPythia_Auto_P2011C_Z%(ll)sbbNp%(np)s", 'Zbbjets'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process, placeholder)
+             for ll, dsids in [('ee',     range(200332, 200335+1)),
+                               ('mumu',   range(200340, 200343+1)),
+                               ('tautau', range(200348, 200351+1))]
+             for d, np in rzip(dsids, nps)]
+nps = ['0', '1', '2', '3incl']
+template, process = "AlpgenPythia_Auto_P2011C_Z%(ll)sccNp%(np)s", 'Zccjets'
+datasets += [Dataset(sampleType, d, group, template%{'ll':ll, 'np':np}, process, placeholder)
+             for ll, dsids in [('ee',     range(200432, 200435+1)),
+                               ('mumu',   range(200440, 200443+1)),
+                               ('tautau', range(200448, 200451+1))]
+             for d, np in rzip(dsids, nps)]
+
 group = 'ttbar'
 template, process = 'McAtNloJimmy_AUET2CT10_SingleTopSChanW%(lv)s', 'singletop'
 datasets += [Dataset(sampleType, d, group, template%{'lv':lv}, process)
