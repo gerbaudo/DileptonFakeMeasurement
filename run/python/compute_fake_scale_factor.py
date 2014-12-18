@@ -137,13 +137,15 @@ def main():
     for g in groups:
         hps = dict((v, histosPerSamplePerSource[v][g])for v in vars)
         plotPerSourceEff(histosPerVar=hps, outputDir=outputDir, lepton=lepton, region=region, sample=g, verbose=verbose)
-    sf_eta = subtractRealAndComputeScaleFactor(histosPerGroup, 'eta1', histoname_sf_vs_eta(lepton), outputDir, region, verbose)
-    sf_pt  = subtractRealAndComputeScaleFactor(histosPerGroup, 'pt1',  histoname_sf_vs_pt(lepton),  outputDir, region, verbose)
-    outputFile = r.TFile.Open(outputFileName, 'recreate')
-    outputFile.cd()
-    sf_eta.Write()
-    sf_pt.Write()
-    outputFile.Close()
+
+
+    hn_sf_eta = histoname_sf_vs_eta           (lepton)
+    hn_sf_pt  = histoname_sf_vs_pt            (lepton)
+    hn_da_eta = histoname_data_fake_eff_vs_eta(lepton)
+    hn_da_pt  = histoname_data_fake_eff_vs_pt (lepton)
+    objs_eta = subtractRealAndComputeScaleFactor(histosPerGroup, 'eta1', hn_sf_eta, hn_da_eta, outputDir, region, verbose)
+    objs_pt  = subtractRealAndComputeScaleFactor(histosPerGroup, 'pt1',  hn_sf_pt,  hn_da_pt,  outputDir, region, verbose)
+    rootUtils.writeObjectsToFile(outputFileName, dictSum(objs_eta, objs_pt), verbose)
     if verbose : print "saved scale factors to %s" % outputFileName
 
 #___________________________________________________
@@ -158,6 +160,8 @@ enum2source = fakeu.enum2source
 
 def histoname_sf_vs_eta(l) : return 'sf_'+l+'_vs_eta'
 def histoname_sf_vs_pt (l) : return 'sf_'+l+'_vs_pt'
+def histoname_data_fake_eff_vs_eta(l) : return l+'_fake_rate_data_vs_eta'
+def histoname_data_fake_eff_vs_pt (l) : return l+'_fake_rate_data_vs_pt'
 
 def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource,
                lepton, group, region, onthefly_tight_def=None, verbose=False):
@@ -179,15 +183,19 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
         weight = weight*normFactor
         tag, probe, met = addTlv(event.l0), addTlv(event.l1), addTlv(event.met)
         isSameSign = tag.charge*probe.charge > 0.
-        isRightLep = probe.isEl if lepton=='el' else probe.isMu if lepton=='mu' else False
+        isRightProbe = probe.isEl if lepton=='el' else probe.isMu if lepton=='mu' else False
         isTight = onthefly_tight_def(probe) if onthefly_tight_def else probe.isTight
         probeSource = probe.source
         sourceReal = 3 # see FakeLeptonSources.h
         isReal = probeSource==sourceReal and not isData
         isFake = not isReal and not isData
         jets = event.jets
-#         def isBjet(j, mv1_80=0.3511) : return j.mv1 > mv1_80 # see SusyDefs.h
-#         hasBjets = any(isBjet(j) for j in jets) # compute only if necessary
+        # jets = [addTlv(j) for j in jets] # only if needed
+        def isBjet(j, mv1_80=0.3511) : return j.mv1 > mv1_80 # see SusyDefs.h
+        # hasBjets = any(isBjet(j) for j in jets) # compute only if necessary
+        # hasFjets = any(abs(j.p4.Eta())>2.4 and j.p4.Pt()>30. for j in jets)
+        # hasCLjets = any(abs(j.p4.Eta())<2.4 and j.p4.Pt()>30 and not isBjet(j) for j in jets)
+        # hasJ30jets = any(j.p4.Pt()>30. for j in jets)
         tag4m, probe4m, met4m = r.TLorentzVector(), r.TLorentzVector(), r.TLorentzVector()
         tag4m.SetPxPyPzE(tag.px, tag.py, tag.pz, tag.E)
         probe4m.SetPxPyPzE(probe.px, probe.py, probe.pz, probe.E)
@@ -203,14 +211,14 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
         passTrigBias =  True
         if   isHflf       : passTrigBias = pt0>20.0 and pt1>20.0
         elif isConversion : passTrigBias = pt1>20.0
-        if tag.isMu and (isSameSign or isConversion) and isRightLep and isLowMt and passTrigBias:
-        # if isMuMu and isRightLep and isLowMt and passTrigBias: # test emu mumu
-        # if (isSameSign or isConversion) and isRightLep and isLowMt: # test sf conversion (not very important for now, 2014-04)
+        if tag.isMu and isRightProbe and isSameSign : # test 1 : no jet req
+        # if tag.isMu and isRightProbe and isSameSign and not hasBjets: # test 2 : veto b-jets
+        # if tag.isMu and isRightProbe and isSameSign and not (hasBjets or hasFjets or hasCLjets): # test 3 : require no jets (cl30, bj, fj)
+        # if tag.isMu and isRightProbe and isSameSign and not hasJ30jets: # test 4 : require no jets (cl30, bj, fj)
+        # if tag.isMu and (isSameSign or isConversion) and isRightProbe and isLowMt and passTrigBias:
+        # if isMuMu and isRightProbe and isLowMt and passTrigBias: # test emu mumu
+        # if (isSameSign or isConversion) and isRightProbe and isLowMt: # test sf conversion (not very important for now, 2014-04)
 
-            def incrementCounts(counts, weightedCounts):
-                counts +=1
-                weightedCounts += weight
-            incrementCounts(nLoose, totWeightLoose)
             def fillHistosBySource(probe):
                 leptonSource = enum2source(probe)
                 def fill(tightOrLoose):
@@ -224,8 +232,9 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
                 if isTight : fill('tight')
             sourceIsKnown = not isData
             if sourceIsKnown : fillHistosBySource(probe)
-
-            if isTight: incrementCounts(nTight, totWeightTight)
+            nLoose, totWeightLoose = nLoose+1, totWeightLoose+weight
+            if isTight:
+                nTight, totWeightTight = nTight+1, totWeightTight+weight
             histosThisGroup['mt0']['loose'].Fill(mt0, weight)
             histosThisGroup['pt0']['loose'].Fill(pt0, weight)
             histosThisGroup['mt1']['loose'].Fill(mt1, weight)
@@ -497,7 +506,8 @@ def plotPerSourceEff(histosPerVar={}, outputDir='', lepton='', region='', sample
         utils.rmIfExists(outFname)
         can.SaveAs(outFname)
 
-def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', outhistoname='', outputDir='./', region='', verbose=False):
+def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', outRatiohistoname='',outDataeffhistoname='',
+                                      outputDir='./', region='', verbose=False):
     "efficiency scale factor"
     groups = histosPerGroup.keys()
     mkdirIfNeeded(outputDir)
@@ -526,12 +536,12 @@ def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', outhistona
     def formatFloat(floats): return ["%.4f"%f for f in floats]
     print "efficiency data : ",formatFloat(getBinContents(dataTight))
     print "efficiency simu : ",formatFloat(getBinContents(simuTight))
-    ratio = dataTight.Clone(outhistoname)
+    ratio = dataTight.Clone(outRatiohistoname)
     ratio.SetDirectory(0)
     ratio.Divide(simuTight)
     print "sf    data/simu : ",formatFloat(getBinContents(ratio))
     print "            +/- : ",formatFloat(getBinErrors(ratio))
-    can = r.TCanvas('c_'+outhistoname, outhistoname, 800, 600)
+    can = r.TCanvas('c_'+outRatiohistoname, outRatiohistoname, 800, 600)
     botPad, topPad = rootUtils.buildBotTopPads(can)
     can.cd()
     topPad.Draw()
@@ -554,7 +564,8 @@ def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', outhistona
     dataTight.Draw('same')
     simuTight.Draw('same')
     leg = drawLegendWithDictKeys(topPad, {'data':dataTight, 'simulation':simuTight}, legWidth=0.4)
-    leg.SetHeader('scale factor '+region+' '+('electron' if '_el_'in outhistoname else 'muon' if '_mu_' in outhistoname else ''))
+    leg.SetHeader('scale factor '+region+' '+('electron' if '_el_'in outRatiohistoname else
+                                              'muon' if '_mu_' in outRatiohistoname else ''))
     can.cd()
     botPad.Draw()
     botPad.cd()
@@ -574,11 +585,12 @@ def subtractRealAndComputeScaleFactor(histosPerGroup={}, variable='', outhistona
     refLine = rootUtils.referenceLine(xAx.GetXmin(), xAx.GetXmax())
     refLine.Draw()
     can.Update()
-    outFname = os.path.join(outputDir, region+'_'+outhistoname)
+    outFname = os.path.join(outputDir, region+'_'+outRatiohistoname)
     for ext in ['.eps','.png']:
         utils.rmIfExists(outFname+ext)
         can.SaveAs(outFname+ext)
-    return ratio
+    eff_data = dataTight.Clone(outDataeffhistoname)
+    return {outRatiohistoname : ratio, outDataeffhistoname : eff_data}
 
 def computeStatErr2(nominal_histo=None) :
     "Compute the bin-by-bin err2 (should include also mc syst, but for now it does not)"
