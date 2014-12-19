@@ -376,12 +376,15 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
             bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
             bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            LeptonVector trigLeps(m_probes.begin(), m_probes.begin()+2); // copy them and insure we're matching the same ones we store
+            bool has2ltrigmatch(SusySelection::passTrig2LwithMatch(trigLeps, m_trigObj, m_met->Et, nt.evt()));
             LeptonVector dummyLepts;
             m_tupleMakerSsInc
                 .setL0IsTight(l0IsTight).setL0Source(l0Source)
                 .setL1IsTight(l1IsTight).setL1Source(l1Source)
                 .setL0EtConeCorr(computeCorrectedEtCone(l0)).setL0PtConeCorr(computeCorrectedPtCone(l0))
                 .setL1EtConeCorr(computeCorrectedEtCone(l1)).setL1PtConeCorr(computeCorrectedPtCone(l1))
+                .setHas2ltrigmatch(static_cast<int>(has2ltrigmatch))
                 .fill(m_evtWeight, run, event, *l0, *l1, *m_met, dummyLepts, jets);
         }
     }

@@ -58,6 +58,7 @@ public:
     TupleMaker& setL1EtConeCorr(float v) { l1_.setEtConeCorr(v); return *this; }
     TupleMaker& setL0PtConeCorr(float v) { l0_.setPtConeCorr(v); return *this; }
     TupleMaker& setL1PtConeCorr(float v) { l1_.setPtConeCorr(v); return *this; }
+    TupleMaker& setHas2ltrigmatch(const int &v) { eventPars_.setHas2ltrigmatch(v); return *this; }
     const TFile* file() const { return file_; }
     const TTree* tree() const { return tree_; }
     const FourMom& l0() const { return l0_; }

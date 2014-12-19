@@ -75,11 +75,13 @@ struct EventParameters {
     double weight;
     unsigned int eventNumber;
     unsigned int runNumber;
-    EventParameters() : weight(0), eventNumber(0), runNumber(0) {}
+    int has2ltrigmatch;
+    EventParameters() : weight(0), eventNumber(0), runNumber(0), has2ltrigmatch(0) {}
 #ifndef __CINT__
     EventParameters& setWeight(const double &w) { weight=w; return *this; }
     EventParameters& setEvent(const unsigned int &e) { eventNumber=e; return *this; }
     EventParameters& setRun(const unsigned int &r) { runNumber=r; return *this; }
+    EventParameters& setHas2ltrigmatch(const int &v) { has2ltrigmatch=v; return *this; }
 #endif
 };
 
