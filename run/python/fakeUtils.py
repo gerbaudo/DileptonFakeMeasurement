@@ -149,12 +149,16 @@ def denominator_std(l) :
     return 1.0/pt if pt>0.0 else None
 
 def elecIsFromPv(l):
-    maxD0Sig, maxZ0SinTheta = 3.0, 0.4 # see SusyNtTools::isSignalElectron
+    # maxD0Sig, maxZ0SinTheta = 3.0, 0.4 # see SusyNtTools::isSignalElectron, WH values
+    maxD0Sig, maxZ0SinTheta = 5.0, 0.4 # see SusyNtTools::isSignalElectron, std values
     return abs(l.d0Signif) < maxD0Sig and abs(l.z0SinTheta) < maxZ0SinTheta
 
 def muonIsFromPv(l):
     maxD0Sig, maxZ0SinTheta = 3.0, 1.0 # see SusyNtTools::isSignalMuon
     return abs(l.d0Signif) < maxD0Sig and abs(l.z0SinTheta) < maxZ0SinTheta
+
+def lepIsFromPv(l):
+    return elecIsFromPv(l) if l.isEl else muonIsFromPv(l) if l.isMu else False
 
 def elecIsIsolated(l, denom, etConeThres, ptConeThres):
     pt, etCone, ptCone = l.p4.Pt(), l.etConeCorr, l.ptConeCorr
