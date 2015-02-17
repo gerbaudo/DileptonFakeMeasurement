@@ -10,16 +10,16 @@
 readonly SCRIPT_NAME=$(basename $0)
 # see http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 readonly PROGDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-readonly SIGNAL_REGION="razor0j" #"emu" #ssinc1j" # depends on what you are working; probably 'emu', 'ssinc1j', ...
+readonly SIGNAL_REGION="ssinc" #"razor0j" #"emu" #ssinc1j" # depends on what you are working; probably 'emu', 'ssinc1j', ...
 # the two options below are needed only when scanning the tight defs for Liz
 readonly TIGHTDEF_OPT="" #"--tight-def fakeu.lepIsTight_07"
 readonly TIGHTDEF_SUFFIX="" # "_tight_07"
 
-readonly TAG_NTUPLE="Nov_27"
-readonly TAG_COMPOSITIONS="razor_mdr00_Nov_27"
-readonly TAG_EFFICIENCIES="Nov_27"
-readonly TAG_SCALE_FACTORS="Nov_27" # still used for el conv, others are flat for these tests
-readonly TAG_WEIGHTED_AVG="razor_mdr00_Nov_27"
+readonly TAG_NTUPLE="Dec_04"
+readonly TAG_COMPOSITIONS="histats_ssinc_mdr20_Dec_09" # "razor_mdr00_Dec_01"
+readonly TAG_EFFICIENCIES="Dec_01"
+readonly TAG_SCALE_FACTORS="Dec_01" # still used for el conv, others are flat for these tests
+readonly TAG_WEIGHTED_AVG="histats_ssinc_mdr20_Dec_10"
 
 function help {
 	echo -e "These are the steps to produce the fake matrix file"
@@ -58,7 +58,7 @@ function compute_efficiencies {
 
 function compute_compositions {
     local FILL="--fill-histos" # force fill
-    local IN_DIR="out/fakerate/"
+    local IN_DIR="out/fakerate_histats/"
     local OUT_DIR="out/fake/compositions_${TAG_COMPOSITIONS}"
     local REGION="${SIGNAL_REGION}"
     local OPT="" # "--syst-fudge" # this and the one below if you are doing fake composition variation
@@ -107,8 +107,8 @@ function build_matrix {
         --eff-histos    ${IN_EFFICICENCY_DIR}/mcqcd_histos_el_eff.root \
         --scale-factors ${IN_SCALEFACTOR_DIR}/conv/el/conv_el_scale_histos.root \
         2>&1 | tee ${OUT_DIR}/build_fake_matrices_el.txt
-
         # --scale-factors ${IN_SCALEFACTOR_DIR}/hflf/el/hflf_el_scale_histos.root \
+
 
 
     python/build_fake_matrices.py \
@@ -117,8 +117,9 @@ function build_matrix {
         --comp-histos   ${IN_COMPOSITION_DIR}/mu/mu_composition_histos.root \
         --eff-histos    ${IN_EFFICICENCY_DIR}/mcqcd_histos_mu_eff.root \
         2>&1 | tee ${OUT_DIR}/build_fake_matrices_mu.txt
-
         # --scale-factors ${IN_SCALEFACTOR_DIR}/hflf/mu/hflf_mu_scale_histos.root \
+
+
 
     echo -e "Putting all the histograms in the same output file"
     echo -e "TODO"
