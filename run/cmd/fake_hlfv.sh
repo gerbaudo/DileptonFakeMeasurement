@@ -15,12 +15,11 @@ readonly SIGNAL_REGION="emu" #"emu" #ssinc1j" # depends on what you are working;
 readonly TIGHTDEF_OPT="" #"--tight-def fakeu.lepIsTight_07"
 readonly TIGHTDEF_SUFFIX="" # "_tight_07"
 
-readonly TAG_NTUPLE="Oct_17"
-readonly TAG_COMPOSITIONS="Oct_19"
-readonly TAG_EFFICIENCIES="Jul_26"
-#readonly TAG_SCALE_FACTORS="Oct_28" # latest
-readonly TAG_SCALE_FACTORS="Jul_26" # still used for el conv, others are flat for these tests
-readonly TAG_WEIGHTED_AVG="_hlvf_Oct_29"
+readonly TAG_NTUPLE="Dec_18"
+readonly TAG_COMPOSITIONS="Dec_18_hlfv_os_pt0_45_pt1_12"
+readonly TAG_EFFICIENCIES="Dec_18_hlfv_os_pt0_45_pt1_12"
+readonly TAG_SCALE_FACTORS="Dec_18" # still used for el conv, others are flat for these tests
+readonly TAG_WEIGHTED_AVG="_hlfv_Dec_18"
 
 function help {
 	echo -e "These are the steps to produce the fake matrix file"
@@ -112,14 +111,15 @@ function build_matrix {
         # tmp disable qcd el scale factor and use const one
         # --scale-factors ${IN_SCALEFACTOR_DIR}/hflf/el/hflf_el_scale_histos.root \
 
-#-build-mu    python/build_fake_matrices.py \
-#-build-mu        ${COMMON_OPT} \
-#-build-mu        --lepton mu \
-#-build-mu        --comp-histos   ${IN_COMPOSITION_DIR}/mu/mu_composition_histos.root \
-#-build-mu        --scale-factors ${IN_SCALEFACTOR_DIR}/ssinc/mu/ssinc_mu_scale_histos.root \
-#-build-mu        --eff-histos    ${IN_EFFICICENCY_DIR}/mcqcd_histos_mu_eff.root \
-#-build-mu        2>&1 | tee ${OUT_DIR}/build_fake_matrices_mu.txt
-#-build-mu
+    python/build_fake_matrices.py \
+        ${COMMON_OPT} \
+        --lepton mu \
+        --comp-histos   ${IN_COMPOSITION_DIR}/mu/mu_composition_histos.root \
+        --eff-histos    ${IN_EFFICICENCY_DIR}/mcqcd_histos_mu_eff.root \
+        2>&1 | tee ${OUT_DIR}/build_fake_matrices_mu.txt
+
+        # --scale-factors ${IN_SCALEFACTOR_DIR}/ssinc/mu/ssinc_mu_scale_histos.root \
+
     echo -e "Putting all the histograms in the same output file"
     echo -e "TODO"
     # python/pick_objects_
