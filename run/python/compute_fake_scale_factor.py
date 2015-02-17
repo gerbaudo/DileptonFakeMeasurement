@@ -110,6 +110,9 @@ def main():
         for group in groups:
             isData = isDataSample(group)
             filenames = filenamesPerGroup[group]
+            if verbose:
+                print " --- group : %s ---".format(group)
+                print '\n\t'.join(filenames)
             histosThisGroup = histosPerGroup[group]
             histosThisGroupPerSource = dict((v, histosPerGroupPerSource[v][group]) for v in histosPerGroupPerSource.keys())
             chain = r.TChain(treeName)
@@ -180,6 +183,7 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
         num_processed_entries += 1
         pars = event.pars
         weight, evtN, runN = pars.weight, pars.eventNumber, pars.runNumber
+        hasTrigmatch = pars.has2ltrigmatch==1
         weight = weight*normFactor
         tag, probe, met = addTlv(event.l0), addTlv(event.l1), addTlv(event.met)
         isSameSign = tag.charge*probe.charge > 0.
@@ -190,12 +194,13 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
         isReal = probeSource==sourceReal and not isData
         isFake = not isReal and not isData
         jets = event.jets
-        # jets = [addTlv(j) for j in jets] # only if needed
+        jets = [addTlv(j) for j in jets] # only if needed
         def isBjet(j, mv1_80=0.3511) : return j.mv1 > mv1_80 # see SusyDefs.h
-        # hasBjets = any(isBjet(j) for j in jets) # compute only if necessary
-        # hasFjets = any(abs(j.p4.Eta())>2.4 and j.p4.Pt()>30. for j in jets)
-        # hasCLjets = any(abs(j.p4.Eta())<2.4 and j.p4.Pt()>30 and not isBjet(j) for j in jets)
-        # hasJ30jets = any(j.p4.Pt()>30. for j in jets)
+        hasBjets = any(isBjet(j) for j in jets) # compute only if necessary
+        hasFjets = any(abs(j.p4.Eta())>2.4 and j.p4.Pt()>30. for j in jets)
+        hasCLjets = any(abs(j.p4.Eta())<2.4 and j.p4.Pt()>30 and not isBjet(j) for j in jets)
+        hasJ30jets = any(j.p4.Pt()>30. for j in jets)
+        hasJets = hasBjets or hasFjets or hasCLjets
         tag4m, probe4m, met4m = r.TLorentzVector(), r.TLorentzVector(), r.TLorentzVector()
         tag4m.SetPxPyPzE(tag.px, tag.py, tag.pz, tag.E)
         probe4m.SetPxPyPzE(probe.px, probe.py, probe.pz, probe.E)
@@ -209,16 +214,22 @@ def fillHistos(chain, histosThisGroup, histosPerSource, histosThisGroupPerSource
         isLowMt = mt1 < 40.0 if region=='hflf' else True # used to reduce the contamination from real (mostly W+jets)
         isMuMu = tag.isMu and probe.isMu
         passTrigBias =  True
+        probeIsFromPv = fakeu.lepIsFromPv(probe)
         if   isHflf       : passTrigBias = pt0>20.0 and pt1>20.0
         elif isConversion : passTrigBias = pt1>20.0
         if tag.isMu and isRightProbe and isSameSign : # test 1 : no jet req
+        # if tag.isMu and isRightProbe and isSameSign and tag4m.Pt()>40.0 : # test 1a : harder tag
         # if tag.isMu and isRightProbe and isSameSign and not hasBjets: # test 2 : veto b-jets
-        # if tag.isMu and isRightProbe and isSameSign and not (hasBjets or hasFjets or hasCLjets): # test 3 : require no jets (cl30, bj, fj)
+        # if tag.isMu and isRightProbe and isSameSign and not hasJets: # test 3 : require no jets (cl30, bj, fj)
         # if tag.isMu and isRightProbe and isSameSign and not hasJ30jets: # test 4 : require no jets (cl30, bj, fj)
+        # if tag.isMu and isRightProbe and isSameSign and not hasJets and tag4m.Pt()>40.0: # test 4 : require no jets (cl30, bj, fj)
+        # --last test-- if tag.isMu and isRightProbe and isSameSign and hasTrigmatch: # test 5 : no jet req, trig match
         # if tag.isMu and (isSameSign or isConversion) and isRightProbe and isLowMt and passTrigBias:
+        # if tag.isMu and isRightProbe and isSameSign and hasTrigmatch and tag4m.Pt()>40.0: # test 6 : try again pt>40
+        # if tag.isMu and isRightProbe and isSameSign and hasTrigmatch and tag4m.Pt()>40.0 and abs(tag4m.DeltaPhi(probe4m))>2.3: # test 7 pt and deltaPhi
+        # if tag.isMu and isRightProbe and isSameSign and hasTrigmatch and probeIsFromPv: # test 8 loose only drops iso
         # if isMuMu and isRightProbe and isLowMt and passTrigBias: # test emu mumu
         # if (isSameSign or isConversion) and isRightProbe and isLowMt: # test sf conversion (not very important for now, 2014-04)
-
             def fillHistosBySource(probe):
                 leptonSource = enum2source(probe)
                 def fill(tightOrLoose):
