@@ -340,6 +340,18 @@ def fillHistos(chain, histosThisGroupPerSource, isData, lepton, group, selection
         l1IsFake = l0.source!=sourceReal and not isData
         atLeastOneIsFake = l0IsFake or l1IsFake
         if not atLeastOneIsFake : continue
+        is_same_sign = int((l0.charge * l1.charge)>0)
+        is_opp_sign = not is_same_sign
+        l0_pt, l1_pt = l0.p4.Pt(), l1.p4.Pt()
+        dphi_l0_met = abs(l0.p4.DeltaPhi(met.p4))
+        dphi_l1_met = abs(l1.p4.DeltaPhi(met.p4))
+        dphi_l0_l1 = abs(l0.p4.DeltaPhi(l1.p4))
+        pass_selection = (is_opp_sign and l0_pt>45.0 and l1_pt>12.0)
+                          # and
+                          # dphi_l0_l1>2.3 and dphi_l1_met<0.7 and dphi_l0_met>2.5
+                          # and (l0_pt-l1_pt)>7.0)
+        if not pass_selection : continue
+
         def fillHistosBySource(lep):
             isTight = lep.isTight
             source = lep.source
