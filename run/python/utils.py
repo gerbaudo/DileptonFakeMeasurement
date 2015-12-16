@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Generic utility functions for SusyTest0
+# Generic utility functions for DileptonFakeMeasurement
 #
 # davide.gerbaudo@gmail.com
 # 2013-07-25

@@ -1,7 +1,7 @@
 #ifndef TIGHTPROBABILITY_H
 #define TIGHTPROBABILITY_H
 
-#include "SusyTest0/SusySelection.h"
+#include "DileptonFakeMeasurement/SusySelection.h"
 
 #include "TH1F.h"
 

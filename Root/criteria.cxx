@@ -1,4 +1,4 @@
-#include "SusyTest0/criteria.h"
+#include "DileptonFakeMeasurement/criteria.h"
 
 #include <algorithm>
 #include <cassert>
@@ -9,8 +9,8 @@
 #include "SusyNtuple/SusyNtTools.h"
 #include "SusyNtuple/WhTruthExtractor.h"
 #include "LeptonTruthTools/RecoTruthMatch.h"
-#include "SusyTest0/DileptonAnalyticalSolver.h"
-#include "SusyTest0/kinematic.h"
+#include "DileptonFakeMeasurement/DileptonAnalyticalSolver.h"
+#include "DileptonFakeMeasurement/kinematic.h"
 
 using Susy::Lepton;
 

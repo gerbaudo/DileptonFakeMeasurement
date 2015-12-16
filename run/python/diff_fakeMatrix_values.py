@@ -1,7 +1,7 @@
 #!/bin/env python
 
 
-# Compare the fake matrix histograms between two files produced by SusyTest0/FinalNewFake.
+# Compare the fake matrix histograms between two files produced by DileptonFakeMeasurement/FinalNewFake.
 #
 # davide.gerbaudo@gmail.com
 # September 2013

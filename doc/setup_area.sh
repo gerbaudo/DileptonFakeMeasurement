@@ -23,9 +23,9 @@ svn co ${SVN_INST}/UCIrvine/SUSYAnalysis/SusyNtuple/trunk  SusyNtuple
 svn co ${SVN_INST}/UCIrvine/mrelich/SusyXSReader/trunk     SusyXSReader
 # my packages
 git clone git@github.com:gerbaudo/SusyMatrixMethod.git
-git clone git@github.com:gerbaudo/SusyTest0.git
+git clone git@github.com:gerbaudo/DileptonFakeMeasurement.git
 
-patch < SusyTest0/doc/ChargeFlip.patch # seed issue
+patch < DileptonFakeMeasurement/doc/ChargeFlip.patch # seed issue
 
 source SusyNtuple/scripts/installMinimalSUSYTools.sh
 # now done by installMinimalSUSYTools

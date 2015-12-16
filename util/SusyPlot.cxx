@@ -5,7 +5,7 @@
 #include "TChain.h"
 #include "Cintex/Cintex.h"
 
-#include "SusyTest0/SusyPlotter.h"
+#include "DileptonFakeMeasurement/SusyPlotter.h"
 #include "SusyNtuple/ChainHelper.h"
 
 using namespace std;

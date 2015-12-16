@@ -18,7 +18,7 @@ tlv = r.TLorentzVector
 
 treename = 'SusySel'
 tag = 'Dec_02'
-basedir = '/gdata/atlas/gerbaudo/wh/Susy2013_Nt_01_04_dev/SusyTest0/run/out/susysel/merged/'
+basedir = '/gdata/atlas/gerbaudo/wh/Susy2013_Nt_01_04_dev/DileptonFakeMeasurement/run/out/susysel/merged/'
 samples = ['diboson', 'heavyflavor', 'ttbar', 'wjets', 'zjets','WH_2Lep_3']
 filenames = dict((s, glob.glob(basedir+'/'+s+'*'+tag+'.root')) for s in samples)
 assert all(len(v)==1 for v in filenames.values()),"ambiguous filenames\n%s"%str(filenames)

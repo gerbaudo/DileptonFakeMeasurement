@@ -1,4 +1,4 @@
-#include "SusyTest0/TightProbability.h"
+#include "DileptonFakeMeasurement/TightProbability.h"
 
 #include <iostream>
 
@@ -6,7 +6,7 @@
 #include "TH1F.h"
 #include "TAxis.h"
 
-#include "SusyTest0/criteria.h"
+#include "DileptonFakeMeasurement/criteria.h"
 
 using std::cout;
 using std::endl;

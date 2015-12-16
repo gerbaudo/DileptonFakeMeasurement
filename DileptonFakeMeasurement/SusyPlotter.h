@@ -1,8 +1,8 @@
 #ifndef SusyAna_SusyPlotter_h
 #define SusyAna_SusyPlotter_h
 
-#include "SusyTest0/SusySelection.h"
-#include "SusyTest0/PlotRegion.h"
+#include "DileptonFakeMeasurement/SusySelection.h"
+#include "DileptonFakeMeasurement/PlotRegion.h"
 
 #include "TH1F.h"
 #include "TH2F.h"

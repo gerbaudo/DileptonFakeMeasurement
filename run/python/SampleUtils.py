@@ -74,7 +74,7 @@ def guessReqidFromFilename(filename='', verbose=False) :
 
 def basePathArea() :
     path = os.path.realpath(__file__)
-    return path[:path.rfind('SusyTest0')]
+    return path[:path.rfind('DileptonFakeMeasurement')]
 def xsReaderDataDir(basePath='') :
     relPath = '/SusyXSReader/data'
     return (basePath if basePath else basePathArea()) + relPath
@@ -110,7 +110,7 @@ class ModeAWhDbReqid :
     "Using the filelists, map reqids to samplenames"
     def __init__(self, filenames = []) :
         self.entries = {}
-        filelistDir = basePathArea()+'/SusyTest0/run/filelist/'
+        filelistDir = basePathArea()+'/DileptonFakeMeasurement/run/filelist/'
         filenames = (filenames if filenames
                      else
         glob.glob(filelistDir+'Herwigpp_simplifiedModel_wA_noslep_WH_*Lep_*.txt')

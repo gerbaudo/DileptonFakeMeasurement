@@ -18,7 +18,7 @@ import re
 
 from utils import getCommandOutput
 
-path     = '../../'          # assume we are running from SusyTest0/run
+path     = '../../'          # assume we are running from DileptonFakeMeasurement/run
 outFname = '../doc/tags.txt' # where the tags will be written
 def extractPkg(line) :
     match = re.search('.*/(\S+)/((tags)|(trunk))/?', line)

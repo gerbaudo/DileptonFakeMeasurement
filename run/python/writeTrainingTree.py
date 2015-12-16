@@ -148,7 +148,7 @@ def train(sigFiles=[], bkgFiles=[], dilepChan='', nJetChan='') :
 
 treename = 'SusySel'
 tag = 'Jan_11' #'Jan_11'
-basedir = '/gdata/atlas/gerbaudo/wh/Susy2013_Nt_01_04_dev/SusyTest0/run/out/susysel/'
+basedir = '/gdata/atlas/gerbaudo/wh/Susy2013_Nt_01_04_dev/DileptonFakeMeasurement/run/out/susysel/'
 
 bkgSamples = ['wjets', 'zjets', 'ttbar', 'diboson', 'heavyflavor', 'fake']
 #bkgSamples = ['ttbar']
