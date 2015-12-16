@@ -3,7 +3,6 @@
 #include <string>
 
 #include "TChain.h"
-#include "Cintex/Cintex.h"
 
 #include "DileptonFakeMeasurement/SusyPlotter.h"
 #include "SusyNtuple/ChainHelper.h"

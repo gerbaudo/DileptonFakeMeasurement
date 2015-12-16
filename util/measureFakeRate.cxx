@@ -4,7 +4,6 @@
 #include <string>
 
 #include "TChain.h"
-#include "Cintex/Cintex.h"
 
 #include "SusyNtuple/ChainHelper.h"
 #include "DileptonFakeMeasurement/MeasureFakeRate2.h"
