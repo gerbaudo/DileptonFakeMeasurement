@@ -377,7 +377,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
             bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
             LeptonVector trigLeps(m_probes.begin(), m_probes.begin()+2); // copy them and insure we're matching the same ones we store
-            bool has2ltrigmatch(SusySelection::passTrig2LwithMatch(trigLeps, m_trigObj, m_met->Et, nt.evt()));
+            // DG-2015-12-17 trigger to be re-implemented for run 2
+            bool has2ltrigmatch = true; // (SusySelection::passTrig2LwithMatch(trigLeps, m_trigObj, m_met->Et, nt.evt()));
             LeptonVector dummyLepts;
             m_tupleMakerSsInc
                 .setL0IsTight(l0IsTight).setL0Source(l0Source)
@@ -864,7 +865,8 @@ bool MeasureFakeRate2::passConvCR(const LeptonVector &leptons,
   if( preMuons[0]->q * preMuons[1]->q > 0 )  return false; // Opposite sign
   LeptonVector tempL(preMuons.size(), NULL);
   std::transform(preMuons.begin(), preMuons.end(), tempL.begin(), muon_ptr2lepton_ptr);
-  bool passTrigger(SusySelection::passTrig2LwithMatch(tempL, m_trigObj, m_met->Et, nt.evt()));
+  // DG-2015-12-17 trigger to be re-implemented for run 2
+  bool passTrigger = true; // (SusySelection::passTrig2LwithMatch(tempL, m_trigObj, m_met->Et, nt.evt()));
   if( !passTrigger )                         return false; // Pt and trigger requirement
   if( met->Et > 50 )                         return false; // Met < 50
   if( (*preMuons[0]+*preMuons[1]).M() < 20 ) return false; // M(mu,mu) > 20
@@ -901,7 +903,8 @@ bool MeasureFakeRate2::passZ3lVetoPlusJetsCR(const LeptonVector &leptons,
            mumuOppSign &&
            mll > 20.0 &&    // avoid quarkonium resonances
            met->Et < 50 &&  // avoid W+jets
-           SusySelection::passTrig2LwithMatch(twoMu, m_trigObj, m_met->Et, nt.evt())){
+           // DG-2015-12-17 trigger to be re-implemented for run 2
+           /*SusySelection::passTrig2LwithMatch(twoMu, m_trigObj, m_met->Et, nt.evt()))*/{
             m_probes.push_back(static_cast<Lepton*>(&el));
             float lepEff(isMc ? el.effSF : 1.0);
             m_evtWeight = lepEff * getEvtWeight(twoMu, true, true);
@@ -922,12 +925,14 @@ float MeasureFakeRate2::getEvtWeight(const LeptonVector& leptons, bool includeBT
   float trigW = 1;
   if(!m_useMCTrig && includeTrig){
       trigW  = (nl == 2 ?
-                m_trigObj->getTriggerWeight(leptons,
-                                            nt.evt()->isMC,
-                                            m_met->Et,
-                                            m_signalJets2Lep.size(),
-                                            nt.evt()->nVtx,
-                                            NtSys_NOM)
+                1.0
+                // DG-2015-12-17 trigger to be re-implemented for run 2
+                // m_trigObj->getTriggerWeight(leptons,
+                //                             nt.evt()->isMC,
+                //                             m_met->Et,
+                //                             m_signalJets2Lep.size(),
+                //                             nt.evt()->nVtx,
+                //                             NtSys_NOM)
                 : 1.0);
     if(trigW != trigW){ cout<<"\tTrigger weight: "<<trigW<<endl; trigW =0; }// deal with NaN
     if(trigW < 0) trigW = 0;
@@ -1023,13 +1028,15 @@ void MeasureFakeRate2::increment(float flag[], bool includeLepSF, bool includeBt
     float btag = includeBtag ? getBTagWeight(nt.evt()) : 1.0;
     flag[WT_Btag]  += nt.evt()->w * btag;
 
-    float trig = m_baseLeptons.size() == 2 && nt.evt()->isMC && !m_useMCTrig ?
-        m_trigObj->getTriggerWeight(m_baseLeptons,
-                                    nt.evt()->isMC,
-                                    m_met->Et,
-                                    m_signalJets2Lep.size(),
-                                    nt.evt()->nVtx,
-                                    NtSys_NOM) : 1;
+    float trig = 1.0;
+    // DG-2015-12-17 trigger to be re-implemented for run 2
+    // float trig = m_baseLeptons.size() == 2 && nt.evt()->isMC && !m_useMCTrig ?
+    //     m_trigObj->getTriggerWeight(m_baseLeptons,
+    //                                 nt.evt()->isMC,
+    //                                 m_met->Et,
+    //                                 m_signalJets2Lep.size(),
+    //                                 nt.evt()->nVtx,
+    //                                 NtSys_NOM) : 1;
     //cout<<"\tTrigger weight: "<<trig<<endl;
     flag[WT_Trig] += trig * nt.evt()->w;
     bool useSumwMap(true);

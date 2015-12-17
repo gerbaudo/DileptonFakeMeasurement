@@ -98,12 +98,13 @@ class SusySelection : public SusyNtAna
     // Cut methods
     bool passHfor() { return passHfor(nt); }
     static bool passHfor(Susy::SusyNtObject &nto);
-    static bool passTrig2L         (const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt);
-    static bool passTrig2LMatch    (const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt);
-    static bool passTrig2LwithMatch(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt);
-    bool passTrig2L(const LeptonVector& leptons) { return passTrig2L(leptons, m_trigObj, m_met->Et, nt.evt()); }
-    bool passTrig2LMatch(const LeptonVector& leptons) { return passTrig2LMatch(leptons, m_trigObj, m_met->Et, nt.evt()); }
-    bool passTrig2LwithMatch(const LeptonVector& leptons) { return passTrig2LwithMatch(leptons, m_trigObj, m_met->Et, nt.evt()); }
+    // DG-2015-12-17 trig match will need to be re-implemented in run2
+    // static bool passTrig2L         (const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt);
+    // static bool passTrig2LMatch    (const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt);
+    // static bool passTrig2LwithMatch(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt);
+    //bool passTrig2L(const LeptonVector& leptons) { return passTrig2L(leptons, m_trigObj, m_met->Et, nt.evt()); }
+    //bool passTrig2LMatch(const LeptonVector& leptons) { return passTrig2LMatch(leptons, m_trigObj, m_met->Et, nt.evt()); }
+    //bool passTrig2LwithMatch(const LeptonVector& leptons) { return passTrig2LwithMatch(leptons, m_trigObj, m_met->Et, nt.evt()); }
     //! for the SS selection we want to accept OS events with an el, for Qflip
     /*!  For MC events that are OS, but that we want to consider as SS
       with some charge-flip probability, the 4-mom of the q-flipped
@@ -188,7 +189,7 @@ class SusySelection : public SusyNtAna
     bool m_debugThisEvent;
     std::string m_outTupleFile;
 
-    DilTrigLogic*       m_trigObj;      // My trigger logic class
+    // DilTrigLogic*       m_trigObj;      // 2L trigger logic class; DG-2015-12-17 will need to re-implement for run 2
     bool                m_useMCTrig;    // Use MC Trigger, i.e. toggle the matching in DilTrigLogic::passDil*()
     chargeFlip*         m_chargeFlip;   //!< tool providing the electron charge flip probability
     float               m_w;            // mc weight

@@ -33,7 +33,7 @@ SusySelection::SusySelection() :
   m_writeTuple(false),
   m_debugThisEvent(false),
   m_outTupleFile(""),
-  m_trigObj(NULL),
+  // m_trigObj(NULL),
   m_useMCTrig(false),
   m_w(1.0),
   m_qflipProb(0.0)
@@ -50,8 +50,8 @@ void SusySelection::Begin(TTree* /*tree*/)
   if(m_dbg) cout << "SusySelection::Begin" << endl;
   string period = "Moriond";
   bool useReweightUtils = false;
-  m_trigObj = new DilTrigLogic(period, useReweightUtils);
-  if(m_useMCTrig) m_trigObj->useMCTrigger();
+  // m_trigObj = new DilTrigLogic(period, useReweightUtils);
+  // if(m_useMCTrig) m_trigObj->useMCTrigger();
   if(m_writeTuple) {
       if(endswith(m_outTupleFile, ".root") && m_tupleMaker.init(m_outTupleFile, "SusySel"))
           cout<<"initialized ntuple file "<<m_outTupleFile<<endl;
@@ -481,24 +481,25 @@ float SusySelection::getBTagWeight(cvj_t& jets, const Event* evt)
 float SusySelection::getTriggerWeight2Lep(const LeptonVector &leptons)
 {
   float trigW = 1.0;
-  // if m_useMCTrig, then we are dropping evts with DilTrigLogic::passDil*, not weighting them
-  // DG Jun2013 : verify this with Matt & Josephine
-  if(!m_useMCTrig){
-    if(leptons.size()==2) trigW = m_trigObj->getTriggerWeight(leptons,
-                                                              nt.evt()->isMC,
-                                                              m_met->Et,
-                                                              m_signalJets2Lep.size(),
-                                                              nt.evt()->nVtx,
-                                                              NtSys_NOM);
-    bool twIsInvalid(isnan(trigW) || trigW<0.0);
-    assert(!twIsInvalid);
-    if(twIsInvalid){
-      if(m_dbg)
-        cout<<"SusySelection::getTriggerWeight: invalid weigth "<<trigW<<", using 0.0"<<endl;
-      trigW = (twIsInvalid ? 0.0 : trigW);
-    }
-  }
   return trigW;
+  // // if m_useMCTrig, then we are dropping evts with DilTrigLogic::passDil*, not weighting them
+  // // DG Jun2013 : verify this with Matt & Josephine
+  // if(!m_useMCTrig){
+  //   if(leptons.size()==2) trigW = m_trigObj->getTriggerWeight(leptons,
+  //                                                             nt.evt()->isMC,
+  //                                                             m_met->Et,
+  //                                                             m_signalJets2Lep.size(),
+  //                                                             nt.evt()->nVtx,
+  //                                                             NtSys_NOM);
+  //   bool twIsInvalid(isnan(trigW) || trigW<0.0);
+  //   assert(!twIsInvalid);
+  //   if(twIsInvalid){
+  //     if(m_dbg)
+  //       cout<<"SusySelection::getTriggerWeight: invalid weigth "<<trigW<<", using 0.0"<<endl;
+  //     trigW = (twIsInvalid ? 0.0 : trigW);
+  //   }
+  // }
+  // return trigW;
 }
 //-----------------------------------------
 // helper function: write header with event types
