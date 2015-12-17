@@ -4,6 +4,8 @@
 
 #include "SusyNtuple/SusyNt.h"
 
+#include "TBits.h"
+
 #include <iostream>
 #include <vector>
 
@@ -23,7 +25,7 @@ struct FourMom {
     bool isTight;
     bool isTightPp; ///< used only for electron to compute tight/loose requirements offline
     int source; // see FakeLeptonSources
-    unsigned int trigFlags;
+    TBits trigBits;
     double charge, d0Signif, z0SinTheta, etCone, ptCone, mv1;
     double etConeCorr, ptConeCorr;
     FourMom() : px(0), py(0), pz(0), E(0),
@@ -31,35 +33,34 @@ struct FourMom {
                 isTight(false),
                 isTightPp(false),
                 source(-1),
-                trigFlags(0),
+                trigBits(0),
                 charge(0), d0Signif(0), z0SinTheta(0), etCone(0), ptCone(0), mv1(0),
                 etConeCorr(0), ptConeCorr(0) {}
 #ifndef __CINT__
 // cint is not able to parse 'complex' code; see
 // http://root.cern.ch/drupal/content/interacting-shared-libraries-rootcint
     FourMom& set4mom(const Lepton &l) {
-        const bool unbiased(true);
         px=l.Px(); py=l.Py(); pz=l.Pz(); E=l.E();
         charge = l.q;
-        d0Signif = l.d0Sig(unbiased);
-        z0SinTheta = l.z0SinTheta(unbiased);
+        d0Signif = l.d0Sig();
+        z0SinTheta = l.z0SinTheta();
         ptCone = l.ptcone30;
         return *this;
     }
     FourMom& set4mom(const Jet &j)    { px=j.Px(); py=j.Py(); pz=j.Pz(); E=j.E(); return *this; }
     FourMom& setMu(const Lepton &l) {
         isMu=true; isEl = isJet = false;
-        if(const Muon* m = dynamic_cast<const Muon*>(&l)) etCone = m->etcone30;
-        trigFlags = l.trigFlags;
+        if(const Muon* m = dynamic_cast<const Muon*>(&l)) etCone = m->etconetopo30;
+        trigBits = l.trigBits;
         return set4mom(l);
     }
     FourMom& setEl(const Lepton &l) {
         isEl=true; isMu = isJet = false;
         if(const Electron *e = dynamic_cast<const Electron*>(&l)){
-            etCone = e->topoEtcone30Corr;
-            isTightPp = e->tightPP;
+            etCone = e->etconetopo30;
+            isTightPp = e->tightLH;
         }
-        trigFlags = l.trigFlags;
+        trigBits = l.trigBits;
         return set4mom(l);
     }
     FourMom& setIsTight(bool v) { isTight = v; return *this; }

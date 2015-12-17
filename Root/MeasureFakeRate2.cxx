@@ -5,7 +5,7 @@
 #include "DileptonFakeMeasurement/kinematic.h"
 #include "DileptonFakeMeasurement/utils.h"
 
-#include "LeptonTruthTools/RecoTruthMatch.h"
+#include "TBits.h"
 
 #include <algorithm> // transform
 #include <cassert>
@@ -701,9 +701,12 @@ bool MeasureFakeRate2::passRealCR(const LeptonVector &leptons,
   bool l1sig(isSignalLepton(leptons[1], m_baseElectrons, m_baseMuons, nVtx, isMC));
   if( !l0sig && !l1sig ) return false;
   // Pass trigger
-  uint l0flag(leptons[0]->trigFlags), l1flag(leptons[1]->trigFlags);
-  bool l0trig(leptons[0]->isEle() ? l0flag & TRIG_e24vhi_medium1 : l0flag & TRIG_mu24i_tight);
-  bool l1trig(leptons[1]->isEle() ? l1flag & TRIG_e24vhi_medium1 : l1flag & TRIG_mu24i_tight);
+  TriggerTools &ntTrig = nttools().triggerTool();
+  TBits l0bit(leptons[0]->trigBits), l1bit(leptons[1]->trigBits);
+  // DG-2015-12-17 \todo  check we're using the right trigger
+  bool l0trig = ntTrig.passTrigger(lep->trigBits, leptons[0]->isEle() ? "HLT_e24_tight_iloose" : "HLT_mu24_imedium")
+  bool l1trig = ntTrig.passTrigger(lep->trigBits, leptons[1]->isEle() ? "HLT_e24_tight_iloose" : "HLT_mu24_imedium")
+
   if( l0sig && l0trig && leptons[0]->Pt() > 25 ) m_probes.push_back( leptons[1] );
   if( l1sig && l1trig && leptons[1]->Pt() > 25 ) m_probes.push_back( leptons[0] );
   if( m_probes.size() == 0 ) return false;

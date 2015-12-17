@@ -5,10 +5,8 @@
 #include <math.h>   // cos
 #include <numeric>  // std::accumulate
 
-#include "Mt2/mt2_bisect.h"
 #include "SusyNtuple/SusyNtTools.h"
 #include "SusyNtuple/WhTruthExtractor.h"
-#include "LeptonTruthTools/RecoTruthMatch.h"
 #include "DileptonFakeMeasurement/DileptonAnalyticalSolver.h"
 #include "DileptonFakeMeasurement/kinematic.h"
 
@@ -173,13 +171,15 @@ bool passMtMinlmetMin(const LeptonVector& l, const Susy::Met* met, float minVal)
 //----------------------------------------------------------
 float computeMt2(const TLorentzVector &l0, const TLorentzVector &l1, const TLorentzVector &met)
 {
-  double pTMiss[3] = {0.0, met.Px(), met.Py()};
-  double pA[3]     = {0.0, l0.Px(), l0.Py()};
-  double pB[3]     = {0.0, l1.Px(), l1.Py()};
-  mt2_bisect::mt2 mt2_event;
-  mt2_event.set_momenta(pA,pB,pTMiss);
-  mt2_event.set_mn(0); // LSP mass = 0 is Generic
-  return mt2_event.get_mt2();
+    return 0.0;
+    // should move to the new mt2 package.
+  // double pTMiss[3] = {0.0, met.Px(), met.Py()};
+  // double pA[3]     = {0.0, l0.Px(), l0.Py()};
+  // double pB[3]     = {0.0, l1.Px(), l1.Py()};
+  // mt2_bisect::mt2 mt2_event;
+  // mt2_event.set_momenta(pA,pB,pTMiss);
+  // mt2_event.set_mn(0); // LSP mass = 0 is Generic
+  // return mt2_event.get_mt2();
 }
 //----------------------------------------------------------
 bool passMT2(const LeptonVector& leptons, const Susy::Met* met, float cut)

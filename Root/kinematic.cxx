@@ -1,6 +1,6 @@
 #include "DileptonFakeMeasurement/kinematic.h"
 
-#include "SusyNtuple/SusyNtTools.h"
+#include "SusyNtuple/KinematicTools.h"
 
 #include "TLorentzVector.h"
 
@@ -31,7 +31,7 @@ swk::DilepVars swk::compute2lVars(const LeptonVector &leptons, const Susy::Met *
         LeptonVector lepts;
         lepts.push_back(&l0);
         lepts.push_back(&l1);
-        v.metrel = SusyNtTools::getMetRel(met, lepts, jets);
+        v.metrel = 0.0; // kin::getMetRel(met, lepts, jets); // cannot get this to work kin:: conflicts with susy::wh::kin ?
         if     (v.numCentralLightJets==1) v.mlj  = swk::mlj (l0, l1, *jets[0]);
         else if(v.numCentralLightJets >1) v.mljj = swk::mljj(l0, l1, *jets[0], *jets[1]);
         v.mt0 = swk::transverseMass(l0, met->lv());

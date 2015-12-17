@@ -76,8 +76,6 @@ class SusySelection : public SusyNtAna
     SusySelection();
     virtual ~SusySelection(){};
 
-    ofstream out;
-
     virtual void    Begin(TTree *tree); //!< called before looping on entries
     virtual void    Terminate(); //!< called after looping is finished
     virtual Bool_t  Process(Long64_t entry); //!< called at each event

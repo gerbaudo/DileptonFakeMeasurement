@@ -1,6 +1,5 @@
 #include "DileptonFakeMeasurement/MatrixPrediction.h"
 #include "DileptonFakeMeasurement/SusySelection.h"
-#include "DileptonFakeMeasurement/SusyPlotter.h"
 #include "DileptonFakeMeasurement/TightProbability.h"
 #include "DileptonFakeMeasurement/MeasureFakeRate2.h"
 #include "DileptonFakeMeasurement/myHist.h"
@@ -20,7 +19,6 @@
 
 #pragma link C++ class MatrixPrediction;
 #pragma link C++ class SusySelection;
-#pragma link C++ class SusyPlotter;
 #pragma link C++ class TightProbability;
 #pragma link C++ class MeasureFakeRate2;
 #pragma link C++ class myHist;
