@@ -130,7 +130,6 @@ Bool_t TightProbability::Process(Long64_t entry) {
   const JetVector &jets = m_signalJets2Lep;
   const Met *met = m_met;
   bool isMc(nt.evt()->isMC);
-  int nVtx(nt.evt()->nVtx);
   bool passEvent(selectEvent());
   //  cout<<(passEvent ? " passEvent " : "!passEvent\n");
   if(!passEvent) return true;
@@ -147,7 +146,7 @@ Bool_t TightProbability::Process(Long64_t entry) {
   for(size_t iL=0; iL<leps.size(); ++iL) {
     Lepton *l = leps[iL];
     bool isEl(l->isEle()), isMu(l->isMu());
-    bool fillNum(isSignalLepton(l, m_baseElectrons, m_baseMuons, nVtx, isMc));
+    bool fillNum = nttools().isSignal(l);
     float pt(l->Pt());
     LeptonOrigin lo(getLeptonOrigin(l));
     if     (isEl) m_h_el_pt_any.Fill(fillNum, weight, pt);
@@ -208,13 +207,11 @@ TightProbability::TightLoosePairType TightProbability::getTightLoosePairType(con
                                                            const Lepton* probe){
   if( !tag ) return kLooseLoose;
   // DG : this is not well defined for !probe.
-  int nvtx  = nt.evt()->nVtx;
-  bool isMC = nt.evt()->isMC;
   bool ptSorted(tag->Pt() >= probe->Pt());
   const Lepton *l0 = ptSorted ? tag : probe;
   const Lepton *l1 = ptSorted ? probe : tag;
-  bool l0isTight(isSignalLepton(l0, m_baseElectrons, m_baseMuons, nvtx, isMC));
-  bool l1isTight(isSignalLepton(l1, m_baseElectrons, m_baseMuons, nvtx, isMC));
+  bool l0isTight = nttools().isSignal(l0);
+  bool l1isTight = nttools().isSignal(l1);
   return (l0isTight
           ? (l1isTight ? kTightTight : kTightLoose)
           : (l1isTight ? kLooseTight : kLooseLoose));

@@ -5,6 +5,9 @@
 #include "DileptonFakeMeasurement/kinematic.h"
 #include "DileptonFakeMeasurement/utils.h"
 
+#include "SusyNtuple/TauId.h"
+#include "SusyNtuple/SusyNtSys.h"
+
 #include "TBits.h"
 
 #include <algorithm> // transform
@@ -277,14 +280,12 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
     } // if(passCR)
     if(m_writeFakeTuple && passCR) {
         unsigned int run(nt.evt()->run), event(nt.evt()->eventNumber);
-        bool isMc(nt.evt()->isMC);
-        int nVtx(nt.evt()->nVtx);
         if(CR==sf::CR_HF_high || CR==sf::CR_HF_SS || CR==sf::CR_Conv) {
             const Lepton *l0 = m_tags.size()>0 ? m_tags[0] : m_baseLeptons[0]; // hack: no tag for conv region (use baseL as a dummy lep)
             const Lepton *l1 = m_probes[0];
             LeptonSource l0Source(getLeptonSource(l0)), l1Source(getLeptonSource(l1));
-            bool l0IsTight(isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc));
-            bool l1IsTight(isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc));
+            bool l0IsTight = nttools().isSignal(l0);
+            bool l1IsTight = nttools().isSignal(l1);
             LeptonVector dummyLepts;
             susy::wh::TupleMaker &tupleMaker = (CR==sf::CR_HF_high ? m_tupleMakerHfCr :
                                                 CR==sf::CR_HF_SS ? m_tupleMakerHfLfSs :
@@ -305,8 +306,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             const Lepton *l1 = m_probes.size()>1 ? m_probes[1] : &dummyL;
             LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk);
             LeptonSource l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
-            bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
-            bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            bool l0IsTight = (l0 ? nttools().isSignal(l0) : false);
+            bool l1IsTight = (l1 ? nttools().isSignal(l1) : false);
             LeptonVector dummyLepts;
             tupleMaker
                 .setL0IsTight(l0IsTight).setL0Source(l0Source)
@@ -319,8 +320,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             if(m_probes.size()>2) cout<<"warning, "<<m_probes.size()<<" probe leptons (expected 2)"<<endl;
             const Lepton *l0 = m_probes[0], *l1 = m_probes[1];
             LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
-            bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
-            bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            bool l0IsTight = (l0 ? nttools().isSignal(l0) : false);
+            bool l1IsTight = (l1 ? nttools().isSignal(l1) : false);
             LeptonVector dummyLepts;
             m_tupleMakerSsInc1j
                 .setL0IsTight(l0IsTight).setL0Source(l0Source)
@@ -333,7 +334,7 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             Lepton *probeEl = m_probes[0];
             LeptonVector mumu; mumu.push_back(m_signalMuons[0]); mumu.push_back(m_signalMuons[1]);
             LeptonSource source(probeEl ? getLeptonSource(probeEl) : LS_Unk);
-            bool isTight(probeEl ? isSignalLepton(probeEl, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            bool isTight(probeEl ? nttools().isSignal(probeEl) : false);
             Lepton dummyL;
             m_tupleMakerZmmeJets
                 .setL1Source(source)
@@ -346,8 +347,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             if(m_probes.size()>2) cout<<"warning, "<<m_probes.size()<<" probe leptons (expected 2)"<<endl;
             const Lepton *l0 = m_probes[0], *l1 = m_probes[1];
             LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
-            bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
-            bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            bool l0IsTight(l0 ? nttools().isSignal(l0) : false);
+            bool l1IsTight(l1 ? nttools().isSignal(l1) : false);
             LeptonVector dummyLepts;
             m_tupleMakerEmu
                 .setL0IsTight(l0IsTight).setL0Source(l0Source)
@@ -359,8 +360,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             assert(m_probes.size()>1);
             const Lepton *l0 = m_probes[0], *l1 = m_probes[1];
             LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
-            bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
-            bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            bool l0IsTight = (l0 ? nttools().isSignal(l0) : false);
+            bool l1IsTight = (l1 ? nttools().isSignal(l1) : false);
             LeptonVector dummyLepts;
             susy::wh::TupleMaker& tm = m_tupleMakerRazor0j;
             tm
@@ -374,8 +375,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             if(m_probes.size()>2) cout<<"warning, "<<m_probes.size()<<" probe leptons (expected 2)"<<endl;
             const Lepton *l0 = m_probes[0], *l1 = m_probes[1];
             LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
-            bool l0IsTight(l0 ? isSignalLepton(l0, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
-            bool l1IsTight(l1 ? isSignalLepton(l1, m_baseElectrons, m_baseMuons, nVtx, isMc) : false);
+            bool l0IsTight = (l0 ? nttools().isSignal(l0) : false);
+            bool l1IsTight = (l1 ? nttools().isSignal(l1) : false);
             LeptonVector trigLeps(m_probes.begin(), m_probes.begin()+2); // copy them and insure we're matching the same ones we store
             // DG-2015-12-17 trigger to be re-implemented for run 2
             bool has2ltrigmatch = true; // (SusySelection::passTrig2LwithMatch(trigLeps, m_trigObj, m_met->Et, nt.evt()));
@@ -427,7 +428,7 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
     bool isElOrMu(lep->isEle() || lep->isMu());
     assert(isElOrMu);
     LeptonType lt(lep->isEle() ? kElectron : kMuon);
-    bool pass(isSignalLepton(lep, m_baseElectrons,m_baseMuons,nt.evt()->nVtx,nt.evt()->isMC));
+    bool pass = nttools().isSignal(lep);
     FillEffHistos   fill1dEff(pass, m_evtWeight, lt, regionIndex, static_cast<Chan>(m_ch));
     Fill2dEffHistos fill2dEff(pass, m_evtWeight, lt, regionIndex, static_cast<Chan>(m_ch));
     float pt(lep->Pt()), eta(fabs(lep->Eta()));
@@ -696,10 +697,8 @@ bool MeasureFakeRate2::passRealCR(const LeptonVector &leptons,
   else if(CR == CR_SideLow) { if( !(61 < mll && mll < 71) )   return false; }
   else if(CR == CR_SideHigh){ if( !(111 < mll && mll < 121) ) return false; }
   // At least one tight lepton
-  int nVtx   = nt.evt()->nVtx;
-  bool isMC  = nt.evt()->isMC;
-  bool l0sig(isSignalLepton(leptons[0], m_baseElectrons, m_baseMuons, nVtx, isMC));
-  bool l1sig(isSignalLepton(leptons[1], m_baseElectrons, m_baseMuons, nVtx, isMC));
+  bool l0sig = nttools().isSignal(leptons[0]);
+  bool l1sig = nttools().isSignal(leptons[1]);
   if( !l0sig && !l1sig ) return false;
   // Pass trigger
   TriggerTools &ntTrig = nttools().triggerTool();
