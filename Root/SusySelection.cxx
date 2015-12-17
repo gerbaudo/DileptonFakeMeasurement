@@ -3,11 +3,10 @@
 #include <cfloat> // FLT_MAX, FLT_MIN
 #include <iomanip> // setw, setprecision
 #include <sstream>      // std::ostringstream
+#include <stdexcept>
 #include "TCanvas.h"
 #include "DileptonFakeMeasurement/SusySelection.h"
-#include "DileptonFakeMeasurement/SusyPlotter.h"
 
-#include "ChargeFlip/chargeFlip.h"
 #include "DileptonFakeMeasurement/criteria.h"
 #include "DileptonFakeMeasurement/kinematic.h"
 #include "DileptonFakeMeasurement/utils.h"
@@ -614,38 +613,39 @@ float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
                                            uint systematic, // DG todo
                                            bool update4mom)
 {
-  cvl_t &ls = leptons;
-  if(ls.size()<2 || !ls[0] || !ls[1] || !m_chargeFlip) return 0.0;
-  Lepton *l0(ls[0]), *l1(ls[1]);
-  int pdg0(susy::pdgIdFromLep(l0)), pdg1(susy::pdgIdFromLep(l1));
-  TLorentzVector smearedLv0(*l0), smearedLv1(*l1);
-  TVector2 smearedMet(met.lv().Px(), met.lv().Py());
-  int sys(NtSys_NOM==systematic ? 0 : 0);
-  //(DGSys_BKGMETHOD_UP==systematic ? +1 : // DG todo : implement syst
-  // (DGSys_BKGMETHOD_DN==systematic ? -1 : 0)));
-  /*
-  cout<<"OS2SS args: "
-      <<" event   "<<nt.evt()->event
-      <<" pdg0 "<<pdg0
-      <<" lv0 px: "<<smearedLv0.Px()<<" py: "<<smearedLv0.Py()<<" pz: "<<smearedLv0.Pz()
-      <<" pdg1 "<<pdg1
-      <<" lv1 px: "<<smearedLv1.Px()<<" py: "<<smearedLv1.Py()<<" pz: "<<smearedLv1.Pz()
-      <<" met px: "<<smearedMet.Px()<<" py: "<<smearedMet.Py()
-      <<endl;
-  */
-  m_chargeFlip->setSeed(nt.evt()->event);
-  float flipProb(m_chargeFlip->OS2SS(pdg0, &smearedLv0, pdg1, &smearedLv1, &smearedMet, sys));
-  float overlapFrac(m_chargeFlip->overlapFrac().first);
-  if(update4mom) {
-    m_unsmeared_lv0 = (*l0);
-    m_unsmeared_lv1 = (*l1);
-    m_unsmeared_met = met;
-    l0->SetPtEtaPhiM(smearedLv0.Pt(), smearedLv0.Eta(), smearedLv0.Phi(), smearedLv0.M());
-    l1->SetPtEtaPhiM(smearedLv1.Pt(), smearedLv1.Eta(), smearedLv1.Phi(), smearedLv1.M());
-    met.Et = smearedMet.Mod();
-    met.phi = smearedMet.Phi();
-  }
-  return flipProb*overlapFrac;
+    return 0.0;
+  // cvl_t &ls = leptons;
+  // if(ls.size()<2 || !ls[0] || !ls[1] || !m_chargeFlip) return 0.0;
+  // Lepton *l0(ls[0]), *l1(ls[1]);
+  // int pdg0(susy::pdgIdFromLep(l0)), pdg1(susy::pdgIdFromLep(l1));
+  // TLorentzVector smearedLv0(*l0), smearedLv1(*l1);
+  // TVector2 smearedMet(met.lv().Px(), met.lv().Py());
+  // int sys(NtSys_NOM==systematic ? 0 : 0);
+  // //(DGSys_BKGMETHOD_UP==systematic ? +1 : // DG todo : implement syst
+  // // (DGSys_BKGMETHOD_DN==systematic ? -1 : 0)));
+  // /*
+  // cout<<"OS2SS args: "
+  //     <<" event   "<<nt.evt()->event
+  //     <<" pdg0 "<<pdg0
+  //     <<" lv0 px: "<<smearedLv0.Px()<<" py: "<<smearedLv0.Py()<<" pz: "<<smearedLv0.Pz()
+  //     <<" pdg1 "<<pdg1
+  //     <<" lv1 px: "<<smearedLv1.Px()<<" py: "<<smearedLv1.Py()<<" pz: "<<smearedLv1.Pz()
+  //     <<" met px: "<<smearedMet.Px()<<" py: "<<smearedMet.Py()
+  //     <<endl;
+  // */
+  // m_chargeFlip->setSeed(nt.evt()->event);
+  // float flipProb(m_chargeFlip->OS2SS(pdg0, &smearedLv0, pdg1, &smearedLv1, &smearedMet, sys));
+  // float overlapFrac(m_chargeFlip->overlapFrac().first);
+  // if(update4mom) {
+  //   m_unsmeared_lv0 = (*l0);
+  //   m_unsmeared_lv1 = (*l1);
+  //   m_unsmeared_met = met;
+  //   l0->SetPtEtaPhiM(smearedLv0.Pt(), smearedLv0.Eta(), smearedLv0.Phi(), smearedLv0.M());
+  //   l1->SetPtEtaPhiM(smearedLv1.Pt(), smearedLv1.Eta(), smearedLv1.Phi(), smearedLv1.M());
+  //   met.Et = smearedMet.Mod();
+  //   met.phi = smearedMet.Phi();
+  // }
+  // return flipProb*overlapFrac;
 }
 //-----------------------------------------
 susy::wh::Chan SusySelection::getChan(const LeptonVector& leps)
@@ -817,15 +817,15 @@ void SusySelection::resetAllCounters()
 //-----------------------------------------
 void SusySelection::initChargeFlipTool()
 {
-  char* rcdir = getenv("ROOTCOREDIR");
-  if(!rcdir){
-    if(m_dbg) cout<<"invalid ROOTCOREDIR, cannot initialize chargeFlipTool"<<endl;
-    return;
-  }
-  string chargeFlipInput(rcdir);
-  chargeFlipInput += "/../ChargeFlip/data/d0_chargeflip_map.root";
-  m_chargeFlip = new chargeFlip(chargeFlipInput);
-  if(m_dbg) m_chargeFlip->printSettings();
+  // char* rcdir = getenv("ROOTCOREDIR");
+  // if(!rcdir){
+  //   if(m_dbg) cout<<"invalid ROOTCOREDIR, cannot initialize chargeFlipTool"<<endl;
+  //   return;
+  // }
+  // string chargeFlipInput(rcdir);
+  // chargeFlipInput += "/../ChargeFlip/data/d0_chargeflip_map.root";
+  // m_chargeFlip = new chargeFlip(chargeFlipInput);
+  // if(m_dbg) m_chargeFlip->printSettings();
 }
 //-----------------------------------------
 LeptonVector SusySelection::getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/)
