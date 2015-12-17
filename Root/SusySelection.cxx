@@ -88,7 +88,7 @@ Bool_t SusySelection::Process(Long64_t entry)
      .lepPt) {
       if(m_writeTuple) {
           double weight(m_weightComponents.product());
-          unsigned int run(nt.evt()->run), event(nt.evt()->event);
+          unsigned int run(nt.evt()->run), event(nt.evt()->eventNumber);
           LeptonVector anyLep(getAnyElOrMu(nt));
           LeptonVector lowPtLep(subtract_vector(anyLep, m_baseLeptons));
           const Lepton *l0 = m_signalLeptons[0];
@@ -133,7 +133,7 @@ bool SusySelection::selectEvent()
   const Susy::Met *met = m_met;
   uint run = nt.evt()->run;
   bool mc = nt.evt()->isMC;
-  m_debugThisEvent = susy::isEventInList(nt.evt()->event);
+  m_debugThisEvent = susy::isEventInList(nt.evt()->eventNumber);
   float mllMin(20);
   WeightComponents &wc = m_weightComponents;
   if(passGRL        (flag           ))  { increment(n_pass_Grl     , wc);} else { return false; }
@@ -626,7 +626,7 @@ float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
   // // (DGSys_BKGMETHOD_DN==systematic ? -1 : 0)));
   // /*
   // cout<<"OS2SS args: "
-  //     <<" event   "<<nt.evt()->event
+  //     <<" event   "<<nt.evt()->eventNumber
   //     <<" pdg0 "<<pdg0
   //     <<" lv0 px: "<<smearedLv0.Px()<<" py: "<<smearedLv0.Py()<<" pz: "<<smearedLv0.Pz()
   //     <<" pdg1 "<<pdg1
@@ -634,7 +634,7 @@ float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
   //     <<" met px: "<<smearedMet.Px()<<" py: "<<smearedMet.Py()
   //     <<endl;
   // */
-  // m_chargeFlip->setSeed(nt.evt()->event);
+  // m_chargeFlip->setSeed(nt.evt()->eventNumber);
   // float flipProb(m_chargeFlip->OS2SS(pdg0, &smearedLv0, pdg1, &smearedLv1, &smearedMet, sys));
   // float overlapFrac(m_chargeFlip->overlapFrac().first);
   // if(update4mom) {

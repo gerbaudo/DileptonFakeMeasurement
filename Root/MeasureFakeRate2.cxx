@@ -229,7 +229,7 @@ void printProgress(const Susy::Event *e, Long64_t counter)
 {
   cout << "**** Processing entry " <<counter
        << " run "<<e->run
-       << " event "<<e->event << " ****" << endl;
+       << " event "<<e->eventNumber << " ****" << endl;
 }
 //----------------------------------------------------------
 Bool_t MeasureFakeRate2::Process(Long64_t entry)
@@ -276,7 +276,7 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
       for(size_t ip=0; ip<m_probes.size(); ++ip) fillRatesHistos(m_probes.at(ip), jets, m_met, cr);
     } // if(passCR)
     if(m_writeFakeTuple && passCR) {
-        unsigned int run(nt.evt()->run), event(nt.evt()->event);
+        unsigned int run(nt.evt()->run), event(nt.evt()->eventNumber);
         bool isMc(nt.evt()->isMC);
         int nVtx(nt.evt()->nVtx);
         if(CR==sf::CR_HF_high || CR==sf::CR_HF_SS || CR==sf::CR_Conv) {
