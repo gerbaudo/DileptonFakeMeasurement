@@ -18,7 +18,9 @@ namespace susy
 bool isRealLepton(const Lepton* lep)
 {
   // Updated way of handling real and fake leptons using LeptonTruthTools
-  return (lep->truthType == RecoTruthMatch::PROMPT);
+    return false;
+    // DG-2015-12-17 \todo update with ss3l procedure
+    // return (lep->truthType == RecoTruthMatch::PROMPT);
 }
 //-----------------------------------------
 bool isFakeLepton(const Lepton* lep)
@@ -28,20 +30,26 @@ bool isFakeLepton(const Lepton* lep)
 //-----------------------------------------
 bool isConvLepton(const Lepton* lep)
 {
-  bool isConverted(lep->truthType == RecoTruthMatch::CONV);
-  bool isChargeFlip(lep->isEle() ?
-                    static_cast<const Susy::Electron*>(lep)->isChargeFlip : false);
-  return isConverted && !isChargeFlip;
+    return false;
+    // DG-2015-12-17 \todo update with ss3l procedure
+  // bool isConverted(lep->truthType == RecoTruthMatch::CONV);
+  // bool isChargeFlip(lep->isEle() ?
+  //                   static_cast<const Susy::Electron*>(lep)->isChargeFlip : false);
+  // return isConverted && !isChargeFlip;
 }
 //-----------------------------------------
 bool isHFLepton(const Lepton* lep)
 {
-  return (lep->truthType == RecoTruthMatch::HF);
+    return false;
+    // DG-2015-12-17 \todo update with ss3l procedure
+    // return (lep->truthType == RecoTruthMatch::HF);
 }
 //-----------------------------------------
 bool isLFLepton(const Lepton* lep)
 {
-  return (lep->truthType == RecoTruthMatch::LF);
+    return false;
+    // DG-2015-12-17 \todo update with ss3l procedure
+    // return (lep->truthType == RecoTruthMatch::LF);
 }
 //-----------------------------------------
 bool isTrueDilepton(const LeptonVector &leptons)
@@ -60,7 +68,7 @@ bool passEleD0S(const LeptonVector &leptons, float maxVal)
 {
   for(size_t i=0; i<leptons.size(); ++i){
       const Susy::Lepton* l = leptons[i];
-      if(l->isEle() && (fabs(l->d0Sig(true)) > maxVal)) return false;
+      if(l->isEle() && (fabs(l->d0Sig()) > maxVal)) return false;
   } // end for(i)
   return true;
 }
@@ -86,11 +94,6 @@ bool sameSign(const LeptonVector& leptons)
 bool oppositeSign(const LeptonVector& leptons)
 {
   return !(sameSign(leptons));
-}
-//-----------------------------------------
-bool passHtautauVeto(int hdecay)
-{
-  return (hdecay!=WhTruthExtractor::kPtauAtau);
 }
 //----------------------------------------------------------
 bool passZllVeto(const LeptonVector& l, float mllLo, float mllHi)

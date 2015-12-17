@@ -26,7 +26,6 @@ namespace susy
   bool oppositeFlavor(const LeptonVector& leptons);
   bool sameSign(const LeptonVector& leptons);
   bool oppositeSign(const LeptonVector& leptons);
-  bool passHtautauVeto(int hdecay);
   bool passZllVeto(const LeptonVector& l, float mllLo, float mllHi);
   bool pass2LepPt(const LeptonVector& l, float minPt0, float minPt1);
   bool passPtllMin(const LeptonVector& l, float minPt);
