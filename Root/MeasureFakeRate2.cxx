@@ -732,11 +732,17 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
   }
   // Check the trigger
   if( tag->Pt() < 20 ) return false;
-  TBits tagFlag = tag->trigFlags;
-  if( !isMM && !(HLT_(tagFlag & TRIG_mu18_tight) && (tagFlag & TRIG_mu18_tight_e7_medium1)) )
-    return false;
-  if( isMM && !((tagFlag & TRIG_mu18_tight) && (tagFlag & TRIG_mu18_tight_mu8_EFFS)) )
-    return false;
+
+  // DG-2015-12-17 the trigger part has to be re-implemented based on
+  // the trigger we'll choose. The idea is to make sure that the tag
+  // is matching one of the legs of the dilepton trigger.
+  // TriggerTools &ntTrig = nttools().triggerTool();
+  // TBits tagBits = tag->trigFlags;
+  // bool fail_trigger_match =
+  //     ( !isMM && !(ntTrig.passTrigger(tagBits, "HLT_mu26_imedium") &&
+  //                  ntTrig.passTrigger(tagBits, "HLT_mu18_tight_e7_medium1")) );
+  // if(fail_trigger_match)
+  //     return false;
 
   // Met and Mt Cut
   if( met->Et > 60 )       return false;  // DG 2014-04-14 : try the same selection as Matt G. (was 40)
@@ -764,11 +770,13 @@ bool MeasureFakeRate2::passHFCR_Ss(const LeptonVector &leptons,
     bool passDilepMuMu(false), passDilepMuEm(false), passDilepEmMu(false);
     for(size_t iTag=0; iTag<m_baseMuons.size(); ++iTag){
         if(const Muon *m = m_baseMuons[iTag]){
-            uint tf = m->trigFlags;
-            passDilepMuMu = (tf & TRIG_mu18_tight_mu8_EFFS);
-            passDilepMuEm = (tf & TRIG_mu18_tight_e7_medium1);
-            passDilepEmMu = (tf & TRIG_e12Tvh_medium1_mu8);
-            bool passDilep(passDilepMuMu || passDilepMuEm || passDilepEmMu);
+            // DG-2015-12-17 trigger to be re-implemented for run 2
+            // uint tf = m->trigFlags;
+            // passDilepMuMu = (tf & TRIG_mu18_tight_mu8_EFFS);
+            // passDilepMuEm = (tf & TRIG_mu18_tight_e7_medium1);
+            // passDilepEmMu = (tf & TRIG_e12Tvh_medium1_mu8);
+            // bool passDilep(passDilepMuMu || passDilepMuEm || passDilepEmMu);
+            bool passDilep = true;
             if(m->isMu() && passDilep) { tag = m_baseMuons.at(iTag); nTags++; }
         }
     } // for(iTag)
@@ -863,7 +871,7 @@ bool MeasureFakeRate2::passZ3lVetoPlusJetsCR(const LeptonVector &leptons,
            mll > 20.0 &&    // avoid quarkonium resonances
            met->Et < 50 &&  // avoid W+jets
            // DG-2015-12-17 trigger to be re-implemented for run 2
-           /*SusySelection::passTrig2LwithMatch(twoMu, m_trigObj, m_met->Et, nt.evt()))*/{
+           /*SusySelection::passTrig2LwithMatch(twoMu, m_trigObj, m_met->Et, nt.evt())*/ true){
             m_probes.push_back(static_cast<Lepton*>(&el));
             float lepEff(isMc ? el.effSF : 1.0);
             m_evtWeight = lepEff * getEvtWeight(twoMu, true, true);
