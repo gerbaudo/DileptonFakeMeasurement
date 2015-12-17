@@ -13,6 +13,8 @@
 #include "TH2F.h"
 //#include "TEfficiency.h"
 
+#include <string>
+
 class EffObject : public TObject
 {
  public:
@@ -20,13 +22,13 @@ class EffObject : public TObject
   //-----------------------------------------//
   // Constructors
   //-----------------------------------------//
-  EffObject(string name, const int nbins, const float* bins){
+  EffObject(std::string name, const int nbins, const float* bins){
     num = new TH1F((name+"_num").c_str(),name.c_str(),nbins,bins);
     den = new TH1F((name+"_den").c_str(),name.c_str(),nbins,bins);
     num->Sumw2();
     den->Sumw2();
   };
-  EffObject(string name, const int nbins, const float min, const float max){
+  EffObject(std::string name, const int nbins, const float min, const float max){
     num = new TH1F((name+"_num").c_str(),name.c_str(),nbins,min,max);
     den = new TH1F((name+"_den").c_str(),name.c_str(),nbins,min,max);
     num->Sumw2();
@@ -52,7 +54,7 @@ class EffObject : public TObject
     if(pass) num->Fill(fillx,weight);
   };
 
-  void SetXLabel(int bin, string label){
+  void SetXLabel(int bin, std::string label){
     this->num->GetXaxis()->SetBinLabel(bin, label.c_str());
     this->den->GetXaxis()->SetBinLabel(bin, label.c_str());
   }
@@ -73,14 +75,14 @@ class EffObject2 : public TObject
   //-----------------------------------------//
   // Constructors
   //-----------------------------------------//
-  EffObject2(string name, const int nxbins, const float* xbins,
+  EffObject2(std::string name, const int nxbins, const float* xbins,
 	     const int nybins, const float* ybins){
     num = new TH2F((name+"_num").c_str(),name.c_str(),nxbins,xbins,nybins,ybins);
     den = new TH2F((name+"_den").c_str(),name.c_str(),nxbins,xbins,nybins,ybins);
     num->Sumw2();
     den->Sumw2();
   };
-  EffObject2(string name, const int nxbins, const float xmin, const float xmax,
+  EffObject2(std::string name, const int nxbins, const float xmin, const float xmax,
 	     const int nybins, const float ymin, const float ymax){
     num = new TH2F((name+"_num").c_str(),name.c_str(),nxbins,xmin,xmax,nybins,ymin,ymax);
     den = new TH2F((name+"_den").c_str(),name.c_str(),nxbins,xmin,xmax,nybins,ymin,ymax);
@@ -112,11 +114,11 @@ class EffObject2 : public TObject
     if(pass) num->Fill(fillx,filly,weight);
   };
 
-  void SetXLabel(int bin, string label){
+  void SetXLabel(int bin, std::string label){
     this->num->GetXaxis()->SetBinLabel(bin, label.c_str());
     this->den->GetXaxis()->SetBinLabel(bin, label.c_str());
   }
-  void SetYLabel(int bin, string label){
+  void SetYLabel(int bin, std::string label){
     this->num->GetYaxis()->SetBinLabel(bin, label.c_str());
     this->den->GetYaxis()->SetBinLabel(bin, label.c_str());
   }
