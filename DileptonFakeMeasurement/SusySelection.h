@@ -19,7 +19,6 @@
 #include "SusyNtuple/SusyNtTools.h"
 #include "SusyNtuple/SusyDefs.h"
 
-#include "SusyXSReader/XSReader.h"
 #include "DileptonFakeMeasurement/ProgressPrinter.h"
 #include "DileptonFakeMeasurement/SsPassFlags.h"
 #include "DileptonFakeMeasurement/DileptonChannel.h"
@@ -28,7 +27,7 @@
 
 enum WeightTypes {
   kRaw = 0,   // raw counts
-  kEvt,       // include gen weight (from ntuple or xsreader)
+  kEvt,       // include gen weight
   kPU,        // include pileup weight
   kLSF,       // include lepton scale factor
   kBtag,      // include b-tag scale factor
@@ -153,7 +152,6 @@ class SusySelection : public SusyNtAna
     static bool passSrWh2j(const susy::wh::kin::DilepVars &v, SsPassFlags &f); //! same as above, but also toggle kin flags
     static bool passSrWhNoMlj(const susy::wh::kin::DilepVars &v);
 
-    void setUseXsReader(bool val){ m_useXsReader = val; };
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
     void setWriteNtuple(bool val) { m_writeTuple = val; };
     void setTupleFile(const std::string &name) { m_writeTuple = true; m_outTupleFile = name; };
@@ -177,9 +175,6 @@ class SusySelection : public SusyNtAna
     void computeRazor(const LeptonVector &leptons, const JetVector& jets, const Met &met,
                       double &dphi_ll_vBetaT, double &mDeltaR);
  protected:
-    //! call SusyNtAna::getEventWeight, replacing the ntuple xsec with the one from the reader
-    float computeEventWeightXsFromReader(float lumi);
-    float getXsFromReader();     //!< cache xsec from xsreader
     float getBTagWeight(cvj_t& jets, const Event* evt);
     float getTriggerWeight2Lep(const LeptonVector &leptons);
     void resetAllCounters();
@@ -190,7 +185,6 @@ class SusySelection : public SusyNtAna
 
   protected:
 
-    XSReader* m_xsReader;
     susy::wh::TupleMaker m_tupleMaker;
     bool m_writeTuple;
     bool m_debugThisEvent;
@@ -200,8 +194,6 @@ class SusySelection : public SusyNtAna
     bool                m_useMCTrig;    // Use MC Trigger, i.e. toggle the matching in DilTrigLogic::passDil*()
     chargeFlip*         m_chargeFlip;   //!< tool providing the electron charge flip probability
     float               m_w;            // mc weight
-    bool                m_useXsReader;  // use SusyXSReader to get the xsec for normalization
-    float               m_xsFromReader; // cached xsec from reader
     float               m_qflipProb;     //! charge flip probability
     TLorentzVector      m_unsmeared_lv0; //! cached lepton LV before charge-flip smearing
     TLorentzVector      m_unsmeared_lv1; //! see above

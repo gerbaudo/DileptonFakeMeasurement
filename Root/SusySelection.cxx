@@ -30,7 +30,6 @@ std::string SusySelection::WeightComponents::str() const
 }
 //-----------------------------------------
 SusySelection::SusySelection() :
-  m_xsReader(NULL),
   m_tupleMaker("",""),
   m_writeTuple(false),
   m_debugThisEvent(false),
@@ -38,8 +37,6 @@ SusySelection::SusySelection() :
   m_trigObj(NULL),
   m_useMCTrig(false),
   m_w(1.0),
-  m_useXsReader(false),
-  m_xsFromReader(-1.0),
   m_qflipProb(0.0)
 {
   resetAllCounters();
@@ -56,11 +53,6 @@ void SusySelection::Begin(TTree* /*tree*/)
   bool useReweightUtils = false;
   m_trigObj = new DilTrigLogic(period, useReweightUtils);
   if(m_useMCTrig) m_trigObj->useMCTrigger();
-  if( m_useXsReader ){
-    m_xsReader = new XSReader();
-    m_xsReader->setDebug(m_dbg);
-    m_xsReader->LoadXSInfo();
-  } // end if(m_useXsReader)
   if(m_writeTuple) {
       if(endswith(m_outTupleFile, ".root") && m_tupleMaker.init(m_outTupleFile, "SusySel"))
           cout<<"initialized ntuple file "<<m_outTupleFile<<endl;
@@ -116,7 +108,6 @@ void SusySelection::Terminate()
   SusyNtAna::Terminate();
   if(m_dbg) cout << "SusySelection::Terminate" << endl;
   dumpEventCounters();
-  if(m_xsReader) delete m_xsReader;
   if(m_chargeFlip) delete m_chargeFlip;
 }
 //-----------------------------------------
@@ -617,25 +608,6 @@ void SusySelection::dumpEventCounters()
     cout<<"ewkSsLea         : "<<lcpet(n_pass_ewkSsLea       , w, cw)<<endl;
     cout<<midRule                                                    <<endl;
   }// end for(w)
-}
-//-----------------------------------------
-float SusySelection::getXsFromReader()
-{
-  if(!m_useXsReader || !m_xsReader) return -1.0;
-  bool xsIsNotCached(m_xsFromReader < 0.0); // was initialized to -1
-  if(xsIsNotCached){
-    int dsid(static_cast<int>(nt.evt()->mcChannel));
-    m_xsFromReader = m_xsReader->GetXS(dsid);
-    if(m_dbg) cout<<"SusySelection::getXsFromReader: got "<<m_xsFromReader<<" for "<<dsid<<endl;
-  }
-  return m_xsFromReader;
-}
-//-----------------------------------------
-float SusySelection::computeEventWeightXsFromReader(float lumi)
-{
-  float defaultXsec = nt.evt()->xsec;
-  assert(defaultXsec != 0.0);
-  return (getEventWeight(lumi) * getXsFromReader() / defaultXsec);
 }
 //-----------------------------------------
 float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
