@@ -7,17 +7,18 @@
 
 #include "SusyNtuple/TauId.h"
 #include "SusyNtuple/SusyNtSys.h"
+#include "SusyNtuple/KinematicTools.h"
 
 #include "TBits.h"
 
 #include <algorithm> // transform
 #include <cassert>
 
-using namespace susy::fake;
 namespace sf = susy::fake;
-using namespace susy::wh;
+namespace sw = susy::wh;
 namespace swk = susy::wh::kin;
-
+using susy::fake::LeptonSource;
+using susy::wh::Chan;
 
 const sf::Region controlRegions[] = {
     sf::CR_Real,
@@ -179,7 +180,7 @@ void MeasureFakeRate2::initHistos(string outName)
   if(nLeptonTypes > kNmaxLeptonTypes) cout<<" Trying book histos for "<<nLeptonTypes<<" lepton types >= "<<kNmaxLeptonTypes<<endl<<" Exiting."<<endl;
   assert(nRegions <= kNmaxControlRegions);
   assert(nLeptonTypes <= kNmaxLeptonTypes);
-  assert(nFlavBins==LS_N);
+  assert(sf::nFlavBins==sf::LS_N);
   cout<<"Creating file: "<<outName<<endl;
   m_outFile = new TFile((outName).c_str(),"recreate");
   m_outFile->cd();
@@ -189,33 +190,33 @@ void MeasureFakeRate2::initHistos(string outName)
     vector<sf::Region> regions(allRegions());
     for(size_t icr=0; icr<regions.size(); ++icr){
       string region(sf::region2str(regions[icr]));
-      for(int ich=0; ich<Ch_N; ++ich){ // for chan in [all, ee, mm, em]
-        string channel = chanNames[ich];
+      for(int ich=0; ich<sw::Ch_N; ++ich){ // for chan in [all, ee, mm, em]
+        string channel = sw::chanNames[ich];
         string bn(lepton+"_"+region+"_"+channel+"_");
-        h_l_pt         [il][icr][ich] = new EffObject(bn+"l_pt",         nFakePtbins,       FakePtbins);
-        h_l_pt_coarse  [il][icr][ich] = new EffObject(bn+"l_pt_coarse",  nCoarseFakePtbins, coarseFakePtbins);
-        h_l_eta        [il][icr][ich] = new EffObject(bn+"l_eta",        nEtabins,          Etabins);
-        h_l_eta_coarse [il][icr][ich] = new EffObject(bn+"l_eta_coarse", nCoarseEtabins,    CoarseEtabins);
-        h_metrel       [il][icr][ich] = new EffObject(bn+"metrel",       nMetbins,          Metbins);
-        h_met          [il][icr][ich] = new EffObject(bn+"met",          nMetbins,          Metbins);
-        h_njets        [il][icr][ich] = new EffObject(bn+"njets",        nJetbins,          Jetbins);
+        h_l_pt         [il][icr][ich] = new EffObject(bn+"l_pt",         sf::nFakePtbins,       sf::FakePtbins);
+        h_l_pt_coarse  [il][icr][ich] = new EffObject(bn+"l_pt_coarse",  sf::nCoarseFakePtbins, sf::coarseFakePtbins);
+        h_l_eta        [il][icr][ich] = new EffObject(bn+"l_eta",        sf::nEtabins,          sf::Etabins);
+        h_l_eta_coarse [il][icr][ich] = new EffObject(bn+"l_eta_coarse", sf::nCoarseEtabins,    sf::CoarseEtabins);
+        h_metrel       [il][icr][ich] = new EffObject(bn+"metrel",       sf::nMetbins,          sf::Metbins);
+        h_met          [il][icr][ich] = new EffObject(bn+"met",          sf::nMetbins,          sf::Metbins);
+        h_njets        [il][icr][ich] = new EffObject(bn+"njets",        sf::nJetbins,          sf::Jetbins);
         h_onebin       [il][icr][ich] = new EffObject(bn+"onebin",       1,    -0.5, 0.5);
-        h_flavor       [il][icr][ich] = new EffObject(bn+"flavor",       LS_N, -0.5, LS_N-0.5);
-        h_l_pt_real    [il][icr][ich] = new EffObject(bn+"l_pt_real",    nFakePtbins,       FakePtbins);
-        h_l_pt_conv    [il][icr][ich] = new EffObject(bn+"l_pt_conv",    nFakePtbins,       FakePtbins);
-        h_l_pt_hf      [il][icr][ich] = new EffObject(bn+"l_pt_hf",      nFakePtbins,       FakePtbins);
-        h_l_pt_lf      [il][icr][ich] = new EffObject(bn+"l_pt_lf",      nFakePtbins,       FakePtbins);
-        h_l_pt_hflf    [il][icr][ich] = new EffObject(bn+"l_pt_hflf",    nFakePtbins,       FakePtbins);
-        h_l_pt_true    [il][icr][ich] = new TH1F     ((bn+"l_pt_true").c_str(), "", nFakePtbins, FakePtbins);
-        h_l_pt_fake    [il][icr][ich] = new TH1F     ((bn+"l_pt_fake").c_str(), "", nFakePtbins, FakePtbins);
-        h_l_pt_eta     [il][icr][ich]   = new EffObject2(bn+"l_pt_eta",       nCoarseFakePtbins, coarseFakePtbins, nEtabins, Etabins);
-        h_flavor_pt      [il][icr][ich] = new EffObject2(bn+"flavor_pt",      nFlavBins, flavBins, nCoarseFakePtbins, coarseFakePtbins);
-        h_flavor_pt_etaC [il][icr][ich] = new EffObject2(bn+"flavor_pt_etaC", nFlavBins, flavBins, nCoarseFakePtbins, coarseFakePtbins);
-        h_flavor_pt_etaF [il][icr][ich] = new EffObject2(bn+"flavor_pt_etaF", nFlavBins, flavBins, nCoarseFakePtbins, coarseFakePtbins);
-        h_flavor_eta     [il][icr][ich] = new EffObject2(bn+"flavor_eta",     nFlavBins, flavBins, nEtabins, Etabins);
-        h_flavor_metrel  [il][icr][ich] = new EffObject2(bn+"flavor_metrel",  nFlavBins, flavBins, nMetbins, Metbins);
-        for(int lbl=0; lbl<nFlavBins; ++lbl) {
-            const std::string &label = LSNames[lbl];
+        h_flavor       [il][icr][ich] = new EffObject(bn+"flavor",       sf::LS_N, -0.5, sf::LS_N-0.5);
+        h_l_pt_real    [il][icr][ich] = new EffObject(bn+"l_pt_real",    sf::nFakePtbins,       sf::FakePtbins);
+        h_l_pt_conv    [il][icr][ich] = new EffObject(bn+"l_pt_conv",    sf::nFakePtbins,       sf::FakePtbins);
+        h_l_pt_hf      [il][icr][ich] = new EffObject(bn+"l_pt_hf",      sf::nFakePtbins,       sf::FakePtbins);
+        h_l_pt_lf      [il][icr][ich] = new EffObject(bn+"l_pt_lf",      sf::nFakePtbins,       sf::FakePtbins);
+        h_l_pt_hflf    [il][icr][ich] = new EffObject(bn+"l_pt_hflf",    sf::nFakePtbins,       sf::FakePtbins);
+        h_l_pt_true    [il][icr][ich] = new TH1F((bn+"l_pt_true").c_str(), "", sf::nFakePtbins, sf::FakePtbins);
+        h_l_pt_fake    [il][icr][ich] = new TH1F((bn+"l_pt_fake").c_str(), "", sf::nFakePtbins, sf::FakePtbins);
+        h_l_pt_eta     [il][icr][ich]   = new EffObject2(bn+"l_pt_eta",       sf::nFakePtbins, sf::coarseFakePtbins, sf::nEtabins, sf::Etabins);
+        h_flavor_pt      [il][icr][ich] = new EffObject2(bn+"flavor_pt",      sf::nFlavBins, sf::flavBins, sf::nCoarseFakePtbins, sf::coarseFakePtbins);
+        h_flavor_pt_etaC [il][icr][ich] = new EffObject2(bn+"flavor_pt_etaC", sf::nFlavBins, sf::flavBins, sf::nCoarseFakePtbins, sf::coarseFakePtbins);
+        h_flavor_pt_etaF [il][icr][ich] = new EffObject2(bn+"flavor_pt_etaF", sf::nFlavBins, sf::flavBins, sf::nCoarseFakePtbins, sf::coarseFakePtbins);
+        h_flavor_eta     [il][icr][ich] = new EffObject2(bn+"flavor_eta",     sf::nFlavBins, sf::flavBins, sf::nEtabins, sf::Etabins);
+        h_flavor_metrel  [il][icr][ich] = new EffObject2(bn+"flavor_metrel",  sf::nFlavBins, sf::flavBins, sf::nMetbins, sf::Metbins);
+        for(int lbl=0; lbl<sf::nFlavBins; ++lbl) {
+            const std::string &label = sf::LSNames[lbl];
             h_flavor         [il][icr][ich]->SetXLabel(lbl+1, label);
             h_flavor_pt      [il][icr][ich]->SetXLabel(lbl+1, label);
             h_flavor_pt_etaC [il][icr][ich]->SetXLabel(lbl+1, label);
@@ -254,7 +255,7 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
   vector<sf::Region> regions(allRegions());
   for(size_t cr = 0; cr<regions.size(); ++cr){
     sf::Region CR = regions[cr];
-    m_ch = Ch_all;
+    m_ch = sw::Ch_all;
     m_probes.clear();
     m_tags.clear();
     bool passCR = false;
@@ -304,8 +305,8 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             // either one or two probes, see passMCReg
             const Lepton *l0 = m_probes.size()>0 ? m_probes[0] : &dummyL;
             const Lepton *l1 = m_probes.size()>1 ? m_probes[1] : &dummyL;
-            LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk);
-            LeptonSource l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
+            LeptonSource l0Source(l0 ? getLeptonSource(l0) : sf::LS_Unk);
+            LeptonSource l1Source(l1 ? getLeptonSource(l1) : sf::LS_Unk);
             bool l0IsTight = (l0 ? nttools().isSignal(l0) : false);
             bool l1IsTight = (l1 ? nttools().isSignal(l1) : false);
             LeptonVector dummyLepts;
@@ -319,7 +320,7 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             assert(m_probes.size()>1);
             if(m_probes.size()>2) cout<<"warning, "<<m_probes.size()<<" probe leptons (expected 2)"<<endl;
             const Lepton *l0 = m_probes[0], *l1 = m_probes[1];
-            LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
+            LeptonSource l0Source(l0 ? getLeptonSource(l0) : sf::LS_Unk), l1Source(l1 ? getLeptonSource(l1) : sf::LS_Unk);
             bool l0IsTight = (l0 ? nttools().isSignal(l0) : false);
             bool l1IsTight = (l1 ? nttools().isSignal(l1) : false);
             LeptonVector dummyLepts;
@@ -333,7 +334,7 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             assert(m_probes.size()==1 && m_signalMuons.size()==2); // here we expect 1 probe (el, store as l1) and 2tags (mu+mu, store in lep vec)
             Lepton *probeEl = m_probes[0];
             LeptonVector mumu; mumu.push_back(m_signalMuons[0]); mumu.push_back(m_signalMuons[1]);
-            LeptonSource source(probeEl ? getLeptonSource(probeEl) : LS_Unk);
+            LeptonSource source(probeEl ? getLeptonSource(probeEl) : sf::LS_Unk);
             bool isTight(probeEl ? nttools().isSignal(probeEl) : false);
             Lepton dummyL;
             m_tupleMakerZmmeJets
@@ -346,7 +347,7 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             assert(m_probes.size()>1);
             if(m_probes.size()>2) cout<<"warning, "<<m_probes.size()<<" probe leptons (expected 2)"<<endl;
             const Lepton *l0 = m_probes[0], *l1 = m_probes[1];
-            LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
+            LeptonSource l0Source(l0 ? getLeptonSource(l0) : sf::LS_Unk), l1Source(l1 ? getLeptonSource(l1) : sf::LS_Unk);
             bool l0IsTight(l0 ? nttools().isSignal(l0) : false);
             bool l1IsTight(l1 ? nttools().isSignal(l1) : false);
             LeptonVector dummyLepts;
@@ -359,7 +360,7 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
         } else if(CR==sf::CR_razor0j) {
             assert(m_probes.size()>1);
             const Lepton *l0 = m_probes[0], *l1 = m_probes[1];
-            LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
+            LeptonSource l0Source(l0 ? getLeptonSource(l0) : sf::LS_Unk), l1Source(l1 ? getLeptonSource(l1) : sf::LS_Unk);
             bool l0IsTight = (l0 ? nttools().isSignal(l0) : false);
             bool l1IsTight = (l1 ? nttools().isSignal(l1) : false);
             LeptonVector dummyLepts;
@@ -374,7 +375,7 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
             assert(m_probes.size()>1);
             if(m_probes.size()>2) cout<<"warning, "<<m_probes.size()<<" probe leptons (expected 2)"<<endl;
             const Lepton *l0 = m_probes[0], *l1 = m_probes[1];
-            LeptonSource l0Source(l0 ? getLeptonSource(l0) : LS_Unk), l1Source(l1 ? getLeptonSource(l1) : LS_Unk);
+            LeptonSource l0Source(l0 ? getLeptonSource(l0) : sf::LS_Unk), l1Source(l1 ? getLeptonSource(l1) : sf::LS_Unk);
             bool l0IsTight = (l0 ? nttools().isSignal(l0) : false);
             bool l1IsTight = (l1 ? nttools().isSignal(l1) : false);
             LeptonVector trigLeps(m_probes.begin(), m_probes.begin()+2); // copy them and insure we're matching the same ones we store
@@ -408,8 +409,8 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
         void operator () (EffObject* eff_array[kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N],
                           double value) {
             if(EffObject* eff = eff_array[l_][r_][c_])         eff->Fill(n_, w_, value);
-            if(c_ != Ch_all)
-                if(EffObject* eff = eff_array[l_][r_][Ch_all]) eff->Fill(n_, w_, value);
+            if(c_ != sw::Ch_all)
+                if(EffObject* eff = eff_array[l_][r_][sw::Ch_all]) eff->Fill(n_, w_, value);
         }
     };
     struct Fill2dEffHistos {
@@ -417,11 +418,11 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
         LeptonType l_; size_t r_; Chan c_;
         Fill2dEffHistos(bool alsoNum, double weight, LeptonType l, size_t r, Chan c)
             : n_(alsoNum), w_(weight), l_(l), r_(r), c_(c) {}
-        void operator () (EffObject2* eff_array[kNmaxLeptonTypes][kNmaxControlRegions][susy::wh::Ch_N],
+        void operator () (EffObject2* eff_array[kNmaxLeptonTypes][kNmaxControlRegions][sw::Ch_N],
                           double valueX, double valueY) {
             if(EffObject2* eff = eff_array[l_][r_][c_])         eff->Fill(n_, w_, valueX, valueY);
-            if(c_ != Ch_all)
-                if(EffObject2* eff = eff_array[l_][r_][Ch_all]) eff->Fill(n_, w_, valueX, valueY);
+            if(c_ != sw::Ch_all)
+                if(EffObject2* eff = eff_array[l_][r_][sw::Ch_all]) eff->Fill(n_, w_, valueX, valueY);
         }
     };
 
@@ -443,7 +444,7 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
     fill2dEff(h_l_pt_eta    , pt, eta);
     if( nt.evt()->isMC ){ // If the event is MC, save the flavor
         LeptonSource ls(getLeptonSource(lep));
-        bool isReal(ls==LS_Real), isHf(ls==LS_HF), isLf(ls==LS_LF), isConv(ls==LS_Conv);
+        bool isReal(ls==sf::LS_Real), isHf(ls==sf::LS_HF), isLf(ls==sf::LS_LF), isConv(ls==sf::LS_Conv);
         bool isQcd(isHf||isLf);
         bool isCentralEta(eta<1.37); // see FakeBinnings.h
         fill1dEff(h_flavor        , ls);
@@ -457,13 +458,13 @@ void MeasureFakeRate2::fillRatesHistos(const Lepton* lep, const JetVector& jets,
         if(isLf)   fill1dEff(h_l_pt_lf,   pt);
         if(isQcd)  fill1dEff(h_l_pt_hflf, pt);
         if(isQcd) {
-            fill1dEff(h_flavor        , LS_QCD);
-            fill2dEff(h_flavor_pt     , LS_QCD, pt);
-            fill2dEff(h_flavor_eta    , LS_QCD, eta);
-            fill2dEff(h_flavor_metrel , LS_QCD, m_metRel);
-            fill2dEff(isCentralEta ? h_flavor_pt_etaC : h_flavor_pt_etaF, LS_QCD, pt);
+            fill1dEff(h_flavor        , sf::LS_QCD);
+            fill2dEff(h_flavor_pt     , sf::LS_QCD, pt);
+            fill2dEff(h_flavor_eta    , sf::LS_QCD, eta);
+            fill2dEff(h_flavor_metrel , sf::LS_QCD, m_metRel);
+            fill2dEff(isCentralEta ? h_flavor_pt_etaC : h_flavor_pt_etaF, sf::LS_QCD, pt);
         }
-        TH1F *hlpt = (ls==LS_Real ? h_l_pt_true[lt][regionIndex][m_ch] : h_l_pt_fake[lt][regionIndex][m_ch]);
+        TH1F *hlpt = (ls==sf::LS_Real ? h_l_pt_true[lt][regionIndex][m_ch] : h_l_pt_fake[lt][regionIndex][m_ch]);
         if(hlpt) hlpt->Fill(pt, m_evtWeight);
     }
 }
@@ -487,7 +488,7 @@ bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
   if( !nt.evt()->isMC )     return false;
   if( leptons.size() != 2 ) return false;
   m_ch = SusySelection::getChan(leptons);
-  m_metRel = getMetRel(met,leptons,jets);
+  m_metRel = kin::getMetRel(met,leptons,jets);
   if(m_metRel<40.0) return false;
 //  if(jets.size()<1) return false;
 //  if(jets.size()<1 || m_metRel<20.0) return false;
@@ -495,9 +496,9 @@ bool MeasureFakeRate2::passMCReg(const LeptonVector &leptons,
     Lepton* l=leptons[il];
     bool isQcdLepton(susy::isHFLepton(l) || susy::isLFLepton(l));
     uint dsid(nt.evt()->mcChannel);
-    if(CR==CR_MCConv && susy::isConvLepton(l)) m_probes.push_back( l ); // Conversion
-    if(CR==CR_MCQCD && isQcdLepton)            m_probes.push_back( l ); // QCD
-    if(CR==CR_MCReal && isRealLepton(l, dsid)) m_probes.push_back( l ); // Real
+    if(CR==sf::CR_MCConv && susy::isConvLepton(l)) m_probes.push_back( l ); // Conversion
+    if(CR==sf::CR_MCQCD && isQcdLepton)            m_probes.push_back( l ); // QCD
+    if(CR==sf::CR_MCReal && isRealLepton(l, dsid)) m_probes.push_back( l ); // Real
   }
   m_evtWeight = MeasureFakeRate2::getEvtWeight(leptons);
   return true;
@@ -628,7 +629,7 @@ SsPassFlags MeasureFakeRate2::passWhSS(const LeptonVector& leptons, const JetVec
   if(susy::passZllVeto   (leptons, loMllZ, hiMllZ))   { increment(n_pass_CRWHSSzveto [ll], wc); f.zllVeto=true;} else  return f;
   if(susy::passMtLlMetMin(leptons, met, mtwwMin))     { increment(n_pass_CRWHSSmwwt  [ll], wc); f.mtllmet=true;} else  return f;
   if(susy::passHtMin     (leptons, jets, met, htMin)) { increment(n_pass_CRWHSShtmin [ll], wc); f.ht     =true;} else  return f;
-  if(getMetRel(met,leptons,jets)>metRelMin)           { increment(n_pass_CRWHSSmetrel[ll], wc); f.metrel =true;} else  return f;
+  if(kin::getMetRel(met,leptons,jets)>metRelMin)      { increment(n_pass_CRWHSSmetrel[ll], wc); f.metrel =true;} else  return f;
   increment(n_pass_CRWHSS[ll], wc);
   return f;
 }
@@ -648,27 +649,28 @@ bool MeasureFakeRate2::passRealCR(const LeptonVector &leptons,
 
   // Same flavor dilepton
   if( leptons.size() != 2 )  return false;
+  Susy::Lepton *l0 = leptons[0], *l1 = leptons[1];
   if( !susy::sameFlavor(leptons) ) return false;
   // In Z window or side bands
-  float mll = Mll(leptons[0],leptons[1]);
-  if(CR == CR_Real)         { if( fabs(mll-91.2) > 10 ) return false; }
-  else if(CR == CR_SideLow) { if( !(61 < mll && mll < 71) )   return false; }
-  else if(CR == CR_SideHigh){ if( !(111 < mll && mll < 121) ) return false; }
+  float mll = kin::Mll(l0,l1);
+  if(CR == sf::CR_Real)         { if( fabs(mll-91.2) > 10 ) return false; }
+  else if(CR == sf::CR_SideLow) { if( !(61 < mll && mll < 71) )   return false; }
+  else if(CR == sf::CR_SideHigh){ if( !(111 < mll && mll < 121) ) return false; }
   // At least one tight lepton
-  bool l0sig = nttools().isSignal(leptons[0]);
-  bool l1sig = nttools().isSignal(leptons[1]);
+  bool l0sig = nttools().isSignal(l0);
+  bool l1sig = nttools().isSignal(l1);
   if( !l0sig && !l1sig ) return false;
   // Pass trigger
   TriggerTools &ntTrig = nttools().triggerTool();
-  TBits l0bit(leptons[0]->trigBits), l1bit(leptons[1]->trigBits);
+  TBits l0bit(l0->trigBits), l1bit(l1->trigBits);
   // DG-2015-12-17 \todo  check we're using the right trigger
-  bool l0trig = ntTrig.passTrigger(lep->trigBits, leptons[0]->isEle() ? "HLT_e24_tight_iloose" : "HLT_mu24_imedium")
-  bool l1trig = ntTrig.passTrigger(lep->trigBits, leptons[1]->isEle() ? "HLT_e24_tight_iloose" : "HLT_mu24_imedium")
+  bool l0trig = ntTrig.passTrigger(l0->trigBits, l0->isEle() ? "HLT_e24_tight_iloose" : "HLT_mu24_imedium");
+  bool l1trig = ntTrig.passTrigger(l1->trigBits, l1->isEle() ? "HLT_e24_tight_iloose" : "HLT_mu24_imedium");
 
-  if( l0sig && l0trig && leptons[0]->Pt() > 25 ) m_probes.push_back( leptons[1] );
-  if( l1sig && l1trig && leptons[1]->Pt() > 25 ) m_probes.push_back( leptons[0] );
+  if( l0sig && l0trig && l0->Pt() > 25 ) m_probes.push_back( l1 );
+  if( l1sig && l1trig && l1->Pt() > 25 ) m_probes.push_back( l0 );
   if( m_probes.size() == 0 ) return false;
-  m_metRel = getMetRel(met, leptons, jets);
+  m_metRel = kin::getMetRel(met, leptons, jets);
   if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(leptons);
   return true;
 }
@@ -695,7 +697,7 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
   // * m(ll) > 40 GeV (probe is muon)
 
   // Check pre muons and jets
-  MuonVector preMuons = getPreMuons(&nt, Susy::NtSys::NOM);
+  MuonVector preMuons = nttools().getPreMuons(&nt, Susy::NtSys::NOM);
   if( preMuons.size() == 0 ) return false;
   if( jets.size() == 0 )     return false;
 
@@ -724,26 +726,26 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
   // Check mll
   bool isMM = tag->isMu() && probe->isMu();
   if(isMM){
-    float mll(Mll(tag,probe)), mZ(91.2);
+    float mll(kin::Mll(tag,probe)), mZ(91.2);
     if( fabs(mll-mZ) < 10 ) return false;
     if( mll < 40 )          return false;
   }
   // Check the trigger
   if( tag->Pt() < 20 ) return false;
-  uint tagFlag = tag->trigFlags;
-  if( !isMM && !((tagFlag & TRIG_mu18_tight) && (tagFlag & TRIG_mu18_tight_e7_medium1)) )
+  TBits tagFlag = tag->trigFlags;
+  if( !isMM && !(HLT_(tagFlag & TRIG_mu18_tight) && (tagFlag & TRIG_mu18_tight_e7_medium1)) )
     return false;
   if( isMM && !((tagFlag & TRIG_mu18_tight) && (tagFlag & TRIG_mu18_tight_mu8_EFFS)) )
     return false;
 
   // Met and Mt Cut
   if( met->Et > 60 )       return false;  // DG 2014-04-14 : try the same selection as Matt G. (was 40)
-  if( CR == CR_HF )      if( Mt(probe,met) > 40  ) return false;
-  if( CR == CR_HF_high ) if( Mt(probe,met) > 100 ) return false;
+  if( CR == sf::CR_HF )      if( kin::Mt(probe,met) > 40  ) return false;
+  if( CR == sf::CR_HF_high ) if( kin::Mt(probe,met) > 100 ) return false;
 
   // We have survived so save objects and return
   LeptonVector temp; temp.push_back(tag); temp.push_back(probe);
-  m_metRel = getMetRel(met, temp, jets);
+  m_metRel = kin::getMetRel(met, temp, jets);
   if( nt.evt()->isMC ) m_evtWeight = getEvtWeight(temp, true);
   m_probes.push_back( probe );
   m_tags.push_back( tag );
@@ -781,7 +783,7 @@ bool MeasureFakeRate2::passHFCR_Ss(const LeptonVector &leptons,
         bool sameSign(tag->q * probe->q > 0.0);
         bool passTrig((probe->isMu()  && passDilepMuMu) ||
                       (probe->isEle() && (passDilepMuEm || passDilepEmMu)));
-        float mt = Mt(probe,met);
+        float mt = kin::Mt(probe,met);
         bool passIterativeSideband = mt < 100.0;
         if(sameSign && passTrig && passIterativeSideband) {
             m_tags.push_back(tag);
@@ -827,9 +829,9 @@ bool MeasureFakeRate2::passConvCR(const LeptonVector &leptons,
   if( !passTrigger )                         return false; // Pt and trigger requirement
   if( met->Et > 50 )                         return false; // Met < 50
   if( (*preMuons[0]+*preMuons[1]).M() < 20 ) return false; // M(mu,mu) > 20
-  if( Mt((Lepton*) preElecs[0], met) > 40)   return false; // Mt(elec, met) < 40
+  if( kin::Mt((Lepton*) preElecs[0], met) > 40)   return false; // Mt(elec, met) < 40
   m_probes.push_back( (Lepton*) preElecs[0] );
-  m_metRel = getMetRel(met, leptons, jets); // Not useful quantity for this region.
+  m_metRel = kin::getMetRel(met, leptons, jets); // Not useful quantity for this region.
   float eff = nt.evt()->isMC ? m_probes[0]->effSF : 1.0;
   m_evtWeight = getEvtWeight(tempL,true,true) * eff;
   return true;
@@ -975,13 +977,13 @@ void MeasureFakeRate2::printCounter(string cut, float counter[ET_N][WT_N], int w
 //----------------------------------------------------------
 sf::LeptonSource MeasureFakeRate2::getLeptonSource(const Lepton* l)
 {
-    LeptonSource source = LS_Unk;
+    LeptonSource source = sf::LS_Unk;
     if(nt.evt()->isMC) {
         uint dsid(nt.evt()->mcChannel);
-        if( isRealLepton(l, dsid) ) source = LS_Real;
-        if( susy::isHFLepton(l) )   source = LS_HF;
-        if( susy::isLFLepton(l) )   source = LS_LF;
-        if( susy::isConvLepton(l) ) source = LS_Conv;
+        if( isRealLepton(l, dsid) ) source = sf::LS_Real;
+        if( susy::isHFLepton(l) )   source = sf::LS_HF;
+        if( susy::isLFLepton(l) )   source = sf::LS_LF;
+        if( susy::isConvLepton(l) ) source = sf::LS_Conv;
     }
     return source;
 }

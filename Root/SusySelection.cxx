@@ -5,8 +5,10 @@
 #include <sstream>      // std::ostringstream
 #include <stdexcept>
 #include "TCanvas.h"
-#include "DileptonFakeMeasurement/SusySelection.h"
 
+#include "SusyNtuple/KinematicTools.h"
+
+#include "DileptonFakeMeasurement/SusySelection.h"
 #include "DileptonFakeMeasurement/criteria.h"
 #include "DileptonFakeMeasurement/kinematic.h"
 #include "DileptonFakeMeasurement/utils.h"
@@ -366,7 +368,7 @@ bool SusySelection::passeq2JetWoutFwVeto(const JetVector& jets)
 //-----------------------------------------
 bool SusySelection::passMetRelMin(const Met *met, const LeptonVector& leptons,
                                   const JetVector& jets, float minVal){
-  float metrel = getMetRel(met,leptons,jets);
+  float metrel = kin::getMetRel(met,leptons,jets);
   return (minVal < metrel);
 }
 //----------------------------------------------------------
@@ -400,7 +402,7 @@ bool SusySelection::passEwkSs(const LeptonVector& leptons, const JetVector& jets
     const Lepton &l0 = *leptons[0], &l1 = *leptons[1];
     TLorentzVector ll(l0+l1);
     return (noBjets && noFwJets && someCentralJets
-            && (getMetRel(met, leptons, jets)>50.0)
+            && (kin::getMetRel(met, leptons, jets)>50.0)
             && susy::sameSign(leptons)
             && (ll.M()<60.0) && (ll.Pt()<20.) && (fabs(l0.DeltaPhi(l1)) >= 1.3));
 }
@@ -414,7 +416,7 @@ bool SusySelection::passEwkSsLoose(const LeptonVector& leptons, const JetVector&
     bool passZeeVeto(isEe ? susy::passZllVeto(leptons, 91.2-10.0, 91.2+10.0) : true);
     return (noBjets && noFwJets && someCentralJets && passZeeVeto
             && susy::sameSign(leptons)
-            && (getMetRel(met, leptons, jets)>40.0));
+            && (kin::getMetRel(met, leptons, jets)>40.0));
 }
 //-----------------------------------------
 bool SusySelection::passEwkSsLea(const LeptonVector& leptons, const JetVector& jets, const Met* met)
