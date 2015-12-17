@@ -125,8 +125,7 @@ bool SusySelection::selectEvent()
 {
   if(m_dbg) cout << "SusySelection::selectEvent" << endl;
   // Basic event cuts
-  int flag = nt.evt()->cutFlags[NtSys_NOM];
-  //int hdec = nt.evt()->hDecay;
+  int flag = nt.evt()->cutFlags[NtSys::NOM];
   const LeptonVector& bleps = m_baseLeptons;
   const JetVector &jets = m_baseJets;
   const JetVector &pjets = m_preJets;
@@ -297,7 +296,7 @@ bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
   bool canBeQflip(isOS && (eventType==ET_ee || eventType==ET_em || eventType==ET_me));
   if (!canBeQflip){ return false; }
   if(canBeQflip){
-    uint systematic=NtSys_NOM; // DG sys todo
+    uint systematic=Susy::NtSys::NOM; // DG sys todo
     m_qflipProb = computeChargeFlipProb(leptons, met, systematic, update4mom);
     m_weightComponents.qflip = m_qflipProb;
   }
@@ -489,7 +488,7 @@ float SusySelection::getTriggerWeight2Lep(const LeptonVector &leptons)
   //                                                             m_met->Et,
   //                                                             m_signalJets2Lep.size(),
   //                                                             nt.evt()->nVtx,
-  //                                                             NtSys_NOM);
+  //                                                             Susy::NtSys::NOM);
   //   bool twIsInvalid(isnan(trigW) || trigW<0.0);
   //   assert(!twIsInvalid);
   //   if(twIsInvalid){
@@ -620,7 +619,7 @@ float SusySelection::computeChargeFlipProb(LeptonVector &leptons, Met &met,
   // int pdg0(susy::pdgIdFromLep(l0)), pdg1(susy::pdgIdFromLep(l1));
   // TLorentzVector smearedLv0(*l0), smearedLv1(*l1);
   // TVector2 smearedMet(met.lv().Px(), met.lv().Py());
-  // int sys(NtSys_NOM==systematic ? 0 : 0);
+  // int sys(Susy::NtSys::NOM==systematic ? 0 : 0);
   // //(DGSys_BKGMETHOD_UP==systematic ? +1 : // DG todo : implement syst
   // // (DGSys_BKGMETHOD_DN==systematic ? -1 : 0)));
   // /*

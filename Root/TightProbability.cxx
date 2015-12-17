@@ -124,8 +124,7 @@ Bool_t TightProbability::Process(Long64_t entry) {
   m_chainEntry++;
   clearObjects();
   cacheStaticWeightComponents();
-  bool removeLepsFromIso(false);
-  selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
+  selectObjects(Susy::NtSys::NOM);
   const LeptonVector &leps = m_baseLeptons;
   const JetVector &jets = m_signalJets2Lep;
   const Met *met = m_met;

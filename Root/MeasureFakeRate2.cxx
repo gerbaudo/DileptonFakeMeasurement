@@ -695,7 +695,7 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
   // * m(ll) > 40 GeV (probe is muon)
 
   // Check pre muons and jets
-  MuonVector preMuons = getPreMuons(&nt, NtSys_NOM);
+  MuonVector preMuons = getPreMuons(&nt, Susy::NtSys::NOM);
   if( preMuons.size() == 0 ) return false;
   if( jets.size() == 0 )     return false;
 
@@ -889,7 +889,7 @@ float MeasureFakeRate2::getEvtWeight(const LeptonVector& leptons, bool includeBT
                 //                             m_met->Et,
                 //                             m_signalJets2Lep.size(),
                 //                             nt.evt()->nVtx,
-                //                             NtSys_NOM)
+                //                             Susy::NtSys::NOM)
                 : 1.0);
     if(trigW != trigW){ cout<<"\tTrigger weight: "<<trigW<<endl; trigW =0; }// deal with NaN
     if(trigW < 0) trigW = 0;
