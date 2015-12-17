@@ -241,13 +241,13 @@ Bool_t MeasureFakeRate2::Process(Long64_t entry)
   GetEntry(entry);
   clearObjects();
   m_chainEntry++;
-  increment(n_readin);
+  increment(n_readin, m_weightComponents);
   if(m_dbg || m_chainEntry%50000==0) printProgress(nt.evt(), m_chainEntry);
-  selectObjects(NtSys_NOM, false, TauID_medium);
+  selectObjects(Susy::NtSys::NOM);
   if( !selectEvent() ) return false;
-  if(m_signalTaus.size()!=0)      /*increment(n_pass_CRWHSStauv  [m_ET]); else */ return false;
-  if( m_baseLeptons.size() >= 2 ) increment(n_pass_atleast2Lep);
-  if( m_baseLeptons.size() == 2 ) increment(n_pass_exactly2Lep);
+  if(m_signalTaus.size()  != 0) increment(n_pass_CRWHSStauv[m_ET], m_weightComponents); else return false;
+  if(m_baseLeptons.size() >= 2) increment(n_pass_ge2l, m_weightComponents);
+  if(m_baseLeptons.size() == 2) increment(n_pass_eq2l, m_weightComponents);
   bool uniqueLepPair(m_baseLeptons.size() == 2);
   if(uniqueLepPair && !susy::passMllMin(m_baseLeptons, 20.0)) return false;
   // Loop over all regions (regardless of data or mc) and only fill relevant data quantitites.
@@ -577,56 +577,15 @@ bool MeasureFakeRate2::passSignalRegion(const LeptonVector &leptons,
 bool MeasureFakeRate2::selectEvent(bool count)
 {
   if(m_dbg) cout << "MeasureFakeRate2::selectEvent" << endl;
-  // Basic event cuts
-  // Upstream Cuts:
-  // * GRL
-  // * LAr error
-  // * tile Error
-  // * TTC veto
-  // * Primary Veretex
-  int flag = nt.evt()->cutFlags[NtSys_NOM];
-  // LAr flag (always true..)
-  if( !passLAr(flag) )               return false;
-  if(count) increment(n_pass_LAr);
-  if(m_dbg) cout<<"\tPass LAr"<<endl;
-  // Bad Jets
-  if( hasBadJet(m_baseJets) )         return false;
-  if(count) increment(n_pass_BadJet);
-  if(m_dbg) cout<<"\tPass Bad jet"<<endl;
-  // FEB issue -- maybe this is calo jets?
-  if(!passDeadRegions(m_preJets, m_met, nt.evt()->run, nt.evt()->isMC)) return false;
-  if(count) increment(n_pass_FEBCut);
-  if(m_dbg) cout<<"\tPass Dead Regions"<<endl;
-  // Bad Muons
-  if( hasBadMuon(m_preMuons) )         return false;
-  if(count) increment(n_pass_BadMuon);
-  if(m_dbg) cout<<"\tPass Bad Muon"<<endl;
-  // Cosmic Muons
-  if( hasCosmicMuon(m_baseMuons) ) return false;
-  if(count) increment(n_pass_Cosmic);
-  if(m_dbg) cout<<"\tPass Cosmic"<<endl;
-  // HFor
-  if( !SusySelection::passHfor(nt) ) return false;
-  if(count) increment(n_pass_HFOR);
-  if(m_dbg) cout<<"\tPass Hfor"<<endl;
-  // HotSpot
-  if( hasHotSpotJet(m_preJets) )       return false;
-  if(count) increment(n_pass_HotSpot);
-  if(m_dbg) cout<<"\tPass Hot Spot"<<endl;
-  // Tile Error
-  if( !passTileTripCut(flag) )          return false;
-  if(count) increment(n_pass_TileError);
-  if(m_dbg) cout<<"\tPass Tile Error"<<endl;
-  // If we are not counting (ie doing cutflow) then remove all the baseline muons with eta < 2.5
-  if( !count ){
-    LeptonVector temp = m_baseLeptons;
-    m_baseLeptons.clear();
-    for(uint il=0; il<temp.size(); ++il){
-      Lepton* lep = temp.at(il);
-      if( lep->isMu() && fabs(lep->Eta()) > 2.4) continue;
-      m_baseLeptons.push_back(lep);
-    }
-  }
+  int flag = nt.evt()->cutFlags[NtSys::NOM];
+  WeightComponents &wc = m_weightComponents;
+  if(nttools().passGRL         (flag       ))  { increment(n_pass_Grl     , wc);} else { return false; }
+  if(nttools().passLarErr      (flag       ))  { increment(n_pass_LarErr  , wc);} else { return false; }
+  if(nttools().passTileErr     (flag       ))  { increment(n_pass_TileErr , wc);} else { return false; }
+  if(nttools().passGoodVtx     (flag       ))  { increment(n_pass_GoodVtx , wc);} else { return false; }
+  if(nttools().passJetCleaning (m_baseJets ))  { increment(n_pass_BadJet  , wc);} else { return false; }
+  if(nttools().passBadMuon     (m_preMuons ))  { increment(n_pass_BadMuon , wc);} else { return false; }
+  if(nttools().passCosmicMuon  (m_baseMuons))  { increment(n_pass_Cosmic  , wc);} else { return false; }
   return true;
 }
 /*--------------------------------------------------------------------------------*/
@@ -647,8 +606,7 @@ SsPassFlags MeasureFakeRate2::passWhSS(const LeptonVector& leptons, const JetVec
   // of the criteria are in a different order (e.g. same-sign).
   // At some point try to unify SusySelection with SusySelectionMatt.
   SsPassFlags f;
-  bool lsf(false), bsf(false); // compute trigw and btagw only when accepting the event
-  if(susy::sameSign(leptons)) { increment(n_pass_CRWHSS2lss  [m_ET], lsf, bsf); f.sameSign=true;} else return f;
+  if(susy::sameSign(leptons)) { increment(n_pass_CRWHSS2lss[m_ET], m_weightComponents); f.sameSign=true;} else return f;
   DiLepEvtType ll = m_ET = getDiLepEvtType(leptons);
   bool isee(ll==ET_ee), isem(ll==ET_em||ll==ET_me), ismm(ll==ET_mm);
   float ptL0Min  = 30;
@@ -661,17 +619,17 @@ SsPassFlags MeasureFakeRate2::passWhSS(const LeptonVector& leptons, const JetVec
   float mtwwMin = (isee ? 150 : (isem ? 140 : (ismm ? 100 : FLT_MIN))); // todo : for now keep it simple, just one cut
   float metRelMin = (isee ? 50 : (isem ? 50 : (ismm ? FLT_MIN : FLT_MIN))); // for now simple
 
-  if(m_signalTaus.size()==0)                          { increment(n_pass_CRWHSStauv  [m_ET], lsf, bsf); f.tauVeto=true;} else  return f;
-  if(numberOfFJets(jets)==0)                          { increment(n_pass_CRWHSSnfj   [m_ET], lsf, bsf); f.fjveto =true;} else  return f;
-  if(numberOfCBJets(jets)==0)                         { increment(n_pass_CRWHSSnbj   [m_ET], lsf, bsf); f.bjveto =true;} else  return f;
-  if(numberOfCLJets(jets)>0)                          { increment(n_pass_CRWHSSnj    [m_ET], lsf, bsf); f.ge1j   =true;} else  return f;
-  if(susy::pass2LepPt    (leptons, ptL0Min, ptL1Min)) { increment(n_pass_CRWHSS2lpt  [m_ET], lsf, bsf); f.lepPt  =true;} else  return f;
-  if(susy::passZllVeto   (leptons, loMllZ, hiMllZ))   { increment(n_pass_CRWHSSzveto [m_ET], lsf, bsf); f.zllVeto=true;} else  return f;
-  if(susy::passMtLlMetMin(leptons, met, mtwwMin))     { increment(n_pass_CRWHSSmwwt  [m_ET], lsf, bsf); f.mtllmet=true;} else  return f;
-  if(susy::passHtMin     (leptons, jets, met, htMin)) { increment(n_pass_CRWHSShtmin [m_ET], lsf, bsf); f.ht     =true;} else  return f;
-  if(getMetRel(met,leptons,jets)>metRelMin)           { increment(n_pass_CRWHSSmetrel[m_ET], lsf, bsf); f.metrel =true;} else  return f;
-  lsf = bsf = true;
-  increment(n_pass_CRWHSS[m_ET], lsf, bsf);
+  WeightComponents &wc = m_weightComponents;
+  if(m_signalTaus.size()==0)                          { increment(n_pass_CRWHSStauv  [ll], wc); f.tauVeto=true;} else  return f;
+  if(nttools().numberOfFJets(jets)==0)                { increment(n_pass_CRWHSSnfj   [ll], wc); f.fjveto =true;} else  return f;
+  if(nttools().numberOfCBJets(jets)==0)               { increment(n_pass_CRWHSSnbj   [ll], wc); f.bjveto =true;} else  return f;
+  if(nttools().numberOfCLJets(jets)>0)                { increment(n_pass_CRWHSSnj    [ll], wc); f.ge1j   =true;} else  return f;
+  if(susy::pass2LepPt    (leptons, ptL0Min, ptL1Min)) { increment(n_pass_CRWHSS2lpt  [ll], wc); f.lepPt  =true;} else  return f;
+  if(susy::passZllVeto   (leptons, loMllZ, hiMllZ))   { increment(n_pass_CRWHSSzveto [ll], wc); f.zllVeto=true;} else  return f;
+  if(susy::passMtLlMetMin(leptons, met, mtwwMin))     { increment(n_pass_CRWHSSmwwt  [ll], wc); f.mtllmet=true;} else  return f;
+  if(susy::passHtMin     (leptons, jets, met, htMin)) { increment(n_pass_CRWHSShtmin [ll], wc); f.ht     =true;} else  return f;
+  if(getMetRel(met,leptons,jets)>metRelMin)           { increment(n_pass_CRWHSSmetrel[ll], wc); f.metrel =true;} else  return f;
+  increment(n_pass_CRWHSS[ll], wc);
   return f;
 }
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=//
@@ -1013,36 +971,6 @@ void MeasureFakeRate2::printCounter(string cut, float counter[ET_N][WT_N], int w
   for(int i=0; i<ET_N-2; ++i)
     cout << "\t" << Form("%10.3f",counter[i][weight]);
   cout << endl;
-}
-//----------------------------------------------------------
-void MeasureFakeRate2::increment(float flag[], bool includeLepSF, bool includeBtag)
-{
-    flag[WT_Raw]   += 1.0;
-    flag[WT_Evt]   += nt.evt()->w;
-    flag[WT_PU]    += nt.evt()->w * nt.evt()->wPileup;
-    flag[WT_PU1fb] += nt.evt()->w * nt.evt()->wPileupAB3;
-    flag[WT_LSF]   += (includeLepSF ?
-                       nt.evt()->w * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF :
-                       nt.evt()->w);
-    float btag = includeBtag ? getBTagWeight(nt.evt()) : 1.0;
-    flag[WT_Btag]  += nt.evt()->w * btag;
-
-    float trig = 1.0;
-    // DG-2015-12-17 trigger to be re-implemented for run 2
-    // float trig = m_baseLeptons.size() == 2 && nt.evt()->isMC && !m_useMCTrig ?
-    //     m_trigObj->getTriggerWeight(m_baseLeptons,
-    //                                 nt.evt()->isMC,
-    //                                 m_met->Et,
-    //                                 m_signalJets2Lep.size(),
-    //                                 nt.evt()->nVtx,
-    //                                 NtSys_NOM) : 1;
-    //cout<<"\tTrigger weight: "<<trig<<endl;
-    flag[WT_Trig] += trig * nt.evt()->w;
-    bool useSumwMap(true);
-
-    float allAE = SusyNtAna::getEventWeight(LUMI_A_L, useSumwMap) * btag * trig;
-    allAE = includeLepSF ? allAE * m_baseLeptons[0]->effSF * m_baseLeptons[1]->effSF : allAE;
-    flag[WT_AllAE] += allAE;
 }
 //----------------------------------------------------------
 sf::LeptonSource MeasureFakeRate2::getLeptonSource(const Lepton* l)

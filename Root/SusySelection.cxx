@@ -77,8 +77,8 @@ Bool_t SusySelection::Process(Long64_t entry)
   clearObjects();
   cacheStaticWeightComponents();
   increment(n_readin, m_weightComponents);
-  bool removeLepsFromIso(false), allowQflip(true);
-  selectObjects(NtSys_NOM, removeLepsFromIso, TauID_medium);
+  bool allowQflip(true);
+  selectObjects(Susy::NtSys::NOM);
   if(!selectEvent()) return kTRUE;
   const JetVector&   bj = m_baseJets;
   const LeptonVector& l = m_signalLeptons;
@@ -136,22 +136,21 @@ bool SusySelection::selectEvent()
   m_debugThisEvent = susy::isEventInList(nt.evt()->eventNumber);
   float mllMin(20);
   WeightComponents &wc = m_weightComponents;
-  if(passGRL        (flag           ))  { increment(n_pass_Grl     , wc);} else { return false; }
-  if(passLarErr     (flag           ))  { increment(n_pass_LarErr  , wc);} else { return false; }
-  if(passTileErr    (flag           ))  { increment(n_pass_TileErr , wc);} else { return false; }
-  if(passTTCVeto    (flag           ))  { increment(n_pass_TTCVeto , wc);} else { return false; }
-  if(passGoodVtx    (flag           ))  { increment(n_pass_GoodVtx , wc);} else { return false; }
-  if(passTileTripCut(flag           ))  { increment(n_pass_TileTrip, wc);} else { return false; }
-  if(passLAr        (flag           ))  { increment(n_pass_LAr     , wc);} else { return false; }
-  if(!hasBadJet     (jets           ))  { increment(n_pass_BadJet  , wc);} else { return false; }
-  if(passDeadRegions(pjets,met,run,mc)) { increment(n_pass_FEBCut  , wc);} else { return false; }
-  if(!hasBadMuon    (m_preMuons     ))  { increment(n_pass_BadMuon , wc);} else { return false; }
-  if(!hasCosmicMuon (m_baseMuons    ))  { increment(n_pass_Cosmic  , wc);} else { return false; }
-  if(passHfor       (               ))  { increment(n_pass_hfor    , wc);} else { return false; }
-  //if(passHtautauVeto(hdec)) { increment(n_pass_HttVeto ); } else { return false; }
-  if(bleps.size() >= 2               )  { increment(n_pass_ge2l    , wc);} else { return false; }
-  if(bleps.size() == 2               )  { increment(n_pass_eq2l    , wc);} else { return false; }
-  if(susy::passMllMin(bleps, mllMin ))  { increment(n_pass_mll     , wc);} else { return false; }
+  nttools().passGRL(flags)
+
+  if(nttools().passGRL         (flag       ))  { increment(n_pass_Grl     , wc);} else { return false; }
+  if(nttools().passLarErr      (flag       ))  { increment(n_pass_LarErr  , wc);} else { return false; }
+  if(nttools().passTileErr     (flag       ))  { increment(n_pass_TileErr , wc);} else { return false; }
+  if(nttools().passTTCVeto     (flag       ))  { increment(n_pass_TTCVeto , wc);} else { return false; }
+  if(nttools().passGoodVtx     (flag       ))  { increment(n_pass_GoodVtx , wc);} else { return false; }
+  if(nttools().passTileTripCut (flag       ))  { increment(n_pass_TileTrip, wc);} else { return false; }
+  if(nttools().passLAr         (flag       ))  { increment(n_pass_LAr     , wc);} else { return false; }
+  if(nttools().passJetCleaning (jets       ))  { increment(n_pass_BadJet  , wc);} else { return false; }
+  if(nttools().passBadMuon     (m_preMuons ))  { increment(n_pass_BadMuon , wc);} else { return false; }
+  if(nttools().passCosmicMuon  (m_baseMuons))  { increment(n_pass_Cosmic  , wc);} else { return false; }
+  if(bleps.size() >= 2               )         { increment(n_pass_ge2l    , wc);} else { return false; }
+  if(bleps.size() == 2               )         { increment(n_pass_eq2l    , wc);} else { return false; }
+  if(susy::passMllMin(bleps, mllMin ))         { increment(n_pass_mll     , wc);} else { return false; }
   return true;
 }
 //-----------------------------------------
