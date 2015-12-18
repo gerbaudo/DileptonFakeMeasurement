@@ -45,8 +45,6 @@ enum WH_SR {
 };
 
 // fw decl
-class chargeFlip;
-
 namespace susy {
 namespace wh {
 namespace kin {
@@ -191,7 +189,7 @@ class SusySelection : public SusyNtAna
 
     // DilTrigLogic*       m_trigObj;      // 2L trigger logic class; DG-2015-12-17 will need to re-implement for run 2
     bool                m_useMCTrig;    // Use MC Trigger, i.e. toggle the matching in DilTrigLogic::passDil*()
-    chargeFlip*         m_chargeFlip;   //!< tool providing the electron charge flip probability
+    // chargeFlip*         m_chargeFlip;   //!< tool providing the electron charge flip probability
     float               m_w;            // mc weight
     float               m_qflipProb;     //! charge flip probability
     TLorentzVector      m_unsmeared_lv0; //! cached lepton LV before charge-flip smearing

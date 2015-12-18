@@ -109,7 +109,7 @@ void SusySelection::Terminate()
   SusyNtAna::Terminate();
   if(m_dbg) cout << "SusySelection::Terminate" << endl;
   dumpEventCounters();
-  if(m_chargeFlip) delete m_chargeFlip;
+  // if(m_chargeFlip) delete m_chargeFlip;
 }
 //-----------------------------------------
 void SusySelection::increment(float counters[], const WeightComponents &wc)
