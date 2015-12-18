@@ -124,30 +124,30 @@ class SusySelection : public SusyNtAna
     bool passeq2JetWoutFwVeto(const JetVector& jets);
     bool passNj(const JetVector& jets, int minNj=2, int maxNj=3);
     bool passMuonRelIso(const LeptonVector &leptons, float maxVal);
-    static bool passEwkSs     (const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    static bool passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    static bool passEwkSsLea  (const LeptonVector& leptons, const JetVector& jets, const Met* met);
+    bool passEwkSs     (const LeptonVector& leptons, const JetVector& jets, const Met* met);
+    bool passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met);
+    bool passEwkSsLea  (const LeptonVector& leptons, const JetVector& jets, const Met* met);
     void checkAndIncrementEwk(const LeptonVector& leptons, const JetVector& jets, const Met* met);
-    static bool passCrWhZVfakeEe(const susy::wh::kin::DilepVars &v);
-    static bool passCrWhZVfakeEm(const susy::wh::kin::DilepVars &v);
-    static bool passCrWhfakeEm  (const susy::wh::kin::DilepVars &v);
-    static bool passCrWhZVMm    (const susy::wh::kin::DilepVars &v);
-    static bool passCrWhfakeMm  (const susy::wh::kin::DilepVars &v);
+    bool passCrWhZVfakeEe(const susy::wh::kin::DilepVars &v);
+    bool passCrWhZVfakeEm(const susy::wh::kin::DilepVars &v);
+    bool passCrWhfakeEm  (const susy::wh::kin::DilepVars &v);
+    bool passCrWhZVMm    (const susy::wh::kin::DilepVars &v);
+    bool passCrWhfakeMm  (const susy::wh::kin::DilepVars &v);
     // just wrapping the channel-specific functions above
-    static bool passCrWhZVfake  (const susy::wh::kin::DilepVars &v);
-    static bool passCrWhfake    (const susy::wh::kin::DilepVars &v);
-    static bool passCrWhZV      (const susy::wh::kin::DilepVars &v);
+    bool passCrWhZVfake  (const susy::wh::kin::DilepVars &v);
+    bool passCrWhfake    (const susy::wh::kin::DilepVars &v);
+    bool passCrWhZV      (const susy::wh::kin::DilepVars &v);
     // same as above, but also increment the counters
     bool passAndIncrementCrWhZVfake(const susy::wh::kin::DilepVars &v);
     bool passAndIncrementCrWhfake  (const susy::wh::kin::DilepVars &v);
     bool passAndIncrementCrWhZV    (const susy::wh::kin::DilepVars &v);
 
     //
-    static bool passSrWh1j(const susy::wh::kin::DilepVars &v);
-    static bool passSrWh1j(const susy::wh::kin::DilepVars &v, SsPassFlags &f); //! same as above, but also toggle kin flags
-    static bool passSrWh2j(const susy::wh::kin::DilepVars &v);
-    static bool passSrWh2j(const susy::wh::kin::DilepVars &v, SsPassFlags &f); //! same as above, but also toggle kin flags
-    static bool passSrWhNoMlj(const susy::wh::kin::DilepVars &v);
+    bool passSrWh1j(const susy::wh::kin::DilepVars &v);
+    bool passSrWh1j(const susy::wh::kin::DilepVars &v, SsPassFlags &f); //! same as above, but also toggle kin flags
+    bool passSrWh2j(const susy::wh::kin::DilepVars &v);
+    bool passSrWh2j(const susy::wh::kin::DilepVars &v, SsPassFlags &f); //! same as above, but also toggle kin flags
+    bool passSrWhNoMlj(const susy::wh::kin::DilepVars &v);
 
     void setUseMCTrig(bool useMCTrig){ m_useMCTrig = useMCTrig; };
     void setWriteNtuple(bool val) { m_writeTuple = val; };
@@ -159,11 +159,11 @@ class SusySelection : public SusyNtAna
     //! any electron or muon, before pt cuts, before overlap removal
     static vl_t getAnyElOrMu(SusyNtObject &susyNt/*, SusyNtSys sys*/);
     static susy::wh::Chan getChan(const LeptonVector& leps); //!< compute lepton channel
-    static SsPassFlags assignNjetFlags(const JetVector& jets, SsPassFlags f);
+    SsPassFlags assignNjetFlags(const JetVector& jets, SsPassFlags f);
     //! determine whether a third lepton makes a Z candidate with a signal lepton
     static bool passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lepton* l1, const LeptonVector& otherLeptons, bool verbose=false);
     //! ugly hack function : utils::filter seems not to work properly with SusyNtTools::isCentralLightJet...
-    static JetVector filterClJets(const JetVector &jets);
+    JetVector filterClJets(const JetVector &jets);
     //! 0-jet signal region for Danny's study
     bool passSrRazor0jet(const LeptonVector &leptons, const JetVector& jets, const Met &met);
     //! 1-jet signal region for Danny's study

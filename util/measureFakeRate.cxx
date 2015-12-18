@@ -39,7 +39,6 @@ void usage(const char *exeName) {
 int main(int argc, char** argv)
 {
 
-  ROOT::Cintex::Cintex::Enable();
   int nEvt = -1;
   int nSkip = 0;
   int dbg = 0;
@@ -104,7 +103,6 @@ int main(int argc, char** argv)
   if(sample.size()) mfr.setSampleName(sample);
   if(output.size()) mfr.setFileName(output);
 
-  mfr.buildSumwMap(chain);
   chain->Process(&mfr, sample.c_str(), nEvt, nSkip);
   delete chain;
   return 0;

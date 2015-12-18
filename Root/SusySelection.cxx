@@ -7,6 +7,7 @@
 #include "TCanvas.h"
 
 #include "SusyNtuple/KinematicTools.h"
+#include "SusyNtuple/AnalysisType.h"
 
 #include "DileptonFakeMeasurement/SusySelection.h"
 #include "DileptonFakeMeasurement/criteria.h"
@@ -42,7 +43,7 @@ SusySelection::SusySelection() :
 {
   resetAllCounters();
 //  setAnaType(Ana_2LepWH); // tmp test for HLFV
-  setAnaType(Ana_2Lep);
+  setAnaType(Susy::AnalysisType::Ana_2Lep);
   setSelectTaus(true);
   initChargeFlipTool();
 }
@@ -51,7 +52,6 @@ void SusySelection::Begin(TTree* /*tree*/)
   SusyNtAna::Begin(0);
   if(m_dbg) cout << "SusySelection::Begin" << endl;
   string period = "Moriond";
-  bool useReweightUtils = false;
   // m_trigObj = new DilTrigLogic(period, useReweightUtils);
   // if(m_useMCTrig) m_trigObj->useMCTrigger();
   if(m_writeTuple) {
@@ -68,7 +68,7 @@ JetVector SusySelection::filterClJets(const JetVector &jets)
 {
     JetVector oj;
     for(size_t i=0; i<jets.size(); ++i)
-        if(SusyNtTools::isCentralLightJet(jets[i])) oj.push_back(jets[i]);
+        if(nttools().jetSelector().isCentralLight(jets[i])) oj.push_back(jets[i]);
     return oj;
 }
 //-----------------------------------------
@@ -130,22 +130,14 @@ bool SusySelection::selectEvent()
   int flag = nt.evt()->cutFlags[NtSys::NOM];
   const LeptonVector& bleps = m_baseLeptons;
   const JetVector &jets = m_baseJets;
-  const JetVector &pjets = m_preJets;
-  const Susy::Met *met = m_met;
-  uint run = nt.evt()->run;
-  bool mc = nt.evt()->isMC;
   m_debugThisEvent = susy::isEventInList(nt.evt()->eventNumber);
   float mllMin(20);
   WeightComponents &wc = m_weightComponents;
-  nttools().passGRL(flags)
 
   if(nttools().passGRL         (flag       ))  { increment(n_pass_Grl     , wc);} else { return false; }
   if(nttools().passLarErr      (flag       ))  { increment(n_pass_LarErr  , wc);} else { return false; }
   if(nttools().passTileErr     (flag       ))  { increment(n_pass_TileErr , wc);} else { return false; }
-  if(nttools().passTTCVeto     (flag       ))  { increment(n_pass_TTCVeto , wc);} else { return false; }
   if(nttools().passGoodVtx     (flag       ))  { increment(n_pass_GoodVtx , wc);} else { return false; }
-  if(nttools().passTileTripCut (flag       ))  { increment(n_pass_TileTrip, wc);} else { return false; }
-  if(nttools().passLAr         (flag       ))  { increment(n_pass_LAr     , wc);} else { return false; }
   if(nttools().passJetCleaning (jets       ))  { increment(n_pass_BadJet  , wc);} else { return false; }
   if(nttools().passBadMuon     (m_preMuons ))  { increment(n_pass_BadMuon , wc);} else { return false; }
   if(nttools().passCosmicMuon  (m_baseMuons))  { increment(n_pass_Cosmic  , wc);} else { return false; }
@@ -222,8 +214,8 @@ SsPassFlags SusySelection::passSrSs(const WH_SR signalRegion,
   increment(n_pass_category[ll], wc);
   if(susy::passNlepMin(ls, 2))                  { increment(n_pass_nSigLep  [ll], wc); f.eq2l       =true;} else return f;
   if(m_signalTaus.size()==0)                    { increment(n_pass_tauVeto  [ll], wc); f.tauVeto    =true;} else return f;
-  if(passTrig2L     (ls))                       { increment(n_pass_tr2L     [ll], wc); f.trig2l     =true;} else return f;
-  if(passTrig2LMatch(ls))                       { increment(n_pass_tr2LMatch[ll], wc); f.trig2lmatch=true;} else return f;
+  // if(passTrig2L     (ls))                       { increment(n_pass_tr2L     [ll], wc); f.trig2l     =true;} else return f;
+  // if(passTrig2LMatch(ls))                       { increment(n_pass_tr2LMatch[ll], wc); f.trig2lmatch=true;} else return f;
   if(data || susy::isTrueDilepton(ls))          { increment(n_pass_mcTrue2l [ll], wc); f.true2l     =true;} else return f;
   bool sameSign = allowQflip ? sameSignOrQflip(ncls, ncmet, ll, update4mom, mc) : susy::sameSign(ncls);
   if(sameSign)                                  { increment(n_pass_ss       [ll], wc); f.sameSign   =true;} else return f;
@@ -270,22 +262,22 @@ bool SusySelection::passHfor(Susy::SusyNtObject &nto)
     return nto.evt()->hfor != kill;
 }
 //-----------------------------------------
-bool SusySelection::passTrig2L(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt)
-{
-  if(leptons.size() != 2 || !dtl) return false;
-  return dtl->passDilEvtTrig(leptons, met, evt);
-}
+// bool SusySelection::passTrig2L(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt)
+// {
+//   if(leptons.size() != 2 || !dtl) return false;
+//   return dtl->passDilEvtTrig(leptons, met, evt);
+// }
 //-----------------------------------------
-bool SusySelection::passTrig2LMatch(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt)
-{
-  if(leptons.size() != 2 || !dtl) return false;
-  return dtl->passDilTrigMatch(leptons, met, evt);
-}
+// bool SusySelection::passTrig2LMatch(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt)
+// {
+//   if(leptons.size() != 2 || !dtl) return false;
+//   return dtl->passDilTrigMatch(leptons, met, evt);
+// }
 //-----------------------------------------
-bool SusySelection::passTrig2LwithMatch(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt)
-{
-  return (passTrig2L(leptons, dtl, met, evt) && passTrig2LMatch(leptons, dtl, met, evt));
-}
+// bool SusySelection::passTrig2LwithMatch(const LeptonVector& leptons, DilTrigLogic *dtl, float met, Event* evt)
+// {
+//   return (passTrig2L(leptons, dtl, met, evt) && passTrig2LMatch(leptons, dtl, met, evt));
+// }
 //-----------------------------------------
 bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
                                     const DiLepEvtType eventType,
@@ -308,62 +300,62 @@ bool SusySelection::sameSignOrQflip(LeptonVector& leptons, Met &met,
 bool SusySelection::passJetVeto(const JetVector& jets)
 {
   // Require no light, b, or forward jets
-  int N_L20 = numberOfCLJets(jets);
-  int N_B20 = numberOfCBJets(jets);
-  int N_F30 = numberOfFJets(jets);
+  int N_L20 = nttools().jetSelector().count_CL_jets(jets);
+  int N_B20 = nttools().jetSelector().count_CB_jets(jets);
+  int N_F30 = nttools().jetSelector().count_F_jets(jets);
   return (N_L20 + N_B20 + N_F30 == 0);
 }
 //-----------------------------------------
 bool SusySelection::passbJetVeto(const JetVector& jets)
 {
   // Reject if there is a b jet using 2L definition
-  int N_B20 = numberOfCBJets(jets);
+  int N_B20 = nttools().jetSelector().count_CB_jets(jets);
   return (N_B20 == 0);
 }
 //-----------------------------------------
 bool SusySelection::passfJetVeto(const JetVector& jets)
 {
-  return (0 == numberOfFJets(jets));
+  return (0 == nttools().jetSelector().count_F_jets(jets));
 }
 //-----------------------------------------
 bool SusySelection::passge1Jet(const JetVector& jets)
 {
-  int N_L20 = numberOfCLJets(jets);
-  int N_B20 = numberOfCBJets(jets);
-  int N_F30 = numberOfFJets(jets);
+  int N_L20 = nttools().jetSelector().count_CL_jets(jets);
+  int N_B20 = nttools().jetSelector().count_CB_jets(jets);
+  int N_F30 = nttools().jetSelector().count_F_jets(jets);
   return (N_L20 >=1 && N_B20 + N_F30 == 0);
 }
 bool SusySelection::passge2Jet(const JetVector& jets)
 {
-  int N_L20 = numberOfCLJets(jets);
-  int N_B20 = numberOfCBJets(jets);
-  int N_F30 = numberOfFJets(jets);
+  int N_L20 = nttools().jetSelector().count_CL_jets(jets);
+  int N_B20 = nttools().jetSelector().count_CB_jets(jets);
+  int N_F30 = nttools().jetSelector().count_F_jets(jets);
   return (N_L20 >=2 && N_B20 + N_F30 == 0);
 }
 bool SusySelection::passge3Jet(const JetVector& jets)
 {
-  int N_L20 = numberOfCLJets(jets);
-  int N_B20 = numberOfCBJets(jets);
-  int N_F30 = numberOfFJets(jets);
+  int N_L20 = nttools().jetSelector().count_CL_jets(jets);
+  int N_B20 = nttools().jetSelector().count_CB_jets(jets);
+  int N_F30 = nttools().jetSelector().count_F_jets(jets);
   return (N_L20 >=3 && N_B20 + N_F30 == 0);
 }
 //-----------------------------------------
 bool SusySelection::passeq2Jet(const JetVector& jets)
 {
-  int N_L20 = numberOfCLJets(jets);
-  int N_B20 = numberOfCBJets(jets);
-  int N_F30 = numberOfFJets(jets);
+  int N_L20 = nttools().jetSelector().count_CL_jets(jets);
+  int N_B20 = nttools().jetSelector().count_CB_jets(jets);
+  int N_F30 = nttools().jetSelector().count_F_jets(jets);
   return (N_L20 == 2 && N_B20 + N_F30 == 0);
 }
 //-----------------------------------------
 bool SusySelection::passge2JetWoutFwVeto(const JetVector& jets)
 {
-  return (numberOfCLJets(jets) >= 2 && numberOfCBJets(jets) < 1);
+  return (nttools().jetSelector().count_CL_jets(jets) >= 2 && nttools().jetSelector().count_CB_jets(jets) < 1);
 }
 //-----------------------------------------
 bool SusySelection::passeq2JetWoutFwVeto(const JetVector& jets)
 {
-  return (numberOfCLJets(jets) == 2 && numberOfCBJets(jets) < 1);
+  return (nttools().jetSelector().count_CL_jets(jets) == 2 && nttools().jetSelector().count_CB_jets(jets) < 1);
 }
 //-----------------------------------------
 bool SusySelection::passMetRelMin(const Met *met, const LeptonVector& leptons,
@@ -374,31 +366,33 @@ bool SusySelection::passMetRelMin(const Met *met, const LeptonVector& leptons,
 //----------------------------------------------------------
 bool SusySelection::passNj(const JetVector& jets, int minNj, int maxNj)
 {
-  int nj(numberOfCLJets(jets));
+  int nj(nttools().jetSelector().count_CL_jets(jets));
   return (minNj < nj && nj <= maxNj
-	  && numberOfCBJets(jets) < 1);
+          && nttools().jetSelector().count_CB_jets(jets) < 1);
 }
 //-----------------------------------------
 bool SusySelection::passMuonRelIso(const LeptonVector &leptons, float maxVal)
 {
-  for(size_t i=0; i<leptons.size(); ++i){
-    const Susy::Lepton* l = leptons[i];
-    if(l->isMu()){
-      const Muon* mu = static_cast<const Muon*>(l);
-      if(!mu) continue;
-      float etcone30 = muEtConeCorr(mu, m_baseElectrons, m_baseMuons,
-                                    nt.evt()->nVtx, nt.evt()->isMC);
-      if(mu->Pt() && (etcone30/mu->Pt() > maxVal)) return false;
-    } // end if(isMu)
-  } // end for(i)
   return true;
+  // DG-2015-12-18 \todo reimplement : for run2 we have different isolations
+  // for(size_t i=0; i<leptons.size(); ++i){
+  //   const Susy::Lepton* l = leptons[i];
+  //   if(l->isMu()){
+  //     const Muon* mu = static_cast<const Muon*>(l);
+  //     if(!mu) continue;
+  //     float etcone30 = muEtConeCorr(mu, m_baseElectrons, m_baseMuons,
+  //                                   nt.evt()->nVtx, nt.evt()->isMC);
+  //     if(mu->Pt() && (etcone30/mu->Pt() > maxVal)) return false;
+  //   } // end if(isMu)
+  // } // end for(i)
+  // return true;
 }
 //-----------------------------------------
 bool SusySelection::passEwkSs(const LeptonVector& leptons, const JetVector& jets, const Met* met)
 {
     if(leptons.size()<2) return false;
-    bool noBjets(numberOfCBJets(jets)==0), noFwJets(numberOfFJets(jets)==0);
-    bool someCentralJets(numberOfCLJets(jets)>0);
+    bool noBjets(nttools().jetSelector().count_CB_jets(jets)==0), noFwJets(nttools().jetSelector().count_F_jets(jets)==0);
+    bool someCentralJets(nttools().jetSelector().count_CL_jets(jets)>0);
     const Lepton &l0 = *leptons[0], &l1 = *leptons[1];
     TLorentzVector ll(l0+l1);
     return (noBjets && noFwJets && someCentralJets
@@ -410,8 +404,8 @@ bool SusySelection::passEwkSs(const LeptonVector& leptons, const JetVector& jets
 bool SusySelection::passEwkSsLoose(const LeptonVector& leptons, const JetVector& jets, const Met* met)
 {
     if(leptons.size()<2) return false;
-    bool noBjets(numberOfCBJets(jets)==0), noFwJets(numberOfFJets(jets)==0);
-    bool someCentralJets(numberOfCLJets(jets)>0);
+    bool noBjets(nttools().jetSelector().count_CB_jets(jets)==0), noFwJets(nttools().jetSelector().count_F_jets(jets)==0);
+    bool someCentralJets(nttools().jetSelector().count_CL_jets(jets)>0);
     bool isEe(leptons[0]->isEle() && leptons[1]->isEle());
     bool passZeeVeto(isEe ? susy::passZllVeto(leptons, 91.2-10.0, 91.2+10.0) : true);
     return (noBjets && noFwJets && someCentralJets && passZeeVeto
@@ -423,8 +417,8 @@ bool SusySelection::passEwkSsLea(const LeptonVector& leptons, const JetVector& j
 {
     bool pass=false;
     if(leptons.size()>=2) {
-        bool noBjets(numberOfCBJets(jets)==0), noFwJets(numberOfFJets(jets)==0);
-        bool someCentralJets(numberOfCLJets(jets)>0);
+        bool noBjets(nttools().jetSelector().count_CB_jets(jets)==0), noFwJets(nttools().jetSelector().count_F_jets(jets)==0);
+        bool someCentralJets(nttools().jetSelector().count_CL_jets(jets)>0);
         const Susy::Lepton &l0 = *leptons[0], &l1 = *leptons[1];
         float mll = (l0+l1).M();
         bool isEe(l0.isEle() && l1.isEle());
@@ -451,10 +445,7 @@ void SusySelection::cacheStaticWeightComponents()
   if(!nt.evt()->isMC) {m_weightComponents.reset(); return;}
   m_weightComponents.gen = nt.evt()->w;
   m_weightComponents.pileup = nt.evt()->wPileup;
-  bool useSumwMap(true);
-  m_weightComponents.susynt = (m_useXsReader ?
-                               computeEventWeightXsFromReader(LUMI_A_L) :
-                               SusyNtAna::getEventWeight(LUMI_A_L, useSumwMap));
+  m_weightComponents.susynt = 1.0; // mcWeighter().getMCWeight(const Event* evt); // DG-2015-12-18 to re-do for run2
   float genpu(m_weightComponents.gen*m_weightComponents.pileup);
   m_weightComponents.norm = (genpu != 0.0 ? m_weightComponents.susynt/genpu : 1.0);
 }
@@ -469,13 +460,7 @@ void SusySelection::computeNonStaticWeightComponents(cvl_t& leptons, cvj_t& jets
 //-----------------------------------------
 float SusySelection::getBTagWeight(cvj_t& jets, const Event* evt)
 {
-  JetVector tempJets;
-  for(uint ij=0; ij<jets.size(); ++ij){
-    Jet* jet = jets.at(ij);
-    if( !(jet->Pt() > 20 && fabs(jet->Eta()) < JET_ETA_CUT_2L) ) continue;
-    tempJets.push_back(jet);
-  }
-  return bTagSF(evt, tempJets, evt->mcChannel, BTag_NOM);
+    return nttools().bTagSF(m_baseJets);
 }
 //-----------------------------------------
 float SusySelection::getTriggerWeight2Lep(const LeptonVector &leptons)
@@ -666,9 +651,9 @@ susy::wh::Chan SusySelection::getChan(const LeptonVector& leps)
 //-----------------------------------------
 SsPassFlags SusySelection::assignNjetFlags(const JetVector& jets, SsPassFlags f)
 {
-  int njCl = numberOfCLJets(jets);
-  int njB  = numberOfCBJets(jets);
-  int njF  = numberOfFJets (jets);
+  int njCl = nttools().jetSelector().count_CL_jets(jets);
+  int njB  = nttools().jetSelector().count_CB_jets(jets);
+  int njF  = nttools().jetSelector().count_F_jets (jets);
   f.bjveto = njB  == 0;
   f.fjveto = njF  == 0;
   f.ge1j   = njCl >= 1;
@@ -679,12 +664,15 @@ SsPassFlags SusySelection::assignNjetFlags(const JetVector& jets, SsPassFlags f)
 //-----------------------------------------
 bool SusySelection::passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lepton* l1, const LeptonVector& otherLeptons, bool verbose)
 {
+    // DG-2015-12-18 obsolete, only used for ss WH study
+    return true;
+    /*
     struct LepPair {
         const Susy::Lepton *signal, *other;
         LepPair(const Susy::Lepton *s, const Susy::Lepton *o) : signal(s), other(o) { assert(s!=0 && o!=0); }
         static const bool unbiasedD0Z0() { return true; }
         static bool lepIsFromPv(const Susy::Lepton* l, float maxD0sig, float maxZ0sinTheta) {
-            return (fabs(l->d0Sig(unbiasedD0Z0())) < maxD0sig && fabs(l->z0SinTheta(unbiasedD0Z0())) < maxZ0sinTheta);
+            return (fabs(l->d0Sig(unbiasedD0Z0())) < maxD0sig && fabs(l->z0SinTheta(unbiasedD0Z0()`)) < maxZ0sinTheta);
         }
         bool otherLepIsElFromPv() { return other->isEle() && lepIsFromPv(other, ELECTRON_D0SIG_CUT_WH, ELECTRON_Z0_SINTHETA_CUT); }
         bool otherLepIsMuFromPv() { return other->isMu()  && lepIsFromPv(other, MUON_D0SIG_CUT,        MUON_Z0_SINTHETA_CUT); }
@@ -714,6 +702,7 @@ bool SusySelection::passThirdLeptonVeto(const Susy::Lepton* l0, const Susy::Lept
     }
     if(verbose && nCandInWindow==0) cout<<" No Z candidate"<<endl;
     return nCandInWindow == 0;
+    */
 }
 //-----------------------------------------
 void SusySelection::resetAllCounters()
@@ -1062,9 +1051,9 @@ bool SusySelection::passSrRazor0jet(const LeptonVector &leptons, const JetVector
 {
     bool pass=false;
     if(leptons.size()<2) return pass;
-    size_t num_central_light_jets = numberOfCLJets(jets);
-    size_t num_central_cb_jets = numberOfCBJets(jets);
-    size_t num_forward_jets = numberOfFJets(jets);
+    // size_t num_central_light_jets = nttools().jetSelector().count_CL_jets(jets);
+    // size_t num_central_cb_jets = nttools().jetSelector().count_CB_jets(jets);
+    // size_t num_forward_jets = nttools().jetSelector().count_F_jets(jets);
     Susy::Lepton &l0 = *leptons[0];
     Susy::Lepton &l1 = *leptons[1];
     bool ee(l0.isEle() && l1.isEle());
@@ -1112,9 +1101,9 @@ bool SusySelection::passSrRazor1jet(const LeptonVector &leptons, const JetVector
 {
     bool pass=false;
     if(leptons.size()<2) return pass;
-    size_t num_central_light_jets = numberOfCLJets(jets);
-    size_t num_central_cb_jets = numberOfCBJets(jets);
-    size_t num_forward_jets = numberOfFJets(jets);
+    size_t num_central_light_jets = nttools().jetSelector().count_CL_jets(jets);
+    size_t num_central_cb_jets = nttools().jetSelector().count_CB_jets(jets);
+    size_t num_forward_jets = nttools().jetSelector().count_F_jets(jets);
     Susy::Lepton &l0 = *leptons[0];
     Susy::Lepton &l1 = *leptons[1];
     bool ee(l0.isEle() && l1.isEle());
@@ -1162,9 +1151,9 @@ void SusySelection::computeRazor(const LeptonVector &leptons, const JetVector& j
 {
     TVector3 vBETA_z, pT_CM, vBETA_T_CMtoR, vBETA_R;
     double SHATR, dphi_LL_vBETA_T, dphi_L1_L2, gamma_R, dphi_vBETA_R_vBETA_T, MDELTAR, costhetaRp1;
-    SusyNtTools::superRazor(leptons, &met,
-                            vBETA_z,  pT_CM, vBETA_T_CMtoR,  vBETA_R,
-                            SHATR, dphi_LL_vBETA_T, dphi_L1_L2, gamma_R, dphi_vBETA_R_vBETA_T, MDELTAR, costhetaRp1);
+    kin::superRazor(leptons, &met,
+                    vBETA_z,  pT_CM, vBETA_T_CMtoR,  vBETA_R,
+                    SHATR, dphi_LL_vBETA_T, dphi_L1_L2, gamma_R, dphi_vBETA_R_vBETA_T, MDELTAR, costhetaRp1);
     dphi_ll_vBetaT = dphi_LL_vBETA_T;
     mDeltaR = MDELTAR;
 }

@@ -26,7 +26,6 @@ void usage(const char *exeName) {
       <<"\t"<<"-t [--tuple-out] fname.root (out ntuple file)"<<endl
       <<"\t"<<"-d [--debug]       : debug (>0 print stuff)"<<endl
       <<"\t"<<"-h [--help]        : print help"            <<endl
-      <<"\t"<<"--WH-sample        : xsec from SusyXSReader"<<endl
       <<endl;
 }
 
@@ -38,14 +37,12 @@ bool endswith(const string &s, const string &end) {
 
 int main(int argc, char** argv)
 {
-  ROOT::Cintex::Cintex::Enable();
   int nEvt = -1;
   int nSkip = 0;
   int dbg = 0;
   string sample;
   string input;
   string output;
-  bool useSusyXSReader = false;
   bool writeTuple = false;
 
   int optind(1);
@@ -63,7 +60,6 @@ int main(int argc, char** argv)
     else if(sw=="-s"||sw=="--sample"     ) { sample = argv[++optind]; }
     else if(sw=="-t"||sw=="--tuple-out")   { writeTuple = true; output = argv[++optind]; }
     else if(sw=="-h"||sw=="--help"       ) { usage(argv[0]); return 0; }
-    else if(sw=="--WH-sample"            ) { useSusyXSReader = true; }
     else cout<<"Unknown switch "<<sw<<endl;
     optind++;
   } // end while(optind<argc)
@@ -90,7 +86,6 @@ int main(int argc, char** argv)
   SusySelection* susyAna = new SusySelection();
   susyAna->setDebug(dbg);
   susyAna->setSampleName(sample);
-  susyAna->buildSumwMap(chain);
   if(writeTuple) susyAna->setTupleFile(output);
   nEvt = (nEvt>0 ? nEvt : nEntries);
   cout<<"Total entries:   "<<nEntries<<endl

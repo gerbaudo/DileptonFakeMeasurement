@@ -35,7 +35,6 @@ void usage(const char *exeName, const char *defaultMatrixFile) {
 
 int main(int argc, char** argv)
 {
-  ROOT::Cintex::Cintex::Enable();
   int nEvt = -1;
   int nSkip = 0;
   int dbg = 0;
@@ -94,14 +93,14 @@ int main(int argc, char** argv)
   if(dbg) chain->ls();
 
   MatrixPrediction fakePred;
-  fakePred.setMatrixFilename(matrixFile);
   fakePred.setDebug(dbg);
   fakePred.setSampleName(sample);
-  if(etapt) fakePred.use2dParametrization();
-  if(writeTuple) fakePred.setTupleFile(output);
-  else           fakePred.setOutputFilename(output);
+  // DG-2015-12-18 \todo update to new matrix prediction class
+  // fakePred.setMatrixFilename(matrixFile);
+  // if(etapt) fakePred.use2dParametrization();
+  // if(writeTuple) fakePred.setTupleFile(output);
+  // else           fakePred.setOutputFilename(output);
 
-  fakePred.buildSumwMap(chain);
   chain->Process(&fakePred, sample.c_str(), nEvt, nSkip);
 
   delete chain;

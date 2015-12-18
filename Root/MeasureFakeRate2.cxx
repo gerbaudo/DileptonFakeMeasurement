@@ -622,9 +622,9 @@ SsPassFlags MeasureFakeRate2::passWhSS(const LeptonVector& leptons, const JetVec
 
   WeightComponents &wc = m_weightComponents;
   if(m_signalTaus.size()==0)                          { increment(n_pass_CRWHSStauv  [ll], wc); f.tauVeto=true;} else  return f;
-  if(nttools().numberOfFJets(jets)==0)                { increment(n_pass_CRWHSSnfj   [ll], wc); f.fjveto =true;} else  return f;
-  if(nttools().numberOfCBJets(jets)==0)               { increment(n_pass_CRWHSSnbj   [ll], wc); f.bjveto =true;} else  return f;
-  if(nttools().numberOfCLJets(jets)>0)                { increment(n_pass_CRWHSSnj    [ll], wc); f.ge1j   =true;} else  return f;
+  if(nttools().jetSelector().count_F_jets(jets)==0)   { increment(n_pass_CRWHSSnfj   [ll], wc); f.fjveto =true;} else  return f;
+  if(nttools().jetSelector().count_CB_jets(jets)==0)  { increment(n_pass_CRWHSSnbj   [ll], wc); f.bjveto =true;} else  return f;
+  if(nttools().jetSelector().count_CL_jets(jets)>0)   { increment(n_pass_CRWHSSnj    [ll], wc); f.ge1j   =true;} else  return f;
   if(susy::pass2LepPt    (leptons, ptL0Min, ptL1Min)) { increment(n_pass_CRWHSS2lpt  [ll], wc); f.lepPt  =true;} else  return f;
   if(susy::passZllVeto   (leptons, loMllZ, hiMllZ))   { increment(n_pass_CRWHSSzveto [ll], wc); f.zllVeto=true;} else  return f;
   if(susy::passMtLlMetMin(leptons, met, mtwwMin))     { increment(n_pass_CRWHSSmwwt  [ll], wc); f.mtllmet=true;} else  return f;
