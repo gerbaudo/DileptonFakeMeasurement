@@ -75,12 +75,7 @@ int main(int argc, char** argv)
       <<endl;
 
   TChain* chain = new TChain("susyNt");
-  bool inputIsFile(string::npos!=input.find(".root"));
-  bool inputIsList(string::npos!=input.find(".txt"));
-  bool inputIsDir (endswith(input, "/"));
-  if(inputIsFile) ChainHelper::addFile    (chain, input);
-  if(inputIsList) ChainHelper::addFileList(chain, input);
-  if(inputIsDir ) ChainHelper::addFileDir (chain, input);
+  ChainHelper::addInput(chain, input);
   if(dbg>0) chain->ls();
   Long64_t nEntries = chain->GetEntries();
   SusySelection* susyAna = new SusySelection();

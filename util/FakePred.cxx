@@ -73,21 +73,7 @@ int main(int argc, char** argv)
       <<endl;
 
   TChain* chain = new TChain("susyNt");
-  bool inputIsFile(string::npos!=input.find(".root"));
-  bool inputIsList(string::npos!=input.find(".txt"));
-  bool inputIsDir (endswith(input, "/"));
-  bool validInput(inputIsFile||inputIsList||inputIsDir);
-  bool validOutput(endswith(output, ".root"));
-  if(!validInput || !validOutput) {
-    cout<<"invalid "
-        <<(validOutput ? "input" : "output")<<" "
-        <<"'"<<(validOutput ? input : output)<<"'"
-        <<endl;
-    usage(argv[0], matrixFile.c_str()); return 1;
-  }
-  if(inputIsFile) ChainHelper::addFile    (chain, input);
-  if(inputIsList) ChainHelper::addFileList(chain, input);
-  if(inputIsDir ) ChainHelper::addFileDir (chain, input);
+  ChainHelper::addInput(chain, input);
   Long64_t nEntries = chain->GetEntries();
   nEvt = (nEvt<0 ? nEntries : nEvt);
   if(dbg) chain->ls();
