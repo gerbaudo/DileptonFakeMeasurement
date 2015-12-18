@@ -19,6 +19,8 @@ namespace Susy {
   More details to come.
   Based on Matt's (mrelich@) procedure.
 
+  This class is half-backed and it should be deleted.
+
   davide.gerbaudo@gmail.com
   August 2013
  */

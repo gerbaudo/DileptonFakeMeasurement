@@ -26,6 +26,8 @@
   The main source of fake muons are semileptonic decays of hadrons
   within jets, mostly heavy flavored ones.
 
+  This executable is half-backed and it should be deleted.
+
 */
 
 using std::cout;
