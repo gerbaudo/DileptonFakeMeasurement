@@ -705,7 +705,7 @@ bool MeasureFakeRate2::passHFCR(const LeptonVector &leptons,
   int nTags   = 0;
   int nBjets  = 0;
   for(uint ij = 0; ij<jets.size(); ++ij){
-    if( !isCentralBJet(jets.at(ij)) ) continue;
+    if( !nttools().jetSelector().isCentralB(jets.at(ij)) ) continue;
     nBjets++;
     for(uint imu=0; imu<preMuons.size(); ++imu){
       if(jets.at(ij)->DeltaR( *preMuons.at(imu) ) < 0.4){
@@ -882,12 +882,13 @@ bool MeasureFakeRate2::passZ3lVetoPlusJetsCR(const LeptonVector &leptons,
 }
 //----------------------------------------------------------
 float MeasureFakeRate2::getEvtWeight(const LeptonVector& leptons, bool includeBTag, bool includeTrig,
-				  bool doMediumpp)
+                                     bool doMediumpp)
 {
   if( !nt.evt()->isMC ) return 1.;
   uint nl = leptons.size();
   float weight = 1;
-  weight = getEventWeight(LUMI_A_L, true); // lumi, xs, sumw, pileup
+  // DG-2015-12-18 \todo re-implement with new mcweighter
+  weight = 1.0; // mcWeighter().getMCWeight(const Event* evt); // lumi, xs, sumw, pileup
   // Trigger
   float trigW = 1;
   if(!m_useMCTrig && includeTrig){
@@ -913,13 +914,7 @@ float MeasureFakeRate2::getEvtWeight(const LeptonVector& leptons, bool includeBT
 //----------------------------------------------------------
 float MeasureFakeRate2::getBTagWeight(const Event* evt)
 {
-  JetVector tempJets;
-  for(uint ij=0; ij<m_baseJets.size(); ++ij){
-    Jet* jet = m_baseJets.at(ij);
-    if( !(jet->Pt() > 20 && fabs(jet->detEta) < JET_ETA_CUT_2L) ) continue;
-    tempJets.push_back(jet);
-  }
-  return bTagSF(evt, tempJets, evt->mcChannel, BTag_NOM);
+    return nttools().bTagSF(m_baseJets);
 }
 //----------------------------------------------------------
 void MeasureFakeRate2::dumpEventCounters()
@@ -999,6 +994,8 @@ sf::LeptonSource MeasureFakeRate2::getLeptonSource(const Lepton* l)
 float MeasureFakeRate2::computeCorrectedEtCone(const Lepton *l)
 {
     float correctedEtCone = 0.0;
+/*
+  DG-2015-12-18 obsolete correction in run2 \todo
     if(l){
         uint nVtx(nt.evt()->nVtx);
         bool isMC(nt.evt()->isMC);
@@ -1010,12 +1007,15 @@ float MeasureFakeRate2::computeCorrectedEtCone(const Lepton *l)
                 correctedEtCone = SusyNtTools::muEtConeCorr(m, m_baseElectrons, m_baseMuons, nVtx, isMC);
         }
     }
+*/
     return correctedEtCone;
 }
 //----------------------------------------------------------
 float MeasureFakeRate2::computeCorrectedPtCone(const Lepton *l)
 {
     float correctedPtCone = 0.0;
+/*
+  DG-2015-12-18 obsolete correction in run2 \todo
     if(l){
         uint nVtx(nt.evt()->nVtx);
         bool isMC(nt.evt()->isMC);
@@ -1027,6 +1027,7 @@ float MeasureFakeRate2::computeCorrectedPtCone(const Lepton *l)
                 correctedPtCone = SusyNtTools::muPtConeCorr(m, m_baseElectrons, m_baseMuons, nVtx, isMC);
         }
     }
+*/
     return correctedPtCone;
 }
 //----------------------------------------------------------
@@ -1051,40 +1052,10 @@ const std::string MeasureFakeRate2::LeptonType2str(const LeptonType l)
 //----------------------------------------------------------
 bool MeasureFakeRate2::isRealLepton(const Lepton* lep, uint dsid)
 {
-  // Updated way of handling real and fake leptons using LeptonTruthTools
-  // Need to handle new g2ww -- Assume all real for now
-  if( dsid == 169471 || dsid == 169472 || dsid == 169473 || dsid == 169474 ||
-      dsid == 169475 || dsid == 169476 || dsid == 169477 || dsid == 169478 ||
-      dsid == 169479)
-    return true;
-  return (lep->truthType == RecoTruthMatch::PROMPT);
-  // Code taken from Steve.  There seems to be an issue with Sherpa samples, so
-  // need to handle those separately. Also just for clarification:
-  // * mcOrigin = 9 -- Tau Lepton
-  // * mcType   = 1 -- Unknown Electron
-  // * mcType   = 2 -- Iso Electron
-  // * mcType   = 5 -- Unknown Muon
-  // * mcType   = 6 -- Iso Muon
-  // Cut is sample dependent due to Sherpa classifications broken
-  // All tau leptons are classified as non-iso
-  // I'm not sure why, yet, but for now I will treat them as real leptons.
-  if(lep->mcOrigin == 9) return true;
-  const int mcType = lep->mcType;
-  // Sherpa diboson, assume all unknowns are real leptons
-  // This is an approximation, but probably ok.
-  if( (dsid>=126892 && dsid<=126895) || (dsid>=147770 && dsid<=147772) ||
-      (dsid>=147774 && dsid<=147776)){
-    if(lep->isEle()) return mcType == 1 || mcType == 2;
-    else             return mcType == 5 || mcType == 6;
-  }
-  else{
-    // 2-lep classifies everything as real if it
-    // is from W, Z, tau, or top..
-    //uint origin = lep->mcOrigin;
-    //return origin == 9 || origin == 12 || origin == 13 || origin == 10;
-    if(lep->isEle()) return mcType == 2;
-    else             return mcType == 6;
-  }
+    // DG-2015-12-18 \todo just a rough estimate, should use whathever the ss3l people do
+    // see https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/MCTruthClassifier for enum values
+    if(lep->isEle()) return lep->mcType == 2;
+    else             return lep->mcType == 6;
 }
 //----------------------------------------------------------
 void MeasureFakeRate2::resetCounters()
